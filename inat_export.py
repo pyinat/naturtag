@@ -31,7 +31,7 @@ INAT_TAXONOMIC_RANKS = [
 ]
 INAT_TAXONOMIC_RANK_LABELS = {
     rank: (
-        'taxonomy:' + 
+        'taxonomy:' +
         rank
         .replace('scientific_name', 'binomial')
         .replace('taxon_', '')
