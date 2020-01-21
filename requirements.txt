@@ -1,3 +1,4 @@
 pandas
+progress
 pyinaturalist
 python-xmp-toolkit

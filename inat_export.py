@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# Observation data can be queried from: https://www.inaturalist.org/observations/export
 import pandas as pd
 import json
 
