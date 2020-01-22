@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-# Observation data can be queried from: https://www.inaturalist.org/observations/export
 import pandas as pd
 import json
 
+
+OBSERVATION_EXPORT_FILE = 'taxonomy_data/observations.csv'
+OUTPUT_FILE = 'taxonomy_data/inat_taxonomy.json'
 
 INAT_TAXONOMIC_RANKS = [
     'taxon_kingdom_name',
@@ -51,7 +53,7 @@ def table_to_tree(csv_file, column_hierarchy):
     tree = {}
     for i, row in df.iterrows():
         tree = build_tree(tree, row, column_hierarchy)
-    with open('out.json', 'w') as f:
+    with open(OUTPUT_FILE, 'w') as f:
         json.dump(tree, f, indent=2)
 
 
@@ -63,4 +65,4 @@ def build_tree(tree, row, column_hierarchy):
 
 
 if __name__ == '__main__':
-    table_to_tree('observations.csv', INAT_TAXONOMIC_RANK_LABELS)
+    table_to_tree(OBSERVATION_EXPORT_FILE, INAT_TAXONOMIC_RANK_LABELS)

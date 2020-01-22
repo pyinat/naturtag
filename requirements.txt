@@ -2,3 +2,5 @@ pandas
 progress
 pyinaturalist
 python-xmp-toolkit
+requests
+requests-ftp
