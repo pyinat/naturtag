@@ -2,9 +2,8 @@
 import pandas as pd
 import json
 
+from taxgen.constants import INAT_OBSERVATION_FILE, INAT_OUTPUT_FILE
 
-OBSERVATION_EXPORT_FILE = 'taxonomy_data/observations.csv'
-OUTPUT_FILE = 'taxonomy_data/inat_taxonomy.json'
 
 INAT_TAXONOMIC_RANKS = [
     'taxon_kingdom_name',
@@ -20,23 +19,23 @@ INAT_TAXONOMIC_RANKS = [
     'taxon_family_name',
     # 'taxon_subfamily_name',
     # 'taxon_supertribe_name',
-    # 'taxon_tribe_name',
+    'taxon_tribe_name',
     # 'taxon_subtribe_name',
     'taxon_genus_name',
     # 'taxon_genushybrid_name',
     'taxon_species_name',
     # 'taxon_hybrid_name',
-    # 'taxon_subspecies_name',
-    # 'taxon_variety_name',
+    'taxon_subspecies_name',
+    'taxon_variety_name',
     # 'taxon_form_name',
     'scientific_name',
     'taxon_id',
     'common_name',
 ]
+# Rename 'taxon_<rank>_name' to 'taxonomy:<rank>' for keyword tags
 INAT_TAXONOMIC_RANK_LABELS = {
     rank: (
-        'taxonomy:' +
-        rank
+        'taxonomy:' + rank
         .replace('scientific_name', 'binomial')
         .replace('taxon_', '')
         .replace('_name', '')
@@ -45,24 +44,31 @@ INAT_TAXONOMIC_RANK_LABELS = {
 }
 
 
-def table_to_tree(csv_file, column_hierarchy):
+def generate_tree(csv_file, column_hierarchy):
     """
     Read tabular data and convert it into a tree, using a defined hierarchy of selected columns
     """
     df = pd.read_csv(csv_file)
     tree = {}
     for i, row in df.iterrows():
-        tree = build_tree(tree, row, column_hierarchy)
-    with open(OUTPUT_FILE, 'w') as f:
+        tree = append_nodes(tree, row, column_hierarchy)
+    with open(INAT_OUTPUT_FILE, 'w') as f:
         json.dump(tree, f, indent=2)
 
 
-def build_tree(tree, row, column_hierarchy):
+def append_nodes(tree, row, column_hierarchy):
+    """
+    Add groups of all ranks contained in a single observation (row)
+    """
     tree_node = tree
     for level, label in column_hierarchy.items():
         tree_node = tree_node.setdefault(f'{label}={row[level]}', {})
     return tree
 
 
+def main():
+    generate_tree(INAT_OBSERVATION_FILE, INAT_TAXONOMIC_RANK_LABELS)
+
+
 if __name__ == '__main__':
-    table_to_tree(OBSERVATION_EXPORT_FILE, INAT_TAXONOMIC_RANK_LABELS)
+    main()

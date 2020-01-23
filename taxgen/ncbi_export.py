@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 import json
-import logging
 from io import BytesIO
 from os import makedirs
-from os.path import isfile, join
+from os.path import isfile
 from zipfile import ZipFile
 
 import pandas as pd
 from requests_ftp.ftp import FTPSession
 from progress.bar import ChargingBar as Bar
 
-logging.basicConfig(level='INFO')
+from taxgen.constants import (
+    DATA_DIR,
+    NCBI_NAMES_DUMP,
+    NCBI_NODES_DUMP,
+    NCBI_COMBINED_DUMP,
+    NCBI_OUTPUT_FILE,
+)
 
 BAR_SUFFIX = '[%(index)d / %(max)d] [%(elapsed_td)s / %(eta_td)s]'
-
 TAXDUMP_URL = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip'
-DATA_DIR = 'taxonomy_data'
-NAMES_DUMP = join(DATA_DIR, 'names.dmp')
-NODES_DUMP = join(DATA_DIR, 'nodes.dmp')
-FLAT_FILE = join(DATA_DIR, 'ncbi_taxonomy.csv')
-TREE_FILE = join(DATA_DIR, 'ncbi_taxonomy.json')
 
 NAME_COLS = [
     'tax_id',
@@ -73,13 +72,13 @@ def download_ncbi_taxdump():
     taxdump.extractall(path=DATA_DIR)
 
 
-def flatten_ncbi_taxdump():
+def combine_ncbi_taxdump():
     """
-    Denormalize dump files into a single CSV
+    Denormalize dump files into one combined CSV
     """
     print('Flattening taxonomy dump files')
-    df = load_ncbi_dump(NAMES_DUMP, NAME_COLS, usecols=[0, 1, 3])
-    df_nodes = load_ncbi_dump(NODES_DUMP, NODE_COLS, usecols=[0, 1, 2])
+    df = load_ncbi_dump(NCBI_NAMES_DUMP, NAME_COLS, usecols=[0, 1, 3])
+    df_nodes = load_ncbi_dump(NCBI_NODES_DUMP, NODE_COLS, usecols=[0, 1, 2])
 
     # Only keep scientific names, and ensure IDs are unique
     df = df[df['name_class'] == 'scientific name']
@@ -87,8 +86,8 @@ def flatten_ncbi_taxdump():
 
     # Merge nodes and names, keeping only IDs, name, and rank
     df = df.merge(df_nodes, on='tax_id')
-    df[SORTED_COLS].to_csv(FLAT_FILE, index=False)
-    print(f'Flattened data written to {FLAT_FILE}')
+    df[SORTED_COLS].to_csv(NCBI_COMBINED_DUMP, index=False)
+    print(f'Flattened data written to {NCBI_COMBINED_DUMP}')
     return df
 
 
@@ -113,6 +112,7 @@ def load_ncbi_dump(file_path, col_names, **kwargs):
     return df
 
 
+# TODO: skip over 'no rank'
 def generate_tree(df):
     """
     Convert NCBI taxonomy node structure into a tree using a depth-first search
@@ -138,22 +138,26 @@ def generate_tree(df):
     tree = find_children(eukaryote_node, {})
     bar.finish()
 
-    with open(TREE_FILE, 'w') as f:
+    with open(NCBI_OUTPUT_FILE, 'w') as f:
         json.dump(tree, f, indent=2)
-    print(f'Taxonomy tree written to {TREE_FILE}')
+    print(f'Taxonomy tree written to {NCBI_OUTPUT_FILE}')
     return tree
 
 
-if __name__ == '__main__':
-    if isfile(NAMES_DUMP) and isfile(NODES_DUMP):
+def main():
+    if isfile(NCBI_NAMES_DUMP) and isfile(NCBI_NODES_DUMP):
         print('Found existing taxonomy dump files')
     else:
         download_ncbi_taxdump()
 
-    if isfile(FLAT_FILE):
+    if isfile(NCBI_COMBINED_DUMP):
         print('Found existing flattened taxonomy file')
-        df = pd.read_csv(FLAT_FILE)
+        df = pd.read_csv(NCBI_COMBINED_DUMP)
     else:
-        df = flatten_ncbi_taxdump()
+        df = combine_ncbi_taxdump()
 
     generate_tree(df)
+
+
+if __name__ == '__main__':
+    main()

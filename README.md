@@ -1,11 +1,11 @@
-# Controlled Vocabulary Taxonomy Generator
+# Taxonomy Keyword Generator
 
-Utilities for working with taxonomy data.
+Tools to produce keyword collections based on taxonomy data.
 
 Initial use case: Generate hierarchical keywords from taxonomy data in order to classify
-observation photos with controlled vocabulary ITPC + XMP tags.
-This is currently just a proof of concept intended for biological taxonomy, but could possibly be
-applied to other forms of hierarchical classification.
+observation photos with a controlled vocabulary for ITPC + XMP metadata.
+This is currently a simple proof of concept intended for biological taxonomy, but could possibly
+be applied to other forms of hierarchical classification.
 
 This repo contains working scripts to generate taxonomic trees (in JSON format)
 from the following sources:
@@ -14,9 +14,8 @@ from the following sources:
 
 ## Installation
 
-This is not currently published onpypi.
 ```
-git clone git@github.com:JWCook/cv-taxonomy-gen.git && cd cv-taxonomy-gen
+git clone git@github.com:JWCook/taxon-keyword-gen.git && cd taxon-keyword-gen
 pip install .
 ```
 
@@ -24,17 +23,22 @@ pip install .
 
 ### iNaturalist
 
+**Use case:** You want hierarchical keywords for just the taxa you have personally observed on
+iNaturalist (or based on some other queryable criteria).
+
 First, run an [iNaturalist observation query](https://www.inaturalist.org/observations/export),
 save the output to `taxonomy_data/observations.csv`, then run:
 ```
-./inat_export.py
+taxgen-inat
 ```
 
 ### NCBI
 
+**Use case:** You want hierarchical keywords for all of the things
+
 Simply run:
 ```
-./ncbi_export.py
+taxgen-ncbi
 ```
 
 ![Screenshot](screenshot.png?raw=true)
@@ -47,8 +51,8 @@ all your photos of viruses or bacteria, you can do that too, I guess.
 
 ## Output 
 
-Tags follow the format `taxonomy:<rank>=<taxon>`.
-For example, a complete set of tags for the common fruit fly would look like:
+Keywords follow the format `taxonomy:<rank>=<taxon>`.
+For example, a complete set of keywords for the common fruit fly would look like:
 ```
 taxonomy:kingdom=Animalia
   taxonomy:phylum=Arthropoda
@@ -70,8 +74,11 @@ taxonomy:kingdom=Animalia
 
 If this actually turns out to be useful, there is lots of room for building on top of this basic
 PoC, for example:
-* Integrate with iNaturalist API to query and download observation data
+* Integrate with iNaturalist API to query and download observation data based on search criteria
+* Add features for writing taxonomic info to XMP metadata
 * Conveniences to make it easier to import generated keywords into popular photo/metadata editing
-  applications that support hierarchical keywords (XnViewMP, Lightroom, Daminion, etc.)
+  applications that support hierarchical keywords (XnView MP, FastPictureiewer, Lightroom, Daminion, etc.)
+    * Add support for FPV keyword synonyms (common name <--> scientific name)
 * Make import & export parameters configurable via config file and/or CLI parameters
+* Add configurable taxon whitelist/blacklist
 * Unit tests, make the code a bit more presentable, etc.
