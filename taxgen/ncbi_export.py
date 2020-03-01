@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 from io import BytesIO
 from os import makedirs
 from os.path import isfile
@@ -14,8 +13,9 @@ from taxgen.constants import (
     NCBI_NAMES_DUMP,
     NCBI_NODES_DUMP,
     NCBI_COMBINED_DUMP,
-    NCBI_OUTPUT_FILE,
+    NCBI_OUTPUT_JSON,
 )
+from taxgen.format import write_tree
 
 BAR_SUFFIX = '[%(index)d / %(max)d] [%(elapsed_td)s / %(eta_td)s]'
 TAXDUMP_URL = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip'
@@ -137,10 +137,6 @@ def generate_tree(df):
     eukaryote_node = df[df['tax_id'] == EUKARYOTA_TAX_ID].iloc[0]
     tree = find_children(eukaryote_node, {})
     bar.finish()
-
-    with open(NCBI_OUTPUT_FILE, 'w') as f:
-        json.dump(tree, f, indent=2)
-    print(f'Taxonomy tree written to {NCBI_OUTPUT_FILE}')
     return tree
 
 
@@ -156,7 +152,8 @@ def main():
     else:
         df = combine_ncbi_taxdump()
 
-    generate_tree(df)
+    tree = generate_tree(df)
+    write_tree(tree, NCBI_OUTPUT_JSON)
 
 
 if __name__ == '__main__':

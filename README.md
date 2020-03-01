@@ -7,7 +7,7 @@ observation photos with a controlled vocabulary for ITPC + XMP metadata.
 This is currently a simple proof of concept intended for biological taxonomy, but could possibly
 be applied to other forms of hierarchical classification.
 
-This repo contains working scripts to generate taxonomic trees (in JSON format)
+This repo contains working scripts to generate taxonomic trees (in multiple formats)
 from the following sources:
 * [iNaturalist observations](https://www.inaturalist.org/observations/export)
 * [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/guide/taxonomy/)
@@ -15,8 +15,7 @@ from the following sources:
 ## Installation
 
 ```
-git clone git@github.com:JWCook/taxon-keyword-gen.git && cd taxon-keyword-gen
-pip install .
+pip install git+https://github.com/JWCook/taxon-keyword-gen.git
 ```
 
 ## Usage
