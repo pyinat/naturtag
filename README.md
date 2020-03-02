@@ -79,5 +79,5 @@ PoC, for example:
   applications that support hierarchical keywords (XnView MP, FastPictureiewer, Lightroom, Daminion, etc.)
     * Add support for FPV keyword synonyms (common name <--> scientific name)
 * Make import & export parameters configurable via config file and/or CLI parameters
-* Add configurable taxon whitelist/blacklist
+* Improve performance of keyword tree generation
 * Unit tests, make the code a bit more presentable, etc.

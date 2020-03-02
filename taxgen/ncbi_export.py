@@ -53,9 +53,37 @@ CELLULAR_ORGANISMS_TAX_ID = 131567
 BACTERIA_TAX_ID = 2
 ARCHAEA_TAX_ID = 2157
 EUKARYOTA_TAX_ID = 2759
+BLACKLIST_TAXA = [
+    'Amoebozoa',
+    'Ancyromonadida',
+    'Apusozoa',
+    'Breviatea',
+    'Chlorophyta',
+    'CRuMs',
+    'Cryptophyceae',
+    'Discoba',
+    'Euglenozoa',
+    'Glaucocystophyceae',
+    'Haptista',
+    'Hemimastigophora',
+    'Heterolobosea',
+    'Jakobida',
+    'Malawimonadidae',
+    'Metamonada',
+    'Rhodelphea',
+    'Rhodophyta',
+    'Sar',
+    'Trebouxiophyceae',
+]
+BLACKLIST_TERMS = [
+    'environmental samples',
+    'incertae sedis',
+    'unclassified',
+]
+
 
 # Estimate based on NCBI taxonomy browser, used for progress bar
-# Can't get an exact estimate ddirectly from dataframe without traversing the whole tree
+# Can't get an exact estimate directly from dataframe without traversing the whole tree
 EUKARYOTE_TAXA_ESTIMATE = 1500000
 
 
@@ -112,7 +140,6 @@ def load_ncbi_dump(file_path, col_names, **kwargs):
     return df
 
 
-# TODO: skip over 'no rank'
 def generate_tree(df):
     """
     Convert NCBI taxonomy node structure into a tree using a depth-first search
@@ -120,24 +147,37 @@ def generate_tree(df):
     print('Generating tree from taxonomy nodes')
     bar = Bar('Processing', max=EUKARYOTE_TAXA_ESTIMATE, suffix=BAR_SUFFIX)
 
-    def find_children(taxon, tree_node):
-        """
-        Get a row and all its children as a dict
-        """
-        tax_label = f"taxonomy:{taxon['rank']}={taxon['name']}"
-        tree_node = {tax_label: {}}
-        children = df[df['parent_tax_id'] == taxon['tax_id']]
+   def find_children(taxon):
+        """ Get a row and all its children as a dict """
+        # If the taxon is blacklisted, ignore it and all its children
+        if _is_ignored(taxon):
+            return {}
+
+        child_taxa = df[df['parent_tax_id'] == taxon['tax_id']]
+        child_nodes = {}
         bar.next()
 
         # Base case: no children; Recursive case: update tree with all children
-        for _, child_node in children.iterrows():
-            tree_node[tax_label].update(find_children(child_node, tree_node))
-        return tree_node
+        for _, child_taxon in child_taxa.iterrows():
+            child_nodes.update(find_children(child_taxon))
 
-    eukaryote_node = df[df['tax_id'] == EUKARYOTA_TAX_ID].iloc[0]
-    tree = find_children(eukaryote_node, {})
+        # Skip over node if it's 'no rank' (typically meaning unclassified)
+        if taxon['rank'] == 'no rank':
+            return child_nodes
+        else:
+            return {f"taxonomy:{taxon['rank']}={taxon['name']}": child_nodes}
+
+    eukaryota_node = df[df['tax_id'] == EUKARYOTA_TAX_ID].iloc[0]
+    tree = find_children(eukaryota_node)
     bar.finish()
     return tree
+
+
+def _is_ignored(taxon):
+    """ Determine if a taxon is blacklisted """
+    has_bl_terms = [term in taxon['name'] for term in BLACKLIST_TERMS]
+    is_bl_taxa = [name == taxon['name'] for name in BLACKLIST_TAXA]
+    return any(has_bl_terms + is_bl_taxa)
 
 
 def main():
