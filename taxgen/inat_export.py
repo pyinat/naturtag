@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import pandas as pd
-import json
 
-from taxgen.constants import INAT_OBSERVATION_FILE, INAT_OUTPUT_JSON
+from taxgen.constants import INAT_OBSERVATION_FILE, INAT_OUTPUT_BASE
 from taxgen.format import write_tree
 
 
@@ -53,8 +52,7 @@ def generate_tree(csv_file, column_hierarchy):
     tree = {}
     for i, row in df.iterrows():
         tree = append_nodes(tree, row, column_hierarchy)
-    with open(INAT_OUTPUT_JSON, 'w') as f:
-        json.dump(tree, f, indent=2)
+    return tree
 
 
 def append_nodes(tree, row, column_hierarchy):
@@ -69,7 +67,7 @@ def append_nodes(tree, row, column_hierarchy):
 
 def main():
     tree = generate_tree(INAT_OBSERVATION_FILE, INAT_TAXONOMIC_RANK_LABELS)
-    write_tree(tree, INAT_OUTPUT_JSON)
+    write_tree(tree, INAT_OUTPUT_BASE)
 
 
 if __name__ == '__main__':

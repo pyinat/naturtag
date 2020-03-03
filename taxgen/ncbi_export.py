@@ -8,18 +8,13 @@ import pandas as pd
 from requests_ftp.ftp import FTPSession
 from progress.bar import ChargingBar as Bar
 
-from taxgen.constants import (
-    DATA_DIR,
-    NCBI_NAMES_DUMP,
-    NCBI_NODES_DUMP,
-    NCBI_COMBINED_DUMP,
-    NCBI_OUTPUT_JSON,
-)
+from taxgen.constants import *
 from taxgen.format import write_tree
 
 BAR_SUFFIX = '[%(index)d / %(max)d] [%(elapsed_td)s / %(eta_td)s]'
 TAXDUMP_URL = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip'
 
+# Columns for NCBI data structures
 NAME_COLS = [
     'tax_id',
     'name',
@@ -47,44 +42,6 @@ SORTED_COLS = [
     'name',
     'rank',
 ]
-
-ROOT_TAX_ID = 1
-CELLULAR_ORGANISMS_TAX_ID = 131567
-BACTERIA_TAX_ID = 2
-ARCHAEA_TAX_ID = 2157
-EUKARYOTA_TAX_ID = 2759
-BLACKLIST_TAXA = [
-    'Amoebozoa',
-    'Ancyromonadida',
-    'Apusozoa',
-    'Breviatea',
-    'Chlorophyta',
-    'CRuMs',
-    'Cryptophyceae',
-    'Discoba',
-    'Euglenozoa',
-    'Glaucocystophyceae',
-    'Haptista',
-    'Hemimastigophora',
-    'Heterolobosea',
-    'Jakobida',
-    'Malawimonadidae',
-    'Metamonada',
-    'Rhodelphea',
-    'Rhodophyta',
-    'Sar',
-    'Trebouxiophyceae',
-]
-BLACKLIST_TERMS = [
-    'environmental samples',
-    'incertae sedis',
-    'unclassified',
-]
-
-
-# Estimate based on NCBI taxonomy browser, used for progress bar
-# Can't get an exact estimate directly from dataframe without traversing the whole tree
-EUKARYOTE_TAXA_ESTIMATE = 1500000
 
 
 def download_ncbi_taxdump():
@@ -140,14 +97,15 @@ def load_ncbi_dump(file_path, col_names, **kwargs):
     return df
 
 
-def generate_tree(df):
+def generate_tree(df, root_taxon):
     """
     Convert NCBI taxonomy node structure into a tree using a depth-first search
     """
-    print('Generating tree from taxonomy nodes')
-    bar = Bar('Processing', max=EUKARYOTE_TAXA_ESTIMATE, suffix=BAR_SUFFIX)
+    print(f"Generating tree from root taxon {root_taxon['rank']}={root_taxon['name']}")
+    max_estimate = ESTIMATES.get(root_taxon['tax_id'], 1500000)
+    bar = Bar('Processing', max=max_estimate, suffix=BAR_SUFFIX)
 
-   def find_children(taxon):
+    def find_children(taxon):
         """ Get a row and all its children as a dict """
         # If the taxon is blacklisted, ignore it and all its children
         if _is_ignored(taxon):
@@ -167,8 +125,7 @@ def generate_tree(df):
         else:
             return {f"taxonomy:{taxon['rank']}={taxon['name']}": child_nodes}
 
-    eukaryota_node = df[df['tax_id'] == EUKARYOTA_TAX_ID].iloc[0]
-    tree = find_children(eukaryota_node)
+    tree = find_children(root_taxon)
     bar.finish()
     return tree
 
@@ -178,6 +135,14 @@ def _is_ignored(taxon):
     has_bl_terms = [term in taxon['name'] for term in BLACKLIST_TERMS]
     is_bl_taxa = [name == taxon['name'] for name in BLACKLIST_TAXA]
     return any(has_bl_terms + is_bl_taxa)
+
+
+def generate_trees(df, root_taxon_ids):
+    """ Generate trees for the given root taxa and write to separate files """
+    for taxon_id in root_taxon_ids:
+        root_node = df[df['tax_id'] == taxon_id].iloc[0]
+        tree = generate_tree(df, root_node)
+        write_tree(tree, f"{NCBI_OUTPUT_BASE}_{root_node['name'].lower()}")
 
 
 def main():
@@ -192,8 +157,9 @@ def main():
     else:
         df = combine_ncbi_taxdump()
 
-    tree = generate_tree(df)
-    write_tree(tree, NCBI_OUTPUT_JSON)
+    # TODO: Make this configurable and/or a CLI param
+    # generate_trees(df, [EUKARYOTA_TAX_ID])
+    generate_trees(df, [ANIMALIA_TAX_ID, PLANT_TAX_ID, FUNGI_TAX_ID])
 
 
 if __name__ == '__main__':
