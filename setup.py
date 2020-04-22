@@ -7,7 +7,9 @@ setup(
     install_requires=[
         'pandas',
         'progress',
+        # Switch back to upstream package if/when PR is merged
         # 'pyinaturalist',
+        "https://github.com/JWCook/pyinaturalist.git",
         # 'python-xmp-toolkit',
         'requests',
         'requests-ftp',
