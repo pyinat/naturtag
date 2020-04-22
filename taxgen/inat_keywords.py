@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+# TODO: Hierarchical tags
 """
 Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations
 """
-import sys
 from logging import getLogger
 
 from pyinaturalist.node_api import get_observation, get_taxa_by_id
@@ -18,36 +18,46 @@ def get_observation_taxon(observation_id):
     return obs['taxon']['id']
 
 
+def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=False):
+    """ Get all taxonomic keywords for a given observation or taxon """
+    min_tax_id = taxon_id or get_observation_taxon(observation_id)
+    taxa = get_taxonomy(min_tax_id)
+
+    keywords = get_taxonomy_keywords(taxa)
+    if common:
+        keywords.extend(get_common_keywords(taxa))
+    if hierarchical:
+        keywords.extend(get_hierarchical_keywords(taxa))
+
+    keywords.append(f'inat:taxon_id={min_tax_id}')
+    if observation_id:
+        keywords.append(f'inat:observation_id={observation_id}')
+
+    return keywords
+
+
 def get_taxonomy(taxon_id):
-    """ Get taxon with all its parents """
+    """ Get a taxon with all its parents """
     r = get_taxa_by_id(taxon_id)
     taxon = r['results'][0]
     return taxon['ancestors'] + [taxon]
 
 
-def get_keywords_from_taxa(taxa):
+def get_taxonomy_keywords(taxa):
     """ Format a list of taxa into rank keywords """
-    keywords = []
-
-    for t in taxa:
-        keywords.append(_quote(f'taxonomy:{t["rank"]}={t["name"]}'))
-    for t in taxa:
-        if t.get('preferred_common_name'):
-            keywords.append(_quote(t['preferred_common_name']))
-
-    return keywords
+    return [quote(f'taxonomy:{t["rank"]}={t["name"]}') for t in taxa]
 
 
-def _quote(s):
+def get_common_keywords(taxa):
+    """ Format a list of taxa into common name keywords """
+    keywords = [quote(t.get('preferred_common_name', '')) for t in taxa]
+    return list(filter(None, keywords))
+
+
+def get_hierarchical_keywords(taxa):
+    raise NotImplementedError
+
+
+def quote(s):
     """ Surround keyword in quotes if it contains whitespace """
     return f'"{s}"' if ' ' in s else s
-
-
-if __name__ == '__main__':
-    # tax_id = sys.argv[1]
-    obs_id = sys.argv[1]
-    tax_id = get_observation_taxon(obs_id)
-    taxonomy = get_taxonomy(tax_id)
-    keywords = get_keywords_from_taxa(taxonomy)
-    keywords.append(f'inat:observation_id=obs_id')
-    print('\n'.join(keywords))

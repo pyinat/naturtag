@@ -61,5 +61,6 @@ def main():
     write_tree(tree, INAT_OUTPUT_BASE)
 
 
+# TODO: Add to Click CLI
 if __name__ == '__main__':
     main()
