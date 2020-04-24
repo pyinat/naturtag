@@ -18,6 +18,7 @@ def get_observation_taxon(observation_id):
     return obs['taxon']['id']
 
 
+# TODO: separate species, binomial, trinomial
 def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=False):
     """ Get all taxonomic keywords for a given observation or taxon """
     min_tax_id = taxon_id or get_observation_taxon(observation_id)
@@ -50,6 +51,10 @@ def get_taxonomy_keywords(taxa):
 
 def get_common_keywords(taxa):
     """ Format a list of taxa into common name keywords """
+    # TODO: Split comma-delimited lists, deduplicate, remove some descriptors, e.g.:
+    # ['Velvet Mites', 'Velvet Mites, Chiggers, and Relatives']
+    # -> ['Velvet Mites', 'Chiggers']
+    # [s.strip() for s in re.split(',|and', "Velvet Mites, Chiggers, and Relatives")]
     keywords = [quote(t.get('preferred_common_name', '')) for t in taxa]
     return list(filter(None, keywords))
 

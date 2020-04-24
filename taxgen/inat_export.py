@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+from os.path import splitext
+
 import pandas as pd
 
-from taxgen.constants import INAT_OBSERVATION_FILE, INAT_OUTPUT_BASE
 from taxgen.format import write_tree
 
 
-# Mapping from inat metadata to keyword tags
+# Mapping from iNat metadata to keyword tags
 INAT_TAXONOMIC_RANKS = {
     'taxon_kingdom_name':       'taxonomy:kingdom',
     'taxon_phylum_name':        'taxonomy:phylum',
@@ -35,7 +35,7 @@ INAT_TAXONOMIC_RANKS = {
 }
 
 
-def generate_tree(csv_file, column_hierarchy):
+def generate_tree(csv_file, output_dir, column_hierarchy=INAT_TAXONOMIC_RANKS):
     """
     Read tabular data and convert it into a tree, using a defined hierarchy of selected columns
     """
@@ -43,7 +43,9 @@ def generate_tree(csv_file, column_hierarchy):
     tree = {}
     for i, row in df.iterrows():
         tree = append_nodes(tree, row, column_hierarchy)
-    return tree
+
+    output_file_base = splitext(csv_file)[0]
+    write_tree(tree, output_dir, output_file_base)
 
 
 def append_nodes(tree, row, column_hierarchy):
@@ -54,13 +56,3 @@ def append_nodes(tree, row, column_hierarchy):
     for level, label in column_hierarchy.items():
         tree_node = tree_node.setdefault(f'{label}={row[level]}', {})
     return tree
-
-
-def main():
-    tree = generate_tree(INAT_OBSERVATION_FILE, INAT_TAXONOMIC_RANKS)
-    write_tree(tree, INAT_OUTPUT_BASE)
-
-
-# TODO: Add to Click CLI
-if __name__ == '__main__':
-    main()

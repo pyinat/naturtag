@@ -18,8 +18,6 @@ setup(
     entry_points={
         'console_scripts': [
             'taxgen=taxgen.cli:main',
-            'taxgen-inat=taxgen.inat_export:main',
-            'taxgen-ncbi=taxgen.ncbi_export:main',
         ],
     }
 )

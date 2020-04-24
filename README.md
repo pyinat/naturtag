@@ -25,19 +25,18 @@ pip install git+https://github.com/JWCook/taxon-keyword-gen.git
 **Use case:** You want hierarchical keywords for just the taxa you have personally observed on
 iNaturalist (or based on some other queryable criteria).
 
-First, run an [iNaturalist observation query](https://www.inaturalist.org/observations/export),
-save the output to `taxonomy_data/observations.csv`, then run:
+First, run an [iNaturalist observation query](https://www.inaturalist.org/observations/export). Select 'Taxon Extras' to include relevant taxonomic ranks, save the output (say, to `observations.csv`), then run:
 ```
-taxgen-inat
+taxgen inat export -i observations.csv
 ```
 
 ### NCBI
 
 **Use case:** You want hierarchical keywords for all of the things
 
-Simply run:
+Run:
 ```
-taxgen-ncbi
+taxgen ncbi export
 ```
 
 ![Screenshot](screenshot.png?raw=true)
@@ -78,6 +77,5 @@ PoC, for example:
 * Conveniences to make it easier to import generated keywords into popular photo/metadata editing
   applications that support hierarchical keywords (XnView MP, FastPictureiewer, Lightroom, Daminion, etc.)
     * Add support for FPV keyword synonyms (common name <--> scientific name)
-* Make import & export parameters configurable via config file and/or CLI parameters
 * Improve performance of keyword tree generation
 * Unit tests, make the code a bit more presentable, etc.
