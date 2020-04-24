@@ -5,42 +5,33 @@ from taxgen.constants import INAT_OBSERVATION_FILE, INAT_OUTPUT_BASE
 from taxgen.format import write_tree
 
 
-INAT_TAXONOMIC_RANKS = [
-    'taxon_kingdom_name',
-    'taxon_phylum_name',
-    # 'taxon_subphylum_name',
-    # 'taxon_superclass_name',
-    'taxon_class_name',
-    # 'taxon_subclass_name',
-    # 'taxon_superorder_name',
-    'taxon_order_name',
-    # 'taxon_suborder_name',
-    # 'taxon_superfamily_name',
-    'taxon_family_name',
-    # 'taxon_subfamily_name',
-    # 'taxon_supertribe_name',
-    'taxon_tribe_name',
-    # 'taxon_subtribe_name',
-    'taxon_genus_name',
-    # 'taxon_genushybrid_name',
-    'taxon_species_name',
-    # 'taxon_hybrid_name',
-    'taxon_subspecies_name',
-    'taxon_variety_name',
-    # 'taxon_form_name',
-    'scientific_name',
-    'taxon_id',
-    'common_name',
-]
-# Rename 'taxon_<rank>_name' to 'taxonomy:<rank>' for keyword tags
-INAT_TAXONOMIC_RANK_LABELS = {
-    rank: (
-        'taxonomy:' + rank
-        .replace('scientific_name', 'binomial')
-        .replace('taxon_', '')
-        .replace('_name', '')
-    )
-    for rank in INAT_TAXONOMIC_RANKS
+# Mapping from inat metadata to keyword tags
+INAT_TAXONOMIC_RANKS = {
+    'taxon_kingdom_name':       'taxonomy:kingdom',
+    'taxon_phylum_name':        'taxonomy:phylum',
+    'taxon_subphylum_name':     'taxonomy:subphylum',
+    'taxon_superclass_name':    'taxonomy:superclass',
+    'taxon_class_name':         'taxonomy:class',
+    'taxon_subclass_name':      'taxonomy:subclass',
+    'taxon_superorder_name':    'taxonomy:superorder',
+    'taxon_order_name':         'taxonomy:order',
+    'taxon_suborder_name':      'taxonomy:suborder',
+    'taxon_superfamily_name':   'taxonomy:superfamily',
+    'taxon_family_name':        'taxonomy:family',
+    'taxon_subfamily_name':     'taxonomy:subfamily',
+    'taxon_supertribe_name':    'taxonomy:supertribe',
+    'taxon_tribe_name':         'taxonomy:tribe',
+    'taxon_subtribe_name':      'taxonomy:subtribe',
+    'taxon_genus_name':         'taxonomy:genus',
+    'taxon_genushybrid_name':   'taxonomy:genushybrid',
+    'taxon_species_name':       'taxonomy:species',
+    'taxon_hybrid_name':        'taxonomy:hybrid',
+    'taxon_subspecies_name':    'taxonomy:subspecies',
+    'taxon_variety_name':       'taxonomy:variety',
+    'taxon_form_name':          'taxonomy:form',
+    'scientific_name':          'taxonomy:binomial',
+    'common_name':              'taxonomy:common',
+    'taxon_id':                 'inat:taxon_id',
 }
 
 
@@ -66,9 +57,10 @@ def append_nodes(tree, row, column_hierarchy):
 
 
 def main():
-    tree = generate_tree(INAT_OBSERVATION_FILE, INAT_TAXONOMIC_RANK_LABELS)
+    tree = generate_tree(INAT_OBSERVATION_FILE, INAT_TAXONOMIC_RANKS)
     write_tree(tree, INAT_OUTPUT_BASE)
 
 
+# TODO: Add to Click CLI
 if __name__ == '__main__':
     main()

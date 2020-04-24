@@ -162,5 +162,6 @@ def main():
     generate_trees(df, [ANIMALIA_TAX_ID, PLANT_TAX_ID, FUNGI_TAX_ID])
 
 
+# TODO: Add to Click CLI
 if __name__ == '__main__':
     main()
