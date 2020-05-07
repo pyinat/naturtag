@@ -22,7 +22,7 @@ def get_observation_taxon(observation_id):
 # TODO: separate species, binomial, trinomial
 def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=False):
     """ Get all taxonomic keywords for a given observation or taxon """
-    min_tax_id = taxon_id or get_observation_taxon(observation_id)
+    min_tax_id = strip_url(taxon_id) or get_observation_taxon(strip_url(observation_id))
     taxa = get_parent_taxa(min_tax_id)
 
     keywords = get_taxonomy_keywords(taxa)
@@ -65,6 +65,11 @@ def get_common_keywords(taxa):
 
 def get_hierarchical_keywords(taxa):
     raise NotImplementedError
+
+
+def strip_url(s):
+    """ If a URL is provided containing an ID, return just the ID """
+    return s.split('/')[-1].split('-')[0] if s else None
 
 
 def quote(s):

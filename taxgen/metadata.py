@@ -1,5 +1,6 @@
 from logging import getLogger
 from os.path import isfile, splitext
+
 from pyexiv2 import Image
 
 KEYWORD_TAGS = [

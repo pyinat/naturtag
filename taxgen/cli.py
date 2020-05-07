@@ -19,19 +19,18 @@ def inat():
     """ Commands for interacting with iNaturalist data """
 
 
-# TODO: also accept taxon or observation URL, just strip off prefix
 @inat.command()
 @click.option('-c', '--common-names', is_flag=True,
               help='Include common names for all ranks (if availalable)')
 @click.option('-h', '--hierarchical', is_flag=True,
               help='Generate pipe-delimited hierarchical keywords')
-@click.option('-o', '--observation', help='Observation ID')
-@click.option('-t', '--taxon', help='Taxon ID')
+@click.option('-o', '--observation', help='Observation ID or URL')
+@click.option('-t', '--taxon', help='Taxon ID or URL')
 @click.option('-i', '--image', type=click.Path(exists=True),
               help='Image file(s) to write keywords tags to')
 def tags(observation, taxon, common_names, hierarchical, image):
     """
-    Get Keyword tags from iNat observations or taxa.
+    Get Keyword tags from an iNaturalist observation or taxon.
     """
     if all([observation, taxon]) or not any([observation, taxon]):
         click.secho('One of either observation or taxon is required', fg='red')
