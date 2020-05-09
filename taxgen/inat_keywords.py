@@ -12,6 +12,7 @@ logger = getLogger(__name__)
 
 def get_observation_taxon(observation_id):
     """ Get the current taxon ID for the given observation """
+    logger.info(f'Fetching observation {observation_id}')
     obs = get_observation(observation_id)
     if obs.get('community_tax_id') and obs['community_tax_id'] != obs['taxon']['id']:
         logger.warn('Community ID does not match selected taxon')
@@ -21,8 +22,8 @@ def get_observation_taxon(observation_id):
 # TODO: separate species, binomial, trinomial
 def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=False):
     """ Get all taxonomic keywords for a given observation or taxon """
-    min_tax_id = taxon_id or get_observation_taxon(observation_id)
-    taxa = get_taxonomy(min_tax_id)
+    min_tax_id = strip_url(taxon_id) or get_observation_taxon(strip_url(observation_id))
+    taxa = get_parent_taxa(min_tax_id)
 
     keywords = get_taxonomy_keywords(taxa)
     if common:
@@ -34,13 +35,16 @@ def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=
     if observation_id:
         keywords.append(f'inat:observation_id={observation_id}')
 
+    logger.info(f'{len(keywords)} keywords generated')
     return keywords
 
 
-def get_taxonomy(taxon_id):
+def get_parent_taxa(taxon_id):
     """ Get a taxon with all its parents """
+    logger.info(f'Fetching taxon {taxon_id}')
     r = get_taxa_by_id(taxon_id)
     taxon = r['results'][0]
+    logger.info(f'{len(taxon["ancestors"])} parent taxa found')
     return taxon['ancestors'] + [taxon]
 
 
@@ -61,6 +65,11 @@ def get_common_keywords(taxa):
 
 def get_hierarchical_keywords(taxa):
     raise NotImplementedError
+
+
+def strip_url(s):
+    """ If a URL is provided containing an ID, return just the ID """
+    return s.split('/')[-1].split('-')[0] if s else None
 
 
 def quote(s):

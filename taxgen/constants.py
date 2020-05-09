@@ -11,6 +11,7 @@ NCBI_OUTPUT_BASE = join(DATA_DIR, 'inat_taxonomy')
 NCBI_TAXDUMP_URL = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip'
 
 INAT_OBSERVATION_FILE = join(DATA_DIR, 'observations.csv')
+INAT_DWC_ARCHIVE_URL = 'http://www.inaturalist.org/observations/gbif-observations-dwca.zip'
 
 # NCBI taxon IDs for relevant groups
 ROOT_TAX_ID = 1

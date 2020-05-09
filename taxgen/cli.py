@@ -6,6 +6,7 @@ from taxgen.inat_export import generate_tree as inat_generate_tree
 from taxgen.ncbi_import import prepare_ncbi_taxdump
 from taxgen.ncbi_export import generate_trees as ncbi_generate_trees
 from taxgen.constants import DATA_DIR, EUKARYOTA_TAX_ID, INAT_OBSERVATION_FILE
+from taxgen.metadata import update_all_keywords
 
 
 @click.group()
@@ -23,11 +24,13 @@ def inat():
               help='Include common names for all ranks (if availalable)')
 @click.option('-h', '--hierarchical', is_flag=True,
               help='Generate pipe-delimited hierarchical keywords')
-@click.option('-o', '--observation', help='Observation ID')
-@click.option('-t', '--taxon', help='Taxon ID')
-def tags(observation, taxon, common_names, hierarchical):
+@click.option('-o', '--observation', help='Observation ID or URL')
+@click.option('-t', '--taxon', help='Taxon ID or URL')
+@click.option('-i', '--image', type=click.Path(exists=True),
+              help='Image file(s) to write keywords tags to')
+def tags(observation, taxon, common_names, hierarchical, image):
     """
-    Get Keyword tags from iNat observations or taxa.
+    Get Keyword tags from an iNaturalist observation or taxon.
     """
     if all([observation, taxon]) or not any([observation, taxon]):
         click.secho('One of either observation or taxon is required', fg='red')
@@ -39,6 +42,9 @@ def tags(observation, taxon, common_names, hierarchical):
         common=common_names,
         hierarchical=hierarchical,
     )
+
+    if image:
+        update_all_keywords(image, keywords, None)
     click.echo('\n'.join(keywords))
 
 
