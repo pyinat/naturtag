@@ -8,12 +8,12 @@ setup(
         'Click>=7.0',
         'pandas',
         'progress',
-        # Switch back to upstream package if/when PR is merged
-        # 'pyinaturalist',
+        'pyinaturalist',
         # "https://github.com/JWCook/pyinaturalist.git",
-        # 'python-xmp-toolkit',
+        'pyexiv2',
         'requests',
         'requests-ftp',
+        'xmltodict',
     ],
     entry_points={
         'console_scripts': [

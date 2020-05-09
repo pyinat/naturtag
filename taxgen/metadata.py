@@ -17,8 +17,9 @@ HIER_KEYWORD_TAGS = [
 logger = getLogger(__name__)
 
 
-def update_all_keywords(path, keywords, hier_keywords=None):
-    metadata = {tag: keywords for tag in KEYWORD_TAGS}
+def update_all_keywords(path, keywords, hier_keywords=None, metadata=None):
+    metadata = metadata or {}
+    metadata.update({tag: keywords for tag in KEYWORD_TAGS})
     if hier_keywords:
         metadata.update({tag: hier_keywords for tag in HIER_KEYWORD_TAGS})
     update_metadata(path, metadata)

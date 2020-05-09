@@ -1,8 +1,10 @@
 import click
+import json
 import sys
 
-from taxgen.inat_keywords import get_keywords
+from taxgen.inat_darwincore import get_observation_dwc_terms
 from taxgen.inat_export import generate_tree as inat_generate_tree
+from taxgen.inat_keywords import get_keywords
 from taxgen.ncbi_import import prepare_ncbi_taxdump
 from taxgen.ncbi_export import generate_trees as ncbi_generate_trees
 from taxgen.constants import DATA_DIR, EUKARYOTA_TAX_ID, INAT_OBSERVATION_FILE
@@ -28,7 +30,9 @@ def inat():
 @click.option('-t', '--taxon', help='Taxon ID or URL')
 @click.option('-i', '--image', type=click.Path(exists=True),
               help='Image file(s) to write keywords tags to')
-def tags(observation, taxon, common_names, hierarchical, image):
+@click.option('-x', '--create-xmp', is_flag=True,
+              help="Create XMP sidecar file if it doesn't already exist")
+def tags(observation, taxon, common_names, hierarchical, image, create_xmp):
     """
     Get Keyword tags from an iNaturalist observation or taxon.
     """
@@ -43,9 +47,15 @@ def tags(observation, taxon, common_names, hierarchical, image):
         hierarchical=hierarchical,
     )
 
+    dwc = {}
+    if observation:
+        dwc = get_observation_dwc_terms(observation)
     if image:
-        update_all_keywords(image, keywords, None)
+        # TODO: implement create_xmp
+        update_all_keywords(image, keywords, metadata=dwc)
+
     click.echo('\n'.join(keywords))
+    # click.echo(json.dumps(dwc, indent=4))
 
 
 @inat.command(name='export')
