@@ -2,7 +2,7 @@ from logging import getLogger
 from pyinaturalist.rest_api import get_observations  # TODO: Currently only in dev branch
 import xmltodict
 
-from taxgen.constants import DWC_NAMESPACES
+from naturtag.constants import DWC_NAMESPACES
 
 logger = getLogger(__name__)
 

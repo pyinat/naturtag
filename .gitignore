@@ -2,4 +2,4 @@ __pycache__
 *.egg-info/
 *.sw*
 .mypy_cache/
-taxonomy_data
+sample_data

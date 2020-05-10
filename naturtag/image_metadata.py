@@ -65,7 +65,7 @@ def write_xmp_sidecar(path, metadata, create_xmp=False):
         _write_xmp(sidecar, metadata)
         sidecar.close()
     else:
-        logger.info('No existing XMP sidecar file found; skipping')
+        logger.info(f'No existing XMP sidecar file found for {path}; skipping')
 
 
 def create_xmp_sidecar(path):

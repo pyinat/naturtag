@@ -1,23 +1,20 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='taxon-keyword-gen',
-    version='0.0.1',
+    name='inat-image-tagger',
+    version='0.1.0',
     packages=find_packages(),
     install_requires=[
         'Click>=7.0',
-        'pandas',
-        'progress',
         'pyinaturalist',
         # "https://github.com/JWCook/pyinaturalist.git",
         'pyexiv2',
-        'requests',
-        'requests-ftp',
         'xmltodict',
     ],
     entry_points={
         'console_scripts': [
-            'taxgen=taxgen.cli:main',
+            'naturtag=naturtag.cli:main',
+            'nt=naturtag.cli:main',
         ],
     }
 )
