@@ -1,79 +1,121 @@
-# Taxonomy Keyword Generator
+# iNaturalist Image Tagger
+A CLI tool to add iNaturalist taxonomy metadata to local observation photos.
 
-Tools to produce keyword collections based on taxonomy data.
+## Use Cases
+The purpose of this is to take some of the useful information from your own observations and
+embed it in your local photo collection.
 
-Initial use case: Generate hierarchical keywords from taxonomy data in order to classify
-observation photos with a controlled vocabulary for ITPC + XMP metadata.
-This is currently a simple proof of concept intended for biological taxonomy, but could possibly
-be applied to other forms of hierarchical classification.
+### Metadata for other biodiversity tools
+This can improve interoperability with other tools and systems that interact with biodiversity
+data. For example, in addition to iNaturalist you may submit observations of certain species to
+another biodiversity observation platform with a more specific focus, such as eBird, BugGuide, or
+Mushroom Observer. For that use case, this tool supports
+[Simple Darwin Core](https://dwc.tdwg.org/simple).
 
-This repo contains working scripts to generate taxonomic trees (in multiple formats)
-from the following sources:
-* [iNaturalist observations](https://www.inaturalist.org/observations/export)
-* [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/guide/taxonomy/)
+### Metadata for photo sharing
+This can also simplify tagging photos for photo hosting sites like Flickr. For that use case, this
+tool generates keywords in the same format as
+[iNaturalist's Flickr Tagger](https://www.inaturalist.org/taxa/flickr_tagger).
+
+### Metadata for local organization
+Finally, this can enable you to search and filter your local photo collection by type of organism
+like you can in the iNaturalist web UI or mobile apps. For that use case, a photo viewer or DAM
+that supports **hierarchical keywords** is recommended, such as Lightroom,
+[FastPictureViewer](https://www.fastpictureviewer.com), or
+[XnViewMP](https://www.xnview.com/en/xnviewmp).
 
 ## Installation
 
 ```
-pip install git+https://github.com/JWCook/taxon-keyword-gen.git
+pip install git+https://github.com/JWCook/inat-image-tagger.git
 ```
 
 ## Usage
 
-### iNaturalist
-
-**Use case:** You want hierarchical keywords for just the taxa you have personally observed on
-iNaturalist (or based on some other queryable criteria).
-
-First, run an [iNaturalist observation query](https://www.inaturalist.org/observations/export). Select 'Taxon Extras' to include relevant taxonomic ranks, save the output (say, to `observations.csv`), then run:
 ```
-taxgen inat export -i observations.csv
-```
+Usage: naturtag [OPTIONS] [IMAGES]...
 
-### NCBI
+  Get Keyword tags from an iNaturalist observation or taxon, and write them
+  to local image metadata
 
-**Use case:** You want hierarchical keywords for all of the things
-
-Run:
-```
-taxgen ncbi export
+Options:
+  -c, --common-names      Include common names for all ranks (if availalable)
+  -o, --observation TEXT  Observation ID or URL
+  -t, --taxon TEXT        Taxon ID or URL
+  -x, --create-xmp        Create XMP sidecar file if it doesn't already exist
+  --help                  Show this message and exit.
 ```
 
-![Screenshot](screenshot.png?raw=true)
+## Examples
 
-This will either download the NCBI taxonomic dump files from the FTP site, or reuse them if they've
-already been downloaded.
+Just generate keywords from a taxon:
+```bash
+naturtag -ct 48978
+Fetching taxon 48978
+12 parent taxa found
+22 keywords generated
 
-By default, only eukaryotic cellular organisms will be exported, but if you really want to organize
-all your photos of viruses or bacteria, you can do that too, I guess.
-
-## Output 
-
-Keywords follow the format `taxonomy:<rank>=<taxon>`.
-For example, a complete set of keywords for the common fruit fly would look like:
-```
 taxonomy:kingdom=Animalia
-  taxonomy:phylum=Arthropoda
-    taxonomy:subphylum=Hexapoda
-      taxonomy:class=Insecta
-        taxonomy:order=Diptera
-          taxonomy:suborder=Brachycera
-            taxonomy:superfamily=Ephydroidea
-              taxonomy:family=Drosophilidae
-                taxonomy:subfamily=Drosophilinae
-                  taxonomy:genus=Drosophila
-                    taxonomy:subgenus=Sophophora
-                      taxonomy:species=melanogaster
-                        "taxonomy:binomial=Drosophila melanogaster"
-                          "taxonomy:common=Common Fruit Fly"
+taxonomy:phylum=Mollusca
+taxonomy:class=Gastropoda
+taxonomy:subclass=Heterobranchia
+taxonomy:infraclass=Euthyneura
+taxonomy:subterclass=Ringipleura
+taxonomy:superorder=Nudipleura
+taxonomy:order=Nudibranchia
+taxonomy:suborder=Cladobranchia
+taxonomy:superfamily=Proctonotoidea
+taxonomy:family=Dironidae
+taxonomy:genus=Dirona
+"taxonomy:species=Dirona picta"
+Animals
+Molluscs
+Gastropods
+"Heterobranch Gastropods"
+"Euthyneuran Gastropods"
+"Nudipleuran Slugs"
+Nudibranchs
+"Colorful Dirona"
+inat:taxon_id=48978
 ```
+
+Generate both keywords and DarwinCore metadata for an observation, and write to two images and an XMP sidecar:
+```
+$ naturtag -co 45524803 img00001.jpg img00002.jpg
+Fetching observation 45524803
+Fetching taxon 48978
+12 parent taxa found
+23 keywords generated
+Getting darwincore terms for observation 45524803
+Writing 39 tags to img00001.jpg
+Writing 37 tags to img00001.xmp
+Writing 39 tags to img00002.jpg
+No existing XMP sidecar file found for img00002.jpg; skipping
+```
+Note: the option `-x` will create an XMP sidecar file if it doesn't exist.
+[See example of XMP metadata generated by this command](./examples/45524803.xmp).
+
+## Development Status
+At the moment this is just an experimental hobby project, and not very polished. The basic
+features described below are functional, though. I plan to work on this long enough to prove
+whether or not the concept will actually be useful as part of a naturalist/photographer's
+workflow; if so, there is a long list of features I'd like to continue adding onto this.
+For example:
 
 ## TODO
+Future feature ideas:
+* Auto-tag mode: scan for images with existing tags (like taxon ID or name), and fill in all
+  missing info
+* Options to fetch keywords from Flickr and other sources
+* Support for annotations (life stage, phenology, etc.) and observation fields
+* Taxon text search in CLI with tab-completion
+* Advanced batch processing
+* Local caching for faster lookups
+* ASCII art-based image previews (only joking. maybe.)
 
-If this actually turns out to be useful, there is lots of room for building on top of this basic
-PoC, for example:
-* Conveniences to make it easier to import generated keywords into popular photo/metadata editing
-  applications that support hierarchical keywords (XnView MP, FastPictureiewer, Lightroom, Daminion, etc.)
-    * Add support for FPV keyword synonyms (common name <--> scientific name)
-* Improve performance of keyword tree generation
-* Unit tests, make the code a bit more presentable, etc.
+
+## See Also
+* For generating keyword _collections_, see the related tool
+  [`taxon-keyword-gen`](https://github.com/JWCook/taxon-keyword-gen).
+* This project uses [`pyinaturalist`](https://github.com/niconoe/pyinaturalist), a python API
+  client for iNaturalist. Refer to that project for more data access tools.

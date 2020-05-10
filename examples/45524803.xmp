@@ -1,0 +1,90 @@
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 4.4.0-Exiv2">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:occurrenceID="https://www.inaturalist.org/observations/45524803"
+   dwc:basisOfRecord="HumanObservation"
+   dwc:institutionCode="iNaturalist"
+   dwc:collectionCode="Observations"
+   dwc:datasetName="iNaturalist research-grade observations"
+   dwc:catalogNumber="45524803"
+   dwc:occurrenceDetails="https://www.inaturalist.org/observations/45524803"
+   dwc:establishmentMeans="wild"
+   dwc:eventDate="2020-05-09T06:01:00-07:00"
+   dwc:eventTime="13:01:00Z"
+   dwc:verbatimEventDate="2020/05/09 6:01 AM PDT"
+   dwc:verbatimLocality="San Diego County, CA, USA"
+   dwc:decimalLatitude="32.8430971478"
+   dwc:decimalLongitude="-117.2815829044"
+   dwc:countryCode="US"
+   dwc:stateProvince="California"
+   dwc:identificationID="102092369"
+   dwc:dateIdentified="2020-05-10T20:42:12Z"
+   dwc:taxonID="48978"
+   dwc:scientificName="Dirona picta"
+   dwc:taxonRank="species"
+   dwc:kingdom="Animalia"
+   dwc:phylum="Mollusca"
+   dwc:class="Gastropoda"
+   dwc:order="Nudibranchia"
+   dwc:family="Dironidae"
+   dwc:genus="Dirona"
+   dwc:inaturalistLogin="alex_bairstow"
+   dwc:recordedBy="Alex Bairstow"
+   dwc:occurrenceRemarks="x13 seen this morning"
+   dwc:coordinateUncertaintyInMeters="4"
+   dcterms:rights="© Alex Bairstow some rights reserved">
+   <dcterms:modified>
+    <rdf:Seq>
+     <rdf:li>2020-05-10T21:02:36Z</rdf:li>
+    </rdf:Seq>
+   </dcterms:modified>
+   <dcterms:references>
+    <rdf:Bag>
+     <rdf:li>https://www.inaturalist.org/observations/45524803</rdf:li>
+    </rdf:Bag>
+   </dcterms:references>
+   <dcterms:license>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0/</rdf:li>
+    </rdf:Alt>
+   </dcterms:license>
+   <dcterms:rightsHolder>
+    <rdf:Seq>
+     <rdf:li>Alex Bairstow</rdf:li>
+    </rdf:Seq>
+   </dcterms:rightsHolder>
+   <dc:subject>
+    <rdf:Bag>
+     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>taxonomy:phylum=Mollusca</rdf:li>
+     <rdf:li>taxonomy:class=Gastropoda</rdf:li>
+     <rdf:li>taxonomy:subclass=Heterobranchia</rdf:li>
+     <rdf:li>taxonomy:infraclass=Euthyneura</rdf:li>
+     <rdf:li>taxonomy:subterclass=Ringipleura</rdf:li>
+     <rdf:li>taxonomy:superorder=Nudipleura</rdf:li>
+     <rdf:li>taxonomy:order=Nudibranchia</rdf:li>
+     <rdf:li>taxonomy:suborder=Cladobranchia</rdf:li>
+     <rdf:li>taxonomy:superfamily=Proctonotoidea</rdf:li>
+     <rdf:li>taxonomy:family=Dironidae</rdf:li>
+     <rdf:li>taxonomy:genus=Dirona</rdf:li>
+     <rdf:li>"taxonomy:species=Dirona picta"</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Molluscs</rdf:li>
+     <rdf:li>Gastropods</rdf:li>
+     <rdf:li>"Heterobranch Gastropods"</rdf:li>
+     <rdf:li>"Euthyneuran Gastropods"</rdf:li>
+     <rdf:li>"Nudipleuran Slugs"</rdf:li>
+     <rdf:li>Nudibranchs</rdf:li>
+     <rdf:li>"Colorful Dirona"</rdf:li>
+     <rdf:li>inat:taxon_id=48978</rdf:li>
+     <rdf:li>inat:observation_id=45524803</rdf:li>
+    </rdf:Bag>
+   </dc:subject>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>

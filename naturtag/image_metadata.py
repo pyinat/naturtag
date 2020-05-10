@@ -60,7 +60,8 @@ def write_xmp_sidecar(path, metadata, create_xmp=False):
         create_xmp_sidecar(xmp_path)
 
     if isfile(xmp_path):
-        logger.info(f'Writing subset of tags to {xmp_path}')
+        n_tags = len(list(filter(lambda x: x.startswith('Xmp.'), metadata)))  # TODO: make less ugly
+        logger.info(f'Writing {n_tags} tags to {xmp_path}')
         sidecar = Image(xmp_path)
         _write_xmp(sidecar, metadata)
         sidecar.close()
