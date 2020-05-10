@@ -72,8 +72,6 @@ taxonomy:kingdom=Animalia
 
 If this actually turns out to be useful, there is lots of room for building on top of this basic
 PoC, for example:
-* Integrate with iNaturalist API to query and download observation data based on search criteria
-* Add features for writing taxonomic info to XMP metadata
 * Conveniences to make it easier to import generated keywords into popular photo/metadata editing
   applications that support hierarchical keywords (XnView MP, FastPictureiewer, Lightroom, Daminion, etc.)
     * Add support for FPV keyword synonyms (common name <--> scientific name)
