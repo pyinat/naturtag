@@ -1,16 +1,10 @@
-import re
-
 import click
 from click_help_colors import HelpColorsCommand
 
 from naturtag.image_metadata import get_keyword_metadata, write_metadata
 from naturtag.inat_darwincore import get_observation_dwc_terms
 from naturtag.inat_keywords import get_keywords
-
-
-def strip_url(ctx, param, value):
-    """ If a URL is provided containing an ID, return just the ID """
-    return int(value.split('/')[-1].split('-')[0]) if value else None
+from naturtag.cli_utils import GlobPath, chain_lists, colorize_help_text, strip_url
 
 
 @click.command(cls=HelpColorsCommand, help_headers_color='blue', help_options_color='cyan')
@@ -23,37 +17,78 @@ def strip_url(ctx, param, value):
 @click.option('-t', '--taxon', help='Taxon ID or URL', callback=strip_url)
 @click.option('-x', '--create-xmp', is_flag=True,
               help="Create XMP sidecar file if it doesn't already exist")
-@click.argument('images', nargs=-1, type=click.Path(dir_okay=False, exists=True, writable=True))
+@click.argument('images', nargs=-1, type=GlobPath(), callback=chain_lists)
+# @click.argument('images', nargs=-1, type=click.Path(dir_okay=False, exists=True, writable=True))
 def tag(ctx, observation, taxon, common_names, hierarchical, create_xmp, images):
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
     metadata.
 
     \b
-    Keywords Only:
-    If no images are specified, this command will just print the generated keywords.
+    ### Data Sources
+    Either a taxon or observation may be specified, either by ID or URL.
+    For example, all of the following options will fetch the same taxonomy
+    metadata:
+    ```
+    -t 48978
+    -t https://www.inaturalist.org/taxa/48978-Dirona-picta
+    -o 45524803
+    -o https://www.inaturalist.org/observations/45524803
+    ```
 
     \b
-    Keywords:
-    Keywords will be generated in the format `taxonomy:{rank}={name}`.
+    The difference is that specifying a taxon (`-t`) will fetch only taxonomy
+    metadata, while specifying an observation (`-o`) will fetch taxonomy plus
+    observation metadata.
 
     \b
-    Hierarchical Keywords:
-    If specified, hierarchical keywords will be generated
+    ### Images
+    Multiple paths are supported, as well as glob patterns, for example:
+    `0001.jpg IMG*.jpg ~/observations/**.jpg`
+    If no images are specified, the generated keywords will be printed.
 
     \b
-    DarwinCore:
-    If an observation is specified, DwC metadata will also be generated, in the form of
-    XMP tags. Among other things, this includes taxonomy tags in the format
-    `dwc:{rank}="{name}"`.
+    ### Keywords
+    Keywords will be generated in the format:
+    `taxonomy:{rank}={name}`
 
     \b
-    Sidecar Files:
+    ### DarwinCore
+    If an observation is specified, DwC metadata will also be generated, in the
+    form of XMP tags. Among other things, this includes taxonomy tags in the
+    format:
+    `dwc:{rank}="{name}"`
+
+    \b
+    ### Sidecar Files
     By default, XMP tags will be written to a sidecar file if it already exists.
-    Use the `-x` / `--create-xmp` option to create a new one if it doesn't exist.
+    Use the `-x` option to create a new one if it doesn't exist.
+
+    \b
+    ### Hierarchical Keywords
+    If specified (`-h`), hierarchical keywords will be generated. These will be
+    interpreted as a tree structure by image viewers that support them.
+
+    \b
+    For example, the following keywords:
+    ```
+    Animalia
+    Animalia|Arthropoda
+    Animalia|Arthropoda|Chelicerata
+    Animalia|Arthropoda|Hexapoda
+    ```
+
+    \b
+    Will translate into the following tree structure:
+    ```
+    Animalia
+        ┗━Arthropoda
+            ┣━Chelicerata
+            ┗━Hexapoda
+    ```
+    #
     """
     if not any([observation, taxon]):
-        # print_help()
         click.echo(ctx.get_help())
         ctx.exit()
     if all([observation, taxon]):
@@ -78,18 +113,6 @@ def tag(ctx, observation, taxon, common_names, hierarchical, create_xmp, images)
         click.echo('\n'.join(keywords))
 
 
-def colorize_help_text(text):
-    """ An ugly hack to make help text prettier """
-    headers = ['Keywords Only:', 'Hierarchical Keywords:', 'Keywords:', 'DarwinCore:',
-               'Sidecar Files:']
-    for h in headers:
-        text = text.replace(h, click.style(h, 'blue'))
-
-    return re.sub(r'`([^`]+)`', click.style(r'\1', 'cyan'), text)
-
-
-tag.help = colorize_help_text(tag.help)
-
-
 # Main CLI entry point
 main = tag
+tag.help = colorize_help_text(tag.help)
