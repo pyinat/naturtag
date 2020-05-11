@@ -20,7 +20,7 @@ def convert_dwc_to_xmp(dwc):
     XMP tags. For example: ``'dwc:species' -> 'Xmp.dwc.species'``
 
     Aside: This is a fun project. If it involved manual XML processsing, it would no longer
-    be a fun project. Thanks, xmltodict.
+    be a fun project. Thanks, xmltodict!
     """
     # Get inner record as a dict, if it exists
     xml_dict = xmltodict.parse(dwc)

@@ -6,8 +6,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         'Click>=7.0',
-        'pyinaturalist',
-        # "https://github.com/JWCook/pyinaturalist.git",
+        'click-help-colors',
+        # 'pyinaturalist',  # TODO: Submit PR(s) for WIP pyinaturalist changes
+        "git+https://github.com/JWCook/pyinaturalist.git@dev",
         'pyexiv2',
         'xmltodict',
     ],

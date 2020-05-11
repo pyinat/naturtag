@@ -26,14 +26,16 @@ def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=
     taxa = get_parent_taxa(min_tax_id)
 
     keywords = get_taxonomy_keywords(taxa)
+    if hierarchical:
+        keywords.extend(get_hierarchical_keywords(keywords))
     if common:
         keywords.extend(get_common_keywords(taxa))
-    if hierarchical:
-        keywords.extend(get_hierarchical_keywords(taxa))
 
     keywords.append(f'inat:taxon_id={min_tax_id}')
+    keywords.append(f'dwc:taxonID={min_tax_id}')
     if observation_id:
         keywords.append(f'inat:observation_id={observation_id}')
+        keywords.append(f'dwc:catalogNumber={observation_id}')
 
     logger.info(f'{len(keywords)} keywords generated')
     return keywords
@@ -63,8 +65,12 @@ def get_common_keywords(taxa):
     return list(filter(None, keywords))
 
 
-def get_hierarchical_keywords(taxa):
-    raise NotImplementedError
+# TODO: Also include common names in hierarchy?
+def get_hierarchical_keywords(keywords):
+    hier_keywords = [keywords[0]]
+    for rank_name in keywords[1:]:
+        hier_keywords.append(f'{hier_keywords[-1]}|{rank_name}')
+    return hier_keywords
 
 
 def quote(s):

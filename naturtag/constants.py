@@ -1,4 +1,4 @@
-from os.path import dirname, join
+from os.path import dirname
 
 PKG_DIR = dirname(dirname(__file__))
 
@@ -8,3 +8,17 @@ DWC_NAMESPACES = {
     "dcterms": "http://purl.org/dc/terms/",
     "dwc": "http://rs.tdwg.org/dwc/terms/",
 }
+
+# Basic DwC fields that can be added for a taxon without an observation
+MINIMAL_DWC_TERMS = [
+    'dwc:kingdom',
+    'dwc:phylum',
+    'dwc:class',
+    'dwc:order',
+    'dwc:family',
+    'dwc:genus',
+    'dwc:species',
+    'dwc:scientificName',
+    'dwc:taxonRank',
+    'dwc:taxonID',
+]
