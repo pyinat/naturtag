@@ -1,0 +1,191 @@
+#:kivy 1.11
+#:import IMAGE_FILETYPES naturtag.ui.IMAGE_FILETYPES
+
+<MDIntField@MDTextField>:
+	input_filter: 'int'
+	helper_text_mode: 'on_focus'
+
+
+<ContentNavigationDrawer>:
+    ScrollView:
+        MDList:
+			MDIconButton:
+				icon: 'close'
+				pos_hint: {'top': 1}
+				on_release: root.nav_drawer.set_state('close')
+            OneLineIconListItem:
+                text: 'Image Selector'
+                on_press:
+                    root.nav_drawer.set_state('close')
+                    root.screen_manager.current = 'main'
+				IconLeftWidget:
+					icon: 'home'
+			OneLineIconListItem:
+                text: 'Settings'
+                on_press:
+                    root.nav_drawer.set_state('close')
+                    root.screen_manager.current = 'settings'
+				IconLeftWidget:
+					icon: 'settings'
+			OneLineIconListItem:
+				text: 'Exit'
+				on_press:
+					app.get_running_app().stop()
+				IconLeftWidget:
+					icon: 'exit-to-app'
+
+
+<Controller>:
+	orientation: 'vertical'
+    common_names: common_names_chk.active
+    hierarchical_keywords: hierarchical_keywords_chk.active
+    darwincore: darwincore_chk.active
+	create_xmp: create_xmp_chk.active
+    observation_id: observation_id_input.text
+    taxon_id: taxon_id_input.text
+	md_bg_color: app.theme_cls.primary_color
+	adaptive_size: True
+
+	MDToolbar:
+		id: toolbar
+		title: 'Navigation Drawer'
+		left_action_items: [['menu', lambda x: nav_drawer.toggle_nav_drawer()]]
+		size_hint_max_y: 100
+
+	NavigationLayout:
+		title: app.title
+		md_bg_color: app.theme_cls.primary_color
+		x: toolbar.height
+
+		ScreenManager:
+			id: screen_manager
+
+			# Settings screen
+			Screen:
+				name: 'settings'
+				MDGridLayout:
+					cols: 2
+
+					MDSwitch:
+						id: common_names_chk
+						active: True
+						size: dp(48), dp(48)
+						pos_hint: {'center_x': .4, 'center_y': .8}
+					MDLabel:
+						text: 'Common Names'
+						pos_hint: {'center_x': .6, 'center_y': .8}
+					MDSwitch:
+						id: hierarchical_keywords_chk
+						active: True
+						size: dp(48), dp(48)
+					MDLabel:
+						text: 'Hierarchical Keywords'
+					MDSwitch:
+						id: darwincore_chk
+						active: True
+						size: dp(48), dp(48)
+					MDLabel:
+						text: 'Darwin Core Metadata'
+					MDSwitch:
+						id: create_xmp_chk
+						size: dp(48), dp(48)
+					MDLabel:
+						text: 'Create XMP Files'
+
+			Screen:
+				name: 'main'
+				BoxLayout:
+
+					# Image viewer
+					ScrollView:
+						do_scroll_x: False
+						do_scroll_y: True
+						effect_cls: 'OpacityScrollEffect'
+						scroll_type: ['bars', 'content']
+						scroll_wheel_distance: 40
+						size: self.size
+						bar_width: 10
+
+						MDGridLayout:
+							id: image_previews
+							adaptive_height: True
+							cols: int(self.width / 200)
+							padding: dp(4), dp(4)
+							spacing: dp(4)
+							row_default_height: 200
+#							row_force_default: True
+							col_default_width: 200
+							col_force_default: True
+
+					# Options + file chooser
+					MDBoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .4
+						size_hint_min_x: 450
+
+						# Options
+						MDBoxLayout:
+							size_hint_y: .15
+							size_hint_min_y: 100
+
+
+							# Text input fields
+							MDGridLayout:
+								cols: 1
+								MDIntField:
+									id: observation_id_input
+									hint_text: 'Observation ID'
+									helper_text: 'Enter an iNaturalist observation ID'
+								MDIntField:
+									id: taxon_id_input
+									hint_text: 'Taxon ID'
+									helper_text: 'Enter an iNaturalist taxon ID'
+
+						# File Chooser
+						MDBoxLayout:
+							orientation: 'vertical'
+							md_bg_color: .5,.5,.5,1
+
+							FileChooserListView:
+							#MDFileManager:
+								# rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
+								id: filechooser
+								filters: IMAGE_FILETYPES
+								# multiselect: True
+								# dirselect: True
+								on_selection: root.add_images(self.selection)
+
+							# List of selected files
+							MDBoxLayout:
+								orientation: 'vertical'
+								md_bg_color: app.theme_cls.primary_color
+
+								MDLabel:
+									text: 'Selected Files:'
+									size_hint_max_y: 20
+								TextInput:
+									text: root.file_list_text
+									id: file_input
+									readonly: True
+									multiline: True
+									size_hint_y: .3
+
+							MDBoxLayout:
+								size_hint_y: None
+								height: 30
+
+								MDRaisedButton:
+									text: 'Clear'
+									on_release: root.reset()
+								MDRaisedButton:
+									text: 'Debug'
+									on_release: root.get_state()
+								MDRaisedButton:
+									text: 'Load'
+									on_release: root.add_images(filechooser.selection)
+		MDNavigationDrawer:
+			id: nav_drawer
+
+			ContentNavigationDrawer:
+				screen_manager: screen_manager
+				nav_drawer: nav_drawer
