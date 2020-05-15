@@ -1,5 +1,8 @@
 __pycache__
+.idea/
 *.egg-info/
 *.sw*
 .mypy_cache/
-sample_data
+build/
+venv/
+sample_data/

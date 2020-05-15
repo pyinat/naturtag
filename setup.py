@@ -8,10 +8,16 @@ setup(
         'Click>=7.0',
         'click-help-colors',
         # 'pyinaturalist',  # TODO: Submit PR(s) for WIP pyinaturalist changes
-        "git+https://github.com/JWCook/pyinaturalist.git@dev",
+        # "git+https://github.com/JWCook/pyinaturalist.git@dev",
         'pyexiv2',
         'xmltodict',
     ],
+    extras_require={
+        'ui': ['docutils', 'kivy', 'pygments'],
+        'ui-win': ['pypiwin32', 'kivy_deps.sdl2', 'kivy_deps.gstreamer', 'kivy_deps.angle'],
+        'dev': ['black', 'kivy_examples', 'pytest']
+    },
+    # pip install
     entry_points={
         'console_scripts': [
             'naturtag=naturtag.cli:main',
