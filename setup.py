@@ -1,5 +1,14 @@
+from itertools import chain
 from setuptools import setup, find_packages
 from naturtag import __version__
+
+extras_require = {
+    'ui': ['docutils', 'kivy>=1.11', 'kivymd~=0.104.1', 'pygments'],
+    'dev': ['black', 'kivy_examples', 'pytest']
+}
+extras_require['all'] = list(chain.from_iterable(extras_require.values()))
+extras_require['ui-win'] = ['pypiwin32', 'kivy_deps.sdl2', 'kivy_deps.gstreamer', 'kivy_deps.angle']
+extras_require['all-win'] = extras_require['all'] + extras_require['ui-win']
 
 setup(
     name='inat-image-tagger',
@@ -9,16 +18,11 @@ setup(
         'Click>=7.0',
         'click-help-colors',
         # 'pyinaturalist',  # TODO: Submit PR(s) for WIP pyinaturalist changes
-        # "git+https://github.com/JWCook/pyinaturalist.git@dev",
+        'pyinaturalist @ git+https://github.com/JWCook/pyinaturalist.git@dev',
         'pyexiv2',
         'xmltodict',
     ],
-    extras_require={
-        'ui': ['docutils', 'kivy>=1.11', 'kivymd~=0.104.1', 'pygments'],
-        'ui-win': ['pypiwin32', 'kivy_deps.sdl2', 'kivy_deps.gstreamer', 'kivy_deps.angle'],
-        'dev': ['black', 'kivy_examples', 'pytest']
-    },
-    # pip install
+    extras_require=extras_require,
     entry_points={
         'console_scripts': [
             'naturtag=naturtag.cli:main',

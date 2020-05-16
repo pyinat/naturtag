@@ -1,7 +1,9 @@
 #:kivy 1.11
+#:import ASSETS_PATH naturtag.ui.ASSETS_PATH
 #:import IMAGE_FILETYPES naturtag.ui.IMAGE_FILETYPES
 #:import IconLeftSwitch naturtag.ui.IconLeftSwitch
 #:import version naturtag.__version__
+
 
 <MDIntField@MDTextField>:
 	input_filter: 'int'
@@ -13,11 +15,11 @@
 		orientation: 'vertical'
 		FloatLayout:
 			size_hint_y: None
-			height: "200dp"
+			height: "310dp"
 
 			canvas:
 				Color:
-					rgba: app.theme_cls.primary_color
+					rgba: app.theme_cls.bg_normal
 				Rectangle:
 					pos: self.pos
 					size: self.size
@@ -25,12 +27,12 @@
 			BoxLayout:
 				id: top_box
 				size_hint_y: None
-				height: "200dp"
+				height: "300dp"
 				x: root.parent.x
 				pos_hint: {"top": 1}
 
 				FitImage:
-					source: f"{images_path}kivymd_alpha.png"
+					source: f"{ASSETS_PATH}inat-image-tagger-logo.png"
 
 			MDIconButton:
 				icon: "close"
@@ -42,7 +44,7 @@
 				markup: True
 				text: f"[b]iNaturalist Image Tagger[/b] Version: {version}"
 				x: root.parent.x + dp(10)
-				y: root.height - top_box.height + dp(10)
+				y: root.height - top_box.height
 				size_hint_y: None
 				height: self.texture_size[1]
 
@@ -80,7 +82,7 @@
 	MDToolbar:
 		id: toolbar
 		title: 'Navigation Drawer'
-		left_action_items: [['menu', lambda x: nav_drawer.toggle_nav_drawer()]]
+		left_action_items: [['menu', lambda x: nav_drawer.set_state('open')]]
 		size_hint_max_y: 100
 
 	NavigationLayout:
@@ -95,6 +97,10 @@
 			Screen:
 				name: 'settings'
 				MDList:
+
+                    OneLineListItem:
+                        text: 'Metadata options'
+    					font_style: 'H5'
 					TwoLineAvatarListItem:
 						text: 'Common names'
 						font_style: 'H6'
@@ -114,7 +120,7 @@
 						font_style: 'H6'
 						secondary_text: 'Convert taxon/observation metadata into XMP Darwin Core metadata'
 						IconLeftSwitch:
-							id: darwincore_chk
+							id: darwin_core_chk
 							active: True
 					TwoLineAvatarListItem:
 						text: 'Create XMP Files'
@@ -123,6 +129,16 @@
 						IconLeftSwitch:
 							id: create_xmp_chk
 							active: True
+
+					OneLineListItem:
+					OneLineListItem:
+                        text: 'UI options'
+    					font_style: 'H5'
+    				OneLineAvatarListItem:
+						text: 'Dark Mode'
+						font_style: 'H6'
+						IconLeftSwitch:
+							id: dark_mode_chk
 
 			Screen:
 				name: 'main'
@@ -176,11 +192,10 @@
 						# File Chooser
 						MDBoxLayout:
 							orientation: 'vertical'
-							md_bg_color: .5,.5,.5,1
+							md_bg_color: .1, .1, .1, .75  #app.theme_cls.bg_darkest
 
 							FileChooserListView:
-							#MDFileManager:
-								# rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
+#								rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
 								id: filechooser
 								filters: IMAGE_FILETYPES
 								# multiselect: True
@@ -212,7 +227,8 @@
 								MDRaisedButton:
 									text: 'Debug'
 									on_release: root.get_state()
-								MDRaisedButton:
+                                    on_release: print(f"{ASSETS_PATH}inat-image-tagger-icon.png")
+                                MDRaisedButton:
 									text: 'Load'
 									on_release: root.add_images(filechooser.selection)
 		MDNavigationDrawer:

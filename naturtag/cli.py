@@ -86,7 +86,7 @@ def tag(ctx, observation, taxon, common_names, hierarchical, create_xmp, images)
             ┣━Chelicerata
             ┗━Hexapoda
     ```
-    #
+    \b
     """
     if not any([observation, taxon]):
         click.echo(ctx.get_help())
