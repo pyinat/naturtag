@@ -8,7 +8,10 @@ from kivy.core.window import Window
 from kivy.properties import DictProperty, ListProperty, StringProperty, ObjectProperty, BooleanProperty
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
+
 from kivymd.uix.imagelist import SmartTileWithLabel as ImageTile
+from kivymd.uix.list import ILeftBodyTouch
+from kivymd.uix.selectioncontrol import MDSwitch
 
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
@@ -25,10 +28,10 @@ class ContentNavigationDrawer(BoxLayout):
     nav_drawer = ObjectProperty()
 
 
+class IconLeftSwitch(ILeftBodyTouch, MDSwitch):
+    pass
+
 class Controller(BoxLayout):
-    common_names = BooleanProperty()
-    hierarchical_keywords = BooleanProperty()
-    create_xmp = BooleanProperty()
     observation_id = StringProperty()
     taxon_id = StringProperty()
     file_list = ListProperty([])
@@ -57,16 +60,31 @@ class Controller(BoxLayout):
         for path in paths:
             self.add_image(path=path)
 
+    # TODO: Apply image file glob patterns to dir
     def add_dir_selection(self, dir):
         print(dir)
 
+    def get_config(self):
+        return {
+            'common_names': self.ids.common_names_chk.active,
+            'hierarchical_keywords': self.ids.hierarchical_keywords_chk.active,
+            'darwincore': self.ids.darwincore_chk.active,
+            'create_xmp': self.ids.create_xmp_chk.active,
+        }
+
+    def get_inputs(self):
+        return {
+            "observation_id":  self.ids.observation_id_input.text,
+            "taxon_id": self.ids.taxon_id_input.text,
+        }
+
     def get_state(self):
         logger.info(
-            f'IDs: {self.ids}\nFiles:\n{self.file_list_text}\n'
-            f'Config: {self.common_names, self.hierarchical_keywords, self.create_xmp}\n'
-            f'Inputs: {self.observation_id, self.taxon_id}'
+            f'IDs: {self.ids}\n'
+            f'Files:\n{self.file_list_text}\n'
+            f'Config: {self.get_config()}\n'
+            f'Inputs: {self.get_inputs()}\n'
         )
-        print(self.ids.filechooser.filters)
 
     def reset(self):
         """ Clear all image selections """
@@ -91,6 +109,7 @@ class ImageTaggerApp(App):
         Window.bind(on_dropfile=controller.add_image)
         Window.size = INIT_WINDOW_SIZE
         controller.ids.screen_manager.current = 'main'
+        # controller.ids.screen_manager.current = 'settings'
         return controller
 
 

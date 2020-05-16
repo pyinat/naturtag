@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from naturtag import __version__
 
 setup(
     name='inat-image-tagger',
-    version='0.1.0',
+    version=__version__,
     packages=find_packages(),
     install_requires=[
         'Click>=7.0',

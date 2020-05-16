@@ -1,5 +1,7 @@
 #:kivy 1.11
 #:import IMAGE_FILETYPES naturtag.ui.IMAGE_FILETYPES
+#:import IconLeftSwitch naturtag.ui.IconLeftSwitch
+#:import version naturtag.__version__
 
 <MDIntField@MDTextField>:
 	input_filter: 'int'
@@ -7,40 +9,69 @@
 
 
 <ContentNavigationDrawer>:
-    ScrollView:
-        MDList:
+	BoxLayout:
+		orientation: 'vertical'
+		FloatLayout:
+			size_hint_y: None
+			height: "200dp"
+
+			canvas:
+				Color:
+					rgba: app.theme_cls.primary_color
+				Rectangle:
+					pos: self.pos
+					size: self.size
+
+			BoxLayout:
+				id: top_box
+				size_hint_y: None
+				height: "200dp"
+				x: root.parent.x
+				pos_hint: {"top": 1}
+
+				FitImage:
+					source: f"{images_path}kivymd_alpha.png"
+
 			MDIconButton:
-				icon: 'close'
-				pos_hint: {'top': 1}
-				on_release: root.nav_drawer.set_state('close')
-            OneLineIconListItem:
-                text: 'Image Selector'
-                on_press:
-                    root.nav_drawer.set_state('close')
-                    root.screen_manager.current = 'main'
-				IconLeftWidget:
-					icon: 'home'
-			OneLineIconListItem:
-                text: 'Settings'
-                on_press:
-                    root.nav_drawer.set_state('close')
-                    root.screen_manager.current = 'settings'
-				IconLeftWidget:
-					icon: 'settings'
-			OneLineIconListItem:
-				text: 'Exit'
-				on_press:
-					app.get_running_app().stop()
-				IconLeftWidget:
-					icon: 'exit-to-app'
+				icon: "close"
+				x: root.parent.x + dp(10)
+				pos_hint: {"top": 1}
+				on_release: root.parent.set_state('close')
+
+			MDLabel:
+				markup: True
+				text: f"[b]iNaturalist Image Tagger[/b] Version: {version}"
+				x: root.parent.x + dp(10)
+				y: root.height - top_box.height + dp(10)
+				size_hint_y: None
+				height: self.texture_size[1]
+
+		ScrollView:
+			MDList:
+				OneLineIconListItem:
+					text: 'Image Selector'
+					on_press:
+						root.nav_drawer.set_state('close')
+						root.screen_manager.current = 'main'
+					IconLeftWidget:
+						icon: 'home'
+				OneLineIconListItem:
+					text: 'Settings'
+					on_press:
+						root.nav_drawer.set_state('close')
+						root.screen_manager.current = 'settings'
+					IconLeftWidget:
+						icon: 'settings'
+				OneLineIconListItem:
+					text: 'Exit'
+					on_press:
+						app.get_running_app().stop()
+					IconLeftWidget:
+						icon: 'exit-to-app'
 
 
 <Controller>:
 	orientation: 'vertical'
-    common_names: common_names_chk.active
-    hierarchical_keywords: hierarchical_keywords_chk.active
-    darwincore: darwincore_chk.active
-	create_xmp: create_xmp_chk.active
     observation_id: observation_id_input.text
     taxon_id: taxon_id_input.text
 	md_bg_color: app.theme_cls.primary_color
@@ -63,34 +94,35 @@
 			# Settings screen
 			Screen:
 				name: 'settings'
-				MDGridLayout:
-					cols: 2
-
-					MDSwitch:
-						id: common_names_chk
-						active: True
-						size: dp(48), dp(48)
-						pos_hint: {'center_x': .4, 'center_y': .8}
-					MDLabel:
-						text: 'Common Names'
-						pos_hint: {'center_x': .6, 'center_y': .8}
-					MDSwitch:
-						id: hierarchical_keywords_chk
-						active: True
-						size: dp(48), dp(48)
-					MDLabel:
+				MDList:
+					TwoLineAvatarListItem:
+						text: 'Common names'
+						font_style: 'H6'
+						secondary_text: 'Include common names in taxonomy keywords'
+						IconLeftSwitch:
+							id: common_names_chk
+							active: True
+					TwoLineAvatarListItem:
 						text: 'Hierarchical Keywords'
-					MDSwitch:
-						id: darwincore_chk
-						active: True
-						size: dp(48), dp(48)
-					MDLabel:
+						font_style: 'H6'
+						secondary_text: 'Generate pipe-delimited hierarchical keywords'
+						IconLeftSwitch:
+							id: hierarchical_keywords_chk
+							active: True
+					TwoLineAvatarListItem:
 						text: 'Darwin Core Metadata'
-					MDSwitch:
-						id: create_xmp_chk
-						size: dp(48), dp(48)
-					MDLabel:
+						font_style: 'H6'
+						secondary_text: 'Convert taxon/observation metadata into XMP Darwin Core metadata'
+						IconLeftSwitch:
+							id: darwincore_chk
+							active: True
+					TwoLineAvatarListItem:
 						text: 'Create XMP Files'
+						font_style: 'H6'
+						secondary_text: "Create XMP sidecar files if they don't already exist"
+						IconLeftSwitch:
+							id: create_xmp_chk
+							active: True
 
 			Screen:
 				name: 'main'
@@ -185,7 +217,6 @@
 									on_release: root.add_images(filechooser.selection)
 		MDNavigationDrawer:
 			id: nav_drawer
-
 			ContentNavigationDrawer:
 				screen_manager: screen_manager
 				nav_drawer: nav_drawer
