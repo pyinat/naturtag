@@ -45,7 +45,7 @@
 		orientation: 'vertical'
 		FloatLayout:
 			size_hint_y: None
-			height: "310dp"
+			height: '310dp'
 			canvas:
 				Color:
 					rgba: app.theme_cls.bg_normal
@@ -56,21 +56,21 @@
 			BoxLayout:
 				id: top_box
 				size_hint_y: None
-				height: "300dp"
+				height: '300dp'
 				x: root.parent.x
-				pos_hint: {"top": 1}
+				pos_hint: {'top': 1}
 				FitImage:
-					source: f"{ASSETS_DIR}inat-image-tagger-logo.png"
+					source: f'{ASSETS_DIR}inat-image-tagger-logo.png'
 
 			MDIconButton:
-				icon: "close"
+				icon: 'close'
 				x: root.parent.x + dp(10)
-				pos_hint: {"top": 1}
+				pos_hint: {'top': 1}
 				on_release: root.parent.set_state('close')
 
 			MDLabel:
 				markup: True
-				text: f"[b]iNaturalist Image Tagger[/b] Version: {version}"
+				text: f'[b]iNaturalist Image Tagger[/b] Version: {version}'
 				x: root.parent.x + dp(10)
 				y: root.height - top_box.height
 				size_hint_y: None
@@ -95,6 +95,6 @@
 				OneLineIconListItem:
 					text: 'Exit'
 					on_press:
-						app.get_running_app().stop()
+						app.stop()
 					IconLeftWidget:
 						icon: 'exit-to-app'

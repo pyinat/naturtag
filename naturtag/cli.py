@@ -1,10 +1,8 @@
 import click
 from click_help_colors import HelpColorsCommand
 
-from naturtag.image_metadata import get_keyword_metadata, write_metadata
-from naturtag.inat_darwincore import get_observation_dwc_terms
-from naturtag.inat_keywords import get_keywords
 from naturtag.cli_utils import GlobPath, chain_lists, colorize_help_text, strip_url
+from naturtag.app import tag_images
 
 
 @click.command(cls=HelpColorsCommand, help_headers_color='blue', help_options_color='cyan')
@@ -13,13 +11,12 @@ from naturtag.cli_utils import GlobPath, chain_lists, colorize_help_text, strip_
               help='Include common names for all ranks that have them')
 @click.option('-h', '--hierarchical', is_flag=True,
               help='Generate pipe-delimited hierarchical keywords')
-@click.option('-o', '--observation', help='Observation ID or URL', callback=strip_url)
-@click.option('-t', '--taxon', help='Taxon ID or URL', callback=strip_url)
+@click.option('-o', '--observation-id', help='Observation ID or URL', callback=strip_url)
+@click.option('-t', '--taxon-id', help='Taxon ID or URL', callback=strip_url)
 @click.option('-x', '--create-xmp', is_flag=True,
               help="Create XMP sidecar file if it doesn't already exist")
 @click.argument('images', nargs=-1, type=GlobPath(), callback=chain_lists)
-# @click.argument('images', nargs=-1, type=click.Path(dir_okay=False, exists=True, writable=True))
-def tag(ctx, observation, taxon, common_names, hierarchical, create_xmp, images):
+def tag(ctx, observation_id, taxon_id, common_names, hierarchical, create_xmp, images):
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
     metadata.
@@ -88,25 +85,14 @@ def tag(ctx, observation, taxon, common_names, hierarchical, create_xmp, images)
     ```
     \b
     """
-    if not any([observation, taxon]):
+    if not any([observation_id, taxon_id]):
         click.echo(ctx.get_help())
         ctx.exit()
-    if all([observation, taxon]):
+    if all([observation_id, taxon_id]):
         click.secho('Provide either a taxon or an observation', fg='red')
         ctx.exit()
-
-    keywords = get_keywords(
-        observation_id=observation,
-        taxon_id=taxon,
-        common=common_names,
-        hierarchical=hierarchical,
-    )
-    metadata = get_keyword_metadata(keywords)
-
-    if observation and images:
-        metadata.update(get_observation_dwc_terms(observation))
-    for image in images:
-        write_metadata(image, metadata, create_xmp=create_xmp)
+    keywords, metadata = tag_images(
+        observation_id, taxon_id, common_names, hierarchical, create_xmp, images)
 
     # If no images were specified, just print keywords
     if not images:

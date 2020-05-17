@@ -4,8 +4,6 @@ import sys
 from os.path import dirname, join
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
-from kv.widgets import SCREENS
-
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import DictProperty, ListProperty, StringProperty, ObjectProperty
@@ -14,11 +12,15 @@ from kivy.uix.boxlayout import BoxLayout
 
 from kivymd.app import MDApp as App
 from kivymd.uix.imagelist import SmartTileWithLabel as ImageTile
+from kivymd.uix.snackbar import Snackbar
+
+from kv.widgets import SCREENS
+from naturtag.app import tag_images
 
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
 out_hdlr = logging.StreamHandler(sys.stdout)
-out_hdlr.setFormatter(logging.Formatter('[%(levelname)s] %(name)s %(funcName)s %(asctime)s %(message)s'))
+out_hdlr.setFormatter(logging.Formatter('[%(levelname)s] %(funcName)s %(asctime)s %(message)s'))
 out_hdlr.setLevel(logging.INFO)
 logger.addHandler(out_hdlr)
 
@@ -55,6 +57,7 @@ class Controller(BoxLayout):
         self.settings = self.settings_screen.ids
         self.inputs = self.image_selector_screen.ids
         self.image_previews = self.image_selector_screen.ids.image_previews
+        self.file_chooser = self.image_selector_screen.ids.file_chooser
 
         # Automatically adjust image preview layout
         self.image_previews.bind(minimum_height=self.image_previews.setter('height'))
@@ -97,12 +100,8 @@ class Controller(BoxLayout):
             'darwin_core': self.settings.darwin_core_chk.active,
             'create_xmp': self.settings.create_xmp_chk.active,
             'dark_mode': self.settings.dark_mode_chk.active,
-        }
-
-    def get_inputs(self):
-        return {
-            "observation_id": self.inputs.observation_id_input.text,
-            "taxon_id": self.inputs.taxon_id_input.text,
+            "observation_id": int(self.inputs.observation_id_input.text or 0),
+            "taxon_id": int(self.inputs.taxon_id_input.text or 0),
         }
 
     def get_state(self):
@@ -110,15 +109,28 @@ class Controller(BoxLayout):
             f'IDs: {self.ids}\n'
             f'Files:\n{self.file_list_text}\n'
             f'Config: {self.get_settings_dict()}\n'
-            f'Inputs: {self.get_inputs()}\n'
         )
 
     def reset(self):
         """ Clear all image selections """
+        logger.info('Clearing image selections')
         self.file_list = []
         self.file_list_text = ''
-        self.ids.filechooser.selection = []
-        self.ids.image_previews.clear_widgets()
+        self.file_chooser.selection = []
+        self.image_previews.clear_widgets()
+
+    def run(self):
+        """ Run image tagging for selected images and input """
+        settings = self.get_settings_dict()
+        tag_images(
+            settings['observation_id'],
+            settings['taxon_id'],
+            settings['common_names'],
+            settings['hierarchical_keywords'],
+            settings['create_xmp'],
+            self.file_list,
+        )
+
 
 class ImageTaggerApp(App):
     def build(self):
@@ -134,6 +146,11 @@ class ImageTaggerApp(App):
 
         controller.ids.screen_manager.current = 'image_selector'
         # controller.ids.screen_manager.current = 'settings'
+        Snackbar(
+            text=f'.{" " * 14}Drag and drop images or select them from the file chooser',
+            duration=10
+        ).show()
+        return controller
 
     def toggle_dark_mode(self, switch=None, is_active=False):
         self.theme_cls.theme_style = 'Dark' if is_active else 'Light'

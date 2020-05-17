@@ -55,7 +55,7 @@
 
                 FileChooserListView:
                     rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
-                    id: filechooser
+                    id: file_chooser
                     filters: IMAGE_FILETYPES
                     # multiselect: True
                     # dirselect: True
@@ -87,4 +87,10 @@
                         on_release: root.controller.get_state()
                     MDRaisedButton:
                         text: 'Load'
-                        on_release: root.controller.add_images(filechooser.selection)
+                        on_release: root.controller.add_images(file_chooser.selection)
+
+    TooltipFloatingButton:
+        icon: 'play'
+        elevation_normal: 8
+        tooltip_text: 'Tag selected images'
+        on_release: root.controller.run()
