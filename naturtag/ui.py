@@ -39,6 +39,10 @@ class Metadata(Widget):
 
 
 class Controller(BoxLayout):
+    """
+    Top-level UI element that controls most app behavior, except for window/theme behavior,
+    which is controlled by ImageTaggerApp
+    """
     file_list = ListProperty([])
     file_list_text = StringProperty()
     selected_image_table = ObjectProperty()
@@ -122,10 +126,14 @@ class Controller(BoxLayout):
     def run(self):
         """ Run image tagging for selected images and input """
         settings = self.get_settings_dict()
+        if not settings['observation_id'] or settings['taxon_id']:
+            Snackbar(text=f'First select either an observation or an organism').show()
+            return
         tag_images(
             settings['observation_id'],
             settings['taxon_id'],
             settings['common_names'],
+            settings['darwin_core'],
             settings['hierarchical_keywords'],
             settings['create_xmp'],
             self.file_list,
@@ -133,6 +141,8 @@ class Controller(BoxLayout):
 
 
 class ImageTaggerApp(App):
+    toolbar = ObjectProperty()
+
     def build(self):
         Builder.load_file(join(KV_SRC_DIR, 'main.kv'))
 
@@ -145,7 +155,9 @@ class ImageTaggerApp(App):
         controller.settings.dark_mode_chk.bind(active=self.toggle_dark_mode)
 
         controller.ids.screen_manager.current = 'image_selector'
+        self.toolbar = controller.ids.toolbar
         # controller.ids.screen_manager.current = 'settings'
+        # TODO: Better help text that disappears as soon as an image or another screen is selected
         Snackbar(
             text=f'.{" " * 14}Drag and drop images or select them from the file chooser',
             duration=10
@@ -154,6 +166,16 @@ class ImageTaggerApp(App):
 
     def toggle_dark_mode(self, switch=None, is_active=False):
         self.theme_cls.theme_style = 'Dark' if is_active else 'Light'
+
+    def toggle_fullscreen(self, *args):
+        """ Enable or disable fullscreen, and change icon"""
+        if Window.fullscreen:
+            Window.fullscreen = 0
+            icon = 'fullscreen'
+        else:
+            Window.fullscreen = 'auto'
+            icon = 'fullscreen-exit'
+        self.toolbar.right_action_items[0] = [icon, self.toggle_fullscreen]
 
 
 if __name__ == '__main__':
