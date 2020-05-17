@@ -1,5 +1,5 @@
 """ Combined entry point for both CLI and GUI """
-from naturtag.image_metadata import get_keyword_metadata, write_metadata
+from naturtag.metadata_writer import get_keyword_metadata, write_metadata
 from naturtag.inat_darwincore import get_observation_dwc_terms
 from naturtag.inat_keywords import get_keywords
 

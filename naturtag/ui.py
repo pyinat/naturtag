@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from os.path import dirname, join
+from os.path import basename, dirname, join
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
 from kivy.core.window import Window
@@ -78,7 +78,14 @@ class Controller(BoxLayout):
             self.file_list.sort()
             self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
             # Update image previews
-            img = ImageTile(source=path)
+
+            img_label = (
+                f'{basename(path)}\n'
+                '2020-01-02\n'
+                '[b]Taxon | Obs | GPS[/b]\n'
+                '[b]EXIF | IPTC | XMP[/b]'
+            )
+            img = ImageTile(source=path, text=img_label)
             img.bind(on_release=self.remove_image)
             self.image_previews.add_widget(img)
 
