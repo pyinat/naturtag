@@ -4,15 +4,16 @@ import sys
 from os.path import dirname, join
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
-from kivymd.app import MDApp as App
+from kv.widgets import SCREENS
+
 from kivy.core.window import Window
+from kivy.lang import Builder
 from kivy.properties import DictProperty, ListProperty, StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 
+from kivymd.app import MDApp as App
 from kivymd.uix.imagelist import SmartTileWithLabel as ImageTile
-from kivymd.uix.list import ILeftBodyTouch
-from kivymd.uix.selectioncontrol import MDSwitch
 
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
@@ -21,34 +22,42 @@ out_hdlr.setFormatter(logging.Formatter('[%(levelname)s] %(name)s %(funcName)s %
 out_hdlr.setLevel(logging.INFO)
 logger.addHandler(out_hdlr)
 
-ASSETS_PATH = join(dirname(dirname(__file__)), 'assets', '')
+ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')
+KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
 INIT_WINDOW_SIZE = (1250, 800)
 MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'
 
 
-class ContentNavigationDrawer(BoxLayout):
-    screen_manager = ObjectProperty()
-    nav_drawer = ObjectProperty()
-
-
-class IconLeftSwitch(ILeftBodyTouch, MDSwitch):
-    pass
+class Metadata(Widget):
+    exif = DictProperty({})
+    iptc = DictProperty({})
+    xmp = DictProperty({})
 
 
 class Controller(BoxLayout):
-    observation_id = StringProperty()
-    taxon_id = StringProperty()
     file_list = ListProperty([])
-    file_list_text = StringProperty('')
+    file_list_text = StringProperty()
     selected_image_table = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Adjust image preview layout
-        self.ids.image_previews.bind(minimum_height=self.ids.image_previews.setter('height'))
-        self.ids.filechooser.filters = IMAGE_FILETYPES
+        # Initialize screens and store references to them
+        for name, cls in SCREENS.items():
+            Builder.load_file(join(KV_SRC_DIR, f'{name}.kv'))
+            new_screen = cls()
+            new_screen.controller = self
+            self.ids.screen_manager.add_widget(new_screen)
+            self.__setattr__(f'{name}_screen', new_screen)
+
+        # Add additional references to some nested objects for easier access
+        self.settings = self.settings_screen.ids
+        self.inputs = self.image_selector_screen.ids
+        self.image_previews = self.image_selector_screen.ids.image_previews
+
+        # Automatically adjust image preview layout
+        self.image_previews.bind(minimum_height=self.image_previews.setter('height'))
 
     def add_image(self, window=None, path=None):
         """ Add an image to the current selection, with deduplication """
@@ -56,13 +65,15 @@ class Controller(BoxLayout):
             path = path.decode('utf-8')
 
         if path not in self.file_list:
+            # Update file list
             logger.info(f'Adding image: {path}')
             self.file_list.append(path)
             self.file_list.sort()
-            self.file_list_text = '\n'.join(self.file_list)
+            self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
+            # Update image previews
             img = ImageTile(source=path)
             img.bind(on_release=self.remove_image)
-            self.ids.image_previews.add_widget(img)
+            self.image_previews.add_widget(img)
 
     def add_images(self, paths):
         """ Add one or more files selected via a FileChooser """
@@ -70,35 +81,35 @@ class Controller(BoxLayout):
             self.add_image(path=path)
 
     def remove_image(self, image):
-        """ Remove an image from file list and its corresponding widget """
+        """ Remove an image from file list and image previews """
         self.file_list.remove(image.source)
+        self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
         image.parent.remove_widget(image)
-        self.file_list_text = '\n'.join(self.file_list)
 
     # TODO: Apply image file glob patterns to dir
     def add_dir_selection(self, dir):
         print(dir)
 
-    def get_config(self):
+    def get_settings_dict(self):
         return {
-            'common_names': self.ids.common_names_chk.active,
-            'hierarchical_keywords': self.ids.hierarchical_keywords_chk.active,
-            'darwincore': self.ids.darwin_core_chk.active,
-            'create_xmp': self.ids.create_xmp_chk.active,
-            'dark_mode': self.ids.dark_mode_chk.active,
+            'common_names': self.settings.common_names_chk.active,
+            'hierarchical_keywords': self.settings.hierarchical_keywords_chk.active,
+            'darwin_core': self.settings.darwin_core_chk.active,
+            'create_xmp': self.settings.create_xmp_chk.active,
+            'dark_mode': self.settings.dark_mode_chk.active,
         }
 
     def get_inputs(self):
         return {
-            "observation_id":  self.ids.observation_id_input.text,
-            "taxon_id": self.ids.taxon_id_input.text,
+            "observation_id": self.inputs.observation_id_input.text,
+            "taxon_id": self.inputs.taxon_id_input.text,
         }
 
     def get_state(self):
         logger.info(
             f'IDs: {self.ids}\n'
             f'Files:\n{self.file_list_text}\n'
-            f'Config: {self.get_config()}\n'
+            f'Config: {self.get_settings_dict()}\n'
             f'Inputs: {self.get_inputs()}\n'
         )
 
@@ -109,24 +120,20 @@ class Controller(BoxLayout):
         self.ids.filechooser.selection = []
         self.ids.image_previews.clear_widgets()
 
-
-class Metadata(Widget):
-    exif = DictProperty({})
-    iptc = DictProperty({})
-    xmp = DictProperty({})
-
-
 class ImageTaggerApp(App):
     def build(self):
+        Builder.load_file(join(KV_SRC_DIR, 'main.kv'))
+
+        # Window and theme settings
         controller = Controller()
         Window.bind(on_dropfile=controller.add_image)
         Window.size = INIT_WINDOW_SIZE
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
-        controller.ids.screen_manager.current = 'main'
+        controller.settings.dark_mode_chk.bind(active=self.toggle_dark_mode)
+
+        controller.ids.screen_manager.current = 'image_selector'
         # controller.ids.screen_manager.current = 'settings'
-        controller.ids.dark_mode_chk.bind(active=self.toggle_dark_mode)
-        return controller
 
     def toggle_dark_mode(self, switch=None, is_active=False):
         self.theme_cls.theme_style = 'Dark' if is_active else 'Light'
