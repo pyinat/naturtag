@@ -3,10 +3,18 @@
 #:import IMAGE_FILETYPES naturtag.ui.IMAGE_FILETYPES
 #:import version naturtag.__version__
 
-
 <MDIntField@MDTextField>:
 	input_filter: 'int'
 	helper_text_mode: 'on_focus'
+
+<ImageScrollView@ScrollView>:
+    do_scroll_x: False
+    do_scroll_y: True
+    effect_cls: 'OpacityScrollEffect'
+    scroll_type: ['bars', 'content']
+    scroll_wheel_distance: 40
+    size: self.size
+    bar_width: 10
 
 
 # Main layout and nav drawer
@@ -18,10 +26,6 @@
     # Toolbar with buttons
 	MDToolbar:
 		id: toolbar
-		title: 'iNaturalist Image Tagger'
-		left_action_items: [['menu', lambda x: nav_drawer.set_state('open')]]
-        right_action_items: [['fullscreen', app.toggle_fullscreen],['settings', app.open_settings]]
-        # Optional: Put settings link in toolbar instead of navbar? [['settings', app.open_settings]]
 		size_hint_max_y: 100
 
     # Main view populated with currently selected screen
@@ -36,15 +40,10 @@
 		MDNavigationDrawer:
 			id: nav_drawer
 			ContentNavigationDrawer:
-				screen_manager: screen_manager
-				nav_drawer: nav_drawer
 
 
 # Main nav drawer
 <ContentNavigationDrawer@BoxLayout>:
-    screen_manager: None
-    nav_drawer: None
-
 	BoxLayout:
 		orientation: 'vertical'
 		FloatLayout:
@@ -70,7 +69,7 @@
 				icon: 'close'
 				x: root.parent.x + dp(10)
 				pos_hint: {'top': 1}
-				on_release: root.parent.set_state('close')
+				on_release: app.close_nav()
 
 			MDLabel:
 				markup: True
@@ -85,15 +84,13 @@
 				OneLineIconListItem:
 					text: 'Image Selector'
 					on_press:
-						root.nav_drawer.set_state('close')
-						root.screen_manager.current = 'image_selector'
+						app.switch_screen('image_selector')
 					IconLeftWidget:
 						icon: 'home'
 				OneLineIconListItem:
 					text: 'Settings'
 					on_press:
-						root.nav_drawer.set_state('close')
-						root.screen_manager.current = 'settings'
+						app.switch_screen('settings')
 					IconLeftWidget:
 						icon: 'settings'
 				OneLineIconListItem:
