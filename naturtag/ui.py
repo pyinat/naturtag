@@ -11,11 +11,12 @@ from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 
 from kivymd.app import MDApp as App
-from kivymd.uix.imagelist import SmartTileWithLabel as ImageTile
+from kivymd.uix.imagelist import SmartTileWithLabel
 from kivymd.uix.snackbar import Snackbar
 
 from kv.widgets import SCREENS
 from naturtag.app import tag_images
+from naturtag.metadata_reader import MetaMetadata
 
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
@@ -32,10 +33,8 @@ MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'
 
 
-class Metadata(Widget):
-    exif = DictProperty({})
-    iptc = DictProperty({})
-    xmp = DictProperty({})
+class ImageMetaTile(SmartTileWithLabel):
+    metadata = ObjectProperty()
 
 
 class Controller(BoxLayout):
@@ -70,24 +69,20 @@ class Controller(BoxLayout):
         """ Add an image to the current selection, with deduplication """
         if isinstance(path, bytes):
             path = path.decode('utf-8')
+        if path in self.file_list:
+            return
 
-        if path not in self.file_list:
-            # Update file list
-            logger.info(f'Adding image: {path}')
-            self.file_list.append(path)
-            self.file_list.sort()
-            self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
-            # Update image previews
+        # Update file list
+        logger.info(f'Adding image: {path}')
+        self.file_list.append(path)
+        self.file_list.sort()
+        self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
+        # Update image previews
 
-            img_label = (
-                f'{basename(path)}\n'
-                '2020-01-02\n'
-                '[b]Taxon | Obs | GPS[/b]\n'
-                '[b]EXIF | IPTC | XMP[/b]'
-            )
-            img = ImageTile(source=path, text=img_label)
-            img.bind(on_release=self.remove_image)
-            self.image_previews.add_widget(img)
+        metadata = MetaMetadata(path)
+        img = ImageMetaTile(source=path, metadata=metadata,  text=metadata.summary)
+        img.bind(on_release=self.remove_image)
+        self.image_previews.add_widget(img)
 
     def add_images(self, paths):
         """ Add one or more files selected via a FileChooser """
