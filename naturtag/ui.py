@@ -2,12 +2,17 @@ import logging
 import os
 import sys
 from os.path import basename, dirname, join
+
+# Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
+
+# Disable multitouch emulation before any other kivy modules are imported
+from kivy.config import Config
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.properties import DictProperty, ListProperty, StringProperty, ObjectProperty
-from kivy.uix.widget import Widget
+from kivy.properties import ListProperty, StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from kivymd.app import MDApp as App
@@ -81,7 +86,7 @@ class Controller(BoxLayout):
 
         metadata = MetaMetadata(path)
         img = ImageMetaTile(source=path, metadata=metadata,  text=metadata.summary)
-        img.bind(on_release=self.remove_image)
+        img.bind(on_touch_down=self.handle_image_click)
         self.image_previews.add_widget(img)
 
     def add_images(self, paths):
@@ -117,6 +122,16 @@ class Controller(BoxLayout):
             f'Config: {self.get_settings_dict()}\n'
         )
 
+    def handle_image_click(self, instance, touch):
+        """ Event handler for clicking an image """
+        if not instance.collide_point(*touch.pos):
+            return
+        elif touch.button == 'right':
+            self.remove_image(instance)
+        # TODO: Implement metadata view
+        else:
+            print('left mouse clicked')
+
     def reset(self):
         """ Clear all image selections """
         logger.info('Clearing image selections')
@@ -128,7 +143,7 @@ class Controller(BoxLayout):
     def run(self):
         """ Run image tagging for selected images and input """
         settings = self.get_settings_dict()
-        if not settings['observation_id'] or settings['taxon_id']:
+        if not settings['observation_id'] and not settings['taxon_id']:
             Snackbar(text=f'First select either an observation or an organism').show()
             return
         tag_images(
@@ -140,6 +155,12 @@ class Controller(BoxLayout):
             settings['create_xmp'],
             self.file_list,
         )
+
+        selected_id = (
+            f'Taxon ID: {settings["observation_id"]}' if settings['observation_id']
+            else f'Observation ID: {settings["observation_id"]}'
+        )
+        Snackbar(text=f'{len(self.file_list)} images tagged with metadata for {selected_id}').show()
 
 
 class ImageTaggerApp(App):
