@@ -4,11 +4,31 @@ from os.path import isfile, splitext
 
 from pyexiv2 import Image
 from pyinaturalist.constants import RANKS
-from naturtag.metadata_writer import KEYWORD_TAGS
+
+# All tags that support regular and hierarchical keyword lists
+KEYWORD_TAGS = [
+    'Exif.Image.XPSubject',
+    'Iptc.Application2.Subject',
+    'Xmp.dc.subject',
+]
+HIER_KEYWORD_TAGS = [
+    'Exif.Image.XPKeywords',
+    'Iptc.Application2.Keywords',
+    'Xmp.lr.hierarchicalSubject',
+]
+
+# Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
+NEW_XMP_CONTENTS = """
+<?xpacket?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="">
+</x:xmpmeta>
+<?xpacket?>
+"""
 
 # Simplified tags without formatting variations
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
+
 logger = getLogger(__name__)
 
 
@@ -19,12 +39,10 @@ def get_tagged_image_metadata(paths):
 
 # TODO: Extract GPS info
 class MetaMetadata:
-    """
-    Container for combining, parsing, and organizing image metadata into relevant categories
-    """
+    """ Class for reading, combining, parsing, organizing, and writing image metadata """
     def __init__(self, image_path):
         self.image_path = image_path
-        self.xmp_path = ''
+        self.xmp_path = splitext(self.image_path)[0] + '.xmp'
         self.exif, self.iptc, self.xmp = self.read_metadata()
         self.combined = {**self.exif, **self.iptc, **self.xmp}
         self.keyword_meta = KeywordMetadata(self.combined)
@@ -33,16 +51,13 @@ class MetaMetadata:
     def read_metadata(self):
         """ Read all formats of metadata from image + sidecar file """
         exif, iptc, xmp = self._safe_read_metadata(self.image_path)
-        self.xmp_path = splitext(self.image_path)[0] + '.xmp'
         if isfile(self.xmp_path):
             s_exif, s_iptc, s_xmp = self._safe_read_metadata(self.xmp_path)
             exif.update(s_exif)
             iptc.update(s_iptc)
             xmp.update(s_xmp)
-        else:
-            self.xmp_path = ''
 
-        paths = self.image_path + (f' + {self.xmp_path}' if self.xmp_path else '')
+        paths = self.image_path + (f' + {self.xmp_path}' if isfile(self.xmp_path) else '')
         counts = ' | '.join([f'EXIF: {len(exif)}', f'IPTC: {len(iptc)}', f'XMP: {len(xmp)}'])
         logger.info(f'Total tags found in {paths}: {counts}')
 
@@ -51,13 +66,8 @@ class MetaMetadata:
     def _safe_read_metadata(self, path, encoding='utf-8'):
         """ Attempt to read metadata, with error handling """
         logger.debug(f'Reading metadata from: {path} ({encoding})')
-
-        # Exiv2 RuntimeError usually means corrupted metadata; see https://dev.exiv2.org/issues/637#note-1
-        try:
-            img = Image(path)
-        except RuntimeError as exc:
-            logger.error(f'Failed to read corrupted metadata from {path}')
-            logger.exception(exc)
+        img = self.read_exiv2_image(path)
+        if not img:
             return {}, {}, {}
 
         try:
@@ -71,6 +81,19 @@ class MetaMetadata:
             img.close()
 
         return exif, iptc, xmp
+
+    @staticmethod
+    def read_exiv2_image(path):
+        """
+        Read an image with basic error handling. Note: Exiv2 ``RuntimeError`` usually means
+        corrupted metadata. See: https://dev.exiv2.org/issues/637#note-1
+        """
+        try:
+            return Image(path)
+        except RuntimeError as exc:
+            logger.error(f'Failed to read corrupted metadata from {path}')
+            logger.exception(exc)
+            return None
 
     def get_inaturalist_ids(self):
         """ Look for taxon and/or observation IDs from combined metadata if available """
@@ -113,19 +136,72 @@ class MetaMetadata:
             ' | '.join([k for k, v in meta_types.items() if v]),
         ])
 
+    def create_xmp_sidecar(self):
+        """ Create a new XMP sidecar file if one does not already exist """
+        if isfile(self.xmp_path):
+            return
+        logger.info(f'Creating new XMP sidecar file: {self.xmp_path}')
+        with open(self.xmp_path, 'w') as f:
+            f.write(NEW_XMP_CONTENTS.strip())
+
+    def update(self, new_metadata):
+        """ Update arbitrary EXIF, IPTC, and/or XMP metadata """
+        logger.info(f'Updating with {len(new_metadata)} tags')
+        def _filter_tags(prefix):
+            return {k: v for k, v in new_metadata.items() if k.startswith(prefix)}
+
+        # Split combined metadata into individual formats
+        self.exif.update(_filter_tags('Exif.'))
+        self.iptc.update(_filter_tags('Iptc.'))
+        self.xmp.update(_filter_tags('Xmp.'))
+        self.combined = {**self.exif, **self.iptc, **self.xmp}
+        self.keyword_meta = KeywordMetadata(self.combined)
+        self.taxon_id, self.observation_id = self.get_inaturalist_ids()
+
+    def update_keywords(self, keywords):
+        """
+        Update only keyword metadata.
+        Keywords will be written to appropriate tags for each metadata format.
+        """
+        self.update(KeywordMetadata(keywords=keywords).tags)
+
+    def write(self, create_xmp_sidecar=True):
+        """ Write current metadata to image and sidecar """
+        self._write(self.image_path)
+        if create_xmp_sidecar:
+            self.create_xmp_sidecar()
+        if isfile(self.xmp_path):
+            self._write(self.xmp_path)
+        else:
+            logger.info(f'No existing XMP sidecar file found for {self.image_path}; skipping')
+
+    def _write(self, path):
+        """ Write current metadata to a single path """
+        logger.info(f'Writing {len(self.combined)} tags to {path}')
+        img = self.read_exiv2_image(path)
+        # TODO: Possible workaround for overwriting corrupted metadata?
+        if img:
+            img.modify_exif(self.exif)
+            img.modify_iptc(self.iptc)
+            img.modify_xmp(self.xmp)
+            img.close()
+
 
 class KeywordMetadata:
     """
     Container for combining, parsing, and organizing keyword metadata into relevant categories
     """
-    def __init__(self, metadata):
-        self.keywords = self.get_combined_keywords(metadata)
+    def __init__(self, metadata=None, keywords=None):
+        """ Initialize with full metadata or keywords only """
+        self.keywords = keywords or self.get_combined_keywords(metadata)
         self.kv_keywords = self.get_kv_keywords()
         self.hier_keywords = self.get_hierarchical_keywords()
         self.normal_keywords = self.get_normal_keywords()
 
     def get_combined_keywords(self, metadata):
         """ Get keywords from all metadata formats """
+        if not metadata:
+            return []
         keywords = [self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS]
         keywords = set(chain.from_iterable(keywords))
         logger.info(f'{len(keywords)} unique keywords found')
@@ -159,12 +235,31 @@ class KeywordMetadata:
         return dict([kw.split('=') for kw in kv_keywords])
 
     def get_hierarchical_keywords(self):
+        """
+        Get all hierarchical keywords as flat strings.
+        Also Account for root node (single value without '|')
+        """
+        hier_keywords = [kw for kw in self.keywords if '|' in kw]
+        if hier_keywords:
+            root = hier_keywords[0].split('|')[0]
+            hier_keywords.insert(0, root)
+        return hier_keywords
+
+    def get_normal_keywords(self):
+        """ Get all single-value keywords that are neither a key-value pair nor hierarchical """
+        return sorted([k for k in self.keywords if '=' not in k and '|' not in k])
+
+    @property
+    def flat_keywords(self):
+        """ Get all non-hierarchical keywords """
+        return [kw for kw in self.keywords if '|' not in kw]
+
+    @property
+    def hier_keyword_tree(self):
         """ Get all hierarchical keywords as a nested dict """
-        hier_keywords = [kw.split('|') for kw in self.keywords if '|' in kw]
         kw_tree = {}
-        for kw_ranks in hier_keywords:
+        for kw_ranks in  [kw.split('|') for kw in self.hier_keywords]:
             kw_tree = self._append_nodes(kw_tree, kw_ranks)
-        logger.info(f'{len(hier_keywords)} hierarchical keywords processed')
         return kw_tree
 
     @staticmethod
@@ -174,13 +269,22 @@ class KeywordMetadata:
             tree_node = tree_node.setdefault(token, {})
         return tree
 
-    def get_normal_keywords(self):
-        """ Get all single-value keywords that are neither a key-value pair nor hierarchical """
-        return sorted([k for k in self.keywords if '=' not in k and '|' not in k])
+    @property
+    def hier_keyword_tree_str(self):
+        """ Get all hierarchical keywords as a single string, in indented tree format """
+        return dict_to_indented_tree(self.hier_keyword_tree)
 
     @property
-    def hier_keyword_str(self):
-        return dict_to_indented_tree(self.hier_keywords)
+    def tags(self):
+        """
+        Add all keywords to all appropriate XMP, EXIF, and IPTC tags
+
+        Returns:
+            dict: Mapping from qualified tag name to tag value(s)
+        """
+        metadata = {tag: self.flat_keywords for tag in KEYWORD_TAGS}
+        metadata.update({tag: self.hier_keywords for tag in HIER_KEYWORD_TAGS})
+        return metadata
 
 
 def dict_to_indented_tree(d):

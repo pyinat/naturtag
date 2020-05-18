@@ -1,22 +1,28 @@
 """ Combined entry point for both CLI and GUI """
-from naturtag.metadata_writer import get_keyword_metadata, write_metadata
+from naturtag.image_metadata import MetaMetadata
 from naturtag.inat_darwincore import get_observation_dwc_terms
 from naturtag.inat_keywords import get_keywords
 
 
-def tag_images(observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp, images):
+def tag_images(observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp_sidecar, images):
     keywords = get_keywords(
         observation_id=observation_id,
         taxon_id=taxon_id,
         common=common_names,
         hierarchical=hierarchical,
     )
-    metadata = get_keyword_metadata(keywords)
-
-    # TODO: Write minimal DwC taxonomy metadata if only a taxon ID is provided
+    # TODO: Simplify this a bit
+    # TODO: Also get DwC taxonomy metadata if only a taxon ID is provided
+    dwc_metadata = {}
     if observation_id and images and darwin_core:
-        metadata.update(get_observation_dwc_terms(observation_id))
-    for image in images:
-        write_metadata(image, metadata, create_xmp=create_xmp)
+        dwc_metadata = get_observation_dwc_terms(observation_id)
+    for image_path in images:
+        tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar)
 
-    return keywords, metadata
+    return keywords, dwc_metadata
+
+def tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar):
+    metadata = MetaMetadata(image_path)
+    metadata.update_keywords(keywords)
+    metadata.update(dwc_metadata)
+    metadata.write(create_xmp_sidecar=create_xmp_sidecar)

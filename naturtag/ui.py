@@ -21,7 +21,7 @@ from kivymd.uix.snackbar import Snackbar
 
 from kv.widgets import SCREENS
 from naturtag.app import tag_images
-from naturtag.metadata_reader import MetaMetadata
+from naturtag.image_metadata import MetaMetadata
 
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
