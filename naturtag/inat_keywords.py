@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-# TODO: Hierarchical tags
-"""
-Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations
-"""
+""" Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations """
 from logging import getLogger
 
 from pyinaturalist.node_api import get_observation, get_taxa_by_id

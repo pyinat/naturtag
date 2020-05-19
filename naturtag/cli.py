@@ -1,8 +1,39 @@
 import click
 from click_help_colors import HelpColorsCommand
 
-from naturtag.cli_utils import GlobPath, chain_lists, colorize_help_text, strip_url
-from naturtag.app import tag_images
+from naturtag.tagger import tag_images
+from glob import glob
+from itertools import chain
+from os.path import expanduser
+from re import compile, DOTALL, MULTILINE
+
+CODE_BLOCK = compile(r'```\n(.+?)```\s*\n', DOTALL)
+CODE_INLINE = compile(r'`([^`]+?)`')
+HEADER = compile(r'^\#+\s*(.*)$', MULTILINE)
+
+
+def chain_lists(ctx, param, value):
+    return list(chain.from_iterable(value))
+
+
+def colorize_help_text(text):
+    """ An ugly hack to make help text prettier """
+    text = HEADER.sub(click.style(r'\1:', 'blue'), text)
+    text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
+    text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
+    return text
+
+
+def strip_url(ctx, param, value):
+    """ If a URL is provided containing an ID, return just the ID """
+    return int(value.split('/')[-1].split('-')[0]) if value else None
+
+
+class GlobPath(click.Path):
+    """ A parameter type that expands glob patterns """
+    def convert(self, value, param, ctx):
+        matches = [expanduser(m) for m in glob(value)]
+        return [click.Path.convert(self, m, param, ctx) for m in matches]
 
 
 @click.command(cls=HelpColorsCommand, help_headers_color='blue', help_options_color='cyan')
@@ -94,7 +125,8 @@ def tag(ctx, observation_id, taxon_id, common_names, darwin_core, hierarchical, 
         click.secho('Provide either a taxon or an observation', fg='red')
         ctx.exit()
     keywords, metadata = tag_images(
-        observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp, images)
+        observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp, images
+    )
 
     # If no images were specified, just print keywords
     if not images:

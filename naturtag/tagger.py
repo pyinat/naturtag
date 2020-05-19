@@ -21,6 +21,7 @@ def tag_images(observation_id, taxon_id, common_names, darwin_core, hierarchical
 
     return keywords, dwc_metadata
 
+
 def tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar):
     metadata = MetaMetadata(image_path)
     metadata.update_keywords(keywords)

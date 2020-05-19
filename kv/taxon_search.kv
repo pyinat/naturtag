@@ -1,0 +1,16 @@
+<TaxonSearchScreen>:
+    id: taxon_search_screen
+    name: 'taxon_search'
+    controller: None
+
+    BoxLayout:
+        MDBoxLayout:
+            id: taxon_search_input
+            MDIntField:
+                id: taxon_text_input
+                hint_text: 'Taxon Name'
+                helper_text: 'Enter a scientific or common name'
+            MDIntField:
+                id: taxon_id_input
+                hint_text: 'Taxon ID'
+                helper_text: 'Enter an iNaturalist taxon ID'

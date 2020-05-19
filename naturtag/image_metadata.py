@@ -129,11 +129,14 @@ class MetaMetadata:
             # 'GPS': self.gps,
         }
         from os.path import basename
-        return '\n'.join([
-            basename(self.image_path),
-            ' | '.join([k for k, v in meta_special.items() if v]),
-            ' | '.join([k for k, v in meta_types.items() if v]),
-        ])
+
+        return '\n'.join(
+            [
+                basename(self.image_path),
+                ' | '.join([k for k, v in meta_special.items() if v]),
+                ' | '.join([k for k, v in meta_types.items() if v]),
+            ]
+        )
 
     def create_xmp_sidecar(self):
         """ Create a new XMP sidecar file if one does not already exist """
@@ -204,7 +207,8 @@ class KeywordMetadata:
 
         # All keywords will be combined and re-sorted, to account for errors in other programs
         keywords = [
-            self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
+            self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS
+        ]
         keywords = set(chain.from_iterable(keywords))
         logger.info(f'{len(keywords)} unique keywords found')
         return [k.replace('"', '') for k in keywords]
