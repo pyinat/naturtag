@@ -40,6 +40,9 @@ INIT_WINDOW_SIZE = (1250, 800)
 MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'
 
+# Key codes; reference: https://gist.github.com/Enteleform/a2e4daf9c302518bf31fcc2b35da4661
+BACKSPACE = 8
+F11 = 292
 
 class ImageMetaTile(SmartTileWithLabel):
     metadata = ObjectProperty()
@@ -194,6 +197,7 @@ class ImageTaggerApp(MDApp):
     Manages window, theme, main screen and navigation state; other application logic is
     handled by Controller
     """
+    controller = ObjectProperty()
     nav_drawer = ObjectProperty()
     screen_manager = ObjectProperty()
     toolbar = ObjectProperty()
@@ -229,13 +233,15 @@ class ImageTaggerApp(MDApp):
         controller.image_previews.bind(minimum_height=controller.image_previews.setter('height'))
 
         # Set Window and theme settings
-        Window.bind(on_dropfile=controller.add_image)
         Window.size = INIT_WINDOW_SIZE
+        Window.bind(on_dropfile=controller.add_image)
+        Window.bind(on_keyboard=self.on_keyboard)
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
 
         alert(  # TODO: make this disappear as soon as an image or another screen is selected
             f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=10)
+        self.controller = controller
         return controller
 
     def home(self, *args):
@@ -251,6 +257,24 @@ class ImageTaggerApp(MDApp):
         self.screen_manager.current = screen_name
         self.update_toolbar(screen_name)
         self.close_nav()
+
+    def on_keyboard(self, window, key, scancode, codepoint, modifier):
+        """ Handle keyboard shortcuts """
+        print(key, scancode, codepoint, modifier)
+        if (modifier, key) == (['ctrl'], BACKSPACE):
+            self.home()
+        elif (modifier, codepoint) == (['ctrl'], 'o'):
+            pass  # TODO: Open kivymd file manager
+        elif (modifier, codepoint) == (['ctrl'], 'q'):
+            self.stop()
+        elif (modifier, codepoint) == (['ctrl'], 'r'):
+            self.controller.run()
+        elif (modifier, codepoint) == (['ctrl'], 's'):
+            self.switch_screen(SETTINGS_SCREEN)
+        elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
+            self.controller.reset()
+        elif key == F11:
+            self.toggle_fullscreen()
 
     def update_toolbar(self, screen_name):
         """ Modify toolbar in-place so it can be shared by all screens """
