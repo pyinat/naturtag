@@ -34,7 +34,7 @@ logger = getLogger(__name__)
 
 def get_tagged_image_metadata(paths):
     all_image_metadata = (MetaMetadata(path) for path in paths)
-    return {path: m for path, m in all_image_metadata.items() if m.taxon_id or m.observation_id}
+    return {m.image_path: m for m in all_image_metadata if m.taxon_id or m.observation_id}
 
 
 # TODO: Extract GPS info
@@ -91,8 +91,7 @@ class MetaMetadata:
         try:
             return Image(path)
         except RuntimeError as exc:
-            logger.error(f'Failed to read corrupted metadata from {path}')
-            logger.exception(exc)
+            logger.error(f'Failed to read corrupted metadata from {path}:\n  {str(exc)}')
             return None
 
     def get_inaturalist_ids(self):
@@ -202,7 +201,10 @@ class KeywordMetadata:
         """ Get keywords from all metadata formats """
         if not metadata:
             return []
-        keywords = [self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS]
+
+        # All keywords will be combined and re-sorted, to account for errors in other programs
+        keywords = [
+            self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
         keywords = set(chain.from_iterable(keywords))
         logger.info(f'{len(keywords)} unique keywords found')
         return [k.replace('"', '') for k in keywords]
@@ -258,7 +260,7 @@ class KeywordMetadata:
     def hier_keyword_tree(self):
         """ Get all hierarchical keywords as a nested dict """
         kw_tree = {}
-        for kw_ranks in  [kw.split('|') for kw in self.hier_keywords]:
+        for kw_ranks in [kw.split('|') for kw in self.hier_keywords]:
             kw_tree = self._append_nodes(kw_tree, kw_ranks)
         return kw_tree
 

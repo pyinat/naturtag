@@ -5,23 +5,14 @@
 
     BoxLayout:
         # Image viewer
-        ScrollView:
-            do_scroll_x: False
-            do_scroll_y: True
-            effect_cls: 'OpacityScrollEffect'
-            scroll_type: ['bars', 'content']
-            scroll_wheel_distance: 40
-            size: self.size
-            bar_width: 10
-
+        ImageScrollView:
             MDGridLayout:
                 id: image_previews
                 adaptive_height: True
-                cols: int(self.width / 200)
+                cols: max(int(self.width / 200), 1)
                 padding: dp(4), dp(4)
                 spacing: dp(4)
                 row_default_height: 200
-                # row_force_default: True
                 col_default_width: 200
                 col_force_default: True
 
@@ -81,10 +72,11 @@
 
                     MDRaisedButton:
                         text: 'Clear'
-                        on_release: root.controller.reset()
+                        on_release: root.controller.clear()
                     MDRaisedButton:
                         text: 'Debug'
                         on_release: root.controller.get_state()
+#                        on_release: root.controller.open_table()
                     MDRaisedButton:
                         text: 'Load'
                         on_release: root.controller.add_images(file_chooser.selection)
