@@ -1,7 +1,8 @@
 #:kivy 1.11
-#:import ASSETS_DIR naturtag.ui.ASSETS_DIR
-#:import IMAGE_FILETYPES naturtag.ui.IMAGE_FILETYPES
+#:import ASSETS_DIR naturtag.constants.ASSETS_DIR
+#:import IMAGE_FILETYPES naturtag.constants.IMAGE_FILETYPES
 #:import version naturtag.__version__
+#:import Transition kivy.uix.screenmanager.NoTransition
 
 <MDIntField@MDTextField>:
 	input_filter: 'int'
@@ -40,6 +41,7 @@
 
 		ScreenManager:
 			id: screen_manager
+			transition: Transition()
 
 		MDNavigationDrawer:
 			id: nav_drawer

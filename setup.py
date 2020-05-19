@@ -15,8 +15,10 @@ setup(
     version=__version__,
     packages=find_packages(),
     install_requires=[
+        'appdirs',
         'Click>=7.0',
         'click-help-colors',
+        'pillow>=7.0',
         # 'pyinaturalist',  # TODO: Submit PR(s) for WIP pyinaturalist changes
         'pyinaturalist @ git+https://github.com/JWCook/pyinaturalist.git@dev',
         'pyexiv2',

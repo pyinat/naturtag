@@ -13,7 +13,6 @@
                 padding: dp(4), dp(4)
                 spacing: dp(4)
                 row_default_height: 200
-                # row_force_default: True
                 col_default_width: 200
                 col_force_default: True
 
@@ -73,7 +72,7 @@
 
                     MDRaisedButton:
                         text: 'Clear'
-                        on_release: root.controller.reset()
+                        on_release: root.controller.clear()
                     MDRaisedButton:
                         text: 'Debug'
                         on_release: root.controller.get_state()

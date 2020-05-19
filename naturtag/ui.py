@@ -24,32 +24,23 @@ from kivymd.uix.snackbar import Snackbar
 
 from kv.widgets import SCREENS, HOME_SCREEN, SETTINGS_SCREEN, METADATA_SCREEN
 from naturtag.app import tag_images
+from naturtag.constants import (
+    KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, BACKSPACE, F11)
 from naturtag.image_metadata import MetaMetadata
+from naturtag.thumbnails import get_thumbnail
 
-logger = logging.getLogger(__name__)
-logger.setLevel('INFO')
+logger = logging.getLogger('naturtag.' + __name__)
+logger.setLevel('DEBUG')
 out_hdlr = logging.StreamHandler(sys.stdout)
 out_hdlr.setFormatter(logging.Formatter('[%(levelname)s] %(funcName)s %(asctime)s %(message)s'))
 out_hdlr.setLevel(logging.INFO)
 logger.addHandler(out_hdlr)
 
-ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')
-KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
-IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
-INIT_WINDOW_SIZE = (1250, 800)
-MD_PRIMARY_PALETTE = 'Teal'
-MD_ACCENT_PALETTE = 'Cyan'
-
-# Key codes; reference: https://gist.github.com/Enteleform/a2e4daf9c302518bf31fcc2b35da4661
-BACKSPACE = 8
-F11 = 292
 
 class ImageMetaTile(SmartTileWithLabel):
     metadata = ObjectProperty()
-
-
-def alert(text, **kwargs):
-    Snackbar(text=text, **kwargs).show()
+    allow_stretch = False
+    box_position = 'header'
 
 
 class Controller(BoxLayout):
@@ -94,7 +85,7 @@ class Controller(BoxLayout):
 
         # Update image previews
         metadata = MetaMetadata(path)
-        img = ImageMetaTile(source=path, metadata=metadata, text=metadata.summary)
+        img = ImageMetaTile(source=get_thumbnail(path), metadata=metadata, text=metadata.summary)
         img.bind(on_touch_down=self.handle_image_click)
         self.image_previews.add_widget(img)
 
@@ -109,6 +100,15 @@ class Controller(BoxLayout):
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
         self.selected_image = None
         image.parent.remove_widget(image)
+
+    def clear(self):
+        """ Clear all image selections """
+        logger.info('Clearing image selections')
+        self.file_list = []
+        self.file_list_text = ''
+        self.inputs.file_list_text_box.text = ''
+        self.file_chooser.selection = []
+        self.image_previews.clear_widgets()
 
     # TODO: Apply image file glob patterns to dir
     def add_dir_selection(self, dir):
@@ -157,14 +157,6 @@ class Controller(BoxLayout):
         self.metadata_tabs.exif.text = json.dumps(self.selected_image.metadata.exif, indent=4)
         self.metadata_tabs.iptc.text = json.dumps(self.selected_image.metadata.iptc, indent=4)
         self.metadata_tabs.xmp.text = json.dumps(self.selected_image.metadata.xmp, indent=4)
-
-    def reset(self):
-        """ Clear all image selections """
-        logger.info('Clearing image selections')
-        self.file_list = []
-        self.file_list_text = ''
-        self.file_chooser.selection = []
-        self.image_previews.clear_widgets()
 
     def run(self):
         """ Run image tagging for selected images and input """
@@ -272,7 +264,7 @@ class ImageTaggerApp(MDApp):
         elif (modifier, codepoint) == (['ctrl'], 's'):
             self.switch_screen(SETTINGS_SCREEN)
         elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
-            self.controller.reset()
+            self.controller.clear()
         elif key == F11:
             self.toggle_fullscreen()
 
@@ -302,6 +294,10 @@ class ImageTaggerApp(MDApp):
             Window.fullscreen = 'auto'
             icon = 'fullscreen-exit'
         self.toolbar.right_action_items[0] = [icon, self.toggle_fullscreen]
+
+
+def alert(text, **kwargs):
+    Snackbar(text=text, **kwargs).show()
 
 
 if __name__ == '__main__':
