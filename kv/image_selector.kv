@@ -1,0 +1,96 @@
+<ImageSelectorScreen>:
+    id: image_selector_screen
+    name: 'image_selector'
+    controller: None
+
+    BoxLayout:
+        # Image viewer
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            effect_cls: 'OpacityScrollEffect'
+            scroll_type: ['bars', 'content']
+            scroll_wheel_distance: 40
+            size: self.size
+            bar_width: 10
+
+            MDGridLayout:
+                id: image_previews
+                adaptive_height: True
+                cols: int(self.width / 200)
+                padding: dp(4), dp(4)
+                spacing: dp(4)
+                row_default_height: 200
+                # row_force_default: True
+                col_default_width: 200
+                col_force_default: True
+
+        # Options + file chooser
+        MDBoxLayout:
+            orientation: 'vertical'
+            size_hint_x: .4
+            size_hint_min_x: 450
+
+            # Text input fields
+            # TODO: Move input/search to a separate screen
+            MDBoxLayout:
+                size_hint_y: .15
+                size_hint_min_y: 120
+
+                MDGridLayout:
+                    cols: 1
+                    MDIntField:
+                        id: observation_id_input
+                        hint_text: 'Observation ID'
+                        helper_text: 'Enter an iNaturalist observation ID'
+                    MDIntField:
+                        id: taxon_id_input
+                        hint_text: 'Taxon ID'
+                        helper_text: 'Enter an iNaturalist taxon ID'
+
+            # File Chooser
+            MDBoxLayout:
+                orientation: 'vertical'
+                md_bg_color: .1, .1, .1, .75  #app.theme_cls.bg_darkest
+
+                FileChooserListView:
+                    rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
+                    id: file_chooser
+                    filters: IMAGE_FILETYPES
+                    # multiselect: True
+                    # dirselect: True
+                    on_selection: root.controller.add_images(self.selection)
+
+                # List of selected files
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    md_bg_color: app.theme_cls.primary_color
+
+                    MDLabel:
+                        text: 'Selected Files:'
+                        size_hint_max_y: 20
+                    TextInput:
+                        id: file_list_text_box
+                        readonly: True
+                        multiline: True
+                        size_hint_y: .3
+
+                MDBoxLayout:
+                    size_hint_y: None
+                    height: 30
+
+                    MDRaisedButton:
+                        text: 'Clear'
+                        on_release: root.controller.reset()
+                    MDRaisedButton:
+                        text: 'Debug'
+                        on_release: root.controller.get_state()
+                    MDRaisedButton:
+                        text: 'Load'
+                        on_release: root.controller.add_images(file_chooser.selection)
+
+    TooltipFloatingButton:
+        icon: 'play'
+        elevation_normal: 8
+        tooltip_text: 'Tag selected images'
+        on_release: root.controller.run()

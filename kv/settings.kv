@@ -1,0 +1,46 @@
+<SettingsScreen>:
+    id: settings_screen
+    name: 'settings'
+
+    MDList:
+        OneLineListItem:
+            text: 'Metadata options'
+            font_style: 'H5'
+        TwoLineAvatarListItem:
+            text: 'Common names'
+            font_style: 'H6'
+            secondary_text: 'Include common names in taxonomy keywords'
+            IconLeftSwitch:
+                id: common_names_chk
+                active: True
+        TwoLineAvatarListItem:
+            text: 'Hierarchical Keywords'
+            font_style: 'H6'
+            secondary_text: 'Generate pipe-delimited hierarchical keywords'
+            IconLeftSwitch:
+                id: hierarchical_keywords_chk
+                active: True
+        TwoLineAvatarListItem:
+            text: 'Darwin Core Metadata'
+            font_style: 'H6'
+            secondary_text: 'Convert taxon/observation metadata into XMP Darwin Core metadata'
+            IconLeftSwitch:
+                id: darwin_core_chk
+                active: True
+        TwoLineAvatarListItem:
+            text: 'Create XMP Files'
+            font_style: 'H6'
+            secondary_text: 'Create XMP sidecar files if they don\'t already exist'
+            IconLeftSwitch:
+                id: create_xmp_chk
+                active: True
+
+        OneLineListItem:
+        OneLineListItem:
+            text: 'UI options'
+            font_style: 'H5'
+        OneLineAvatarListItem:
+            text: 'Dark Mode'
+            font_style: 'H6'
+            IconLeftSwitch:
+                id: dark_mode_chk
