@@ -34,7 +34,7 @@ logger = getLogger(__name__)
 
 def get_tagged_image_metadata(paths):
     all_image_metadata = (MetaMetadata(path) for path in paths)
-    return {path: m for path, m in all_image_metadata.items() if m.taxon_id or m.observation_id}
+    return {m.image_path: m for m in all_image_metadata if m.taxon_id or m.observation_id}
 
 
 # TODO: Extract GPS info
@@ -260,7 +260,7 @@ class KeywordMetadata:
     def hier_keyword_tree(self):
         """ Get all hierarchical keywords as a nested dict """
         kw_tree = {}
-        for kw_ranks in  [kw.split('|') for kw in self.hier_keywords]:
+        for kw_ranks in [kw.split('|') for kw in self.hier_keywords]:
             kw_tree = self._append_nodes(kw_tree, kw_ranks)
         return kw_tree
 

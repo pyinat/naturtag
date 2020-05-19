@@ -39,8 +39,14 @@ logger.addHandler(out_hdlr)
 
 class ImageMetaTile(SmartTileWithLabel):
     metadata = ObjectProperty()
+    original: StringProperty()
     allow_stretch = False
     box_position = 'header'
+
+    def __init__(self, metadata, original, **kwargs):
+        super().__init__(**kwargs)
+        self.metadata = metadata
+        self.original = original
 
 
 class Controller(BoxLayout):
@@ -85,7 +91,7 @@ class Controller(BoxLayout):
 
         # Update image previews
         metadata = MetaMetadata(path)
-        img = ImageMetaTile(source=get_thumbnail(path), metadata=metadata, text=metadata.summary)
+        img = ImageMetaTile(source=get_thumbnail(path), original=path, metadata=metadata, text=metadata.summary)
         img.bind(on_touch_down=self.handle_image_click)
         self.image_previews.add_widget(img)
 
@@ -96,7 +102,7 @@ class Controller(BoxLayout):
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
-        self.file_list.remove(image.source)
+        self.file_list.remove(image.original)
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
         self.selected_image = None
         image.parent.remove_widget(image)
@@ -178,7 +184,7 @@ class Controller(BoxLayout):
         )
 
         selected_id = (
-            f'Taxon ID: {settings["observation_id"]}' if settings['observation_id']
+            f'Taxon ID: {settings["taxon_id"]}' if settings['taxon_id']
             else f'Observation ID: {settings["observation_id"]}'
         )
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
