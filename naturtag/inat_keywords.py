@@ -15,7 +15,7 @@ def get_observation_taxon(observation_id):
     logger.info(f'Fetching observation {observation_id}')
     obs = get_observation(observation_id)
     if obs.get('community_tax_id') and obs['community_tax_id'] != obs['taxon']['id']:
-        logger.warn('Community ID does not match selected taxon')
+        logger.warning('Community ID does not match selected taxon')
     return obs['taxon']['id']
 
 

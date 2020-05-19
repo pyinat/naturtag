@@ -1,21 +1,27 @@
 import logging
 import os
 import sys
-from os.path import dirname, join
+from os.path import basename, dirname, join
+
+# Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
+
+# Disable multitouch emulation before any other kivy modules are imported
+from kivy.config import Config
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.properties import DictProperty, ListProperty, StringProperty, ObjectProperty
-from kivy.uix.widget import Widget
+from kivy.properties import ListProperty, StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 
 from kivymd.app import MDApp as App
-from kivymd.uix.imagelist import SmartTileWithLabel as ImageTile
+from kivymd.uix.imagelist import SmartTileWithLabel
 from kivymd.uix.snackbar import Snackbar
 
 from kv.widgets import SCREENS
 from naturtag.app import tag_images
+from naturtag.image_metadata import MetaMetadata
 
 logger = logging.getLogger(__name__)
 logger.setLevel('INFO')
@@ -32,13 +38,15 @@ MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'
 
 
-class Metadata(Widget):
-    exif = DictProperty({})
-    iptc = DictProperty({})
-    xmp = DictProperty({})
+class ImageMetaTile(SmartTileWithLabel):
+    metadata = ObjectProperty()
 
 
 class Controller(BoxLayout):
+    """
+    Top-level UI element that controls most app behavior, except for window/theme behavior,
+    which is controlled by ImageTaggerApp
+    """
     file_list = ListProperty([])
     file_list_text = StringProperty()
     selected_image_table = ObjectProperty()
@@ -66,17 +74,20 @@ class Controller(BoxLayout):
         """ Add an image to the current selection, with deduplication """
         if isinstance(path, bytes):
             path = path.decode('utf-8')
+        if path in self.file_list:
+            return
 
-        if path not in self.file_list:
-            # Update file list
-            logger.info(f'Adding image: {path}')
-            self.file_list.append(path)
-            self.file_list.sort()
-            self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
-            # Update image previews
-            img = ImageTile(source=path)
-            img.bind(on_release=self.remove_image)
-            self.image_previews.add_widget(img)
+        # Update file list
+        logger.info(f'Adding image: {path}')
+        self.file_list.append(path)
+        self.file_list.sort()
+        self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
+        # Update image previews
+
+        metadata = MetaMetadata(path)
+        img = ImageMetaTile(source=path, metadata=metadata,  text=metadata.summary)
+        img.bind(on_touch_down=self.handle_image_click)
+        self.image_previews.add_widget(img)
 
     def add_images(self, paths):
         """ Add one or more files selected via a FileChooser """
@@ -111,6 +122,16 @@ class Controller(BoxLayout):
             f'Config: {self.get_settings_dict()}\n'
         )
 
+    def handle_image_click(self, instance, touch):
+        """ Event handler for clicking an image """
+        if not instance.collide_point(*touch.pos):
+            return
+        elif touch.button == 'right':
+            self.remove_image(instance)
+        # TODO: Implement metadata view
+        else:
+            print('left mouse clicked')
+
     def reset(self):
         """ Clear all image selections """
         logger.info('Clearing image selections')
@@ -122,17 +143,29 @@ class Controller(BoxLayout):
     def run(self):
         """ Run image tagging for selected images and input """
         settings = self.get_settings_dict()
+        if not settings['observation_id'] and not settings['taxon_id']:
+            Snackbar(text=f'First select either an observation or an organism').show()
+            return
         tag_images(
             settings['observation_id'],
             settings['taxon_id'],
             settings['common_names'],
+            settings['darwin_core'],
             settings['hierarchical_keywords'],
             settings['create_xmp'],
             self.file_list,
         )
 
+        selected_id = (
+            f'Taxon ID: {settings["observation_id"]}' if settings['observation_id']
+            else f'Observation ID: {settings["observation_id"]}'
+        )
+        Snackbar(text=f'{len(self.file_list)} images tagged with metadata for {selected_id}').show()
+
 
 class ImageTaggerApp(App):
+    toolbar = ObjectProperty()
+
     def build(self):
         Builder.load_file(join(KV_SRC_DIR, 'main.kv'))
 
@@ -145,7 +178,9 @@ class ImageTaggerApp(App):
         controller.settings.dark_mode_chk.bind(active=self.toggle_dark_mode)
 
         controller.ids.screen_manager.current = 'image_selector'
+        self.toolbar = controller.ids.toolbar
         # controller.ids.screen_manager.current = 'settings'
+        # TODO: Better help text that disappears as soon as an image or another screen is selected
         Snackbar(
             text=f'.{" " * 14}Drag and drop images or select them from the file chooser',
             duration=10
@@ -154,6 +189,16 @@ class ImageTaggerApp(App):
 
     def toggle_dark_mode(self, switch=None, is_active=False):
         self.theme_cls.theme_style = 'Dark' if is_active else 'Light'
+
+    def toggle_fullscreen(self, *args):
+        """ Enable or disable fullscreen, and change icon"""
+        if Window.fullscreen:
+            Window.fullscreen = 0
+            icon = 'fullscreen'
+        else:
+            Window.fullscreen = 'auto'
+            icon = 'fullscreen-exit'
+        self.toolbar.right_action_items[0] = [icon, self.toggle_fullscreen]
 
 
 if __name__ == '__main__':

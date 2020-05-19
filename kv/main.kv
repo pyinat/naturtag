@@ -15,12 +15,16 @@
 	md_bg_color: app.theme_cls.primary_color
 	adaptive_size: True
 
+    # Toolbar with buttons
 	MDToolbar:
 		id: toolbar
 		title: 'iNaturalist Image Tagger'
 		left_action_items: [['menu', lambda x: nav_drawer.set_state('open')]]
+        right_action_items: [['fullscreen', app.toggle_fullscreen],['settings', app.open_settings]]
+        # Optional: Put settings link in toolbar instead of navbar? [['settings', app.open_settings]]
 		size_hint_max_y: 100
 
+    # Main view populated with currently selected screen
 	NavigationLayout:
 		title: app.title
 		md_bg_color: app.theme_cls.primary_color

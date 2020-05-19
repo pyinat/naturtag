@@ -9,6 +9,8 @@ from naturtag.app import tag_images
 @click.pass_context
 @click.option('-c', '--common-names', is_flag=True,
               help='Include common names for all ranks that have them')
+@click.option('-d', '--darwin-core', is_flag=True,
+              help='Generate Darwin Core metadata')
 @click.option('-h', '--hierarchical', is_flag=True,
               help='Generate pipe-delimited hierarchical keywords')
 @click.option('-o', '--observation-id', help='Observation ID or URL', callback=strip_url)
@@ -16,7 +18,7 @@ from naturtag.app import tag_images
 @click.option('-x', '--create-xmp', is_flag=True,
               help="Create XMP sidecar file if it doesn't already exist")
 @click.argument('images', nargs=-1, type=GlobPath(), callback=chain_lists)
-def tag(ctx, observation_id, taxon_id, common_names, hierarchical, create_xmp, images):
+def tag(ctx, observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp, images):
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
     metadata.
@@ -92,7 +94,7 @@ def tag(ctx, observation_id, taxon_id, common_names, hierarchical, create_xmp, i
         click.secho('Provide either a taxon or an observation', fg='red')
         ctx.exit()
     keywords, metadata = tag_images(
-        observation_id, taxon_id, common_names, hierarchical, create_xmp, images)
+        observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp, images)
 
     # If no images were specified, just print keywords
     if not images:
