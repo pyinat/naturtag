@@ -1,0 +1,41 @@
+<MetadataViewScreen>:
+    id: metadata_view_screen
+    name: 'metadata_view'
+    controller: None
+
+#    ImageScrollView:
+    MDTabs:
+        id: metadata_tabs
+
+        MetadataTab:
+            text: 'Combined'
+            TextInput:
+                id: combined
+                readonly: True
+                multiline: True
+        MetadataTab:
+            text: 'Keywords'
+            TextInput:
+                id: keywords
+                readonly: True
+                multiline: True
+        MetadataTab:
+            text: 'EXIF'
+            TextInput:
+                id: exif
+                readonly: True
+                multiline: True
+        MetadataTab:
+            text: 'IPTC'
+            TextInput:
+                id: iptc
+                readonly: True
+                multiline: True
+        MetadataTab:
+            text: 'XMP'
+            TextInput:
+                id: xmp
+                readonly: True
+                multiline: True
+
+

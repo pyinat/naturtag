@@ -91,8 +91,7 @@ class MetaMetadata:
         try:
             return Image(path)
         except RuntimeError as exc:
-            logger.error(f'Failed to read corrupted metadata from {path}')
-            logger.exception(exc)
+            logger.error(f'Failed to read corrupted metadata from {path}:\n  {str(exc)}')
             return None
 
     def get_inaturalist_ids(self):
@@ -202,7 +201,10 @@ class KeywordMetadata:
         """ Get keywords from all metadata formats """
         if not metadata:
             return []
-        keywords = [self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS]
+
+        # All keywords will be combined and re-sorted, to account for errors in other programs
+        keywords = [
+            self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
         keywords = set(chain.from_iterable(keywords))
         logger.info(f'{len(keywords)} unique keywords found')
         return [k.replace('"', '') for k in keywords]

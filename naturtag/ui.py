@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -21,7 +22,7 @@ from kivymd.uix.datatables import MDDataTable
 from kivymd.uix.imagelist import SmartTileWithLabel
 from kivymd.uix.snackbar import Snackbar
 
-from kv.widgets import SCREENS
+from kv.widgets import SCREENS, HOME_SCREEN, SETTINGS_SCREEN, METADATA_SCREEN
 from naturtag.app import tag_images
 from naturtag.image_metadata import MetaMetadata
 
@@ -34,7 +35,6 @@ logger.addHandler(out_hdlr)
 
 ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')
 KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
-HOME_SCREEN = 'image_selector'
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
 INIT_WINDOW_SIZE = (1250, 800)
 MD_PRIMARY_PALETTE = 'Teal'
@@ -48,7 +48,7 @@ class ImageMetaTile(SmartTileWithLabel):
 def alert(text, **kwargs):
     Snackbar(text=text, **kwargs).show()
 
-# TODO: Split this up into multiple classes
+
 class Controller(BoxLayout):
     """
     Top-level UI element that controls application state and logic,
@@ -56,15 +56,15 @@ class Controller(BoxLayout):
     """
     file_list = ListProperty([])
     file_list_text = StringProperty()
-    selected_image = ObjectProperty()
-    selected_image_table = ObjectProperty()
+    selected_image = ObjectProperty(None)
 
-    def __init__(self, settings, inputs, image_previews, file_chooser, **kwargs):
+    def __init__(self, settings, inputs, image_previews, file_chooser, metadata_tabs, **kwargs):
         super().__init__(**kwargs)
         self.settings = settings
         self.inputs = inputs
         self.image_previews = image_previews
         self.file_chooser = file_chooser
+        self.metadata_tabs = metadata_tabs
 
     # TODO: for testing only
     def open_table(self):
@@ -88,8 +88,8 @@ class Controller(BoxLayout):
         self.file_list.append(path)
         self.file_list.sort()
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
-        # Update image previews
 
+        # Update image previews
         metadata = MetaMetadata(path)
         img = ImageMetaTile(source=path, metadata=metadata, text=metadata.summary)
         img.bind(on_touch_down=self.handle_image_click)
@@ -130,13 +130,30 @@ class Controller(BoxLayout):
         )
 
     def handle_image_click(self, instance, touch):
-        """ Event handler for clicking an image """
+        """ Event handler for clicking an image; either remove or open image details """
         if not instance.collide_point(*touch.pos):
             return
         elif touch.button == 'right':
             self.remove_image(instance)
         else:
             self.selected_image = instance
+            self.set_metadata_view()
+            MDApp.get_running_app().switch_screen(METADATA_SCREEN)
+
+    def set_metadata_view(self):
+        if not self.selected_image:
+            return
+        # TODO: This is pretty ugly. Ideally this would be a collection of DataTables.
+        self.metadata_tabs.combined.text = json.dumps(self.selected_image.metadata.combined, indent=4)
+        self.metadata_tabs.keywords.text = (
+            'Normal Keywords:\n' +
+            json.dumps(self.selected_image.metadata.keyword_meta.flat_keywords, indent=4) +
+            '\n\n\nHierarchical Keywords:\n' +
+            self.selected_image.metadata.keyword_meta.hier_keyword_tree_str
+        )
+        self.metadata_tabs.exif.text = json.dumps(self.selected_image.metadata.exif, indent=4)
+        self.metadata_tabs.iptc.text = json.dumps(self.selected_image.metadata.iptc, indent=4)
+        self.metadata_tabs.xmp.text = json.dumps(self.selected_image.metadata.xmp, indent=4)
 
     def reset(self):
         """ Clear all image selections """
@@ -174,7 +191,7 @@ class Controller(BoxLayout):
 
 class ImageTaggerApp(MDApp):
     """
-    Manages window, theme, screen and navigation state; other application logic is
+    Manages window, theme, main screen and navigation state; other application logic is
     handled by Controller
     """
     nav_drawer = ObjectProperty()
@@ -189,12 +206,13 @@ class ImageTaggerApp(MDApp):
             Builder.load_file(join(KV_SRC_DIR, f'{screen_name}.kv'))
             screens[screen_name] = screen_cls()
 
-        # Init controller with references to some nested screen objects for easier access
+        # Init controller with references to nested screen objects for easier access
         controller = Controller(
-            settings=screens['settings'].ids,
+            settings=screens[SETTINGS_SCREEN].ids,
             inputs=screens[HOME_SCREEN].ids,
             image_previews=screens[HOME_SCREEN].ids.image_previews,
             file_chooser=screens[HOME_SCREEN].ids.file_chooser,
+            metadata_tabs=screens[METADATA_SCREEN].ids,
         )
 
         # Init screen manager and nav elements
@@ -236,7 +254,7 @@ class ImageTaggerApp(MDApp):
 
     def update_toolbar(self, screen_name):
         """ Modify toolbar in-place so it can be shared by all screens """
-        self.toolbar.title = screen_name.title()
+        self.toolbar.title = screen_name.title().replace('_', ' ')
         if screen_name == HOME_SCREEN:
             self.toolbar.left_action_items = [['menu', self.open_nav]]
             self.toolbar.right_action_items = [
