@@ -1,10 +1,11 @@
 # Generic/reusable autocomplete components
 # Ideas for autocomplete layout originally taken from:
 # https://www.reddit.com/r/kivy/comments/99n2ct/anyone_having_idea_for_autocomplete_feature_in/e4phtf8/
+from collections import Iterable
 from logging import getLogger
 
 from kivy.clock import Clock
-from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
 from kivy.uix.behaviors import FocusBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
@@ -50,17 +51,44 @@ class AutocompleteSearch(MDBoxLayout):
 
         matches = self.get_autocomplete(seatch_str)
         logger.info(f'Found {len(matches)} matches for search string "{seatch_str}"')
-        self.dropdown.data = [{'text': i} for i in matches]
+        self.dropdown.data = [self._get_row(i) for i in matches]
         self.height = min(MAX_DROPDOWN_SIZE, (len(matches) * DROPDOWN_ITEM_SIZE) + 50)
 
-    def get_autocomplete(self, search_str):
-        """ Autocompletion behavior to be implemented by a subclass """
-        raise NotImplementedError
+    @staticmethod
+    def _get_row(item):
+        """ Return a row for dropdown list; use optional suggestion_text if provided """
+        labels = (item, item) if isinstance(item, str) else item
+        return {'text': labels[0], 'suggestion_text': labels[1]}
 
+    # TODO: formatting for suggestion_text; smaller text + different color
     def update_selection(self, selection):
         """ Intermediate handler to update suggestion text based on dropdown selection """
         logger.info(f'Updating selection: {selection}')
-        self.input.suggestion_text = (selection or {}).get('text', '')
+        self.input.suggestion_text = '    ' + selection
+
+    def get_autocomplete(self, search_str):
+        """
+        Autocompletion behavior to be implemented by a subclass.
+
+        If the dropdown should display additional/different info from the suggestion_text (the text
+        that will go into the text input field when selected),
+         return a list of tuples in the format::
+
+            [
+                (display_text, suggestion_text),
+                (display_text, suggestion_text),
+                ...
+            ]
+
+        Otherwise, return a list of strings and the same text will be used for both.
+
+        Args:
+            search_str (str): Search string to fetch matches for
+
+        Returns:
+            list: List of either match strings, or ``(display_text, suggestion_text)`` tuples
+        """
+        raise NotImplementedError
 
 
 class DropdownItem(RecycleDataViewBehavior, MDLabel):
@@ -68,6 +96,7 @@ class DropdownItem(RecycleDataViewBehavior, MDLabel):
     index = None
     is_selected = BooleanProperty(False)
     selectable = True
+    suggestion_text = StringProperty()
 
     def refresh_view_attrs(self, rv, index, data):
         """ Catch and handle view changes """
@@ -86,7 +115,7 @@ class DropdownItem(RecycleDataViewBehavior, MDLabel):
         self.is_selected = is_selected
         # TODO: Is there a better way of referencing AutocompleteSearch than parent.parent.parent?
         if is_selected:
-            self.parent.parent.parent.update_selection(dropdown.data[index])
+            self.parent.parent.parent.update_selection(self.suggestion_text)
 
 
 class SearchInput(MDTextField):
