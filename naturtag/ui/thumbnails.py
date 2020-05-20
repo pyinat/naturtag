@@ -5,7 +5,7 @@ from os.path import isfile, join, splitext
 from logging import getLogger
 from naturtag.constants import THUMBNAILS_DIR, THUMBNAIL_SIZE
 
-logger = getLogger(__name__)
+logger = getLogger().getChild(__name__)
 
 
 def get_thumbnail(image_path):
@@ -15,7 +15,6 @@ def get_thumbnail(image_path):
     thumbnail_path = get_thumbnail_path(image_path)
     if isfile(thumbnail_path):
         logger.info(f'Found existing thumbnail for {image_path}')
-        print(f'Found existing thumbnail for {image_path}')
         return thumbnail_path
     else:
         return generate_thumbnail(image_path, thumbnail_path)
@@ -30,7 +29,6 @@ def get_thumbnail_path(image_path):
 
 def generate_thumbnail(image_path, thumbnail_path):
     logger.info(f'Generating new thumbnail for {image_path}:\n  {thumbnail_path}')
-    print(f'Generating new thumbnail for {image_path}:\n  {thumbnail_path}')
     try:
         image = Image.open(image_path)
         image.thumbnail(THUMBNAIL_SIZE)

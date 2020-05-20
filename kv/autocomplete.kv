@@ -1,0 +1,31 @@
+#:import SelectableRecycleBoxLayout naturtag.ui.autocomplete.SelectableRecycleBoxLayout
+
+# Dropdown box to display autocomplete results
+<AutocompleteDropdown@RecycleView>:
+    bar_width: 10
+    scroll_type:['bars']
+    viewclass: 'SelectableLabel'
+    SelectableRecycleBoxLayout:
+        default_size: None, dp(20)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
+        multiselect: False
+
+# Label that changes color to indicate when it's selected
+<SelectableLabel>:
+    canvas.before:
+        Color:
+            rgba: app.theme_cls.accent_color if self.is_selected else (1, 1, 1, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+# Example search input + dropdown
+#<AutocompleteSearch@MDBoxLayout>:
+#    TaxonAutocompleteInput:
+#        hint_text: 'Search'
+#        dropdown: dropdown
+#    AutocompleteDropdown:
+#        id: dropdown

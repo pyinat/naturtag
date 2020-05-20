@@ -10,6 +10,7 @@ from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase
 from kivymd.uix.tooltip import MDTooltip
 
+
 # Screen classes
 class ImageSelectorScreen(MDScreen):
     pass
@@ -39,13 +40,14 @@ SCREENS = {
 
 # Controls & other UI elements
 class IconLeftSwitch(ILeftBodyTouch, MDSwitch):
-    pass
+    """ Switch that works as a list item """
 
 class TooltipFloatingButton(MDFloatingActionButton, MDTooltip):
-    pass
+    """ Button class with tooltip behavior """
 
 class MetadataTab(BoxLayout, MDTabsBase):
     """ Class for a tab in a MDTabs view"""
+
 
 class ImageMetaTile(SmartTileWithLabel):
     """ Class that contains an image thumbnail to display plus its associated metadata """

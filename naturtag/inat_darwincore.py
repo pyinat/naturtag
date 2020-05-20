@@ -4,7 +4,7 @@ import xmltodict
 
 from naturtag.constants import DWC_NAMESPACES
 
-logger = getLogger(__name__)
+logger = getLogger().getChild(__name__)
 
 
 def get_observation_dwc_terms(observation_id):

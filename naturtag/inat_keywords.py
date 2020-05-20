@@ -3,7 +3,7 @@ from logging import getLogger
 
 from pyinaturalist.node_api import get_observation, get_taxa_by_id
 
-logger = getLogger(__name__)
+logger = getLogger().getChild(__name__)
 
 
 def get_observation_taxon(observation_id):

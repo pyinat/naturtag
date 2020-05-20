@@ -1,16 +1,28 @@
+#:import TaxonAutocompleteInput naturtag.ui.autocomplete.TaxonAutocompleteInput
+
+<TaxonAutocompleteSearch@MDBoxLayout>:
+    orientation: 'vertical'
+    spacing: 2
+    pos_hint: {'center_x': .5, 'center_y': .5}
+    size_hint: None, None
+    size: 600, 60
+    TaxonAutocompleteInput:
+        hint_text: 'Taxon Name'
+        helper_text: 'Enter a scientific or common name'
+        helper_text_mode: 'on_focus'
+        dropdown: dropdown
+    AutocompleteDropdown:
+        id: dropdown
+
 <TaxonSearchScreen>:
     id: taxon_search_screen
     name: 'taxon_search'
     controller: None
 
-    BoxLayout:
-        MDBoxLayout:
-            id: taxon_search_input
-            MDIntField:
-                id: taxon_text_input
-                hint_text: 'Taxon Name'
-                helper_text: 'Enter a scientific or common name'
-            MDIntField:
-                id: taxon_id_input
-                hint_text: 'Taxon ID'
-                helper_text: 'Enter an iNaturalist taxon ID'
+    MDBoxLayout:
+        id: taxon_search_input
+        TaxonAutocompleteSearch:
+        MDIntField:
+            id: taxon_id_input
+            hint_text: 'Taxon ID'
+            helper_text: 'Enter an iNaturalist taxon ID'

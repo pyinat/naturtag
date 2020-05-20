@@ -1,7 +1,6 @@
 """ Main Kivy application """
-import logging
 import os
-import sys
+from logging import getLogger
 from os.path import join
 
 # Set GL backend before any kivy modules are imported
@@ -22,12 +21,7 @@ from naturtag.ui.controller import Controller, alert
 from naturtag.ui.search_controller import SearchController
 from naturtag.ui.widget_classes import SCREENS, HOME_SCREEN
 
-logger = logging.getLogger('naturtag.' + __name__)
-logger.setLevel('DEBUG')
-out_hdlr = logging.StreamHandler(sys.stdout)
-out_hdlr.setFormatter(logging.Formatter('[%(levelname)s] %(funcName)s %(asctime)s %(message)s'))
-out_hdlr.setLevel(logging.INFO)
-logger.addHandler(out_hdlr)
+logger = getLogger().getChild(__name__)
 
 
 class ImageTaggerApp(MDApp):
@@ -44,12 +38,12 @@ class ImageTaggerApp(MDApp):
         # Init screens and store references to them
         screens = {}
         Builder.load_file(join(KV_SRC_DIR, 'main.kv'))
+        Builder.load_file(join(KV_SRC_DIR, 'autocomplete.kv'))
         for screen_name, screen_cls in SCREENS.items():
             screen_path = join(KV_SRC_DIR, f'{screen_name}.kv')
             Builder.load_file(screen_path)
             screens[screen_name] = screen_cls()
             logger.info(f'Loaded screen {screen_path}')
-
         # Init controller with references to nested screen objects for easier access
         controller = Controller(
             inputs=screens[HOME_SCREEN].ids,
@@ -119,6 +113,8 @@ class ImageTaggerApp(MDApp):
             self.controller.run()
         elif (modifier, codepoint) == (['ctrl'], 's'):
             self.switch_screen('settings')
+        elif (modifier, codepoint) == (['ctrl'], 't'):
+            self.switch_screen('taxon_search')
         elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
             self.controller.clear()
         elif key == F11:

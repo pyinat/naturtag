@@ -5,6 +5,9 @@ PKG_DIR = dirname(dirname(__file__))
 ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')
 KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
 
+AUTOCOMPLETE_DELAY = 0.5
+AUTOCOMPLETE_MIN_CHARS = 3
+
 THUMBNAILS_DIR = join(user_cache_dir(), 'inat-thumbnails')
 THUMBNAIL_SIZE = (200, 200)
 

@@ -1,5 +1,5 @@
 import json
-import logging
+from logging import getLogger
 
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -14,7 +14,7 @@ from naturtag.image_metadata import MetaMetadata
 from naturtag.ui.thumbnails import get_thumbnail
 from naturtag.ui.widget_classes import ImageMetaTile
 
-logger = logging.getLogger(__name__)
+logger = getLogger().getChild(__name__)
 
 
 class Controller(BoxLayout):
@@ -72,6 +72,7 @@ class Controller(BoxLayout):
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
+        logger.info(f'Removing image: {image.original}')
         self.file_list.remove(image.original)
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
         self.selected_image = None
@@ -145,6 +146,12 @@ class Controller(BoxLayout):
         if not settings['observation_id'] and not settings['taxon_id']:
             alert(f'Select either an observation or an organism to tag images with')
             return
+        selected_id = (
+            f'Taxon ID: {settings["taxon_id"]}' if settings['taxon_id']
+            else f'Observation ID: {settings["observation_id"]}'
+        )
+        logger.info(f'Tagging {len(self.file_list)} images with metadata for {selected_id}')
+
         tag_images(
             settings['observation_id'],
             settings['taxon_id'],
@@ -153,11 +160,6 @@ class Controller(BoxLayout):
             settings['hierarchical_keywords'],
             settings['create_xmp'],
             self.file_list,
-        )
-
-        selected_id = (
-            f'Taxon ID: {settings["taxon_id"]}' if settings['taxon_id']
-            else f'Observation ID: {settings["observation_id"]}'
         )
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
 

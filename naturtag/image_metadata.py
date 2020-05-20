@@ -29,7 +29,7 @@ NEW_XMP_CONTENTS = """
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
 
-logger = getLogger(__name__)
+logger = getLogger().getChild(__name__)
 
 
 def get_tagged_image_metadata(paths):
@@ -65,7 +65,7 @@ class MetaMetadata:
 
     def _safe_read_metadata(self, path, encoding='utf-8'):
         """ Attempt to read metadata, with error handling """
-        logger.debug(f'Reading metadata from: {path} ({encoding})')
+        logger.info(f'Reading metadata from: {path} ({encoding})')
         img = self.read_exiv2_image(path)
         if not img:
             return {}, {}, {}
