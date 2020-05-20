@@ -1,0 +1,31 @@
+dist: bionic
+language: python
+python:
+- 3.6
+- 3.7
+- 3.8
+#cache: pip
+before_install:
+- sudo apt-get update -y
+- sudo apt-get install -y exiv2
+install:
+- pip install -e .[dev]
+script:
+# No real tests yet, just run a couple typical commands as a smoke test
+- naturtag -cdo 45524803
+- naturtag -cdt 48978
+deploy:
+  - provider: pypi
+    user: __token__
+    password:
+      secure: yi08BfwwdaRm5xSXD23cUX8BZIpjVPnxnA6aZ5XnHfVqdrF0M+ZUORHN9RYnAWG4QmULZPPX0ibwkJGJhqqRJmJGIvDByCHUjK45RxZpOonkTdQpoHtEJ6xSKYQo24shO2PEeUiKI4tV5ou14CQsw3EcCriQL6eCke9Ng8CjPsUf+gNJ8b8YM+74fQtjdWPhuAzPSVmLWqIL2OWSi6NSxWP4+ohZ23HFRArMe7flSUsmGyqA/uusHXkMIibJvePujFDghqmMYXHDjlxrrytaID8qpSm/TMllVM5vfKXl2psqiNCR2DR1ACDdyMsbKbwZX2hprgxDICp+9ceZdnzTsCbZWK00LvOH8ly5mnO4tiCv8G6/WTBqMtuSO4KO29Xs9lw6UdOgVlVKeieggu/+PEYHfLZVxVz+5YX3RPJf+y5V+/wDWeiJUz2dRmgJPn3RG+FfdmuFl4MRjQYGcDn8R8z4jy599lxceadDsibGM0tZ5c/mYpdo5FEGmYbx4VozCMCcF0LLfwoV5TuPFTOfCvEnx2ESJy+USWZPvpcexpkpg+sEU/5XEZxn7H0yRYn/8WU+xit2r9eJOZTLq8TPpcYUNgZJKwZ8jERBQeq7oLuOQ669liLtzCWBO1p8hnjBn6DMze8WizQp4plPFQafwDc3ttqksZw4GGM2zapre7A=
+    distributions: sdist bdist_wheel
+    skip_existing: true
+    on:
+      tags: true
+#  - provider: releases
+#    api_key: "GITHUB OAUTH TOKEN"
+#    file: "FILE TO UPLOAD"
+#    skip_cleanup: true
+#    on:
+#      tags: true

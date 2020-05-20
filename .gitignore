@@ -4,5 +4,6 @@ __pycache__
 *.sw*
 .mypy_cache/
 build/
+dist/
 venv/
 sample_data/

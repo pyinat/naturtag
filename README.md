@@ -1,4 +1,6 @@
 # iNaturalist Image Tagger
+[![Build Status](https://travis-ci.org/JWCook/inat-image-tagger.svg?branch=dev)](https://travis-ci.org/JWCook/inat-image-tagger)
+
 A tool to add iNaturalist taxonomy metadata to local observation photos, which can be used as
 either a python package, a command-line interface, or a graphical interface.
 
@@ -50,8 +52,15 @@ that supports **hierarchical keywords** is recommended, such as Lightroom,
 # CLI
 
 ## CLI Installation
-
+This project depends on [exiv2](https://www.exiv2.org/download.html). Example install commands:
+```bash
+apt install exiv2   # Debian-based
+dnf install exiv2   # Fedora-based
+brew install exiv2  # MacOS
 ```
+
+Then, install the python package:
+```bash
 pip install git+https://github.com/JWCook/inat-image-tagger.git
 ```
 
