@@ -1,10 +1,13 @@
 from pyinaturalist.node_api import get_taxa, get_taxa_autocomplete
+from naturtag.ui.autocomplete import AutocompleteSearch
 
+
+# TODO: Split taxon results into tokens, use only part of it (matched term) for suggestion test
+class TaxonAutocompleteSearch(AutocompleteSearch):
+    """ Autocomplete search for iNaturalist taxa """
+    def get_autocomplete(self, search_str):
+        return get_taxa_autocomplete(q=search_str, minify=True).get('results', [])
 
 class SearchController:
-    def __init__(self, taxon_inputs, observation_inputs):
-        self.taxon_inputs = taxon_inputs
-        self.observation_inputs = observation_inputs
-
-    def get_autocomplete(self):
-        get_taxa_autocomplete(q=self.taxon_inputs.taxon_text_input.text)
+    """ Controller class to manage all taxon and observation search parameters """
+    pass

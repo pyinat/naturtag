@@ -1,10 +1,19 @@
+# Generic/reusable autocomplete components
 #:import SelectableRecycleBoxLayout naturtag.ui.autocomplete.SelectableRecycleBoxLayout
+
+# Default attributes for top-level search container
+<AutocompleteSearch>:
+    orientation: 'vertical'
+    spacing: 2
+    pos_hint: {'center_x': .5, 'center_y': .5}
+    size_hint: None, None
+    size: 400, 60
 
 # Dropdown box to display autocomplete results
 <AutocompleteDropdown@RecycleView>:
     bar_width: 10
-    scroll_type:['bars']
-    viewclass: 'SelectableLabel'
+    scroll_type:['bars', 'content']
+    viewclass: 'DropdownItem'
     SelectableRecycleBoxLayout:
         default_size: None, dp(20)
         default_size_hint: 1, None
@@ -13,19 +22,24 @@
         orientation: 'vertical'
         multiselect: False
 
-# Label that changes color to indicate when it's selected
-<SelectableLabel>:
+# TODO: Dropdown items should use a monospaced font for whitespace-aligned text
+# Dropdown item that changes color to indicate when it's selected
+<DropdownItem>:
+    theme_text_color: 'Primary'
     canvas.before:
         Color:
-            rgba: app.theme_cls.accent_color if self.is_selected else (1, 1, 1, 1)
+            rgba: app.theme_cls.accent_color if self.is_selected else app.theme_cls.bg_normal
         Rectangle:
             pos: self.pos
             size: self.size
 
-# Example search input + dropdown
-#<AutocompleteSearch@MDBoxLayout>:
-#    TaxonAutocompleteInput:
+# Example of a complete search layout;
+# Requires AutocompleteSearch subclass that implements get_autocomplete()
+#<MyAutocompleteSearch>:
+#    input: input
+#    dropdown: dropdown
+#    SearchInput:
+#        id: input
 #        hint_text: 'Search'
-#        dropdown: dropdown
 #    AutocompleteDropdown:
 #        id: dropdown
