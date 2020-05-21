@@ -172,7 +172,11 @@ class MetaMetadata(ImageMetadata):
         if self._min_rank is None:
             self._min_rank = get_min_rank(self.simplified) or (None, None)
         return self._min_rank
-    
+
+    @property
+    def has_taxon(self):
+        return bool(self.taxon_id or all(self.min_rank))
+
     @property
     def simplified(self):
         """

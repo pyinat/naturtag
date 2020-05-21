@@ -70,10 +70,35 @@ def get_parent_taxa(taxon_id):
     return taxon['ancestors'] + [taxon]
 
 
-def get_taxa_by_best_info(id=None, rank=None, name=None):
-    """ Get taxon info by ID if provided, otherwise rank + name """
-    params = {'id': id} if id else {'rank': rank, 'q': name}
+# TODO: This should be reorganized somehow, I don't quite like the look if it
+#  (image_metadata module depends on this module and vice versa)
+def get_taxon_and_obs_from_metadata(metadata):
+    observation = None
+    taxon = None
+    logger.info(f'Searching for matching taxon and/or observation for {metadata.image_path}')
+
+    if metadata.observation_id:
+        observation = get_observation(metadata.observation_id)
+        # Handle observation with no taxon ID (e.g., not yet identified)
+        taxon_id = observation.get('taxon', {}).get('id')
+        if taxon_id:
+            taxon = get_taxa(id=taxon_id)
+            logger.info(f'Found observation {metadata.observation_id}')
+        else:
+            logger.warning(f'Observation {metadata.observation_id} is unidentified')
+
+    if not taxon and metadata.has_taxon:
+        taxon = get_taxon_from_metadata(metadata)
+    return taxon, observation
+
+
+def get_taxon_from_metadata(metadata):
+    """ Fetch taxon record from MetaMetadata object: either by ID or rank + name """
+    rank, name =  metadata.min_rank
+    params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank':rank, 'q': name}
+    logger.info(f'Querying taxon by: {params}')
     return get_taxa(**params)['results']
+
 
 def get_taxa_autocomplete(search_str):
     """ Get taxa autocomplete search results, both with the matched term plus extra info """
@@ -135,10 +160,10 @@ def get_inaturalist_ids(metadata):
 
 def get_min_rank(metadata):
     """ Get the lowest (most specific) taxonomic rank from tags, if any """
-    for rank in RANKS[::-1]:
+    for rank in RANKS:
         if rank in metadata:
             logger.info(f'Found minimum rank: {rank} = {metadata[rank]}')
-            return (rank, metadata)
+            return (rank, metadata[rank])
     return None
 
 

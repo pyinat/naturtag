@@ -12,11 +12,13 @@ from kivymd.uix.snackbar import Snackbar
 
 from naturtag.tagger import tag_images
 from naturtag.image_metadata import MetaMetadata
+from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
 from naturtag.ui.thumbnails import get_thumbnail
 
 logger = getLogger().getChild(__name__)
 
 
+# TODO: Make taxon query and metadata scanning asynchronous
 class ImageMetaTile(SmartTileWithLabel):
     """ Class that contains an image thumbnail to display plus its associated metadata """
     metadata = ObjectProperty()
@@ -55,6 +57,12 @@ class Controller(BoxLayout):
             row_data=[ (f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
         ).open()
 
+    def add_images(self, paths):
+        """ Add one or more files selected via a FileChooser """
+        for path in paths:
+            self.add_image(path=path)
+
+    # TODO: If an image is dragged & dropped onto a different screen, return to home screen
     def add_image(self, window=None, path=None):
         """ Add an image to the current selection, with deduplication """
         if isinstance(path, bytes):
@@ -62,13 +70,13 @@ class Controller(BoxLayout):
         if path in self.file_list:
             return
 
-        # Update file list
+        # Add to file list
         logger.info(f'Adding image: {path}')
         self.file_list.append(path)
         self.file_list.sort()
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
 
-        # Update image previews
+        # Add thumbnail to image preview screen
         metadata = MetaMetadata(path)
         img = ImageMetaTile(
             source=get_thumbnail(path), metadata=metadata, text=metadata.summary
@@ -76,10 +84,15 @@ class Controller(BoxLayout):
         img.bind(on_touch_down=self.handle_image_click)
         self.image_previews.add_widget(img)
 
-    def add_images(self, paths):
-        """ Add one or more files selected via a FileChooser """
-        for path in paths:
-            self.add_image(path=path)
+        # Run a search using any relevant tags we found
+        self.search_tax_obs(metadata)
+
+    def search_tax_obs(self, metadata):
+        taxon, observation = get_taxon_and_obs_from_metadata(metadata)
+        # TODO: Just temporary debug output here; need to display this info in the UI
+        import json
+        print(json.dumps(taxon, indent=4))
+        print(json.dumps(observation, indent=4))
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
