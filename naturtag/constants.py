@@ -20,6 +20,10 @@ MD_ACCENT_PALETTE = 'Cyan'
 BACKSPACE = 8
 F11 = 292
 
+# Simplified tags without formatting variations
+TAXON_KEYS = ['taxonid', 'dwc:taxonid']
+OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
+
 # Specific XML namespaces to use terms from when processing DwC observation records
 # Note: exiv2 will automatically add recognized namespaces when adding properties
 DWC_NAMESPACES = {

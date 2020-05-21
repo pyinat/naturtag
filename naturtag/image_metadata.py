@@ -3,7 +3,7 @@ from logging import getLogger
 from os.path import basename, isfile, splitext
 
 from pyexiv2 import Image
-from pyinaturalist.constants import RANKS
+from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank, sort_taxonomy_keywords
 
 # All tags that support regular and hierarchical keyword lists
 KEYWORD_TAGS = [
@@ -24,10 +24,6 @@ NEW_XMP_CONTENTS = """
 </x:xmpmeta>
 <?xpacket?>
 """
-
-# Simplified tags without formatting variations
-TAXON_KEYS = ['taxonid', 'dwc:taxonid']
-OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
 
 logger = getLogger().getChild(__name__)
 
@@ -174,7 +170,7 @@ class MetaMetadata(ImageMetadata):
     def min_rank(self):
         """ Get the lowest (most specific) taxonomic rank from tags, if any """
         if self._min_rank is None:
-            self._min_rank = get_min_rank(self.simplified) or ()
+            self._min_rank = get_min_rank(self.simplified) or (None, None)
         return self._min_rank
     
     @property
@@ -262,19 +258,10 @@ class KeywordMetadata:
         else:
             return [keywords.strip()] if keywords.strip() else []
 
-    @staticmethod
-    def _sort_taxonomy_keywords(keywords):
-        """ Sort keywords by taxonomic rank, where applicable """
-        def get_rank_idx(tag):
-            base_tag = tag.split(':')[-1].split('=')[0]
-            return RANKS.index(base_tag) if base_tag in RANKS else 0
-
-        return sorted(keywords, key=get_rank_idx, reverse=True)
-
     def get_kv_keywords(self):
         """ Get all keywords that contain key-value pairs"""
         kv_keywords = [kw for kw in self.keywords if kw.count('=') == 1 and kw.split('=')[1]]
-        kv_keywords = self._sort_taxonomy_keywords(kv_keywords)
+        kv_keywords = sort_taxonomy_keywords(kv_keywords)
         logger.info(f'{len(kv_keywords)} unique key-value pairs found in keywords')
         return dict([kw.split('=') for kw in kv_keywords])
 
@@ -331,9 +318,6 @@ class KeywordMetadata:
         return metadata
 
 
-# Helper functions for metadadta classes (these could go in a separate module)
-
-
 def dict_to_indented_tree(d):
     """ Convert a dict-formatted tree into a single string, in indented tree format """
     def append_children(d, indent_lvl):
@@ -345,26 +329,6 @@ def dict_to_indented_tree(d):
 
     return append_children(d, 0)
 
-def get_inaturalist_ids(metadata):
-    """ Look for taxon and/or observation IDs from metadata if available """
-    # Get first non-None value from specified keys, if any; otherwise return None
-    def _first_match(d, keys):
-        return next(filter(None, map(d.get, keys)), None)
-
-    # Check all possible keys for valid taxon and observation IDs
-    taxon_id = _first_match(metadata, TAXON_KEYS)
-    observation_id = _first_match(metadata, OBSERVATION_KEYS)
-    logger.info(f'Taxon ID: {taxon_id} | Observation ID: {observation_id}')
-    return taxon_id, observation_id
-
-
-def get_min_rank(self, metadata):
-    """ Get the lowest (most specific) taxonomic rank from tags, if any """
-    for rank in RANKS[::-1]:
-        if rank in self.simplified:
-            logger.info(f'Found minimum rank: {rank} = {self.simplified[rank]}')
-            return (rank, metadata)
-    return None
 
 def simplify_keys(mapping):
     """
