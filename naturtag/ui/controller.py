@@ -7,14 +7,25 @@ from kivy.metrics import dp
 
 from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
+from kivymd.uix.imagelist import SmartTileWithLabel
 from kivymd.uix.snackbar import Snackbar
 
 from naturtag.tagger import tag_images
 from naturtag.image_metadata import MetaMetadata
 from naturtag.ui.thumbnails import get_thumbnail
-from naturtag.ui.widget_classes import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
+
+
+class ImageMetaTile(SmartTileWithLabel):
+    """ Class that contains an image thumbnail to display plus its associated metadata """
+    metadata = ObjectProperty()
+    allow_stretch = False
+    box_color = [0, 0, 0, 0.4]
+
+    def __init__(self, metadata, **kwargs):
+        super().__init__(**kwargs)
+        self.metadata = metadata
 
 
 class Controller(BoxLayout):
@@ -60,7 +71,7 @@ class Controller(BoxLayout):
         # Update image previews
         metadata = MetaMetadata(path)
         img = ImageMetaTile(
-            source=get_thumbnail(path), original=path, metadata=metadata, text=metadata.summary
+            source=get_thumbnail(path), metadata=metadata, text=metadata.summary
         )
         img.bind(on_touch_down=self.handle_image_click)
         self.image_previews.add_widget(img)
@@ -72,8 +83,8 @@ class Controller(BoxLayout):
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
-        logger.info(f'Removing image: {image.original}')
-        self.file_list.remove(image.original)
+        logger.info(f'Removing image: {image.metadata.image_path}')
+        self.file_list.remove(image.metadata.image_path)
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
         self.selected_image = None
         image.parent.remove_widget(image)
