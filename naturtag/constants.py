@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from os.path import dirname, join
-from appdirs import user_cache_dir
+from appdirs import user_data_dir
 from pyinaturalist.constants import RANKS
 
 PKG_DIR = dirname(dirname(__file__))
@@ -8,11 +8,14 @@ ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')
 ICONS_DIR = join(ASSETS_DIR, 'iconic_taxa')
 KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
 
+DATA_DIR = join(user_data_dir(), 'Naturtag')
+THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
+THUMBNAIL_SIZE = (200, 200)
+CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
+CACHE_BACKEND = 'sqlite'
+
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3
-
-THUMBNAILS_DIR = join(user_cache_dir(), 'inat-thumbnails')
-THUMBNAIL_SIZE = (200, 200)
 
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
 INIT_WINDOW_SIZE = (1250, 800)

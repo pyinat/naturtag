@@ -1,5 +1,8 @@
 """ Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations """
 from logging import getLogger
+
+import requests
+import requests_cache
 import xmltodict
 
 from pyinaturalist.node_api import (
@@ -8,8 +11,10 @@ from pyinaturalist.node_api import (
     get_taxa_by_id,
 )
 from pyinaturalist.rest_api import get_observations  # TODO: Currently only in dev branch
-from naturtag.constants import DWC_NAMESPACES, TAXON_KEYS, OBSERVATION_KEYS, RANKS
+from naturtag.constants import DWC_NAMESPACES, TAXON_KEYS, OBSERVATION_KEYS, RANKS, CACHE_BACKEND, CACHE_PATH
 
+# Patch requests to use CachedSession for pyinaturalist API calls
+requests_cache.install_cache(backend=CACHE_BACKEND, cache_name=CACHE_PATH)
 logger = getLogger().getChild(__name__)
 
 

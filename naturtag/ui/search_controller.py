@@ -61,7 +61,8 @@ class TaxonSearchController:
         logger.info(f'Selecting taxon: {id or json_result["id"]}')
         self.selected_taxon = Taxon(json_result=json_result, id=id)
         self.taxon_id_input = id
-        self.selected_taxon_photo.source = self.selected_taxon.photo_url
+        if self.selected_taxon.photo_url:
+            self.selected_taxon_photo.source = self.selected_taxon.photo_url
         self.selected_taxon_name.text = (
             f'[{self.selected_taxon.id}] {self.selected_taxon.rank.title()}: '
             f'{self.selected_taxon.name}\n'

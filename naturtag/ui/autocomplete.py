@@ -122,6 +122,7 @@ class DropdownItem(RecycleDataViewBehavior, MDLabel):
         """ Respond to the selection of items in the view """
         self.is_selected = is_selected
         # TODO: Is there a better way of referencing AutocompleteSearch than parent.parent.parent?
+        # TODO: Use event trigger instead?
         if is_selected:
             self.parent.parent.parent.update_selection(self.suggestion_text, self.metadata)
 

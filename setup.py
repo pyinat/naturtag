@@ -19,9 +19,11 @@ setup(
         'Click>=7.0',
         'click-help-colors',
         'pillow>=7.0',
+        'pyexiv2',
         # 'pyinaturalist',  # TODO: Submit PR(s) for WIP pyinaturalist changes
         'pyinaturalist @ git+https://github.com/JWCook/pyinaturalist.git@dev',
-        'pyexiv2',
+        'requests',
+        'requests-cache',
         'xmltodict',
     ],
     extras_require=extras_require,
