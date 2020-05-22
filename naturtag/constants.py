@@ -1,9 +1,11 @@
+from collections import OrderedDict
 from os.path import dirname, join
 from appdirs import user_cache_dir
 from pyinaturalist.constants import RANKS
 
 PKG_DIR = dirname(dirname(__file__))
 ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')
+ICONS_DIR = join(ASSETS_DIR, 'iconic_taxa')
 KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
 
 AUTOCOMPLETE_DELAY = 0.5
@@ -24,6 +26,24 @@ F11 = 292
 # Simplified tags without formatting variations
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
+
+# Iconic taxa, aka common taxon search categories, in the same order as shown on the iNar web UI
+ICONIC_TAXA = OrderedDict([
+    (3, 'aves'),
+    (20978, 'amphibia'),
+    (26036, 'reptilia'),
+    (40151, 'mammalia'),
+    (47178, 'actinopterygii'),
+    (47115, 'mollusca'),
+    (47119, 'arachnida'),
+    (47158, 'insecta'),
+    (47126, 'plantae'),
+    (47170, 'fungi'),
+    (48222, 'chromista'),
+    (47686, 'protozoa'),
+    # (1, 'animalia'),
+    # (0, 'unknown'),
+])
 
 # Specific XML namespaces to use terms from when processing DwC observation records
 # Note: exiv2 will automatically add recognized namespaces when adding properties

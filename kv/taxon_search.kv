@@ -25,6 +25,8 @@
                 text: 'Categories'
                 font_style: 'H6'
                 size_hint_max_y: 60
+            IconicTaxaLayout:
+                id: iconic_taxa
 
             # Temp spacer
             MDBoxLayout:
@@ -57,3 +59,15 @@
         helper_text_mode: 'on_focus'
     AutocompleteDropdown:
         id: dropdown
+
+ # Iconic taxa 'Categories' selector
+<IconicTaxaLayout@MDGridLayout>:
+    adaptive_size: True
+    md_bg_color: app.theme_cls.bg_darkest
+    cols: 6
+    padding: dp(10), dp(10)
+    spacing: dp(20)
+    row_default_height: 32
+    row_force_default: True
+    col_default_width: 32
+    col_force_default: True
