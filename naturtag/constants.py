@@ -1,5 +1,6 @@
 from os.path import dirname, join
 from appdirs import user_cache_dir
+from pyinaturalist.constants import RANKS
 
 PKG_DIR = dirname(dirname(__file__))
 ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')

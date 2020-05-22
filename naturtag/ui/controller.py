@@ -18,7 +18,6 @@ from naturtag.ui.thumbnails import get_thumbnail
 logger = getLogger().getChild(__name__)
 
 
-# TODO: Make taxon query and metadata scanning asynchronous
 class ImageMetaTile(SmartTileWithLabel):
     """ Class that contains an image thumbnail to display plus its associated metadata """
     metadata = ObjectProperty()

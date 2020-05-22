@@ -2,15 +2,13 @@
 from logging import getLogger
 import xmltodict
 
-from pyinaturalist.constants import RANKS
 from pyinaturalist.node_api import (
     get_observation,
     get_taxa,
     get_taxa_by_id,
-    get_taxa_autocomplete as _get_taxa_autocomplete,
 )
 from pyinaturalist.rest_api import get_observations  # TODO: Currently only in dev branch
-from naturtag.constants import DWC_NAMESPACES, TAXON_KEYS, OBSERVATION_KEYS
+from naturtag.constants import DWC_NAMESPACES, TAXON_KEYS, OBSERVATION_KEYS, RANKS
 
 logger = getLogger().getChild(__name__)
 
@@ -35,7 +33,7 @@ def get_observation_dwc_terms(observation_id):
 def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=False):
     """ Get all taxonomic keywords for a given observation or taxon """
     min_tax_id = taxon_id or get_observation_taxon(observation_id)
-    taxa = get_parent_taxa(min_tax_id)
+    taxa = get_taxon_with_ancestors(min_tax_id)
 
     keywords = get_taxonomy_keywords(taxa)
     if hierarchical:
@@ -53,15 +51,20 @@ def get_keywords(observation_id=None, taxon_id=None, common=False, hierarchical=
     return keywords
 
 
-def get_child_taxa(taxon_id):
-    """ Get a taxon's children' """
+def get_taxon_children(taxon_id):
+    """ Get a taxon's children """
     logger.info(f'Fetching children of taxon {taxon_id}')
     r = get_taxa(parent_id=taxon_id)
     logger.info(f'{len(r["results"])} child taxa found')
     return r['results']
 
 
-def get_parent_taxa(taxon_id):
+def get_taxon_ancestors(taxon_id):
+    """ Get a taxon' parents """
+    return get_taxon_with_ancestors(taxon_id)[:-1]
+
+
+def get_taxon_with_ancestors(taxon_id):
     """ Get a taxon with all its parents """
     logger.info(f'Fetching parents of taxon {taxon_id}')
     r = get_taxa_by_id(taxon_id)
@@ -70,8 +73,8 @@ def get_parent_taxa(taxon_id):
     return taxon['ancestors'] + [taxon]
 
 
-# TODO: This should be reorganized somehow, I don't quite like the look if it
-#  (image_metadata module depends on this module and vice versa)
+# TODO: This should be reorganized somehow, I don't quite like the look if it;
+#  image_metadata module depends on this module and vice versa (kinda)
 def get_taxon_and_obs_from_metadata(metadata):
     observation = None
     taxon = None
@@ -98,20 +101,6 @@ def get_taxon_from_metadata(metadata):
     params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank':rank, 'q': name}
     logger.info(f'Querying taxon by: {params}')
     return get_taxa(**params)['results']
-
-
-def get_taxa_autocomplete(search_str):
-    """ Get taxa autocomplete search results, both with the matched term plus extra info """
-    results = _get_taxa_autocomplete(q=search_str).get('results', [])
-    return [_get_taxon_labels(taxon) for taxon in results]
-
-
-def _get_taxon_labels(taxon):
-    # Padding in format strings is to visually align taxon IDs (< 7 chars) and ranks (< 11 chars)
-    display_text = "{:<8} {:>12} {}".format(taxon["id"], taxon["rank"].title(), taxon["name"])
-    if 'preferred_common_name' in taxon:
-        display_text += f' ({taxon["preferred_common_name"]})'
-    return display_text, taxon['matched_term']
 
 
 def get_taxonomy_keywords(taxa):

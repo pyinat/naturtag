@@ -44,6 +44,7 @@ class ImageTaggerApp(MDApp):
             Builder.load_file(screen_path)
             screens[screen_name] = screen_cls()
             logger.info(f'Loaded screen {screen_path}')
+
         # Init controller with references to nested screen objects for easier access
         controller = Controller(
             inputs=screens[HOME_SCREEN].ids,
@@ -53,8 +54,8 @@ class ImageTaggerApp(MDApp):
             metadata_tabs=screens['metadata'].ids,
         )
         search_controller = SearchController(
-            taxon_inputs=screens['taxon_search'].ids.taxon_search_input.ids,
-            observation_inputs=screens['observation_search'].ids.observation_search_input.ids,
+            taxon_screen=screens['taxon_search'].ids,
+            observation_screen=screens['observation_search'].ids,
         )
 
         # Init screen manager and nav elements
@@ -63,11 +64,10 @@ class ImageTaggerApp(MDApp):
         self.toolbar = controller.ids.toolbar
         for screen_name, screen in screens.items():
             self.screen_manager.add_widget(screen)
-            if screen_name.endswith('_search'):
-                screen.controller = search_controller
-            else:
+            if not screen_name.endswith('_search'):
                 screen.controller = controller
-        self.home()
+        # self.home()
+        self.switch_screen('taxon_search')
 
         # Set some event bindings that can't (easily) by done in kvlang
         controller.settings.dark_mode_chk.bind(active=self.toggle_dark_mode)
@@ -80,9 +80,9 @@ class ImageTaggerApp(MDApp):
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
 
-        alert(  # TODO: make this disappear as soon as an image or another screen is selected
-            f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=7
-        )
+        # alert(  # TODO: make this disappear as soon as an image or another screen is selected
+        #     f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=7
+        # )
         self.controller = controller
         return controller
 

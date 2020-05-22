@@ -5,9 +5,10 @@
 <AutocompleteSearch>:
     orientation: 'vertical'
     spacing: 2
-    pos_hint: {'center_x': .5, 'center_y': .5}
+#    pos_hint: {'center_x': .5, 'center_y': .5}
+#    height: 60
     size_hint: None, None
-    size: 400, 60
+    size_hint_min_x: 400
 
 # Dropdown box to display autocomplete results
 <AutocompleteDropdown@RecycleView>:
@@ -28,7 +29,7 @@
     theme_text_color: 'Primary'
     canvas.before:
         Color:
-            rgba: app.theme_cls.accent_color if self.is_selected else app.theme_cls.bg_normal
+            rgba: app.theme_cls.accent_color if self.is_selected else app.theme_cls.bg_dark
         Rectangle:
             pos: self.pos
             size: self.size

@@ -3,21 +3,53 @@
 <TaxonSearchScreen>:
     id: taxon_search_screen
     name: 'taxon_search'
-    controller: None
 
-    MDBoxLayout:
-        id: taxon_search_input
-        TaxonAutocompleteSearch:
-        MDIntField:
-            id: taxon_id_input
-            hint_text: 'Taxon ID'
-            helper_text: 'Enter an iNaturalist taxon ID'
+    BoxLayout:
+        # Search inputs
+        MDBoxLayout:
+            orientation: 'vertical'
+            md_bg_color: app.theme_cls.bg_light
+            MDGridLayout:
+                cols: 2
+                adaptive_size: True
+                TaxonAutocompleteSearch:
+                    id: taxon_search_input
+                MDIntField:
+                    id: taxon_id_input
+                    hint_text: 'Taxon ID'
+                    helper_text: 'Enter an iNaturalist taxon ID'
+#                    size_hint_x: .5
+                    size_hint_max_x: 60
 
+            MDLabel:
+                text: 'Categories'
+                font_style: 'H6'
+                size_hint_max_y: 60
+
+            # Temp spacer
+            MDBoxLayout:
+                height: 300
+
+        # Info display for selected taxon
+        MDBoxLayout:
+            orientation: 'vertical'
+#            size_hint_x: .7
+#            adaptive_size: True
+            md_bg_color: app.theme_cls.bg_darkest
+            AsyncImage:
+                id: selected_taxon_photo
+                size_hint_max_y: 400
+            MDLabel:
+                id: selected_taxon_name
+                theme_text_color: 'Primary'
+                font_style: 'H5'
+
+# Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
     input: input
     dropdown: dropdown
     size: 600, 60
-
+#    size_hint_min_x: 300
     SearchInput:
         id: input
         hint_text: 'Taxon Name'
