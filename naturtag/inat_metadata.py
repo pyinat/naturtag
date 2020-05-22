@@ -85,7 +85,7 @@ def get_taxon_and_obs_from_metadata(metadata):
         # Handle observation with no taxon ID (e.g., not yet identified)
         taxon_id = observation.get('taxon', {}).get('id')
         if taxon_id:
-            taxon = get_taxa(id=taxon_id)
+            taxon = get_taxa_by_id(taxon_id)
             logger.info(f'Found observation {metadata.observation_id}')
         else:
             logger.warning(f'Observation {metadata.observation_id} is unidentified')
@@ -100,7 +100,7 @@ def get_taxon_from_metadata(metadata):
     rank, name =  metadata.min_rank
     params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank':rank, 'q': name}
     logger.info(f'Querying taxon by: {params}')
-    return get_taxa(**params)['results']
+    return get_taxa(**params)['results'][0]
 
 
 def get_taxonomy_keywords(taxa):

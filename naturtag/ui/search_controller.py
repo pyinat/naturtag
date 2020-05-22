@@ -31,17 +31,15 @@ class IconicTaxaIcon(SmartTile):
         super().__init__(source=icon_path, **kwargs)
 
 
-# TODO: One controller class for each screen, or combined?
-class SearchController:
-    """ Controller class to manage all taxon and observation search parameters """
-    def __init__(self, taxon_screen, observation_screen):
-        self.taxon_screen = taxon_screen
-        self.observation_screen = observation_screen
-        self.taxon_search_input = taxon_screen.taxon_search_input
-        self.taxon_id_input = taxon_screen.taxon_id_input
-        self.selected_taxon_photo = taxon_screen.selected_taxon_photo
-        self.selected_taxon_name = taxon_screen.selected_taxon_name
-        self.iconic_taxa = taxon_screen.iconic_taxa
+class TaxonSearchController:
+    """ Controller class to manage taxon search and display """
+    def __init__(self, screen):
+        self.screen = screen
+        self.taxon_search_input = screen.taxon_search_input
+        self.taxon_id_input = screen.taxon_id_input
+        self.selected_taxon_photo = screen.selected_taxon_photo
+        self.selected_taxon_name = screen.selected_taxon_name
+        self.iconic_taxa = screen.iconic_taxa
 
         self.taxon_search_input.selection_callback = self.handle_selection
 
@@ -53,13 +51,16 @@ class SearchController:
         self.selected_observation = None
 
     def handle_selection(self, metadata):
-        self.select_taxon(metadata['id'])
+        """ Handle selecting a taxon from autocomplete dropdown """
+        self.select_taxon(json_result=metadata)
 
     # TODO: add more info, make link clickable, make this not look terrible
-    def select_taxon(self, id):
-        logger.warning(f'Selecting taxon: {id}')
-        self.selected_taxon = Taxon(id=id)
+    def select_taxon(self, json_result=None, id=None):
+        """ Update taxon info display by either ID, partial record, or complete record """
         # TODO: Cache thumbnails for these (default_photo.square_url)
+        logger.info(f'Selecting taxon: {id}')
+        self.selected_taxon = Taxon(json_result=json_result, id=id)
+        self.taxon_id_input = id
         self.selected_taxon_photo.source = self.selected_taxon.photo_url
         self.selected_taxon_name.text = (
             f'[{self.selected_taxon.id}] {self.selected_taxon.rank.title()}: '
@@ -67,3 +68,8 @@ class SearchController:
             f'[ref=https://www.inaturalist.org/taxa/{self.selected_taxon.id}]link[/ref]'
         )
 
+
+class ObservationSearchController:
+    """ Controller class to manage observation search and display """
+    def __init__(self, screen):
+        self.screen = screen

@@ -88,10 +88,13 @@ class Controller(BoxLayout):
 
     def search_tax_obs(self, metadata):
         taxon, observation = get_taxon_and_obs_from_metadata(metadata)
+        if taxon:
+            MDApp.get_running_app().taxon_search_controller.select_taxon(json_result=taxon)
+            self.inputs.taxon_id_input.text = str(taxon['id'])
         # TODO: Just temporary debug output here; need to display this info in the UI
-        import json
-        print(json.dumps(taxon, indent=4))
-        print(json.dumps(observation, indent=4))
+        if observation:
+            import json
+            print(json.dumps(observation, indent=4))
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
