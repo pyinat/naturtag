@@ -38,13 +38,20 @@ class Controller(BoxLayout):
     file_list_text = StringProperty()
     selected_image = ObjectProperty(None)
 
-    def __init__(self, inputs, image_previews, file_chooser, settings, metadata_tabs, **kwargs):
+    def __init__(self, image_selector_screen, settings_screen, metadata_screen, **kwargs):
         super().__init__(**kwargs)
-        self.inputs = inputs
-        self.image_previews = image_previews
-        self.file_chooser = file_chooser
-        self.settings = settings
-        self.metadata_tabs = metadata_tabs
+        self.inputs = image_selector_screen
+        self.image_previews = image_selector_screen.image_previews
+        self.file_chooser = image_selector_screen.file_chooser
+        self.settings = settings_screen
+        self.metadata_screen = metadata_screen
+
+        self.inputs.clear_button.bind(on_release=self.clear)
+        self.inputs.debug_button.bind(on_release=self.get_state)
+        # self.inputs.debug_button.bind(on_release=self.open_table)
+        self.inputs.clear_button.bind(on_release=self.add_file_chooser_images)
+        self.inputs.run_button.bind(on_release=self.run)
+        self.file_chooser.bind(on_submit=self.add_file_chooser_images)
 
     # TODO: for testing only
     def open_table(self):
@@ -56,9 +63,11 @@ class Controller(BoxLayout):
             row_data=[ (f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
         ).open()
 
-    def add_images(self, paths):
+    def add_file_chooser_images(self, *args):
         """ Add one or more files selected via a FileChooser """
-        for path in paths:
+        print(args)
+        print(self.file_chooser.selection)
+        for path in self.file_chooser.selection:
             self.add_image(path=path)
 
     # TODO: If an image is dragged & dropped onto a different screen, return to home screen
@@ -104,7 +113,7 @@ class Controller(BoxLayout):
         self.selected_image = None
         image.parent.remove_widget(image)
 
-    def clear(self):
+    def clear(self, *args):
         """ Clear all image selections """
         logger.info('Clearing image selections')
         self.file_list = []
@@ -128,7 +137,7 @@ class Controller(BoxLayout):
             "taxon_id": int(self.inputs.taxon_id_input.text or 0),
         }
 
-    def get_state(self):
+    def get_state(self, *args):
         logger.info(
             f'IDs: {self.ids}\n'
             f'Files:\n{self.file_list_text}\n'
@@ -150,20 +159,20 @@ class Controller(BoxLayout):
         if not self.selected_image:
             return
         # TODO: This is pretty ugly. Ideally this would be a collection of DataTables.
-        self.metadata_tabs.combined.text = json.dumps(
+        self.metadata_screen.combined.text = json.dumps(
             self.selected_image.metadata.combined, indent=4
         )
-        self.metadata_tabs.keywords.text = (
+        self.metadata_screen.keywords.text = (
             'Normal Keywords:\n'
             + json.dumps(self.selected_image.metadata.keyword_meta.flat_keywords, indent=4)
             + '\n\n\nHierarchical Keywords:\n'
             + self.selected_image.metadata.keyword_meta.hier_keyword_tree_str
         )
-        self.metadata_tabs.exif.text = json.dumps(self.selected_image.metadata.exif, indent=4)
-        self.metadata_tabs.iptc.text = json.dumps(self.selected_image.metadata.iptc, indent=4)
-        self.metadata_tabs.xmp.text = json.dumps(self.selected_image.metadata.xmp, indent=4)
+        self.metadata_screen.exif.text = json.dumps(self.selected_image.metadata.exif, indent=4)
+        self.metadata_screen.iptc.text = json.dumps(self.selected_image.metadata.iptc, indent=4)
+        self.metadata_screen.xmp.text = json.dumps(self.selected_image.metadata.xmp, indent=4)
 
-    def run(self):
+    def run(self, *args):
         """ Run image tagging for selected images and input """
         settings = self.get_settings_dict()
         if not self.file_list:

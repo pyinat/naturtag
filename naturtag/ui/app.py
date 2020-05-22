@@ -47,14 +47,12 @@ class ImageTaggerApp(MDApp):
 
         # Init controllers with references to nested screen objects for easier access
         self.controller = Controller(
-            inputs=screens[HOME_SCREEN].ids,
-            image_previews=screens[HOME_SCREEN].ids.image_previews,
-            file_chooser=screens[HOME_SCREEN].ids.file_chooser,
-            settings=screens['settings'].ids,
-            metadata_tabs=screens['metadata'].ids,
+            screens[HOME_SCREEN].ids,
+            screens['settings'].ids,
+            screens['metadata'].ids,
         )
-        self.taxon_search_controller = TaxonSearchController(screen=screens['taxon_search'].ids)
-        # observation_search_controller = SearchController(observation_screen=screens['observation_search'].ids)
+        self.taxon_search_controller = TaxonSearchController(screens['taxon_search'].ids)
+        # observation_search_controller = ObservationSearchController(observation_screen=screens['observation_search'].ids)
 
         # Init screen manager and nav elements
         self.nav_drawer = self.controller.ids.nav_drawer
@@ -62,11 +60,8 @@ class ImageTaggerApp(MDApp):
         self.toolbar = self.controller.ids.toolbar
         for screen_name, screen in screens.items():
             self.screen_manager.add_widget(screen)
-            # TODO: refactor so the controller knows about it screens but not vice versa
-            if not screen_name.endswith('_search'):
-                screen.controller = self.controller
-        # self.home()
-        self.switch_screen('taxon_search')
+        self.home()
+        # self.switch_screen('taxon_search')
 
         # Set some event bindings that can't (easily) by done in kvlang
         self.controller.settings.dark_mode_chk.bind(active=self.toggle_dark_mode)
