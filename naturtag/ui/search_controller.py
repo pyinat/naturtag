@@ -58,7 +58,7 @@ class TaxonSearchController:
     def select_taxon(self, json_result=None, id=None):
         """ Update taxon info display by either ID, partial record, or complete record """
         # TODO: Cache thumbnails for these (default_photo.square_url)
-        logger.info(f'Selecting taxon: {id}')
+        logger.info(f'Selecting taxon: {id or json_result["id"]}')
         self.selected_taxon = Taxon(json_result=json_result, id=id)
         self.taxon_id_input = id
         self.selected_taxon_photo.source = self.selected_taxon.photo_url

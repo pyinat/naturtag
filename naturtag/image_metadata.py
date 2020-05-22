@@ -199,7 +199,7 @@ class MetaMetadata(ImageMetadata):
                 'SIDECAR': bool(self.xmp_path),
             }
             meta_special = {
-                'TAX': self.taxon_id or self.min_rank,
+                'TAX': self.has_taxon,
                 'OBS': self.observation_id,
                 # 'GPS': self.gps,
             }

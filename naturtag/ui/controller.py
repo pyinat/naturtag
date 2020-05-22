@@ -10,6 +10,7 @@ from kivymd.uix.datatables import MDDataTable
 from kivymd.uix.imagelist import SmartTileWithLabel
 from kivymd.uix.snackbar import Snackbar
 
+from naturtag.glob import get_images_from_paths
 from naturtag.tagger import tag_images
 from naturtag.image_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
@@ -46,35 +47,26 @@ class Controller(BoxLayout):
         self.settings = settings_screen
         self.metadata_screen = metadata_screen
 
+        # Bind widget events
         self.inputs.clear_button.bind(on_release=self.clear)
         self.inputs.debug_button.bind(on_release=self.get_state)
         # self.inputs.debug_button.bind(on_release=self.open_table)
-        self.inputs.clear_button.bind(on_release=self.add_file_chooser_images)
+        self.inputs.load_button.bind(on_release=self.add_file_chooser_images)
         self.inputs.run_button.bind(on_release=self.run)
         self.file_chooser.bind(on_submit=self.add_file_chooser_images)
 
-    # TODO: for testing only
-    def open_table(self):
-        MDDataTable(
-            column_data=[
-                ("No.", dp(30)),  ("Column 1", dp(30)), ("Column 2", dp(30)),
-                ("Column 3", dp(30)), ("Column 4", dp(30)), ("Column 5", dp(30)),
-            ],
-            row_data=[ (f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
-        ).open()
-
     def add_file_chooser_images(self, *args):
-        """ Add one or more files selected via a FileChooser """
-        print(args)
-        print(self.file_chooser.selection)
-        for path in self.file_chooser.selection:
+        """ Add one or more files and/or dirs selected via a FileChooser """
+        self.add_images(self.file_chooser.selection)
+
+    def add_images(self, paths):
+        """ Add one or more files and/or dirs """
+        for path in get_images_from_paths(paths):
             self.add_image(path=path)
 
     # TODO: If an image is dragged & dropped onto a different screen, return to home screen
-    def add_image(self, window=None, path=None):
+    def add_image(self, path):
         """ Add an image to the current selection, with deduplication """
-        if isinstance(path, bytes):
-            path = path.decode('utf-8')
         if path in self.file_list:
             return
 
@@ -103,7 +95,7 @@ class Controller(BoxLayout):
         # TODO: Just temporary debug output here; need to display this info in the UI
         if observation:
             import json
-            print(json.dumps(observation, indent=4))
+            logger.info(json.dumps(observation, indent=4))
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
@@ -121,10 +113,6 @@ class Controller(BoxLayout):
         self.inputs.file_list_text_box.text = ''
         self.file_chooser.selection = []
         self.image_previews.clear_widgets()
-
-    # TODO: Apply image file glob patterns to dir
-    def add_dir_selection(self, dir):
-        print(dir)
 
     def get_settings_dict(self):
         return {
@@ -197,6 +185,16 @@ class Controller(BoxLayout):
             self.file_list,
         )
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
+
+    # TODO: for testing only
+    def open_table(self):
+        MDDataTable(
+            column_data=[
+                ("No.", dp(30)),  ("Column 1", dp(30)), ("Column 2", dp(30)),
+                ("Column 3", dp(30)), ("Column 4", dp(30)), ("Column 5", dp(30)),
+            ],
+            row_data=[ (f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
+        ).open()
 
 
 def alert(text, **kwargs):

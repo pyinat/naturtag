@@ -69,7 +69,7 @@ class ImageTaggerApp(MDApp):
 
         # Set Window and theme settings
         Window.size = INIT_WINDOW_SIZE
-        Window.bind(on_dropfile=self.controller.add_image)
+        Window.bind(on_dropfile=lambda x, y: self.controller.add_images(y))
         Window.bind(on_keyboard=self.on_keyboard)
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
