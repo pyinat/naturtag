@@ -1,13 +1,15 @@
 # iNaturalist Image Tagger
 [![Build Status](https://travis-ci.org/JWCook/inat-image-tagger.svg?branch=dev)](https://travis-ci.org/JWCook/inat-image-tagger)
 
-A tool to add iNaturalist taxonomy metadata to local observation photos, which can be used as
-either a python package, a command-line interface, or a graphical interface.
+A tool to add iNaturalist taxonomy metadata to local observation photos.
+This includes a command-line interface and a graphical interface, and can also be used as a
+python package.
 
 # Contents
 
 * [Use Cases](#use-cases)
-* [CLI Usage](#cli)
+* [Development Status](#development-status)
+* [CLI](#cli)
     * [Installation](#cli-installation)
     * [Usage](#cli-usage)
     * [Data Sources](#data-sources)
@@ -20,10 +22,9 @@ either a python package, a command-line interface, or a graphical interface.
 * [GUI](#gui)
     * [Installation](#gui-installation)
     * [Usage](#gui-usage)
+    * [Taxon Search](#taxon-search)
     * [Metadata](#metadata)
     * [Keyboard Shortcuts](#keyboard-shortcuts)
-* [Development Status](#development-status)
-* [TODO](#todo)
 * [See Also](#see-also)
 
 ## Use Cases
@@ -48,6 +49,17 @@ like you can in the iNaturalist web UI or mobile apps. For that use case, a phot
 that supports **hierarchical keywords** is recommended, such as Lightroom,
 [FastPictureViewer](https://www.fastpictureviewer.com), or
 [XnViewMP](https://www.xnview.com/en/xnviewmp).
+
+# Development Status
+See [Issues](https://github.com/JWCook/inat-image-tagger/issues?q=) for planned features and
+current progress.
+
+This is currently just an experimental hobby project, and not very polished. All the
+features described below are functional, however.
+
+I plan to work on this long enough to prove whether or not the concept is useful as part
+of a naturalist/photographer/hobbyist's workflow; if so, there is a long list of features
+I'd like to continue adding onto this.
 
 # CLI
 
@@ -203,22 +215,30 @@ pip install inat-image-tagger[ui-win]
 
 ### Image Selection & Tagging
 The basic UI components are shown below:
-![Screenshot](assets/gui-image-selector.png)
+![Screenshot](assets/screenshots/gui-image-selector.png)
 
 1. Drag & drop images into the window. Right-click an image to remove it.
 2. Or, select files via the file browser on the right
 3. Enter an iNaturalist observation ID or taxon ID
 4. Click the 'Run' button in the lower-left to tag the selected images
 
+### Taxon Search
+If you don't already know the taxon ID, click the 'Find a Species' button to go to the taxon
+search screen. Currently this includes searching by name, with autocompletion support.
+The underlying functionality is the main focus for development right now, so the UI is **very**
+primitive at this point.
+
+![Screenshot](assets/screenshots/gui-taxon-search.png)
+
 ### Metadata
  A very simple (and ugly) metadata view is included, mainly for debugging purposes.
  Left-click an image to open it:
-![Screenshot](assets/gui-metadata.png)
+![Screenshot](assets/screenshots/gui-metadata.png)
 
 ### Settings
 There are also some settings to customize the metadata that your images will be tagged with:
 
-![Screenshot](assets/gui-settings.png)
+![Screenshot](assets/screenshots/gui-settings.png)
 
 See [CLI Usage](#cli-usage) for more details on these settings.
 
@@ -233,28 +253,6 @@ Ctrl+Backspace  | Return to main screen
 Ctrl+R          | Run image tagger
 Shift+Ctrl+X    | Clear selected images
 Ctrl+Q          | Quit
-
-# Development Status
-This is currently just an experimental hobby project, and not very polished. All the
-features described above are functional, however.
-
-I plan to work on this long enough to prove whether or not the concept is useful as part
-of a naturalist/photographer/hobbyist's workflow; if so, there is a long list of features
-I'd like to continue adding onto this.
-
-For example:
-
-# TODO
-Future feature ideas:
-* Tests, more docs, publish on pypi, etc.
-* Auto-tag mode: scan for images with existing tags (like taxon ID or name), and fill in all
-  missing info
-* Options to fetch keywords from Flickr and other sources
-* Support for annotations (life stage, phenology, etc.) and observation fields
-* Taxon text search with autocompletion
-* Advanced batch processing
-* Local caching for faster lookups
-
 
 # See Also
 * For generating keyword _collections_, see the related tool
