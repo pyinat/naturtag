@@ -7,7 +7,7 @@ from re import compile, DOTALL, MULTILINE
 
 CODE_BLOCK = compile(r'```\n(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
-HEADER = compile(r'^\#+\s*(.*)$', MULTILINE)
+HEADER = compile(r'^#+\s*(.*)$', MULTILINE)
 
 
 def colorize_help_text(text):

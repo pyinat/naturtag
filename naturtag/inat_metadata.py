@@ -114,8 +114,8 @@ def get_observation_from_metadata(metadata):
 
 def get_taxon_from_metadata(metadata):
     """ Fetch taxon record from MetaMetadata object: either by ID or rank + name """
-    rank, name =  metadata.min_rank
-    params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank':rank, 'q': name}
+    rank, name = metadata.min_rank
+    params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank': rank, 'q': name}
     logger.info(f'Querying taxon by: {params}')
     results = get_taxa(**params)['results']
     if results:
@@ -174,7 +174,7 @@ def get_min_rank(metadata):
     for rank in RANKS:
         if rank in metadata:
             logger.info(f'Found minimum rank: {rank} = {metadata[rank]}')
-            return (rank, metadata[rank])
+            return rank, metadata[rank]
     return None
 
 

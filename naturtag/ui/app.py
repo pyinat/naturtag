@@ -16,9 +16,10 @@ from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
 
 from naturtag.constants import (
-    DATA_DIR, KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, BACKSPACE, F11)
+    KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, BACKSPACE, F11)
 from naturtag.ui.controller import Controller, alert
-from naturtag.ui.search_controller import TaxonSearchController, ObservationSearchController
+from naturtag.ui.taxon_search_controller import TaxonSearchController
+from naturtag.ui.observation_search_controller import ObservationSearchController
 from naturtag.ui.widget_classes import SCREENS, HOME_SCREEN
 
 logger = getLogger().getChild(__name__)
@@ -30,6 +31,7 @@ class ImageTaggerApp(MDApp):
     handled by Controller
     """
     controller = ObjectProperty()
+    taxon_search_controller = ObjectProperty()
     nav_drawer = ObjectProperty()
     screen_manager = ObjectProperty()
     toolbar = ObjectProperty()

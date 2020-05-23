@@ -7,27 +7,16 @@ from kivy.metrics import dp
 
 from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
-from kivymd.uix.imagelist import SmartTileWithLabel
 from kivymd.uix.snackbar import Snackbar
 
 from naturtag.glob import get_images_from_paths
 from naturtag.tagger import tag_images
-from naturtag.image_metadata import MetaMetadata
+from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
 from naturtag.ui.thumbnails import get_thumbnail
+from naturtag.ui.image import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
-
-
-class ImageMetaTile(SmartTileWithLabel):
-    """ Class that contains an image thumbnail to display plus its associated metadata """
-    metadata = ObjectProperty()
-    allow_stretch = False
-    box_color = [0, 0, 0, 0.4]
-
-    def __init__(self, metadata, **kwargs):
-        super().__init__(**kwargs)
-        self.metadata = metadata
 
 
 class Controller(BoxLayout):
@@ -187,6 +176,7 @@ class Controller(BoxLayout):
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
 
     # TODO: for testing only
+    @staticmethod
     def open_table(self):
         MDDataTable(
             column_data=[

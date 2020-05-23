@@ -21,7 +21,7 @@ def get_thumbnail(image_path, large=False):
 
     Args:
         image_path (str): Path to source image
-        largs (bool): Make it a 'larger' thumbnail
+        large (bool): Make it a 'larger' thumbnail
 
     Returns:
         str: Path to thumbnail image
@@ -73,10 +73,10 @@ def cache_async_thumbnail(async_image, large=False):
     image_bytes = BytesIO()
     async_image._coreimage.image.texture.save(image_bytes, fmt=ext)
     image_bytes.seek(0)
-    return generate_thumbnail(image_bytes, thumbnail_path, large=True, format=ext)
+    return generate_thumbnail(image_bytes, thumbnail_path, large=True, fmt=ext)
 
 
-def generate_thumbnail(source, thumbnail_path, large=False, format=format):
+def generate_thumbnail(source, thumbnail_path, large=False, fmt=None):
     """
     Generate a new thumbnail from the source image, or just copy the image to the cache if it's
     already thumbnail size
@@ -89,7 +89,7 @@ def generate_thumbnail(source, thumbnail_path, large=False, format=format):
             image.thumbnail(target_size)
         else:
             logger.info(f'Image is already thumbnail size! ({image.size})')
-        image.save(thumbnail_path, format=format.replace('jpg', 'jpeg'))
+        image.save(thumbnail_path, fmt=fmt.replace('jpg', 'jpeg'))
         return thumbnail_path
     # If we're unable to generate a thumbnail, just use the original image
     except RuntimeError as e:
