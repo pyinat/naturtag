@@ -16,7 +16,7 @@ from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
 
 from naturtag.constants import (
-    KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, BACKSPACE, F11)
+    DATA_DIR, KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, BACKSPACE, F11)
 from naturtag.ui.controller import Controller, alert
 from naturtag.ui.search_controller import TaxonSearchController, ObservationSearchController
 from naturtag.ui.widget_classes import SCREENS, HOME_SCREEN

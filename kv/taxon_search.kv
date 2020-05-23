@@ -1,4 +1,5 @@
 #:import TaxonAutocompleteSearch naturtag.ui.search_controller.TaxonAutocompleteSearch
+#:import CachedAsyncImage naturtag.ui.search_controller.CachedAsyncImage
 
 <TaxonSearchScreen>:
     id: taxon_search_screen
@@ -38,7 +39,7 @@
 #            size_hint_x: .7
 #            adaptive_size: True
             md_bg_color: app.theme_cls.bg_darkest
-            AsyncImage:
+            CachedAsyncImage:
                 id: selected_taxon_photo
                 size_hint_max_y: 400
             MDLabel:

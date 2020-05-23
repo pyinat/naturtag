@@ -1,5 +1,7 @@
 """ Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations """
 from logging import getLogger
+from os import makedirs
+from os.path import dirname
 
 import requests
 import requests_cache
@@ -14,6 +16,7 @@ from pyinaturalist.rest_api import get_observations  # TODO: Currently only in d
 from naturtag.constants import DWC_NAMESPACES, TAXON_KEYS, OBSERVATION_KEYS, RANKS, CACHE_BACKEND, CACHE_PATH
 
 # Patch requests to use CachedSession for pyinaturalist API calls
+makedirs(dirname(CACHE_PATH), exist_ok=True)
 requests_cache.install_cache(backend=CACHE_BACKEND, cache_name=CACHE_PATH)
 logger = getLogger().getChild(__name__)
 

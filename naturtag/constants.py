@@ -11,6 +11,7 @@ KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
 DATA_DIR = join(user_data_dir(), 'Naturtag')
 THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
 THUMBNAIL_SIZE = (200, 200)
+LG_THUMBNAIL_SIZE = (400, 400)
 CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
 CACHE_BACKEND = 'sqlite'
 

@@ -26,12 +26,11 @@ def get_images_from_paths(paths):
     """  Get all images of supported filetypes from one or more dirs and/or image paths """
     image_paths = []
     paths = [paths] if isinstance(paths, (str, bytes)) else paths
-    logger.info('Getting images from paths: {paths}')
+    logger.info(f'Getting images from paths: {paths}')
 
     for path in paths:
         if isinstance(path, bytes):
             path = path.decode('utf-8')
-        print('Getting: ', path)
         if isdir(path):
             image_paths.extend(get_images_from_dir(path))
         elif isfile(path):
