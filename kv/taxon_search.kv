@@ -9,23 +9,20 @@
         # Search inputs
         MDBoxLayout:
             orientation: 'vertical'
+            size_hint_x: .4
+            size_hint_min_x: dp(500)
+            size_hint_max_x: dp(700)
             md_bg_color: app.theme_cls.bg_light
-            MDGridLayout:
-                cols: 2
-                adaptive_size: True
-                TaxonAutocompleteSearch:
-                    id: taxon_search_input
-                MDIntField:
-                    id: taxon_id_input
-                    hint_text: 'Taxon ID'
-                    helper_text: 'Enter an iNaturalist taxon ID'
-#                    size_hint_x: .5
-                    size_hint_max_x: 60
-
+            MDIntField:
+                id: taxon_id_input
+                hint_text: 'Taxon ID'
+                helper_text: 'Enter an iNaturalist taxon ID'
+            TaxonAutocompleteSearch:
+                id: taxon_search_input
             MDLabel:
                 text: 'Categories'
                 font_style: 'H6'
-                size_hint_max_y: 60
+                size_hint_max_y: dp(60)
             IconicTaxaLayout:
                 id: iconic_taxa
 
@@ -36,23 +33,50 @@
         # Info display for selected taxon
         MDBoxLayout:
             orientation: 'vertical'
-#            size_hint_x: .7
-#            adaptive_size: True
             md_bg_color: app.theme_cls.bg_darkest
-            CachedAsyncImage:
-                id: selected_taxon_photo
-                size_hint_max_y: 400
-            MDLabel:
-                id: selected_taxon_name
-                theme_text_color: 'Primary'
-                font_style: 'H5'
+            MDGridLayout:
+                md_bg_color: app.theme_cls.bg_light
+                cols: 2
+                spacing: dp(10)
+                # Taxon photo + link
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(10)
+                    size_hint_max_x: dp(500)
+                    CachedAsyncImage:
+                        id: selected_taxon_photo
+                        size_hint_max_y: dp(500)
+                    TooltipIconButton:
+                        id: selected_taxon_link_button
+                        icon: 'link-variant'
+                        text: 'View on iNaturalist'
+                        size_hint_x: 1
+                # Name, rank, and other basic attributes
+                MDList:
+                    id: selected_taxon_basic_info
+            # Taxonomy
+            ImageScrollView:
+                MDBoxLayout:
+                    MDLabel:
+                        theme_text_color: 'Primary'
+                        font_style: 'H5'
+                        text: 'Parents'
+                    MDLabel:
+                        id: selected_taxon_ancestors
+                        theme_text_color: 'Primary'
+                    MDLabel:
+                        theme_text_color: 'Primary'
+                        font_style: 'H5'
+                        text: 'Children'
+                    MDLabel:
+                        id: selected_taxon_children
+                        theme_text_color: 'Primary'
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
     input: input
     dropdown: dropdown
-    size: 600, 60
-#    size_hint_min_x: 300
+    size_hint_x: 1
     SearchInput:
         id: input
         hint_text: 'Taxon Name'
@@ -68,7 +92,7 @@
     cols: 6
     padding: dp(10), dp(10)
     spacing: dp(20)
-    row_default_height: 32
+    row_default_height: dp(32)
     row_force_default: True
-    col_default_width: 32
+    col_default_width: dp(32)
     col_force_default: True

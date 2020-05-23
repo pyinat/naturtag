@@ -12,9 +12,12 @@ DATA_DIR = join(user_data_dir(), 'Naturtag')
 THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
 THUMBNAIL_SIZE = (200, 200)
 THUMBNAIL_DEFAULT_FORMAT = 'png'
-LG_THUMBNAIL_SIZE = (400, 400)
+LG_THUMBNAIL_SIZE = (500, 500)
 CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
 CACHE_BACKEND = 'sqlite'
+
+TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
+OBSERVATION_BASE_URL = 'https://www.inaturalist.org/observations'
 
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3

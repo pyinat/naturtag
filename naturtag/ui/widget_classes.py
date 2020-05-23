@@ -2,6 +2,7 @@
 from kivy.uix.boxlayout import BoxLayout
 
 from kivymd.uix.button import MDFloatingActionButton
+from kivymd.uix.button import MDRoundFlatIconButton
 from kivymd.uix.list import ILeftBodyTouch
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDSwitch
@@ -41,7 +42,10 @@ class IconLeftSwitch(ILeftBodyTouch, MDSwitch):
     """ Switch that works as a list item """
 
 class TooltipFloatingButton(MDFloatingActionButton, MDTooltip):
-    """ Button class with tooltip behavior """
+    """ Floating action button class with tooltip behavior """
+
+class TooltipIconButton(MDRoundFlatIconButton, MDTooltip):
+    """ Flat button class with icon and tooltip behavior """
 
 class MetadataTab(BoxLayout, MDTabsBase):
     """ Class for a tab in a MDTabs view"""

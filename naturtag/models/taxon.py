@@ -1,6 +1,7 @@
 from collections.abc import Collection
 
 from pyinaturalist.node_api import get_taxa_by_id
+from naturtag.constants import TAXON_BASE_URL
 
 
 class JsonModel:
@@ -38,6 +39,10 @@ class Taxon(JsonModel):
         r = get_taxa_by_id(id or self.id)
         self.json = r['results'][0]
         return self.json
+
+    @property
+    def link(self):
+        return f'{TAXON_BASE_URL}/{self.id}'
 
     @property
     def ancestors(self):

@@ -89,7 +89,7 @@ def generate_thumbnail(source, thumbnail_path, large=False, format=format):
             image.thumbnail(target_size)
         else:
             logger.info(f'Image is already thumbnail size! ({image.size})')
-        image.save(thumbnail_path, format=format)
+        image.save(thumbnail_path, format=format.replace('jpg', 'jpeg'))
         return thumbnail_path
     # If we're unable to generate a thumbnail, just use the original image
     except RuntimeError as e:
