@@ -5,7 +5,12 @@ from os.path import isfile, join, splitext
 from logging import getLogger
 
 from PIL import Image
-from naturtag.constants import THUMBNAILS_DIR, THUMBNAIL_SIZE, LG_THUMBNAIL_SIZE
+from naturtag.constants import (
+    THUMBNAILS_DIR,
+    THUMBNAIL_SIZE,
+    LG_THUMBNAIL_SIZE,
+    THUMBNAIL_DEFAULT_FORMAT,
+)
 
 logger = getLogger().getChild(__name__)
 
@@ -44,16 +49,24 @@ def get_thumbnail_path(image_path):
     """ Determine the thumbnail filename based on a hash of the original file path """
     makedirs(THUMBNAILS_DIR, exist_ok=True)
     thumbnail_hash = md5(image_path.encode()).hexdigest()
+    ext = _get_format(image_path)
+    return join(THUMBNAILS_DIR, f'{thumbnail_hash}.{ext}')
+
+
+def _get_format(image_path):
+    """ Account for various edge cases when getting an image format based on a file extension """
+    if isinstance(image_path, bytes):
+        image_path = image_path.decode('utf-8')
     # Strip off request params if path is a URL
     image_path = image_path.split('?')[0]
-    ext = splitext(image_path)[-1] or '.png'
-    return join(THUMBNAILS_DIR, f'{thumbnail_hash}{ext}')
+    ext = splitext(image_path)[-1] or THUMBNAIL_DEFAULT_FORMAT
+    return ext.lower().replace('.', '')
 
 
 def cache_async_thumbnail(async_image, large=False):
     """ Get raw image data from an AsyncImage and cache a thumbnail for future usage """
     thumbnail_path = get_thumbnail_path(async_image.source)
-    ext = splitext(thumbnail_path)[-1].replace('.', '')
+    ext = _get_format(thumbnail_path)
     logger.info(f'Getting image data downloaded from {async_image.source}; format {ext}')
 
     # Load inner 'texture' bytes into a file-like object that PIL can read
@@ -76,7 +89,7 @@ def generate_thumbnail(source, thumbnail_path, large=False, format=format):
             image.thumbnail(target_size)
         else:
             logger.info(f'Image is already thumbnail size! ({image.size})')
-        image.save(thumbnail_path)
+        image.save(thumbnail_path, format=format)
         return thumbnail_path
     # If we're unable to generate a thumbnail, just use the original image
     except RuntimeError as e:
