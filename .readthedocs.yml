@@ -9,7 +9,8 @@ formats:
   - pdf
 
 python:
-  version: 3.8
+  version: 3.7
+  system_packages: True
   install:
     - method: pip
       path: .
