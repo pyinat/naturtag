@@ -1,0 +1,13 @@
+# Default settings
+
+display:
+  dark_mode: false
+inaturalist:
+  locale: null
+  preferred_place_id: 1
+  username: null
+metadata:
+  common_names: true
+  create_xmp: true
+  darwin_core: true
+  hierarchical_keywords: true

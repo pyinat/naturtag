@@ -1,2 +1,3 @@
 include *.kv
+include default-settings.yml
 recursive-include assets *

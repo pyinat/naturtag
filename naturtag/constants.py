@@ -15,6 +15,8 @@ THUMBNAIL_DEFAULT_FORMAT = 'png'
 LG_THUMBNAIL_SIZE = (500, 500)
 CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
 CACHE_BACKEND = 'sqlite'
+CONFIG_PATH = join(DATA_DIR, 'settings.yml')
+DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
 
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
 OBSERVATION_BASE_URL = 'https://www.inaturalist.org/observations'

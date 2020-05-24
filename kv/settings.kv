@@ -4,43 +4,44 @@
 
     MDList:
         OneLineListItem:
-            text: 'Metadata options'
             font_style: 'H5'
-        TwoLineAvatarListItem:
-            text: 'Common names'
-            font_style: 'H6'
-            secondary_text: 'Include common names in taxonomy keywords'
-            IconLeftSwitch:
-                id: common_names_chk
-                active: True
-        TwoLineAvatarListItem:
-            text: 'Hierarchical Keywords'
-            font_style: 'H6'
-            secondary_text: 'Generate pipe-delimited hierarchical keywords'
-            IconLeftSwitch:
-                id: hierarchical_keywords_chk
-                active: True
-        TwoLineAvatarListItem:
-            text: 'Darwin Core Metadata'
-            font_style: 'H6'
-            secondary_text: 'Convert taxon/observation metadata into XMP Darwin Core metadata'
-            IconLeftSwitch:
-                id: darwin_core_chk
-                active: True
-        TwoLineAvatarListItem:
-            text: 'Create XMP Files'
-            font_style: 'H6'
-            secondary_text: 'Create XMP sidecar files if they don\'t already exist'
-            IconLeftSwitch:
-                id: create_xmp_chk
-                active: True
+            text: 'iNaturalist settings'
 
         OneLineListItem:
         OneLineListItem:
-            text: 'Display options'
             font_style: 'H5'
+            text: 'Metadata settings'
+        TwoLineAvatarListItem:
+            font_style: 'H6'
+            text: 'Common names'
+            secondary_text: 'Include common names in taxonomy keywords'
+            SwitchListItem:
+                id: common_names_chk
+        TwoLineAvatarListItem:
+            font_style: 'H6'
+            text: 'Hierarchical Keywords'
+            secondary_text: 'Generate pipe-delimited hierarchical keywords'
+            SwitchListItem:
+                id: hierarchical_keywords_chk
+        TwoLineAvatarListItem:
+            font_style: 'H6'
+            text: 'Darwin Core Metadata'
+            secondary_text: 'Convert taxon/observation metadata into XMP Darwin Core metadata'
+            SwitchListItem:
+                id: darwin_core_chk
+        TwoLineAvatarListItem:
+            font_style: 'H6'
+            text: 'Create XMP Files'
+            secondary_text: 'Create XMP sidecar files if they don\'t already exist'
+            SwitchListItem:
+                id: create_xmp_chk
+
+        OneLineListItem:
+        OneLineListItem:
+            font_style: 'H6'
+            font_style: 'H5'
+            text: 'Display settings'
         OneLineAvatarListItem:
             text: 'Dark Mode'
-            font_style: 'H6'
-            IconLeftSwitch:
+            SwitchListItem:
                 id: dark_mode_chk

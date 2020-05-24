@@ -22,6 +22,7 @@ setup(
         'pyexiv2',
         # 'pyinaturalist',  # TODO: Submit PR(s) for WIP pyinaturalist changes
         'pyinaturalist @ git+https://github.com/JWCook/pyinaturalist.git@dev',
+        'pyyaml',
         'requests',
         'requests-cache',
         'xmltodict',

@@ -28,12 +28,11 @@ class Controller(BoxLayout):
     file_list_text = StringProperty()
     selected_image = ObjectProperty(None)
 
-    def __init__(self, image_selector_screen, settings_screen, metadata_screen, **kwargs):
+    def __init__(self, image_selector_screen, metadata_screen, **kwargs):
         super().__init__(**kwargs)
         self.inputs = image_selector_screen
         self.image_previews = image_selector_screen.image_previews
         self.file_chooser = image_selector_screen.file_chooser
-        self.settings = settings_screen
         self.metadata_screen = metadata_screen
 
         # Bind widget events
@@ -103,13 +102,8 @@ class Controller(BoxLayout):
         self.file_chooser.selection = []
         self.image_previews.clear_widgets()
 
-    def get_settings_dict(self):
+    def get_input_dict(self):
         return {
-            'common_names': self.settings.common_names_chk.active,
-            'hierarchical_keywords': self.settings.hierarchical_keywords_chk.active,
-            'darwin_core': self.settings.darwin_core_chk.active,
-            'create_xmp': self.settings.create_xmp_chk.active,
-            'dark_mode': self.settings.dark_mode_chk.active,
             "observation_id": int(self.inputs.observation_id_input.text or 0),
             "taxon_id": int(self.inputs.taxon_id_input.text or 0),
         }
@@ -118,7 +112,7 @@ class Controller(BoxLayout):
         logger.info(
             f'IDs: {self.ids}\n'
             f'Files:\n{self.file_list_text}\n'
-            f'Config: {self.get_settings_dict()}\n'
+            f'Input: {self.get_input_dict()}\n'
         )
 
     def handle_image_click(self, instance, touch):
@@ -151,26 +145,29 @@ class Controller(BoxLayout):
 
     def run(self, *args):
         """ Run image tagging for selected images and input """
-        settings = self.get_settings_dict()
+        inputs = self.get_input_dict()
         if not self.file_list:
             alert(f'Select images to tag')
             return
-        if not settings['observation_id'] and not settings['taxon_id']:
+        if not inputs['observation_id'] and not inputs['taxon_id']:
             alert(f'Select either an observation or an organism to tag images with')
             return
         selected_id = (
-            f'Taxon ID: {settings["taxon_id"]}' if settings['taxon_id']
-            else f'Observation ID: {settings["observation_id"]}'
+            f'Taxon ID: {inputs["taxon_id"]}' if inputs['taxon_id']
+            else f'Observation ID: {inputs["observation_id"]}'
         )
         logger.info(f'Tagging {len(self.file_list)} images with metadata for {selected_id}')
 
+        # TODO: Is there a better way to access settings?
+        metadata_settings = MDApp.get_running_app().settings_controller.metadata
+
         tag_images(
-            settings['observation_id'],
-            settings['taxon_id'],
-            settings['common_names'],
-            settings['darwin_core'],
-            settings['hierarchical_keywords'],
-            settings['create_xmp'],
+            inputs['observation_id'],
+            inputs['taxon_id'],
+            metadata_settings['common_names'],
+            metadata_settings['darwin_core'],
+            metadata_settings['hierarchical_keywords'],
+            metadata_settings['create_xmp'],
             self.file_list,
         )
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
