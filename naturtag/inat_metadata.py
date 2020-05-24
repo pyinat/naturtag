@@ -68,7 +68,7 @@ def get_taxon_children(taxon_id):
 
 
 def get_taxon_ancestors(taxon_id):
-    """ Get a taxon' parents """
+    """ Get a taxon's parents """
     return get_taxon_with_ancestors(taxon_id)[:-1]
 
 

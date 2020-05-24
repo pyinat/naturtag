@@ -9,6 +9,7 @@ python package.
 
 * [Use Cases](#use-cases)
 * [Development Status](#development-status)
+* [Python Package](#python-package)
 * [CLI](#cli)
     * [Installation](#cli-installation)
     * [Usage](#cli-usage)
@@ -61,6 +62,10 @@ features described below are functional, however.
 I plan to work on this long enough to prove whether or not the concept is useful as part
 of a naturalist/photographer/hobbyist's workflow; if so, there is a long list of features
 I'd like to continue adding onto this.
+
+# Python Package
+See [documentation on ReadTheDocs](https://naturtag.readthedocs.io) for details on the python package.:w
+
 
 # CLI
 

@@ -4,7 +4,14 @@ from naturtag import __version__
 
 extras_require = {
     'ui': ['docutils', 'kivy>=1.11', 'kivymd~=0.104.1', 'pygments'],
-    'dev': ['black', 'kivy_examples', 'pytest'],
+    'dev': [
+        'black',
+        'kivy_examples',
+        'pytest',
+        'Sphinx>=3.0',
+        'sphinxcontrib-apidoc',
+        'sphinx-rtd-theme',
+    ],
 }
 extras_require['all'] = list(chain.from_iterable(extras_require.values()))
 extras_require['ui-win'] = ['pypiwin32', 'kivy_deps.sdl2', 'kivy_deps.gstreamer', 'kivy_deps.angle']
