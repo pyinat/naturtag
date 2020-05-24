@@ -20,6 +20,7 @@ DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
 
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
 OBSERVATION_BASE_URL = 'https://www.inaturalist.org/observations'
+PLACES_BASE_URL = 'https://www.inaturalist.org/places'
 
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3

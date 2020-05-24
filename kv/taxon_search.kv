@@ -13,7 +13,7 @@
             size_hint_min_x: dp(500)
             size_hint_max_x: dp(700)
             md_bg_color: app.theme_cls.bg_light
-            MDIntField:
+            IntField:
                 id: taxon_id_input
                 hint_text: 'Taxon ID'
                 helper_text: 'Enter an iNaturalist taxon ID'
@@ -55,7 +55,7 @@
                 MDList:
                     id: selected_taxon_basic_info
             # Taxonomy
-            ImageScrollView:
+            ScrollViewY:
                 MDBoxLayout:
                     MDLabel:
                         theme_text_color: 'Primary'

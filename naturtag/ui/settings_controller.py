@@ -1,5 +1,8 @@
+from locale import locale_alias, getdefaultlocale
 from logging import getLogger
+import webbrowser
 
+from naturtag.constants import PLACES_BASE_URL
 from naturtag.settings import read_settings, write_settings, reset_defaults
 
 logger = getLogger().getChild(__name__)
@@ -9,22 +12,31 @@ class SettingsController:
     """ Controller class to manage Settings screen, and reading from and writing to settings file """
     def __init__(self, settings_screen):
         self.screen = settings_screen
-        # Control widgets id should be a setting name matching that in the settings file (w/ suffix)
+        self.settings_dict = read_settings()
+
+        # Set default locale if it's unset
+        if self.inaturalist['locale'] is None:
+            self.inaturalist['locale'] = getdefaultlocale()[0]
+
+        self.screen.preferred_place_id_label.bind(
+            on_release=lambda *x: webbrowser.open(PLACES_BASE_URL))
+
+        # Control widget ids should match the options in the settings file (with suffixes)
         self.controls = {
             id.replace('_chk',  '').replace('_input', ''): getattr(settings_screen, id)
             for id in settings_screen
         }
-        self.settings_dict = read_settings()
         self.update_control_widgets()
 
     def update_control_widgets(self):
-        """ Update state of settings controls in UI based on settings file """
+        """ Update state of settings controls in UI with values from settings file """
         logger.info(f'Loading settings: {self.settings_dict}')
         for k, section in self.settings_dict.items():
             for setting_name, value in section.items():
                 self.set_control_value(setting_name, value)
 
     def save_settings(self):
+        """ Save the current state of the control widgets to settings file """
         logger.info(f'Saving settings: {self.settings_dict}')
         for k, section in self.settings_dict.items():
             for setting_name in section.keys():

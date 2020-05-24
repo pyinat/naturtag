@@ -4,7 +4,7 @@
 
     BoxLayout:
         # Image viewer
-        ImageScrollView:
+        ScrollViewY:
             MDGridLayout:
                 id: image_previews
                 adaptive_height: True
@@ -37,7 +37,7 @@
                         width: dp(200)
                         on_press:
                             app.switch_screen('observation_search')
-                    MDIntField:
+                    IntField:
                         id: observation_id_input
                         hint_text: 'Observation ID'
                         helper_text: 'Enter an iNaturalist observation ID'
@@ -47,7 +47,7 @@
                         width: dp(200)
                         on_press:
                             app.switch_screen('taxon_search')
-                    MDIntField:
+                    IntField:
                         id: taxon_id_input
                         hint_text: 'Taxon ID'
                         helper_text: 'Enter an iNaturalist taxon ID'

@@ -24,6 +24,7 @@ python package.
     * [Usage](#gui-usage)
     * [Taxon Search](#taxon-search)
     * [Metadata](#metadata)
+    * [Settings](#settings)
     * [Keyboard Shortcuts](#keyboard-shortcuts)
 * [See Also](#see-also)
 
@@ -236,7 +237,9 @@ primitive at this point.
 ![Screenshot](assets/screenshots/gui-metadata.png)
 
 ### Settings
-There are also some settings to customize the metadata that your images will be tagged with:
+There are also some settings to customize the metadata that your images will be tagged with,
+as well as iNaturalist info used in search filters. And yes, there is a dark mode, because
+why not.
 
 ![Screenshot](assets/screenshots/gui-settings.png)
 

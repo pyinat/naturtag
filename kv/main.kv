@@ -4,11 +4,19 @@
 #:import version naturtag.__version__
 #:import Transition kivy.uix.screenmanager.NoTransition
 
-<MDIntField@MDTextField>:
+
+<TextFieldListItem@MDTextFieldRound>:
+    normal_color: app.theme_cls.bg_dark
+    icon_right_color: app.theme_cls.accent_color
+
+<IconRight@IconRightWidget>:
+    md_bg_color: app.theme_cls.accent_color
+
+<IntField@MDTextField>:
 	input_filter: 'int'
 	helper_text_mode: 'on_focus'
 
-<ImageScrollView@ScrollView>:
+<ScrollViewY@ScrollView>:
     do_scroll_x: False
     do_scroll_y: True
     effect_cls: 'OpacityScrollEffect'
