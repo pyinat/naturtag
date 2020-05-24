@@ -1,8 +1,8 @@
-iNaturalist Image Tagger
-====================================
+Naturtag: an iNaturalist Image Tagger
+=====================================
 
-This is the python package documentation for `inat-image-tagger <https://github.com/JWCook/inat-image-tagger>`_.
-For general usage information see the `README <https://github.com/JWCook/inat-image-tagger/blob/master/README.md>`_.
+This is the python package documentation for `naturtag <https://github.com/JWCook/naturtag>`_.
+For general usage information see the `README <https://github.com/JWCook/naturtag/blob/master/README.md>`_.
 
 .. toctree::
    :maxdepth: 2

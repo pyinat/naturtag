@@ -18,7 +18,7 @@ extras_require['ui-win'] = ['pypiwin32', 'kivy_deps.sdl2', 'kivy_deps.gstreamer'
 extras_require['all-win'] = extras_require['all'] + extras_require['ui-win']
 
 setup(
-    name='inat-image-tagger',
+    name='naturtag',
     version=__version__,
     packages=find_packages(),
     install_requires=[

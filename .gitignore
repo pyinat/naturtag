@@ -5,6 +5,7 @@ __pycache__
 .mypy_cache/
 _build/
 build/
+pip-wheel-metadata/
 dist/
 docs/modules/
 venv/

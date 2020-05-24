@@ -1,8 +1,10 @@
-# iNaturalist Image Tagger
-[![Build Status](https://travis-ci.org/JWCook/inat-image-tagger.svg?branch=dev)](https://travis-ci.org/JWCook/inat-image-tagger)
+# Naturtag: an iNaturalist Image Tagger
+[![Build Status](https://travis-ci.org/JWCook/naturtag.svg?branch=dev)](https://travis-ci.org/JWCook/naturtag)
+[![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/latest/?badge=latest)
+![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)
 
-A tool to add iNaturalist taxonomy metadata to local observation photos.
-This includes a command-line interface and a graphical interface, and can also be used as a
+A tool to add iNaturalist taxonomy & observation metadata to local observation photos.
+This includes a command-line interface, a graphical interface, and can also be used as a
 python package.
 
 # Contents
@@ -53,7 +55,7 @@ that supports **hierarchical keywords** is recommended, such as Lightroom,
 [XnViewMP](https://www.xnview.com/en/xnviewmp).
 
 # Development Status
-See [Issues](https://github.com/JWCook/inat-image-tagger/issues?q=) for planned features and
+See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and
 current progress.
 
 This is currently just an experimental hobby project, and not very polished. All the
@@ -79,7 +81,7 @@ brew install exiv2  # MacOS
 
 Then, install the python package:
 ```bash
-pip install git+https://github.com/JWCook/inat-image-tagger.git
+pip install git+https://github.com/JWCook/naturtag.git
 ```
 
 ## CLI Usage
@@ -210,11 +212,11 @@ This project also includes a graphical frontend, although it very early in devel
 OS-specific builds will be coming soon, but for now running it requires a local python development
 environment. To install:
 ```
-pip install inat-image-tagger[ui]
+pip install naturtag[ui]
 ```
 Some additional dependencies are required on Windows:
 ```
-pip install inat-image-tagger[ui-win]
+pip install naturtag[ui-win]
 ```
 
 ##  GUI Usage
