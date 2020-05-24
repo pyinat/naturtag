@@ -1,9 +1,9 @@
 from itertools import chain
 from logging import getLogger
-from os.path import isfile, splitext
+from os.path import basename, isfile, splitext
 
 from pyexiv2 import Image
-from pyinaturalist.constants import RANKS
+from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank, sort_taxonomy_keywords
 
 # All tags that support regular and hierarchical keyword lists
 KEYWORD_TAGS = [
@@ -25,11 +25,7 @@ NEW_XMP_CONTENTS = """
 <?xpacket?>
 """
 
-# Simplified tags without formatting variations
-TAXON_KEYS = ['taxonid', 'dwc:taxonid']
-OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
-
-logger = getLogger(__name__)
+logger = getLogger().getChild(__name__)
 
 
 def get_tagged_image_metadata(paths):
@@ -37,16 +33,12 @@ def get_tagged_image_metadata(paths):
     return {m.image_path: m for m in all_image_metadata if m.taxon_id or m.observation_id}
 
 
-# TODO: Extract GPS info
-class MetaMetadata:
-    """ Class for reading, combining, parsing, organizing, and writing image metadata """
+class ImageMetadata:
+    """ Class for reading & writing basic image metadata """
     def __init__(self, image_path):
         self.image_path = image_path
         self.xmp_path = splitext(self.image_path)[0] + '.xmp'
         self.exif, self.iptc, self.xmp = self.read_metadata()
-        self.combined = {**self.exif, **self.iptc, **self.xmp}
-        self.keyword_meta = KeywordMetadata(self.combined)
-        self.taxon_id, self.observation_id = self.get_inaturalist_ids()
 
     def read_metadata(self):
         """ Read all formats of metadata from image + sidecar file """
@@ -65,7 +57,7 @@ class MetaMetadata:
 
     def _safe_read_metadata(self, path, encoding='utf-8'):
         """ Attempt to read metadata, with error handling """
-        logger.debug(f'Reading metadata from: {path} ({encoding})')
+        logger.info(f'Reading metadata from: {path} ({encoding})')
         img = self.read_exiv2_image(path)
         if not img:
             return {}, {}, {}
@@ -94,47 +86,6 @@ class MetaMetadata:
             logger.error(f'Failed to read corrupted metadata from {path}:\n  {str(exc)}')
             return None
 
-    def get_inaturalist_ids(self):
-        """ Look for taxon and/or observation IDs from combined metadata if available """
-        # Reduce variations in similarly-named keys
-        def _simplify_key(s):
-            return s.lower().replace('_', '').split(':')[-1]
-
-        # Get first non-None value from specified keys, if any; otherwise return None
-        def _first_match(metadata, keys):
-            return next(filter(None, map(metadata.get, keys)), None)
-
-        # Check all possible keys for valid taxon and observation IDs
-        simplified_metadata = {
-            _simplify_key(k): v
-            for k, v in {**self.combined, **self.keyword_meta.kv_keywords}.items()
-        }
-        taxon_id = _first_match(simplified_metadata, TAXON_KEYS)
-        observation_id = _first_match(simplified_metadata, OBSERVATION_KEYS)
-        logger.info(f'Taxon ID: {taxon_id} | Observation ID: {observation_id}')
-        return taxon_id, observation_id
-
-    @property
-    def summary(self):
-        """ Get a condensed summary of available metadata """
-        meta_types = {
-            'EXIF': bool(self.exif),
-            'IPTC': bool(self.iptc),
-            'XMP': bool(self.xmp),
-            'SIDECAR': bool(self.xmp_path),
-        }
-        meta_special = {
-            'TAX': self.taxon_id,
-            'OBS': self.observation_id,
-            # 'GPS': self.gps,
-        }
-        from os.path import basename
-        return '\n'.join([
-            basename(self.image_path),
-            ' | '.join([k for k, v in meta_special.items() if v]),
-            ' | '.join([k for k, v in meta_types.items() if v]),
-        ])
-
     def create_xmp_sidecar(self):
         """ Create a new XMP sidecar file if one does not already exist """
         if isfile(self.xmp_path):
@@ -146,6 +97,7 @@ class MetaMetadata:
     def update(self, new_metadata):
         """ Update arbitrary EXIF, IPTC, and/or XMP metadata """
         logger.info(f'Updating with {len(new_metadata)} tags')
+
         def _filter_tags(prefix):
             return {k: v for k, v in new_metadata.items() if k.startswith(prefix)}
 
@@ -153,16 +105,6 @@ class MetaMetadata:
         self.exif.update(_filter_tags('Exif.'))
         self.iptc.update(_filter_tags('Iptc.'))
         self.xmp.update(_filter_tags('Xmp.'))
-        self.combined = {**self.exif, **self.iptc, **self.xmp}
-        self.keyword_meta = KeywordMetadata(self.combined)
-        self.taxon_id, self.observation_id = self.get_inaturalist_ids()
-
-    def update_keywords(self, keywords):
-        """
-        Update only keyword metadata.
-        Keywords will be written to appropriate tags for each metadata format.
-        """
-        self.update(KeywordMetadata(keywords=keywords).tags)
 
     def write(self, create_xmp_sidecar=True):
         """ Write current metadata to image and sidecar """
@@ -178,12 +120,111 @@ class MetaMetadata:
         """ Write current metadata to a single path """
         logger.info(f'Writing {len(self.combined)} tags to {path}')
         img = self.read_exiv2_image(path)
-        # TODO: Possible workaround for overwriting corrupted metadata?
+        # TODO: Possible workaround to enable overwriting corrupted metadata?
         if img:
             img.modify_exif(self.exif)
             img.modify_iptc(self.iptc)
             img.modify_xmp(self.xmp)
             img.close()
+
+
+# TODO: Extract GPS info
+class MetaMetadata(ImageMetadata):
+    """ Class for parsing & organizing info derived from basic image metadata """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Define lazy-loaded properties
+        self._inaturalist_ids = None
+        self._min_rank = None
+        self._simplified = None
+        self._summary = None
+        self.combined = None
+        self.keyword_meta = None
+        self._update_derived_properties()
+
+    def _update_derived_properties(self):
+        """ Reset/ update all secondary properties derived from base metadata formats """
+        self._inaturalist_ids = None
+        self._min_rank = None
+        self._simplified = None
+        self._summary = None
+        self.combined = {**self.exif, **self.iptc, **self.xmp}
+        self.keyword_meta = KeywordMetadata(self.combined)
+
+    @property
+    def inaturalist_ids(self):
+        """ Look for taxon and/or observation IDs from metadata if available """
+        if self._inaturalist_ids is None:
+            self._inaturalist_ids = get_inaturalist_ids(self.simplified)
+        return self._inaturalist_ids
+
+    @property
+    def taxon_id(self):
+        return self.inaturalist_ids[0]
+
+    @property
+    def observation_id(self):
+        return self.inaturalist_ids[1]
+
+    @property
+    def min_rank(self):
+        """ Get the lowest (most specific) taxonomic rank from tags, if any """
+        if self._min_rank is None:
+            self._min_rank = get_min_rank(self.simplified) or (None, None)
+        return self._min_rank
+
+    @property
+    def has_taxon(self):
+        return bool(self.taxon_id or all(self.min_rank))
+
+    @property
+    def simplified(self):
+        """
+        Get simplified/deduplicated key-value pairs from a combination of keywords + basic metadata
+        """
+        if self._simplified is None:
+            self._simplified = simplify_keys({**self.combined, **self.keyword_meta.kv_keywords})
+            for k in KEYWORD_TAGS + HIER_KEYWORD_TAGS:
+                self._simplified.pop(k, None)
+        return self._simplified
+
+    @property
+    def summary(self):
+        """ Get a condensed summary of available metadata """
+        if self._summary is None:
+            meta_types = {
+                'EXIF': bool(self.exif),
+                'IPTC': bool(self.iptc),
+                'XMP': bool(self.xmp),
+                'SIDECAR': bool(self.xmp_path),
+            }
+            meta_special = {
+                'TAX': self.taxon_id or self.min_rank,
+                'OBS': self.observation_id,
+                # 'GPS': self.gps,
+            }
+            logger.info(f'Metadata summary: {meta_types} {meta_special}')
+
+            self._summary = '\n'.join(
+                [
+                    basename(self.image_path),
+                    ' | '.join([k for k, v in meta_special.items() if v]),
+                    ' | '.join([k for k, v in meta_types.items() if v]),
+                ]
+            )
+        return self._summary
+
+    def update(self, new_metadata):
+        """ Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties """
+        super().update(new_metadata)
+        self._update_derived_properties()
+
+    def update_keywords(self, keywords):
+        """
+        Update only keyword metadata.
+        Keywords will be written to appropriate tags for each metadata format.
+        """
+        self.update(KeywordMetadata(keywords=keywords).tags)
 
 
 class KeywordMetadata:
@@ -204,7 +245,8 @@ class KeywordMetadata:
 
         # All keywords will be combined and re-sorted, to account for errors in other programs
         keywords = [
-            self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
+            self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS
+        ]
         keywords = set(chain.from_iterable(keywords))
         logger.info(f'{len(keywords)} unique keywords found')
         return [k.replace('"', '') for k in keywords]
@@ -220,19 +262,10 @@ class KeywordMetadata:
         else:
             return [keywords.strip()] if keywords.strip() else []
 
-    @staticmethod
-    def _sort_taxonomy_keywords(keywords):
-        """ Sort keywords by taxonomic rank, where applicable """
-        def get_rank_idx(tag):
-            base_tag = tag.split(':')[-1].split('=')[0]
-            return RANKS.index(base_tag) if base_tag in RANKS else 0
-
-        return sorted(keywords, key=get_rank_idx, reverse=True)
-
     def get_kv_keywords(self):
         """ Get all keywords that contain key-value pairs"""
         kv_keywords = [kw for kw in self.keywords if kw.count('=') == 1 and kw.split('=')[1]]
-        kv_keywords = self._sort_taxonomy_keywords(kv_keywords)
+        kv_keywords = sort_taxonomy_keywords(kv_keywords)
         logger.info(f'{len(kv_keywords)} unique key-value pairs found in keywords')
         return dict([kw.split('=') for kw in kv_keywords])
 
@@ -299,3 +332,20 @@ def dict_to_indented_tree(d):
         return subtree
 
     return append_children(d, 0)
+
+
+def simplify_keys(mapping):
+    """
+    Simplify/deduplicate dict keys, to reduce variations in similarly-named keys
+
+    Example::
+        >>> simplify_keys({'my_namepace:Super_Order': 'Panorpida'})
+        {'superfamily': 'Panorpida'}
+
+    Returns:
+        dict: Dict with simplified/deduplicated keys
+    """
+    return {
+        k.lower().replace('_', '').split(':')[-1]: v
+        for k, v in mapping.items()
+    }

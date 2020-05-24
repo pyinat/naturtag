@@ -1,7 +1,6 @@
 """ Combined entry point for both CLI and GUI """
 from naturtag.image_metadata import MetaMetadata
-from naturtag.inat_darwincore import get_observation_dwc_terms
-from naturtag.inat_keywords import get_keywords
+from naturtag.inat_metadata import get_keywords, get_observation_dwc_terms
 
 
 def tag_images(observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp_sidecar, images):
@@ -20,6 +19,7 @@ def tag_images(observation_id, taxon_id, common_names, darwin_core, hierarchical
         tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar)
 
     return keywords, dwc_metadata
+
 
 def tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar):
     metadata = MetaMetadata(image_path)

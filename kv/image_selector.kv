@@ -29,11 +29,26 @@
                 size_hint_min_y: 120
 
                 MDGridLayout:
-                    cols: 1
+                    cols: 2
+                    spacing: dp(4)
+                    MDRoundFlatIconButton:
+                        disabled: True  # TODO: Remove once implemented
+                        text: 'Find an Observation'
+                        icon: 'crosshairs-gps'
+                        width: dp(200)
+                        on_press:
+                            app.switch_screen('observation_search')
                     MDIntField:
                         id: observation_id_input
                         hint_text: 'Observation ID'
                         helper_text: 'Enter an iNaturalist observation ID'
+                    MDRoundFlatIconButton:
+#                        disabled: True  # TODO: Remove once implemented
+                        text: 'Find a Species'
+                        icon: 'ladybug'
+                        width: dp(200)
+                        on_press:
+                            app.switch_screen('taxon_search')
                     MDIntField:
                         id: taxon_id_input
                         hint_text: 'Taxon ID'
@@ -48,8 +63,6 @@
                     rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
                     id: file_chooser
                     filters: IMAGE_FILETYPES
-                    # multiselect: True
-                    # dirselect: True
                     on_selection: root.controller.add_images(self.selection)
 
                 # List of selected files
@@ -69,16 +82,20 @@
                 MDBoxLayout:
                     size_hint_y: None
                     height: 30
+                    spacing: dp(5)
 
                     MDRaisedButton:
                         text: 'Clear'
+                        md_bg_color: app.theme_cls.accent_color
                         on_release: root.controller.clear()
                     MDRaisedButton:
                         text: 'Debug'
+                        md_bg_color: app.theme_cls.accent_color
                         on_release: root.controller.get_state()
 #                        on_release: root.controller.open_table()
                     MDRaisedButton:
                         text: 'Load'
+                        md_bg_color: app.theme_cls.accent_color
                         on_release: root.controller.add_images(file_chooser.selection)
 
     TooltipFloatingButton:
