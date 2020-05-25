@@ -1,10 +1,15 @@
 """ Classes to extend image container functionality for caching, metadata, etc. """
+from logging import getLogger
+
 from kivy.properties import ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 from kivymd.uix.list import ThreeLineAvatarListItem, ILeftBody
 
-from naturtag.thumbnails import get_thumbnail_if_exists, cache_async_thumbnail
+from naturtag.thumbnails import get_thumbnail_if_exists
+from naturtag.ui.cache import get_any_thumbnail_if_exists, cache_async_thumbnail
+
+logger = getLogger().getChild(__name__)
 
 
 class IconicTaxaIcon(SmartTile):
@@ -13,22 +18,29 @@ class IconicTaxaIcon(SmartTile):
 
 class CachedAsyncImage(AsyncImage):
     """ AsyncImage which, once loaded, caches the image for future use """
-    def __init__(self, **kwargs):
+    def __init__(self, thumbnail_size='large', **kwargs):
+        """
+        Args:
+            size (str) : Size of thumbnail to cache
+        """
+        self.thumbnail_size = thumbnail_size
+        self.thumbnail_path = None
         super().__init__(**kwargs)
-        self.has_thumbnail = False
 
     def _load_source(self, *args):
-        # Before downloading remote image, first check for existing thumbnail
-        thumbnail_path = get_thumbnail_if_exists(self.source)
-        if thumbnail_path:
-            self.has_thumbnail = True
-            self.source = thumbnail_path
+        """ Before downloading remote image, first check for existing thumbnail """
+        # Differentiating between None and '' here to handle on_load being triggered multiple times
+        if self.thumbnail_path is None:
+            self.thumbnail_path = get_any_thumbnail_if_exists(self.source) or ''
+            if self.thumbnail_path:
+                logger.debug(f'Found {self.source} in cache: {self.thumbnail_path}')
+                self.source = self.thumbnail_path
         super()._load_source(*args)
 
     def on_load(self, *args):
         """ After loading, cache the downloaded image for future use, if not previously done """
-        if self.has_thumbnail is False and self._coreimage.image.texture and self.source.startswith('http'):
-            cache_async_thumbnail(self, large=True)
+        if not get_thumbnail_if_exists(self.source):
+            cache_async_thumbnail(self, size=self.thumbnail_size)
 
 
 class TaxonListItem(ThreeLineAvatarListItem):
@@ -49,6 +61,8 @@ class TaxonListItem(ThreeLineAvatarListItem):
 
 class TaxonThumbnail(CachedAsyncImage, ILeftBody):
     """ Class that contains a taxon thumbnail to be used in a list item """
+    def __init__(self, **kwargs):
+        super().__init__(thumbnail_size='small', **kwargs)
 
 
 class ImageMetaTile(SmartTileWithLabel):

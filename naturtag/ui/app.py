@@ -13,10 +13,11 @@ Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
+from kivy.uix.image import Image
 from kivymd.app import MDApp
 
 from naturtag.constants import (
-    KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, BACKSPACE, F11)
+    KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, ALL_ATLASES, BACKSPACE, F11)
 from naturtag.ui.controller import Controller, alert
 from naturtag.ui.settings_controller import SettingsController
 from naturtag.ui.taxon_search_controller import TaxonSearchController
@@ -76,6 +77,10 @@ class ImageTaggerApp(MDApp):
         Window.bind(on_request_close=self.on_request_close)
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
+
+        # Preload atlases so they're immediately available in Kivy cache
+        for atlas_path in ALL_ATLASES:
+            Image(source=f'{atlas_path}/')
 
         # alert(  # TODO: make this disappear as soon as an image or another screen is selected
         #     f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=7

@@ -1,20 +1,20 @@
+""" Utilities for generating and retrieving image thumbnails """
 from hashlib import md5
-from io import BytesIO, IOBase
+from io import IOBase
 from os import makedirs
-from os.path import isfile, join, splitext
+from os.path import dirname, isfile, join, normpath, splitext
 from logging import getLogger
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
 from naturtag.constants import (
+    EXIF_ORIENTATION_ID,
     THUMBNAILS_DIR,
     THUMBNAIL_SIZE_DEFAULT,
-    THUMBNAIL_SIZE_SM,
-    THUMBNAIL_SIZE_LG,
+    THUMBNAIL_SIZES,
     THUMBNAIL_DEFAULT_FORMAT,
 )
 
-EXIF_ORIENTATION_ID = '0x0112'
 logger = getLogger().getChild(__name__)
 
 
@@ -50,8 +50,28 @@ def get_thumbnail_if_exists(source):
     if isfile(thumbnail_path):
         logger.debug(f'Found existing thumbnail for {source}')
         return thumbnail_path
+    elif normpath(dirname(source)) == normpath(THUMBNAILS_DIR) or source.startswith('atlas://'):
+        logger.debug(f'Image is already a thumbnail: {source}')
+        return source
     else:
         return None
+
+
+def get_thumbnail_hash(source):
+    """ Get a unique string based on the source to use as a filename or atlas resource ID """
+    return md5(source.encode()).hexdigest()
+
+
+def get_thumbnail_size(size):
+    """ Get one of the predefined thumbnail dimensions from a size string
+
+    Args:
+        size (str): One of: 'small', 'medium', 'large'
+
+    Returns:
+        ``int, int``: X and Y dimensions of thumbnail size
+    """
+    return THUMBNAIL_SIZES.get(size, THUMBNAIL_SIZE_DEFAULT)
 
 
 def get_thumbnail_path(source):
@@ -62,7 +82,7 @@ def get_thumbnail_path(source):
         source (str): File path or URI for image source
     """
     makedirs(THUMBNAILS_DIR, exist_ok=True)
-    thumbnail_hash = md5(source.encode()).hexdigest()
+    thumbnail_hash = get_thumbnail_hash(source)
     ext = get_format(source)
     return join(THUMBNAILS_DIR, f'{thumbnail_hash}.{ext}')
 
@@ -86,55 +106,34 @@ def get_format(source):
     return ext.lower().replace('.', '').replace('jpeg', 'jpg') or 'jpg'
 
 
-def cache_async_thumbnail(async_image, **kwargs):
-    """
-    Get raw image data from an AsyncImage and cache a thumbnail for future usage.
-    See :py:func:`.generate_thumbnail` for size options.
-
-    Args:
-        async_image (:py:class:`~kivy.uix.image.AsyncImage`): Image object
-
-    Returns:
-        str: The path of the new thumbnail
-    """
-    thumbnail_path = get_thumbnail_path(async_image.source)
-    ext = get_format(thumbnail_path)
-    logger.debug(f'Getting image data downloaded from {async_image.source}; format {ext}')
-
-    # Load inner 'texture' bytes into a file-like object that PIL can read
-    image_bytes = BytesIO()
-    async_image._coreimage.image.texture.save(image_bytes, fmt=ext)
+def generate_thumbnail_from_bytes(image_bytes, source, **kwargs):
+    """ Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path """
     image_bytes.seek(0)
+    fmt = get_format(source)
+    thumbnail_path = get_thumbnail_path(source)
 
     if len(image_bytes.getvalue()) > 0:
-        return generate_thumbnail(image_bytes, thumbnail_path, fmt=ext, **kwargs)
+        return generate_thumbnail(image_bytes, thumbnail_path, fmt=fmt, **kwargs)
     else:
-        logger.error(f'Failed to save texture to thumbnail: {async_image.source}')
+        logger.error(f'Failed to save image bytes to thumbnail for {source}')
         return None
 
 
-# TODO: pass in small=True to correctly resize icon-sized taxon thumbs; some are, e.g., 75x79
-def generate_thumbnail(source, thumbnail_path, fmt=None, small=False, large=False):
+def generate_thumbnail(source, thumbnail_path, fmt=None, size='medium'):
     """
-    Generate and store a thumbnail from the source image, in one of 3 sizea; default is 200x200
+    Generate and store a thumbnail from the source image
 
     Args:
         source (str): File path or URI for image source
         thumbnail_path (str): Destination path for thumbnail
         fmt (str): Image format to specify to PIL, if it can't be auto-detected
-        small (bool): Store a smaller thumbnail
-        large (bool): Store a larger thumbnail
+        size (str): One of: 'small', 'medium', 'large'
 
     Returns:
         str: The path of the new thumbnail
     """
-    logger.info(f'Generating new thumbnail for {source}:\n  {thumbnail_path}')
-
-    target_size = THUMBNAIL_SIZE_DEFAULT
-    if small:
-        target_size = THUMBNAIL_SIZE_SM
-    elif large:
-        target_size = THUMBNAIL_SIZE_LG
+    target_size = get_thumbnail_size(size)
+    logger.info(f'Generating {target_size} thumbnail for {source}:\n  {thumbnail_path}')
 
     # Resize if necessary, or just copy the image to the cache if it's already thumbnail size
     try:

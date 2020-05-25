@@ -16,16 +16,29 @@ AUTOCOMPLETE_MIN_CHARS = 3
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
 
 # Thumnbnail & cache settings
+EXIF_ORIENTATION_ID = '0x0112'
 THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
 THUMBNAIL_DEFAULT_FORMAT = 'png'
-THUMBNAIL_SIZE_DEFAULT = (200, 200)
 THUMBNAIL_SIZE_SM = (75, 75)
+THUMBNAIL_SIZE_DEFAULT = (200, 200)
 THUMBNAIL_SIZE_LG = (500, 500)
+THUMBNAIL_SIZES = {
+    'small': THUMBNAIL_SIZE_SM,
+    'medium': THUMBNAIL_SIZE_DEFAULT,
+    'large': THUMBNAIL_SIZE_LG,
+}
+
+# Atlas settings
 ATLAS_MAX_SIZE = 4096
 ATLAS_BASE = 'atlas://../../assets/atlas'  # Path is relative to Kivy app.py
 ATLAS_PATH = join(ASSETS_DIR, 'atlas', 'taxon_icons.atlas')
 ATLAS_TAXON_ICONS = f'{ATLAS_BASE}/taxon_icons'
+ATLAS_TAXON_PHOTOS = f'{ATLAS_BASE}/taxon_photos'
+ATLAS_LOCAL_PHOTOS = f'{ATLAS_BASE}/local_photos'
 ATLAS_APP_ICONS = f'{ATLAS_BASE}/app_icons'
+ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
+
+# Cache settings
 CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
 CACHE_BACKEND = 'sqlite'
 

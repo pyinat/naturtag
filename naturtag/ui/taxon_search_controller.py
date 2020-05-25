@@ -1,11 +1,10 @@
 from logging import getLogger
 import webbrowser
 
-from kivy.uix.image import Image
 from kivymd.uix.list import OneLineListItem, ThreeLineAvatarListItem, ImageLeftWidget
 
 from pyinaturalist.node_api import get_taxa_autocomplete
-from naturtag.constants import ATLAS_APP_ICONS, ICONIC_TAXA
+from naturtag.constants import ICONIC_TAXA
 from naturtag.models import Taxon, get_icon_path
 from naturtag.ui import get_app_settings
 from naturtag.ui.autocomplete import AutocompleteSearch
@@ -43,7 +42,6 @@ class TaxonSearchController:
         # Other Controls
         self.taxon_link = screen.selected_taxon_link_button
         self.taxon_parent_button = screen.taxon_parent_button
-        # TODO: This button is not very responsive...
         self.taxon_parent_button.bind(on_release=lambda x: self.select_taxon(x.taxon.parent))
 
         # Outputs
@@ -53,8 +51,7 @@ class TaxonSearchController:
         self.taxon_children = screen.taxonomy_section.ids.taxon_children
         self.basic_info = self.screen.basic_info_section
 
-        # Set 'Categories' (iconic taxa) icons (+ stupid hack to preload atlas; not sure why it fails otherwise)
-        Image(source=f'{ATLAS_APP_ICONS}/foo')
+        # Set 'Categories' (iconic taxa) icons
         for id in ICONIC_TAXA:
             icon = IconicTaxaIcon(source=get_icon_path(id))
             self.screen.iconic_taxa.add_widget(icon)
@@ -80,6 +77,7 @@ class TaxonSearchController:
 
     def load_photo_section(self):
         """ Load taxon photo + links """
+        logger.info('Loading photo section')
         if self.selected_taxon.photo_url:
             self.taxon_photo.source = self.selected_taxon.photo_url
         self.taxon_link.bind(
@@ -99,6 +97,7 @@ class TaxonSearchController:
     def load_basic_info_section(self):
         """ Load basic info for the currently selected taxon """
         # Basic info box: Name, rank
+        logger.info('Loading basic info section')
         item = ThreeLineAvatarListItem(
             text=self.selected_taxon.name,
             secondary_text=self.selected_taxon.rank.title(),
@@ -120,10 +119,13 @@ class TaxonSearchController:
 
     def load_taxonomy_section(self):
         """ Populate ancestors and children for the currently selected taxon """
+        logger.info('Loading ancestors')
         self.taxon_ancestors.clear_widgets()
         for taxon in self.selected_taxon.ancestors:
             self.taxon_ancestors.add_widget(self._get_list_item(taxon))
 
+        # TODO: This can take awhile if there are lots of children; make these async calls?
+        logger.info('Loading children')
         self.taxon_children.clear_widgets()
         for taxon in self.selected_taxon.children:
             self.taxon_children.add_widget(self._get_list_item(taxon))

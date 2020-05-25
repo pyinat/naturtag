@@ -1,13 +1,51 @@
 """ Utilities for intelligently combining thumbnail images into a Kivy Atlas """
 from logging import getLogger
 from math import ceil
+
+from kivy.atlas import Atlas
+from kivy.cache import Cache
 from PIL import Image
 
 from naturtag.constants import (
-    ATLAS_MAX_SIZE, THUMBNAILS_DIR, THUMBNAIL_SIZE_DEFAULT, THUMBNAIL_SIZE_SM, THUMBNAIL_SIZE_LG)
+    ATLAS_TAXON_ICONS,
+    ATLAS_TAXON_PHOTOS,
+    ATLAS_LOCAL_PHOTOS,
+    ATLAS_MAX_SIZE,
+    THUMBNAILS_DIR,
+    THUMBNAIL_SIZE_DEFAULT,
+    THUMBNAIL_SIZE_SM,
+    THUMBNAIL_SIZE_LG,
+)
 from naturtag.glob import get_images_from_paths
 
+# Current organization of altas files by thumb size; this may change in the future
+ATLAS_CATEGORIES = {
+    'small': ATLAS_TAXON_ICONS,
+    'medium': ATLAS_LOCAL_PHOTOS,
+    'large': ATLAS_TAXON_PHOTOS,
+}
+
 logger = getLogger().getChild(__name__)
+
+
+def get_resource_path_if_exists(atlas_category, id):
+    """ If the specified ID exists in the atlas, return the full path """
+    atlas_path = ATLAS_CATEGORIES.get(atlas_category)
+    atlas = get_atlas(atlas_path)
+    if id in atlas.textures:
+        logger.debug(f'Found {id} in atlas')
+        return f'{atlas_path}/{id}'
+    return None
+
+
+def get_atlas(atlas_path):
+    """ Get atlas from the Kivy cache if present, otherwise initialize it """
+    atlas = Cache.get('kv.atlas', atlas_path.replace('atlas://', ''))
+    if not atlas:
+        logger.info(f'Initializing atlas "{atlas_path}"')
+        atlas = Atlas(f'{atlas_path}.atlas')
+        Cache.append('kv.atlas', atlas_path, atlas)
+    return atlas
 
 
 def build_taxon_icon_atlas():
@@ -32,7 +70,6 @@ def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg)
         atlas_name: Name of atlas file to create
         \\*\\*limit_kwarg: At most one limit to provide to :py:func:`.get_atlas_dimensions`
     """
-    from kivy.atlas import Atlas
 
     # Allow smallest dimension to be as low as half the max. This this works because each thumbnail
     # size category is over twice the size of the next smallest one
@@ -44,7 +81,8 @@ def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg)
 
     atlas_size = get_atlas_dimensions(len(image_paths), src_x, src_y, padding=padding, **limit_kwarg)
     logger.info(f'Calculated atlas size: {atlas_size}')
-    Atlas.create(atlas_name, image_paths, atlas_size, padding=padding)
+    if atlas_size != (0, 0):
+        Atlas.create(atlas_name, image_paths, atlas_size, padding=padding)
 
 
 def filter_images_by_size(image_paths, max_x, max_y, min_x, min_y):
@@ -124,3 +162,9 @@ def _largest_factor_pair(n):
         if n % i == 0:
             return i, int(n/i)
     return n, 1
+
+
+if __name__ == '__main__':
+    build_taxon_icon_atlas()
+    build_taxon_photo_atlas()
+    build_local_photo_atlas()
