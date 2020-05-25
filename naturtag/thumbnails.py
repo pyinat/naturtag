@@ -113,6 +113,7 @@ def cache_async_thumbnail(async_image, **kwargs):
         return None
 
 
+# TODO: pass in small=True to correctly resize icon-sized taxon thumbs; some are, e.g., 75x79
 def generate_thumbnail(source, thumbnail_path, fmt=None, small=False, large=False):
     """
     Generate and store a thumbnail from the source image, in one of 3 sizea; default is 200x200

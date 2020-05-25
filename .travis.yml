@@ -12,6 +12,7 @@ install:
 script:
 - naturtag -cdo 45524803
 - naturtag -cdt 48978
+- pytest
 
 deploy:
   # PyPi: Master branch
