@@ -1,4 +1,5 @@
-#:import TaxonAutocompleteSearch naturtag.ui.search_controller.TaxonAutocompleteSearch
+#:import TaxonAutocompleteSearch naturtag.ui.taxon_search_controller.TaxonAutocompleteSearch
+#:import CachedAsyncImage naturtag.ui.image.CachedAsyncImage
 
 <TaxonSearchScreen>:
     id: taxon_search_screen
@@ -8,24 +9,23 @@
         # Search inputs
         MDBoxLayout:
             orientation: 'vertical'
-            md_bg_color: app.theme_cls.bg_light
-            MDGridLayout:
-                cols: 2
-                adaptive_size: True
-                TaxonAutocompleteSearch:
-                    id: taxon_search_input
-                MDIntField:
-                    id: taxon_id_input
-                    hint_text: 'Taxon ID'
-                    helper_text: 'Enter an iNaturalist taxon ID'
-#                    size_hint_x: .5
-                    size_hint_max_x: 60
-
+            padding: dp(10)
+            size_hint_x: .4
+            size_hint_min_x: dp(500)
+            size_hint_max_x: dp(700)
+            md_bg_color: app.theme_cls.bg_normal
+            IntField:
+                id: taxon_id_input
+                hint_text: 'Taxon ID'
+                helper_text: 'Enter an iNaturalist taxon ID'
+            TaxonAutocompleteSearch:
+                id: taxon_search_input
             MDLabel:
                 text: 'Categories'
                 font_style: 'H6'
-                size_hint_max_y: 60
-
+                size_hint_max_y: dp(60)
+            IconicTaxaLayout:
+                id: iconic_taxa
             # Temp spacer
             MDBoxLayout:
                 height: 300
@@ -33,27 +33,70 @@
         # Info display for selected taxon
         MDBoxLayout:
             orientation: 'vertical'
-#            size_hint_x: .7
-#            adaptive_size: True
-            md_bg_color: app.theme_cls.bg_darkest
-            AsyncImage:
-                id: selected_taxon_photo
-                size_hint_max_y: 400
-            MDLabel:
-                id: selected_taxon_name
-                theme_text_color: 'Primary'
-                font_style: 'H5'
+            md_bg_color: app.theme_cls.bg_dark
+            MDGridLayout:
+                cols: 2
+                spacing: dp(10)
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    spacing: dp(10)
+                    size_hint_max_x: dp(500)
+                    CachedAsyncImage:
+                        id: selected_taxon_photo
+                        size_hint_max_y: dp(500)
+                    TooltipIconButton:
+                        id: selected_taxon_link_button
+                        icon: 'link-variant'
+                        text: 'View on iNaturalist'
+                        width: self.parent.width
+                    TooltipIconButton:
+                        id: taxon_parent_button
+                        icon: 'arrow-up-circle-outline'
+                        text: 'View parent'
+                        width: self.parent.width
+                        disabled: True
+                MDList:
+                    id: basic_info_section
+            TaxonomySection:
+                id: taxonomy_section
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
     input: input
     dropdown: dropdown
-    size: 600, 60
-#    size_hint_min_x: 300
+    size_hint_x: 1
     SearchInput:
         id: input
         hint_text: 'Taxon Name'
         helper_text: 'Enter a scientific or common name'
         helper_text_mode: 'on_focus'
+#        icon_right: 'close-circle-outline'  # TODO: Is there an event for this to bind to?
     AutocompleteDropdown:
         id: dropdown
+
+ # Iconic taxa 'Categories' selector
+<IconicTaxaLayout@MDGridLayout>:
+    adaptive_size: True
+    md_bg_color: app.theme_cls.bg_dark
+    cols: 6
+    padding: dp(10), dp(10)
+    spacing: dp(20)
+    row_default_height: dp(40)
+    row_force_default: True
+    col_default_width: dp(40)
+    col_force_default: True
+
+<TaxonomySection@MDGridLayout>:
+    cols: 2
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'Ancestors'
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'Children'
+    ScrollViewY:
+        MDList:
+            id: taxon_ancestors
+    ScrollViewY:
+        MDList:
+            id: taxon_children

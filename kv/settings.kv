@@ -1,47 +1,84 @@
 <SettingsScreen>:
     id: settings_screen
     name: 'settings'
-    controller: None
 
-    MDList:
-        OneLineListItem:
-            text: 'Metadata options'
-            font_style: 'H5'
-        TwoLineAvatarListItem:
-            text: 'Common names'
-            font_style: 'H6'
-            secondary_text: 'Include common names in taxonomy keywords'
-            IconLeftSwitch:
-                id: common_names_chk
-                active: True
-        TwoLineAvatarListItem:
-            text: 'Hierarchical Keywords'
-            font_style: 'H6'
-            secondary_text: 'Generate pipe-delimited hierarchical keywords'
-            IconLeftSwitch:
-                id: hierarchical_keywords_chk
-                active: True
-        TwoLineAvatarListItem:
-            text: 'Darwin Core Metadata'
-            font_style: 'H6'
-            secondary_text: 'Convert taxon/observation metadata into XMP Darwin Core metadata'
-            IconLeftSwitch:
-                id: darwin_core_chk
-                active: True
-        TwoLineAvatarListItem:
-            text: 'Create XMP Files'
-            font_style: 'H6'
-            secondary_text: 'Create XMP sidecar files if they don\'t already exist'
-            IconLeftSwitch:
-                id: create_xmp_chk
-                active: True
+    ScrollViewY:
+        MDList:
+            size_hint_min_x: 400
+            size_hint_max_x: 700
+            OneLineListItem:
+                font_style: 'H5'
+                text: 'iNaturalist settings'
+            TwoLineListItem:
+                font_style: 'H6'
+                text: 'Username'
+                secondary_text: 'iNaturalist username used to filter observations'
+            TextFieldListItem:
+                id: username_input
+                icon_right: 'account'
+            TwoLineListItem:
+                font_style: 'H6'
+                text: 'Locale'
+                secondary_text: 'Locale preference for taxon common names'
+            TextFieldListItem:
+                id: locale_input
+                icon_right: 'earth'
+            ThreeLineListItem:
+                id: preferred_place_id_label
+                font_style: 'H6'
+                text: 'Preferred place ID'
+                secondary_text: 'Place preference for regional taxon common names'
+                tertiary_text: 'See [b][color=#00BED4]https://www.inaturalist.org/places[/color][/b] to search for your region'
+            TextFieldListItem:
+                id: preferred_place_id_input
+                icon_right: 'city'
+                input_filter: 'int'
 
-        OneLineListItem:
-        OneLineListItem:
-            text: 'Display options'
-            font_style: 'H5'
-        OneLineAvatarListItem:
-            text: 'Dark Mode'
-            font_style: 'H6'
-            IconLeftSwitch:
-                id: dark_mode_chk
+            OneLineListItem:
+            OneLineListItem:
+                font_style: 'H5'
+                text: 'Metadata settings'
+            TwoLineAvatarIconListItem:
+                font_style: 'H6'
+                text: 'Common names'
+                secondary_text: 'Include common names in taxonomy keywords'
+                SwitchListItem:
+                    id: common_names_chk
+                IconRight:
+                    icon: 'cat'
+            TwoLineAvatarIconListItem:
+                font_style: 'H6'
+                text: 'Hierarchical Keywords'
+                secondary_text: 'Generate pipe-delimited hierarchical keywords'
+                SwitchListItem:
+                    id: hierarchical_keywords_chk
+                IconRight:
+                    icon: 'file-tree'
+            TwoLineAvatarIconListItem:
+                font_style: 'H6'
+                text: 'Darwin Core Metadata'
+                secondary_text: 'Convert taxon/observation metadata into XMP Darwin Core metadata'
+                SwitchListItem:
+                    id: darwin_core_chk
+                IconRight:
+                    icon: 'xml'
+            TwoLineAvatarIconListItem:
+                font_style: 'H6'
+                text: 'Create XMP Files'
+                secondary_text: "Create XMP sidecar files if they don't already exist"
+                SwitchListItem:
+                    id: create_xmp_chk
+                IconRight:
+                    icon: 'file-multiple'
+
+            OneLineListItem:
+            OneLineListItem:
+                font_style: 'H6'
+                font_style: 'H5'
+                text: 'Display settings'
+            OneLineAvatarIconListItem:
+                text: 'Dark Mode'
+                SwitchListItem:
+                    id: dark_mode_chk
+                IconRight:
+                    icon: 'theme-light-dark'

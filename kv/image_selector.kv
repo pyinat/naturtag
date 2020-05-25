@@ -1,11 +1,10 @@
 <ImageSelectorScreen>:
     id: image_selector_screen
     name: 'image_selector'
-    controller: None
 
     BoxLayout:
         # Image viewer
-        ImageScrollView:
+        ScrollViewY:
             MDGridLayout:
                 id: image_previews
                 adaptive_height: True
@@ -38,18 +37,17 @@
                         width: dp(200)
                         on_press:
                             app.switch_screen('observation_search')
-                    MDIntField:
+                    IntField:
                         id: observation_id_input
                         hint_text: 'Observation ID'
                         helper_text: 'Enter an iNaturalist observation ID'
                     MDRoundFlatIconButton:
-#                        disabled: True  # TODO: Remove once implemented
                         text: 'Find a Species'
                         icon: 'ladybug'
                         width: dp(200)
                         on_press:
                             app.switch_screen('taxon_search')
-                    MDIntField:
+                    IntField:
                         id: taxon_id_input
                         hint_text: 'Taxon ID'
                         helper_text: 'Enter an iNaturalist taxon ID'
@@ -62,8 +60,8 @@
                 FileChooserListView:
                     rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
                     id: file_chooser
+                    dirselect: True
                     filters: IMAGE_FILETYPES
-                    on_selection: root.controller.add_images(self.selection)
 
                 # List of selected files
                 MDBoxLayout:
@@ -85,21 +83,20 @@
                     spacing: dp(5)
 
                     MDRaisedButton:
+                        id: clear_button
                         text: 'Clear'
                         md_bg_color: app.theme_cls.accent_color
-                        on_release: root.controller.clear()
                     MDRaisedButton:
+                        id: debug_button
                         text: 'Debug'
                         md_bg_color: app.theme_cls.accent_color
-                        on_release: root.controller.get_state()
-#                        on_release: root.controller.open_table()
                     MDRaisedButton:
+                        id: load_button
                         text: 'Load'
                         md_bg_color: app.theme_cls.accent_color
-                        on_release: root.controller.add_images(file_chooser.selection)
 
     TooltipFloatingButton:
+        id: run_button
         icon: 'play'
         elevation_normal: 8
         tooltip_text: 'Tag selected images'
-        on_release: root.controller.run()

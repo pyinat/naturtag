@@ -4,16 +4,24 @@
 #:import version naturtag.__version__
 #:import Transition kivy.uix.screenmanager.NoTransition
 
-<MDIntField@MDTextField>:
+
+<TextFieldListItem@MDTextFieldRound>:
+    normal_color: app.theme_cls.bg_dark
+    icon_right_color: app.theme_cls.accent_color
+
+<IconRight@IconRightWidget>:
+    md_bg_color: app.theme_cls.accent_color
+
+<IntField@MDTextField>:
 	input_filter: 'int'
 	helper_text_mode: 'on_focus'
 
-<ImageScrollView@ScrollView>:
+<ScrollViewY@ScrollView>:
     do_scroll_x: False
     do_scroll_y: True
     effect_cls: 'OpacityScrollEffect'
     scroll_type: ['bars', 'content']
-    scroll_wheel_distance: 40
+    scroll_wheel_distance: 100
     size: self.size
     bar_width: 10
 
@@ -69,7 +77,7 @@
 				x: root.parent.x
 				pos_hint: {'top': 1}
 				FitImage:
-					source: f'{ASSETS_DIR}inat-image-tagger-logo.png'
+					source: f'{ASSETS_DIR}naturtag-logo.png'
 
 			MDIconButton:
 				icon: 'close'
@@ -79,7 +87,7 @@
 
 			MDLabel:
 				markup: True
-				text: f'[b]iNaturalist Image Tagger[/b] Version: {version}'
+				text: f'[b]Naturtag[/b] Version: {version}'
 				x: root.parent.x + dp(10)
 				y: root.height - top_box.height
 				size_hint_y: None

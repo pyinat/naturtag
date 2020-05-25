@@ -3,7 +3,10 @@ __pycache__
 *.egg-info/
 *.sw*
 .mypy_cache/
+_build/
 build/
+pip-wheel-metadata/
 dist/
+docs/modules/
 venv/
 sample_data/

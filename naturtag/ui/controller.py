@@ -7,26 +7,16 @@ from kivy.metrics import dp
 
 from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
-from kivymd.uix.imagelist import SmartTileWithLabel
 from kivymd.uix.snackbar import Snackbar
 
+from naturtag.glob import get_images_from_paths
 from naturtag.tagger import tag_images
-from naturtag.image_metadata import MetaMetadata
+from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
 from naturtag.ui.thumbnails import get_thumbnail
+from naturtag.ui.image import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
-
-
-class ImageMetaTile(SmartTileWithLabel):
-    """ Class that contains an image thumbnail to display plus its associated metadata """
-    metadata = ObjectProperty()
-    allow_stretch = False
-    box_color = [0, 0, 0, 0.4]
-
-    def __init__(self, metadata, **kwargs):
-        super().__init__(**kwargs)
-        self.metadata = metadata
 
 
 class Controller(BoxLayout):
@@ -38,34 +28,33 @@ class Controller(BoxLayout):
     file_list_text = StringProperty()
     selected_image = ObjectProperty(None)
 
-    def __init__(self, inputs, image_previews, file_chooser, settings, metadata_tabs, **kwargs):
+    def __init__(self, image_selector_screen, metadata_screen, **kwargs):
         super().__init__(**kwargs)
-        self.inputs = inputs
-        self.image_previews = image_previews
-        self.file_chooser = file_chooser
-        self.settings = settings
-        self.metadata_tabs = metadata_tabs
+        self.inputs = image_selector_screen
+        self.image_previews = image_selector_screen.image_previews
+        self.file_chooser = image_selector_screen.file_chooser
+        self.metadata_screen = metadata_screen
 
-    # TODO: for testing only
-    def open_table(self):
-        MDDataTable(
-            column_data=[
-                ("No.", dp(30)),  ("Column 1", dp(30)), ("Column 2", dp(30)),
-                ("Column 3", dp(30)), ("Column 4", dp(30)), ("Column 5", dp(30)),
-            ],
-            row_data=[ (f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
-        ).open()
+        # Bind widget events
+        self.inputs.clear_button.bind(on_release=self.clear)
+        self.inputs.debug_button.bind(on_release=self.get_state)
+        # self.inputs.debug_button.bind(on_release=self.open_table)
+        self.inputs.load_button.bind(on_release=self.add_file_chooser_images)
+        self.inputs.run_button.bind(on_release=self.run)
+        self.file_chooser.bind(on_submit=self.add_file_chooser_images)
+
+    def add_file_chooser_images(self, *args):
+        """ Add one or more files and/or dirs selected via a FileChooser """
+        self.add_images(self.file_chooser.selection)
 
     def add_images(self, paths):
-        """ Add one or more files selected via a FileChooser """
-        for path in paths:
+        """ Add one or more files and/or dirs """
+        for path in get_images_from_paths(paths):
             self.add_image(path=path)
 
     # TODO: If an image is dragged & dropped onto a different screen, return to home screen
-    def add_image(self, window=None, path=None):
+    def add_image(self, path):
         """ Add an image to the current selection, with deduplication """
-        if isinstance(path, bytes):
-            path = path.decode('utf-8')
         if path in self.file_list:
             return
 
@@ -88,10 +77,13 @@ class Controller(BoxLayout):
 
     def search_tax_obs(self, metadata):
         taxon, observation = get_taxon_and_obs_from_metadata(metadata)
+        if taxon:
+            MDApp.get_running_app().taxon_search_controller.select_taxon(json_result=taxon)
+            self.inputs.taxon_id_input.text = str(taxon['id'])
         # TODO: Just temporary debug output here; need to display this info in the UI
-        import json
-        print(json.dumps(taxon, indent=4))
-        print(json.dumps(observation, indent=4))
+        if observation:
+            import json
+            logger.info(json.dumps(observation, indent=4))
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
@@ -101,7 +93,7 @@ class Controller(BoxLayout):
         self.selected_image = None
         image.parent.remove_widget(image)
 
-    def clear(self):
+    def clear(self, *args):
         """ Clear all image selections """
         logger.info('Clearing image selections')
         self.file_list = []
@@ -110,26 +102,17 @@ class Controller(BoxLayout):
         self.file_chooser.selection = []
         self.image_previews.clear_widgets()
 
-    # TODO: Apply image file glob patterns to dir
-    def add_dir_selection(self, dir):
-        print(dir)
-
-    def get_settings_dict(self):
+    def get_input_dict(self):
         return {
-            'common_names': self.settings.common_names_chk.active,
-            'hierarchical_keywords': self.settings.hierarchical_keywords_chk.active,
-            'darwin_core': self.settings.darwin_core_chk.active,
-            'create_xmp': self.settings.create_xmp_chk.active,
-            'dark_mode': self.settings.dark_mode_chk.active,
             "observation_id": int(self.inputs.observation_id_input.text or 0),
             "taxon_id": int(self.inputs.taxon_id_input.text or 0),
         }
 
-    def get_state(self):
+    def get_state(self, *args):
         logger.info(
             f'IDs: {self.ids}\n'
             f'Files:\n{self.file_list_text}\n'
-            f'Config: {self.get_settings_dict()}\n'
+            f'Input: {self.get_input_dict()}\n'
         )
 
     def handle_image_click(self, instance, touch):
@@ -147,44 +130,58 @@ class Controller(BoxLayout):
         if not self.selected_image:
             return
         # TODO: This is pretty ugly. Ideally this would be a collection of DataTables.
-        self.metadata_tabs.combined.text = json.dumps(
+        self.metadata_screen.combined.text = json.dumps(
             self.selected_image.metadata.combined, indent=4
         )
-        self.metadata_tabs.keywords.text = (
+        self.metadata_screen.keywords.text = (
             'Normal Keywords:\n'
             + json.dumps(self.selected_image.metadata.keyword_meta.flat_keywords, indent=4)
             + '\n\n\nHierarchical Keywords:\n'
             + self.selected_image.metadata.keyword_meta.hier_keyword_tree_str
         )
-        self.metadata_tabs.exif.text = json.dumps(self.selected_image.metadata.exif, indent=4)
-        self.metadata_tabs.iptc.text = json.dumps(self.selected_image.metadata.iptc, indent=4)
-        self.metadata_tabs.xmp.text = json.dumps(self.selected_image.metadata.xmp, indent=4)
+        self.metadata_screen.exif.text = json.dumps(self.selected_image.metadata.exif, indent=4)
+        self.metadata_screen.iptc.text = json.dumps(self.selected_image.metadata.iptc, indent=4)
+        self.metadata_screen.xmp.text = json.dumps(self.selected_image.metadata.xmp, indent=4)
 
-    def run(self):
+    def run(self, *args):
         """ Run image tagging for selected images and input """
-        settings = self.get_settings_dict()
+        inputs = self.get_input_dict()
         if not self.file_list:
             alert(f'Select images to tag')
             return
-        if not settings['observation_id'] and not settings['taxon_id']:
+        if not inputs['observation_id'] and not inputs['taxon_id']:
             alert(f'Select either an observation or an organism to tag images with')
             return
         selected_id = (
-            f'Taxon ID: {settings["taxon_id"]}' if settings['taxon_id']
-            else f'Observation ID: {settings["observation_id"]}'
+            f'Taxon ID: {inputs["taxon_id"]}' if inputs['taxon_id']
+            else f'Observation ID: {inputs["observation_id"]}'
         )
         logger.info(f'Tagging {len(self.file_list)} images with metadata for {selected_id}')
 
+        # TODO: Is there a better way to access settings?
+        metadata_settings = MDApp.get_running_app().settings_controller.metadata
+
         tag_images(
-            settings['observation_id'],
-            settings['taxon_id'],
-            settings['common_names'],
-            settings['darwin_core'],
-            settings['hierarchical_keywords'],
-            settings['create_xmp'],
+            inputs['observation_id'],
+            inputs['taxon_id'],
+            metadata_settings['common_names'],
+            metadata_settings['darwin_core'],
+            metadata_settings['hierarchical_keywords'],
+            metadata_settings['create_xmp'],
             self.file_list,
         )
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
+
+    # TODO: for testing only
+    @staticmethod
+    def open_table(self):
+        MDDataTable(
+            column_data=[
+                ("No.", dp(30)),  ("Column 1", dp(30)), ("Column 2", dp(30)),
+                ("Column 3", dp(30)), ("Column 4", dp(30)), ("Column 5", dp(30)),
+            ],
+            row_data=[ (f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
+        ).open()
 
 
 def alert(text, **kwargs):

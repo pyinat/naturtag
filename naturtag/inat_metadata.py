@@ -1,5 +1,10 @@
 """ Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations """
 from logging import getLogger
+from os import makedirs
+from os.path import dirname
+
+import requests
+import requests_cache
 import xmltodict
 
 from pyinaturalist.node_api import (
@@ -8,8 +13,11 @@ from pyinaturalist.node_api import (
     get_taxa_by_id,
 )
 from pyinaturalist.rest_api import get_observations  # TODO: Currently only in dev branch
-from naturtag.constants import DWC_NAMESPACES, TAXON_KEYS, OBSERVATION_KEYS, RANKS
+from naturtag.constants import DWC_NAMESPACES, TAXON_KEYS, OBSERVATION_KEYS, RANKS, CACHE_BACKEND, CACHE_PATH
 
+# Patch requests to use CachedSession for pyinaturalist API calls
+makedirs(dirname(CACHE_PATH), exist_ok=True)
+requests_cache.install_cache(backend=CACHE_BACKEND, cache_name=CACHE_PATH)
 logger = getLogger().getChild(__name__)
 
 
@@ -60,7 +68,7 @@ def get_taxon_children(taxon_id):
 
 
 def get_taxon_ancestors(taxon_id):
-    """ Get a taxon' parents """
+    """ Get a taxon's parents """
     return get_taxon_with_ancestors(taxon_id)[:-1]
 
 
@@ -76,31 +84,45 @@ def get_taxon_with_ancestors(taxon_id):
 # TODO: This should be reorganized somehow, I don't quite like the look if it;
 #  image_metadata module depends on this module and vice versa (kinda)
 def get_taxon_and_obs_from_metadata(metadata):
-    observation = None
-    taxon = None
     logger.info(f'Searching for matching taxon and/or observation for {metadata.image_path}')
-
-    if metadata.observation_id:
-        observation = get_observation(metadata.observation_id)
-        # Handle observation with no taxon ID (e.g., not yet identified)
-        taxon_id = observation.get('taxon', {}).get('id')
-        if taxon_id:
-            taxon = get_taxa(id=taxon_id)
-            logger.info(f'Found observation {metadata.observation_id}')
-        else:
-            logger.warning(f'Observation {metadata.observation_id} is unidentified')
-
+    taxon, observation = get_observation_from_metadata(metadata)
     if not taxon and metadata.has_taxon:
         taxon = get_taxon_from_metadata(metadata)
+    if not taxon:
+        logger.info('No taxon found')
+    return taxon, observation
+
+
+def get_observation_from_metadata(metadata):
+    if not metadata.observation_id:
+        logger.info('No observation ID specified')
+        return None, None
+
+    observation = get_observation(metadata.observation_id)
+    taxon = None
+    taxon_id = observation.get('taxon', {}).get('id')
+
+    # Handle observation with no taxon ID (e.g., not yet identified)
+    if taxon_id:
+        taxon = get_taxa_by_id(taxon_id)
+        logger.info(f'Found observation {metadata.observation_id} and taxon {taxon_id}')
+    else:
+        logger.warning(f'Observation {metadata.observation_id} is unidentified')
+
     return taxon, observation
 
 
 def get_taxon_from_metadata(metadata):
     """ Fetch taxon record from MetaMetadata object: either by ID or rank + name """
-    rank, name =  metadata.min_rank
-    params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank':rank, 'q': name}
+    rank, name = metadata.min_rank
+    params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank': rank, 'q': name}
     logger.info(f'Querying taxon by: {params}')
-    return get_taxa(**params)['results']
+    results = get_taxa(**params)['results']
+    if results:
+        logger.info('Taxon found')
+        return results[0]
+    else:
+        return None
 
 
 def get_taxonomy_keywords(taxa):
@@ -152,7 +174,7 @@ def get_min_rank(metadata):
     for rank in RANKS:
         if rank in metadata:
             logger.info(f'Found minimum rank: {rank} = {metadata[rank]}')
-            return (rank, metadata[rank])
+            return rank, metadata[rank]
     return None
 
 

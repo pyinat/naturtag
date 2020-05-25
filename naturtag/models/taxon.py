@@ -1,16 +1,7 @@
-from collections.abc import Collection
-
+from os.path import join
 from pyinaturalist.node_api import get_taxa_by_id
-
-
-class JsonModel:
-    """ Class representing a model build from a JSON response object """
-    def __init__(self, json_result):
-        """ Sets all response attributes as instance attributes, except nested dicts & lists """
-        self.json = json_result
-        for k, v in (json_result or {}).items():
-            if isinstance(v, str) or not isinstance(v, Collection):
-                self.__setattr__(k, v)
+from naturtag.constants import TAXON_BASE_URL, ICONS_DIR, ICONIC_TAXA
+from naturtag.models.base import JsonModel
 
 
 class Taxon(JsonModel):
@@ -23,9 +14,7 @@ class Taxon(JsonModel):
 
         Alternatively, this class can be initialized with just an ID to fetch remaining info.
         """
-        if not json_result and id:
-            json_result = self.get_full_record(id)
-        super().__init__(json_result)
+        super().__init__(json_result=json_result, id=id)
 
         photo = self.json.get('default_photo') or {}  # Attribute could be present but set to null
         self.photo_url = photo.get('medium_url')
@@ -40,6 +29,18 @@ class Taxon(JsonModel):
         return self.json
 
     @property
+    def common_name(self):
+        return self.json.get('preferred_common_name', '')
+
+    @property
+    def icon_path(self):
+        return get_icon_path(self.iconic_taxon_id)
+
+    @property
+    def link(self):
+        return f'{TAXON_BASE_URL}/{self.id}'
+
+    @property
     def ancestors(self):
         """ Get this taxon's ancestors as Taxon objects (in descending order of rank) """
         if self._ancestors is None:
@@ -47,6 +48,11 @@ class Taxon(JsonModel):
                 self.get_full_record()
             self._ancestors = [Taxon(t) for t in self.json.get('ancestors', [])]
         return self._ancestors
+
+    @property
+    def parent(self):
+        """ Return immediate parent, if any """
+        return self.ancestors[-1] if self.ancestors else None
 
     @property
     def children(self):
@@ -57,3 +63,10 @@ class Taxon(JsonModel):
                 self.get_full_record()
             self._children = [Taxon(t) for t in self.json.get('children', [])]
         return self._children
+
+
+def get_icon_path(id):
+    """ An iconic function to return an icon for an iconic taxon """
+    if id not in ICONIC_TAXA:
+        return None
+    return join(ICONS_DIR, f'{ICONIC_TAXA[id]}.png')
