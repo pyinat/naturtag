@@ -3,29 +3,37 @@ from os.path import dirname, join
 from appdirs import user_data_dir
 from pyinaturalist.constants import RANKS
 
+# Resource directories
 PKG_DIR = dirname(dirname(__file__))
-ASSETS_DIR = join(dirname(dirname(__file__)), 'assets', '')
+ASSETS_DIR = join(PKG_DIR, 'assets', '')
+KV_SRC_DIR = join(PKG_DIR, 'kv')
 ICONS_DIR = join(ASSETS_DIR, 'iconic_taxa')
-KV_SRC_DIR = join(dirname(dirname(__file__)), 'kv')
-
 DATA_DIR = join(user_data_dir(), 'Naturtag')
+
+# TODO: These may be useful as user-configurable settings
+AUTOCOMPLETE_DELAY = 0.5
+AUTOCOMPLETE_MIN_CHARS = 3
+IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
+
+# Thumnbnail & cache settings
 THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
-THUMBNAIL_SIZE = (200, 200)
 THUMBNAIL_DEFAULT_FORMAT = 'png'
-LG_THUMBNAIL_SIZE = (500, 500)
+THUMBNAIL_SIZE_DEFAULT = (200, 200)
+THUMBNAIL_SIZE_SM = (75, 75)
+THUMBNAIL_SIZE_LG = (500, 500)
 CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
 CACHE_BACKEND = 'sqlite'
+
+# Config files
 CONFIG_PATH = join(DATA_DIR, 'settings.yml')
 DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
 
+# URLs
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
 OBSERVATION_BASE_URL = 'https://www.inaturalist.org/observations'
 PLACES_BASE_URL = 'https://www.inaturalist.org/places'
 
-AUTOCOMPLETE_DELAY = 0.5
-AUTOCOMPLETE_MIN_CHARS = 3
-
-IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
+# Theme/window settings
 INIT_WINDOW_SIZE = (1250, 800)
 MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'
