@@ -9,10 +9,11 @@
         # Search inputs
         MDBoxLayout:
             orientation: 'vertical'
+            padding: dp(10)
             size_hint_x: .4
             size_hint_min_x: dp(500)
             size_hint_max_x: dp(700)
-            md_bg_color: app.theme_cls.bg_light
+            md_bg_color: app.theme_cls.bg_normal
             IntField:
                 id: taxon_id_input
                 hint_text: 'Taxon ID'
@@ -32,11 +33,10 @@
         # Info display for selected taxon
         MDBoxLayout:
             orientation: 'vertical'
-            md_bg_color: app.theme_cls.bg_darkest
+            md_bg_color: app.theme_cls.bg_dark
             MDGridLayout:
                 cols: 2
                 spacing: dp(10)
-                md_bg_color: app.theme_cls.bg_light
                 MDBoxLayout:
                     orientation: 'vertical'
                     spacing: dp(10)
@@ -77,7 +77,7 @@
  # Iconic taxa 'Categories' selector
 <IconicTaxaLayout@MDGridLayout>:
     adaptive_size: True
-    md_bg_color: app.theme_cls.bg_darkest
+    md_bg_color: app.theme_cls.bg_dark
     cols: 6
     padding: dp(10), dp(10)
     spacing: dp(20)

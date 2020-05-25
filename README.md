@@ -225,7 +225,7 @@ pip install naturtag[ui-win]
 The basic UI components are shown below:
 ![Screenshot](assets/screenshots/gui-image-selector.png)
 
-1. Drag & drop images into the window. Right-click an image to remove it.
+1. Drag & drop images or folders into the window. Right-click an image to remove it.
 2. Or, select files via the file browser on the right
 3. Enter an iNaturalist observation ID or taxon ID
 4. Click the 'Run' button in the lower-left to tag the selected images
@@ -233,8 +233,6 @@ The basic UI components are shown below:
 ### Taxon Search
 If you don't already know the taxon ID, click the 'Find a Species' button to go to the taxon
 search screen. Currently this includes searching by name, with autocompletion support.
-The underlying functionality is the main focus for development right now, so the UI is **very**
-primitive at this point.
 
 ![Screenshot](assets/screenshots/gui-taxon-search.png)
 
