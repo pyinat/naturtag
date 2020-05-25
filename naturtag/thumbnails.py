@@ -78,7 +78,7 @@ def get_format(source):
         str: Format, if found; otherwise, defaults to ``jpg``
     """
     if isinstance(source, bytes):
-        image_path = source.decode('utf-8')
+        source = source.decode('utf-8')
     # Strip off request params if path is a URL
     source = source.split('?')[0]
     ext = splitext(source)[-1] or THUMBNAIL_DEFAULT_FORMAT

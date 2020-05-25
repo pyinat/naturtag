@@ -9,7 +9,6 @@ ASSETS_DIR = join(PKG_DIR, 'assets', '')
 KV_SRC_DIR = join(PKG_DIR, 'kv')
 ICONS_DIR = join(ASSETS_DIR, 'iconic_taxa')
 DATA_DIR = join(user_data_dir(), 'Naturtag')
-ATLAS_BASE = 'atlas://assets/atlas/naturtag-icons'
 
 # TODO: These may be useful as user-configurable settings
 AUTOCOMPLETE_DELAY = 0.5
@@ -23,6 +22,10 @@ THUMBNAIL_SIZE_DEFAULT = (200, 200)
 THUMBNAIL_SIZE_SM = (75, 75)
 THUMBNAIL_SIZE_LG = (500, 500)
 ATLAS_MAX_SIZE = 4096
+ATLAS_BASE = 'atlas://../../assets/atlas'  # Path is relative to Kivy app.py
+ATLAS_PATH = join(ASSETS_DIR, 'atlas', 'taxon_icons.atlas')
+ATLAS_TAXON_ICONS = f'{ATLAS_BASE}/taxon_icons'
+ATLAS_APP_ICONS = f'{ATLAS_BASE}/app_icons'
 CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
 CACHE_BACKEND = 'sqlite'
 

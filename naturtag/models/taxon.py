@@ -1,6 +1,6 @@
 from os.path import join
 from pyinaturalist.node_api import get_taxa_by_id
-from naturtag.constants import TAXON_BASE_URL, ICONS_DIR, ICONIC_TAXA, ATLAS_BASE
+from naturtag.constants import TAXON_BASE_URL, ICONIC_TAXA, ATLAS_APP_ICONS
 from naturtag.models.base import JsonModel
 
 
@@ -71,5 +71,4 @@ def get_icon_path(id):
     """ An iconic function to return an icon for an iconic taxon """
     if id not in ICONIC_TAXA:
         return None
-    return f'{ATLAS_BASE}/{ICONIC_TAXA[id]}'
-    # return join(ICONS_DIR, f'{ICONIC_TAXA[id]}.png')
+    return f'{ATLAS_APP_ICONS}/{ICONIC_TAXA[id]}'

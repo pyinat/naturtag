@@ -1,10 +1,11 @@
 from logging import getLogger
 import webbrowser
 
+from kivy.uix.image import Image
 from kivymd.uix.list import OneLineListItem, ThreeLineAvatarListItem, ImageLeftWidget
 
 from pyinaturalist.node_api import get_taxa_autocomplete
-from naturtag.constants import ICONIC_TAXA
+from naturtag.constants import ATLAS_APP_ICONS, ICONIC_TAXA
 from naturtag.models import Taxon, get_icon_path
 from naturtag.ui import get_app_settings
 from naturtag.ui.autocomplete import AutocompleteSearch
@@ -52,7 +53,8 @@ class TaxonSearchController:
         self.taxon_children = screen.taxonomy_section.ids.taxon_children
         self.basic_info = self.screen.basic_info_section
 
-        # Set 'Categories' (iconic taxa) icons
+        # Set 'Categories' (iconic taxa) icons (+ stupid hack to preload atlas; not sure why it fails otherwise)
+        Image(source=f'{ATLAS_APP_ICONS}/foo')
         for id in ICONIC_TAXA:
             icon = IconicTaxaIcon(source=get_icon_path(id))
             self.screen.iconic_taxa.add_widget(icon)
@@ -83,6 +85,7 @@ class TaxonSearchController:
         self.taxon_link.bind(
             on_release=lambda *x: webbrowser.open(self.selected_taxon.link))
         self.taxon_link.tooltip_text = self.selected_taxon.link
+        self.taxon_link.disabled = False
 
         # Configure 'View parent' button
         if self.selected_taxon.parent:
