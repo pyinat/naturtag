@@ -31,7 +31,6 @@ class CachedAsyncImage(AsyncImage):
             cache_async_thumbnail(self, large=True)
 
 
-
 class TaxonListItem(ThreeLineAvatarListItem):
     """ Class that displays condensed taxon info as a list item """
     def __init__(self, taxon, button_callback=None, **kwargs):

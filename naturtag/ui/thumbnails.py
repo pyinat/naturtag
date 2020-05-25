@@ -60,7 +60,7 @@ def _get_format(image_path):
     # Strip off request params if path is a URL
     image_path = image_path.split('?')[0]
     ext = splitext(image_path)[-1] or THUMBNAIL_DEFAULT_FORMAT
-    return ext.lower().replace('.', '')
+    return ext.lower().replace('.', '').replace('jpeg', 'jpg') or 'jpg'
 
 
 def cache_async_thumbnail(async_image, large=False):
@@ -93,7 +93,7 @@ def generate_thumbnail(source, thumbnail_path, large=False, fmt=None):
             image.thumbnail(target_size)
         else:
             logger.debug(f'Image is already thumbnail size! ({image.size})')
-        image.save(thumbnail_path, fmt=fmt.replace('jpg', 'jpeg'))
+        image.save(thumbnail_path, fmt=fmt.replace('jpg', 'jpeg') if fmt else None)
         return thumbnail_path
     # If we're unable to generate a thumbnail, just use the original image
     except RuntimeError as e:

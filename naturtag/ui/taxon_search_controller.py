@@ -31,8 +31,9 @@ class TaxonSearchController:
     def __init__(self, screen):
         self.screen = screen
         # Search inputs
-        self.taxon_search_input = screen.taxon_search_input
         self.taxon_id_input = screen.taxon_id_input
+        self.taxon_id_input.bind(on_text_validate=self.handle_input_id)
+        self.taxon_search_input = screen.taxon_search_input
         self.taxon_search_input.selection_callback = self.handle_selection
 
         # Outputs
@@ -52,11 +53,15 @@ class TaxonSearchController:
         """ Handle selecting a taxon from autocomplete dropdown """
         self.select_taxon(json_result=metadata)
 
+    def handle_input_id(self, input):
+        self.select_taxon(id=int(input.text))
+
     def select_taxon(self, taxon_obj=None, json_result=None, id=None):
         """ Update taxon info display by either object, ID, partial record, or complete record """
         self.basic_info.clear_widgets()
         self.selected_taxon = taxon_obj or Taxon(json_result=json_result, id=id)
         self.taxon_id_input = self.selected_taxon.id
+
         logger.info(f'Selecting taxon: {self.selected_taxon.id}')
         self.load_photo_section()
         self.load_basic_info_section()
