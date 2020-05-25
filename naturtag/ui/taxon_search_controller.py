@@ -1,8 +1,7 @@
 from logging import getLogger
-from os.path import join
 import webbrowser
 
-from kivymd.uix.list import OneLineListItem, TwoLineAvatarListItem, ThreeLineAvatarListItem, ImageLeftWidget
+from kivymd.uix.list import OneLineListItem, ThreeLineAvatarListItem, ImageLeftWidget
 
 from pyinaturalist.node_api import get_taxa_autocomplete
 from naturtag.constants import ICONIC_TAXA

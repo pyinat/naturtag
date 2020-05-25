@@ -13,7 +13,7 @@ from naturtag.glob import get_images_from_paths
 from naturtag.tagger import tag_images
 from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
-from naturtag.ui.thumbnails import get_thumbnail
+from naturtag.thumbnails import get_thumbnail
 from naturtag.ui.image import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
@@ -180,7 +180,7 @@ class Controller(BoxLayout):
                 ("No.", dp(30)),  ("Column 1", dp(30)), ("Column 2", dp(30)),
                 ("Column 3", dp(30)), ("Column 4", dp(30)), ("Column 5", dp(30)),
             ],
-            row_data=[ (f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
+            row_data=[(f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
         ).open()
 
 

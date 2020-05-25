@@ -12,7 +12,9 @@ class Taxon(JsonModel):
         records from :py:func:`get_taxa` and :py:func:`get_taxa_autocomplete`, respectively.
         Will lazy-load additional info as needed.
 
-        Alternatively, this class can be initialized with just an ID to fetch remaining info.
+        Args:
+            json_result (dict): JSON from API response item
+            id (int): Initialize with just a taxon ID to fetch remaining info
         """
         super().__init__(json_result=json_result, id=id)
 

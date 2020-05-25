@@ -2,9 +2,9 @@
 from kivy.properties import ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
-from kivymd.uix.list import OneLineListItem, TwoLineAvatarListItem, ThreeLineAvatarListItem, ImageLeftWidget, ILeftBody
+from kivymd.uix.list import ThreeLineAvatarListItem, ILeftBody
 
-from naturtag.ui.thumbnails import get_thumbnail_if_exists, cache_async_thumbnail
+from naturtag.thumbnails import get_thumbnail_if_exists, cache_async_thumbnail
 
 
 class IconicTaxaIcon(SmartTile):

@@ -4,6 +4,10 @@ from naturtag.inat_metadata import get_keywords, get_observation_dwc_terms
 
 
 def tag_images(observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp_sidecar, images):
+    """
+    Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
+    metadata. See :py:func:`~naturtag.cli.tag` for details.
+    """
     keywords = get_keywords(
         observation_id=observation_id,
         taxon_id=taxon_id,

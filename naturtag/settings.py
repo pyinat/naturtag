@@ -10,7 +10,12 @@ logger = getLogger().getChild(__name__)
 
 
 def read_settings():
-    """ Read settings from the settings file """
+    """
+    Read settings from the settings file
+
+    Returns:
+        dict: Stored config state
+    """
     if not isfile(CONFIG_PATH):
         reset_defaults()
     logger.info(f'Reading settings to {CONFIG_PATH}')
@@ -19,7 +24,11 @@ def read_settings():
 
 
 def write_settings(new_config):
-    """ Write updated settings to the settings file """
+    """  Write updated settings to the settings file
+
+    Args:
+        new_config (dict): Updated config state
+    """
     # First re-read current config, in case it changed on disk (manual edits)
     # And update on a per-section basis so we don't overwrite with an empty section
     settings = read_settings()

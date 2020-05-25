@@ -18,60 +18,87 @@ EXIF_ORIENTATION_ID = '0x0112'
 logger = getLogger().getChild(__name__)
 
 
-def get_thumbnail(image_path, large=False):
+def get_thumbnail(source, **kwargs):
     """
     Get a cached thumbnail for an image, if one already exists; otherwise, generate a new one.
+    See :py:func:`.generate_thumbnail` for size options.
 
     Args:
-        image_path (str): Path to source image
-        large (bool): Make it a 'larger' thumbnail
+        source (str): File path or URI for image source
 
     Returns:
         str: Path to thumbnail image
     """
-    thumbnail_path = get_thumbnail_path(image_path)
+    thumbnail_path = get_thumbnail_path(source)
     if isfile(thumbnail_path):
         return thumbnail_path
     else:
-        return generate_thumbnail(image_path, thumbnail_path, large)
+        return generate_thumbnail(source, thumbnail_path, **kwargs)
 
 
-def get_thumbnail_if_exists(image_path):
+def get_thumbnail_if_exists(source):
     """
     Get a cached thumbnail for an image, if one already exists, but if not, don't generate a new one
+
+    Args:
+        source (str): File path or URI for image source
+
+    Returns:
+        str: The path of the new thumbnail, if found; otherwise ``None``
     """
-    thumbnail_path = get_thumbnail_path(image_path)
+    thumbnail_path = get_thumbnail_path(source)
     if isfile(thumbnail_path):
-        logger.debug(f'Found existing thumbnail for {image_path}')
+        logger.debug(f'Found existing thumbnail for {source}')
         return thumbnail_path
     else:
         return None
 
 
-def get_thumbnail_path(image_path):
-    """ Determine the thumbnail filename based on a hash of the original file path """
+def get_thumbnail_path(source):
+    """
+    Determine the thumbnail filename based on a hash of the original file path
+
+    Args:
+        source (str): File path or URI for image source
+    """
     makedirs(THUMBNAILS_DIR, exist_ok=True)
-    thumbnail_hash = md5(image_path.encode()).hexdigest()
-    ext = _get_format(image_path)
+    thumbnail_hash = md5(source.encode()).hexdigest()
+    ext = get_format(source)
     return join(THUMBNAILS_DIR, f'{thumbnail_hash}.{ext}')
 
 
-def _get_format(image_path):
-    """ Account for various edge cases when getting an image format based on a file extension """
-    if isinstance(image_path, bytes):
-        image_path = image_path.decode('utf-8')
+def get_format(source):
+    """
+    Account for various edge cases when getting an image format based on a file extension
+
+    Args:
+        source (str): File path or URI for image source
+
+    Returns:
+        str: Format, if found; otherwise, defaults to ``jpg``
+    """
+    if isinstance(source, bytes):
+        image_path = source.decode('utf-8')
     # Strip off request params if path is a URL
-    image_path = image_path.split('?')[0]
-    ext = splitext(image_path)[-1] or THUMBNAIL_DEFAULT_FORMAT
+    source = source.split('?')[0]
+    ext = splitext(source)[-1] or THUMBNAIL_DEFAULT_FORMAT
+    # Note: PIL only accepts 'jpeg' (not 'jpg'), and Kivy is the opposite
     return ext.lower().replace('.', '').replace('jpeg', 'jpg') or 'jpg'
 
 
 def cache_async_thumbnail(async_image, **kwargs):
     """
-    Get raw image data from an AsyncImage and cache a thumbnail for future usage
+    Get raw image data from an AsyncImage and cache a thumbnail for future usage.
+    See :py:func:`.generate_thumbnail` for size options.
+
+    Args:
+        async_image (:py:class:`~kivy.uix.image.AsyncImage`): Image object
+
+    Returns:
+        str: The path of the new thumbnail
     """
     thumbnail_path = get_thumbnail_path(async_image.source)
-    ext = _get_format(thumbnail_path)
+    ext = get_format(thumbnail_path)
     logger.debug(f'Getting image data downloaded from {async_image.source}; format {ext}')
 
     # Load inner 'texture' bytes into a file-like object that PIL can read
@@ -89,6 +116,16 @@ def cache_async_thumbnail(async_image, **kwargs):
 def generate_thumbnail(source, thumbnail_path, fmt=None, small=False, large=False):
     """
     Generate and store a thumbnail from the source image, in one of 3 sizea; default is 200x200
+
+    Args:
+        source (str): File path or URI for image source
+        thumbnail_path (str): Destination path for thumbnail
+        fmt (str): Image format to specify to PIL, if it can't be auto-detected
+        small (bool): Store a smaller thumbnail
+        large (bool): Store a larger thumbnail
+
+    Returns:
+        str: The path of the new thumbnail
     """
     logger.info(f'Generating new thumbnail for {source}:\n  {thumbnail_path}')
 

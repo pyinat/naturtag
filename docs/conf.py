@@ -21,9 +21,19 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx_autodoc_typehints',
     'sphinx_rtd_theme',
     'sphinxcontrib.apidoc',
 ]
+
+intersphinx_mapping = {
+    'click': ('https://click.palletsprojects.com/en/7.x/', None),
+    'kivy': ('https://kivy.org/doc/stable', None),
+    'kivymd': ('https://kivymd.readthedocs.io/en/latest', None),
+    'pillow': ('https://pillow.readthedocs.io/en/stable', None),
+    'pyinaturalist': ('https://pyinaturalist.readthedocs.io/en/latest/', None),
+}
+intersphinx_timeout = 30
 
 # Use apidoc to auto-generate rst sources
 apidoc_module_dir = '../naturtag'

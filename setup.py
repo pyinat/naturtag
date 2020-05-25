@@ -9,8 +9,9 @@ extras_require = {
         'kivy_examples',
         'pytest',
         'Sphinx>=3.0',
-        'sphinxcontrib-apidoc',
+        'sphinx-autodoc-typehints',
         'sphinx-rtd-theme',
+        'sphinxcontrib-apidoc',
     ],
 }
 extras_require['all'] = list(chain.from_iterable(extras_require.values()))

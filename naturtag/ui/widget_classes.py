@@ -3,7 +3,7 @@ from kivy.uix.boxlayout import BoxLayout
 
 from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.button import MDRoundFlatIconButton
-from kivymd.uix.list import ILeftBodyTouch, IRightBodyTouch, OneLineListItem
+from kivymd.uix.list import ILeftBodyTouch, OneLineListItem
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase
