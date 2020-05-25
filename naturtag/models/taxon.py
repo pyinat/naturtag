@@ -50,6 +50,11 @@ class Taxon(JsonModel):
         return self._ancestors
 
     @property
+    def parent(self):
+        """ Return immediate parent, if any """
+        return self.ancestors[-1] if self.ancestors else None
+
+    @property
     def children(self):
         """ Get this taxon's children as Taxon objects (in descending order of rank) """
         if self._children is None:

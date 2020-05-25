@@ -36,10 +36,15 @@ class TaxonSearchController:
         self.taxon_search_input = screen.taxon_search_input
         self.taxon_search_input.selection_callback = self.handle_selection
 
+        # Other Controls
+        self.taxon_link = screen.selected_taxon_link_button
+        self.taxon_parent_button = screen.taxon_parent_button
+        # TODO: This button is not very responsive...
+        self.taxon_parent_button.bind(on_release=lambda x: self.select_taxon(x.taxon.parent))
+
         # Outputs
         self.selected_taxon = None
         self.taxon_photo = screen.selected_taxon_photo
-        self.taxon_link = screen.selected_taxon_link_button
         self.taxon_ancestors = screen.taxonomy_section.ids.taxon_ancestors
         self.taxon_children = screen.taxonomy_section.ids.taxon_children
         self.basic_info = self.screen.basic_info_section
@@ -68,12 +73,21 @@ class TaxonSearchController:
         self.load_taxonomy_section()
 
     def load_photo_section(self):
-        """ Load taxon photo + link to iNaturalist taxon page """
+        """ Load taxon photo + links """
         if self.selected_taxon.photo_url:
             self.taxon_photo.source = self.selected_taxon.photo_url
         self.taxon_link.bind(
             on_release=lambda *x: webbrowser.open(self.selected_taxon.link))
         self.taxon_link.tooltip_text = self.selected_taxon.link
+
+        # Configure 'View parent' button
+        if self.selected_taxon.parent:
+            self.taxon_parent_button.disabled = False
+            self.taxon_parent_button.taxon = self.selected_taxon
+            self.taxon_parent_button.tooltip_text = f'Go to {self.selected_taxon.parent.name}'
+        else:
+            self.taxon_parent_button.disabled = True
+            self.taxon_parent_button.tooltip_text = ''
 
     def load_basic_info_section(self):
         """ Load basic info for the currently selected taxon """
