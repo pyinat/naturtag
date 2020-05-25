@@ -51,9 +51,9 @@ class ImageTaggerApp(MDApp):
 
         # Init controllers with references to nested screen objects for easier access
         self.controller = Controller(screens[HOME_SCREEN].ids, screens['metadata'].ids)
+        self.settings_controller = SettingsController(screens['settings'].ids)
         self.taxon_search_controller = TaxonSearchController(screens['taxon_search'].ids)
         # observation_search_controller = ObservationSearchController(screens['observation_search'].ids)
-        self.settings_controller = SettingsController(screens['settings'].ids)
 
         # Init screen manager and nav elements
         self.nav_drawer = self.controller.ids.nav_drawer

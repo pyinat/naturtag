@@ -6,6 +6,7 @@ from kivymd.uix.list import OneLineListItem, ThreeLineAvatarListItem, ImageLeftW
 from pyinaturalist.node_api import get_taxa_autocomplete
 from naturtag.constants import ICONIC_TAXA
 from naturtag.models import Taxon, get_icon_path
+from naturtag.ui import get_app_settings
 from naturtag.ui.autocomplete import AutocompleteSearch
 from naturtag.ui.image import IconicTaxaIcon, TaxonListItem
 
@@ -29,6 +30,9 @@ class TaxonSearchController:
     """ Controller class to manage taxon search and display """
     def __init__(self, screen):
         self.screen = screen
+        self.taxon_history = get_app_settings().taxon_history
+        self.taxon_frequency = get_app_settings().taxon_frequency
+
         # Search inputs
         self.taxon_id_input = screen.taxon_id_input
         self.taxon_id_input.bind(on_text_validate=self.handle_input_id)
@@ -65,6 +69,7 @@ class TaxonSearchController:
         self.basic_info.clear_widgets()
         self.selected_taxon = taxon_obj or Taxon(json_result=json_result, id=id)
         self.taxon_id_input = self.selected_taxon.id
+        self.taxon_history.append(self.selected_taxon.id)
 
         logger.info(f'Selecting taxon: {self.selected_taxon.id}')
         self.load_photo_section()
