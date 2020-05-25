@@ -1,8 +1,8 @@
 """ Classes to extend image container functionality for caching, metadata, etc. """
 from kivy.properties import ObjectProperty
 from kivy.uix.image import AsyncImage
-from kivymd.uix.imagelist import SmartTile
-from kivymd.uix.imagelist import SmartTileWithLabel
+from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
+from kivymd.uix.list import OneLineListItem, TwoLineAvatarListItem, ThreeLineAvatarListItem, ImageLeftWidget, ILeftBody
 
 from naturtag.ui.thumbnails import get_thumbnail_if_exists, cache_async_thumbnail
 
@@ -27,8 +27,29 @@ class CachedAsyncImage(AsyncImage):
 
     def on_load(self, *args):
         """ After loading, cache the downloaded image for future use, if not previously done """
-        if self._coreimage.image.texture and not self.has_thumbnail:
+        if self.has_thumbnail is False and self._coreimage.image.texture and self.source.startswith('http'):
             cache_async_thumbnail(self, large=True)
+
+
+
+class TaxonListItem(ThreeLineAvatarListItem):
+    """ Class that displays condensed taxon info as a list item """
+    def __init__(self, taxon, button_callback=None, **kwargs):
+        super().__init__(
+            font_style='H6',
+            text=taxon.name,
+            secondary_text=taxon.rank,
+            tertiary_text=taxon.common_name or '',
+            **kwargs,
+        )
+        self.taxon = taxon
+        if button_callback:
+            self.bind(on_release=button_callback)
+        self.add_widget(TaxonThumbnail(source=taxon.thumbnail_url or taxon.icon_path))
+
+
+class TaxonThumbnail(CachedAsyncImage, ILeftBody):
+    """ Class that contains a taxon thumbnail to be used in a list item """
 
 
 class ImageMetaTile(SmartTileWithLabel):

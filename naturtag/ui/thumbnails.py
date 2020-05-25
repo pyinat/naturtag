@@ -39,7 +39,7 @@ def get_thumbnail_if_exists(image_path):
     """
     thumbnail_path = get_thumbnail_path(image_path)
     if isfile(thumbnail_path):
-        logger.info(f'Found existing thumbnail for {image_path}')
+        logger.debug(f'Found existing thumbnail for {image_path}')
         return thumbnail_path
     else:
         return None
@@ -67,13 +67,17 @@ def cache_async_thumbnail(async_image, large=False):
     """ Get raw image data from an AsyncImage and cache a thumbnail for future usage """
     thumbnail_path = get_thumbnail_path(async_image.source)
     ext = _get_format(thumbnail_path)
-    logger.info(f'Getting image data downloaded from {async_image.source}; format {ext}')
+    logger.debug(f'Getting image data downloaded from {async_image.source}; format {ext}')
 
     # Load inner 'texture' bytes into a file-like object that PIL can read
     image_bytes = BytesIO()
     async_image._coreimage.image.texture.save(image_bytes, fmt=ext)
     image_bytes.seek(0)
-    return generate_thumbnail(image_bytes, thumbnail_path, large=True, fmt=ext)
+    # TODO: Unsure why some images fail
+    if len(image_bytes.getvalue()) > 0:
+        return generate_thumbnail(image_bytes, thumbnail_path, large=True, fmt=ext)
+    else:
+        logger.error(f'Failed to save texture to thumbnail: {async_image.source}')
 
 
 def generate_thumbnail(source, thumbnail_path, large=False, fmt=None):
@@ -88,7 +92,7 @@ def generate_thumbnail(source, thumbnail_path, large=False, fmt=None):
         if image.size[0] > target_size[0] or image.size[1] > target_size[1]:
             image.thumbnail(target_size)
         else:
-            logger.info(f'Image is already thumbnail size! ({image.size})')
+            logger.debug(f'Image is already thumbnail size! ({image.size})')
         image.save(thumbnail_path, fmt=fmt.replace('jpg', 'jpeg'))
         return thumbnail_path
     # If we're unable to generate a thumbnail, just use the original image

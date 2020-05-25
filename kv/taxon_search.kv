@@ -25,7 +25,6 @@
                 size_hint_max_y: dp(60)
             IconicTaxaLayout:
                 id: iconic_taxa
-
             # Temp spacer
             MDBoxLayout:
                 height: 300
@@ -35,10 +34,9 @@
             orientation: 'vertical'
             md_bg_color: app.theme_cls.bg_darkest
             MDGridLayout:
-                md_bg_color: app.theme_cls.bg_light
                 cols: 2
                 spacing: dp(10)
-                # Taxon photo + link
+                md_bg_color: app.theme_cls.bg_light
                 MDBoxLayout:
                     orientation: 'vertical'
                     spacing: dp(10)
@@ -51,26 +49,10 @@
                         icon: 'link-variant'
                         text: 'View on iNaturalist'
                         width: self.parent.width
-                # Name, rank, and other basic attributes
                 MDList:
-                    id: selected_taxon_basic_info
-            # Taxonomy
-            ScrollViewY:
-                MDBoxLayout:
-                    MDLabel:
-                        theme_text_color: 'Primary'
-                        font_style: 'H5'
-                        text: 'Parents'
-                    MDLabel:
-                        id: selected_taxon_ancestors
-                        theme_text_color: 'Primary'
-                    MDLabel:
-                        theme_text_color: 'Primary'
-                        font_style: 'H5'
-                        text: 'Children'
-                    MDLabel:
-                        id: selected_taxon_children
-                        theme_text_color: 'Primary'
+                    id: basic_info_section
+            TaxonomySection:
+                id: taxonomy_section
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
@@ -96,3 +78,18 @@
     row_force_default: True
     col_default_width: dp(32)
     col_force_default: True
+
+<TaxonomySection@MDGridLayout>:
+    cols: 2
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'Ancestors'
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'Children'
+    ScrollViewY:
+        MDList:
+            id: taxon_ancestors
+    ScrollViewY:
+        MDList:
+            id: taxon_children

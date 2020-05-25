@@ -30,11 +30,11 @@ class Taxon(JsonModel):
 
     @property
     def common_name(self):
-        return self.json.get('preferred_common_name')
+        return self.json.get('preferred_common_name', '')
 
     @property
     def icon_path(self):
-        return self.get_icon_path(self.iconic_taxon_id)
+        return get_icon_path(self.iconic_taxon_id)
 
     @property
     def link(self):
@@ -65,4 +65,3 @@ def get_icon_path(id):
     if id not in ICONIC_TAXA:
         return None
     return join(ICONS_DIR, f'{ICONIC_TAXA[id]}.png')
-
