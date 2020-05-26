@@ -6,6 +6,7 @@ from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 from kivymd.uix.list import ThreeLineAvatarListItem, ILeftBody
 
+from naturtag.models import get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists
 from naturtag.ui.cache import get_any_thumbnail_if_exists, cache_async_thumbnail
 
@@ -14,6 +15,10 @@ logger = getLogger().getChild(__name__)
 
 class IconicTaxaIcon(SmartTile):
     box_color = (0, 0, 0, 0)
+
+    def __init__(self, taxon_id, **kwargs):
+        self.taxon_id = taxon_id
+        super().__init__(source=get_icon_path(taxon_id), **kwargs)
 
 
 class CachedAsyncImage(AsyncImage):

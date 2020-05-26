@@ -53,7 +53,8 @@ class TaxonSearchController:
 
         # Set 'Categories' (iconic taxa) icons
         for id in ICONIC_TAXA:
-            icon = IconicTaxaIcon(source=get_icon_path(id))
+            icon = IconicTaxaIcon(id)
+            icon.bind(on_release=lambda x: self.select_taxon(id=x.taxon_id))
             self.screen.iconic_taxa.add_widget(icon)
 
     def handle_selection(self, metadata):

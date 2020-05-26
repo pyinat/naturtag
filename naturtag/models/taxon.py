@@ -59,13 +59,20 @@ class Taxon(JsonModel):
     @property
     def children(self):
         """ Get this taxon's children as Taxon objects (in descending order of rank) """
+        def get_rank_idx(taxon):
+            return RANKS.index(taxon.rank) if taxon.rank in RANKS else 0
+
         if self._children is None:
             # TODO: Determine if it's already a full record but the taxon has no children?
             if 'children' not in self.json:
                 self.get_full_record()
             self._children = [Taxon(t) for t in self.json.get('children', [])]
+            # Children may be different ranks; sort children by rank then name
+            self._children.sort(key=lambda t: t.name)
+            self._children.sort(key=lambda t: RANKS.index(t.rank), reverse=True)
         return self._children
 
+from naturtag.constants import RANKS
 
 def get_icon_path(id):
     """ An iconic function to return an icon for an iconic taxon """
