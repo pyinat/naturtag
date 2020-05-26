@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch
 from naturtag.atlas import get_atlas_dimensions
 
 

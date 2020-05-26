@@ -2,6 +2,7 @@ from collections import OrderedDict
 from os.path import dirname, join
 from appdirs import user_data_dir
 from pyinaturalist.constants import RANKS
+#RANKS + ['infraclass']
 
 # Resource directories
 PKG_DIR = dirname(dirname(__file__))

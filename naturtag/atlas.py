@@ -1,9 +1,8 @@
 """ Utilities for intelligently combining thumbnail images into a Kivy Atlas """
 from logging import getLogger
 from math import ceil
+from time import sleep
 
-from kivy.atlas import Atlas
-from kivy.cache import Cache
 from PIL import Image
 
 from naturtag.constants import (
@@ -16,7 +15,10 @@ from naturtag.constants import (
     THUMBNAIL_SIZE_SM,
     THUMBNAIL_SIZE_LG,
 )
-from naturtag.glob import get_images_from_paths
+from naturtag.image_glob import get_images_from_paths
+from naturtag.constants import ICONIC_TAXA
+from naturtag.models import Taxon
+from naturtag.thumbnails import generate_thumbnail_from_url, get_thumbnail_if_exists
 
 # Current organization of altas files by thumb size; this may change in the future
 ATLAS_CATEGORIES = {
@@ -24,6 +26,14 @@ ATLAS_CATEGORIES = {
     'medium': ATLAS_LOCAL_PHOTOS,
     'large': ATLAS_TAXON_PHOTOS,
 }
+
+PRELOAD_TAXA = ICONIC_TAXA.copy()
+PRELOAD_TAXA[47685] = 'Mycetozoa'
+PRELOAD_TAXA[47120] = 'Arthropoda'
+PRELOAD_TAXA[47273] = 'Elasmobranchii'
+PRELOAD_TAXA[1] = 'animalia'
+
+IMAGE_DOWNLOAD_DELAY = 1
 
 logger = getLogger().getChild(__name__)
 
@@ -40,6 +50,8 @@ def get_resource_path_if_exists(atlas_category, id):
 
 def get_atlas(atlas_path):
     """ Get atlas from the Kivy cache if present, otherwise initialize it """
+    from kivy.atlas import Atlas
+    from kivy.cache import Cache
     atlas = Cache.get('kv.atlas', atlas_path.replace('atlas://', ''))
     if not atlas:
         logger.info(f'Initializing atlas "{atlas_path}"')
@@ -48,16 +60,18 @@ def get_atlas(atlas_path):
     return atlas
 
 
-def build_taxon_icon_atlas():
-    build_atlas(THUMBNAILS_DIR, *THUMBNAIL_SIZE_SM, 'taxon_icons', max_size=ATLAS_MAX_SIZE)
+def build_taxon_icon_atlas(dir=THUMBNAILS_DIR):
+    build_atlas(dir, *THUMBNAIL_SIZE_SM, 'taxon_icons', max_size=ATLAS_MAX_SIZE)
 
 
-def build_taxon_photo_atlas():
-    build_atlas(THUMBNAILS_DIR, *THUMBNAIL_SIZE_LG, 'taxon_photos', max_size=ATLAS_MAX_SIZE)
+# TODO: Aspect ratios vary quite a bit for these. Should divide (or sort?) them by square-ish, landscape, and portrait.
+# Or Maybe just crop them all to be square? (or at most 4:3?)
+def build_taxon_photo_atlas(dir=THUMBNAILS_DIR):
+    build_atlas(dir, *THUMBNAIL_SIZE_LG, 'taxon_photos', max_size=ATLAS_MAX_SIZE*2)
 
 
-def build_local_photo_atlas():
-    build_atlas(THUMBNAILS_DIR, *THUMBNAIL_SIZE_DEFAULT, 'local_photos', max_size=ATLAS_MAX_SIZE)
+def build_local_photo_atlas(dir=THUMBNAILS_DIR):
+    build_atlas(dir, *THUMBNAIL_SIZE_DEFAULT, 'local_photos', max_size=ATLAS_MAX_SIZE*2)
 
 
 def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg):
@@ -70,6 +84,7 @@ def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg)
         atlas_name: Name of atlas file to create
         \\*\\*limit_kwarg: At most one limit to provide to :py:func:`.get_atlas_dimensions`
     """
+    from kivy.atlas import Atlas
 
     # Allow smallest dimension to be as low as half the max. This this works because each thumbnail
     # size category is over twice the size of the next smallest one
@@ -149,11 +164,12 @@ def get_atlas_dimensions(n_images, x, y, padding=2, max_size=None, max_bins=None
 
 
 def _max_factor(n, factor, max_size):
-    """ Return the largest factor that will fit within the provided max """
-    if not max_size or n * factor <= max_size:
+    """ Return the largest factor within the provided max;
+    e.g., the most images of size n thet can fit in max_size
+    """
+    if max_size is None or n * factor <= max_size:
         return factor
-    else:
-        return _max_factor(n, factor-1, max_size)
+    return max_size // n
 
 
 def _largest_factor_pair(n):
@@ -164,7 +180,37 @@ def _largest_factor_pair(n):
     return n, 1
 
 
+def preload_iconic_taxa_thumbnails():
+    """ Pre-download taxon thumbnails for iconic taxa and descendants down to 2 ranks below """
+    for id, name in list(PRELOAD_TAXA.items()):
+        min_rank = 'family'
+        if name == 'mammalia':
+            min_rank = 'genus'
+        if name in ['chromista', 'animalia']:
+            min_rank = 'class'
+        logger.info(f'Processing iconic taxon: {name} down to {min_rank} level')
+        preload_thumnails(Taxon(id=id), min_rank=min_rank)
+
+
+def preload_thumnails(taxon, min_rank='family', depth=0):
+    logger.info(f'Processing: {taxon.rank} {taxon.name} at depth {depth}')
+    thumnail_exists = taxon.photo_url and get_thumbnail_if_exists(taxon.photo_url)
+    if taxon.photo_url and not thumnail_exists:
+        generate_thumbnail_from_url(taxon.photo_url, 'large')
+        generate_thumbnail_from_url(taxon.thumbnail_url, 'small')
+        sleep(IMAGE_DOWNLOAD_DELAY)
+
+    if taxon.rank not in [min_rank, 'species', 'subspecies']:
+        n_children = len(taxon.children)
+        for i, child in enumerate(taxon.children):
+            # Skip child if it's already loaded in another category
+            if child.id not in PRELOAD_TAXA:
+                logger.info(f'Child {i}/{n_children}')
+                preload_thumnails(child, min_rank, depth=depth + 1)
+
+
 if __name__ == '__main__':
+    # preload_iconic_taxa_thumbnails()
     build_taxon_icon_atlas()
     build_taxon_photo_atlas()
     build_local_photo_atlas()

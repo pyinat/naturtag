@@ -9,7 +9,7 @@ from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
 from kivymd.uix.snackbar import Snackbar
 
-from naturtag.glob import get_images_from_paths
+from naturtag.image_glob import get_images_from_paths
 from naturtag.tagger import tag_images
 from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata

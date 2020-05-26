@@ -1,7 +1,7 @@
 import click
 from click_help_colors import HelpColorsCommand
 
-from naturtag.glob import glob_paths
+from naturtag.image_glob import glob_paths
 from naturtag.tagger import tag_images
 from re import compile, DOTALL, MULTILINE
 

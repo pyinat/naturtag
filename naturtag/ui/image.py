@@ -1,7 +1,7 @@
 """ Classes to extend image container functionality for caching, metadata, etc. """
 from logging import getLogger
 
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, NumericProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 from kivymd.uix.list import ThreeLineAvatarListItem, ILeftBody

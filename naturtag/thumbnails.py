@@ -1,12 +1,15 @@
 """ Utilities for generating and retrieving image thumbnails """
 from hashlib import md5
-from io import IOBase
+from io import BytesIO, IOBase
 from os import makedirs
 from os.path import dirname, isfile, join, normpath, splitext
+from shutil import copyfileobj
 from logging import getLogger
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
+import requests
+
 from naturtag.constants import (
     EXIF_ORIENTATION_ID,
     THUMBNAILS_DIR,
@@ -46,6 +49,9 @@ def get_thumbnail_if_exists(source):
     Returns:
         str: The path of the new thumbnail, if found; otherwise ``None``
     """
+    if not source:
+        return None
+
     thumbnail_path = get_thumbnail_path(source)
     if isfile(thumbnail_path):
         logger.debug(f'Found existing thumbnail for {source}')
@@ -106,6 +112,18 @@ def get_format(source):
     return ext.lower().replace('.', '').replace('jpeg', 'jpg') or 'jpg'
 
 
+def generate_thumbnail_from_url(url, size):
+    logger.info(f'Downloading: {url}')
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        image_bytes = BytesIO()
+        r.raw.decode_content = True
+        copyfileobj(r.raw, image_bytes)
+        generate_thumbnail_from_bytes(image_bytes, url, size=size, default_flip=False)
+    else:
+        logger.info(f'Request failed: {str(r)}')
+
+
 def generate_thumbnail_from_bytes(image_bytes, source, **kwargs):
     """ Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path """
     image_bytes.seek(0)
@@ -119,7 +137,7 @@ def generate_thumbnail_from_bytes(image_bytes, source, **kwargs):
         return None
 
 
-def generate_thumbnail(source, thumbnail_path, fmt=None, size='medium'):
+def generate_thumbnail(source, thumbnail_path, fmt=None, size='medium', default_flip=True):
     """
     Generate and store a thumbnail from the source image
 
@@ -137,7 +155,7 @@ def generate_thumbnail(source, thumbnail_path, fmt=None, size='medium'):
 
     # Resize if necessary, or just copy the image to the cache if it's already thumbnail size
     try:
-        image = get_orientated_image(source)
+        image = get_orientated_image(source, default_flip=default_flip)
         if image.size[0] > target_size[0] or image.size[1] > target_size[1]:
             image.thumbnail(target_size)
         else:
@@ -152,7 +170,7 @@ def generate_thumbnail(source, thumbnail_path, fmt=None, size='medium'):
         return source
 
 
-def get_orientated_image(source):
+def get_orientated_image(source, default_flip=True):
     """
     Load and rotate/transpose image according to EXIF orientation, if any. If missing orientation
     and the image was fetched from iNat, it will be vertically mirrored. (?)
@@ -163,7 +181,18 @@ def get_orientated_image(source):
     if exif.get(EXIF_ORIENTATION_ID):
         image = exif_transpose(image)
     # TODO: In the future there may be more cases than just local images and remote images from iNat
-    elif isinstance(source, IOBase):
+    elif default_flip and isinstance(source, IOBase):
         image = flip(image)
 
     return image
+
+
+def flip_all(path):
+    from naturtag.image_glob import get_images_from_dir
+    for source in get_images_from_dir(path):
+        print(f'Transposing {source}')
+        image = Image.open(source)
+        image = flip(image)
+        image.save(source)
+        image.close()
+
