@@ -5,6 +5,7 @@ from os import makedirs
 from os.path import dirname, isfile, join, normpath, splitext
 from shutil import copyfileobj
 from logging import getLogger
+from typing import Tuple, Union
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
@@ -21,16 +22,16 @@ from naturtag.constants import (
 logger = getLogger().getChild(__name__)
 
 
-def get_thumbnail(source, **kwargs):
+def get_thumbnail(source: str, **kwargs) -> str:
     """
     Get a cached thumbnail for an image, if one already exists; otherwise, generate a new one.
     See :py:func:`.generate_thumbnail` for size options.
 
     Args:
-        source (str): File path or URI for image source
+        source: File path or URI for image source
 
     Returns:
-        str: Path to thumbnail image
+        Path to thumbnail image
     """
     thumbnail_path = get_thumbnail_path(source)
     if isfile(thumbnail_path):
@@ -39,15 +40,15 @@ def get_thumbnail(source, **kwargs):
         return generate_thumbnail(source, thumbnail_path, **kwargs)
 
 
-def get_thumbnail_if_exists(source):
+def get_thumbnail_if_exists(source: str) -> Union[str, None]:
     """
     Get a cached thumbnail for an image, if one already exists, but if not, don't generate a new one
 
     Args:
-        source (str): File path or URI for image source
+        source: File path or URI for image source
 
     Returns:
-        str: The path of the new thumbnail, if found; otherwise ``None``
+        The path of the new thumbnail, if found; otherwise ``None``
     """
     if not source:
         return None
@@ -63,29 +64,29 @@ def get_thumbnail_if_exists(source):
         return None
 
 
-def get_thumbnail_hash(source):
+def get_thumbnail_hash(source: str) -> str:
     """ Get a unique string based on the source to use as a filename or atlas resource ID """
     return md5(source.encode()).hexdigest()
 
 
-def get_thumbnail_size(size):
+def get_thumbnail_size(size: str) -> Tuple[int, int]:
     """ Get one of the predefined thumbnail dimensions from a size string
 
     Args:
-        size (str): One of: 'small', 'medium', 'large'
+        size: One of: 'small', 'medium', 'large'
 
     Returns:
-        ``int, int``: X and Y dimensions of thumbnail size
+        X and Y dimensions of thumbnail size
     """
     return THUMBNAIL_SIZES.get(size, THUMBNAIL_SIZE_DEFAULT)
 
 
-def get_thumbnail_path(source):
+def get_thumbnail_path(source: str) -> str:
     """
     Determine the thumbnail filename based on a hash of the original file path
 
     Args:
-        source (str): File path or URI for image source
+        source: File path or URI for image source
     """
     makedirs(THUMBNAILS_DIR, exist_ok=True)
     thumbnail_hash = get_thumbnail_hash(source)
@@ -93,15 +94,15 @@ def get_thumbnail_path(source):
     return join(THUMBNAILS_DIR, f'{thumbnail_hash}.{ext}')
 
 
-def get_format(source):
+def get_format(source: str) -> str:
     """
     Account for various edge cases when getting an image format based on a file extension
 
     Args:
-        source (str): File path or URI for image source
+        source: File path or URI for image source
 
     Returns:
-        str: Format, if found; otherwise, defaults to ``jpg``
+        Format, if found; otherwise, defaults to ``jpg``
     """
     if isinstance(source, bytes):
         source = source.decode('utf-8')
@@ -112,7 +113,8 @@ def get_format(source):
     return ext.lower().replace('.', '').replace('jpeg', 'jpg') or 'jpg'
 
 
-def generate_thumbnail_from_url(url, size):
+def generate_thumbnail_from_url(url: str, size: str):
+    """ Like :py:func:`.generate_thumbnail`, but downloads an image from a URL """
     logger.info(f'Downloading: {url}')
     r = requests.get(url, stream=True)
     if r.status_code == 200:
@@ -124,7 +126,7 @@ def generate_thumbnail_from_url(url, size):
         logger.info(f'Request failed: {str(r)}')
 
 
-def generate_thumbnail_from_bytes(image_bytes, source, **kwargs):
+def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
     """ Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path """
     image_bytes.seek(0)
     fmt = get_format(source)
@@ -137,7 +139,13 @@ def generate_thumbnail_from_bytes(image_bytes, source, **kwargs):
         return None
 
 
-def generate_thumbnail(source, thumbnail_path, fmt=None, size='medium', default_flip=True):
+def generate_thumbnail(
+        source,
+        thumbnail_path: str,
+        fmt: str=None,
+        size: str='medium',
+        default_flip: bool=True,
+):
     """
     Generate and store a thumbnail from the source image
 
@@ -170,7 +178,7 @@ def generate_thumbnail(source, thumbnail_path, fmt=None, size='medium', default_
         return source
 
 
-def get_orientated_image(source, default_flip=True):
+def get_orientated_image(source, default_flip: bool=True) -> Image:
     """
     Load and rotate/transpose image according to EXIF orientation, if any. If missing orientation
     and the image was fetched from iNat, it will be vertically mirrored. (?)
@@ -187,7 +195,8 @@ def get_orientated_image(source, default_flip=True):
     return image
 
 
-def flip_all(path):
+def flip_all(path: str):
+    """ Vertically flip all images in a directory. Mainly for debugging purposes. """
     from naturtag.image_glob import get_images_from_dir
     for source in get_images_from_dir(path):
         print(f'Transposing {source}')
@@ -195,4 +204,3 @@ def flip_all(path):
         image = flip(image)
         image.save(source)
         image.close()
-

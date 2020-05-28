@@ -77,29 +77,29 @@ class Taxon:
         self.taxon_photos = t.taxon_photos
 
     @property
-    def icon_path(self):
+    def icon_path(self) -> str:
         return get_icon_path(self.iconic_taxon_id)
 
     @property
-    def link(self):
+    def link(self) -> str:
         return f'{TAXON_BASE_URL}/{self.id}'
 
     @property
-    def photo_url(self):
+    def photo_url(self) -> str:
         return self.default_photo.get('medium_url')
 
     @property
-    def has_cc_photo(self):
+    def has_cc_photo(self) -> bool:
         """ Determine if there is a default photo with a Creative Commons license """
         license = self.default_photo.get('license_code', '').upper()
         return license in CC_LICENSES and self.photo_url
 
     @property
-    def thumbnail_url(self):
+    def thumbnail_url(self) -> str:
         return self.default_photo.get('square_url')
 
     @property
-    def parent_taxa(self):
+    def parent_taxa(self) -> List:
         """ Get this taxon's ancestors as Taxon objects (in descending order of rank) """
         if self._parent_taxa is None:
             if not self.ancestors:
@@ -113,7 +113,7 @@ class Taxon:
         return self.parent_taxa[-1] if self.parent_taxa else None
 
     @property
-    def child_taxa(self):
+    def child_taxa(self) -> List:
         """ Get this taxon's children as Taxon objects (in descending order of rank) """
         def get_rank_idx(taxon):
             return RANKS.index(taxon.rank) if taxon.rank in RANKS else 0
@@ -129,7 +129,7 @@ class Taxon:
         return self._child_taxa
 
 
-def get_icon_path(id):
+def get_icon_path(id: int) -> str:
     """ An iconic function to return an icon for an iconic taxon """
     if id not in ICONIC_TAXA:
         return None

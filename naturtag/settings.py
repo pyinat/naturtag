@@ -57,8 +57,9 @@ def reset_defaults():
 
 
 # TODO: Is there a better file format for taxon history than just a plain text file? JSON list? sqlite?
+# TODO: Separately store loaded history, new history for session; only write (append) new history
 def read_taxon_history():
-    """ Read taxon view history and frequenct
+    """ Read taxon view history and frequency
 
     Returns:
         ``list, dict``: Stored taxon history as a sequence of ints, and taxon frequecy dict

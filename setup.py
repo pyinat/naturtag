@@ -7,6 +7,7 @@ extras_require = {
     'dev': [
         'black',
         'kivy_examples',
+        'memory_profiler',
         'prettyprinter',
         'pytest',
         'Sphinx>=3.0',

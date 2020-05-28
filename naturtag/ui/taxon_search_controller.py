@@ -57,7 +57,7 @@ class TaxonSearchController:
             icon.bind(on_release=lambda x: self.select_taxon(id=x.taxon_id))
             self.screen.iconic_taxa.add_widget(icon)
 
-    def handle_selection(self, metadata):
+    def handle_selection(self, metadata: dict):
         """ Handle selecting a taxon from autocomplete dropdown """
         self.select_taxon(taxon_dict=metadata)
 
