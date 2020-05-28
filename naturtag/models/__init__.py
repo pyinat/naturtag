@@ -1,5 +1,4 @@
-""" These are more like models + controllers, but I'm just going to keep calling them 'models'. """
-from naturtag.models.base import JsonModel
+""" Data classes with utilities for managing specific resources """
 from naturtag.models.taxon import Taxon, get_icon_path
 from naturtag.models.observation import Observation
 from naturtag.models.image_metadata import ImageMetadata

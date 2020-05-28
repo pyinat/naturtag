@@ -52,7 +52,7 @@ def cache_async_thumbnail(async_image, **kwargs):
         return None
 
     # thumbnail_path = get_thumbnail_path(async_image.source)
-    ext = get_format( async_image.source)
+    ext = get_format(async_image.source)
     logger.debug(f'Getting image data downloaded from {async_image.source}; format {ext}')
 
     # Load inner 'texture' bytes into a file-like object that PIL can read

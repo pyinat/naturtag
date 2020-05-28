@@ -66,9 +66,7 @@ class Controller(BoxLayout):
 
         # Add thumbnail to image preview screen
         metadata = MetaMetadata(path)
-        img = ImageMetaTile(
-            source=get_thumbnail(path), metadata=metadata, text=metadata.summary
-        )
+        img = ImageMetaTile(source=get_thumbnail(path), metadata=metadata, text=metadata.summary)
         img.bind(on_touch_down=self.handle_image_click)
         self.image_previews.add_widget(img)
 
@@ -78,11 +76,10 @@ class Controller(BoxLayout):
     def search_tax_obs(self, metadata):
         taxon, observation = get_taxon_and_obs_from_metadata(metadata)
         if taxon:
-            MDApp.get_running_app().taxon_search_controller.select_taxon(json_result=taxon)
+            MDApp.get_running_app().taxon_search_controller.select_taxon(taxon_dict=taxon)
             self.inputs.taxon_id_input.text = str(taxon['id'])
         # TODO: Just temporary debug output here; need to display this info in the UI
         if observation:
-            import json
             logger.info(json.dumps(observation, indent=4))
 
     def remove_image(self, image):

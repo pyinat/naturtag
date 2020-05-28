@@ -17,7 +17,15 @@ from kivy.uix.image import Image
 from kivymd.app import MDApp
 
 from naturtag.constants import (
-    KV_SRC_DIR, INIT_WINDOW_SIZE, MD_PRIMARY_PALETTE, MD_ACCENT_PALETTE, ALL_ATLASES, BACKSPACE, F11)
+    KV_SRC_DIR,
+    INIT_WINDOW_SIZE,
+    MD_PRIMARY_PALETTE,
+    MD_ACCENT_PALETTE,
+    ATLAS_APP_ICONS,
+    ATLAS_TAXON_ICONS,
+    BACKSPACE,
+    F11,
+)
 from naturtag.ui.controller import Controller, alert
 from naturtag.ui.settings_controller import SettingsController
 from naturtag.ui.taxon_search_controller import TaxonSearchController
@@ -68,7 +76,9 @@ class ImageTaggerApp(MDApp):
 
         # Set some event bindings that can't (easily) by done in kvlang
         self.settings_controller.screen.dark_mode_chk.bind(active=self.set_theme_mode)
-        self.controller.image_previews.bind(minimum_height=self.controller.image_previews.setter('height'))
+        self.controller.image_previews.bind(
+            minimum_height=self.controller.image_previews.setter('height')
+        )
 
         # Set Window and theme settings
         Window.size = INIT_WINDOW_SIZE
@@ -79,8 +89,8 @@ class ImageTaggerApp(MDApp):
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
 
         # Preload atlases so they're immediately available in Kivy cache
-        for atlas_path in ALL_ATLASES:
-            Image(source=f'{atlas_path}/')
+        Image(source=f'{ATLAS_APP_ICONS}/')
+        # Image(source=f'{ATLAS_TAXON_ICONS}/')
 
         # alert(  # TODO: make this disappear as soon as an image or another screen is selected
         #     f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=7

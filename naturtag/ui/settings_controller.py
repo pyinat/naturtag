@@ -27,11 +27,12 @@ class SettingsController:
             self.inaturalist['locale'] = getdefaultlocale()[0]
 
         self.screen.preferred_place_id_label.bind(
-            on_release=lambda *x: webbrowser.open(PLACES_BASE_URL))
+            on_release=lambda *x: webbrowser.open(PLACES_BASE_URL)
+        )
 
         # Control widget ids should match the options in the settings file (with suffixes)
         self.controls = {
-            id.replace('_chk',  '').replace('_input', ''): getattr(settings_screen, id)
+            id.replace('_chk', '').replace('_input', ''): getattr(settings_screen, id)
             for id in settings_screen
         }
         self.update_control_widgets()

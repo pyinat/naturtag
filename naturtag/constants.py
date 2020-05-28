@@ -28,6 +28,7 @@ THUMBNAIL_SIZES = {
     'medium': THUMBNAIL_SIZE_DEFAULT,
     'large': THUMBNAIL_SIZE_LG,
 }
+CC_LICENSES = ['CC0', 'CC-BY', 'CC_BY_NC']
 
 # Atlas settings
 ATLAS_MAX_SIZE = 4096

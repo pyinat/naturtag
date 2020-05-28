@@ -17,7 +17,7 @@ from naturtag.atlas import get_atlas_dimensions
         (2000, 128, 209, {'max_size': 1024}, (910, 844)),
         (2000, 128, 209, {'max_bins': 4}, (2600, 5275)),
         (2000, 128, 209, {'max_per_bin': 425}, (780, 14981)),
-    ]
+    ],
 )
 def test_get_atlas_dimensions(n_images, x, y, limit_kwarg, expected_dimensions):
     assert get_atlas_dimensions(n_images, x, y, **limit_kwarg) == expected_dimensions

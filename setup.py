@@ -7,6 +7,7 @@ extras_require = {
     'dev': [
         'black',
         'kivy_examples',
+        'prettyprinter',
         'pytest',
         'Sphinx>=3.0',
         'sphinx-autodoc-typehints',
@@ -24,6 +25,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'appdirs',
+        'attrs',
         'Click>=7.0',
         'click-help-colors',
         'pillow>=7.0',

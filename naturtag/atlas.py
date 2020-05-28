@@ -10,6 +10,7 @@ from naturtag.constants import (
     ATLAS_TAXON_PHOTOS,
     ATLAS_LOCAL_PHOTOS,
     ATLAS_MAX_SIZE,
+    CC_LICENSES,
     THUMBNAILS_DIR,
     THUMBNAIL_SIZE_DEFAULT,
     THUMBNAIL_SIZE_SM,
@@ -52,6 +53,7 @@ def get_atlas(atlas_path):
     """ Get atlas from the Kivy cache if present, otherwise initialize it """
     from kivy.atlas import Atlas
     from kivy.cache import Cache
+
     atlas = Cache.get('kv.atlas', atlas_path.replace('atlas://', ''))
     if not atlas:
         logger.info(f'Initializing atlas "{atlas_path}"')
@@ -67,11 +69,11 @@ def build_taxon_icon_atlas(dir=THUMBNAILS_DIR):
 # TODO: Aspect ratios vary quite a bit for these. Should divide (or sort?) them by square-ish, landscape, and portrait.
 # Or Maybe just crop them all to be square? (or at most 4:3?)
 def build_taxon_photo_atlas(dir=THUMBNAILS_DIR):
-    build_atlas(dir, *THUMBNAIL_SIZE_LG, 'taxon_photos', max_size=ATLAS_MAX_SIZE*2)
+    build_atlas(dir, *THUMBNAIL_SIZE_LG, 'taxon_photos', max_size=ATLAS_MAX_SIZE * 2)
 
 
 def build_local_photo_atlas(dir=THUMBNAILS_DIR):
-    build_atlas(dir, *THUMBNAIL_SIZE_DEFAULT, 'local_photos', max_size=ATLAS_MAX_SIZE*2)
+    build_atlas(dir, *THUMBNAIL_SIZE_DEFAULT, 'local_photos', max_size=ATLAS_MAX_SIZE * 2)
 
 
 def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg):
@@ -94,7 +96,9 @@ def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg)
     image_paths = list(filter_images_by_size(image_paths, src_x, src_y, min_x, min_y))
     logger.info(f'{len(image_paths)} images found')
 
-    atlas_size = get_atlas_dimensions(len(image_paths), src_x, src_y, padding=padding, **limit_kwarg)
+    atlas_size = get_atlas_dimensions(
+        len(image_paths), src_x, src_y, padding=padding, **limit_kwarg
+    )
     logger.info(f'Calculated atlas size: {atlas_size}')
     if atlas_size != (0, 0):
         Atlas.create(atlas_name, image_paths, atlas_size, padding=padding)
@@ -118,7 +122,7 @@ def filter_images_by_size(image_paths, max_x, max_y, min_x, min_y):
         img = Image.open(image_path)
         img_x, img_y = img.size
         img.close()
-        if min_x <= img_x <= max_x and min_y< img_y <= max_y:
+        if min_x <= img_x <= max_x and min_y < img_y <= max_y:
             yield image_path
 
 
@@ -156,7 +160,8 @@ def get_atlas_dimensions(n_images, x, y, padding=2, max_size=None, max_bins=None
         n_images += 1
 
     # Get total atlas dimensions that will fit all the thumbnails
-    x += padding; y += padding
+    x += padding
+    y += padding
     factors = _largest_factor_pair(n_images)
     factor_x = _max_factor(x, factors[0], max_size)
     factor_y = _max_factor(y, factors[1], max_size)
@@ -174,9 +179,9 @@ def _max_factor(n, factor, max_size):
 
 def _largest_factor_pair(n):
     """ Get the largest pair of factors for the given number """
-    for i in reversed(range(1, int(n**0.5) + 1)):
+    for i in reversed(range(1, int(n ** 0.5) + 1)):
         if n % i == 0:
-            return i, int(n/i)
+            return i, int(n / i)
     return n, 1
 
 
@@ -195,14 +200,16 @@ def preload_iconic_taxa_thumbnails():
 def preload_thumnails(taxon, min_rank='family', depth=0):
     logger.info(f'Processing: {taxon.rank} {taxon.name} at depth {depth}')
     thumnail_exists = taxon.photo_url and get_thumbnail_if_exists(taxon.photo_url)
-    if taxon.photo_url and not thumnail_exists:
+
+    # Only preload images that can be redistributed under Creative Commons
+    if taxon.has_cc_photo and not thumnail_exists:
         generate_thumbnail_from_url(taxon.photo_url, 'large')
         generate_thumbnail_from_url(taxon.thumbnail_url, 'small')
         sleep(IMAGE_DOWNLOAD_DELAY)
 
     if taxon.rank not in [min_rank, 'species', 'subspecies']:
-        n_children = len(taxon.children)
-        for i, child in enumerate(taxon.children):
+        n_children = len(taxon.child_taxa)
+        for i, child in enumerate(taxon.child_taxa):
             # Skip child if it's already loaded in another category
             if child.id not in PRELOAD_TAXA:
                 logger.info(f'Child {i}/{n_children}')

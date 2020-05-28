@@ -59,15 +59,22 @@ class TaxonSearchController:
 
     def handle_selection(self, metadata):
         """ Handle selecting a taxon from autocomplete dropdown """
-        self.select_taxon(json_result=metadata)
+        self.select_taxon(taxon_dict=metadata)
 
     def handle_input_id(self, input):
         self.select_taxon(id=int(input.text))
 
-    def select_taxon(self, taxon_obj=None, json_result=None, id=None):
+    def select_taxon(self, taxon_obj=None, taxon_dict=None, id=None):
         """ Update taxon info display by either object, ID, partial record, or complete record """
+        if not any([taxon_obj, taxon_dict, id]):
+            return
+        if not taxon_obj:
+            taxon_obj = Taxon.from_dict(taxon_dict) if taxon_dict else  Taxon.from_id(id)
+
+        logger.info(f'Loading from: {[taxon_obj, taxon_dict, id]}')
+
         self.basic_info.clear_widgets()
-        self.selected_taxon = taxon_obj or Taxon(json_result=json_result, id=id)
+        self.selected_taxon = taxon_obj
         self.taxon_id_input = self.selected_taxon.id
         self.taxon_history.append(self.selected_taxon.id)
 
@@ -81,8 +88,7 @@ class TaxonSearchController:
         logger.info('Loading photo section')
         if self.selected_taxon.photo_url:
             self.taxon_photo.source = self.selected_taxon.photo_url
-        self.taxon_link.bind(
-            on_release=lambda *x: webbrowser.open(self.selected_taxon.link))
+        self.taxon_link.bind(on_release=lambda *x: webbrowser.open(self.selected_taxon.link))
         self.taxon_link.tooltip_text = self.selected_taxon.link
         self.taxon_link.disabled = False
 
@@ -102,7 +108,7 @@ class TaxonSearchController:
         item = ThreeLineAvatarListItem(
             text=self.selected_taxon.name,
             secondary_text=self.selected_taxon.rank.title(),
-            tertiary_text=self.selected_taxon.common_name,
+            tertiary_text=self.selected_taxon.preferred_common_name,
         )
 
         # Icon (if available)
@@ -114,7 +120,7 @@ class TaxonSearchController:
         # Basic info box: Other attrs
         for k in ['id', 'is_active', 'observations_count', 'complete_species_count']:
             label = k.title().replace('_', ' ')
-            value = self.selected_taxon.json.get(k)
+            value = getattr(self.selected_taxon, k)
             item = OneLineListItem(text=f'{label}: {value}')
             self.basic_info.add_widget(item)
 
@@ -122,13 +128,13 @@ class TaxonSearchController:
         """ Populate ancestors and children for the currently selected taxon """
         logger.info('Loading ancestors')
         self.taxon_ancestors.clear_widgets()
-        for taxon in self.selected_taxon.ancestors:
+        for taxon in self.selected_taxon.parent_taxa:
             self.taxon_ancestors.add_widget(self._get_list_item(taxon))
 
         # TODO: This can take awhile if there are lots of children; make these async calls?
         logger.info('Loading children')
         self.taxon_children.clear_widgets()
-        for taxon in self.selected_taxon.children:
+        for taxon in self.selected_taxon.child_taxa:
             self.taxon_children.add_widget(self._get_list_item(taxon))
 
     def _get_list_item(self, taxon):

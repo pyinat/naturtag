@@ -8,7 +8,7 @@ from kivymd.uix.list import ThreeLineAvatarListItem, ILeftBody
 
 from naturtag.models import get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists
-from naturtag.ui.cache import get_any_thumbnail_if_exists, cache_async_thumbnail
+from naturtag.ui.cache import cache_async_thumbnail
 
 logger = getLogger().getChild(__name__)
 
@@ -36,7 +36,7 @@ class CachedAsyncImage(AsyncImage):
         """ Before downloading remote image, first check for existing thumbnail """
         # Differentiating between None and '' here to handle on_load being triggered multiple times
         if self.thumbnail_path is None:
-            self.thumbnail_path = get_any_thumbnail_if_exists(self.source) or ''
+            self.thumbnail_path = get_thumbnail_if_exists(self.source) or ''
             if self.thumbnail_path:
                 logger.debug(f'Found {self.source} in cache: {self.thumbnail_path}')
                 self.source = self.thumbnail_path
@@ -55,7 +55,7 @@ class TaxonListItem(ThreeLineAvatarListItem):
             font_style='H6',
             text=taxon.name,
             secondary_text=taxon.rank,
-            tertiary_text=taxon.common_name or '',
+            tertiary_text=taxon.preferred_common_name,
             **kwargs,
         )
         self.taxon = taxon
