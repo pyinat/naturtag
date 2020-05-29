@@ -56,7 +56,7 @@ class ImageTaggerApp(MDApp):
             screen_path = join(KV_SRC_DIR, f'{screen_name}.kv')
             Builder.load_file(screen_path)
             screens[screen_name] = screen_cls()
-            logger.info(f'Loaded screen {screen_path}')
+            logger.debug(f'Init: Loaded screen {screen_path}')
 
         # Init controllers with references to nested screen objects for easier access
         self.controller = Controller(screens[HOME_SCREEN].ids, screens['metadata'].ids)
@@ -122,7 +122,6 @@ class ImageTaggerApp(MDApp):
 
     def on_keyboard(self, window, key, scancode, codepoint, modifier):
         """ Handle keyboard shortcuts """
-        # logger.info(key, scancode, codepoint, modifier)
         if (modifier, key) == (['ctrl'], BACKSPACE):
             self.home()
         elif (modifier, codepoint) == (['ctrl'], 'o'):
@@ -145,13 +144,12 @@ class ImageTaggerApp(MDApp):
         self.toolbar.title = screen_name.title().replace('_', ' ')
         if screen_name == HOME_SCREEN:
             self.toolbar.left_action_items = [['menu', self.open_nav]]
-            self.toolbar.right_action_items = [
-                ['fullscreen', self.toggle_fullscreen],
-                ['dots-vertical', self.open_settings],
-            ]
         else:
             self.toolbar.left_action_items = [["arrow-left", self.home]]
-            self.toolbar.right_action_items = []
+        self.toolbar.right_action_items = [
+            ['fullscreen', self.toggle_fullscreen],
+            ['dots-vertical', self.open_settings],
+        ]
 
     def set_theme_mode(self, switch=None, is_active=None):
         """ Set light or dark themes, based on either toggle switch or settings """

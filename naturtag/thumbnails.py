@@ -5,7 +5,7 @@ from os import makedirs
 from os.path import dirname, isfile, join, normpath, splitext
 from shutil import copyfileobj
 from logging import getLogger
-from typing import Tuple, Union
+from typing import BinaryIO, Tuple, Union
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
@@ -140,7 +140,7 @@ def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
 
 
 def generate_thumbnail(
-        source,
+        source: Union[BinaryIO, str],
         thumbnail_path: str,
         fmt: str=None,
         size: str='medium',
@@ -168,13 +168,12 @@ def generate_thumbnail(
             image.thumbnail(target_size)
         else:
             logger.debug(f'Image is already thumbnail size: ({image.size})')
-        image.save(thumbnail_path, fmt=fmt.replace('jpg', 'jpeg') if fmt else None)
+        image.save(thumbnail_path, format=fmt.replace('jpg', 'jpeg') if fmt else None)
         return thumbnail_path
 
     # If we're unable to generate a thumbnail, just return the original image source
-    except RuntimeError as e:
-        logger.error('Failed to generate thumbnail:')
-        logger.exception(e)
+    except RuntimeError:
+        logger.exception('Failed to generate thumbnail')
         return source
 
 
@@ -204,3 +203,11 @@ def flip_all(path: str):
         image = flip(image)
         image.save(source)
         image.close()
+
+
+def to_monochrome(source, fmt):
+    """ Convert an image to monochrome """
+    img = Image.open(source)
+    img.convert('1')
+    img.save(source, format=fmt.replace('jpg', 'jpeg') if fmt else None)
+    return source

@@ -59,7 +59,7 @@ class Controller(BoxLayout):
             return
 
         # Add to file list
-        logger.info(f'Adding image: {path}')
+        logger.info(f'Main: Adding image {path}')
         self.file_list.append(path)
         self.file_list.sort()
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
@@ -75,16 +75,21 @@ class Controller(BoxLayout):
 
     def search_tax_obs(self, metadata):
         taxon, observation = get_taxon_and_obs_from_metadata(metadata)
+
+        # Select a taxon discovered from tags, unless one has already beeen selected
+        taxon_search_controller = MDApp.get_running_app().taxon_search_controller
+        if taxon and taxon_search_controller.selected_taxon is None:
+            taxon_search_controller.select_taxon(taxon_dict=taxon)
+
         if taxon:
-            MDApp.get_running_app().taxon_search_controller.select_taxon(taxon_dict=taxon)
             self.inputs.taxon_id_input.text = str(taxon['id'])
         # TODO: Just temporary debug output here; need to display this info in the UI
         if observation:
-            logger.info(json.dumps(observation, indent=4))
+            logger.debug('Main: ' + json.dumps(observation, indent=4))
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
-        logger.info(f'Removing image: {image.metadata.image_path}')
+        logger.info(f'Main: Removing image {image.metadata.image_path}')
         self.file_list.remove(image.metadata.image_path)
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
         self.selected_image = None
@@ -92,7 +97,7 @@ class Controller(BoxLayout):
 
     def clear(self, *args):
         """ Clear all image selections """
-        logger.info('Clearing image selections')
+        logger.info('Main: Clearing image selections')
         self.file_list = []
         self.file_list_text = ''
         self.inputs.file_list_text_box.text = ''
@@ -107,6 +112,7 @@ class Controller(BoxLayout):
 
     def get_state(self, *args):
         logger.info(
+            'Main:',
             f'IDs: {self.ids}\n'
             f'Files:\n{self.file_list_text}\n'
             f'Input: {self.get_input_dict()}\n'
@@ -153,7 +159,7 @@ class Controller(BoxLayout):
             f'Taxon ID: {inputs["taxon_id"]}' if inputs['taxon_id']
             else f'Observation ID: {inputs["observation_id"]}'
         )
-        logger.info(f'Tagging {len(self.file_list)} images with metadata for {selected_id}')
+        logger.info(f'Main: Tagging {len(self.file_list)} images with metadata for {selected_id}')
 
         # TODO: Is there a better way to access settings?
         metadata_settings = MDApp.get_running_app().settings_controller.metadata

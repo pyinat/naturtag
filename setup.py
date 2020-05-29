@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 from naturtag import __version__
 
 extras_require = {
-    'ui': ['docutils', 'kivy>=1.11', 'kivymd~=0.104.1', 'pygments'],
+    'ui': ['kivy>=1.11', 'kivymd~=0.104.1', 'pygments'],
     'dev': [
         'black',
         'kivy_examples',

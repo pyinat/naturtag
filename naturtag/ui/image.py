@@ -1,4 +1,5 @@
 """ Classes to extend image container functionality for caching, metadata, etc. """
+from io import BytesIO
 from logging import getLogger
 
 from kivy.properties import ObjectProperty, NumericProperty
@@ -7,7 +8,7 @@ from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 from kivymd.uix.list import ThreeLineAvatarListItem, ILeftBody
 
 from naturtag.models import get_icon_path
-from naturtag.thumbnails import get_thumbnail_if_exists
+from naturtag.thumbnails import get_thumbnail_if_exists, get_format
 from naturtag.ui.cache import cache_async_thumbnail
 
 logger = getLogger().getChild(__name__)
@@ -46,6 +47,20 @@ class CachedAsyncImage(AsyncImage):
         """ After loading, cache the downloaded image for future use, if not previously done """
         if not get_thumbnail_if_exists(self.source):
             cache_async_thumbnail(self, size=self.thumbnail_size)
+
+    def get_image_bytes(self):
+        if not (self._coreimage.image and self._coreimage.image.texture):
+            logger.warning(f'Texture for {self.source} not loaded')
+            return None
+
+        # thumbnail_path = get_thumbnail_path(self.source)
+        ext = get_format(self.source)
+        logger.debug(f'Getting image data downloaded from {self.source}; format {ext}')
+
+        # Load inner 'texture' bytes into a file-like object that PIL can read
+        image_bytes = BytesIO()
+        self._coreimage.image.texture.save(image_bytes, fmt=ext)
+        return image_bytes, ext
 
 
 class TaxonListItem(ThreeLineAvatarListItem):

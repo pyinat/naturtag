@@ -23,6 +23,7 @@
             MDLabel:
                 text: 'Categories'
                 font_style: 'H6'
+                theme_text_color: 'Primary'
                 size_hint_max_y: dp(60)
             IconicTaxaLayout:
                 id: iconic_taxa
@@ -33,10 +34,14 @@
         # Info display for selected taxon
         MDBoxLayout:
             orientation: 'vertical'
+            padding: dp(20)
             md_bg_color: app.theme_cls.bg_dark
             MDGridLayout:
                 cols: 2
                 spacing: dp(10)
+                size_hint_y: .7
+                size_hint_min_y: dp(300)
+                size_hint_max_y: dp(650)
                 MDBoxLayout:
                     orientation: 'vertical'
                     spacing: dp(10)
@@ -44,20 +49,14 @@
                     CachedAsyncImage:
                         id: selected_taxon_photo
                         size_hint_max_y: dp(500)
-                    TooltipIconButton:
-                        id: selected_taxon_link_button
-                        icon: 'link-variant'
-                        text: 'View on iNaturalist'
-                        width: self.parent.width
-                        disabled: True
-                    TooltipIconButton:
-                        id: taxon_parent_button
-                        icon: 'arrow-up-circle-outline'
-                        text: 'View parent'
-                        width: self.parent.width
-                        disabled: True
-                MDList:
-                    id: basic_info_section
+                MDBoxLayout:
+                    size_hint_max_x:  dp(500)
+                    orientation: 'vertical'
+                    ScrollViewY:
+                        MDList:
+                            id: basic_info_section
+                    LinksSection:
+                        id: taxon_links
             TaxonomySection:
                 id: taxonomy_section
 
@@ -87,6 +86,23 @@
     col_default_width: dp(40)
     col_force_default: True
 
+# Taxon links
+<LinksSection@MDBoxLayout>:
+    size_hint_max_y: dp(50)
+    TooltipIconButton:
+        id: taxon_parent_button
+        icon: 'arrow-up-circle-outline'
+        text: 'View parent'
+        width: dp(250)
+        disabled: True
+    TooltipIconButton:
+        id: selected_taxon_link_button
+        icon: 'link-variant'
+        text: 'View on iNaturalist'
+        width: dp(250)
+        disabled: True
+
+# Taxon ancestors & children
 <TaxonomySection@MDGridLayout>:
     cols: 2
     OneLineListItem:
@@ -96,8 +112,10 @@
         font_style: 'H5'
         text: 'Children'
     ScrollViewY:
+        size_hint_max_x: dp(500)
         MDList:
             id: taxon_ancestors
     ScrollViewY:
+        size_hint_max_x: dp(500)
         MDList:
             id: taxon_children

@@ -1,30 +1,31 @@
-""" Utilities for UI-specific caching """
+""" UI-specific utilities for image caching """
 from logging import getLogger
-from io import BytesIO
+
+from kivy.core.image import Image
 
 from naturtag.thumbnails import (
     get_thumbnail_hash,
-    get_format,
     get_thumbnail,
     get_thumbnail_if_exists,
     generate_thumbnail_from_bytes,
+    to_monochrome,
 )
 from naturtag.atlas import get_resource_path_if_exists
 
 logger = getLogger().getChild(__name__)
 
 
-def get_any_thumbnail(source, size='small'):
+def get_any_thumbnail(source: str, size: str='small') -> str:
     """ Get the path of a thumbnail stored inside either an atlas or the thumbnail cache """
     return get_atlas_thumbnail_if_exists(source, size) or get_thumbnail(source)
 
 
-def get_any_thumbnail_if_exists(source, size='small'):
+def get_any_thumbnail_if_exists(source: str, size: str='small') -> str:
     """ Get the path of a thumbnail stored inside either an atlas or the thumbnail cache """
     return get_atlas_thumbnail_if_exists(source, size) or get_thumbnail_if_exists(source)
 
 
-def get_atlas_thumbnail_if_exists(source, size):
+def get_atlas_thumbnail_if_exists(source: str, size: str) -> str:
     """ Get the path of a thumbnail stored inside an atlas, if available
 
     Args:
@@ -47,15 +48,13 @@ def cache_async_thumbnail(async_image, **kwargs):
     Returns:
         str: The path of the new thumbnail
     """
-    if not (async_image._coreimage.image and async_image._coreimage.image.texture):
-        logger.warning(f'Texture for {async_image.source} not loaded')
-        return None
-
-    # thumbnail_path = get_thumbnail_path(async_image.source)
-    ext = get_format(async_image.source)
-    logger.debug(f'Getting image data downloaded from {async_image.source}; format {ext}')
-
-    # Load inner 'texture' bytes into a file-like object that PIL can read
-    image_bytes = BytesIO()
-    async_image._coreimage.image.texture.save(image_bytes, fmt=ext)
+    image_bytes, _ = async_image.get_image_bytes()
     generate_thumbnail_from_bytes(image_bytes, async_image.source, **kwargs)
+
+
+# TODO: Not quite working as intended
+def async_image_to_monochrome(async_image, **kwargs):
+    image_bytes, ext = async_image.get_image_bytes()
+    image_bytes = to_monochrome(image_bytes, ext)
+    image_bytes.seek(0)
+    return Image(image_bytes, ext=ext)

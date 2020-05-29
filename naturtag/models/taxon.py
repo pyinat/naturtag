@@ -2,6 +2,7 @@ import attr
 from typing import List, Dict
 
 from pyinaturalist.node_api import get_taxa_by_id
+from naturtag.inat_metadata import get_rank_idx
 from naturtag.constants import TAXON_BASE_URL, ICONIC_TAXA, ATLAS_APP_ICONS, CC_LICENSES, RANKS
 
 kwarg = attr.ib(default=None)
@@ -115,8 +116,8 @@ class Taxon:
     @property
     def child_taxa(self) -> List:
         """ Get this taxon's children as Taxon objects (in descending order of rank) """
-        def get_rank_idx(taxon):
-            return RANKS.index(taxon.rank) if taxon.rank in RANKS else 0
+        def get_child_idx(taxon):
+            return get_rank_idx(taxon.rank), taxon.name
 
         if self._child_taxa is None:
             # TODO: Determine if it's already a full record but the taxon has no children?
@@ -124,8 +125,7 @@ class Taxon:
                 self.update_from_full_record()
             self._child_taxa = [Taxon.from_dict(t, partial=True) for t in self.children]
             # Children may be different ranks; sort children by rank then name
-            self._child_taxa.sort(key=lambda t: t.name)
-            self._child_taxa.sort(key=lambda t: RANKS.index(t.rank), reverse=True)
+            self._child_taxa.sort(key=get_child_idx)
         return self._child_taxa
 
 

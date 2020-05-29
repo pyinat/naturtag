@@ -150,10 +150,13 @@ def get_hierarchical_keywords(keywords):
 
 def sort_taxonomy_keywords(keywords):
     """ Sort keywords by taxonomic rank, where applicable """
-    def get_rank_idx(tag):
-        base_tag = tag.split(':')[-1].split('=')[0]
-        return RANKS.index(base_tag) if base_tag in RANKS else 0
-    return sorted(keywords, key=get_rank_idx, reverse=True)
+    def _get_rank_idx(tag):
+        return get_rank_idx(tag.split(':')[-1].split('=')[0])
+    return sorted(keywords, key=_get_rank_idx)
+
+
+def get_rank_idx(rank):
+    return RANKS[::-1].index(rank) if rank in RANKS else 0
 
 
 def get_inaturalist_ids(metadata):
