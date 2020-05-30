@@ -63,25 +63,31 @@ class TaxonSearchController:
         self.taxon_history_list = screen.history_tab.ids.taxon_history_list
         self.frequent_taxa = get_app_settings().frequent_taxa
         self.frequent_taxa_list = screen.frequent_tab.ids.frequent_taxa_list
+        self.frequent_taxa_list.sort_key = self.get_frequent_taxon_idx
         self.starred_taxa_map = {}
         self.starred_taxa_ids = get_app_settings().starred_taxa
         self.starred_taxa_list = screen.starred_tab.ids.starred_taxa_list
         self.init_stored_taxa()
 
     def handle_input_id(self, input):
+        """ Handle entering a taxon ID and pressing Enter """
         self.select_taxon(id=int(input.text))
 
     def handle_selection(self, metadata: dict):
         """ Handle selecting a taxon from autocomplete dropdown """
         self.select_taxon(taxon_dict=metadata)
 
-    # TODO: Add button to items in starred tab to remove from list (in addition to star next to selected taxon)
     def handle_star(self, button):
         """ Either add or remove a taxon from the starred list """
         if button.is_selected:
             self.add_star(self.selected_taxon.id)
         else:
             self.remove_star(self.selected_taxon.id)
+
+    def get_frequent_taxon_idx(self, list_item):
+        """ Sort key for frequently viewed taxa """
+        num_views = self.frequent_taxa.get(list_item.taxon.id, 0)
+        return num_views * -1
 
     # TODO: This should be delayed / populated asynchronously
     def init_stored_taxa(self):
@@ -111,11 +117,6 @@ class TaxonSearchController:
             self.taxon_history_map[taxon_id] = item
         self.taxon_history_list.add_widget(item, len(self.taxon_history_list.children))
 
-        # Update frequent items
-        # TODO: Re-sort frequent items in UI
-        self.frequent_taxa.setdefault(taxon_id, 0)
-        self.frequent_taxa[taxon_id] += 1
-
     def add_star(self, taxon_id):
         logger.info(f'Adding taxon to starred: {taxon_id}')
         item = self._get_list_item(taxon_id=taxon_id)
@@ -123,10 +124,15 @@ class TaxonSearchController:
             self.starred_taxa_ids.append(taxon_id)
         self.starred_taxa_map[taxon_id] = item
         self.starred_taxa_list.add_widget(item, len(self.starred_taxa_list.children))
-        # X button
+        # Add X (remove) button
         remove_button = StarButton(taxon_id, icon='close')
         remove_button.bind(on_release=lambda x: self.remove_star(x.taxon_id))
         item.add_widget(remove_button)
+
+    def add_frequent_taxon(self, taxon_id):
+        self.frequent_taxa.setdefault(taxon_id, 0)
+        self.frequent_taxa[taxon_id] += 1
+        self.frequent_taxa_list.sort()
 
     def remove_star(self, taxon_id):
         logger.info(f'Removing taxon from starred: {taxon_id}')
@@ -150,12 +156,15 @@ class TaxonSearchController:
         self.load_basic_info_section()
         self.load_taxonomy_section()
         self.update_history(self.selected_taxon.id)
+        self.add_frequent_taxon(self.selected_taxon.id)
 
     def load_photo_section(self):
         """ Load taxon photo + links """
         logger.info('Taxon: Loading photo section')
         if self.selected_taxon.photo_url:
             self.taxon_photo.source = self.selected_taxon.photo_url
+
+        # Configure link to iNaturalist page
         self.taxon_link.bind(on_release=lambda *x: webbrowser.open(self.selected_taxon.link))
         self.taxon_link.tooltip_text = self.selected_taxon.link
         self.taxon_link.disabled = False
@@ -203,14 +212,14 @@ class TaxonSearchController:
         logger.info('Taxon: Loading ancestors')
         self.taxon_ancestors.clear_widgets()
         for taxon in self.selected_taxon.parent_taxa:
-            self.taxon_ancestors.add_widget(self._get_list_item(taxon))
+            self.taxon_ancestors.add_widget(self._get_list_item(taxon=taxon))
 
         # TODO: This can take awhile if there are lots of children; make these async calls?
         logger.info('Taxon: Loading children')
         self.taxon_children.clear_widgets()
         for taxon in self.selected_taxon.child_taxa:
-            self.taxon_children.add_widget(self._get_list_item(taxon))
+            self.taxon_children.add_widget(self._get_list_item(taxon=taxon))
 
-    def _get_list_item(self, taxon=None, taxon_id=None):
-        taxon = taxon or Taxon.from_id(taxon_id or self.selected_taxon.id)
-        return TaxonListItem(taxon, lambda x: self.select_taxon(x.taxon))
+    def _get_list_item(self, **kwargs):
+        """ Get a taxon list item, with thumbnail + info, that selects its taxon when pressed """
+        return TaxonListItem(**kwargs, button_callback=lambda x: self.select_taxon(x.taxon))

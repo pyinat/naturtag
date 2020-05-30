@@ -1,6 +1,7 @@
 #:import TaxonAutocompleteSearch naturtag.ui.taxon_search_controller.TaxonAutocompleteSearch
 #:import CachedAsyncImage naturtag.ui.image.CachedAsyncImage
 
+
 <TaxonSearchScreen>:
     id: taxon_search_screen
     name: 'taxon_search'
@@ -99,7 +100,7 @@
         text: 'Frequent'
     ScrollViewY:
         size_hint_max_x: dp(500)
-        MDList:
+        SortableList:
             id: frequent_taxa_list
 
 # Starred taxa tab

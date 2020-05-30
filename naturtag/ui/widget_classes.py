@@ -4,7 +4,7 @@ from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.button import MDRoundFlatIconButton
-from kivymd.uix.list import IconRightWidget, ILeftBodyTouch, OneLineListItem
+from kivymd.uix.list import MDList, IconRightWidget, ILeftBodyTouch, OneLineListItem
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase, MDTabsLabel
@@ -54,7 +54,9 @@ class TooltipIconButton(MDRoundFlatIconButton, MDTooltip):
 
 
 class StarButton(IconRightWidget):
-    """ Icon button that toggles between 'selected' and 'unselected' star icons """
+    """
+    Selectable icon button that optionally toggles between 'selected' and 'unselected' star icons
+    """
     taxon_id = NumericProperty()
     is_selected = BooleanProperty()
 
@@ -72,6 +74,20 @@ class StarButton(IconRightWidget):
     def set_icon(self):
         if not self.custom_icon:
             self.icon = 'star' if self.is_selected else 'star-outline'
+
+
+class SortableList(MDList):
+    """ List class that can be sorted by a custom sort key """
+    def __init__(self, sort_key=None, **kwargs):
+        self.sort_key = sort_key
+        super().__init__(**kwargs)
+
+    def sort(self):
+        """ Sort child items in-place using current sort key """
+        children = self.children.copy()
+        self.clear_widgets()
+        for child in sorted(children, key=self.sort_key):
+            self.add_widget(child)
 
 
 class Tab(MDBoxLayout, MDTabsBase):

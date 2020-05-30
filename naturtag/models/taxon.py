@@ -78,6 +78,10 @@ class Taxon:
         self.taxon_photos = t.taxon_photos
 
     @property
+    def ancestry_str(self):
+        return ' | '.join(t.name for t in self.parent_taxa)
+
+    @property
     def icon_path(self) -> str:
         return get_icon_path(self.iconic_taxon_id)
 

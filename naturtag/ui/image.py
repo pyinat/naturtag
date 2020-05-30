@@ -6,8 +6,9 @@ from kivy.properties import ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 from kivymd.uix.list import ThreeLineAvatarIconListItem, ILeftBody
+from kivymd.uix.tooltip import MDTooltip
 
-from naturtag.models import get_icon_path
+from naturtag.models import Taxon, get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists, get_format
 from naturtag.ui.cache import cache_async_thumbnail
 
@@ -63,14 +64,30 @@ class IconicTaxaIcon(SmartTile):
         super().__init__(source=get_icon_path(taxon_id), **kwargs)
 
 
-class TaxonListItem(ThreeLineAvatarIconListItem):
+class ImageMetaTile(SmartTileWithLabel):
+    """ Class that contains an image thumbnail to display plus its associated metadata """
+    metadata = ObjectProperty()
+    allow_stretch = False
+    box_color = [0, 0, 0, 0.4]
+
+    def __init__(self, metadata, **kwargs):
+        super().__init__(**kwargs)
+        self.metadata = metadata
+
+
+class TaxonListItem(ThreeLineAvatarIconListItem, MDTooltip):
     """ Class that displays condensed taxon info as a list item """
-    def __init__(self, taxon, button_callback=None, **kwargs):
+    def __init__(self, taxon=None, taxon_id=None, button_callback=None, **kwargs):
+        if not taxon and not taxon_id:
+            raise ValueError('Must provide either a taxon object or ID')
+        taxon = taxon or Taxon.from_id(taxon_id)
+
         super().__init__(
             font_style='H6',
             text=taxon.name,
             secondary_text=taxon.rank,
             tertiary_text=taxon.preferred_common_name,
+            tooltip_text=f'ID: {taxon.id}\nAncestry: {taxon.ancestry_str}\nChildren: {len(taxon.child_taxa)}',
             **kwargs,
         )
         self.taxon = taxon
@@ -83,14 +100,3 @@ class TaxonThumbnail(CachedAsyncImage, ILeftBody):
     """ Class that contains a taxon thumbnail to be used in a list item """
     def __init__(self, **kwargs):
         super().__init__(thumbnail_size='small', **kwargs)
-
-
-class ImageMetaTile(SmartTileWithLabel):
-    """ Class that contains an image thumbnail to display plus its associated metadata """
-    metadata = ObjectProperty()
-    allow_stretch = False
-    box_color = [0, 0, 0, 0.4]
-
-    def __init__(self, metadata, **kwargs):
-        super().__init__(**kwargs)
-        self.metadata = metadata
