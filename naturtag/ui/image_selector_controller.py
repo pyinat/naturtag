@@ -14,16 +14,14 @@ from naturtag.tagger import tag_images
 from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
 from naturtag.thumbnails import get_thumbnail
+from naturtag.ui import get_taxon_view_controller
 from naturtag.ui.image import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
 
 
-class Controller(BoxLayout):
-    """
-    Top-level UI element that controls application state and logic,
-    excluding screens & navigation, which is managed by ImageTaggerApp
-    """
+class ImageSelectorController(BoxLayout):
+    """ Controller class to manage image slector screen """
     file_list = ListProperty([])
     file_list_text = StringProperty()
     selected_image = ObjectProperty(None)
@@ -77,9 +75,9 @@ class Controller(BoxLayout):
         taxon, observation = get_taxon_and_obs_from_metadata(metadata)
 
         # Select a taxon discovered from tags, unless one has already beeen selected
-        taxon_search_controller = MDApp.get_running_app().taxon_search_controller
-        if taxon and taxon_search_controller.selected_taxon is None:
-            taxon_search_controller.select_taxon(taxon_dict=taxon)
+        taxon_view_controller = get_taxon_view_controller()
+        if taxon and taxon_view_controller.selected_taxon is None:
+            taxon_view_controller.select_taxon(taxon_dict=taxon)
 
         if taxon:
             self.inputs.taxon_id_input.text = str(taxon['id'])

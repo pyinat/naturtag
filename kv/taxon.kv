@@ -1,12 +1,12 @@
-#:import TaxonAutocompleteSearch naturtag.ui.taxon_search_controller.TaxonAutocompleteSearch
+#:import TaxonAutocompleteSearch naturtag.ui.taxon_selection_controller.TaxonAutocompleteSearch
 #:import CachedAsyncImage naturtag.ui.image.CachedAsyncImage
 
 
-<TaxonSearchScreen>:
-    id: taxon_search_screen
-    name: 'taxon_search'
+<TaxonScreen>:
+    name: 'taxon'
 
     BoxLayout:
+        # Taxon selection: search, history, etc.
         MDTabs:
             id: taxon_selection_tabs
             size_hint_x: .4
@@ -75,47 +75,6 @@
     # Temp spacer
     MDBoxLayout:
         height: 300
-
-# Taxon history tab
-<TaxonHistoryTab@Tab>:
-    text: 'history'
-    # tooltip_text: 'History'
-    orientation: 'vertical'
-    OneLineListItem:
-        font_style: 'H5'
-        text: 'History'
-    ScrollViewY:
-        size_hint_max_x: dp(500)
-        MDList:
-            id: taxon_history_list
-
-# Frequently viewed taxa tab
-<FrequentTaxaTab@Tab>:
-    id: frequent_tab
-    text: 'poll'
-    # tooltip_text: 'Frequent'
-    orientation: 'vertical'
-    OneLineListItem:
-        font_style: 'H5'
-        text: 'Frequent'
-    ScrollViewY:
-        size_hint_max_x: dp(500)
-        SortableList:
-            id: frequent_taxa_list
-
-# Starred taxa tab
-<StarredTaxaTab@Tab>:
-    id: starred_tab
-    text: 'star'
-    # tooltip_text: 'Starred'
-    orientation: 'vertical'
-    OneLineListItem:
-        font_style: 'H5'
-        text: 'Starred'
-    ScrollViewY:
-        size_hint_max_x: dp(500)
-        MDList:
-            id: starred_taxa_list
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:

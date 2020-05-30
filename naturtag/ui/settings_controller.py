@@ -2,6 +2,8 @@ from locale import locale_alias, getdefaultlocale
 from logging import getLogger
 import webbrowser
 
+from kivymd.app import MDApp
+
 from naturtag.constants import PLACES_BASE_URL
 from naturtag.settings import (
     read_settings,
@@ -29,6 +31,7 @@ class SettingsController:
         self.screen.preferred_place_id_label.bind(
             on_release=lambda *x: webbrowser.open(PLACES_BASE_URL)
         )
+        self.screen.dark_mode_chk.bind(active=MDApp.get_running_app().set_theme_mode)
 
         # Control widget ids should match the options in the settings file (with suffixes)
         self.controls = {

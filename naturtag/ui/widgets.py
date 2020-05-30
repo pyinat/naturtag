@@ -1,45 +1,16 @@
-""" Stub classes for custom widgets and screens """
+""" Custom widgets and stub classes """
 from kivy.properties import BooleanProperty, NumericProperty, StringProperty
 from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.button import MDRoundFlatIconButton
 from kivymd.uix.list import MDList, IconRightWidget, ILeftBodyTouch, OneLineListItem
-from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.tab import MDTabsBase, MDTabsLabel
 from kivymd.uix.textfield import MDTextFieldRound
 from kivymd.uix.tooltip import MDTooltip
 
 
-# Screen classes
-class ImageSelectorScreen(MDScreen):
-    pass
-
-class SettingsScreen(MDScreen):
-    pass
-
-class MetadataViewScreen(MDScreen):
-    pass
-
-class TaxonSearchScreen(MDScreen):
-    pass
-
-class ObservationSearchScreen(MDScreen):
-    pass
-
-
-HOME_SCREEN = 'image_selector'
-SCREENS = {
-    HOME_SCREEN: ImageSelectorScreen,
-    'settings': SettingsScreen,
-    'metadata': MetadataViewScreen,
-    'taxon_search': TaxonSearchScreen,
-    'observation_search': ObservationSearchScreen,
-}
-
-
-# Controls & other UI elements
 class SwitchListItem(ILeftBodyTouch, MDSwitch):
     """ Switch that works as a list item """
 
@@ -51,6 +22,21 @@ class TooltipFloatingButton(MDFloatingActionButton, MDTooltip):
 
 class TooltipIconButton(MDRoundFlatIconButton, MDTooltip):
     """ Flat button class with icon and tooltip behavior """
+
+
+# TODO: Debug root cause of rogue tooltips!
+class HideableTooltip(MDTooltip):
+    """
+    This is a workaround for unexpected bahvior with tooltips and tabs. If a HideableTooltip is
+    in an unselected tab, it will always report that the mouse cursor does not intersect it.
+    """
+    def __init__(self, is_visible_callback, **kwargs):
+        self.is_visible_callback = is_visible_callback
+        super().__init__(**kwargs)
+
+    def on_mouse_pos(self, *args):
+        if self.is_visible_callback():
+            super().on_mouse_pos(*args)
 
 
 class StarButton(IconRightWidget):

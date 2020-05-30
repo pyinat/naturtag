@@ -26,11 +26,11 @@ from naturtag.constants import (
     BACKSPACE,
     F11,
 )
-from naturtag.ui.controller import Controller, alert
+from naturtag.ui.image_selector_controller import ImageSelectorController, alert
 from naturtag.ui.settings_controller import SettingsController
-from naturtag.ui.taxon_search_controller import TaxonSearchController
-from naturtag.ui.observation_search_controller import ObservationSearchController
-from naturtag.ui.widget_classes import SCREENS, HOME_SCREEN
+from naturtag.ui.taxon_selection_controller import TaxonSelectionController
+from naturtag.ui.taxon_view_controller import TaxonViewController
+from naturtag.ui.screens import HOME_SCREEN, Root, load_screens
 
 logger = getLogger().getChild(__name__)
 
@@ -40,49 +40,46 @@ class ImageTaggerApp(MDApp):
     Manages window, theme, main screen and navigation state; other application logic is
     handled by Controller
     """
-    controller = ObjectProperty()
-    taxon_search_controller = ObjectProperty()
+    root = ObjectProperty()
+    image_selector_controller = ObjectProperty()
+    taxon_selection_controller = ObjectProperty()
+    taxon_view_controller = ObjectProperty()
     settings_controller = ObjectProperty
     nav_drawer = ObjectProperty()
     screen_manager = ObjectProperty()
     toolbar = ObjectProperty()
 
+    @staticmethod
+    def _add_screen(screen_name):
+        screen_path = join(KV_SRC_DIR, f'{screen_name}.kv')
+        Builder.load_file(screen_path)
+        logger.debug(f'Init: Loaded screen {screen_path}')
+
     def build(self):
         # Init screens and store references to them
-        screens = {}
-        Builder.load_file(join(KV_SRC_DIR, 'main.kv'))
-        Builder.load_file(join(KV_SRC_DIR, 'autocomplete.kv'))
-        for screen_name, screen_cls in SCREENS.items():
-            screen_path = join(KV_SRC_DIR, f'{screen_name}.kv')
-            Builder.load_file(screen_path)
-            screens[screen_name] = screen_cls()
-            logger.debug(f'Init: Loaded screen {screen_path}')
+        screens = load_screens()
+        self.root = Root()
 
-        # Init controllers with references to nested screen objects for easier access
-        self.controller = Controller(screens[HOME_SCREEN].ids, screens['metadata'].ids)
+        # Init controllers with references to nested screen objects
+        self.image_selector_controller = ImageSelectorController(screens[HOME_SCREEN].ids, screens['metadata'].ids)
         self.settings_controller = SettingsController(screens['settings'].ids)
-        self.taxon_search_controller = TaxonSearchController(screens['taxon_search'].ids)
-        # observation_search_controller = ObservationSearchController(screens['observation_search'].ids)
+        self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
+        self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
+        # observation_search_controller = ObservationSearchController(screens['observation'].ids)
 
         # Init screen manager and nav elements
-        self.nav_drawer = self.controller.ids.nav_drawer
-        self.screen_manager = self.controller.ids.screen_manager
-        self.toolbar = self.controller.ids.toolbar
+        self.nav_drawer = self.root.ids.nav_drawer
+        self.screen_manager = self.root.ids.screen_manager
+        self.toolbar = self.root.ids.toolbar
         for screen_name, screen in screens.items():
             self.screen_manager.add_widget(screen)
         self.set_theme_mode()
         self.home()
-        # self.switch_screen('taxon_search')
-
-        # Set some event bindings that can't (easily) by done in kvlang
-        self.settings_controller.screen.dark_mode_chk.bind(active=self.set_theme_mode)
-        self.controller.image_previews.bind(
-            minimum_height=self.controller.image_previews.setter('height')
-        )
+        # self.switch_screen('taxa')
 
         # Set Window and theme settings
         Window.size = INIT_WINDOW_SIZE
-        Window.bind(on_dropfile=lambda x, y: self.controller.add_images(y))
+        Window.bind(on_dropfile=lambda x, y: self.image_selector_controller.add_images(y))
         Window.bind(on_keyboard=self.on_keyboard)
         Window.bind(on_request_close=self.on_request_close)
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
@@ -95,7 +92,7 @@ class ImageTaggerApp(MDApp):
         # alert(  # TODO: make this disappear as soon as an image or another screen is selected
         #     f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=7
         # )
-        return self.controller
+        return self.root
 
     def home(self, *args):
         self.switch_screen(HOME_SCREEN)
@@ -116,7 +113,7 @@ class ImageTaggerApp(MDApp):
         self.close_nav()
 
     def on_request_close(self, *args):
-        """ Save any usaved settings before exiting """
+        """ Save any unsaved settings before exiting """
         self.settings_controller.save_settings()
         self.stop()
 
@@ -129,13 +126,13 @@ class ImageTaggerApp(MDApp):
         elif (modifier, codepoint) == (['ctrl'], 'q'):
             self.on_request_close()
         elif (modifier, codepoint) == (['ctrl'], 'r'):
-            self.controller.run()
+            self.image_selector_controller.run()
         elif (modifier, codepoint) == (['ctrl'], 's'):
             self.switch_screen('settings')
         elif (modifier, codepoint) == (['ctrl'], 't'):
-            self.switch_screen('taxon_search')
+            self.switch_screen('taxa')
         elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
-            self.controller.clear()
+            self.image_selector_controller.clear()
         elif key == F11:
             self.toggle_fullscreen()
 

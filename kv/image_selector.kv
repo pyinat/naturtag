@@ -1,5 +1,4 @@
 <ImageSelectorScreen>:
-    id: image_selector_screen
     name: 'image_selector'
 
     BoxLayout:
@@ -36,7 +35,7 @@
                         icon: 'crosshairs-gps'
                         width: dp(200)
                         on_press:
-                            app.switch_screen('observation_search')
+                            app.switch_screen('observation')
                     IntField:
                         id: observation_id_input
                         hint_text: 'Observation ID'
@@ -46,7 +45,7 @@
                         icon: 'ladybug'
                         width: dp(200)
                         on_press:
-                            app.switch_screen('taxon_search')
+                            app.switch_screen('taxon')
                     IntField:
                         id: taxon_id_input
                         hint_text: 'Taxon ID'

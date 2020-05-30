@@ -11,6 +11,7 @@ from kivymd.uix.tooltip import MDTooltip
 from naturtag.models import Taxon, get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists, get_format
 from naturtag.ui.cache import cache_async_thumbnail
+from naturtag.ui.widgets import HideableTooltip
 
 logger = getLogger().getChild(__name__)
 
@@ -75,21 +76,6 @@ class ImageMetaTile(SmartTileWithLabel):
         self.metadata = metadata
 
 
-# TODO: Debug root cause of rogue tooltips!
-class HideableTooltip(MDTooltip):
-    """
-    This is a workaround for unexpected bahvior with tooltips and tabs. If a HideableTooltip is
-    in an unselected tab, it will always report that the mouse cursor does not intersect it.
-    """
-    def __init__(self, tab_check_callback, **kwargs):
-        self.tab_check_callback = tab_check_callback
-        super().__init__(**kwargs)
-
-    def on_mouse_pos(self, *args):
-        if self.tab_check_callback():
-            super().on_mouse_pos(*args)
-
-
 class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
     """ Class that displays condensed taxon info as a list item """
     def __init__(self, taxon=None, taxon_id=None, parent_tab=None, button_callback=None, **kwargs):
@@ -102,8 +88,8 @@ class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
             text=taxon.name,
             secondary_text=taxon.rank,
             tertiary_text=taxon.preferred_common_name,
-            tooltip_text=f'[{parent_tab.uid if parent_tab else None}] ID: {taxon.id}\nAncestry: {taxon.ancestry_str}\nChildren: {len(taxon.child_taxa)}',
-            tab_check_callback=self.is_visible,
+            tooltip_text=f'ID: {taxon.id}\nAncestry: {taxon.ancestry_str}\nChildren: {len(taxon.child_taxa)}',
+            is_visible_callback=self.is_visible,
             **kwargs,
         )
 
