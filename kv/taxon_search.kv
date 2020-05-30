@@ -8,7 +8,7 @@
 
     BoxLayout:
         MDTabs:
-            id: taxon_search_tabs
+            id: taxon_selection_tabs
             size_hint_x: .4
             size_hint_min_x: dp(500)
             size_hint_max_x: dp(700)
@@ -163,11 +163,11 @@
 <TaxonomySection@MDGridLayout>:
     cols: 2
     OneLineListItem:
+        id: taxon_ancestors_label
         font_style: 'H5'
-        text: 'Ancestors'
     OneLineListItem:
+        id: taxon_children_label
         font_style: 'H5'
-        text: 'Children'
     ScrollViewY:
         size_hint_max_x: dp(500)
         MDList:

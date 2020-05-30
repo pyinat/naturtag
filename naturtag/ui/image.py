@@ -75,9 +75,24 @@ class ImageMetaTile(SmartTileWithLabel):
         self.metadata = metadata
 
 
-class TaxonListItem(ThreeLineAvatarIconListItem, MDTooltip):
+# TODO: Debug root cause of rogue tooltips!
+class HideableTooltip(MDTooltip):
+    """
+    This is a workaround for unexpected bahvior with tooltips and tabs. If a HideableTooltip is
+    in an unselected tab, it will always report that the mouse cursor does not intersect it.
+    """
+    def __init__(self, tab_check_callback, **kwargs):
+        self.tab_check_callback = tab_check_callback
+        super().__init__(**kwargs)
+
+    def on_mouse_pos(self, *args):
+        if self.tab_check_callback():
+            super().on_mouse_pos(*args)
+
+
+class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
     """ Class that displays condensed taxon info as a list item """
-    def __init__(self, taxon=None, taxon_id=None, button_callback=None, **kwargs):
+    def __init__(self, taxon=None, taxon_id=None, parent_tab=None, button_callback=None, **kwargs):
         if not taxon and not taxon_id:
             raise ValueError('Must provide either a taxon object or ID')
         taxon = taxon or Taxon.from_id(taxon_id)
@@ -87,13 +102,27 @@ class TaxonListItem(ThreeLineAvatarIconListItem, MDTooltip):
             text=taxon.name,
             secondary_text=taxon.rank,
             tertiary_text=taxon.preferred_common_name,
-            tooltip_text=f'ID: {taxon.id}\nAncestry: {taxon.ancestry_str}\nChildren: {len(taxon.child_taxa)}',
+            tooltip_text=f'[{parent_tab.uid if parent_tab else None}] ID: {taxon.id}\nAncestry: {taxon.ancestry_str}\nChildren: {len(taxon.child_taxa)}',
+            tab_check_callback=self.is_visible,
             **kwargs,
         )
+
+        # Save info about the tab this list item belongs to, if any
+        self.tab_id = parent_tab.uid if parent_tab else None
+        self.tab_list = parent_tab.parent.parent if parent_tab else None
+
+        # Select the associated taxon when this list item is pressed
         self.taxon = taxon
         if button_callback:
             self.bind(on_release=button_callback)
         self.add_widget(TaxonThumbnail(source=taxon.thumbnail_url or taxon.icon_path))
+
+    def is_visible(self):
+        """ If this item belongs to a tab, determine if that tab is currently selected """
+        return (
+            self.tab_id is None or self.tab_list is None or
+            self.tab_id == self.tab_list.current_slide.uid
+        )
 
 
 class TaxonThumbnail(CachedAsyncImage, ILeftBody):

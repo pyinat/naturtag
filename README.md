@@ -3,7 +3,7 @@
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/latest/?badge=latest)
 ![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)
 
-A tool to add iNaturalist taxonomy & observation metadata to local observation photos.
+A tool to browse and add iNaturalist taxonomy & observation metadata to local observation photos.
 This includes a command-line interface, a graphical interface, and can also be used as a
 python package.
 

@@ -107,4 +107,3 @@ class TooltipTab(MDBoxLayout, MDTabsBase):
 
 class TooltipTabLabel(MDTabsLabel, MDTooltip):
     """ Tab Label for MDTabs with tooltop behavior """
-
