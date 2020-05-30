@@ -6,8 +6,8 @@ from naturtag.constants import PLACES_BASE_URL
 from naturtag.settings import (
     read_settings,
     write_settings,
-    read_taxon_history,
-    write_taxon_history,
+    read_stored_taxa,
+    write_stored_taxa,
     reset_defaults,
 )
 
@@ -20,7 +20,7 @@ class SettingsController:
     def __init__(self, settings_screen):
         self.screen = settings_screen
         self.settings_dict = read_settings()
-        self.taxon_history, self.taxon_frequency = read_taxon_history()
+        self.taxon_history, self.starred_taxa, self.frequent_taxa = read_stored_taxa()
 
         # Set default locale if it's unset
         if self.inaturalist['locale'] is None:
@@ -54,7 +54,7 @@ class SettingsController:
                     section[setting_name] = value
 
         write_settings(self.settings_dict)
-        write_taxon_history(self.taxon_history)
+        write_stored_taxa(self.taxon_history, self.starred_taxa)
 
     def get_control_value(self, setting_name):
         """ Get the value of the control widget corresponding to a setting """

@@ -49,6 +49,7 @@ CONFIG_PATH = join(DATA_DIR, 'settings.yml')
 DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
 TAXON_HISTORY_PATH = join(DATA_DIR, 'taxon_history')
 TAXON_FREQUENCY_PATH = join(DATA_DIR, 'taxon_frequency.json')
+STARRED_TAXA_PATH = join(DATA_DIR, 'starred_taxa')
 
 # URLs
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'

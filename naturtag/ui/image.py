@@ -2,10 +2,10 @@
 from io import BytesIO
 from logging import getLogger
 
-from kivy.properties import ObjectProperty, NumericProperty
+from kivy.properties import ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
-from kivymd.uix.list import ThreeLineAvatarListItem, ILeftBody
+from kivymd.uix.list import ThreeLineAvatarIconListItem, ILeftBody
 
 from naturtag.models import get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists, get_format
@@ -63,7 +63,7 @@ class IconicTaxaIcon(SmartTile):
         super().__init__(source=get_icon_path(taxon_id), **kwargs)
 
 
-class TaxonListItem(ThreeLineAvatarListItem):
+class TaxonListItem(ThreeLineAvatarIconListItem):
     """ Class that displays condensed taxon info as a list item """
     def __init__(self, taxon, button_callback=None, **kwargs):
         super().__init__(

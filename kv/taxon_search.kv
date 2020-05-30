@@ -11,14 +11,15 @@
             size_hint_x: .4
             size_hint_min_x: dp(500)
             size_hint_max_x: dp(700)
-#            md_bg_color: app.theme_cls.bg_normal
             background_color: app.theme_cls.primary_color
-            TaxonSearch:
+            TaxonSearchTab:
                 id: search_tab
             TaxonHistoryTab:
                 id: history_tab
-            TaxonFrequencyTab:
+            FrequentTaxaTab:
                 id: frequent_tab
+            StarredTaxaTab:
+                id: starred_tab
 
         # Info display for selected taxon
         MDBoxLayout:
@@ -50,7 +51,7 @@
                 id: taxonomy_section
 
 # Taxon search tab
-<TaxonSearch@Tab>:
+<TaxonSearchTab@Tab>:
     text: 'magnify'
     # tooltip_text: 'Search'
     orientation: 'vertical'
@@ -88,7 +89,7 @@
             id: taxon_history_list
 
 # Frequently viewed taxa tab
-<TaxonFrequencyTab@Tab>:
+<FrequentTaxaTab@Tab>:
     id: frequent_tab
     text: 'poll'
     # tooltip_text: 'Frequent'
@@ -99,7 +100,21 @@
     ScrollViewY:
         size_hint_max_x: dp(500)
         MDList:
-            id: taxon_frequency_list
+            id: frequent_taxa_list
+
+# Starred taxa tab
+<StarredTaxaTab@Tab>:
+    id: starred_tab
+    text: 'star'
+    # tooltip_text: 'Starred'
+    orientation: 'vertical'
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'Starred'
+    ScrollViewY:
+        size_hint_max_x: dp(500)
+        MDList:
+            id: starred_taxa_list
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
@@ -134,13 +149,13 @@
         id: taxon_parent_button
         icon: 'arrow-up-circle-outline'
         text: 'View parent'
-        width: dp(250)
+        width: dp(225)
         disabled: True
     TooltipIconButton:
         id: selected_taxon_link_button
         icon: 'link-variant'
         text: 'View on iNaturalist'
-        width: dp(250)
+        width: dp(225)
         disabled: True
 
 # Taxon ancestors & children
