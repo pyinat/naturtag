@@ -14,14 +14,6 @@ from naturtag.ui.cache import cache_async_thumbnail
 logger = getLogger().getChild(__name__)
 
 
-class IconicTaxaIcon(SmartTile):
-    box_color = (0, 0, 0, 0)
-
-    def __init__(self, taxon_id, **kwargs):
-        self.taxon_id = taxon_id
-        super().__init__(source=get_icon_path(taxon_id), **kwargs)
-
-
 class CachedAsyncImage(AsyncImage):
     """ AsyncImage which, once loaded, caches the image for future use """
     def __init__(self, thumbnail_size='large', **kwargs):
@@ -61,6 +53,14 @@ class CachedAsyncImage(AsyncImage):
         image_bytes = BytesIO()
         self._coreimage.image.texture.save(image_bytes, fmt=ext)
         return image_bytes, ext
+
+
+class IconicTaxaIcon(SmartTile):
+    box_color = (0, 0, 0, 0)
+
+    def __init__(self, taxon_id, **kwargs):
+        self.taxon_id = taxon_id
+        super().__init__(source=get_icon_path(taxon_id), **kwargs)
 
 
 class TaxonListItem(ThreeLineAvatarListItem):

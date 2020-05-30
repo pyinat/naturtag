@@ -6,30 +6,19 @@
     name: 'taxon_search'
 
     BoxLayout:
-        # Search inputs
-        MDBoxLayout:
-            orientation: 'vertical'
-            padding: dp(10)
+        MDTabs:
+            id: taxon_search_tabs
             size_hint_x: .4
             size_hint_min_x: dp(500)
             size_hint_max_x: dp(700)
-            md_bg_color: app.theme_cls.bg_normal
-            IntField:
-                id: taxon_id_input
-                hint_text: 'Taxon ID'
-                helper_text: 'Enter an iNaturalist taxon ID'
-            TaxonAutocompleteSearch:
-                id: taxon_search_input
-            MDLabel:
-                text: 'Categories'
-                font_style: 'H6'
-                theme_text_color: 'Primary'
-                size_hint_max_y: dp(60)
-            IconicTaxaLayout:
-                id: iconic_taxa
-            # Temp spacer
-            MDBoxLayout:
-                height: 300
+#            md_bg_color: app.theme_cls.bg_normal
+            background_color: app.theme_cls.primary_color
+            TaxonSearch:
+                id: search_tab
+            TaxonHistoryTab:
+                id: history_tab
+            TaxonFrequencyTab:
+                id: frequent_tab
 
         # Info display for selected taxon
         MDBoxLayout:
@@ -59,6 +48,58 @@
                         id: taxon_links
             TaxonomySection:
                 id: taxonomy_section
+
+# Taxon search tab
+<TaxonSearch@Tab>:
+    text: 'magnify'
+    # tooltip_text: 'Search'
+    orientation: 'vertical'
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'Search'
+    IntField:
+        id: taxon_id_input
+        hint_text: 'Taxon ID'
+        helper_text: 'Enter an iNaturalist taxon ID'
+    TaxonAutocompleteSearch:
+        id: taxon_search_input
+    MDLabel:
+        text: 'Categories'
+        font_style: 'H6'
+        theme_text_color: 'Primary'
+        size_hint_max_y: dp(60)
+    IconicTaxaLayout:
+        id: iconic_taxa
+    # Temp spacer
+    MDBoxLayout:
+        height: 300
+
+# Taxon history tab
+<TaxonHistoryTab@Tab>:
+    text: 'history'
+    # tooltip_text: 'History'
+    orientation: 'vertical'
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'History'
+    ScrollViewY:
+        size_hint_max_x: dp(500)
+        MDList:
+            id: taxon_history_list
+
+# Frequently viewed taxa tab
+<TaxonFrequencyTab@Tab>:
+    id: frequent_tab
+    text: 'poll'
+    # tooltip_text: 'Frequent'
+    orientation: 'vertical'
+    OneLineListItem:
+        font_style: 'H5'
+        text: 'Frequent'
+    ScrollViewY:
+        size_hint_max_x: dp(500)
+        MDList:
+            id: taxon_frequency_list
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:

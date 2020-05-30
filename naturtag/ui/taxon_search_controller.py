@@ -1,3 +1,4 @@
+# TODO: This class has gotten large; split this up into at leeast two modules
 from logging import getLogger
 import webbrowser
 
@@ -30,13 +31,11 @@ class TaxonSearchController:
     """ Controller class to manage taxon search and display """
     def __init__(self, screen):
         self.screen = screen
-        self.taxon_history = get_app_settings().taxon_history
-        self.taxon_frequency = get_app_settings().taxon_frequency
 
         # Search inputs
-        self.taxon_id_input = screen.taxon_id_input
+        self.taxon_id_input = screen.search_tab.ids.taxon_id_input
         self.taxon_id_input.bind(on_text_validate=self.handle_input_id)
-        self.taxon_search_input = screen.taxon_search_input
+        self.taxon_search_input = screen.search_tab.ids.taxon_search_input
         self.taxon_search_input.selection_callback = self.handle_selection
 
         # Other Controls
@@ -55,7 +54,15 @@ class TaxonSearchController:
         for id in ICONIC_TAXA:
             icon = IconicTaxaIcon(id)
             icon.bind(on_release=lambda x: self.select_taxon(id=x.taxon_id))
-            self.screen.iconic_taxa.add_widget(icon)
+            self.screen.search_tab.ids.iconic_taxa.add_widget(icon)
+
+        # History
+        self.taxon_history_ids = get_app_settings().taxon_history
+        self.taxon_history_list = screen.history_tab.ids.taxon_history_list
+        self.taxon_history_map = {}
+        self.taxon_frequency = get_app_settings().taxon_frequency
+        self.taxon_frequency_list = screen.frequent_tab.ids.taxon_frequency_list
+        self.init_history()
 
     def handle_selection(self, metadata: dict):
         """ Handle selecting a taxon from autocomplete dropdown """
@@ -63,6 +70,35 @@ class TaxonSearchController:
 
     def handle_input_id(self, input):
         self.select_taxon(id=int(input.text))
+
+    # TODO: This should be delayed / populated asynchronously
+    def init_history(self):
+        """ Load taxon history and frequently viewed items """
+        for taxon_id in self.taxon_history_ids[::-1]:
+            if taxon_id not in self.taxon_history_map:
+                item = TaxonListItem(Taxon.from_id(taxon_id), lambda x: self.select_taxon(x.taxon))
+                self.taxon_history_list.add_widget(item)
+                self.taxon_history_map[taxon_id] = item
+
+        for taxon_id in self.taxon_frequency.keys():
+            item = TaxonListItem(Taxon.from_id(taxon_id), lambda x: self.select_taxon(x.taxon))
+            self.taxon_frequency_list.add_widget(item)
+
+    def update_history(self, taxon_id):
+        self.taxon_history_ids.append(self.selected_taxon.id)
+        # If item already exists in history, move it from its previous position to the top
+        if taxon_id in self.taxon_history_map:
+            item = self.taxon_history_map[taxon_id]
+            self.taxon_history_list.remove_widget(item)
+        else:
+            item = TaxonListItem(Taxon.from_id(taxon_id), lambda x: self.select_taxon(x.taxon))
+            self.taxon_history_map[taxon_id] = item
+        self.taxon_history_list.add_widget(item, len(self.taxon_history_list.children))
+
+        # Update frequent items
+        # TODO: How to re-sort frequent items in UI?
+        self.taxon_frequency.setdefault(taxon_id, 0)
+        self.taxon_frequency[taxon_id] += 1
 
     def select_taxon(self, taxon_obj=None, taxon_dict=None, id=None):
         """ Update taxon info display by either object, ID, partial record, or complete record """
@@ -74,12 +110,12 @@ class TaxonSearchController:
         self.basic_info.clear_widgets()
         self.selected_taxon = taxon_obj
         self.taxon_id_input = self.selected_taxon.id
-        self.taxon_history.append(self.selected_taxon.id)
 
         logger.info(f'Taxon: Selecting taxon {self.selected_taxon.id}')
         self.load_photo_section()
         self.load_basic_info_section()
         self.load_taxonomy_section()
+        self.update_history(self.selected_taxon.id)
 
     def load_photo_section(self):
         """ Load taxon photo + links """
