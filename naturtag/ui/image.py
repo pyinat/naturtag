@@ -2,7 +2,7 @@
 from io import BytesIO
 from logging import getLogger
 
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 from kivymd.uix.list import ThreeLineAvatarIconListItem, ILeftBody
@@ -56,19 +56,37 @@ class CachedAsyncImage(AsyncImage):
         return image_bytes, ext
 
 
+DESELECTED_COLOR = (0, 0, 0, 0)
+SELECTED_COLOR = (0.2, 0.6, 0.6, .4)
+
 class IconicTaxaIcon(SmartTile):
-    box_color = (0, 0, 0, 0)
+    """ Icon for an iconic taxon """
+    is_selected = BooleanProperty()
 
     def __init__(self, taxon_id, **kwargs):
+        super().__init__(source=get_icon_path(taxon_id), allow_stretch=False, **kwargs)
+        self.is_selected = False
+        self.box_color = DESELECTED_COLOR
         self.taxon_id = taxon_id
-        super().__init__(source=get_icon_path(taxon_id), **kwargs)
+        self.bind(on_release=self.toggle_selection)
+
+    def toggle_selection(self, *args):
+        """ Toggle between selected and deselected when clicked. The SmartTile overlay can be
+        conveniently repurposed as a background, since the icon is so small the overlay covers it
+        """
+        if self.is_selected:
+            self.box_color = DESELECTED_COLOR
+            self.is_selected = False
+        else:
+            self.box_color = SELECTED_COLOR
+            self.is_selected = True
 
 
 class ImageMetaTile(SmartTileWithLabel):
     """ Class that contains an image thumbnail to display plus its associated metadata """
     metadata = ObjectProperty()
     allow_stretch = False
-    box_color = [0, 0, 0, 0.4]
+    box_color = (0, 0, 0, 0.4)
 
     def __init__(self, metadata, **kwargs):
         super().__init__(**kwargs)

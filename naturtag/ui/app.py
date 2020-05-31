@@ -61,9 +61,13 @@ class ControllerProxy:
         self.is_starred = self.taxon_selection_controller.is_starred
         self.add_star = self.taxon_selection_controller.add_star
         self.remove_star = self.taxon_selection_controller.remove_star
-        self.stored_taxa = self.settings_controller.stored_taxa
         self.select_taxon = self.taxon_view_controller.select_taxon
         self.update_history = self.taxon_selection_controller.update_history
+
+        # Proxy properties
+        self.stored_taxa = self.settings_controller.stored_taxa
+        self.locale = self.settings_controller.locale
+        self.preferred_place_id = self.settings_controller.preferred_place_id
 
     def lazy_init(self, *args):
         """

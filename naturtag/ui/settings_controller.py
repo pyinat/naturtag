@@ -94,6 +94,14 @@ class SettingsController:
             logger.warning(f'Could not detect type for {control_widget}')
 
     @property
+    def locale(self):
+        return self.inaturalist.get('locale')
+
+    @property
+    def preferred_place_id(self):
+        return self.inaturalist.get('preferred_place_id')
+
+    @property
     def inaturalist(self):
         return self.settings_dict['inaturalist']
 

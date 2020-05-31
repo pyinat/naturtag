@@ -107,6 +107,18 @@
         MDTextField:
             id: max_rank_input
             hint_text: 'Max rank'
+    MDBoxLayout:
+        spacing: dp(10)
+        TooltipIconButton:
+            id: taxon_search_button
+            icon: 'magnify'
+            text: 'Search'
+            width: dp(220)
+        TooltipIconButton:
+            id: reset_search_button
+            icon: 'restart'
+            text: 'Reset Filters'
+            width: dp(220)
     # Temp spacer
     MDBoxLayout:
         height: 300
@@ -140,17 +152,18 @@
 # Taxon links
 <LinksSection@MDBoxLayout>:
     size_hint_max_y: dp(50)
+    spacing: dp(10)
     TooltipIconButton:
         id: taxon_parent_button
         icon: 'arrow-up-circle-outline'
         text: 'View parent'
-        width: dp(225)
+        width: dp(220)
         disabled: True
     TooltipIconButton:
         id: selected_taxon_link_button
         icon: 'link-variant'
         text: 'View on iNaturalist'
-        width: dp(225)
+        width: dp(220)
         disabled: True
 
 # Taxon ancestors & children

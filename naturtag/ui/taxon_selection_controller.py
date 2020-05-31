@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from pyinaturalist.node_api import get_taxa_autocomplete
+from pyinaturalist.node_api import get_taxa, get_taxa_autocomplete
 from naturtag.constants import ICONIC_TAXA, RANKS
 from naturtag.ui import get_app
 from naturtag.ui.autocomplete import AutocompleteSearch
@@ -41,6 +41,7 @@ class TaxonSelectionController:
         self.exact_rank_input = screen.search_tab.ids.exact_rank_input
         self.min_rank_input = screen.search_tab.ids.min_rank_input
         self.max_rank_input = screen.search_tab.ids.max_rank_input
+        self.iconic_taxa_filters = self.screen.search_tab.ids.iconic_taxa
 
         # Search inputs with dropdowns
         self.rank_menus = (
@@ -49,11 +50,17 @@ class TaxonSelectionController:
             DropdownTextField(text_input=self.max_rank_input, text_items=RANKS),
         )
 
+        # Buttons
+        self.taxon_search_button = self.screen.search_tab.ids.taxon_search_button
+        self.taxon_search_button.bind(on_release=self.search)
+        self.reset_search_button = self.screen.search_tab.ids.reset_search_button
+        self.reset_search_button.bind(on_release=self.reset_search_inputs)
+
         # 'Categories' (iconic taxa) icons
         for id in ICONIC_TAXA:
             icon = IconicTaxaIcon(id)
             icon.bind(on_release=lambda x: get_app().select_taxon(id=x.taxon_id))
-            self.screen.search_tab.ids.iconic_taxa.add_widget(icon)
+            self.iconic_taxa_filters.add_widget(icon)
 
         # History, frequent, and starred items
         self.taxon_history_ids = []
@@ -66,13 +73,43 @@ class TaxonSelectionController:
         self.frequent_taxa_list = screen.frequent_tab.ids.frequent_taxa_list
         self.frequent_taxa_list.sort_key = self.get_frequent_taxon_idx
 
-    def is_starred(self, taxon_id: int) -> bool:
-        """ Check if the specified taxon is in the Starred list """
-        return taxon_id in self.starred_taxa_map
+    @property
+    def selected_iconic_taxa(self):
+        return [t for t in self.iconic_taxa_filters.children if t.is_selected]
+
+    def search(self, *args):
+        """ Run a search with the currently selected search parameters """
+        params = self.get_search_parameters()
+        logger.info(f'Searching taxa with parameters: {params}')
+        results = get_taxa(**params)['results']
+        logger.info([f'{r["id"]}: {r["name"]}' for r in results])
+
+    def get_search_parameters(self):
+        """ Get API-compatible search parameters from the input widgets """
+        params = {
+            'q': self.taxon_search_input.input.text,
+            'taxon_id': [t.taxon_id for t in self.selected_iconic_taxa],
+            'rank': self.exact_rank_input.text,
+            'min_rank': self.min_rank_input.text,
+            'max_rank': self.max_rank_input.text,
+            'per_page': 30,  # TODO: Paginated results
+            'locale': get_app().locale,
+            'preferred_place_id': get_app().preferred_place_id,
+        }
+        return {k: v for k, v in params.items() if v}
+
+    def reset_search_inputs(self, *args):
+        logger.info('Resetting search filters')
+        for t in self.selected_iconic_taxa:
+            t.toggle_selection()
+        self.exact_rank_input.text = ''
+        self.min_rank_input.text = ''
+        self.max_rank_input.text = ''
 
     # TODO: This should be done asynchronously
     def init_stored_taxa(self):
         """ Load taxon history, starred, and frequently viewed items """
+        logger.info('Loading stored taxa')
         stored_taxa = get_app().stored_taxa
         self.taxon_history_ids, self.starred_taxa_ids, self.frequent_taxa_ids = stored_taxa
 
@@ -128,6 +165,10 @@ class TaxonSelectionController:
         item = self.starred_taxa_map.pop(taxon_id)
         self.starred_taxa_ids.remove(taxon_id)
         self.starred_taxa_list.remove_widget(item)
+
+    def is_starred(self, taxon_id: int) -> bool:
+        """ Check if the specified taxon is in the Starred list """
+        return taxon_id in self.starred_taxa_map
 
     def get_frequent_taxon_idx(self, list_item) -> int:
         """ Get sort index for frequently viewed taxa (by number of views, descending) """
