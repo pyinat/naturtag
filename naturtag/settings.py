@@ -4,7 +4,7 @@ from logging import getLogger
 from os import makedirs
 from os.path import isfile
 from shutil import copyfile
-from typing import Tuple, List, Dict, Any
+from typing import List, Dict, Any
 
 import json
 import yaml
@@ -16,12 +16,13 @@ from naturtag.constants import (
     TAXON_HISTORY_PATH,
     TAXON_FREQUENCY_PATH,
     STARRED_TAXA_PATH,
+    STORED_TAXA_PATH,
 )
 
 logger = getLogger().getChild(__name__)
 
 
-def read_settings() ->  Dict[str, Any]:
+def read_settings() -> Dict[str, Any]:
     """  Read settings from the settings file
 
     Returns:
@@ -60,56 +61,45 @@ def reset_defaults():
 
 # TODO: Is there a better file format for taxon history than just a plain text file? JSON list? sqlite?
 # TODO: Separately store loaded history, new history for session; only write (append) new history
-def read_stored_taxa() -> Tuple[List[int], List[int], Dict[int, int]]:
+def read_stored_taxa() -> Dict:
     """ Read taxon view history, starred, and frequency
 
     Returns:
         Stored taxon view history, starred, and frequency
     """
-    return (
-        read_int_list_file(TAXON_HISTORY_PATH),
-        read_int_list_file(STARRED_TAXA_PATH),
-        read_int_dict_file(TAXON_FREQUENCY_PATH),
-    )
+    if not isfile(STORED_TAXA_PATH):
+        stored_taxa = {}
+    else:
+        with open(STORED_TAXA_PATH) as f:
+            stored_taxa = json.load(f)
+
+    stored_taxa.setdefault('history', [])
+    stored_taxa.setdefault('starred', [])
+    stored_taxa['frequent'] = convert_int_dict(stored_taxa.get('frequent', {}))
+    return stored_taxa
 
 
-def write_stored_taxa(history: List[int], starred: List[int]):
+def write_stored_taxa(stored_taxa: Dict):
     """ Write taxon view history to file, along with stats on most frequently viewed taxa
 
     Args:
         Complete taxon history (including previously stored history)
     """
-    logger.info(f'Writing taxon view history ({len(history)} items)')
-    with open(TAXON_HISTORY_PATH, 'w') as f:
-        f.write('\n'.join(map(str, history)))
+    # Do a recount/resort before writing
+    stored_taxa["frequent"] = OrderedDict(Counter(stored_taxa["history"]).most_common())
 
-    logger.info(f'Writing starred taxa ({len(starred)} items)')
-    with open(STARRED_TAXA_PATH, 'w') as f:
-        f.write('\n'.join(map(str, set(starred))))
-
-    logger.info('Writing taxon view frequency')
-    with open(TAXON_FREQUENCY_PATH, 'w') as f:
-        counter = OrderedDict(Counter(history).most_common())
-        json.dump(counter, f, indent=4)
+    logger.info(
+        f'Writing stored taxa: {len(stored_taxa["history"])} history items, '
+        f'{len(stored_taxa["starred"])} starred items, '
+        f'{len(stored_taxa["frequent"])} frequent items'
+    )
+    with open(STORED_TAXA_PATH, 'w') as f:
+        json.dump(stored_taxa, f, indent=4)
 
 
-def read_int_list_file(path) -> List[int]:
-    """ Load a plaintext file containing a list of ints, and skip any invalid (non-int) values """
-    if not isfile(STARRED_TAXA_PATH):
-        return []
-    with open(path) as f:
-        lines = (line.strip() for line in f.readlines())
-        return [int(line) for line in lines if line and _is_int(line)]
-
-
-def read_int_dict_file(path) -> Dict[int, int]:
-    """ Load a JSON file containing a mapping of int keys and values """
-    if not isfile(path):
-        return {}
-    else:
-        with open(path) as f:
-            int_dict = json.load(f)
-            return {int(k): int(v) for k, v in int_dict.items() if _is_int(k) and _is_int(v)}
+def convert_int_dict(int_dict):
+    """  Convery JSOn string keys to ints """
+    return {int(k): int(v) for k, v in int_dict.items() if _is_int(k) and _is_int(v)}
 
 
 def _is_int(value):

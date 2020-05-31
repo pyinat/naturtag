@@ -47,6 +47,8 @@ CACHE_BACKEND = 'sqlite'
 # Config files
 CONFIG_PATH = join(DATA_DIR, 'settings.yml')
 DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
+
+STORED_TAXA_PATH = join(DATA_DIR, 'stored_taxa.json')
 TAXON_HISTORY_PATH = join(DATA_DIR, 'taxon_history')
 TAXON_FREQUENCY_PATH = join(DATA_DIR, 'taxon_frequency.json')
 STARRED_TAXA_PATH = join(DATA_DIR, 'starred_taxa')

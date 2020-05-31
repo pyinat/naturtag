@@ -1,5 +1,6 @@
 from locale import locale_alias, getdefaultlocale
 from logging import getLogger
+from typing import Tuple, List, Dict
 import webbrowser
 
 from kivymd.app import MDApp
@@ -22,7 +23,7 @@ class SettingsController:
     def __init__(self, settings_screen):
         self.screen = settings_screen
         self.settings_dict = read_settings()
-        self.taxon_history, self.starred_taxa, self.frequent_taxa = read_stored_taxa()
+        self._stored_taxa = read_stored_taxa()
 
         # Set default locale if it's unset
         if self.inaturalist['locale'] is None:
@@ -41,8 +42,12 @@ class SettingsController:
         self.update_control_widgets()
 
     @property
-    def stored_taxa(self):
-        return self.taxon_history, self.starred_taxa, self.frequent_taxa
+    def stored_taxa(self) -> Tuple[List[int], List[int], Dict[int, int]]:
+        return (
+            self._stored_taxa['history'],
+            self._stored_taxa['starred'],
+            self._stored_taxa['frequent'],
+        )
 
     def update_control_widgets(self):
         """ Update state of settings controls in UI with values from settings file """
@@ -61,7 +66,7 @@ class SettingsController:
                     section[setting_name] = value
 
         write_settings(self.settings_dict)
-        write_stored_taxa(self.taxon_history, self.starred_taxa)
+        write_stored_taxa(self._stored_taxa)
 
     def get_control_value(self, setting_name):
         """ Get the value of the control widget corresponding to a setting """
