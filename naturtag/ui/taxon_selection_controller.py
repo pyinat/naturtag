@@ -1,11 +1,11 @@
 from logging import getLogger
 
 from pyinaturalist.node_api import get_taxa_autocomplete
-from naturtag.constants import ICONIC_TAXA
+from naturtag.constants import ICONIC_TAXA, RANKS
 from naturtag.ui import get_app
 from naturtag.ui.autocomplete import AutocompleteSearch
 from naturtag.ui.image import IconicTaxaIcon, TaxonListItem
-from naturtag.ui.widgets import StarButton
+from naturtag.ui.widgets import DropdownTextField, StarButton
 
 logger = getLogger().getChild(__name__)
 
@@ -38,8 +38,18 @@ class TaxonSelectionController:
         self.taxon_id_input.bind(on_text_validate=self.on_taxon_id)
         self.taxon_search_input = screen.search_tab.ids.taxon_search_input
         self.taxon_search_input.selection_callback = self.on_select_search_result
+        self.exact_rank_input = screen.search_tab.ids.exact_rank_input
+        self.min_rank_input = screen.search_tab.ids.min_rank_input
+        self.max_rank_input = screen.search_tab.ids.max_rank_input
 
-        # Set 'Categories' (iconic taxa) icons
+        # Search inputs with dropdowns
+        self.rank_menus = (
+            DropdownTextField(text_input=self.exact_rank_input, text_items=RANKS),
+            DropdownTextField(text_input=self.min_rank_input, text_items=RANKS),
+            DropdownTextField(text_input=self.max_rank_input, text_items=RANKS),
+        )
+
+        # 'Categories' (iconic taxa) icons
         for id in ICONIC_TAXA:
             icon = IconicTaxaIcon(id)
             icon.bind(on_release=lambda x: get_app().select_taxon(id=x.taxon_id))
@@ -60,7 +70,7 @@ class TaxonSelectionController:
         """ Check if the specified taxon is in the Starred list """
         return taxon_id in self.starred_taxa_map
 
-    # TODO: This should be delayed / populated asynchronously
+    # TODO: This should be done asynchronously
     def init_stored_taxa(self):
         """ Load taxon history, starred, and frequently viewed items """
         stored_taxa = get_app().stored_taxa

@@ -59,7 +59,7 @@ OBSERVATION_BASE_URL = 'https://www.inaturalist.org/observations'
 PLACES_BASE_URL = 'https://www.inaturalist.org/places'
 
 # Theme/window settings
-INIT_WINDOW_POSITION = ('custom', 0, 100)
+INIT_WINDOW_POSITION = ('custom', 100, 100)
 INIT_WINDOW_SIZE = (1500, 900)
 MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'

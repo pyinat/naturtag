@@ -1,5 +1,6 @@
 #:import TaxonAutocompleteSearch naturtag.ui.taxon_selection_controller.TaxonAutocompleteSearch
 #:import CachedAsyncImage naturtag.ui.image.CachedAsyncImage
+#:import RANKS naturtag.constants.RANKS
 
 
 <TaxonScreen>:
@@ -55,11 +56,24 @@
         StatusBar:
             id: status_bar
 
+
+<SectionHeader@MDLabel>:
+    font_style: 'H6'
+    theme_text_color: 'Primary'
+    size_hint_max_y: dp(60)
+
+
+<InputLabel@MDLabel>:
+    theme_text_color: 'Primary'
+    size_hint_max_x: dp(100)
+    size_hint_max_y: dp(50)
+
 # Taxon search tab
 <TaxonSearchTab@Tab>:
     text: 'magnify'
     # tooltip_text: 'Search'
     orientation: 'vertical'
+    padding: dp(20)
     OneLineListItem:
         font_style: 'H5'
         text: 'Search'
@@ -69,13 +83,30 @@
         helper_text: 'Enter an iNaturalist taxon ID'
     TaxonAutocompleteSearch:
         id: taxon_search_input
-    MDLabel:
+    SectionHeader:
         text: 'Categories'
-        font_style: 'H6'
-        theme_text_color: 'Primary'
-        size_hint_max_y: dp(60)
     IconicTaxaLayout:
         id: iconic_taxa
+    SectionHeader:
+        text: 'Rank'
+    MDGridLayout:
+        cols: 2
+        InputLabel:
+            text: 'Exact'
+        MDTextField:
+            id: exact_rank_input
+            readonly: True
+            hint_text: 'Exact rank'
+        InputLabel:
+            text: 'Minimum'
+        MDTextField:
+            id: min_rank_input
+            hint_text: 'Min rank'
+        InputLabel:
+            text: 'Maximum'
+        MDTextField:
+            id: max_rank_input
+            hint_text: 'Max rank'
     # Temp spacer
     MDBoxLayout:
         height: 300
@@ -125,12 +156,14 @@
 # Taxon ancestors & children
 <TaxonomySection@MDGridLayout>:
     cols: 2
+    # Labels: These will be updated with # of ancestors & children
     OneLineListItem:
         id: taxon_ancestors_label
         font_style: 'H5'
     OneLineListItem:
         id: taxon_children_label
         font_style: 'H5'
+    # Result lists
     ScrollViewY:
         size_hint_max_x: dp(500)
         MDList:
