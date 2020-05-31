@@ -1,10 +1,11 @@
 """ Custom widgets and stub classes """
-from kivy.properties import BooleanProperty, NumericProperty, StringProperty
+from kivy.properties import BooleanProperty, NumericProperty, StringProperty, ListProperty
 from kivy.uix.widget import Widget
 
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFloatingActionButton
 from kivymd.uix.button import MDRoundFlatIconButton
+from kivymd.uix.label import MDLabel
 from kivymd.uix.list import MDList, IconRightWidget, ILeftBodyTouch, OneLineListItem
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.selectioncontrol import MDSwitch
@@ -26,6 +27,10 @@ class TooltipFloatingButton(MDFloatingActionButton, MDTooltip):
 
 class TooltipIconButton(MDRoundFlatIconButton, MDTooltip):
     """ Flat button class with icon and tooltip behavior """
+
+class TooltipLabel(MDLabel, MDTooltip):
+    """ Label class with tooltip behavior """
+    padding = ListProperty([0, 0, 0, 0])
 
 
 class DropdownTextField(MDDropdownMenu):

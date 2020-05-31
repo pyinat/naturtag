@@ -31,7 +31,7 @@ class TaxonViewController:
         self.taxon_children = screen.taxonomy_section.ids.taxon_children
         self.basic_info = self.screen.basic_info_section
 
-    def select_taxon(self, taxon_obj=None, taxon_dict: dict=None, id: int=None, if_empty: bool=False):
+    def select_taxon(self, taxon_obj: Taxon=None, taxon_dict: dict=None, id: int=None, if_empty: bool=False):
         """ Update taxon info display by either object, ID, partial record, or complete record """
         if if_empty and self.selected_taxon is not None:
             return
@@ -104,15 +104,18 @@ class TaxonViewController:
 
     def load_taxonomy_section(self):
         """ Populate ancestors and children for the currently selected taxon """
+        def _get_label(text, items):
+            return text + (f' ({len(items)})' if items else '')
+
         logger.info('Taxon: Loading ancestors')
-        self.taxon_ancestors_label.text = f'Ancestors ({len(self.selected_taxon.parent_taxa)})'
+        self.taxon_ancestors_label.text = _get_label('Ancestors', self.selected_taxon.parent_taxa)
         self.taxon_ancestors.clear_widgets()
         for taxon in self.selected_taxon.parent_taxa:
             self.taxon_ancestors.add_widget(self.get_taxon_list_item(taxon=taxon))
 
         # TODO: This can take awhile if there are lots of children; make these async calls?
         logger.info('Taxon: Loading children')
-        self.taxon_children_label.text = f'Children ({len(self.selected_taxon.child_taxa)})'
+        self.taxon_children_label.text = _get_label('Children', self.selected_taxon.child_taxa)
         self.taxon_children.clear_widgets()
         for taxon in self.selected_taxon.child_taxa:
             self.taxon_children.add_widget(self.get_taxon_list_item(taxon=taxon))

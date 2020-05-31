@@ -18,6 +18,8 @@
                 background_color: app.theme_cls.primary_color
                 TaxonSearchTab:
                     id: search_tab
+                TaxonSearchResultsTab:
+                    id: search_results_tab
                 TaxonHistoryTab:
                     id: history_tab
                 FrequentTaxaTab:
@@ -56,12 +58,15 @@
         StatusBar:
             id: status_bar
 
-
-<SectionHeader@MDLabel>:
-    font_style: 'H6'
+<TabHeader@MDLabel>:
+    font_style: 'H4'
     theme_text_color: 'Primary'
     size_hint_max_y: dp(60)
 
+<SectionHeader@TooltipLabel>:
+    font_style: 'H6'
+    theme_text_color: 'Primary'
+    size_hint_max_y: dp(60)
 
 <InputLabel@MDLabel>:
     theme_text_color: 'Primary'
@@ -74,8 +79,7 @@
     # tooltip_text: 'Search'
     orientation: 'vertical'
     padding: dp(20)
-    OneLineListItem:
-        font_style: 'H5'
+    TabHeader:
         text: 'Search'
     IntField:
         id: taxon_id_input
@@ -85,6 +89,7 @@
         id: taxon_search_input
     SectionHeader:
         text: 'Categories'
+        tooltip_text: 'Iconic taxa categories to browse or filter searches with'
     IconicTaxaLayout:
         id: iconic_taxa
     SectionHeader:
@@ -122,6 +127,18 @@
     # Temp spacer
     MDBoxLayout:
         height: 300
+
+# Taxon search results tab
+<TaxonSearchResultsTab@Tab>:
+    text: 'layers-search'
+    # tooltip_text: 'Search'
+    orientation: 'vertical'
+    padding: dp(20)
+    TabHeader:
+        text: 'Search Results'
+    ScrollViewY:
+        MDList:
+            id: search_results_list
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
