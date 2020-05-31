@@ -52,7 +52,7 @@ class TaxonSelectionController:
         self.starred_taxa_ids = []
         self.starred_taxa_map = {}
         self.starred_taxa_list = screen.starred_tab.ids.starred_taxa_list
-        self.frequent_taxa_ids = []
+        self.frequent_taxa_ids = {}
         self.frequent_taxa_list = screen.frequent_tab.ids.frequent_taxa_list
         self.frequent_taxa_list.sort_key = self.get_frequent_taxon_idx
 

@@ -20,21 +20,22 @@ from naturtag.ui.image import ImageMetaTile
 logger = getLogger().getChild(__name__)
 
 
-class ImageSelectorController(BoxLayout):
+class ImageSelectionController(BoxLayout):
     """ Controller class to manage image slector screen """
     file_list = ListProperty([])
     file_list_text = StringProperty()
     selected_image = ObjectProperty(None)
 
-    def __init__(self, image_selector_screen, metadata_screen, **kwargs):
+    def __init__(self, image_selection_screen, metadata_screen, **kwargs):
         super().__init__(**kwargs)
-        self.inputs = image_selector_screen
-        self.image_previews = image_selector_screen.image_previews
-        self.file_chooser = image_selector_screen.file_chooser
+        self.inputs = image_selection_screen
+        self.image_previews = image_selection_screen.image_previews
+        self.file_chooser = image_selection_screen.file_chooser
         self.metadata_screen = metadata_screen
 
         # Bind widget events
-        self.inputs.clear_button.bind(on_release=self.clear)
+        # self.inputs.clear_button.bind(on_release=self.clear)
+        self.inputs.clear_button.bind(on_release=lambda *x: get_app().show_progress())
         self.inputs.debug_button.bind(on_release=self.get_state)
         # self.inputs.debug_button.bind(on_release=self.open_table)
         self.inputs.load_button.bind(on_release=self.add_file_chooser_images)

@@ -9,7 +9,7 @@ from kivy.uix.boxlayout import BoxLayout
 
 from naturtag.constants import KV_SRC_DIR
 
-HOME_SCREEN = 'image_selector'
+HOME_SCREEN = 'image_selection'
 SCREEN_COMPONENTS = ['main', 'autocomplete', 'taxon_selection']
 
 logger = getLogger().getChild(__name__)
@@ -18,7 +18,7 @@ logger = getLogger().getChild(__name__)
 class Root(BoxLayout):
     pass
 
-class ImageSelectorScreen(MDScreen):
+class ImageSelectionScreen(MDScreen):
     pass
 
 class SettingsScreen(MDScreen):
@@ -35,7 +35,7 @@ class ObservationScreen(MDScreen):
 
 
 SCREENS = {
-    HOME_SCREEN: ImageSelectorScreen,
+    HOME_SCREEN: ImageSelectionScreen,
     'settings': SettingsScreen,
     'metadata': MetadataViewScreen,
     'taxon': TaxonScreen,

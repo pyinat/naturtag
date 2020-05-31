@@ -29,6 +29,9 @@
     readonly: True
     multiline: True
 
+<StatusBar@MDBoxLayout>:
+    size_hint_max_y: dp(20)
+    md_bg_color: app.theme_cls.bg_light
 
 # Top-level layout with screen manager, toolbar, and nav drawer
 <Root>:
@@ -54,7 +57,6 @@
 		MDNavigationDrawer:
 			id: nav_drawer
 			ContentNavigationDrawer:
-
 
 # Main nav drawer
 <ContentNavigationDrawer@BoxLayout>:
@@ -98,7 +100,7 @@
 				OneLineIconListItem:
 					text: 'Image Selector'
 					on_press:
-						app.switch_screen('image_selector')
+						app.switch_screen('image_selection')
 					IconLeftWidget:
 						icon: 'home'
 				OneLineIconListItem:

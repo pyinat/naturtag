@@ -18,6 +18,7 @@ from kivymd.app import MDApp
 
 from naturtag.constants import (
     KV_SRC_DIR,
+    INIT_WINDOW_POSITION,
     INIT_WINDOW_SIZE,
     MD_PRIMARY_PALETTE,
     MD_ACCENT_PALETTE,
@@ -26,7 +27,7 @@ from naturtag.constants import (
     BACKSPACE,
     F11,
 )
-from naturtag.ui.image_selector_controller import ImageSelectorController, alert
+from naturtag.ui.image_selection_controller import ImageSelectionController, alert
 from naturtag.ui.settings_controller import SettingsController
 from naturtag.ui.taxon_selection_controller import TaxonSelectionController
 from naturtag.ui.taxon_view_controller import TaxonViewController
@@ -39,7 +40,7 @@ class ControllerProxy:
     """ The individual controllers need to talk to each other sometimes.
     Any such interactions go through this class so they don't talk to each other directly.
     """
-    image_selector_controller = ObjectProperty()
+    image_selection_controller = ObjectProperty()
     taxon_selection_controller = ObjectProperty()
     taxon_view_controller = ObjectProperty()
     settings_controller = ObjectProperty()
@@ -49,7 +50,7 @@ class ControllerProxy:
 
     def init_controllers(self, screens):
         # Init controllers with references to nested screen objects
-        self.image_selector_controller = ImageSelectorController(screens[HOME_SCREEN].ids, screens['metadata'].ids)
+        self.image_selection_controller = ImageSelectionController(screens[HOME_SCREEN].ids, screens['metadata'].ids)
         self.settings_controller = SettingsController(screens['settings'].ids)
         self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
         self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
@@ -63,7 +64,7 @@ class ControllerProxy:
         self.select_taxon = self.taxon_view_controller.select_taxon
         self.update_history = self.taxon_selection_controller.update_history
 
-        # This part uses a lot of RAM, so do this last
+        # This part can take some time, so do this last
         self.taxon_selection_controller.init_stored_taxa()
 
 
@@ -75,6 +76,7 @@ class NaturtagApp(MDApp, ControllerProxy):
     nav_drawer = ObjectProperty()
     screen_manager = ObjectProperty()
     toolbar = ObjectProperty()
+    status_bar = ObjectProperty()
 
     @staticmethod
     def _add_screen(screen_name):
@@ -91,16 +93,22 @@ class NaturtagApp(MDApp, ControllerProxy):
         # Init screen manager and nav elements
         self.nav_drawer = self.root.ids.nav_drawer
         self.screen_manager = self.root.ids.screen_manager
+        # self.status_bar = self.root.ids.status_bar
         self.toolbar = self.root.ids.toolbar
+
         for screen_name, screen in screens.items():
             self.screen_manager.add_widget(screen)
         self.set_theme_mode()
         self.home()
-        # self.switch_screen('taxa')
+        # self.switch_screen('taxon')
 
         # Set Window and theme settings
+        position, left, top = INIT_WINDOW_POSITION
+        Window.position = position
+        Window.left = left
+        Window.top = top
         Window.size = INIT_WINDOW_SIZE
-        Window.bind(on_dropfile=lambda x, y: self.image_selector_controller.add_images(y))
+        Window.bind(on_dropfile=lambda x, y: self.image_selection_controller.add_images(y))
         Window.bind(on_keyboard=self.on_keyboard)
         Window.bind(on_request_close=self.on_request_close)
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
@@ -125,13 +133,16 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.nav_drawer.set_state('close')
 
     def switch_screen(self, screen_name):
-        # If we're leaving the Settings screen, save any changes
-        if self.screen_manager.current == 'settings':
+        # If we're leaving a screen with stored state, save it first
+        # TODO: Also save stored taxa, but needs optimization first (async, only store if changed)
+        if self.screen_manager.current in ['settings']:
             self.settings_controller.save_settings()
 
         self.screen_manager.current = screen_name
         self.update_toolbar(screen_name)
         self.close_nav()
+        if screen_name  == 'taxon':
+            self.taxon_selection_controller.init_stored_taxa()
 
     def on_request_close(self, *args):
         """ Save any unsaved settings before exiting """
@@ -147,13 +158,13 @@ class NaturtagApp(MDApp, ControllerProxy):
         elif (modifier, codepoint) == (['ctrl'], 'q'):
             self.on_request_close()
         elif (modifier, codepoint) == (['ctrl'], 'r'):
-            self.image_selector_controller.run()
+            self.image_selection_controller.run()
         elif (modifier, codepoint) == (['ctrl'], 's'):
             self.switch_screen('settings')
         elif (modifier, codepoint) == (['ctrl'], 't'):
-            self.switch_screen('taxa')
+            self.switch_screen('taxon')
         elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
-            self.image_selector_controller.clear()
+            self.image_selection_controller.clear()
         elif key == F11:
             self.toggle_fullscreen()
 
