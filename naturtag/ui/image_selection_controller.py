@@ -34,8 +34,9 @@ class ImageSelectionController(BoxLayout):
         self.metadata_screen = metadata_screen
 
         # Bind widget events
-        # self.inputs.clear_button.bind(on_release=self.clear)
-        self.inputs.clear_button.bind(on_release=lambda *x: get_app().show_progress())
+        self.inputs.taxon_id_input.bind(on_text_validate=self.on_taxon_id)
+        self.inputs.clear_button.bind(on_release=self.clear)
+        # self.inputs.clear_button.bind(on_release=lambda *x: get_app().show_progress())
         self.inputs.debug_button.bind(on_release=self.get_state)
         # self.inputs.debug_button.bind(on_release=self.open_table)
         self.inputs.load_button.bind(on_release=self.add_file_chooser_images)
@@ -172,6 +173,12 @@ class ImageSelectionController(BoxLayout):
             self.file_list,
         )
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
+
+    @staticmethod
+    def on_taxon_id(input):
+        """ Handle entering a taxon ID and pressing Enter """
+        get_app().switch_screen('taxon')
+        get_app().select_taxon(id=int(input.text))
 
     # TODO: for testing only
     @staticmethod
