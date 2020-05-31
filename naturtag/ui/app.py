@@ -35,16 +35,43 @@ from naturtag.ui.screens import HOME_SCREEN, Root, load_screens
 logger = getLogger().getChild(__name__)
 
 
-class ImageTaggerApp(MDApp):
+class ControllerProxy:
+    """ The individual controllers need to talk to each other sometimes.
+    Any such interactions go through this class so they don't talk to each other directly.
     """
-    Manages window, theme, main screen and navigation state; other application logic is
-    handled by Controller
-    """
-    root = ObjectProperty()
     image_selector_controller = ObjectProperty()
     taxon_selection_controller = ObjectProperty()
     taxon_view_controller = ObjectProperty()
-    settings_controller = ObjectProperty
+    settings_controller = ObjectProperty()
+
+    # def __init__(self, *args, **kwargs):
+    #     pass
+
+    def init_controllers(self, screens):
+        # Init controllers with references to nested screen objects
+        self.image_selector_controller = ImageSelectorController(screens[HOME_SCREEN].ids, screens['metadata'].ids)
+        self.settings_controller = SettingsController(screens['settings'].ids)
+        self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
+        self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
+        # observation_search_controller = ObservationSearchController(screens['observation'].ids)
+
+        # Proxy methods
+        self.is_starred = self.taxon_selection_controller.is_starred
+        self.add_star = self.taxon_selection_controller.add_star
+        self.remove_star = self.taxon_selection_controller.remove_star
+        self.stored_taxa = self.settings_controller.stored_taxa
+        self.select_taxon = self.taxon_view_controller.select_taxon
+        self.update_history = self.taxon_selection_controller.update_history
+
+        # This part uses a lot of RAM, so do this last
+        self.taxon_selection_controller.init_stored_taxa()
+
+
+class NaturtagApp(MDApp, ControllerProxy):
+    """ Manages window, theme, main screen and navigation state; other application logic is
+    handled by Controller
+    """
+    root = ObjectProperty()
     nav_drawer = ObjectProperty()
     screen_manager = ObjectProperty()
     toolbar = ObjectProperty()
@@ -59,13 +86,7 @@ class ImageTaggerApp(MDApp):
         # Init screens and store references to them
         screens = load_screens()
         self.root = Root()
-
-        # Init controllers with references to nested screen objects
-        self.image_selector_controller = ImageSelectorController(screens[HOME_SCREEN].ids, screens['metadata'].ids)
-        self.settings_controller = SettingsController(screens['settings'].ids)
-        self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
-        self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
-        # observation_search_controller = ObservationSearchController(screens['observation'].ids)
+        ControllerProxy.init_controllers(self, screens)
 
         # Init screen manager and nav elements
         self.nav_drawer = self.root.ids.nav_drawer
@@ -166,7 +187,7 @@ class ImageTaggerApp(MDApp):
 
 
 def main():
-    ImageTaggerApp().run()
+    NaturtagApp().run()
 
 
 if __name__ == '__main__':

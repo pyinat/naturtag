@@ -10,6 +10,8 @@ from kivymd.uix.tab import MDTabsBase, MDTabsLabel
 from kivymd.uix.textfield import MDTextFieldRound
 from kivymd.uix.tooltip import MDTooltip
 
+from naturtag.constants import MAX_LABEL_CHARS
+
 
 class SwitchListItem(ILeftBodyTouch, MDSwitch):
     """ Switch that works as a list item """
@@ -87,9 +89,16 @@ class TooltipTab(MDBoxLayout, MDTabsBase):
 
     def __init__(self, **kwargs):
         self.padding = (0,0,0,0)
-        self.tab_label = TooltipTabLabel(tab=self, tooltip_text=self.tooltip_text)
+        self.tab_label = TooltipTabLabel(tab=self, tooltip_text=truncate(self.tooltip_text))
         Widget.__init__(self, **kwargs)
 
 
 class TooltipTabLabel(MDTabsLabel, MDTooltip):
     """ Tab Label for MDTabs with tooltop behavior """
+
+
+def truncate(text):
+    """ Truncate a label string to not exceed maximum length """
+    if len(text) > MAX_LABEL_CHARS:
+        text = text[:MAX_LABEL_CHARS - 2] + '...'
+    return text

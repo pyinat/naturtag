@@ -1,5 +1,5 @@
 import attr
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from pyinaturalist.node_api import get_taxa_by_id
 from naturtag.inat_metadata import get_rank_idx
@@ -133,7 +133,7 @@ class Taxon:
         return self._child_taxa
 
 
-def get_icon_path(id: int) -> str:
+def get_icon_path(id: int) -> Optional[str]:
     """ An iconic function to return an icon for an iconic taxon """
     if id not in ICONIC_TAXA:
         return None

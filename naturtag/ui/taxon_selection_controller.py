@@ -2,7 +2,7 @@ from logging import getLogger
 
 from pyinaturalist.node_api import get_taxa_autocomplete
 from naturtag.constants import ICONIC_TAXA
-from naturtag.ui import get_settings_controller, get_taxon_view_controller
+from naturtag.ui import get_app
 from naturtag.ui.autocomplete import AutocompleteSearch
 from naturtag.ui.image import IconicTaxaIcon, TaxonListItem
 from naturtag.ui.widgets import StarButton
@@ -42,27 +42,30 @@ class TaxonSelectionController:
         # Set 'Categories' (iconic taxa) icons
         for id in ICONIC_TAXA:
             icon = IconicTaxaIcon(id)
-            icon.bind(on_release=lambda x: self.select_taxon(id=x.taxon_id))
+            icon.bind(on_release=lambda x: get_app().select_taxon(id=x.taxon_id))
             self.screen.search_tab.ids.iconic_taxa.add_widget(icon)
 
         # History, frequent, and starred items
+        self.taxon_history_ids = []
         self.taxon_history_map = {}
-        self.taxon_history_ids = get_settings_controller().taxon_history
         self.taxon_history_list = screen.history_tab.ids.taxon_history_list
-        self.frequent_taxa = get_settings_controller().frequent_taxa
+        self.starred_taxa_ids = []
+        self.starred_taxa_map = {}
+        self.starred_taxa_list = screen.starred_tab.ids.starred_taxa_list
+        self.frequent_taxa_ids = []
         self.frequent_taxa_list = screen.frequent_tab.ids.frequent_taxa_list
         self.frequent_taxa_list.sort_key = self.get_frequent_taxon_idx
-        self.starred_taxa_map = {}
-        self.starred_taxa_ids = get_settings_controller().starred_taxa
-        self.starred_taxa_list = screen.starred_tab.ids.starred_taxa_list
-        self.init_stored_taxa()
 
     def is_starred(self, taxon_id: int) -> bool:
+        """ Check if the specified taxon is in the Starred list """
         return taxon_id in self.starred_taxa_map
 
     # TODO: This should be delayed / populated asynchronously
     def init_stored_taxa(self):
         """ Load taxon history, starred, and frequently viewed items """
+        stored_taxa = get_app().stored_taxa
+        self.taxon_history_ids, self.starred_taxa_ids, self.frequent_taxa_ids = stored_taxa
+
         for taxon_id in self.taxon_history_ids[::-1]:
             if taxon_id not in self.taxon_history_map:
                 item = self.get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.history_tab)
@@ -72,7 +75,7 @@ class TaxonSelectionController:
         for taxon_id in self.starred_taxa_ids[::-1]:
             self.add_star(taxon_id)
 
-        for taxon_id in self.frequent_taxa.keys():
+        for taxon_id in self.frequent_taxa_ids.keys():
             item = self.get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.frequent_tab)
             self.frequent_taxa_list.add_widget(item)
 
@@ -92,8 +95,8 @@ class TaxonSelectionController:
         self.add_frequent_taxon(taxon_id)
 
     def add_frequent_taxon(self, taxon_id: int):
-        self.frequent_taxa.setdefault(taxon_id, 0)
-        self.frequent_taxa[taxon_id] += 1
+        self.frequent_taxa_ids.setdefault(taxon_id, 0)
+        self.frequent_taxa_ids[taxon_id] += 1
         self.frequent_taxa_list.sort()
 
     def add_star(self, taxon_id: int):
@@ -118,23 +121,21 @@ class TaxonSelectionController:
 
     def get_frequent_taxon_idx(self, list_item) -> int:
         """ Get sort index for frequently viewed taxa (by number of views, descending) """
-        num_views = self.frequent_taxa.get(list_item.taxon.id, 0)
+        num_views = self.frequent_taxa_ids.get(list_item.taxon.id, 0)
         return num_views * -1  # Effectively the same as reverse=True
 
-    def get_taxon_list_item(self, **kwargs):
+    @staticmethod
+    def get_taxon_list_item(**kwargs):
         """ Get a taxon list item, with thumbnail + info, that selects its taxon when pressed """
-        return TaxonListItem(**kwargs, button_callback=lambda x: self.select_taxon(x.taxon))
-
-    def on_select_search_result(self, metadata: dict):
-        """ Handle selecting a taxon from autocomplete dropdown """
-        self.select_taxon(taxon_dict=metadata)
-
-    def on_taxon_id(self, input):
-        """ Handle entering a taxon ID and pressing Enter """
-        self.select_taxon(id=int(input.text))
+        return TaxonListItem(**kwargs, button_callback=lambda x: get_app().select_taxon(x.taxon))
 
     @staticmethod
-    def select_taxon(*args, **kwargs):
-        get_taxon_view_controller().select_taxon(*args, **kwargs)
+    def on_select_search_result(metadata: dict):
+        """ Handle selecting a taxon from autocomplete dropdown """
+        get_app().select_taxon(taxon_dict=metadata)
 
+    @staticmethod
+    def on_taxon_id(input):
+        """ Handle entering a taxon ID and pressing Enter """
+        get_app().select_taxon(id=int(input.text))
 

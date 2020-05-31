@@ -5,7 +5,7 @@ from os import makedirs
 from os.path import dirname, isfile, join, normpath, splitext
 from shutil import copyfileobj
 from logging import getLogger
-from typing import BinaryIO, Tuple, Union
+from typing import BinaryIO, Optional, Tuple, Union
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
@@ -40,7 +40,7 @@ def get_thumbnail(source: str, **kwargs) -> str:
         return generate_thumbnail(source, thumbnail_path, **kwargs)
 
 
-def get_thumbnail_if_exists(source: str) -> Union[str, None]:
+def get_thumbnail_if_exists(source: str) -> Optional[str]:
     """
     Get a cached thumbnail for an image, if one already exists, but if not, don't generate a new one
 

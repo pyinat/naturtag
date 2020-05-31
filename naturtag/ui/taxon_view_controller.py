@@ -5,7 +5,7 @@ import webbrowser
 from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, ImageLeftWidget, IconRightWidget
 
 from naturtag.models import Taxon, get_icon_path
-from naturtag.ui import get_taxon_selection_controller
+from naturtag.ui import get_app
 from naturtag.ui.image import TaxonListItem
 from naturtag.ui.widgets import StarButton
 
@@ -31,8 +31,10 @@ class TaxonViewController:
         self.taxon_children = screen.taxonomy_section.ids.taxon_children
         self.basic_info = self.screen.basic_info_section
 
-    def select_taxon(self, taxon_obj=None, taxon_dict: dict=None, id: int=None):
+    def select_taxon(self, taxon_obj=None, taxon_dict: dict=None, id: int=None, if_empty: bool=False):
         """ Update taxon info display by either object, ID, partial record, or complete record """
+        if if_empty and self.selected_taxon is not None:
+            return
         if not any([taxon_obj, taxon_dict, id]):
             return
         if not taxon_obj:
@@ -47,10 +49,7 @@ class TaxonViewController:
         self.load_photo_section()
         self.load_basic_info_section()
         self.load_taxonomy_section()
-
-        selection_controller = get_taxon_selection_controller()
-        selection_controller.update_history(self.selected_taxon.id)
-        selection_controller.add_frequent_taxon(self.selected_taxon.id)
+        get_app().update_history(self.selected_taxon.id)
 
     def load_photo_section(self):
         """ Load taxon photo + links """
@@ -91,7 +90,7 @@ class TaxonViewController:
         # Star Button
         star_icon = StarButton(
             self.selected_taxon.id,
-            is_selected=get_taxon_selection_controller().is_starred(self.selected_taxon.id),
+            is_selected=get_app().is_starred(self.selected_taxon.id),
         )
         star_icon.bind(on_release=self.on_star)
         item.add_widget(star_icon)
@@ -124,8 +123,7 @@ class TaxonViewController:
 
     def on_star(self, button):
         """ Either add or remove a taxon from the starred list """
-        selection_controller = get_taxon_selection_controller()
         if button.is_selected:
-            selection_controller.add_star(self.selected_taxon.id)
+            get_app().add_star(self.selected_taxon.id)
         else:
-            selection_controller.remove_star(self.selected_taxon.id)
+            get_app().remove_star(self.selected_taxon.id)

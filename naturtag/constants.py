@@ -60,6 +60,7 @@ PLACES_BASE_URL = 'https://www.inaturalist.org/places'
 INIT_WINDOW_SIZE = (1250, 800)
 MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'
+MAX_LABEL_CHARS = 80
 
 # Key codes; reference: https://gist.github.com/Enteleform/a2e4daf9c302518bf31fcc2b35da4661
 BACKSPACE = 8

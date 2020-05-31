@@ -14,7 +14,7 @@ from naturtag.tagger import tag_images
 from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
 from naturtag.thumbnails import get_thumbnail
-from naturtag.ui import get_taxon_view_controller
+from naturtag.ui import get_app
 from naturtag.ui.image import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
@@ -74,10 +74,9 @@ class ImageSelectorController(BoxLayout):
     def search_tax_obs(self, metadata):
         taxon, observation = get_taxon_and_obs_from_metadata(metadata)
 
-        # Select a taxon discovered from tags, unless one has already beeen selected
-        taxon_view_controller = get_taxon_view_controller()
-        if taxon and taxon_view_controller.selected_taxon is None:
-            taxon_view_controller.select_taxon(taxon_dict=taxon)
+        # Select a taxon discovered from tags, unless one has already been selected
+        if taxon:
+            get_app().select_taxon(taxon_dict=taxon, if_empty=True)
 
         if taxon:
             self.inputs.taxon_id_input.text = str(taxon['id'])

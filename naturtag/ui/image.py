@@ -6,12 +6,11 @@ from kivy.properties import ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 from kivymd.uix.list import ThreeLineAvatarIconListItem, ILeftBody
-from kivymd.uix.tooltip import MDTooltip
 
 from naturtag.models import Taxon, get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists, get_format
 from naturtag.ui.cache import cache_async_thumbnail
-from naturtag.ui.widgets import HideableTooltip
+from naturtag.ui.widgets import HideableTooltip, truncate
 
 logger = getLogger().getChild(__name__)
 
@@ -88,7 +87,11 @@ class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
             text=taxon.name,
             secondary_text=taxon.rank,
             tertiary_text=taxon.preferred_common_name,
-            tooltip_text=f'ID: {taxon.id}\nAncestry: {taxon.ancestry_str}\nChildren: {len(taxon.child_taxa)}',
+            tooltip_text=(
+                f'ID: {taxon.id}\n'
+                f'Ancestry: {truncate(taxon.ancestry_str)}\n'
+                f'Children: {len(taxon.child_taxa)}'
+            ),
             is_visible_callback=self.is_visible,
             **kwargs,
         )

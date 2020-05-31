@@ -40,6 +40,10 @@ class SettingsController:
         }
         self.update_control_widgets()
 
+    @property
+    def stored_taxa(self):
+        return self.taxon_history, self.starred_taxa, self.frequent_taxa
+
     def update_control_widgets(self):
         """ Update state of settings controls in UI with values from settings file """
         logger.info(f'Loading settings: {self.settings_dict}')
