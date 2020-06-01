@@ -200,7 +200,7 @@ class NaturtagApp(MDApp, ControllerProxy):
         if self.screen_manager.current == HOME_SCREEN:
             self.image_selection_controller.clear()
         elif self.screen_manager.current == 'taxon':
-            self.taxon_search_controller.reset_search_inputs()
+            self.taxon_search_controller.reset_all_search_inputs()
 
     def update_toolbar(self, screen_name):
         """ Modify toolbar in-place so it can be shared by all screens """

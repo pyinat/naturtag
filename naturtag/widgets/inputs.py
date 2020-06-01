@@ -15,7 +15,7 @@ class DropdownTextField(MDDropdownMenu):
         if add_none_item:
             kwargs['items'].insert(0, {'text': 'None'})
 
-        kwargs['callback'] = self.set_rank_input
+        kwargs['callback'] = self.on_select
         kwargs['caller'] = text_input
         kwargs.setdefault('max_height', 400)
         kwargs.setdefault('width_mult', 4)
@@ -38,8 +38,9 @@ class DropdownTextField(MDDropdownMenu):
         if self.text_input.text == '  ':
             self.text_input.text = ''
 
-    def set_rank_input(self, dropdown_item):
+    def on_select(self, dropdown_item):
         """ On clicking a dropdown item, populate the text field's text """
         # Selecting the 'None' item removes any previous selection
         self.text_input.text = dropdown_item.text.replace('None', '')
         self.dismiss()
+

@@ -8,52 +8,55 @@
     padding: dp(20)
     TabHeader:
         text: 'Search'
-    IntField:
-        id: taxon_id_input
-        hint_text: 'Taxon ID'
-        helper_text: 'Enter an iNaturalist taxon ID'
-    TaxonAutocompleteSearch:
-        id: taxon_search_input
-    SectionHeader:
-        text: 'Categories'
-        tooltip_text: 'Iconic taxa categories to browse or filter searches with'
-    IconicTaxaLayout:
-        id: iconic_taxa
-    SectionHeader:
-        text: 'Rank'
-    MDGridLayout:
-        cols: 2
-        InputLabel:
-            text: 'Exact'
-        MDTextField:
-            id: exact_rank_input
-            readonly: True
-            hint_text: 'Exact rank'
-        InputLabel:
-            text: 'Minimum'
-        MDTextField:
-            id: min_rank_input
-            hint_text: 'Min rank'
-        InputLabel:
-            text: 'Maximum'
-        MDTextField:
-            id: max_rank_input
-            hint_text: 'Max rank'
-    MDBoxLayout:
-        spacing: dp(10)
-        TooltipIconButton:
-            id: taxon_search_button
-            icon: 'magnify'
-            text: 'Search'
-            width: dp(220)
-        TooltipIconButton:
-            id: reset_search_button
-            icon: 'restart'
-            text: 'Reset Filters'
-            width: dp(220)
+    ScrollViewY:
+        MDBoxLayout:
+            orientation: 'vertical'
+            IntField:
+                id: taxon_id_input
+                hint_text: 'Taxon ID'
+                helper_text: 'Enter an iNaturalist taxon ID'
+            TaxonAutocompleteSearch:
+                id: taxon_search_input
+            SectionHeader:
+                text: 'Categories'
+                tooltip_text: 'Iconic taxa categories to browse or filter searches with'
+            IconicTaxaLayout:
+                id: iconic_taxa
+            SectionHeader:
+                text: 'Rank'
+            MDGridLayout:
+                cols: 2
+                InputLabel:
+                    text: 'Exact'
+                MDTextField:
+                    id: exact_rank_input
+                    readonly: True
+                    hint_text: 'Exact rank'
+                InputLabel:
+                    text: 'Minimum'
+                MDTextField:
+                    id: min_rank_input
+                    hint_text: 'Min rank'
+                InputLabel:
+                    text: 'Maximum'
+                MDTextField:
+                    id: max_rank_input
+                    hint_text: 'Max rank'
+            MDBoxLayout:
+                spacing: dp(10)
+                TooltipIconButton:
+                    id: taxon_search_button
+                    icon: 'magnify'
+                    text: 'Search'
+                    width: dp(220)
+                TooltipIconButton:
+                    id: reset_search_button
+                    icon: 'restart'
+                    text: 'Reset Filters'
+                    width: dp(220)
     # Temp spacer
-    MDBoxLayout:
-        height: 300
+#    MDBoxLayout:
+#        height: 300
 
 # Taxon search results tab
 <TaxonSearchResultsTab@Tab>:
@@ -69,15 +72,20 @@
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
-    input: input
+    input: text_input
     dropdown: dropdown
     size_hint_x: 1
-    SearchInput:
-        id: input
-        hint_text: 'Taxon Name'
-        helper_text: 'Enter a scientific or common name'
-        helper_text_mode: 'on_focus'
-#        icon_right: 'close-circle-outline'  # TODO: Is there an event for this to bind to?
+    BoxLayout:
+        SearchInput:
+            id: text_input
+            hint_text: 'Taxon Name'
+            helper_text: 'Enter a scientific or common name'
+            helper_text_mode: 'on_focus'
+        MDIconButton:
+            id: search_input_clear_button
+            icon: 'close-circle-outline'
+            size_hint_max_x: dp(20)
+
     AutocompleteDropdown:
         id: dropdown
 

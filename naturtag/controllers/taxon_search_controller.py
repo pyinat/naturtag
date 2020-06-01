@@ -8,6 +8,7 @@ from naturtag.widgets import DropdownTextField, IconicTaxaIcon, TaxonListItem
 
 logger = getLogger().getChild(__name__)
 
+
 class TaxonSearchController:
     """ Controller class to manage taxon search """
     def __init__(self, screen):
@@ -40,8 +41,10 @@ class TaxonSearchController:
         # Buttons
         self.taxon_search_button = screen.search_tab.ids.taxon_search_button
         self.taxon_search_button.bind(on_release=self.search)
+        self.search_input_clear_button = self.taxon_search_input.ids.search_input_clear_button
+        self.search_input_clear_button.bind(on_release=self.taxon_search_input.reset)
         self.reset_search_button = screen.search_tab.ids.reset_search_button
-        self.reset_search_button.bind(on_release=self.reset_search_inputs)
+        self.reset_search_button.bind(on_release=self.reset_all_search_inputs)
 
         # Search results
         self.search_results_list = self.search_results_tab.ids.search_results_list
@@ -79,8 +82,9 @@ class TaxonSearchController:
             item = TaxonListItem(taxon=Taxon.from_dict(taxon_dict), parent_tab=self.search_results_tab)
             self.search_results_list.add_widget(item)
 
-    def reset_search_inputs(self, *args):
+    def reset_all_search_inputs(self, *args):
         logger.info('Resetting search filters')
+        self.taxon_search_input.reset()
         for t in self.selected_iconic_taxa:
             t.toggle_selection()
         self.exact_rank_input.text = ''
@@ -90,7 +94,7 @@ class TaxonSearchController:
     @staticmethod
     def on_select_iconic_taxon(button):
         """ Handle clicking an iconic taxon; don't re-select the taxon if we're de-selecting it """
-        if not button.is_selected:
+        if not button.is_selected:  # Note: this is the state *after* the click event
             get_app().select_taxon(id=button.taxon_id)
 
     @staticmethod

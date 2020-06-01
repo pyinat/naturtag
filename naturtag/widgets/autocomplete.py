@@ -1,10 +1,12 @@
 # Generic/reusable autocomplete components
 # Ideas for autocomplete layout originally taken from:
 # https://www.reddit.com/r/kivy/comments/99n2ct/anyone_having_idea_for_autocomplete_feature_in/e4phtf8/
+# TODO: Fix issues with positioning/resizing dropdown
 from collections.abc import Mapping
 from logging import getLogger
 
 from kivy.clock import Clock
+from kivy.metrics import dp
 from kivy.properties import BooleanProperty, DictProperty, ObjectProperty, StringProperty
 from kivy.uix.behaviors import FocusBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -18,14 +20,19 @@ from kivymd.uix.textfield import MDTextField
 from naturtag.constants import AUTOCOMPLETE_DELAY, AUTOCOMPLETE_MIN_CHARS
 
 # Set dropdown size large enough for 10 results; if there are any more than that, use scrollbar
-DROPDOWN_ITEM_SIZE = 22
-MAX_DROPDOWN_SIZE = 10 * 22 + 50
+TEXT_INPUT_SIZE = dp(50)
+DROPDOWN_ITEM_SIZE = dp(22)
+MAX_DROPDOWN_SIZE = dp(10 * DROPDOWN_ITEM_SIZE + TEXT_INPUT_SIZE)
 
 logger = getLogger().getChild(__name__)
 
 
 class DropdownLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
-    """ Class that adds selection and focus behaviour to a dropdown list """
+    """
+    Class that adds selection and focus behaviour to a dropdown list. Using a RecycleBoxLayout
+    because other options (like :py:class:`.MDDropdownList`) are inefficient for frequently
+    changing contents.
+    """
 
 
 class AutocompleteSearch(MDBoxLayout):
@@ -48,8 +55,8 @@ class AutocompleteSearch(MDBoxLayout):
 
     def callback(self, *args):
         """ Autocompletion callback, rate-limited by ``AUTOCOMPLETE_DELAY`` milliseconds """
-        seatch_str = self.input.text
-        if len(seatch_str) < AUTOCOMPLETE_MIN_CHARS:
+        search_str = self.input.text
+        if len(search_str) < AUTOCOMPLETE_MIN_CHARS:
             return
 
         def get_row(item):
@@ -58,10 +65,11 @@ class AutocompleteSearch(MDBoxLayout):
                 return item
             return {'text': item, 'suggestion_text': item, 'metadata': {}}
 
-        matches = self.get_autocomplete(seatch_str)
-        logger.info(f'Found {len(matches)} matches for search string "{seatch_str}"')
+        matches = self.get_autocomplete(search_str)
+        logger.info(f'Found {len(matches)} matches for search string "{search_str}"')
         self.dropdown.data = [get_row(i) for i in matches]
-        self.height = min(MAX_DROPDOWN_SIZE, (len(matches) * DROPDOWN_ITEM_SIZE) + 50)
+        full_height = (len(matches) * DROPDOWN_ITEM_SIZE) + TEXT_INPUT_SIZE
+        self.height = min(MAX_DROPDOWN_SIZE, dp(full_height))
 
     # TODO: formatting for suggestion_text; smaller text + different color
     def update_selection(self, suggestion_text, metadata):
@@ -69,6 +77,8 @@ class AutocompleteSearch(MDBoxLayout):
         logger.info(f'Updating selection: {suggestion_text}')
         self.input.suggestion_text = '    ' + suggestion_text
         self.selection_callback(metadata)
+        self.height = TEXT_INPUT_SIZE * 2
+        self.dropdown.data = []
 
     def get_autocomplete(self, search_str):
         """
@@ -93,6 +103,13 @@ class AutocompleteSearch(MDBoxLayout):
             list: List of either match strings, or dicts with additional metadata
         """
         raise NotImplementedError
+
+    def reset(self, *args):
+        """ Reset inputs and autocomplete results """
+        self.input.text = ''
+        self.input.suggestion_text = ''
+        self.dropdown.data = []
+        self.height = TEXT_INPUT_SIZE * 2
 
 
 class DropdownItem(RecycleDataViewBehavior, MDLabel):
@@ -129,7 +146,7 @@ class SearchInput(MDTextField):
     """ A text input field for autocomplete search. """
     def on_text(self, instance, value):
         """ Trigger an autocomplete query, unless one has been triggered immediately prior """
-        self.parent.trigger()
+        self.parent.parent.trigger()
 
     # TODO: Not yet working as intended
     def keyboard_on_key_down(self, window, keycode, text, modifiers):
