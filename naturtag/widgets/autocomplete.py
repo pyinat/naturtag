@@ -24,7 +24,7 @@ MAX_DROPDOWN_SIZE = 10 * 22 + 50
 logger = getLogger().getChild(__name__)
 
 
-class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
+class DropdownLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
     """ Class that adds selection and focus behaviour to a dropdown list """
 
 

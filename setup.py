@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 from naturtag import __version__
 
 extras_require = {
-    'ui': ['kivy>=1.11', 'kivymd~=0.104.1', 'pygments'],
+    'app': ['kivy>=1.11', 'kivymd~=0.104.1', 'pygments'],
     'dev': [
         'black',
         'kivy_examples',
@@ -17,8 +17,8 @@ extras_require = {
     ],
 }
 extras_require['all'] = list(chain.from_iterable(extras_require.values()))
-extras_require['ui-win'] = ['pypiwin32', 'kivy_deps.sdl2', 'kivy_deps.gstreamer', 'kivy_deps.angle']
-extras_require['all-win'] = extras_require['all'] + extras_require['ui-win']
+extras_require['app-win'] = ['pypiwin32', 'kivy_deps.sdl2', 'kivy_deps.gstreamer', 'kivy_deps.angle']
+extras_require['all-win'] = extras_require['all'] + extras_require['app-win']
 
 setup(
     name='naturtag',
@@ -45,7 +45,7 @@ setup(
             'nt=naturtag.cli:main',
         ],
         'gui_scripts': [
-            'naturtag-ui=naturtag.ui.app:main',
+            'naturtag-app=naturtag.app.app:main',
         ],
     }
 )

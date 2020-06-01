@@ -10,7 +10,7 @@ from kivy.uix.boxlayout import BoxLayout
 from naturtag.constants import KV_SRC_DIR
 
 HOME_SCREEN = 'image_selection'
-SCREEN_COMPONENTS = ['main', 'autocomplete', 'taxon_selection']
+SCREEN_COMPONENTS = ['widgets', 'main', 'autocomplete', 'taxon_search', 'taxon_selection']
 
 logger = getLogger().getChild(__name__)
 

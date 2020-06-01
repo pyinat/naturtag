@@ -5,22 +5,23 @@ from logging import getLogger
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
-from kivymd.uix.list import ThreeLineAvatarIconListItem, ILeftBody
 
 from naturtag.models import Taxon, get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists, get_format
-from naturtag.ui.cache import cache_async_thumbnail
-from naturtag.ui.widgets import HideableTooltip, truncate
+from naturtag.app.cache import cache_async_thumbnail
 
 logger = getLogger().getChild(__name__)
+
+DESELECTED_COLOR = (0, 0, 0, 0)
+SELECTED_COLOR = (0.2, 0.6, 0.6, .4)
 
 
 class CachedAsyncImage(AsyncImage):
     """ AsyncImage which, once loaded, caches the image for future use """
-    def __init__(self, thumbnail_size='large', **kwargs):
+    def __init__(self, thumbnail_size: str='large', **kwargs):
         """
         Args:
-            size (str) : Size of thumbnail to cache
+            size : Size of thumbnail to cache
         """
         self.thumbnail_size = thumbnail_size
         self.thumbnail_path = None
@@ -56,9 +57,6 @@ class CachedAsyncImage(AsyncImage):
         return image_bytes, ext
 
 
-DESELECTED_COLOR = (0, 0, 0, 0)
-SELECTED_COLOR = (0.2, 0.6, 0.6, .4)
-
 class IconicTaxaIcon(SmartTile):
     """ Icon for an iconic taxon """
     is_selected = BooleanProperty()
@@ -85,54 +83,7 @@ class IconicTaxaIcon(SmartTile):
 class ImageMetaTile(SmartTileWithLabel):
     """ Class that contains an image thumbnail to display plus its associated metadata """
     metadata = ObjectProperty()
-    allow_stretch = False
-    box_color = (0, 0, 0, 0.4)
 
     def __init__(self, metadata, **kwargs):
         super().__init__(**kwargs)
         self.metadata = metadata
-
-
-class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
-    """ Class that displays condensed taxon info as a list item """
-    def __init__(self, taxon=None, taxon_id=None, parent_tab=None, button_callback=None, **kwargs):
-        if not taxon and not taxon_id:
-            raise ValueError('Must provide either a taxon object or ID')
-        taxon = taxon or Taxon.from_id(taxon_id)
-
-        super().__init__(
-            font_style='H6',
-            text=taxon.name,
-            secondary_text=taxon.rank,
-            tertiary_text=taxon.preferred_common_name,
-            tooltip_text=(
-                f'ID: {taxon.id}\n'
-                f'Ancestry: {truncate(taxon.ancestry_str)}\n'
-                f'Children: {len(taxon.child_taxa)}'
-            ),
-            is_visible_callback=self.is_visible,
-            **kwargs,
-        )
-
-        # Save info about the tab this list item belongs to, if any
-        self.tab_id = parent_tab.uid if parent_tab else None
-        self.tab_list = parent_tab.parent.parent if parent_tab else None
-
-        # Select the associated taxon when this list item is pressed
-        self.taxon = taxon
-        if button_callback:
-            self.bind(on_release=button_callback)
-        self.add_widget(TaxonThumbnail(source=taxon.thumbnail_url or taxon.icon_path))
-
-    def is_visible(self):
-        """ If this item belongs to a tab, determine if that tab is currently selected """
-        return (
-            self.tab_id is None or self.tab_list is None or
-            self.tab_id == self.tab_list.current_slide.uid
-        )
-
-
-class TaxonThumbnail(CachedAsyncImage, ILeftBody):
-    """ Class that contains a taxon thumbnail to be used in a list item """
-    def __init__(self, **kwargs):
-        super().__init__(thumbnail_size='small', **kwargs)

@@ -5,34 +5,6 @@
 #:import Transition kivy.uix.screenmanager.NoTransition
 
 
-<TextFieldListItem@MDTextFieldRound>:
-    normal_color: app.theme_cls.bg_dark
-    icon_right_color: app.theme_cls.accent_color
-
-<IconRight@IconRightWidget>:
-    md_bg_color: app.theme_cls.accent_color
-
-<IntField@MDTextField>:
-	input_filter: 'int'
-	helper_text_mode: 'on_focus'
-
-<ScrollViewY@ScrollView>:
-    do_scroll_x: False
-    do_scroll_y: True
-    effect_cls: 'OpacityScrollEffect'
-    scroll_type: ['bars', 'content']
-    scroll_wheel_distance: 100
-    size: self.size
-    bar_width: 10
-
-<TextOutput@TextInput>:
-    readonly: True
-    multiline: True
-
-<StatusBar@MDBoxLayout>:
-    size_hint_max_y: dp(20)
-    md_bg_color: app.theme_cls.bg_light
-
 # Top-level layout with screen manager, toolbar, and nav drawer
 <Root>:
 	orientation: 'vertical'

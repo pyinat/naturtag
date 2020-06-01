@@ -1,0 +1,68 @@
+# Custom widgets, defined mainly for non-behavioral styling/settings to be reused
+# See naturtag.ui.widgets for more
+
+# Labels
+# ------------------------------
+
+<InputLabel@MDLabel>:
+    theme_text_color: 'Primary'
+    size_hint_max_x: dp(100)
+    size_hint_max_y: dp(50)
+
+<SectionHeader@TooltipLabel>:
+    font_style: 'H6'
+    theme_text_color: 'Primary'
+    size_hint_max_y: dp(60)
+    padding: 0, 0, 0, 0
+
+<TabHeader@MDLabel>:
+    font_style: 'H4'
+    theme_text_color: 'Primary'
+    size_hint_max_y: dp(60)
+
+# Images
+# ------------------------------
+
+<ImageMetaTile>:
+    allow_stretch: False
+    box_color: 0, 0, 0, 0.4
+
+
+# Input & output fields
+# ------------------------------
+
+<IntField@MDTextField>:
+	input_filter: 'int'
+	helper_text_mode: 'on_focus'
+
+<TextOutput@TextInput>:
+    readonly: True
+    multiline: True
+
+
+# List items
+# ------------------------------
+
+<IconRight@IconRightWidget>:
+    md_bg_color: app.theme_cls.accent_color
+
+<TextFieldListItem@MDTextFieldRound>:
+    normal_color: app.theme_cls.bg_dark
+    icon_right_color: app.theme_cls.accent_color
+
+
+# Layouts & views
+# ------------------------------
+
+<ScrollViewY@ScrollView>:
+    do_scroll_x: False
+    do_scroll_y: True
+    effect_cls: 'OpacityScrollEffect'
+    scroll_type: ['bars', 'content']
+    scroll_wheel_distance: 100
+    size: self.size
+    bar_width: 10
+
+<StatusBar@MDBoxLayout>:
+    size_hint_max_y: dp(20)
+    md_bg_color: app.theme_cls.bg_light

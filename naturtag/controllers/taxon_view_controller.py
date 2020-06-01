@@ -2,12 +2,11 @@
 from logging import getLogger
 import webbrowser
 
-from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, ImageLeftWidget, IconRightWidget
+from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, ImageLeftWidget
 
 from naturtag.models import Taxon, get_icon_path
-from naturtag.ui import get_app
-from naturtag.ui.image import TaxonListItem
-from naturtag.ui.widgets import StarButton
+from naturtag.app import get_app
+from naturtag.widgets import StarButton, TaxonListItem
 
 logger = getLogger().getChild(__name__)
 

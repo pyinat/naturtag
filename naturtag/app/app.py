@@ -25,15 +25,17 @@ from naturtag.constants import (
     MD_PRIMARY_PALETTE,
     MD_ACCENT_PALETTE,
     ATLAS_APP_ICONS,
-    ATLAS_TAXON_ICONS,
     BACKSPACE,
     F11,
 )
-from naturtag.ui.image_selection_controller import ImageSelectionController, alert
-from naturtag.ui.settings_controller import SettingsController
-from naturtag.ui.taxon_selection_controller import TaxonSelectionController
-from naturtag.ui.taxon_view_controller import TaxonViewController
-from naturtag.ui.screens import HOME_SCREEN, Root, load_screens
+from naturtag.controllers import (
+    ImageSelectionController,
+    SettingsController,
+    TaxonSearchController,
+    TaxonSelectionController,
+    TaxonViewController,
+)
+from naturtag.app.screens import HOME_SCREEN, Root, load_screens
 
 logger = getLogger().getChild(__name__)
 
@@ -44,6 +46,7 @@ class ControllerProxy:
     This also just serves as documentation for these interactions so I don't lose track of them.
     """
     image_selection_controller = ObjectProperty()
+    taxon_search_controller = ObjectProperty()
     taxon_selection_controller = ObjectProperty()
     taxon_view_controller = ObjectProperty()
     settings_controller = ObjectProperty()
@@ -55,6 +58,7 @@ class ControllerProxy:
         self.settings_controller = SettingsController(screens['settings'].ids)
         self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
         self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
+        self.taxon_search_controller = TaxonSearchController(screens['taxon'].ids)
         # observation_search_controller = ObservationSearchController(screens['observation'].ids)
 
         # Proxy methods
@@ -73,7 +77,6 @@ class ControllerProxy:
         """
         Additional initialization to delay slightly so it doesn't block rendering the window firs
         """
-        from time import sleep
         if self._initialized:
             return
         self._initialized = True

@@ -1,5 +1,5 @@
 # Generic/reusable autocomplete components
-#:import SelectableRecycleBoxLayout naturtag.ui.autocomplete.SelectableRecycleBoxLayout
+#:import DropdownLayout naturtag.widgets.DropdownLayout
 
 # Default attributes for top-level search container
 <AutocompleteSearch>:
@@ -13,7 +13,7 @@
     bar_width: 10
     scroll_type:['bars', 'content']
     viewclass: 'DropdownItem'
-    SelectableRecycleBoxLayout:
+    DropdownLayout:
         default_size: None, dp(20)
         default_size_hint: 1, None
         size_hint_y: None

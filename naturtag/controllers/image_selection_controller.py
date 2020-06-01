@@ -14,8 +14,8 @@ from naturtag.tagger import tag_images
 from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
 from naturtag.thumbnails import get_thumbnail
-from naturtag.ui import get_app
-from naturtag.ui.image import ImageMetaTile
+from naturtag.app import get_app
+from naturtag.widgets import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
 
