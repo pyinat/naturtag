@@ -26,6 +26,7 @@ from naturtag.constants import (
     MD_ACCENT_PALETTE,
     ATLAS_APP_ICONS,
     BACKSPACE,
+    ENTER,
     F11,
 )
 from naturtag.controllers import (
@@ -172,20 +173,34 @@ class NaturtagApp(MDApp, ControllerProxy):
         """ Handle keyboard shortcuts """
         if (modifier, key) == (['ctrl'], BACKSPACE):
             self.home()
+        elif (modifier, key) == (['ctrl'], ENTER):
+            self.current_screen_action()
+        elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
+            self.current_screen_clear()
         elif (modifier, codepoint) == (['ctrl'], 'o'):
             pass  # TODO: Open kivymd file manager
         elif (modifier, codepoint) == (['ctrl'], 'q'):
             self.on_request_close()
-        elif (modifier, codepoint) == (['ctrl'], 'r'):
-            self.image_selection_controller.run()
         elif (modifier, codepoint) == (['ctrl'], 's'):
             self.switch_screen('settings')
         elif (modifier, codepoint) == (['ctrl'], 't'):
             self.switch_screen('taxon')
-        elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
-            self.image_selection_controller.clear()
         elif key == F11:
             self.toggle_fullscreen()
+
+    def current_screen_action(self):
+        """ Run the current screen's main action """
+        if self.screen_manager.current == HOME_SCREEN:
+            self.image_selection_controller.run()
+        elif self.screen_manager.current == 'taxon':
+            self.taxon_search_controller.search()
+
+    def current_screen_clear(self):
+        """ Clear the settings on the current screen, if applicable """
+        if self.screen_manager.current == HOME_SCREEN:
+            self.image_selection_controller.clear()
+        elif self.screen_manager.current == 'taxon':
+            self.taxon_search_controller.reset_search_inputs()
 
     def update_toolbar(self, screen_name):
         """ Modify toolbar in-place so it can be shared by all screens """

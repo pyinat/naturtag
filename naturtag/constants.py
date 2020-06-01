@@ -67,6 +67,7 @@ MAX_LABEL_CHARS = 80
 
 # Key codes; reference: https://gist.github.com/Enteleform/a2e4daf9c302518bf31fcc2b35da4661
 BACKSPACE = 8
+ENTER = 13
 F11 = 292
 
 # Simplified tags without formatting variations
