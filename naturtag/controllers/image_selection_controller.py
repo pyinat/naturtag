@@ -114,7 +114,7 @@ class ImageSelectionController(BoxLayout):
         logger.info(f'Main: Removing image {image.metadata.image_path}')
         self.file_list.remove(image.metadata.image_path)
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
-        self.selected_image = None
+        self.selected_image = ''
         image.parent.remove_widget(image)
 
     def clear(self, *args):

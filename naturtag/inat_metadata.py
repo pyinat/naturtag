@@ -104,7 +104,7 @@ def get_observation_from_metadata(metadata):
 
     # Handle observation with no taxon ID (e.g., not yet identified)
     if taxon_id:
-        taxon = get_taxa_by_id(taxon_id)
+        taxon = get_taxa_by_id(taxon_id).get('results', [None])[0]
         logger.info(f'Found observation {metadata.observation_id} and taxon {taxon_id}')
     else:
         logger.warning(f'Observation {metadata.observation_id} is unidentified')
