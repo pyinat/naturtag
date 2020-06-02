@@ -4,12 +4,10 @@ from logging import getLogger
 from os.path import join
 
 # Set GL backend before any kivy modules are imported
-
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
 # Disable multitouch emulation before any other kivy modules are imported
 from kivy.config import Config
-from kivy.clock import Clock
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 from kivy.core.window import Window

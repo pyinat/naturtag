@@ -9,6 +9,12 @@ from naturtag.widgets import truncate
 
 class Tab(MDBoxLayout, MDTabsBase):
     """ Class for a tab in a MDTabs view"""
+    def select(self):
+        """ Switch to this tab in the tabs view """
+        # Yep, just making the label push its own button; there doesn't seem to be a better way
+        self.tab_label.state = 'down'
+        self.tab_label.dispatch('on_release')
+        self.tab_label.state = 'normal'
 
 
 # TODO: Not working

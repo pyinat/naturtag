@@ -90,6 +90,7 @@ class TaxonSearchController:
         for taxon_dict in results:
             item = TaxonListItem(taxon=Taxon.from_dict(taxon_dict), parent_tab=self.search_results_tab)
             self.search_results_list.add_widget(item)
+        self.search_results_tab.select()
 
     def reset_all_search_inputs(self, *args):
         logger.info('Resetting search filters')
