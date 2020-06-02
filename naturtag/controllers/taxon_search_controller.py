@@ -1,3 +1,4 @@
+import asyncio
 from logging import getLogger
 
 from pyinaturalist.node_api import get_taxa
@@ -53,14 +54,22 @@ class TaxonSearchController:
     def selected_iconic_taxa(self):
         return [t for t in self.iconic_taxa_filters.children if t.is_selected]
 
-    # TODO: Paginated results
     def search(self, *args):
         """ Run a search with the currently selected search parameters """
+        asyncio.run(self._search())
+
+    # TODO: Paginated results
+    async def _search(self):
+        # TODO: To make async HTTP requests, Pick one of: grequests, aiohttp, twisted, tornado...
+        # async def _get_taxa(params):
+        #     return get_taxa(**params)['results']
+
         params = self.get_search_parameters()
         logger.info(f'Searching taxa with parameters: {params}')
+        # results = await _get_taxa(params)
         results = get_taxa(**params)['results']
         logger.info(f'Found {len(results)} search results')
-        self.update_search_results(results)
+        await self.update_search_results(results)
 
     def get_search_parameters(self):
         """ Get API-compatible search parameters from the input widgets """
@@ -76,7 +85,7 @@ class TaxonSearchController:
         }
         return {k: v for k, v in params.items() if v}
 
-    def update_search_results(self, results):
+    async def update_search_results(self, results):
         self.search_results_list.clear_widgets()
         for taxon_dict in results:
             item = TaxonListItem(taxon=Taxon.from_dict(taxon_dict), parent_tab=self.search_results_tab)

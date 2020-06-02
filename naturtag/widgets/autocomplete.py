@@ -2,6 +2,7 @@
 # Ideas for autocomplete layout originally taken from:
 # https://www.reddit.com/r/kivy/comments/99n2ct/anyone_having_idea_for_autocomplete_feature_in/e4phtf8/
 # TODO: Fix issues with positioning/resizing dropdown
+import asyncio
 from collections.abc import Mapping
 from logging import getLogger
 
@@ -65,7 +66,7 @@ class AutocompleteSearch(MDBoxLayout):
                 return item
             return {'text': item, 'suggestion_text': item, 'metadata': {}}
 
-        matches = self.get_autocomplete(search_str)
+        matches = asyncio.run(self.get_autocomplete(search_str))
         logger.info(f'Found {len(matches)} matches for search string "{search_str}"')
         self.dropdown.data = [get_row(i) for i in matches]
         full_height = (len(matches) * DROPDOWN_ITEM_SIZE) + TEXT_INPUT_SIZE
@@ -80,7 +81,7 @@ class AutocompleteSearch(MDBoxLayout):
         self.height = TEXT_INPUT_SIZE * 2
         self.dropdown.data = []
 
-    def get_autocomplete(self, search_str):
+    async def get_autocomplete(self, search_str):
         """
         Autocompletion behavior to be implemented by a subclass. There are two return format options:
 

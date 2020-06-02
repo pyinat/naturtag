@@ -1,3 +1,4 @@
+import asyncio
 from logging import getLogger
 
 from naturtag.app import get_app
@@ -6,6 +7,7 @@ from naturtag.widgets import StarButton, TaxonListItem
 logger = getLogger().getChild(__name__)
 
 
+# TODO: Better name for this?
 class TaxonSelectionController:
     """ Controller class to manage selecting stored taxa """
     def __init__(self, screen):
@@ -25,25 +27,35 @@ class TaxonSelectionController:
         self.frequent_taxa_list = screen.frequent_tab.ids.frequent_taxa_list
         self.frequent_taxa_list.sort_key = self.get_frequent_taxon_idx
 
-    # TODO: This should be done asynchronously
-    def init_stored_taxa(self):
+    def post_init(self):
+        asyncio.run(self.init_stored_taxa())
+
+    async def init_stored_taxa(self):
         """ Load taxon history, starred, and frequently viewed items """
         logger.info('Loading stored taxa')
         stored_taxa = get_app().stored_taxa
         self.taxon_history_ids, self.starred_taxa_ids, self.frequent_taxa_ids = stored_taxa
 
-        for taxon_id in self.taxon_history_ids[::-1]:
-            if taxon_id not in self.taxon_history_map:
-                item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.history_tab)
-                self.taxon_history_list.add_widget(item)
-                self.taxon_history_map[taxon_id] = item
+        async def load_history():
+            logger.info(f'Loading {len(self.taxon_history_ids)} (unique) taxa from history')
+            for taxon_id in self.taxon_history_ids[::-1]:
+                if taxon_id not in self.taxon_history_map:
+                    item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.history_tab)
+                    self.taxon_history_list.add_widget(item)
+                    self.taxon_history_map[taxon_id] = item
 
-        for taxon_id in self.starred_taxa_ids[::-1]:
-            self.add_star(taxon_id)
+        async def load_starred():
+            logger.info(f'Loading {len(self.starred_taxa_ids)} starred taxa')
+            for taxon_id in self.starred_taxa_ids[::-1]:
+                self.add_star(taxon_id)
 
-        for taxon_id in self.frequent_taxa_ids.keys():
-            item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.frequent_tab)
-            self.frequent_taxa_list.add_widget(item)
+        async def load_frequent():
+            logger.info(f'Loading {len(self.frequent_taxa_ids)} frequently viewed taxa')
+            for taxon_id in self.frequent_taxa_ids.keys():
+                item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.frequent_tab)
+                self.frequent_taxa_list.add_widget(item)
+
+        await asyncio.gather(load_history(), load_starred(), load_frequent())
 
     def update_history(self, taxon_id: int):
         """ Update history + frequency """

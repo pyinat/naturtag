@@ -1,3 +1,4 @@
+import asyncio
 import json
 from logging import getLogger
 
@@ -48,13 +49,19 @@ class ImageSelectionController(BoxLayout):
         self.add_images(self.file_chooser.selection)
 
     def add_images(self, paths):
-        """ Add one or more files and/or dirs """
-        for path in get_images_from_paths(paths):
-            self.add_image(path=path)
+        """ Add one or more files and/or dirs, with deduplication """
+        results = asyncio.run(self.load_images(paths))
+        self.select_first_result(results)
 
-    # TODO: If an image is dragged & dropped onto a different screen, return to home screen
     def add_image(self, path):
-        """ Add an image to the current selection, with deduplication """
+        """ Add an image to the current selection """
+        self.add_images([path])
+
+    async def load_images(self, paths):
+        return await asyncio.gather(*[self.load_image(path=path) for path in get_images_from_paths(paths)])
+
+    # TODO: Use tasks to load incremental results in the UI
+    async def load_image(self, path):
         if path in self.file_list:
             return
 
@@ -71,20 +78,36 @@ class ImageSelectionController(BoxLayout):
         self.image_previews.add_widget(img)
 
         # Run a search using any relevant tags we found
-        self.search_tax_obs(metadata)
+        taxon, observation = self.search_tax_obs(metadata)
+        await asyncio.sleep(0)
+        return taxon, observation
 
+    # TODO: async HTTP requests
     def search_tax_obs(self, metadata):
         taxon, observation = get_taxon_and_obs_from_metadata(metadata)
-
-        # Select a taxon discovered from tags, unless one has already been selected
-        if taxon:
-            get_app().select_taxon(taxon_dict=taxon, if_empty=True)
 
         if taxon:
             self.inputs.taxon_id_input.text = str(taxon['id'])
         # TODO: Just temporary debug output here; need to display this info in the UI
         if observation:
             logger.debug('Main: ' + json.dumps(observation, indent=4))
+
+        return taxon, observation
+
+    @staticmethod
+    def select_first_result(results):
+        """ Select the first taxon and/or observations discovered from tags, if any """
+        if not results:
+            return
+        taxa, observations = zip(*results)
+        taxon = next(filter(None, taxa), None)
+        if taxon:
+            get_app().select_taxon(taxon_dict=taxon, if_empty=True)
+
+        # TODO
+        # observation = next(filter(None, observations), None)
+        # if observation:
+        #     get_app().select_observation(observation_dict=observation, if_empty=True)
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """

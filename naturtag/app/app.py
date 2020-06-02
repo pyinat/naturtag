@@ -53,7 +53,6 @@ class ControllerProxy:
     settings_controller = ObjectProperty()
 
     def init_controllers(self, screens):
-        self._initialized = False
         # Init controllers with references to nested screen objects
         self.image_selection_controller = ImageSelectionController(screens[HOME_SCREEN].ids, screens['metadata'].ids)
         self.settings_controller = SettingsController(screens['settings'].ids)
@@ -74,14 +73,7 @@ class ControllerProxy:
         self.locale = self.settings_controller.locale
         self.preferred_place_id = self.settings_controller.preferred_place_id
 
-    def lazy_init(self, *args):
-        """
-        Additional initialization to delay slightly so it doesn't block rendering the window firs
-        """
-        if self._initialized:
-            return
-        self._initialized = True
-        self.taxon_selection_controller.init_stored_taxa()
+        self.taxon_selection_controller.post_init()
 
 
 class NaturtagApp(MDApp, ControllerProxy):
@@ -137,9 +129,6 @@ class NaturtagApp(MDApp, ControllerProxy):
         # alert(  # TODO: make this disappear as soon as an image or another screen is selected
         #     f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=7
         # )
-
-        # Taxon page initialization can take some time, so at least render main window first
-        Clock.schedule_once(self.lazy_init, 5)
         return self.root
 
     def home(self, *args):
@@ -160,9 +149,6 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.screen_manager.current = screen_name
         self.update_toolbar(screen_name)
         self.close_nav()
-        # If scheduled lazy init hasn't started yet, do it now
-        if screen_name == 'taxon':
-            self.lazy_init()
 
     def on_request_close(self, *args):
         """ Save any unsaved settings before exiting """

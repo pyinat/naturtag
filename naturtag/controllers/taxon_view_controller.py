@@ -1,4 +1,5 @@
 # TODO: This class has gotten large; split this up into at leeast two modules: taxon_select and taxon_view
+import asyncio
 from logging import getLogger
 import webbrowser
 
@@ -45,12 +46,19 @@ class TaxonViewController:
         # self.taxon_id_input.text = str(self.selected_taxon.id)
 
         logger.info(f'Taxon: Selecting taxon {self.selected_taxon.id}')
-        self.load_photo_section()
-        self.load_basic_info_section()
-        self.load_taxonomy_section()
+
+        asyncio.run(self.load_taxon_info())
         get_app().update_history(self.selected_taxon.id)
 
-    def load_photo_section(self):
+    async def load_taxon_info(self):
+        await asyncio.gather(
+            self.load_photo_section(),
+            self.load_basic_info_section(),
+            self.load_ancestors(),
+            self.load_children(),
+        )
+
+    async def load_photo_section(self):
         """ Load taxon photo + links """
         logger.info('Taxon: Loading photo section')
         if self.selected_taxon.photo_url:
@@ -70,7 +78,7 @@ class TaxonViewController:
             self.taxon_parent_button.disabled = True
             self.taxon_parent_button.tooltip_text = ''
 
-    def load_basic_info_section(self):
+    async def load_basic_info_section(self):
         """ Load basic info for the currently selected taxon """
         # Name, rank
         logger.info('Taxon: Loading basic info section')
@@ -101,23 +109,23 @@ class TaxonViewController:
             item = OneLineListItem(text=f'{label}: {value}')
             self.basic_info.add_widget(item)
 
-    def load_taxonomy_section(self):
-        """ Populate ancestors and children for the currently selected taxon """
-        def _get_label(text, items):
-            return text + (f' ({len(items)})' if items else '')
-
+    async def load_ancestors(self):
+        """ Populate ancestors for the currently selected taxon """
         logger.info('Taxon: Loading ancestors')
         self.taxon_ancestors_label.text = _get_label('Ancestors', self.selected_taxon.parent_taxa)
         self.taxon_ancestors.clear_widgets()
         for taxon in self.selected_taxon.parent_taxa:
             self.taxon_ancestors.add_widget(self.get_taxon_list_item(taxon=taxon))
+            await asyncio.sleep(0)
 
-        # TODO: This can take awhile if there are lots of children; make these async calls?
+    async def load_children(self):
+        """ Populate children for the currently selected taxon """
         logger.info('Taxon: Loading children')
         self.taxon_children_label.text = _get_label('Children', self.selected_taxon.child_taxa)
         self.taxon_children.clear_widgets()
         for taxon in self.selected_taxon.child_taxa:
             self.taxon_children.add_widget(self.get_taxon_list_item(taxon=taxon))
+            await asyncio.sleep(0)
 
     def get_taxon_list_item(self, **kwargs):
         """ Get a taxon list item, with thumbnail + info, that selects its taxon when pressed """
@@ -129,3 +137,7 @@ class TaxonViewController:
             get_app().add_star(self.selected_taxon.id)
         else:
             get_app().remove_star(self.selected_taxon.id)
+
+
+def _get_label(text, items):
+    return text + (f' ({len(items)})' if items else '')
