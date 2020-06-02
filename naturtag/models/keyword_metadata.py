@@ -1,7 +1,8 @@
 from itertools import chain
 from logging import getLogger
+from typing import Any, Dict, List
 
-from naturtag.inat_metadata import sort_taxonomy_keywords
+from naturtag.inat_metadata import sort_taxonomy_keywords, quote
 
 # All tags that support regular and hierarchical keyword lists
 KEYWORD_TAGS = [
@@ -29,7 +30,7 @@ class KeywordMetadata:
         self.hier_keywords = self.get_hierarchical_keywords()
         self.normal_keywords = self.get_normal_keywords()
 
-    def get_combined_keywords(self, metadata):
+    def get_combined_keywords(self, metadata: Dict[str, Any]) -> List[str]:
         """ Get keywords from all metadata formats """
         if not metadata:
             return []
@@ -43,7 +44,7 @@ class KeywordMetadata:
         return [k.replace('"', '') for k in keywords]
 
     @staticmethod
-    def _get_keyword_list(metadata, tag):
+    def _get_keyword_list(metadata: Dict[str, Any], tag: str) -> List[str]:
         """ Split comma-separated keywords into a list, if not already a list """
         keywords = metadata.get(tag, [])
         if isinstance(keywords, list):
@@ -53,14 +54,14 @@ class KeywordMetadata:
         else:
             return [keywords.strip()] if keywords.strip() else []
 
-    def get_kv_keywords(self):
+    def get_kv_keywords(self) -> Dict[str, str]:
         """ Get all keywords that contain key-value pairs"""
         kv_keywords = [kw for kw in self.keywords if kw.count('=') == 1 and kw.split('=')[1]]
         kv_keywords = sort_taxonomy_keywords(kv_keywords)
         logger.info(f'{len(kv_keywords)} unique key-value pairs found in keywords')
         return dict([kw.split('=') for kw in kv_keywords])
 
-    def get_hierarchical_keywords(self):
+    def get_hierarchical_keywords(self) -> List[str]:
         """
         Get all hierarchical keywords as flat strings.
         Also Account for root node (single value without '|')
@@ -71,17 +72,22 @@ class KeywordMetadata:
             hier_keywords.insert(0, root)
         return hier_keywords
 
-    def get_normal_keywords(self):
+    def get_normal_keywords(self) -> List[str]:
         """ Get all single-value keywords that are neither a key-value pair nor hierarchical """
         return sorted([k for k in self.keywords if '=' not in k and '|' not in k])
 
     @property
-    def flat_keywords(self):
+    def flat_keywords(self) -> List[str]:
         """ Get all non-hierarchical keywords """
         return [kw for kw in self.keywords if '|' not in kw]
 
     @property
-    def hier_keyword_tree(self):
+    def flickr_tags(self):
+        """ Get all taxonomy and normal keywords as quoted, space-separated tags compatible with Flickr """
+        return ' '.join([quote(kw) for kw in self.kv_keyword_list + self.normal_keywords])
+
+    @property
+    def hier_keyword_tree(self) -> Dict[str, Any]:
         """ Get all hierarchical keywords as a nested dict """
         kw_tree = {}
         for kw_ranks in [kw.split('|') for kw in self.hier_keywords]:
@@ -96,12 +102,17 @@ class KeywordMetadata:
         return tree
 
     @property
-    def hier_keyword_tree_str(self):
+    def hier_keyword_tree_str(self) -> str:
         """ Get all hierarchical keywords as a single string, in indented tree format """
         return dict_to_indented_tree(self.hier_keyword_tree)
 
     @property
-    def tags(self):
+    def kv_keyword_list(self) -> List[str]:
+        """ Join key-value pairs back into strings """
+        return [f'{k}={v}' for k, v in self.kv_keywords.items()]
+
+    @property
+    def tags(self) -> Dict[str, Any]:
         """
         Add all keywords to all appropriate XMP, EXIF, and IPTC tags
 
@@ -113,7 +124,7 @@ class KeywordMetadata:
         return metadata
 
 
-def dict_to_indented_tree(d):
+def dict_to_indented_tree(d: Dict[str, Any]) -> str:
     """ Convert a dict-formatted tree into a single string, in indented tree format """
     def append_children(d, indent_lvl):
         subtree = ''

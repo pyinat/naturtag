@@ -152,11 +152,11 @@ def sort_taxonomy_keywords(keywords):
     """ Sort keywords by taxonomic rank, where applicable """
     def _get_rank_idx(tag):
         return get_rank_idx(tag.split(':')[-1].split('=')[0])
-    return sorted(keywords, key=_get_rank_idx)
+    return sorted(keywords, key=_get_rank_idx, reverse=True)
 
 
 def get_rank_idx(rank):
-    return RANKS[::-1].index(rank) if rank in RANKS else 0
+    return RANKS.index(rank) if rank in RANKS else 0
 
 
 def get_inaturalist_ids(metadata):

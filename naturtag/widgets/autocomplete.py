@@ -80,8 +80,8 @@ class AutocompleteSearch(MDBoxLayout):
         logger.info(f'Updating selection: {suggestion_text}')
         self.input.suggestion_text = '    ' + suggestion_text
         self.dispatch('on_select_result', metadata)
-        self.height = TEXT_INPUT_SIZE * 2
-        self.dropdown.data = []
+        # self.height = TEXT_INPUT_SIZE * 2
+        # self.dropdown.data = []
 
     def on_select_result(self, *args):
         """ Called when selecting a dropdown item """
@@ -114,8 +114,8 @@ class AutocompleteSearch(MDBoxLayout):
         """ Reset inputs and autocomplete results """
         self.input.text = ''
         self.input.suggestion_text = ''
-        self.dropdown.data = []
-        self.height = TEXT_INPUT_SIZE * 2
+        # self.dropdown.data = []
+        # self.height = TEXT_INPUT_SIZE * 2
 
 
 class DropdownItem(RecycleDataViewBehavior, MDLabel):

@@ -26,6 +26,7 @@ python package.
     * [Installation](#gui-installation)
     * [Usage](#gui-usage)
     * [Taxon Search](#taxon-search)
+    * [Saved Species](#saved-species)
     * [Metadata](#metadata)
     * [Settings](#settings)
     * [Keyboard Shortcuts](#keyboard-shortcuts)
@@ -225,20 +226,37 @@ pip install naturtag[ui-win]
 The basic UI components are shown below:
 ![Screenshot](assets/screenshots/gui-image-selector.png)
 
-1. Drag & drop images or folders into the window. Right-click an image to remove it.
+1. Drag & drop images or folders into the window. **Middle-click** an image to remove it.
 2. Or, select files via the file browser on the right
 3. Enter an iNaturalist observation ID or taxon ID
 4. Click the 'Run' button in the lower-left to tag the selected images
 
 ### Taxon Search
 If you don't already know the taxon ID, click the 'Find a Species' button to go to the taxon
-search screen. Currently this includes searching by name, with autocompletion support.
+search screen. You can start with searching by name, with autocompletion support:
 
 ![Screenshot](assets/screenshots/gui-taxon-search.png)
 
+You can also run a full search using the additional filters. For example, to search for plants
+and fungi with 'goose' in either the species or genus name:
+
+![Screenshot](assets/screenshots/gui-taxon-search-results.png)
+
+### Saved Species
+The additional tabs on the taxon screen contain:
+* History of recently viewed taxa
+* Most frequently viewed taxa
+* Starred taxa
+
+To save a particular taxon for future reference, click the ✩ icon next to it.
+
 ### Metadata
- A very simple (and ugly) metadata view is included, mainly for debugging purposes.
- Left-click an image to open it:
+**Right-click** an image to copy its keyword tags. Currently this just includes keywords compatible
+with Flickr.
+
+Also, a very simple (and ugly) metadata view is included, mainly for debugging purposes.
+**Left-click** an image to open it:
+
 ![Screenshot](assets/screenshots/gui-metadata.png)
 
 ### Settings

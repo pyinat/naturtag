@@ -5,17 +5,14 @@ from logging import getLogger
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.metrics import dp
-
-from kivymd.app import MDApp
 from kivymd.uix.datatables import MDDataTable
-from kivymd.uix.snackbar import Snackbar
 
+from naturtag.app import alert, get_app
 from naturtag.image_glob import get_images_from_paths
-from naturtag.tagger import tag_images
-from naturtag.models.meta_metadata import MetaMetadata
 from naturtag.inat_metadata import get_taxon_and_obs_from_metadata
+from naturtag.models.meta_metadata import MetaMetadata
+from naturtag.tagger import tag_images
 from naturtag.thumbnails import get_thumbnail
-from naturtag.app import get_app
 from naturtag.widgets import ImageMetaTile
 
 logger = getLogger().getChild(__name__)
@@ -74,8 +71,9 @@ class ImageSelectionController(BoxLayout):
         # Add thumbnail to image preview screen
         metadata = MetaMetadata(path)
         img = ImageMetaTile(source=get_thumbnail(path), metadata=metadata, text=metadata.summary)
-        img.bind(on_touch_down=self.handle_image_click)
+        img.bind(on_touch_down=self.on_image_click)
         self.image_previews.add_widget(img)
+        logger.info(metadata.keyword_meta.flickr_tags) # TODO: remove after debugging
 
         # Run a search using any relevant tags we found
         # TODO: async HTTP requests
@@ -138,16 +136,20 @@ class ImageSelectionController(BoxLayout):
             f'Input: {self.get_input_dict()}\n'
         )
 
-    def handle_image_click(self, instance, touch):
-        """ Event handler for clicking an image; either remove or open image details """
+    def on_image_click(self, instance, touch):
+        """ Event handler for clicking an image; either open metadata, copy metadata, or remove """
         if not instance.collide_point(*touch.pos):
             return
         elif touch.button == 'right':
+            from kivy.core.clipboard import Clipboard
+            Clipboard.copy(instance.metadata.keyword_meta.flickr_tags)
+            alert('Tags copied to clipboard')
+        elif touch.button == 'middle':
             self.remove_image(instance)
         else:
             self.selected_image = instance
             self.set_metadata_view()
-            MDApp.get_running_app().switch_screen('metadata')
+            get_app().switch_screen('metadata')
 
     def set_metadata_view(self):
         if not self.selected_image:
@@ -181,9 +183,7 @@ class ImageSelectionController(BoxLayout):
         )
         logger.info(f'Main: Tagging {len(self.file_list)} images with metadata for {selected_id}')
 
-        # TODO: Is there a better way to access settings?
-        metadata_settings = MDApp.get_running_app().settings_controller.metadata
-
+        metadata_settings = get_app().metadata
         tag_images(
             inputs['observation_id'],
             inputs['taxon_id'],
@@ -211,7 +211,3 @@ class ImageSelectionController(BoxLayout):
             ],
             row_data=[(f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
         ).open()
-
-
-def alert(text, **kwargs):
-    Snackbar(text=text, **kwargs).show()

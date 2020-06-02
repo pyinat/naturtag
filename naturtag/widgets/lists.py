@@ -1,3 +1,4 @@
+from kivy.uix.behaviors import ButtonBehavior
 from kivymd.uix.list import MDList, ILeftBody, ILeftBodyTouch, OneLineListItem
 from kivymd.uix.list import ThreeLineAvatarIconListItem
 from kivymd.uix.selectioncontrol import MDSwitch
@@ -29,6 +30,8 @@ class SwitchListItem(ILeftBodyTouch, MDSwitch):
 class TextInputListItem(OneLineListItem, MDTextFieldRound):
     """ Switch that works as a list item """
 
+from kivy.core.clipboard import Clipboard
+from naturtag.app import alert
 
 class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
     """ Class that displays condensed taxon info as a list item """
@@ -58,6 +61,16 @@ class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
         # Select the associated taxon when this list item is pressed
         self.taxon = taxon
         self.add_widget(ThumbnailListItem(source=taxon.thumbnail_url or taxon.icon_path))
+
+    def on_touch_down(self, touch):
+        """ Copy text on right-click """
+        if not self.collide_point(*touch.pos):
+            return
+        elif touch.button == 'right':
+            Clipboard.copy(self.text)
+            alert('Copied to clipboard')
+        else:
+            super().on_touch_down(touch)
 
     def is_visible(self):
         """ If this item belongs to a tab, determine if that tab is currently selected """

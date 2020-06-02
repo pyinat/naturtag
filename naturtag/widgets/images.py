@@ -2,11 +2,13 @@
 from io import BytesIO
 from logging import getLogger
 
+from kivy.core.window import Window
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.image import AsyncImage
+from kivy.uix.widget import Widget
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 
-from naturtag.models import Taxon, get_icon_path
+from naturtag.models import get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists, get_format
 from naturtag.app.cache import cache_async_thumbnail
 

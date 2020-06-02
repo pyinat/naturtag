@@ -47,7 +47,7 @@ class TaxonSelectionController:
 
         async def load_starred():
             logger.info(f'Loading {len(self.starred_taxa_ids)} starred taxa')
-            for taxon_id in self.starred_taxa_ids[::-1]:
+            for taxon_id in self.starred_taxa_ids:
                 self.add_star(taxon_id)
 
         async def load_frequent():

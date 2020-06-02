@@ -1,7 +1,6 @@
 """ Main Kivy application """
 import os
 from logging import getLogger
-from os.path import join
 
 # Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
@@ -11,14 +10,12 @@ from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 from kivy.core.window import Window
-from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivy.uix.image import Image
 from kivymd.app import MDApp
 
 from naturtag.app.screens import HOME_SCREEN, Root, load_screens
 from naturtag.constants import (
-    KV_SRC_DIR,
     INIT_WINDOW_POSITION,
     INIT_WINDOW_SIZE,
     MD_PRIMARY_PALETTE,
@@ -72,6 +69,7 @@ class ControllerProxy:
         # Proxy properties
         self.stored_taxa = self.settings_controller.stored_taxa
         self.locale = self.settings_controller.locale
+        self.metadata = self.settings_controller.metadata
         self.preferred_place_id = self.settings_controller.preferred_place_id
 
         self.taxon_selection_controller.post_init()
@@ -92,12 +90,6 @@ class NaturtagApp(MDApp, ControllerProxy):
     screen_manager = ObjectProperty()
     toolbar = ObjectProperty()
     status_bar = ObjectProperty()
-
-    @staticmethod
-    def _add_screen(screen_name):
-        screen_path = join(KV_SRC_DIR, f'{screen_name}.kv')
-        Builder.load_file(screen_path)
-        logger.debug(f'Init: Loaded screen {screen_path}')
 
     def build(self):
         # Init screens and store references to them
