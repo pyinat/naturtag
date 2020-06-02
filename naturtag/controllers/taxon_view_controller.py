@@ -131,7 +131,9 @@ class TaxonViewController:
 
     def get_taxon_list_item(self, **kwargs):
         """ Get a taxon list item, with thumbnail + info, that selects its taxon when pressed """
-        return TaxonListItem(**kwargs, button_callback=lambda x: self.select_taxon(x.taxon))
+        item = TaxonListItem(**kwargs)
+        item.bind(on_release=lambda x: self.select_taxon(x.taxon))
+        return item
 
     def on_star(self, button):
         """ Either add or remove a taxon from the starred list """

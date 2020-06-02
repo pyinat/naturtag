@@ -16,6 +16,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.image import Image
 from kivymd.app import MDApp
 
+from naturtag.app.screens import HOME_SCREEN, Root, load_screens
 from naturtag.constants import (
     KV_SRC_DIR,
     INIT_WINDOW_POSITION,
@@ -34,7 +35,8 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.app.screens import HOME_SCREEN, Root, load_screens
+from naturtag.widgets import TaxonListItem
+
 
 logger = getLogger().getChild(__name__)
 
@@ -73,6 +75,12 @@ class ControllerProxy:
         self.preferred_place_id = self.settings_controller.preferred_place_id
 
         self.taxon_selection_controller.post_init()
+
+    def get_taxon_list_item(self, *args, **kwargs):
+        """ Get a new :py:class:`.TaxonListItem with event binding """
+        item = TaxonListItem(*args, **kwargs)
+        item.bind(on_release=lambda x: self.taxon_view_controller.select_taxon(x.taxon))
+        return item
 
 
 class NaturtagApp(MDApp, ControllerProxy):

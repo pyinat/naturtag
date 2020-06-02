@@ -5,7 +5,7 @@ from pyinaturalist.node_api import get_taxa
 from naturtag.constants import ICONIC_TAXA, RANKS
 from naturtag.models import Taxon
 from naturtag.app import get_app
-from naturtag.widgets import DropdownTextField, IconicTaxaIcon, TaxonListItem
+from naturtag.widgets import DropdownTextField, IconicTaxaIcon
 
 logger = getLogger().getChild(__name__)
 
@@ -20,7 +20,7 @@ class TaxonSearchController:
         self.taxon_id_input = screen.search_tab.ids.taxon_id_input
         self.taxon_id_input.bind(on_text_validate=self.on_taxon_id)
         self.taxon_search_input = screen.search_tab.ids.taxon_search_input
-        self.taxon_search_input.selection_callback = self.on_select_search_result
+        self.taxon_search_input.bind(on_select_result=self.on_select_result)
         self.exact_rank_input = screen.search_tab.ids.exact_rank_input
         self.min_rank_input = screen.search_tab.ids.min_rank_input
         self.max_rank_input = screen.search_tab.ids.max_rank_input
@@ -88,7 +88,8 @@ class TaxonSearchController:
     async def update_search_results(self, results):
         self.search_results_list.clear_widgets()
         for taxon_dict in results:
-            item = TaxonListItem(taxon=Taxon.from_dict(taxon_dict), parent_tab=self.search_results_tab)
+            item = get_app().get_taxon_list_item(
+                taxon=Taxon.from_dict(taxon_dict), parent_tab=self.search_results_tab)
             self.search_results_list.add_widget(item)
         self.search_results_tab.select()
 
@@ -108,8 +109,8 @@ class TaxonSearchController:
             get_app().select_taxon(id=button.taxon_id)
 
     @staticmethod
-    def on_select_search_result(metadata: dict):
-        """ Handle clicking a taxon from autocomplete dropdown """
+    def on_select_result(instance, metadata: dict):
+        """ Handle clicking a taxon search result from the autocomplete dropdown """
         get_app().select_taxon(taxon_dict=metadata)
 
     @staticmethod

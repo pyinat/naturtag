@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from logging import getLogger
 
 from kivy.clock import Clock
+from kivy.event import EventDispatcher
 from kivy.metrics import dp
 from kivy.properties import BooleanProperty, DictProperty, ObjectProperty, StringProperty
 from kivy.uix.behaviors import FocusBehavior
@@ -43,16 +44,17 @@ class AutocompleteSearch(MDBoxLayout):
     Also includes rate-limited trigger for input delay (so we don't spam searches on every keypress).
 
     Must be inherited by a subclass that implements :py:meth:`get_autocomplete`.
+
+    Events:
+        on_select_result: Called when a result is selected from the dropdown list
     """
     input = ObjectProperty()
     dropdown = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.register_event_type('on_select_result')
         self.trigger = Clock.create_trigger(self.callback, AUTOCOMPLETE_DELAY)
-        # Define a callback to trigger external changes on selection
-        # TODO: This is probably not the kivy way of doing things; not sure how to define a custom event to bind to
-        self.selection_callback = lambda *x: x
 
     def callback(self, *args):
         """ Autocompletion callback, rate-limited by ``AUTOCOMPLETE_DELAY`` milliseconds """
@@ -77,9 +79,12 @@ class AutocompleteSearch(MDBoxLayout):
         """ Intermediate handler to update suggestion text based on dropdown selection """
         logger.info(f'Updating selection: {suggestion_text}')
         self.input.suggestion_text = '    ' + suggestion_text
-        self.selection_callback(metadata)
+        self.dispatch('on_select_result', metadata)
         self.height = TEXT_INPUT_SIZE * 2
         self.dropdown.data = []
+
+    def on_select_result(self, *args):
+        """ Called when selecting a dropdown item """
 
     async def get_autocomplete(self, search_str):
         """

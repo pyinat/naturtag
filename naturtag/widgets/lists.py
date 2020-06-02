@@ -32,7 +32,7 @@ class TextInputListItem(OneLineListItem, MDTextFieldRound):
 
 class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
     """ Class that displays condensed taxon info as a list item """
-    def __init__(self, taxon=None, taxon_id=None, parent_tab=None, button_callback=None, **kwargs):
+    def __init__(self, taxon=None, taxon_id=None, parent_tab=None,**kwargs):
         if not taxon and not taxon_id:
             raise ValueError('Must provide either a taxon object or ID')
         taxon = taxon or Taxon.from_id(taxon_id)
@@ -57,9 +57,6 @@ class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
 
         # Select the associated taxon when this list item is pressed
         self.taxon = taxon
-        if not button_callback:
-            button_callback = lambda x: get_app().select_taxon(x.taxon)
-        self.bind(on_release=button_callback)
         self.add_widget(ThumbnailListItem(source=taxon.thumbnail_url or taxon.icon_path))
 
     def is_visible(self):

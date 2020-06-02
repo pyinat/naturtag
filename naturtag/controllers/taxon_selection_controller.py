@@ -2,7 +2,7 @@ import asyncio
 from logging import getLogger
 
 from naturtag.app import get_app
-from naturtag.widgets import StarButton, TaxonListItem
+from naturtag.widgets import StarButton
 
 logger = getLogger().getChild(__name__)
 
@@ -40,7 +40,8 @@ class TaxonSelectionController:
             logger.info(f'Loading {len(self.taxon_history_ids)} (unique) taxa from history')
             for taxon_id in self.taxon_history_ids[::-1]:
                 if taxon_id not in self.taxon_history_map:
-                    item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.history_tab)
+                    item = get_app().get_taxon_list_item(
+                        taxon_id=taxon_id, parent_tab=self.history_tab)
                     self.taxon_history_list.add_widget(item)
                     self.taxon_history_map[taxon_id] = item
 
@@ -52,7 +53,8 @@ class TaxonSelectionController:
         async def load_frequent():
             logger.info(f'Loading {len(self.frequent_taxa_ids)} frequently viewed taxa')
             for taxon_id in self.frequent_taxa_ids.keys():
-                item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.frequent_tab)
+                item = get_app().get_taxon_list_item(
+                    taxon_id=taxon_id, parent_tab=self.frequent_tab)
                 self.frequent_taxa_list.add_widget(item)
 
         await asyncio.gather(load_history(), load_starred(), load_frequent())
@@ -66,7 +68,7 @@ class TaxonSelectionController:
             item = self.taxon_history_map[taxon_id]
             self.taxon_history_list.remove_widget(item)
         else:
-            item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.history_tab)
+            item = get_app().get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.history_tab)
             self.taxon_history_map[taxon_id] = item
 
         self.taxon_history_list.add_widget(item, len(self.taxon_history_list.children))
@@ -80,7 +82,7 @@ class TaxonSelectionController:
     def add_star(self, taxon_id: int):
         """ Add a taxon to Starred list """
         logger.info(f'Adding taxon to starred: {taxon_id}')
-        item = TaxonListItem(taxon_id=taxon_id, parent_tab=self.starred_tab)
+        item = get_app().get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.starred_tab)
         if taxon_id not in self.starred_taxa_ids:
             self.starred_taxa_ids.append(taxon_id)
         self.starred_taxa_map[taxon_id] = item
