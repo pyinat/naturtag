@@ -65,8 +65,8 @@ class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
     def is_visible(self):
         """ If this item belongs to a tab, determine if that tab is currently selected """
         return (
-            self.tab_id is None or self.tab_list is None or
-            self.tab_id == self.tab_list.current_slide.uid
+            self.tab_id is None or self.tab_list is None or  # Not in a tab; always show
+            self.tab_id == self.tab_list.current_slide.uid  # In selected tab
         )
 
 

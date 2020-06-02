@@ -22,7 +22,7 @@ logger = getLogger().getChild(__name__)
 
 
 class ImageSelectionController(BoxLayout):
-    """ Controller class to manage image slector screen """
+    """ Controller class to manage image selector screen """
     file_list = ListProperty([])
     file_list_text = StringProperty()
     selected_image = ObjectProperty(None)
@@ -78,35 +78,33 @@ class ImageSelectionController(BoxLayout):
         self.image_previews.add_widget(img)
 
         # Run a search using any relevant tags we found
-        taxon, observation = self.search_tax_obs(metadata)
+        # TODO: async HTTP requests
+        taxon, observation = get_taxon_and_obs_from_metadata(metadata)
         await asyncio.sleep(0)
         return taxon, observation
 
-    # TODO: async HTTP requests
-    def search_tax_obs(self, metadata):
-        taxon, observation = get_taxon_and_obs_from_metadata(metadata)
+    def select_photo_taxon(self, taxon_id):
+        self.inputs.taxon_id_input.text = str(taxon_id)
 
-        if taxon:
-            self.inputs.taxon_id_input.text = str(taxon['id'])
-        # TODO: Just temporary debug output here; need to display this info in the UI
-        if observation:
-            logger.debug('Main: ' + json.dumps(observation, indent=4))
+    def select_photo_observation(self, observation_id):
+        self.inputs.observation_id_input.text = str(observation_id)
 
-        return taxon, observation
-
-    @staticmethod
-    def select_first_result(results):
+    def select_first_result(self, results):
         """ Select the first taxon and/or observations discovered from tags, if any """
         if not results:
             return
         taxa, observations = zip(*results)
+
         taxon = next(filter(None, taxa), None)
         if taxon:
+            self.select_photo_taxon(taxon['id'])
             get_app().select_taxon(taxon_dict=taxon, if_empty=True)
 
-        # TODO
-        # observation = next(filter(None, observations), None)
-        # if observation:
+        # TODO: Display this info in the UI after observation search/view screens are implemented
+        observation = next(filter(None, observations), None)
+        if observation:
+            self.select_photo_observation(observation['id'])
+            logger.debug('Main: ' + json.dumps(observation, indent=4))
         #     get_app().select_observation(observation_dict=observation, if_empty=True)
 
     def remove_image(self, image):

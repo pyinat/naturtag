@@ -66,6 +66,7 @@ class ControllerProxy:
         self.add_star = self.taxon_selection_controller.add_star
         self.remove_star = self.taxon_selection_controller.remove_star
         self.select_taxon = self.taxon_view_controller.select_taxon
+        self.select_photo_taxon = self.image_selection_controller.select_photo_taxon
         self.update_history = self.taxon_selection_controller.update_history
 
         # Proxy properties
