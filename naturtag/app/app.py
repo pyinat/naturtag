@@ -27,6 +27,7 @@ from naturtag.constants import (
 )
 from naturtag.controllers import (
     ImageSelectionController,
+    MetadataViewController,
     SettingsController,
     TaxonSearchController,
     TaxonSelectionController,
@@ -44,6 +45,7 @@ class ControllerProxy:
     This also just serves as documentation for these interactions so I don't lose track of them.
     """
     image_selection_controller = ObjectProperty()
+    metadata_view_controller = ObjectProperty()
     taxon_search_controller = ObjectProperty()
     taxon_selection_controller = ObjectProperty()
     taxon_view_controller = ObjectProperty()
@@ -51,7 +53,8 @@ class ControllerProxy:
 
     def init_controllers(self, screens):
         # Init controllers with references to nested screen objects
-        self.image_selection_controller = ImageSelectionController(screens[HOME_SCREEN].ids, screens['metadata'].ids)
+        self.image_selection_controller = ImageSelectionController(screens[HOME_SCREEN].ids)
+        self.metadata_view_controller = MetadataViewController(screens['metadata'].ids)
         self.settings_controller = SettingsController(screens['settings'].ids)
         self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
         self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
@@ -61,6 +64,7 @@ class ControllerProxy:
         # Proxy methods
         self.is_starred = self.taxon_selection_controller.is_starred
         self.add_star = self.taxon_selection_controller.add_star
+        self.load_metadata = self.metadata_view_controller.load_metadata
         self.remove_star = self.taxon_selection_controller.remove_star
         self.select_taxon = self.taxon_view_controller.select_taxon
         self.select_photo_taxon = self.image_selection_controller.select_photo_taxon

@@ -25,6 +25,7 @@ python package.
 * [GUI](#gui)
     * [Installation](#gui-installation)
     * [Usage](#gui-usage)
+    * [Image Selection and Tagging](#image-selection-and-tagging)
     * [Taxon Search](#taxon-search)
     * [Saved Species](#saved-species)
     * [Metadata](#metadata)
@@ -222,14 +223,19 @@ pip install naturtag[ui-win]
 
 ##  GUI Usage
 
-### Image Selection & Tagging
+### Image Selection and Tagging
 The basic UI components are shown below:
 ![Screenshot](assets/screenshots/gui-image-selector.png)
 
-1. Drag & drop images or folders into the window. **Middle-click** an image to remove it.
+1. Drag & drop images or folders into the window.
 2. Or, select files via the file browser on the right
 3. Enter an iNaturalist observation ID or taxon ID
 4. Click the 'Run' button in the lower-left to tag the selected images
+
+Other things to do:
+* **Middle-click** an image to remove it
+* **Right-click** an image for a menu of more actions
+* See [Metadata](#metadata) for more details
 
 ### Taxon Search
 If you don't already know the taxon ID, click the 'Find a Species' button to go to the taxon
@@ -251,11 +257,11 @@ The additional tabs on the taxon screen contain:
 To save a particular taxon for future reference, click the ✩ icon next to it.
 
 ### Metadata
-**Right-click** an image to copy its keyword tags. Currently this just includes keywords compatible
-with Flickr.
+**Right-click** an image and select **Copy Flickr tags** to copy keyword tags compatible with Flickr.
+![Screenshot](assets/screenshots/gui-image-context-menu.png)
 
 Also, a very simple (and ugly) metadata view is included, mainly for debugging purposes.
-**Left-click** an image to open it:
+To open it, **Right-click** an image and select **View metadata**.
 
 ![Screenshot](assets/screenshots/gui-metadata.png)
 

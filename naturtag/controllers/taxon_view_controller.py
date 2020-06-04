@@ -33,21 +33,22 @@ class TaxonViewController:
 
     def select_taxon(self, taxon_obj: Taxon=None, taxon_dict: dict=None, id: int=None, if_empty: bool=False):
         """ Update taxon info display by either object, ID, partial record, or complete record """
+        # Initialize from object, dict, or ID
         if if_empty and self.selected_taxon is not None:
             return
         if not any([taxon_obj, taxon_dict, id]):
             return
         if not taxon_obj:
             taxon_obj = Taxon.from_dict(taxon_dict) if taxon_dict else Taxon.from_id(int(id))
+        # Don't need to do anything if this taxon is already selected
+        if self.selected_taxon is not None and taxon_obj.id == self.selected_taxon.id:
+            return
 
+        logger.info(f'Taxon: Selecting taxon {taxon_obj.id}')
         self.basic_info.clear_widgets()
         self.selected_taxon = taxon_obj
-        # TODO: Set id on image selector page instead
-        # self.taxon_id_input.text = str(self.selected_taxon.id)
-
-        logger.info(f'Taxon: Selecting taxon {self.selected_taxon.id}')
-
         asyncio.run(self.load_taxon_info())
+
         # Add to taxon history, and update taxon id on image selector screen
         get_app().update_history(self.selected_taxon.id)
         get_app().select_photo_taxon(self.selected_taxon.id)

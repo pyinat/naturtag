@@ -3,7 +3,6 @@ import json
 from logging import getLogger
 
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
 
 from naturtag.app import alert, get_app
 from naturtag.image_glob import get_images_from_paths
@@ -16,24 +15,20 @@ from naturtag.widgets import ImageMetaTile
 logger = getLogger().getChild(__name__)
 
 
-class ImageSelectionController(BoxLayout):
+class ImageSelectionController:
     """ Controller class to manage image selector screen """
-    file_list = ListProperty([])
-    file_list_text = StringProperty()
-    selected_image = ObjectProperty(None)
-
-    def __init__(self, image_selection_screen, metadata_screen, **kwargs):
-        super().__init__(**kwargs)
-        self.context_menu = image_selection_screen.context_menu
-        self.inputs = image_selection_screen
-        self.image_previews = image_selection_screen.image_previews
-        self.file_chooser = image_selection_screen.file_chooser
-        self.metadata_screen = metadata_screen
+    def __init__(self, screen, **kwargs):
+        self.context_menu = screen.context_menu
+        self.inputs = screen
+        self.image_previews = screen.image_previews
+        self.file_chooser = screen.file_chooser
+        self.file_list = []
+        self.file_list_text = ''
 
         # Context menu item events
         self.context_menu.ids.view_taxon_ctx.bind(on_release=self.view_taxon)
-        # self.context_menu.ids.view_observation_ctx.bind(on_release=)
-        # self.context_menu.ids.view_metadata_ctx.bind(on_release=)
+        # self.context_menu.ids.view_observation_ctx.bind(on_release=self.view_observation)
+        self.context_menu.ids.view_metadata_ctx.bind(on_release=self.view_metadata)
         self.context_menu.ids.copy_flickr_tags_ctx.bind(on_release=lambda x: x.selected_image.copy_flickr_tags())
         self.context_menu.ids.remove_ctx.bind(on_release=lambda x: self.remove_image(x.selected_image))
 
@@ -115,7 +110,6 @@ class ImageSelectionController(BoxLayout):
         logger.info(f'Main: Removing image {image.metadata.image_path}')
         self.file_list.remove(image.metadata.image_path)
         self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
-        self.selected_image = ''
         image.parent.remove_widget(image)
 
     def clear(self, *args):
@@ -156,11 +150,9 @@ class ImageSelectionController(BoxLayout):
         # Middle-click: remove image
         elif touch.button == 'middle':
             self.remove_image(instance)
-        # Left-click: open metadata view
+        # Left-click: # TODO: larger image view
         else:
-            self.selected_image = instance
-            self.set_metadata_view()
-            get_app().switch_screen('metadata')
+            pass
 
     # TODO: reuse Taxon object previously found by load_image; needs a bit of refactoring
     @staticmethod
@@ -168,23 +160,10 @@ class ImageSelectionController(BoxLayout):
         get_app().switch_screen('taxon')
         get_app().select_taxon(id=instance.metadata.taxon_id)
 
-    # TODO: Move to separate MetadataController; there should be one controller per screen
-    # TODO: This is pretty ugly. Ideally this would be a collection of DataTables.
-    def set_metadata_view(self):
-        if not self.selected_image:
-            return
-        self.metadata_screen.combined.text = json.dumps(
-            self.selected_image.metadata.combined, indent=4
-        )
-        self.metadata_screen.keywords.text = (
-            'Normal Keywords:\n'
-            + json.dumps(self.selected_image.metadata.keyword_meta.flat_keywords, indent=4)
-            + '\n\n\nHierarchical Keywords:\n'
-            + self.selected_image.metadata.keyword_meta.hier_keyword_tree_str
-        )
-        self.metadata_screen.exif.text = json.dumps(self.selected_image.metadata.exif, indent=4)
-        self.metadata_screen.iptc.text = json.dumps(self.selected_image.metadata.iptc, indent=4)
-        self.metadata_screen.xmp.text = json.dumps(self.selected_image.metadata.xmp, indent=4)
+    @staticmethod
+    def view_metadata(instance):
+        get_app().switch_screen('metadata')
+        get_app().load_metadata(instance.metadata)
 
     def run(self, *args):
         """ Run image tagging for selected images and input """
