@@ -81,7 +81,9 @@ class ControllerProxy:
     def get_taxon_list_item(self, *args, **kwargs):
         """ Get a new :py:class:`.TaxonListItem with event binding """
         item = TaxonListItem(*args, **kwargs)
-        item.bind(on_release=lambda x: self.taxon_view_controller.select_taxon(x.taxon))
+        # If TaxonListItem's disable_button is set, don't set button action
+        if not kwargs.get('disable_button'):
+            item.bind(on_release=lambda x: self.taxon_view_controller.select_taxon(x.taxon))
         return item
 
 

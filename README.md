@@ -254,7 +254,9 @@ The additional tabs on the taxon screen contain:
 * Most frequently viewed taxa
 * Starred taxa
 
-To save a particular taxon for future reference, click the ✩ icon next to it.
+To save a particular taxon for future reference, click the ✩ icon in the top left of its info panel,
+and it will be saved in the ★ tab. These items can be re-ordered via **Right-click** -> **Move to top**.
+(Unfortunately, drag-and-drop functionality is not currently possible for list items).
 
 ### Metadata
 **Right-click** an image and select **Copy Flickr tags** to copy keyword tags compatible with Flickr.

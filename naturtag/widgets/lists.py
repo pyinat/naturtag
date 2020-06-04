@@ -1,12 +1,12 @@
-from kivy.uix.behaviors import ButtonBehavior
+from kivy.core.clipboard import Clipboard
 from kivymd.uix.list import MDList, ILeftBody, ILeftBodyTouch, OneLineListItem
 from kivymd.uix.list import ThreeLineAvatarIconListItem
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivymd.uix.textfield import MDTextFieldRound
 
+from naturtag.app import alert
 from naturtag.models import Taxon
-from naturtag.app import get_app
-from naturtag.widgets import truncate, CachedAsyncImage, HideableTooltip
+from naturtag.widgets import truncate, CachedAsyncImage, HideableTooltip, Tab
 
 
 class SortableList(MDList):
@@ -30,27 +30,37 @@ class SwitchListItem(ILeftBodyTouch, MDSwitch):
 class TextInputListItem(OneLineListItem, MDTextFieldRound):
     """ Switch that works as a list item """
 
-from kivy.core.clipboard import Clipboard
-from naturtag.app import alert
 
-class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
+# class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
+class TaxonListItem(ThreeLineAvatarIconListItem):
     """ Class that displays condensed taxon info as a list item """
-    def __init__(self, taxon=None, taxon_id=None, parent_tab=None,**kwargs):
+    def __init__(
+            self,
+            taxon: Taxon=None,
+            taxon_id: int=None,
+            parent_tab: Tab=None,
+            disable_button: bool=False,
+            **kwargs,
+    ):
         if not taxon and not taxon_id:
             raise ValueError('Must provide either a taxon object or ID')
+        if not disable_button:
+            self.bind(on_touch_down=self._on_touch_down)
         taxon = taxon or Taxon.from_id(taxon_id)
+        self.disable_button = disable_button
 
         super().__init__(
             font_style='H6',
             text=taxon.name,
             secondary_text=taxon.rank,
             tertiary_text=taxon.preferred_common_name,
-            tooltip_text=(
-                f'ID: {taxon.id}\n'
-                f'Ancestry: {truncate(taxon.ancestry_str)}\n'
-                f'Children: {len(taxon.child_taxa)}'
-            ),
-            is_visible_callback=self.is_visible,
+            # TODO: Need to fine-tune tooltip behavior before enabling again
+            # tooltip_text=(
+            #     f'ID: {taxon.id}\n'
+            #     f'Ancestry: {truncate(taxon.ancestry_str)}\n'
+            #     f'Children: {len(taxon.child_taxa)}'
+            # ),
+            # is_visible_callback=self.is_visible,
             **kwargs,
         )
 
@@ -62,7 +72,7 @@ class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):
         self.taxon = taxon
         self.add_widget(ThumbnailListItem(source=taxon.thumbnail_url or taxon.icon_path))
 
-    def on_touch_down(self, touch):
+    def _on_touch_down(self, instance, touch):
         """ Copy text on right-click """
         if not self.collide_point(*touch.pos):
             return

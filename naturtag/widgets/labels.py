@@ -6,7 +6,7 @@ from kivymd.uix.tooltip import MDTooltip
 # TODO: Debug root cause of rogue tooltips!
 class HideableTooltip(MDTooltip):
     """
-    This is a workaround for unexpected bahvior with tooltips and tabs. If a HideableTooltip is
+    This is a workaround for unexpected behavior with tooltips and tabs. If a HideableTooltip is
     in an unselected tab, it will always report that the mouse cursor does not intersect it.
     """
     def __init__(self, is_visible_callback, **kwargs):

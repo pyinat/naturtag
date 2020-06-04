@@ -142,7 +142,7 @@ class ImageSelectionController:
         # Right-click: Open context menu for the image
         elif touch.button == 'right':
             self.context_menu.show(*get_app().root_window.mouse_pos)
-            self.context_menu.selected_image = instance
+            self.context_menu.ref = instance
             # Enable 'view taxon/observation' menu items, if applicable
             self.context_menu.ids.view_taxon_ctx.disabled = not instance.metadata.taxon_id
             self.context_menu.ids.view_observation_ctx.disabled = not instance.metadata.observation_id

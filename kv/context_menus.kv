@@ -1,7 +1,9 @@
-#: import PhotoContextMenu naturtag.widgets.PhotoContextMenu
+#: import ObjectContextMenu naturtag.widgets.ObjectContextMenu
 #: import PhotoContextMenuItem naturtag.widgets.PhotoContextMenuItem
+#: import ListContextMenuItem naturtag.widgets.ListContextMenuItem
 
-<PhotoContextMenu>:
+
+<PhotoContextMenu@ObjectContextMenu>:
     visible: False
     PhotoContextMenuItem:
         id: view_taxon_ctx
@@ -30,3 +32,10 @@
 #                text: "Search for observations of this taxon"
 #            ContextMenuTextItem:
 #                text: "Search for similar species"
+
+
+<StarredTaxonContextMenu@ObjectContextMenu>:
+    visible: False
+    ListContextMenuItem:
+        id: move_to_top_ctx
+        text: "Move to top"

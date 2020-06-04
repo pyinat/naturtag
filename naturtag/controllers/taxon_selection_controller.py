@@ -16,6 +16,10 @@ class TaxonSelectionController:
         self.frequent_tab = screen.frequent_tab
         self.starred_tab = screen.starred_tab
 
+        # Context menu
+        self.context_menu = screen.context_menu
+        self.context_menu.ids.move_to_top_ctx.bind(on_release=self.move_starred_to_top)
+
         # Various taxon lists
         self.taxon_history_ids = []
         self.taxon_history_map = {}
@@ -82,15 +86,21 @@ class TaxonSelectionController:
     def add_star(self, taxon_id: int):
         """ Add a taxon to Starred list """
         logger.info(f'Adding taxon to starred: {taxon_id}')
-        item = get_app().get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.starred_tab)
         if taxon_id not in self.starred_taxa_ids:
             self.starred_taxa_ids.append(taxon_id)
-        self.starred_taxa_map[taxon_id] = item
-        self.starred_taxa_list.add_widget(item, len(self.starred_taxa_list.children))
+
+        item = get_app().get_taxon_list_item(
+            taxon_id=taxon_id,
+            parent_tab=self.starred_tab,
+            disable_button=True,
+        )
+        item.bind(on_touch_down=self.on_starred_taxon_click)
         # Add X (remove) button
         remove_button = StarButton(taxon_id, icon='close')
         remove_button.bind(on_release=lambda x: self.remove_star(x.taxon_id))
         item.add_widget(remove_button)
+        self.starred_taxa_map[taxon_id] = item
+        self.starred_taxa_list.add_widget(item, len(self.starred_taxa_list.children))
 
     def remove_star(self, taxon_id: int):
         """ Remove a taxon from Starred list """
@@ -102,6 +112,30 @@ class TaxonSelectionController:
     def is_starred(self, taxon_id: int) -> bool:
         """ Check if the specified taxon is in the Starred list """
         return taxon_id in self.starred_taxa_map
+
+    def on_starred_taxon_click(self, instance, touch):
+        """ Event handler for clicking a item from starred taxa list """
+        if not instance.collide_point(*touch.pos):
+            return
+        # Right-click: Open context menu
+        elif touch.button == 'right':
+            self.context_menu.show(*get_app().root_window.mouse_pos)
+            self.context_menu.ref = instance
+            # self.context_menu.ids.view_taxon_ctx.disabled = not instance.metadata.taxon_id
+        # Middle-click: remove item
+        elif touch.button == 'middle':
+            self.remove_star(instance.taxon.id)
+        # Left-cliok: select taxon
+        else:
+            get_app().select_taxon(instance.taxon)
+
+    def move_starred_to_top(self, instance):
+        """ Move a starred taxon to the top of the list, both in the UI and in persisted list """
+        lst = self.starred_taxa_ids
+        lst.append(lst.pop(lst.index(instance.taxon_id)))
+        item = self.starred_taxa_map[instance.taxon_id]
+        self.starred_taxa_list.remove_widget(item)
+        self.starred_taxa_list.add_widget(item, len(self.starred_taxa_list.children))
 
     def get_frequent_taxon_idx(self, list_item) -> int:
         """ Get sort index for frequently viewed taxa (by number of views, descending) """
