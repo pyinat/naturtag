@@ -3,7 +3,7 @@
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/latest/?badge=latest)
 ![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)
 
-A tool to add iNaturalist taxonomy & observation metadata to local observation photos.
+A tool to browse and add iNaturalist taxonomy & observation metadata to local observation photos.
 This includes a command-line interface, a graphical interface, and can also be used as a
 python package.
 
@@ -25,7 +25,9 @@ python package.
 * [GUI](#gui)
     * [Installation](#gui-installation)
     * [Usage](#gui-usage)
+    * [Image Selection and Tagging](#image-selection-and-tagging)
     * [Taxon Search](#taxon-search)
+    * [Saved Species](#saved-species)
     * [Metadata](#metadata)
     * [Settings](#settings)
     * [Keyboard Shortcuts](#keyboard-shortcuts)
@@ -221,24 +223,48 @@ pip install naturtag[ui-win]
 
 ##  GUI Usage
 
-### Image Selection & Tagging
+### Image Selection and Tagging
 The basic UI components are shown below:
 ![Screenshot](assets/screenshots/gui-image-selector.png)
 
-1. Drag & drop images or folders into the window. Right-click an image to remove it.
+1. Drag & drop images or folders into the window.
 2. Or, select files via the file browser on the right
 3. Enter an iNaturalist observation ID or taxon ID
 4. Click the 'Run' button in the lower-left to tag the selected images
 
+Other things to do:
+* **Middle-click** an image to remove it
+* **Right-click** an image for a menu of more actions
+* See [Metadata](#metadata) for more details
+
 ### Taxon Search
 If you don't already know the taxon ID, click the 'Find a Species' button to go to the taxon
-search screen. Currently this includes searching by name, with autocompletion support.
+search screen. You can start with searching by name, with autocompletion support:
 
 ![Screenshot](assets/screenshots/gui-taxon-search.png)
 
+You can also run a full search using the additional filters. For example, to search for plants
+and fungi with 'goose' in either the species or genus name:
+
+![Screenshot](assets/screenshots/gui-taxon-search-results.png)
+
+### Saved Species
+The additional tabs on the taxon screen contain:
+* History of recently viewed taxa
+* Most frequently viewed taxa
+* Starred taxa
+
+To save a particular taxon for future reference, click the ✩ icon in the top left of its info panel,
+and it will be saved in the ★ tab. These items can be re-ordered via **Right-click** -> **Move to top**.
+(Unfortunately, drag-and-drop functionality is not currently possible for list items).
+
 ### Metadata
- A very simple (and ugly) metadata view is included, mainly for debugging purposes.
- Left-click an image to open it:
+**Right-click** an image and select **Copy Flickr tags** to copy keyword tags compatible with Flickr.
+![Screenshot](assets/screenshots/gui-image-context-menu.png)
+
+Also, a very simple (and ugly) metadata view is included, mainly for debugging purposes.
+To open it, **Right-click** an image and select **View metadata**.
+
 ![Screenshot](assets/screenshots/gui-metadata.png)
 
 ### Settings
@@ -253,14 +279,16 @@ See [CLI Usage](#cli-usage) for more details on these settings.
 ### Keyboard Shortcuts
 Some keyboard shortcuts are included for convenience:
 
-Key(s)          | Action
-----------------|-------
-F11             | Toggle fullscreen
-Ctrl+S          | Open settings screen
-Ctrl+Backspace  | Return to main screen
-Ctrl+R          | Run image tagger
-Shift+Ctrl+X    | Clear selected images
-Ctrl+Q          | Quit
+Key(s)          | Action                 | Screen
+----------------|------------------------|----------
+F11             | Toggle fullscreen      | All
+Ctrl+Enter      | Run image tagger       | Image selection
+Ctrl+Enter      | Run taxon search       | Taxon search
+Shift+Ctrl+X    | Clear selected images  | Image selection
+Shift+Ctrl+X    | Clear search filters   | Taxon search
+Ctrl+S          | Open settings screen   | All
+Ctrl+Backspace  | Return to main screen  | All
+Ctrl+Q          | Quit                   | All
 
 # See Also
 * For generating keyword _collections_, see the related tool

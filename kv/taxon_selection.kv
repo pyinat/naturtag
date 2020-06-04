@@ -1,0 +1,37 @@
+# Layouts for selecting stored taxa
+
+# Taxon history tab
+<TaxonHistoryTab@Tab>:
+    text: 'history'
+    # tooltip_text: 'History'
+    orientation: 'vertical'
+    padding: dp(20)
+    TabHeader:
+        text: 'History'
+    ScrollViewY:
+        MDList:
+            id: taxon_history_list
+
+# Frequently viewed taxa tab
+<FrequentTaxaTab@Tab>:
+    text: 'poll'
+    # tooltip_text: 'Frequent'
+    orientation: 'vertical'
+    padding: dp(20)
+    TabHeader:
+        text: 'Frequent'
+    ScrollViewY:
+        SortableList:
+            id: frequent_taxa_list
+
+# Starred taxa tab
+<StarredTaxaTab@Tab>:
+    text: 'star'
+    # tooltip_text: 'Starred'
+    orientation: 'vertical'
+    padding: dp(20)
+    TabHeader
+        text: 'Starred'
+    ScrollViewY:
+        MDList:
+            id: starred_taxa_list

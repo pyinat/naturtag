@@ -1,14 +1,28 @@
+import attr
+from typing import List, Dict
+
 from pyinaturalist.node_api import get_observation
 from naturtag.constants import OBSERVATION_BASE_URL
-from naturtag.models.base import JsonModel
+
+kwarg = attr.ib(default=None)
 
 
-class Observation(JsonModel):
-    def __init__(self, json_result=None, id=None):
-        """
-        Construct an Observation object from an API response from :py:func:`get_observations`.
-        Will lazy-load additional info as needed.
+# TODO
+@attr.s
+class Observation:
+    id: int = kwarg
 
-        Alternatively, this class can be initialized with just an ID to fetch remaining info.
-        """
-        super().__init__(json_result=json_result, id=id)
+    @classmethod
+    def from_id(cls, id: int):
+        """ Lookup and create a new Observation object from an ID """
+        r = get_observation(id)
+        json = r['results'][0]
+        return cls.from_dict(json)
+
+    @classmethod
+    def from_dict(cls, json: Dict, partial: bool = False):
+        """ Create a new Observation object from an API response """
+        # Strip out Nones so we use our default factories instead (e.g. for empty lists)
+        attr_names = attr.fields_dict(cls).keys()
+        valid_json = {k: v for k, v in json.items() if k in attr_names and v is not None}
+        return cls(partial=partial, **valid_json)

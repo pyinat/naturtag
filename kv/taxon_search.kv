@@ -1,76 +1,91 @@
-#:import TaxonAutocompleteSearch naturtag.ui.taxon_search_controller.TaxonAutocompleteSearch
-#:import CachedAsyncImage naturtag.ui.image.CachedAsyncImage
+# Layout for taxon search & search results
 
-<TaxonSearchScreen>:
-    id: taxon_search_screen
-    name: 'taxon_search'
-
-    BoxLayout:
-        # Search inputs
+# Taxon search tab
+<TaxonSearchTab@Tab>:
+    text: 'magnify'
+    # tooltip_text: 'Search'
+    orientation: 'vertical'
+    padding: dp(20)
+    TabHeader:
+        text: 'Search'
+    ScrollViewY:
         MDBoxLayout:
             orientation: 'vertical'
-            padding: dp(10)
-            size_hint_x: .4
-            size_hint_min_x: dp(500)
-            size_hint_max_x: dp(700)
-            md_bg_color: app.theme_cls.bg_normal
             IntField:
                 id: taxon_id_input
                 hint_text: 'Taxon ID'
                 helper_text: 'Enter an iNaturalist taxon ID'
             TaxonAutocompleteSearch:
                 id: taxon_search_input
-            MDLabel:
+            SectionHeader:
                 text: 'Categories'
-                font_style: 'H6'
-                size_hint_max_y: dp(60)
+                tooltip_text: 'Iconic taxa categories to browse or filter searches with'
             IconicTaxaLayout:
                 id: iconic_taxa
-            # Temp spacer
-            MDBoxLayout:
-                height: 300
-
-        # Info display for selected taxon
-        MDBoxLayout:
-            orientation: 'vertical'
-            md_bg_color: app.theme_cls.bg_dark
+            SectionHeader:
+                text: 'Rank'
             MDGridLayout:
                 cols: 2
+                InputLabel:
+                    text: 'Exact'
+                MDTextField:
+                    id: exact_rank_input
+                    readonly: True
+                    hint_text: 'Exact rank'
+                InputLabel:
+                    text: 'Minimum'
+                MDTextField:
+                    id: min_rank_input
+                    hint_text: 'Min rank'
+                InputLabel:
+                    text: 'Maximum'
+                MDTextField:
+                    id: max_rank_input
+                    hint_text: 'Max rank'
+            MDBoxLayout:
                 spacing: dp(10)
-                MDBoxLayout:
-                    orientation: 'vertical'
-                    spacing: dp(10)
-                    size_hint_max_x: dp(500)
-                    CachedAsyncImage:
-                        id: selected_taxon_photo
-                        size_hint_max_y: dp(500)
-                    TooltipIconButton:
-                        id: selected_taxon_link_button
-                        icon: 'link-variant'
-                        text: 'View on iNaturalist'
-                        width: self.parent.width
-                    TooltipIconButton:
-                        id: taxon_parent_button
-                        icon: 'arrow-up-circle-outline'
-                        text: 'View parent'
-                        width: self.parent.width
-                        disabled: True
-                MDList:
-                    id: basic_info_section
-            TaxonomySection:
-                id: taxonomy_section
+                TooltipIconButton:
+                    id: taxon_search_button
+                    icon: 'magnify'
+                    text: 'Search'
+                    width: dp(220)
+                TooltipIconButton:
+                    id: reset_search_button
+                    icon: 'restart'
+                    text: 'Reset Filters'
+                    width: dp(220)
+    # Temp spacer
+#    MDBoxLayout:
+#        height: 300
+
+# Taxon search results tab
+<TaxonSearchResultsTab@Tab>:
+    text: 'layers-search'
+    # tooltip_text: 'Search'
+    orientation: 'vertical'
+    padding: dp(20)
+    TabHeader:
+        text: 'Search Results'
+    ScrollViewY:
+        MDList:
+            id: search_results_list
 
 # Autocomplete search layout with input + dropdown
 <TaxonAutocompleteSearch>:
-    input: input
+    input: text_input
     dropdown: dropdown
     size_hint_x: 1
-    SearchInput:
-        id: input
-        hint_text: 'Taxon Name'
-        helper_text: 'Enter a scientific or common name'
-        helper_text_mode: 'on_focus'
-#        icon_right: 'close-circle-outline'  # TODO: Is there an event for this to bind to?
+    BoxLayout:
+        SearchInput:
+            id: text_input
+            hint_text: 'Taxon Name'
+            helper_text: 'Enter a scientific or common name'
+            helper_text_mode: 'on_focus'
+        MDIconButton:
+            id: search_input_clear_button
+            icon: 'close-circle-outline'
+            size_hint_max_x: dp(20)
+
     AutocompleteDropdown:
         id: dropdown
 
@@ -85,18 +100,3 @@
     row_force_default: True
     col_default_width: dp(40)
     col_force_default: True
-
-<TaxonomySection@MDGridLayout>:
-    cols: 2
-    OneLineListItem:
-        font_style: 'H5'
-        text: 'Ancestors'
-    OneLineListItem:
-        font_style: 'H5'
-        text: 'Children'
-    ScrollViewY:
-        MDList:
-            id: taxon_ancestors
-    ScrollViewY:
-        MDList:
-            id: taxon_children

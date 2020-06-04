@@ -104,7 +104,7 @@ def get_observation_from_metadata(metadata):
 
     # Handle observation with no taxon ID (e.g., not yet identified)
     if taxon_id:
-        taxon = get_taxa_by_id(taxon_id)
+        taxon = get_taxa_by_id(taxon_id).get('results', [None])[0]
         logger.info(f'Found observation {metadata.observation_id} and taxon {taxon_id}')
     else:
         logger.warning(f'Observation {metadata.observation_id} is unidentified')
@@ -150,10 +150,13 @@ def get_hierarchical_keywords(keywords):
 
 def sort_taxonomy_keywords(keywords):
     """ Sort keywords by taxonomic rank, where applicable """
-    def get_rank_idx(tag):
-        base_tag = tag.split(':')[-1].split('=')[0]
-        return RANKS.index(base_tag) if base_tag in RANKS else 0
-    return sorted(keywords, key=get_rank_idx, reverse=True)
+    def _get_rank_idx(tag):
+        return get_rank_idx(tag.split(':')[-1].split('=')[0])
+    return sorted(keywords, key=_get_rank_idx, reverse=True)
+
+
+def get_rank_idx(rank):
+    return RANKS.index(rank) if rank in RANKS else 0
 
 
 def get_inaturalist_ids(metadata):

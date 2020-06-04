@@ -8,7 +8,15 @@ logger = getLogger().getChild(__name__)
 
 
 def glob_paths(path_patterns):
-    """ Given one to many glob patterns, expand all into a list of files """
+    """
+    Given one to many glob patterns, expand all into a list of matching files
+
+    Args:
+        path_patterns (list): Glob patterns
+
+    Returns:
+        list: Expanded list of file paths
+    """
     expanded_paths = []
     for pattern in path_patterns:
         expanded_paths.extend([expanduser(path) for path in glob(pattern)])
@@ -16,14 +24,31 @@ def glob_paths(path_patterns):
 
 
 def get_images_from_dir(dir):
-    """ Get all images of supported filetypes from the selected directory """
+    """
+    Get all images of supported filetypes from the selected directory.
+    Note: Currently not recursive.
+
+    Args:
+        dir (list): Path to image directory
+
+    Returns:
+        list: Paths of supported image files in the directory
+    """
     paths = glob_paths([join(dir, pattern) for pattern in IMAGE_FILETYPES])
     logger.info(f'{len(paths)} images found in directory: {dir}')
     return paths
 
 
 def get_images_from_paths(paths):
-    """  Get all images of supported filetypes from one or more dirs and/or image paths """
+    """
+    Get all images of supported filetypes from one or more dirs and/or image paths
+
+    Args:
+        paths (``str`` or ``list``): Paths to images and/or image directories
+
+    Returns:
+        list: Combined list of image file paths
+    """
     image_paths = []
     paths = [paths] if isinstance(paths, (str, bytes)) else paths
     logger.info(f'Getting images from paths: {paths}')

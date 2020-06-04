@@ -1,32 +1,53 @@
 from locale import locale_alias, getdefaultlocale
 from logging import getLogger
+from typing import Tuple, List, Dict
 import webbrowser
 
+from kivymd.app import MDApp
+
 from naturtag.constants import PLACES_BASE_URL
-from naturtag.settings import read_settings, write_settings, reset_defaults
+from naturtag.settings import (
+    read_settings,
+    write_settings,
+    read_stored_taxa,
+    write_stored_taxa,
+    reset_defaults,
+)
 
 logger = getLogger().getChild(__name__)
 
 
+# TODO: Track whether state changed since last write; if not, don't write on close
 class SettingsController:
     """ Controller class to manage Settings screen, and reading from and writing to settings file """
     def __init__(self, settings_screen):
         self.screen = settings_screen
         self.settings_dict = read_settings()
+        self._stored_taxa = read_stored_taxa()
 
         # Set default locale if it's unset
         if self.inaturalist['locale'] is None:
             self.inaturalist['locale'] = getdefaultlocale()[0]
 
         self.screen.preferred_place_id_label.bind(
-            on_release=lambda *x: webbrowser.open(PLACES_BASE_URL))
+            on_release=lambda *x: webbrowser.open(PLACES_BASE_URL)
+        )
+        self.screen.dark_mode_chk.bind(active=MDApp.get_running_app().set_theme_mode)
 
         # Control widget ids should match the options in the settings file (with suffixes)
         self.controls = {
-            id.replace('_chk',  '').replace('_input', ''): getattr(settings_screen, id)
+            id.replace('_chk', '').replace('_input', ''): getattr(settings_screen, id)
             for id in settings_screen
         }
         self.update_control_widgets()
+
+    @property
+    def stored_taxa(self) -> Tuple[List[int], List[int], Dict[int, int]]:
+        return (
+            self._stored_taxa['history'],
+            self._stored_taxa['starred'],
+            self._stored_taxa['frequent'],
+        )
 
     def update_control_widgets(self):
         """ Update state of settings controls in UI with values from settings file """
@@ -45,6 +66,7 @@ class SettingsController:
                     section[setting_name] = value
 
         write_settings(self.settings_dict)
+        write_stored_taxa(self._stored_taxa)
 
     def get_control_value(self, setting_name):
         """ Get the value of the control widget corresponding to a setting """
@@ -70,6 +92,14 @@ class SettingsController:
             return control_widget, 'text', str
         else:
             logger.warning(f'Could not detect type for {control_widget}')
+
+    @property
+    def locale(self):
+        return self.inaturalist.get('locale')
+
+    @property
+    def preferred_place_id(self):
+        return self.inaturalist.get('preferred_place_id')
 
     @property
     def inaturalist(self):
