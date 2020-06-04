@@ -61,7 +61,7 @@ class ImageSelectionController:
     # TODO: Use tasks to load incremental results in the UI
     async def load_image(self, path):
         if path in self.file_list:
-            return
+            return None, None
 
         # Add to file list
         logger.info(f'Main: Adding image {path}')
@@ -89,7 +89,7 @@ class ImageSelectionController:
 
     def select_first_result(self, results):
         """ Select the first taxon and/or observations discovered from tags, if any """
-        if not results:
+        if not results or not any(*results):
             return
         taxa, observations = zip(*results)
 
