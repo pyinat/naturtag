@@ -2,12 +2,12 @@
 from io import BytesIO
 from logging import getLogger
 
-from kivy.core.window import Window
+from kivy.core.clipboard import Clipboard
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.image import AsyncImage
-from kivy.uix.widget import Widget
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 
+from naturtag.app import alert
 from naturtag.models import get_icon_path
 from naturtag.thumbnails import get_thumbnail_if_exists, get_format
 from naturtag.app.cache import cache_async_thumbnail
@@ -89,3 +89,7 @@ class ImageMetaTile(SmartTileWithLabel):
     def __init__(self, metadata, **kwargs):
         super().__init__(**kwargs)
         self.metadata = metadata
+
+    def copy_flickr_tags(self, *args):
+        Clipboard.copy(self.metadata.keyword_meta.flickr_tags)
+        alert('Tags copied to clipboard')

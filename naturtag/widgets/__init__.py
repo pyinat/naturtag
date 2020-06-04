@@ -18,6 +18,7 @@ from naturtag.widgets.images import CachedAsyncImage, IconicTaxaIcon, ImageMetaT
 from naturtag.widgets.inputs import DropdownTextField
 from naturtag.widgets.labels import HideableTooltip, TooltipLabel
 from naturtag.widgets.lists import SortableList, SwitchListItem, TextInputListItem, TaxonListItem, ThumbnailListItem
+from naturtag.widgets.menus import PhotoContextMenu, PhotoContextMenuItem
 from naturtag.widgets.tabs import Tab
 from naturtag.widgets.taxon_autocomplete import TaxonAutocompleteSearch
 

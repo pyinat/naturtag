@@ -4,8 +4,6 @@ from logging import getLogger
 
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.metrics import dp
-from kivymd.uix.datatables import MDDataTable
 
 from naturtag.app import alert, get_app
 from naturtag.image_glob import get_images_from_paths
@@ -26,12 +24,20 @@ class ImageSelectionController(BoxLayout):
 
     def __init__(self, image_selection_screen, metadata_screen, **kwargs):
         super().__init__(**kwargs)
+        self.context_menu = image_selection_screen.context_menu
         self.inputs = image_selection_screen
         self.image_previews = image_selection_screen.image_previews
         self.file_chooser = image_selection_screen.file_chooser
         self.metadata_screen = metadata_screen
 
-        # Bind widget events
+        # Context menu item events
+        self.context_menu.ids.view_taxon_ctx.bind(on_release=self.view_taxon)
+        # self.context_menu.ids.view_observation_ctx.bind(on_release=)
+        # self.context_menu.ids.view_metadata_ctx.bind(on_release=)
+        self.context_menu.ids.copy_flickr_tags_ctx.bind(on_release=lambda x: x.selected_image.copy_flickr_tags())
+        self.context_menu.ids.remove_ctx.bind(on_release=lambda x: self.remove_image(x.selected_image))
+
+        # Other widget events
         self.inputs.taxon_id_input.bind(on_text_validate=self.on_taxon_id)
         self.inputs.clear_button.bind(on_release=self.clear)
         # self.inputs.clear_button.bind(on_release=lambda *x: get_app().show_progress())
@@ -73,7 +79,6 @@ class ImageSelectionController(BoxLayout):
         img = ImageMetaTile(source=get_thumbnail(path), metadata=metadata, text=metadata.summary)
         img.bind(on_touch_down=self.on_image_click)
         self.image_previews.add_widget(img)
-        logger.info(metadata.keyword_meta.flickr_tags) # TODO: remove after debugging
 
         # Run a search using any relevant tags we found
         # TODO: async HTTP requests
@@ -137,24 +142,37 @@ class ImageSelectionController(BoxLayout):
         )
 
     def on_image_click(self, instance, touch):
-        """ Event handler for clicking an image; either open metadata, copy metadata, or remove """
+        """ Event handler for clicking an image """
         if not instance.collide_point(*touch.pos):
             return
+        # Right-click: Open context menu for the image
         elif touch.button == 'right':
-            from kivy.core.clipboard import Clipboard
-            Clipboard.copy(instance.metadata.keyword_meta.flickr_tags)
-            alert('Tags copied to clipboard')
+            self.context_menu.show(*get_app().root_window.mouse_pos)
+            self.context_menu.selected_image = instance
+            # Enable 'view taxon/observation' menu items, if applicable
+            self.context_menu.ids.view_taxon_ctx.disabled = not instance.metadata.taxon_id
+            self.context_menu.ids.view_observation_ctx.disabled = not instance.metadata.observation_id
+            self.context_menu.ids.copy_flickr_tags_ctx.disabled = not instance.metadata.keyword_meta.flickr_tags
+        # Middle-click: remove image
         elif touch.button == 'middle':
             self.remove_image(instance)
+        # Left-click: open metadata view
         else:
             self.selected_image = instance
             self.set_metadata_view()
             get_app().switch_screen('metadata')
 
+    # TODO: reuse Taxon object previously found by load_image; needs a bit of refactoring
+    @staticmethod
+    def view_taxon(instance):
+        get_app().switch_screen('taxon')
+        get_app().select_taxon(id=instance.metadata.taxon_id)
+
+    # TODO: Move to separate MetadataController; there should be one controller per screen
+    # TODO: This is pretty ugly. Ideally this would be a collection of DataTables.
     def set_metadata_view(self):
         if not self.selected_image:
             return
-        # TODO: This is pretty ugly. Ideally this would be a collection of DataTables.
         self.metadata_screen.combined.text = json.dumps(
             self.selected_image.metadata.combined, indent=4
         )
@@ -202,12 +220,14 @@ class ImageSelectionController(BoxLayout):
         get_app().select_taxon(id=int(input.text))
 
     # TODO: for testing only
-    @staticmethod
-    def open_table(self):
-        MDDataTable(
-            column_data=[
-                ("No.", dp(30)),  ("Column 1", dp(30)), ("Column 2", dp(30)),
-                ("Column 3", dp(30)), ("Column 4", dp(30)), ("Column 5", dp(30)),
-            ],
-            row_data=[(f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
-        ).open()
+    # from kivy.metrics import dp
+    # from kivymd.uix.datatables import MDDataTable
+    # @staticmethod
+    # def open_table(self):
+    #     MDDataTable(
+    #         column_data=[
+    #             ("No.", dp(30)),  ("Column 1", dp(30)), ("Column 2", dp(30)),
+    #             ("Column 3", dp(30)), ("Column 4", dp(30)), ("Column 5", dp(30)),
+    #         ],
+    #         row_data=[(f"{i + 1}", "2.23", "3.65", "44.1", "0.45", "62.5") for i in range(50)],
+    #     ).open()

@@ -198,7 +198,6 @@ def flip_all(path: str):
     """ Vertically flip all images in a directory. Mainly for debugging purposes. """
     from naturtag.image_glob import get_images_from_dir
     for source in get_images_from_dir(path):
-        print(f'Transposing {source}')
         image = Image.open(source)
         image = flip(image)
         image.save(source)
