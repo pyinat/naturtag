@@ -8,5 +8,6 @@ build/
 pip-wheel-metadata/
 dist/
 docs/modules/
+libs/
 venv/
 sample_data/
