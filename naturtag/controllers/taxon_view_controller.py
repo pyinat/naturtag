@@ -1,4 +1,3 @@
-# TODO: This class has gotten large; split this up into at leeast two modules: taxon_select and taxon_view
 import asyncio
 from logging import getLogger
 import webbrowser

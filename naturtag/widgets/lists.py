@@ -6,7 +6,7 @@ from kivymd.uix.textfield import MDTextFieldRound
 
 from naturtag.app import alert
 from naturtag.models import Taxon
-from naturtag.widgets import truncate, CachedAsyncImage, HideableTooltip, Tab
+from naturtag.widgets import CachedAsyncImage, Tab
 
 
 class SortableList(MDList):
@@ -28,7 +28,7 @@ class SwitchListItem(ILeftBodyTouch, MDSwitch):
 
 
 class TextInputListItem(OneLineListItem, MDTextFieldRound):
-    """ Switch that works as a list item """
+    """ Text input that works as a list item """
 
 
 # class TaxonListItem(ThreeLineAvatarIconListItem, HideableTooltip):

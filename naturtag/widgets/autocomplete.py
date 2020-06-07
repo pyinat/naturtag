@@ -1,15 +1,24 @@
-# Generic/reusable autocomplete components
-# Ideas for autocomplete layout originally taken from:
-# https://www.reddit.com/r/kivy/comments/99n2ct/anyone_having_idea_for_autocomplete_feature_in/e4phtf8/
-# TODO: Fix issues with positioning/resizing dropdown
+"""
+Generic/reusable autocomplete search + dropdown components
+Since this has 5+ levels of nested widgets, here's an overview of what they do:
+
+AutocompleteController:         : Manages interactions between input, search, and dropdown
+    TextInput                   : Text input for search
+    DropdownContainer           : Wraps contents with 'open' and 'dismiss' functionality
+        RecycleView             : Manages display of (subset of) frequently-changing contents
+            DropdownLayout      : Selection behavior + event
+                DropdownItem    : Autocomplete results
+                DropdownItem
+                ...
+"""
 import asyncio
 from collections.abc import Mapping
 from logging import getLogger
 
 from kivy.clock import Clock
-from kivy.event import EventDispatcher
+from kivy.core.window import Window
 from kivy.metrics import dp
-from kivy.properties import BooleanProperty, DictProperty, ObjectProperty, StringProperty
+from kivy.properties import DictProperty, StringProperty, BooleanProperty, ObjectProperty, NumericProperty
 from kivy.uix.behaviors import FocusBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
@@ -19,46 +28,64 @@ from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 
+from naturtag.app.screens import load_kv
 from naturtag.constants import AUTOCOMPLETE_DELAY, AUTOCOMPLETE_MIN_CHARS
 
-# Set dropdown size large enough for 10 results; if there are any more than that, use scrollbar
-TEXT_INPUT_SIZE = dp(50)
-DROPDOWN_ITEM_SIZE = dp(22)
-MAX_DROPDOWN_SIZE = dp(10 * DROPDOWN_ITEM_SIZE + TEXT_INPUT_SIZE)
-
+PADDING = dp(50)
+ROW_SIZE = dp(22)
 logger = getLogger().getChild(__name__)
+load_kv('autocomplete')
 
 
-class DropdownLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
+class AutocompleteController(MDBoxLayout):
     """
-    Class that adds selection and focus behaviour to a dropdown list. Using a RecycleBoxLayout
-    because other options (like :py:class:`.MDDropdownList`) are inefficient for frequently
-    changing contents.
-    """
-
-
-class AutocompleteSearch(MDBoxLayout):
-    """
-    Layout class containing components needed for autocomplete search.
+    Class containing all components needed for autocomplete search.
     This manages an input field and a dropdown, so they don't interact with each other directly.
     Also includes rate-limited trigger for input delay (so we don't spam searches on every keypress).
 
     Must be inherited by a subclass that implements :py:meth:`get_autocomplete`.
 
     Events:
-        on_select_result: Called when a result is selected from the dropdown list
+        on_selection: Called when a result is selected from the dropdown list
     """
-    input = ObjectProperty()
-    dropdown = ObjectProperty()
-
-    def __init__(self, **kwargs):
+    def __init__(self, text_input_kwargs=None, **kwargs):
+        """
+        Args:
+            text_input_kwargs: Optional settings for :py:class:`.MDTextField`
+        """
         super().__init__(**kwargs)
-        self.register_event_type('on_select_result')
+        self.register_event_type('on_selection')
         self.trigger = Clock.create_trigger(self.callback, AUTOCOMPLETE_DELAY)
+        Clock.schedule_once(lambda *x: self._post_init(text_input_kwargs or {}))
+
+    def _post_init(self, text_input_kwargs):
+        """ Finish initialization after populating children (otherwise self.ids will be empty """
+        self.text_input = self.ids.text_input
+        self.text_input.bind(
+            text=lambda *x: self.trigger(),
+            focus=self.on_text_focus,
+        )
+        self.ids.clear_input_button.bind(on_release=self.reset)
+
+        if text_input_kwargs:
+            logger.debug(f'Overriding text input settings: {text_input_kwargs}')
+            for k, v in text_input_kwargs.items():
+                setattr(self.text_input, k, v)
+
+        self.dropdown_container = self.ids.dropdown_container
+        self.dropdown_view = self.ids.dropdown_view
+        self.ids.dropdown_layout.bind(on_selection=lambda *x: self.update_selection(*x))
+
+    def on_text_focus(self, instance, *args):
+        """ Re-open dropdown after clicking on input again (if there are previous results) """
+        if instance.focus:
+            logger.debug('Opening dropdown on text focus')
+            self.dropdown_container.open()
 
     def callback(self, *args):
         """ Autocompletion callback, rate-limited by ``AUTOCOMPLETE_DELAY`` milliseconds """
-        search_str = self.input.text
+        logger.debug('Populating autocomplete results')
+        search_str = self.text_input.text
         if len(search_str) < AUTOCOMPLETE_MIN_CHARS:
             return
 
@@ -70,21 +97,18 @@ class AutocompleteSearch(MDBoxLayout):
 
         matches = asyncio.run(self.get_autocomplete(search_str))
         logger.info(f'Found {len(matches)} matches for search string "{search_str}"')
-        self.dropdown.data = [get_row(i) for i in matches]
-        full_height = (len(matches) * DROPDOWN_ITEM_SIZE) + TEXT_INPUT_SIZE
-        self.height = min(MAX_DROPDOWN_SIZE, dp(full_height))
+        self.dropdown_view.data = [get_row(i) for i in matches]
+        self.dropdown_container.open()
 
     # TODO: formatting for suggestion_text; smaller text + different color
-    def update_selection(self, suggestion_text, metadata):
+    def update_selection(self, instance, suggestion_text, metadata):
         """ Intermediate handler to update suggestion text based on dropdown selection """
-        logger.info(f'Updating selection: {suggestion_text}')
-        self.input.suggestion_text = '    ' + suggestion_text
-        self.dispatch('on_select_result', metadata)
-        # self.height = TEXT_INPUT_SIZE * 2
-        # self.dropdown.data = []
+        self.text_input.suggestion_text = '    ' + suggestion_text
+        self.dispatch('on_selection', metadata)
+        Clock.schedule_once(self.dropdown_container.dismiss, 0.2)
 
-    def on_select_result(self, *args):
-        """ Called when selecting a dropdown item """
+    def on_selection(self, metadata):
+        """  Called when a result is selected from the dropdown list """
 
     async def get_autocomplete(self, search_str):
         """
@@ -108,14 +132,78 @@ class AutocompleteSearch(MDBoxLayout):
         Returns:
             list: List of either match strings, or dicts with additional metadata
         """
-        raise NotImplementedError
+        return [{'text': f'Text: {search_str}'}] + [{'text': f'Text: {i}'} for i in range(9)]
 
     def reset(self, *args):
         """ Reset inputs and autocomplete results """
-        self.input.text = ''
-        self.input.suggestion_text = ''
-        # self.dropdown.data = []
-        # self.height = TEXT_INPUT_SIZE * 2
+        self.text_input.text = ''
+        self.text_input.suggestion_text = ''
+        self.dropdown_view.data = []
+
+
+class DropdownContainer(MDBoxLayout):
+    """ Container layout that wraps dropdown with 'open' and 'dismiss' functionality """
+    caller = ObjectProperty()
+    layout = ObjectProperty()
+    view = ObjectProperty()
+    max_height = NumericProperty(500)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Window.bind(on_resize=self.reset_layout_size)
+        self._calculate_complete = False
+        self.start_coords = [0, 0]
+        self._data = []
+        self.is_open = False
+
+    def reset_layout_size(self, *args):
+        """ When the window is resized, re-calculate properties """
+        self._calculate_complete = False
+
+    def set_layout_size(self):
+        self.start_coords = self.caller.to_window(*self.caller.pos)
+        # 'default_size' is the size of EACH ROW!? This took HOURS to debug!
+        self.layout.default_size = self.caller.width, ROW_SIZE
+        self._calculate_complete = True
+
+    def open(self):
+        logger.debug(f'Opening dropdown at {self.layout.center_x}, {self.layout.center_y}')
+        if not self._calculate_complete:
+            self.set_layout_size()
+        # Re-opening without any changes to data
+        if self._data and not self.view.data:
+            self.view.data = self._data
+        self.is_open = True
+
+    def on_touch_down(self, touch):
+        """ Close the dropdown if we click off of it """
+        if not self.is_open or self.view.collide_point(*touch.pos):
+            super().on_touch_down(touch)
+        else:
+            self.dismiss()
+
+    def dismiss(self, *args):
+        # Temporarily store data and remove from RecycleView to resize it
+        self._data = self.view.data
+        self.view.data = []
+        self.is_open = False
+
+
+class DropdownLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
+    """
+    Class that adds selection and focus behaviour to a dropdown list. Using a RecycleBoxLayout
+    because other options (like :py:class:`.MDDropdownList`) are inefficient for frequently
+    changing contents.
+
+    Events:
+        on_selection: Called when a result is selected from the dropdown list
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.register_event_type('on_selection')
+
+    def on_selection(self, suggestion_text, metadata):
+        """  Called when a result is selected from the dropdown list """
 
 
 class DropdownItem(RecycleDataViewBehavior, MDLabel):
@@ -135,25 +223,25 @@ class DropdownItem(RecycleDataViewBehavior, MDLabel):
         return super().refresh_view_attrs(rv, index, data)
 
     def on_touch_down(self, touch):
-        """ Add selection on click """
+        """ Add selection on click. ``on_selection`` event is raised here instead of in
+        :py:meth:`.apply_selection` in order to handle only real selection events and not
+        automatic selection checks.
+         """
         if super().on_touch_down(touch):
             return True
         if self.collide_point(*touch.pos) and self.selectable:
-            return self.parent.select_with_touch(self.index, touch)
+            logger.debug(f'Selecting item {self.text}')
+            self.parent.select_with_touch(self.index, touch)
+            self.parent.dispatch('on_selection', self.suggestion_text, self.metadata)
+            return True
 
-    def apply_selection(self, dropdown, index, is_selected):
+    def apply_selection(self, dropdown_view, index, is_selected):
         """ Respond to the selection of items in the view """
         self.is_selected = is_selected
-        if is_selected:
-            dropdown.parent.update_selection(self.suggestion_text, self.metadata)
 
 
 class SearchInput(MDTextField):
-    """ A text input field for autocomplete search. """
-    def on_text(self, instance, value):
-        """ Trigger an autocomplete query, unless one has been triggered immediately prior """
-        self.parent.parent.trigger()
-
+    """ A text input field for autocomplete search """
     # TODO: Not yet working as intended
     def keyboard_on_key_down(self, window, keycode, text, modifiers):
         """ Select an autocomplete match with the tab key """

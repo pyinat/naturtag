@@ -46,12 +46,12 @@ class AutocompleteController(MDBoxLayout):
             text_input_kwargs: Optional settings for :py:class:`.MDTextField`
         """
         super().__init__(**kwargs)
+        self.register_event_type('on_selection')
+        self.trigger = Clock.create_trigger(self.callback, AUTOCOMPLETE_DELAY)
         Clock.schedule_once(lambda *x: self._post_init(text_input_kwargs or {}))
 
     def _post_init(self, text_input_kwargs):
         """ Finish initialization after populating children """
-        self.trigger = Clock.create_trigger(self.callback, AUTOCOMPLETE_DELAY)
-
         # Re-open dropdown after clicking on input again (if there are previous results)
         self.text_input = self.ids.text_input
         self.text_input.bind(
@@ -72,8 +72,6 @@ class AutocompleteController(MDBoxLayout):
         self.dropdown_container = self.ids.dropdown_container
         # Re-open dropdown after clicking on input again (if there are previous results)
         self.text_input.bind(focus=self.on_text_focus)
-
-        self.register_event_type('on_selection')
 
         # Debug buttons
         self.ids.button_up.bind(on_release=self.button_up)

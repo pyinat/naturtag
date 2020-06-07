@@ -12,7 +12,7 @@ def truncate(text: str) -> str:
 
 
 from naturtag.constants import MAX_LABEL_CHARS
-from naturtag.widgets.autocomplete import AutocompleteSearch, DropdownLayout, DropdownItem, SearchInput
+from naturtag.widgets.autocomplete import AutocompleteController
 from naturtag.widgets.buttons import StarButton, TooltipFloatingButton, TooltipIconButton
 from naturtag.widgets.images import CachedAsyncImage, IconicTaxaIcon, ImageMetaTile
 from naturtag.widgets.inputs import DropdownTextField

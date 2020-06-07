@@ -10,10 +10,11 @@ from kivy.uix.boxlayout import BoxLayout
 from naturtag.constants import KV_SRC_DIR
 
 HOME_SCREEN = 'image_selection'
+# TODO: Load kv files in corresponding widget modules instead?
 SCREEN_COMPONENTS = [
     'widgets',
     'main',
-    'autocomplete',
+    # 'autocomplete',
     'context_menus',
     'taxon_search',
     'taxon_selection',

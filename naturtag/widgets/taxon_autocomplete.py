@@ -1,8 +1,8 @@
 from pyinaturalist.node_api import get_taxa_autocomplete
-from naturtag.widgets import AutocompleteSearch
+from naturtag.widgets import AutocompleteController
 
 
-class TaxonAutocompleteSearch(AutocompleteSearch):
+class TaxonAutocompleteSearch(AutocompleteController):
     """ Autocomplete search for iNaturalist taxa """
     async def get_autocomplete(self, search_str):
         """ Get taxa autocomplete search results, as display text + other metadata """

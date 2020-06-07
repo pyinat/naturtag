@@ -1,6 +1,7 @@
 import asyncio
 from logging import getLogger
 
+from kivy.clock import Clock
 from pyinaturalist.node_api import get_taxa
 from naturtag.constants import ICONIC_TAXA, RANKS
 from naturtag.models import Taxon
@@ -20,7 +21,7 @@ class TaxonSearchController:
         self.taxon_id_input = screen.search_tab.ids.taxon_id_input
         self.taxon_id_input.bind(on_text_validate=self.on_taxon_id)
         self.taxon_search_input = screen.search_tab.ids.taxon_search_input
-        self.taxon_search_input.bind(on_select_result=self.on_select_result)
+        self.taxon_search_input.bind(on_selection=self.on_selection)
         self.exact_rank_input = screen.search_tab.ids.exact_rank_input
         self.min_rank_input = screen.search_tab.ids.min_rank_input
         self.max_rank_input = screen.search_tab.ids.max_rank_input
@@ -42,8 +43,6 @@ class TaxonSearchController:
         # Buttons
         self.taxon_search_button = screen.search_tab.ids.taxon_search_button
         self.taxon_search_button.bind(on_release=self.search)
-        self.search_input_clear_button = self.taxon_search_input.ids.search_input_clear_button
-        self.search_input_clear_button.bind(on_release=self.taxon_search_input.reset)
         self.reset_search_button = screen.search_tab.ids.reset_search_button
         self.reset_search_button.bind(on_release=self.reset_all_search_inputs)
 
@@ -74,7 +73,7 @@ class TaxonSearchController:
     def get_search_parameters(self):
         """ Get API-compatible search parameters from the input widgets """
         params = {
-            'q': self.taxon_search_input.input.text,
+            'q': self.taxon_search_input.text_input.text,
             'taxon_id': [t.taxon_id for t in self.selected_iconic_taxa],
             'rank': self.exact_rank_input.text,
             'min_rank': self.min_rank_input.text,
@@ -109,7 +108,7 @@ class TaxonSearchController:
             get_app().select_taxon(id=button.taxon_id)
 
     @staticmethod
-    def on_select_result(instance, metadata: dict):
+    def on_selection(instance, metadata: dict):
         """ Handle clicking a taxon search result from the autocomplete dropdown """
         get_app().select_taxon(taxon_dict=metadata)
 
