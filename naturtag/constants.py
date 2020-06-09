@@ -88,9 +88,10 @@ ICONIC_TAXA = OrderedDict([
     (47170, 'fungi'),
     (48222, 'chromista'),
     (47686, 'protozoa'),
-    # (1, 'animalia'),
-    # (0, 'unknown'),
 ])
+# Other not-quite-as-iconic icons to show
+ICONISH_TAXA = {**ICONIC_TAXA, 1: 'animalia', 0: 'unknown'}
+PLACEHOLDER_ICON = f'{ATLAS_APP_ICONS}/unknown'
 
 # Specific XML namespaces to use terms from when processing DwC observation records
 # Note: exiv2 will automatically add recognized namespaces when adding properties

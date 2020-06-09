@@ -1,5 +1,7 @@
 #:import CachedAsyncImage naturtag.widgets.CachedAsyncImage
+#:import PLACEHOLDER_ICON naturtag.constants.PLACEHOLDER_ICON
 #:import RANKS naturtag.constants.RANKS
+
 
 <TaxonScreen>:
     name: 'taxon'
@@ -48,6 +50,7 @@
                             CachedAsyncImage:
                                 id: selected_taxon_photo
                                 size_hint_max_y: dp(500)
+                                source: PLACEHOLDER_ICON
                         MDBoxLayout:
                             size_hint_max_x:  dp(500)
                             orientation: 'vertical'

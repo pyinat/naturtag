@@ -3,7 +3,7 @@ from typing import List, Dict, Optional
 
 from pyinaturalist.node_api import get_taxa_by_id
 from naturtag.inat_metadata import get_rank_idx
-from naturtag.constants import TAXON_BASE_URL, ICONIC_TAXA, ATLAS_APP_ICONS, CC_LICENSES, RANKS
+from naturtag.constants import TAXON_BASE_URL, ICONISH_TAXA, ATLAS_APP_ICONS, CC_LICENSES
 
 kwarg = attr.ib(default=None)
 
@@ -135,6 +135,7 @@ class Taxon:
 
 def get_icon_path(id: int) -> Optional[str]:
     """ An iconic function to return an icon for an iconic taxon """
-    if id not in ICONIC_TAXA:
-        return None
-    return f'{ATLAS_APP_ICONS}/{ICONIC_TAXA[id]}'
+    if id not in ICONISH_TAXA:
+        id = 0
+        print('NONICONIC:', id)
+    return f'{ATLAS_APP_ICONS}/{ICONISH_TAXA[id]}'
