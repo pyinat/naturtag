@@ -1,3 +1,4 @@
+from kivy.properties import StringProperty
 from kivymd.uix.menu import MDDropdownMenu
 
 
@@ -44,3 +45,32 @@ class DropdownTextField(MDDropdownMenu):
         self.text_input.text = dropdown_item.text.replace('None', '')
         self.dismiss()
 
+
+class TextFieldWrapper:
+    """ Mixin for a class that wraps a :py:class:`.MDTextField` within another layout or widget.
+    Properties set on the class will be passed along to the text field.
+    """
+    hint_text = StringProperty()
+    helper_text = StringProperty()
+    helper_text_mode = StringProperty()
+    color_mode = StringProperty()
+    icon_right = StringProperty()
+    icon_right_color = StringProperty()
+
+    def on_hint_text(self, instance, value):
+        self.ids.text_input.hint_text = value
+
+    def on_helper_text(self, instance, value):
+        self.ids.text_input.helper_text = value
+
+    def on_helper_text_mode(self, instance, value):
+        self.ids.text_input.helper_text_mode = value
+
+    def on_color_mode(self, instance, value):
+        self.ids.text_input.color_mode = value
+
+    def on_icon_right(self, instance, value):
+        self.ids.text_input.icon_right = value
+
+    def on_icon_right_color(self, instance, value):
+        self.ids.text_input.icon_right_color = value

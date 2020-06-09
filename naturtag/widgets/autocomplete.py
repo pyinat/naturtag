@@ -4,10 +4,10 @@ Since this has 5+ levels of nested widgets, here's an overview of what they do:
 
 AutocompleteController:         : Manages interactions between input, search, and dropdown
     TextInput                   : Text input for search
-    DropdownContainer           : Wraps contents with 'open' and 'dismiss' functionality
-        RecycleView             : Manages display of (subset of) frequently-changing contents
-            DropdownLayout      : Selection behavior + event
-                DropdownItem    : Autocomplete results
+    DropdownContainer           : Wraps contents with resizing, 'open' and 'dismiss' functionality
+        RecycleView             : Manages displaying (a subset of) frequently-changing contents
+            DropdownLayout      : Adds selection behavior + selection event
+                DropdownItem    : Individual selectable search results
                 DropdownItem
                 ...
 """
@@ -25,11 +25,13 @@ from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 
+from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 
 from naturtag.app.screens import load_kv
 from naturtag.constants import AUTOCOMPLETE_DELAY, AUTOCOMPLETE_MIN_CHARS
+from naturtag.widgets import TextFieldWrapper
 
 PADDING = dp(50)
 ROW_SIZE = dp(22)
@@ -37,7 +39,7 @@ logger = getLogger().getChild(__name__)
 load_kv('autocomplete')
 
 
-class AutocompleteController(MDBoxLayout):
+class AutocompleteSearch(MDBoxLayout, TextFieldWrapper):
     """
     Class containing all components needed for autocomplete search.
     This manages an input field and a dropdown, so they don't interact with each other directly.
@@ -141,8 +143,10 @@ class AutocompleteController(MDBoxLayout):
         self.dropdown_view.data = []
 
 
-class DropdownContainer(MDBoxLayout):
-    """ Container layout that wraps dropdown with 'open' and 'dismiss' functionality """
+class DropdownContainer(MDCard):
+    """ Container layout that handles positioning & sizing of contents, and wraps with
+    'open' and 'dismiss' functionality
+    """
     caller = ObjectProperty()
     layout = ObjectProperty()
     view = ObjectProperty()
@@ -150,26 +154,37 @@ class DropdownContainer(MDBoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        Window.bind(on_resize=self.reset_layout_size)
-        self._calculate_complete = False
+        Window.bind(
+            on_resize=self.on_window_resize,
+            on_restore=self.on_window_resize,
+            on_maximize=self.on_window_resize,
+        )
+        self._resize_complete = False
         self.start_coords = [0, 0]
         self._data = []
         self.is_open = False
 
-    def reset_layout_size(self, *args):
-        """ When the window is resized, re-calculate properties """
-        self._calculate_complete = False
+    def on_window_resize(self, *args):
+        """ When the window is resized, re-calculate properties.
+        If the dropdown is open, resize now; otherwise, delay until re-opened.
+        """
+        self._resize_complete = False
+        if self.is_open:
+            self.resize_layout()
 
-    def set_layout_size(self):
+    def resize_layout(self):
+        """ Adjust size of layout to fit contents """
         self.start_coords = self.caller.to_window(*self.caller.pos)
-        # 'default_size' is the size of EACH ROW!? This took HOURS to debug!
-        self.layout.default_size = self.caller.width, ROW_SIZE
-        self._calculate_complete = True
+        self.layout.size_hint_min_y = ROW_SIZE * len(self.view.data)
+        # If data hasn't been set yet, resize again when set
+        if self.view.data:
+            self._resize_complete = True
 
     def open(self):
+        """ Open dropdown """
         logger.debug(f'Opening dropdown at {self.layout.center_x}, {self.layout.center_y}')
-        if not self._calculate_complete:
-            self.set_layout_size()
+        if not self._resize_complete:
+            self.resize_layout()
         # Re-opening without any changes to data
         if self._data and not self.view.data:
             self.view.data = self._data
@@ -183,9 +198,10 @@ class DropdownContainer(MDBoxLayout):
             self.dismiss()
 
     def dismiss(self, *args):
-        # Temporarily store data and remove from RecycleView to resize it
-        self._data = self.view.data
-        self.view.data = []
+        """ Close dropdown, and temporarily store data and remove from RecycleView to resize it """
+        if self.view.data:
+            self._data = self.view.data
+            self.view.data = []
         self.is_open = False
 
 

@@ -10,10 +10,12 @@
         text: 'Search'
     TaxonAutocompleteSearch:
         id: taxon_search_input
+        hint_text: 'Taxon name'
+        helper_text: 'Enter a scientific or common name'
     ScrollViewY:
+        size_hint_min_y: 500
         MDBoxLayout:
             orientation: 'vertical'
-            size_hint_min_y: 700
             IntField:
                 id: taxon_id_input
                 hint_text: 'Taxon ID'

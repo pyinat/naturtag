@@ -1,9 +1,10 @@
-<AutocompleteController>:
+<AutocompleteSearch>:
     orientation: 'vertical'
+    size_hint_max_y: 280
     BoxLayout:
         id: input_layout
-        #SearchInput:
-        MDTextField:
+        size_hint_max_y: 60
+        SearchInput:
             id: text_input
             # Default settings; can be overridden in AutocompleteController constructor
             hint_text: 'Search'
@@ -18,6 +19,7 @@
         caller: text_input
         layout: dropdown_layout
         view: dropdown_view
+        size_hint: 1, 1
         RecycleView:
             id: dropdown_view
             spacing: dp(2)
@@ -27,10 +29,10 @@
             DropdownLayout:
                 id: dropdown_layout
                 orientation: 'vertical'
-                default_size: dp(450), dp(22)
-                adaptive_size: True
-                size_hint_max_y: dp(220)
                 multiselect: False
+                # Set the size of each DropdownItem
+                default_size: None, dp(22)
+                default_size_hint: 1, None
 
 # Dropdown item that changes color to indicate when it's selected
 <DropdownItem>:

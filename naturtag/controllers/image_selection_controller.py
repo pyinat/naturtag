@@ -81,10 +81,10 @@ class ImageSelectionController:
         await asyncio.sleep(0)
         return taxon, observation
 
-    def select_photo_taxon(self, taxon_id):
+    def select_taxon_from_photo(self, taxon_id):
         self.inputs.taxon_id_input.text = str(taxon_id)
 
-    def select_photo_observation(self, observation_id):
+    def select_observation_from_photo(self, observation_id):
         self.inputs.observation_id_input.text = str(observation_id)
 
     def select_first_result(self, results):
@@ -95,13 +95,13 @@ class ImageSelectionController:
 
         taxon = next(filter(None, taxa), None)
         if taxon:
-            self.select_photo_taxon(taxon['id'])
+            self.select_taxon_from_photo(taxon['id'])
             get_app().select_taxon(taxon_dict=taxon, if_empty=True)
 
         # TODO: Display this info in the UI after observation search/view screens are implemented
         observation = next(filter(None, observations), None)
         if observation:
-            self.select_photo_observation(observation['id'])
+            self.select_observation_from_photo(observation['id'])
             logger.debug('Main: ' + json.dumps(observation, indent=4))
         #     get_app().select_observation(observation_dict=observation, if_empty=True)
 

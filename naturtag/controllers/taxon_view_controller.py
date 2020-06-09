@@ -50,7 +50,7 @@ class TaxonViewController:
 
         # Add to taxon history, and update taxon id on image selector screen
         get_app().update_history(self.selected_taxon.id)
-        get_app().select_photo_taxon(self.selected_taxon.id)
+        get_app().select_taxon_from_photo(self.selected_taxon.id)
 
     async def load_taxon_info(self):
         await asyncio.gather(

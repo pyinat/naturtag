@@ -73,11 +73,11 @@ class TaxonSearchController:
     def get_search_parameters(self):
         """ Get API-compatible search parameters from the input widgets """
         params = {
-            'q': self.taxon_search_input.text_input.text,
+            'q': self.taxon_search_input.text_input.text.strip(),
             'taxon_id': [t.taxon_id for t in self.selected_iconic_taxa],
-            'rank': self.exact_rank_input.text,
-            'min_rank': self.min_rank_input.text,
-            'max_rank': self.max_rank_input.text,
+            'rank': self.exact_rank_input.text.strip(),
+            'min_rank': self.min_rank_input.text.strip(),
+            'max_rank': self.max_rank_input.text.strip(),
             'per_page': 30,
             'locale': get_app().locale,
             'preferred_place_id': get_app().preferred_place_id,
