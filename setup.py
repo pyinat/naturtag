@@ -11,7 +11,6 @@ extras_require = {
         'prettyprinter',
         'pytest',
         'Sphinx>=3.0',
-        'sphinx-autodoc-typehints',
         'sphinx-rtd-theme',
         'sphinxcontrib-apidoc',
     ],
@@ -31,8 +30,7 @@ setup(
         'click-help-colors',
         'pillow>=7.0',
         'pyexiv2',
-        # 'pyinaturalist',  # TODO: Submit PR(s) for WIP pyinaturalist changes
-        'pyinaturalist @ git+https://github.com/JWCook/pyinaturalist.git@dev',
+        'pyinaturalist==0.10.0.dev206',
         'pyyaml',
         'requests',
         'requests-cache',
