@@ -2,6 +2,8 @@
 [![Build Status](https://travis-ci.org/JWCook/naturtag.svg?branch=dev)](https://travis-ci.org/JWCook/naturtag)
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/latest/?badge=latest)
 ![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)
+![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)
 
 A tool to browse and add iNaturalist taxonomy & observation metadata to local observation photos.
 This includes a command-line interface, a graphical interface, and can also be used as a
