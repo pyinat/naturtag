@@ -18,13 +18,14 @@ def tag_images(
     )
     # TODO: Simplify this a bit
     # TODO: Also get DwC taxonomy metadata if only a taxon ID is provided
+    all_metadata = []
     dwc_metadata = {}
     if observation_id and images and darwin_core:
         dwc_metadata = get_observation_dwc_terms(observation_id)
     for image_path in images:
-        tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar)
+        all_metadata.append(tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar))
 
-    return keywords, dwc_metadata
+    return all_metadata, keywords, dwc_metadata
 
 
 def tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar):
@@ -32,3 +33,4 @@ def tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar):
     metadata.update_keywords(keywords)
     metadata.update(dwc_metadata)
     metadata.write(create_xmp_sidecar=create_xmp_sidecar)
+    return metadata

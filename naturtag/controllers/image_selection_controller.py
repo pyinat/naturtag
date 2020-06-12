@@ -113,11 +113,13 @@ class ImageSelectionController:
         image.parent.remove_widget(image)
 
     def clear(self, *args):
-        """ Clear all image selections """
+        """ Clear all image selections (selected files, previews, and inputs) """
         logger.info('Main: Clearing image selections')
         self.file_list = []
         self.file_list_text = ''
         self.inputs.file_list_text_box.text = ''
+        self.inputs.observation_id_input.text = ''
+        self.inputs.taxon_id_input.text = ''
         self.file_chooser.selection = []
         self.image_previews.clear_widgets()
 
@@ -163,7 +165,7 @@ class ImageSelectionController:
     @staticmethod
     def view_metadata(instance):
         get_app().switch_screen('metadata')
-        get_app().load_metadata(instance.metadata)
+        get_app().select_metadata(instance.metadata)
 
     def run(self, *args):
         """ Run image tagging for selected images and input """
@@ -181,7 +183,7 @@ class ImageSelectionController:
         logger.info(f'Main: Tagging {len(self.file_list)} images with metadata for {selected_id}')
 
         metadata_settings = get_app().metadata
-        tag_images(
+        all_metadata, _, _ = tag_images(
             inputs['observation_id'],
             inputs['taxon_id'],
             metadata_settings['common_names'],
@@ -191,6 +193,13 @@ class ImageSelectionController:
             self.file_list,
         )
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
+
+        # Update image previews with new metadata
+        previews = {img.metadata.image_path: img for img in self.image_previews.children}
+        for metadata in all_metadata:
+            img = previews[metadata.image_path]
+            img.metadata = metadata
+            img.text = metadata.summary
 
     @staticmethod
     def on_taxon_id(input):

@@ -112,7 +112,7 @@ def tag(ctx, observation_id, taxon_id, common_names, darwin_core, hierarchical, 
         click.secho('Provide either a taxon or an observation', fg='red')
         ctx.exit()
 
-    keywords, metadata = tag_images(
+    _, keywords, metadata = tag_images(
         observation_id,
         taxon_id,
         common_names,

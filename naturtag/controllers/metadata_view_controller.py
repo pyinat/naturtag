@@ -13,7 +13,7 @@ class MetadataViewController:
         self.xmp = screen.xmp
         self.keywords = screen.keywords
 
-    def load_metadata(self, metadata):
+    def select_metadata(self, metadata):
         self.combined.text = json.dumps(metadata.combined, indent=4)
         self.keywords.text = (
                 'Normal Keywords:\n'
