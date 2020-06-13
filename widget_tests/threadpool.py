@@ -6,10 +6,12 @@ URLS = ['http://www.cnn.com/',
         'http://www.bbc.co.uk/',
         'http://some-made-up-domain.com/']
 
+
 # Retrieve a single page and report the URL and contents
 def load_url(url, timeout):
     with urllib.request.urlopen(url, timeout=timeout) as conn:
         return conn.read()
+
 
 # We can use a with statement to ensure threads are cleaned up promptly
 with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:

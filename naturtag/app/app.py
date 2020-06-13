@@ -86,10 +86,13 @@ class ControllerProxy:
     def get_taxon_list_item(self, *args, **kwargs):
         """ Get a new :py:class:`.TaxonListItem with event binding """
         item = TaxonListItem(*args, **kwargs)
-        # If TaxonListItem's disable_button is set, don't set button action
-        if not kwargs.get('disable_button'):
-            item.bind(on_release=lambda x: self.taxon_view_controller.select_taxon(x.taxon))
+        self.bind_to_select_taxon(item)
         return item
+
+    def bind_to_select_taxon(self, item):
+        # If TaxonListItem's disable_button is set, don't set button action
+        if not item.disable_button:
+            item.bind(on_release=lambda x: self.taxon_view_controller.select_taxon(x.taxon))
 
 
 class NaturtagApp(MDApp, ControllerProxy):
@@ -117,8 +120,8 @@ class NaturtagApp(MDApp, ControllerProxy):
         for screen_name, screen in screens.items():
             self.screen_manager.add_widget(screen)
         self.set_theme_mode()
-        self.home()
-        # self.switch_screen('taxon')
+        # self.home()
+        self.switch_screen('taxon')
 
         # Set Window and theme settings
         position, left, top = INIT_WINDOW_POSITION
