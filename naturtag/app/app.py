@@ -168,10 +168,12 @@ class NaturtagApp(MDApp, ControllerProxy):
             self.home()
         elif (modifier, key) == (['ctrl'], ENTER):
             self.current_screen_action()
-        elif (modifier, codepoint) == (['shift', 'ctrl'], 'x'):
+        elif (set(modifier), codepoint) == ({'ctrl', 'shift'}, 'x'):
             self.current_screen_clear()
         elif (modifier, codepoint) == (['ctrl'], 'o'):
-            pass  # TODO: Open kivymd file manager
+            self.image_selection_controller.open_native_file_chooser()
+        elif (set(modifier), codepoint) == ({'ctrl', 'shift'}, 'o'):
+            self.image_selection_controller.open_native_file_chooser(dirs=True)
         elif (modifier, codepoint) == (['ctrl'], 'q'):
             self.on_request_close()
         elif (modifier, codepoint) == (['ctrl'], 's'):

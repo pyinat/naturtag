@@ -86,6 +86,18 @@ class ImageSelectionController:
         await asyncio.sleep(0)
         return taxon, observation
 
+    def open_native_file_chooser(self, dirs=False):
+        """ A bit of a hack; uses a hidden tkinter window to open a native file chooser dialog """
+        from tkinter import Tk
+        from tkinter.filedialog import askopenfilenames, askdirectory
+        Tk().withdraw()
+        # Tkinter does not have a single dialog that combines directory and file selection >:[
+        if dirs:
+            paths = askdirectory(title='Choose an image directory')
+        else:
+            paths = askopenfilenames(title='Choose images')
+        self.add_images(paths)
+
     def select_taxon_from_photo(self, taxon_id):
         self.inputs.taxon_id_input.text = str(taxon_id)
 

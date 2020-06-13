@@ -281,16 +281,18 @@ See [CLI Usage](#cli-usage) for more details on these settings.
 ### Keyboard Shortcuts
 Some keyboard shortcuts are included for convenience:
 
-Key(s)          | Action                 | Screen
-----------------|------------------------|----------
-F11             | Toggle fullscreen      | All
-Ctrl+Enter      | Run image tagger       | Image selection
-Ctrl+Enter      | Run taxon search       | Taxon search
-Shift+Ctrl+X    | Clear selected images  | Image selection
-Shift+Ctrl+X    | Clear search filters   | Taxon search
-Ctrl+S          | Open settings screen   | All
-Ctrl+Backspace  | Return to main screen  | All
-Ctrl+Q          | Quit                   | All
+Key(s)          | Action                    | Screen
+----            |----                       |----------
+F11             | Toggle fullscreen         | All
+Ctrl+O          | Open file chooser         | Image selection
+Shift+Ctrl+O    | Open file chooser (dirs)  | Image selection
+Ctrl+Enter      | Run image tagger          | Image selection
+Ctrl+Enter      | Run taxon search          | Taxon search
+Shift+Ctrl+X    | Clear selected images     | Image selection
+Shift+Ctrl+X    | Clear search filters      | Taxon search
+Ctrl+S          | Open settings screen      | All
+Ctrl+Backspace  | Return to main screen     | All
+Ctrl+Q          | Quit                      | All
 
 # See Also
 * For generating keyword _collections_, see the related tool
