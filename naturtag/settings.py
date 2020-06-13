@@ -4,20 +4,12 @@ from logging import getLogger
 from os import makedirs
 from os.path import isfile
 from shutil import copyfile
-from typing import List, Dict, Any
+from typing import Dict, Any
 
 import json
 import yaml
 
-from naturtag.constants import (
-    DATA_DIR,
-    CONFIG_PATH,
-    DEFAULT_CONFIG_PATH,
-    TAXON_HISTORY_PATH,
-    TAXON_FREQUENCY_PATH,
-    STARRED_TAXA_PATH,
-    STORED_TAXA_PATH,
-)
+from naturtag.constants import DATA_DIR, CONFIG_PATH, DEFAULT_CONFIG_PATH, STORED_TAXA_PATH
 
 logger = getLogger().getChild(__name__)
 
@@ -46,6 +38,7 @@ def write_settings(new_config: Dict[str, Any]):
     settings = read_settings()
     logger.info(f'Writing settings to {CONFIG_PATH}')
     for k, v in new_config.items():
+        settings.setdefault(k, {})
         settings[k].update(v)
 
     with open(CONFIG_PATH, 'w') as f:

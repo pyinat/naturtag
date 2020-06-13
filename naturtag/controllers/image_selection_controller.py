@@ -23,7 +23,6 @@ class ImageSelectionController:
         self.image_previews = screen.image_previews
         self.file_chooser = screen.file_chooser
         self.file_list = []
-        self.file_list_text = ''
 
         # Context menu item events
         self.context_menu.ids.view_taxon_ctx.bind(on_release=self.view_taxon)
@@ -41,6 +40,10 @@ class ImageSelectionController:
         self.inputs.load_button.bind(on_release=self.add_file_chooser_images)
         self.inputs.run_button.bind(on_release=self.run)
         self.file_chooser.bind(on_submit=self.add_file_chooser_images)
+
+    def post_init(self):
+        # Load and save start dir from file chooser with the rest of the app settings
+        get_app().add_control_widget(self.file_chooser, 'start_dir', 'photos')
 
     def add_file_chooser_images(self, *args):
         """ Add one or more files and/or dirs selected via a FileChooser """
@@ -70,7 +73,6 @@ class ImageSelectionController:
         logger.info(f'Main: Adding image {path}')
         self.file_list.append(path)
         self.file_list.sort()
-        self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
 
         # Add thumbnail to image preview screen
         metadata = MetaMetadata(path)
@@ -112,15 +114,12 @@ class ImageSelectionController:
         """ Remove an image from file list and image previews """
         logger.info(f'Main: Removing image {image.metadata.image_path}')
         self.file_list.remove(image.metadata.image_path)
-        self.inputs.file_list_text_box.text = '\n'.join(self.file_list)
         image.parent.remove_widget(image)
 
     def clear(self, *args):
         """ Clear all image selections (selected files, previews, and inputs) """
         logger.info('Main: Clearing image selections')
         self.file_list = []
-        self.file_list_text = ''
-        self.inputs.file_list_text_box.text = ''
         self.inputs.observation_id_input.text = ''
         self.inputs.taxon_id_input.text = ''
         self.file_chooser.selection = []
@@ -138,7 +137,7 @@ class ImageSelectionController:
         logger.info(
             'Main:',
             f'IDs: {self.ids}\n'
-            f'Files:\n{self.file_list_text}\n'
+            f'Files:\n{self.file_list}\n'
             f'Input: {self.input_dict}\n'
         )
 

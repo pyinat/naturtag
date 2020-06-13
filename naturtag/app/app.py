@@ -69,6 +69,7 @@ class ControllerProxy:
         self.select_taxon = self.taxon_view_controller.select_taxon
         self.select_taxon_from_photo = self.image_selection_controller.select_taxon_from_photo
         self.update_history = self.taxon_selection_controller.update_history
+        self.add_control_widget = self.settings_controller.add_control_widget
 
         # Proxy properties
         self.stored_taxa = self.settings_controller.stored_taxa
@@ -76,6 +77,7 @@ class ControllerProxy:
         self.metadata = self.settings_controller.metadata
         self.preferred_place_id = self.settings_controller.preferred_place_id
 
+        self.image_selection_controller.post_init()
         self.taxon_selection_controller.post_init()
 
     def get_taxon_list_item(self, *args, **kwargs):

@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from os.path import dirname, join
 from appdirs import user_data_dir
+from naturtag import __version__
+from pyinaturalist import DEFAULT_USER_AGENT
 from pyinaturalist.constants import RANKS
 #RANKS + ['infraclass']
 
@@ -47,16 +49,14 @@ CACHE_BACKEND = 'sqlite'
 # Config files
 CONFIG_PATH = join(DATA_DIR, 'settings.yml')
 DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
-
 STORED_TAXA_PATH = join(DATA_DIR, 'stored_taxa.json')
-TAXON_HISTORY_PATH = join(DATA_DIR, 'taxon_history')
-TAXON_FREQUENCY_PATH = join(DATA_DIR, 'taxon_frequency.json')
-STARRED_TAXA_PATH = join(DATA_DIR, 'starred_taxa')
+MAX_DISPLAY_HISTORY = 25  # Max number of history items to display at a time
 
-# URLs
+# URLs / API settings
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
 OBSERVATION_BASE_URL = 'https://www.inaturalist.org/observations'
 PLACES_BASE_URL = 'https://www.inaturalist.org/places'
+USER_AGENT = f'naturtag/{__version__}; {DEFAULT_USER_AGENT}'.lower()
 
 # Theme/window settings
 INIT_WINDOW_POSITION = ('custom', 100, 100)

@@ -15,7 +15,7 @@ SCREEN_COMPONENTS = [
     'widgets',
     'main',
     # 'autocomplete',
-    'context_menus',
+    'menus',
     'taxon_search',
     'taxon_selection',
 ]

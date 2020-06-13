@@ -58,9 +58,9 @@ class AutocompleteSearch(MDBoxLayout, TextFieldWrapper):
         super().__init__(**kwargs)
         self.register_event_type('on_selection')
         self.trigger = Clock.create_trigger(self.callback, AUTOCOMPLETE_DELAY)
-        Clock.schedule_once(lambda *x: self._post_init(text_input_kwargs or {}))
+        Clock.schedule_once(lambda *x: self.post_init(text_input_kwargs or {}))
 
-    def _post_init(self, text_input_kwargs):
+    def post_init(self, text_input_kwargs):
         """ Finish initialization after populating children (otherwise self.ids will be empty """
         self.text_input = self.ids.text_input
         self.text_input.bind(

@@ -1,7 +1,9 @@
 import asyncio
+from collections import OrderedDict
 from logging import getLogger
 
 from naturtag.app import get_app
+from naturtag.constants import MAX_DISPLAY_HISTORY
 from naturtag.widgets import StarButton
 
 logger = getLogger().getChild(__name__)
@@ -41,13 +43,15 @@ class TaxonSelectionController:
         self.taxon_history_ids, self.starred_taxa_ids, self.frequent_taxa_ids = stored_taxa
 
         async def load_history():
-            logger.info(f'Loading {len(self.taxon_history_ids)} (unique) taxa from history')
-            for taxon_id in self.taxon_history_ids[::-1]:
-                if taxon_id not in self.taxon_history_map:
-                    item = get_app().get_taxon_list_item(
-                        taxon_id=taxon_id, parent_tab=self.history_tab)
-                    self.taxon_history_list.add_widget(item)
-                    self.taxon_history_map[taxon_id] = item
+            unique_history = list(OrderedDict.fromkeys(self.taxon_history_ids[::-1]))[:MAX_DISPLAY_HISTORY]
+            logger.info(
+                f'Loading the most recent {len(unique_history)} unique taxa from history '
+                f'(from {len(self.taxon_history_ids)} total)',
+            )
+            for taxon_id in unique_history:
+                item = get_app().get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.history_tab)
+                self.taxon_history_list.add_widget(item)
+                self.taxon_history_map[taxon_id] = item
 
         async def load_starred():
             logger.info(f'Loading {len(self.starred_taxa_ids)} starred taxa')
@@ -56,7 +60,7 @@ class TaxonSelectionController:
 
         async def load_frequent():
             logger.info(f'Loading {len(self.frequent_taxa_ids)} frequently viewed taxa')
-            for taxon_id in self.frequent_taxa_ids.keys():
+            for taxon_id in list(self.frequent_taxa_ids.keys())[:MAX_DISPLAY_HISTORY]:
                 item = get_app().get_taxon_list_item(
                     taxon_id=taxon_id, parent_tab=self.frequent_tab)
                 self.frequent_taxa_list.add_widget(item)
