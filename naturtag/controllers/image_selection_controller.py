@@ -23,6 +23,7 @@ class ImageSelectionController:
         self.image_previews = screen.image_previews
         self.file_chooser = screen.file_chooser
         self.file_list = []
+        self.theme_cls = get_app().theme_cls
 
         # Context menu item events
         self.context_menu.ids.view_taxon_ctx.bind(on_release=self.view_taxon)
@@ -76,7 +77,7 @@ class ImageSelectionController:
 
         # Add thumbnail to image preview screen
         metadata = MetaMetadata(path)
-        img = ImageMetaTile(source=get_thumbnail(path), metadata=metadata, text=metadata.summary)
+        img = ImageMetaTile(metadata, source=get_thumbnail(path))
         img.bind(on_touch_down=self.on_image_click)
         self.image_previews.add_widget(img)
 
@@ -212,9 +213,7 @@ class ImageSelectionController:
         # Update image previews with new metadata
         previews = {img.metadata.image_path: img for img in self.image_previews.children}
         for metadata in all_metadata:
-            img = previews[metadata.image_path]
-            img.metadata = metadata
-            img.text = metadata.summary
+            previews[metadata.image_path].metadata = metadata
 
     @staticmethod
     def on_taxon_id(input):
