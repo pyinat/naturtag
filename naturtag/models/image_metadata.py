@@ -55,6 +55,10 @@ class ImageMetadata:
 
         return exif, iptc, xmp
 
+    @property
+    def has_sidecar(self):
+        return isfile(self.xmp_path)
+
     @staticmethod
     def read_exiv2_image(path):
         """

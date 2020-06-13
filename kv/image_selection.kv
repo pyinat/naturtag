@@ -62,8 +62,7 @@
                     # File Chooser
                     MDBoxLayout:
                         orientation: 'vertical'
-                        md_bg_color: .1, .1, .1, .75  #app.theme_cls.bg_darkest
-
+                        md_bg_color: .1, .1, .1, .75
                         FileChooserListView:
                             rootpath: 'D:\\NextCloud\\Photos'  # TODO: remove, just for debugging
                             id: file_chooser
@@ -84,6 +83,7 @@
                                 multiline: True
                                 size_hint_y: .3
 
+                        # Buttons; TODO: Make this less ugly
                         MDBoxLayout:
                             size_hint_y: None
                             height: dp(30)
@@ -92,15 +92,30 @@
                             MDRaisedButton:
                                 id: clear_button
                                 text: 'Clear'
+                                height: dp(50)
+                                theme_text_color: 'Primary'
                                 md_bg_color: app.theme_cls.accent_color
-                            MDRaisedButton:
-                                id: debug_button
-                                text: 'Debug'
-                                md_bg_color: app.theme_cls.accent_color
+#                            MDRaisedButton:
+#                                id: debug_button
+#                                text: 'Debug'
+#                                md_bg_color: app.theme_cls.accent_color
                             MDRaisedButton:
                                 id: load_button
-                                text: 'Load'
+                                text: 'Load Selected File/Folder'
+                                height: dp(50)
+                                theme_text_color: 'Primary'
                                 md_bg_color: app.theme_cls.accent_color
+                            MDBoxLayout:
+                                md_bg_color: app.theme_cls.accent_color
+                                adaptive_height: True
+                                padding: dp(10), dp(0)
+                                MDSwitch:
+                                    id: recursive_chk
+                                MDLabel:
+                                    text: 'Recursive'
+                                    halign: 'center'
+                                    font_style: 'Button'
+                                    theme_text_color: 'ContrastParentBackground'
             StatusBar:
                 id: status_bar
 

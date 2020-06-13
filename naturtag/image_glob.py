@@ -1,5 +1,6 @@
 from glob import glob
 from fnmatch import fnmatch
+from itertools import chain
 from logging import getLogger
 from os.path import expanduser, isdir, isfile, join
 from typing import List, Union
@@ -19,34 +20,36 @@ def glob_paths(path_patterns: List[str]) -> List[str]:
     Returns:
         Expanded list of file paths
     """
-    expanded_paths = []
-    for pattern in path_patterns:
-        expanded_paths.extend([expanduser(path) for path in glob(pattern)])
-    return expanded_paths
+    return list(chain.from_iterable(
+        [expanduser(path) for path in glob(pattern, recursive=True)]
+        for pattern in path_patterns
+    ))
 
 
-def get_images_from_dir(dir: str) -> List[str]:
+def get_images_from_dir(dir: str, recursive: bool = False) -> List[str]:
     """
     Get all images of supported filetypes from the selected directory.
-    Note: Currently not recursive.
 
     Args:
         dir: Path to image directory
+        recursive: Recursively get images from subdirectories
 
     Returns:
         Paths of supported image files in the directory
     """
-    paths = glob_paths([join(dir, pattern) for pattern in IMAGE_FILETYPES])
+    patterns = {f'**/{ext}' for ext in IMAGE_FILETYPES} if recursive else IMAGE_FILETYPES
+    paths = glob_paths([join(dir, pattern) for pattern in patterns])
     logger.info(f'{len(paths)} images found in directory: {dir}')
     return paths
 
 
-def get_images_from_paths(paths: Union[str, List[str]]) -> List[str]:
+def get_images_from_paths(paths: Union[str, List[str]], recursive: bool = False) -> List[str]:
     """
     Get all images of supported filetypes from one or more dirs and/or image paths
 
     Args:
         paths: Paths to images and/or image directories
+        recursive: Recursively get images from subdirectories
 
     Returns:
          Combined list of image file paths
@@ -59,7 +62,7 @@ def get_images_from_paths(paths: Union[str, List[str]]) -> List[str]:
         if isinstance(path, bytes):
             path = path.decode('utf-8')
         if isdir(path):
-            image_paths.extend(get_images_from_dir(path))
+            image_paths.extend(get_images_from_dir(path, recursive=recursive))
         elif is_image_path(path):
             image_paths.append(path)
         else:

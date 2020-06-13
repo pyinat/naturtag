@@ -35,9 +35,9 @@ class ImageSelectionController:
         # Other widget events
         self.inputs.taxon_id_input.bind(on_text_validate=self.on_taxon_id)
         self.inputs.clear_button.bind(on_release=self.clear)
-        # self.inputs.clear_button.bind(on_release=lambda *x: get_app().show_progress())
-        self.inputs.debug_button.bind(on_release=self.get_state)
+        # self.inputs.debug_button.bind(on_release=self.get_state)
         # self.inputs.debug_button.bind(on_release=self.open_table)
+        # self.inputs.debug_button.bind(on_release=lambda *x: get_app().show_progress())
         self.inputs.load_button.bind(on_release=self.add_file_chooser_images)
         self.inputs.run_button.bind(on_release=self.run)
         self.file_chooser.bind(on_submit=self.add_file_chooser_images)
@@ -56,7 +56,10 @@ class ImageSelectionController:
         self.add_images([path])
 
     async def load_images(self, paths):
-        return await asyncio.gather(*[self.load_image(path=path) for path in get_images_from_paths(paths)])
+        return await asyncio.gather(*[
+            self.load_image(path=path)
+            for path in get_images_from_paths(paths, recursive=self.input_dict['recursive'])
+        ])
 
     # TODO: Use tasks to load incremental results in the UI
     async def load_image(self, path):
@@ -89,7 +92,7 @@ class ImageSelectionController:
 
     def select_first_result(self, results):
         """ Select the first taxon and/or observations discovered from tags, if any """
-        if not results or not any(*results):
+        if not results or not any(results):
             return
         taxa, observations = zip(*results)
 
@@ -123,10 +126,12 @@ class ImageSelectionController:
         self.file_chooser.selection = []
         self.image_previews.clear_widgets()
 
-    def get_input_dict(self):
+    @property
+    def input_dict(self):
         return {
             "observation_id": int(self.inputs.observation_id_input.text or 0),
             "taxon_id": int(self.inputs.taxon_id_input.text or 0),
+            "recursive": self.inputs.recursive_chk.active,
         }
 
     def get_state(self, *args):
@@ -134,7 +139,7 @@ class ImageSelectionController:
             'Main:',
             f'IDs: {self.ids}\n'
             f'Files:\n{self.file_list_text}\n'
-            f'Input: {self.get_input_dict()}\n'
+            f'Input: {self.input_dict}\n'
         )
 
     def on_image_click(self, instance, touch):
@@ -169,23 +174,22 @@ class ImageSelectionController:
 
     def run(self, *args):
         """ Run image tagging for selected images and input """
-        inputs = self.get_input_dict()
         if not self.file_list:
             alert(f'Select images to tag')
             return
-        if not inputs['observation_id'] and not inputs['taxon_id']:
+        if not self.input_dict['observation_id'] and not self.input_dict['taxon_id']:
             alert(f'Select either an observation or an organism to tag images with')
             return
         selected_id = (
-            f'Taxon ID: {inputs["taxon_id"]}' if inputs['taxon_id']
-            else f'Observation ID: {inputs["observation_id"]}'
+            f'Observation ID: {self.input_dict["observation_id"]}' if self.input_dict['observation_id']
+            else f'Taxon ID: {self.input_dict["taxon_id"]}'
         )
         logger.info(f'Main: Tagging {len(self.file_list)} images with metadata for {selected_id}')
 
         metadata_settings = get_app().metadata
         all_metadata, _, _ = tag_images(
-            inputs['observation_id'],
-            inputs['taxon_id'],
+            self.input_dict['observation_id'],
+            self.input_dict['taxon_id'],
             metadata_settings['common_names'],
             metadata_settings['darwin_core'],
             metadata_settings['hierarchical_keywords'],

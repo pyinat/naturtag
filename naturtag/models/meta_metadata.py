@@ -76,7 +76,7 @@ class MetaMetadata(ImageMetadata):
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
                 'XMP': bool(self.xmp),
-                'SIDECAR': bool(self.xmp_path),
+                'SIDECAR': self.has_sidecar,
             }
             meta_special = {
                 'TAX': self.has_taxon,
