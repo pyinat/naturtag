@@ -3,12 +3,15 @@ import os
 from logging import getLogger
 
 # Set GL backend before any kivy modules are imported
+from naturtag.inat_metadata import strip_url_by_type
+
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
 # Disable multitouch emulation before any other kivy modules are imported
 from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
+from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from kivy.uix.image import Image
@@ -180,9 +183,12 @@ class NaturtagApp(MDApp, ControllerProxy):
             self.switch_screen('settings')
         elif (modifier, codepoint) == (['ctrl'], 't'):
             self.switch_screen('taxon')
+        elif (modifier, codepoint) == (['ctrl'], 'v'):
+            self.current_screen_paste()
         elif key == F11:
             self.toggle_fullscreen()
 
+    # TODO: current_screen_*() may be better organized as controller methods (inherited/overridden as needed)
     def current_screen_action(self):
         """ Run the current screen's main action """
         if self.screen_manager.current == HOME_SCREEN:
@@ -196,6 +202,20 @@ class NaturtagApp(MDApp, ControllerProxy):
             self.image_selection_controller.clear()
         elif self.screen_manager.current == 'taxon':
             self.taxon_search_controller.reset_all_search_inputs()
+
+    # TODO: Threw this together quickly, this could be cleaned up a lot
+    def current_screen_paste(self):
+        value = Clipboard.paste()
+        taxon_id, observation_id = strip_url_by_type(value)
+        if taxon_id:
+            self.select_taxon(id=taxon_id)
+        if self.screen_manager.current == HOME_SCREEN:
+            if observation_id:
+                self.image_selection_controller.inputs.observation_id_input.text = str(observation_id)
+                self.image_selection_controller.inputs.taxon_id_input.text = ''
+            elif taxon_id:
+                self.image_selection_controller.inputs.observation_id_input.text = ''
+                self.image_selection_controller.inputs.taxon_id_input.text = str(taxon_id)
 
     def update_toolbar(self, screen_name):
         """ Modify toolbar in-place so it can be shared by all screens """

@@ -199,6 +199,7 @@ class ImageSelectionController:
         logger.info(f'Main: Tagging {len(self.file_list)} images with metadata for {selected_id}')
 
         metadata_settings = get_app().metadata
+        # TODO: Handle write errors (like file locked) and show dialog
         all_metadata, _, _ = tag_images(
             self.input_dict['observation_id'],
             self.input_dict['taxon_id'],
