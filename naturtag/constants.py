@@ -50,7 +50,7 @@ CACHE_BACKEND = 'sqlite'
 CONFIG_PATH = join(DATA_DIR, 'settings.yml')
 DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
 STORED_TAXA_PATH = join(DATA_DIR, 'stored_taxa.json')
-MAX_DISPLAY_HISTORY = 25  # Max number of history items to display at a time
+MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 
 # URLs / API settings
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'

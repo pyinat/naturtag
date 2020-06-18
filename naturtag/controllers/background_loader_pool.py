@@ -4,6 +4,7 @@ from time import time
 
 from kivy.clock import mainthread
 from kivy.event import EventDispatcher
+from kivy.uix.widget import Widget
 
 from kivymd.uix.progressbar import MDProgressBar
 from naturtag.app import get_app
@@ -14,9 +15,14 @@ logger = getLogger().getChild(__name__)
 
 
 class BackgroundLoader(EventDispatcher):
+    """ Class to help with loading operations. This runs blocking I/O in a separate thread,
+    and updates a progress bar on the UI as results are completed."""
     __events__ = ('on_load',)
 
-    def __init__(self, status_bar, total, **kwargs):
+    def __init__(self, status_bar: Widget, total: int = None, **kwargs):
+        """ Note: ``total`` can be initialized here, to start progress bar immediately;
+        or in :py:meth:`.start_progress`.
+        """
         super().__init__(**kwargs)
         # Schedule all events to run on the main thread
         self.dispatch = mainthread(self.dispatch)
@@ -25,12 +31,13 @@ class BackgroundLoader(EventDispatcher):
         self.start_time = time()
         self.status_bar = status_bar
         self.progress_bar = None
-        self.total = total
-        self.start_progress()
+
+        if total:
+            self.start_progress(total)
 
     @mainthread
-    def start_progress(self):
-        self.progress_bar = MDProgressBar(max=self.total)
+    def start_progress(self, total: int):
+        self.progress_bar = MDProgressBar(max=total)
         self.status_bar.add_widget(self.progress_bar)
 
     @mainthread

@@ -1,11 +1,16 @@
+import asyncio
 from collections import OrderedDict
 from logging import getLogger
+from time import time
 
 from kivy.clock import Clock
 
+from kivymd.uix.progressbar import MDProgressBar
+
 from naturtag.app import get_app
 from naturtag.constants import MAX_DISPLAY_HISTORY
-from naturtag.controllers.background_loader import BackgroundLoader
+# from naturtag.controllers.background_loader_pool import BackgroundLoader
+from naturtag.controllers.batch_loader import BatchLoader, SleepyBatchLoader, TaxonBatchLoader
 from naturtag.controllers.controller import Controller
 from naturtag.widgets import StarButton, TaxonListItem
 
@@ -39,36 +44,56 @@ class TaxonSelectionController(Controller):
         self.frequent_taxa_list.sort_key = self.get_frequent_taxon_idx
 
     def post_init(self):
-        Clock.schedule_once(lambda *x: self.init_stored_taxa(), 2)
+        # Clock.schedule_once(lambda *x: self.init_stored_taxa(), 2)
+        # Clock.schedule_once(lambda *x: asyncio.run(self.test_loader()), 2)
+        Clock.schedule_once(lambda *x: asyncio.run(self.init_stored_taxa()), 2)
 
-    def init_stored_taxa(self):
+    async def test_loader(self):
+        self.progress_bar = MDProgressBar(max=1000)
+        self.status_bar.add_widget(self.progress_bar)
+
+        def update_progress(obj, value):
+            print(value)
+            self.progress_bar.value = value
+
+        loader = SleepyBatchLoader()
+
+        def load_complete(*args):
+            print('Done loading!')
+            self.progress_bar.color = .1, .8, .1, 1
+
+        loader.bind(on_progress=update_progress)
+        loader.bind(on_complete=load_complete)
+        loader.bind(on_load=lambda *x: print('Loaded', x))
+
+        await loader.add_batch((0.012 for _ in range(250)), key='batch 1')
+        await loader.add_batch((0.014 for _ in range(250)), key='batch 2')
+        await loader.add_batch((0.016 for _ in range(250)), key='batch 3')
+        await loader.add_batch((0.018 for _ in range(250)), key='batch 4')
+
+    async def init_stored_taxa(self):
         """ Load taxon history, starred, and frequently viewed items """
         logger.info('Loading stored taxa')
         stored_taxa = get_app().stored_taxa
         self.taxon_history_ids, self.starred_taxa_ids, self.frequent_taxa_ids = stored_taxa
+
         unique_history = list(OrderedDict.fromkeys(self.taxon_history_ids[::-1]))[:MAX_DISPLAY_HISTORY]
         top_frequent_ids = list(self.frequent_taxa_ids.keys())[:MAX_DISPLAY_HISTORY]
-
         total_taxa = sum(map(len, (unique_history, self.starred_taxa_ids, top_frequent_ids)))
-        loader = BackgroundLoader(self.status_bar, total_taxa)
 
-        logger.info(
-            f'Loading the most recent {len(unique_history)} unique taxa from history '
-            f'(from {len(self.taxon_history_ids)} total)',
-        )
-        for taxon_id, item in loader.load_taxa(unique_history):
-            self.taxon_history_list.add_widget(item)
-            self.taxon_history_map[taxon_id] = item
+        self.progress_bar = MDProgressBar(max=total_taxa)
+        self.status_bar.add_widget(self.progress_bar)
 
         logger.info(f'Loading {len(self.starred_taxa_ids)} starred taxa')
-        for taxon_id, item in loader.load_taxa(self.starred_taxa_ids, disable_button=True):
-            self.bind_star(taxon_id, item)
+        for taxon_id in self.starred_taxa_ids:
+            self.add_star(taxon_id)
 
         logger.info(f'Loading {len(top_frequent_ids)} frequently viewed taxa')
-        for taxon_id, item in loader.load_taxa(top_frequent_ids):
+        for taxon_id in top_frequent_ids:
+            item = get_app().get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.frequent_tab)
             self.frequent_taxa_list.add_widget(item)
 
-        loader.stop()
+        # await asyncio.gather(load_history(), load_starred(), load_frequent())
 
     def update_history(self, taxon_id: int):
         """ Update history + frequency """

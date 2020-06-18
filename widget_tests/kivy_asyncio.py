@@ -1,5 +1,6 @@
 """
 Kivy asyncio example app.
+From: https://gist.github.com/dolang/42df81c78bf0108209d837f6ba9da052
 
 Kivy needs to run on the main thread and its graphical instructions have to be
 called from there.  But it's still possible to run an asyncio EventLoop, it
@@ -83,6 +84,9 @@ class EventLoopWorker(EventDispatcher):
             self._pulse_task.cancel()
         self._pulse_task = self.loop.create_task(self.pulse())
 
+    def submit(self, text):
+        self.loop.call_soon_threadsafe(self.set_pulse_text, text)
+
     def on_pulse(self, *_):
         pass
 
@@ -110,8 +114,7 @@ class AsyncioExampleApp(App):
         use the thread safe variant to run it on the asyncio event loop:
         """
         if self.event_loop_worker is not None:
-            loop = self.event_loop_worker.loop
-            loop.call_soon_threadsafe(self.event_loop_worker.set_pulse_text, text)
+            self.event_loop_worker.submit(text)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ from logging import getLogger
 import webbrowser
 
 from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, ImageLeftWidget
+from naturtag.controllers.background_loader_pool import BackgroundLoader
 
 from naturtag.models import Taxon, get_icon_path
 from naturtag.app import get_app
@@ -14,7 +15,7 @@ logger = getLogger().getChild(__name__)
 class TaxonViewController:
     """ Controller class to manage displaying info about a selected taxon """
     def __init__(self, screen):
-        self.screen = screen
+        self.status_bar = screen.status_bar
 
         # Other Controls
         self.taxon_link = screen.taxon_links.ids.selected_taxon_link_button
@@ -28,7 +29,7 @@ class TaxonViewController:
         self.taxon_children_label = screen.taxonomy_section.ids.taxon_children_label
         self.taxon_ancestors = screen.taxonomy_section.ids.taxon_ancestors
         self.taxon_children = screen.taxonomy_section.ids.taxon_children
-        self.basic_info = self.screen.basic_info_section
+        self.basic_info = screen.basic_info_section
 
     def select_taxon(self, taxon_obj: Taxon=None, taxon_dict: dict=None, id: int=None, if_empty: bool=False):
         """ Update taxon info display by either object, ID, partial record, or complete record """
@@ -56,9 +57,11 @@ class TaxonViewController:
         await asyncio.gather(
             self.load_photo_section(),
             self.load_basic_info_section(),
+            # self.load_taxonomy(),
             self.load_ancestors(),
             self.load_children(),
         )
+        # self.load_taxonomy()
 
     async def load_photo_section(self):
         """ Load taxon photo + links """
@@ -128,6 +131,23 @@ class TaxonViewController:
         for taxon in self.selected_taxon.child_taxa:
             self.taxon_children.add_widget(self.get_taxon_list_item(taxon=taxon))
             await asyncio.sleep(0)
+
+    def load_taxonomy(self):
+        total_taxa = len(self.selected_taxon.parent_taxa) + len(self.selected_taxon.child_taxa)
+        loader = BackgroundLoader(self.status_bar, total_taxa)
+
+        logger.info('Taxon: Loading ancestors')
+        self.taxon_ancestors_label.text = _get_label('Ancestors', self.selected_taxon.parent_taxa)
+        self.taxon_ancestors.clear_widgets()
+        for _, item in loader.load_taxa([taxon.id for taxon in self.selected_taxon.parent_taxa]):
+            self.taxon_ancestors.add_widget(item)
+
+        logger.info('Taxon: Loading children')
+        self.taxon_children_label.text = _get_label('Children', self.selected_taxon.child_taxa)
+        self.taxon_children.clear_widgets()
+        for _, item in loader.load_taxa([taxon.id for taxon in self.selected_taxon.child_taxa]):
+            self.taxon_children.add_widget(item)
+        loader.stop()
 
     def get_taxon_list_item(self, **kwargs):
         """ Get a taxon list item, with thumbnail + info, that selects its taxon when pressed """
