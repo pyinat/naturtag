@@ -3,12 +3,10 @@ from collections import OrderedDict
 from logging import getLogger
 
 from kivy.clock import Clock
-from kivymd.uix.progressbar import MDProgressBar
 
 from naturtag.app import get_app
 from naturtag.constants import MAX_DISPLAY_HISTORY
-from naturtag.controllers.batch_loader import TaxonBatchLoader
-from naturtag.controllers.controller import Controller
+from naturtag.controllers import Controller, TaxonBatchLoader
 from naturtag.widgets import StarButton, TaxonListItem
 
 logger = getLogger().getChild(__name__)
@@ -40,7 +38,7 @@ class TaxonSelectionController(Controller):
         self.frequent_taxa_list.sort_key = self.get_frequent_taxon_idx
 
     def post_init(self):
-        Clock.schedule_once(lambda *x: asyncio.run(self.init_stored_taxa()), 0)
+        Clock.schedule_once(lambda *x: asyncio.run(self.init_stored_taxa()), 1)
 
     async def init_stored_taxa(self):
         """ Load taxon history, starred, and frequently viewed items """
@@ -48,34 +46,33 @@ class TaxonSelectionController(Controller):
         stored_taxa = get_app().stored_taxa
         self.taxon_history_ids, self.starred_taxa_ids, self.frequent_taxa_ids = stored_taxa
 
+        # Collect all the taxon IDs we need to load
         unique_history = list(OrderedDict.fromkeys(self.taxon_history_ids[::-1]))[:MAX_DISPLAY_HISTORY]
         starred_taxa_ids = self.starred_taxa_ids[::-1]
         top_frequent_ids = list(self.frequent_taxa_ids.keys())[:MAX_DISPLAY_HISTORY]
         total_taxa = sum(map(len, (unique_history, self.starred_taxa_ids, top_frequent_ids)))
 
-        logger.info(
-            'Taxon: Loading:\n'
-            f'  * {len(unique_history)} unique taxa from history'
-            f' (from {len(self.taxon_history_ids)} total)\n'
-            f'  * {len(starred_taxa_ids)} starred taxa'
-            f'  * {len(top_frequent_ids)} frequently viewed taxa'
-        )
+        # Set up batch loader + event bindings
+        loader = TaxonBatchLoader()
+        self.start_progress(total_taxa, loader)
 
+        # Add the finishing touches after all items have loaded
         def index_list_items(*args):
-            """ Add the finishing touches after all items have loaded """
             for item in self.taxon_history_list.children:
                 self.taxon_history_map[item.taxon.id] = item
             for item in self.starred_taxa_list.children:
                 self.bind_star(item)
-
-        # Set up batch loader + event bindings
-        loader = TaxonBatchLoader()
         loader.bind(on_complete=index_list_items)
-        get_app().start_progress(total_taxa, loader)
 
         # Start loading batches of TaxonListItems
+        logger.info(
+            f'Taxon: Loading {len(unique_history)} unique taxa from history'
+            f' (from {len(self.taxon_history_ids)} total)'
+        )
         await loader.add_batch(unique_history, parent_list=self.taxon_history_list)
+        logger.info(f'Taxon: Loading {len(starred_taxa_ids)} starred taxa')
         await loader.add_batch(starred_taxa_ids, parent_list=self.starred_taxa_list)
+        logger.info(f'Taxon: Loading {len(top_frequent_ids)} frequently viewed taxa')
         await loader.add_batch(top_frequent_ids, parent_list=self.frequent_taxa_list)
 
     def update_history(self, taxon_id: int):
