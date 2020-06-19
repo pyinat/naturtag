@@ -130,12 +130,6 @@ class TaxonViewController(Controller):
         self.taxon_children.clear_widgets()
         await loader.add_batch(self.selected_taxon.child_taxa_ids, parent_list=self.taxon_children)
 
-    def get_taxon_list_item(self, **kwargs):
-        """ Get a taxon list item, with thumbnail + info, that selects its taxon when pressed """
-        item = TaxonListItem(**kwargs)
-        item.bind(on_release=lambda x: self.select_taxon(x.taxon))
-        return item
-
     def on_star(self, button):
         """ Either add or remove a taxon from the starred list """
         if button.is_selected:

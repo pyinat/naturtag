@@ -84,7 +84,7 @@ class TaxonSelectionController(Controller):
             item = self.taxon_history_map[taxon_id]
             self.taxon_history_list.remove_widget(item)
         else:
-            item = get_app().get_taxon_list_item(taxon_id=taxon_id, parent_tab=self.history_tab)
+            item = get_app().get_taxon_list_item(taxon_id)
             self.taxon_history_map[taxon_id] = item
 
         self.taxon_history_list.add_widget(item, len(self.taxon_history_list.children))
@@ -101,7 +101,7 @@ class TaxonSelectionController(Controller):
         if taxon_id not in self.starred_taxa_ids:
             self.starred_taxa_ids.append(taxon_id)
 
-        item = get_app().get_taxon_list_item(taxon_id=taxon_id, disable_button=True)
+        item = get_app().get_taxon_list_item(taxon_id, disable_button=True)
         self.starred_taxa_list.add_widget(item, len(self.starred_taxa_list.children))
         self.bind_star(item)
 

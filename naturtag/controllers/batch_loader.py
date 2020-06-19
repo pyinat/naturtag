@@ -2,7 +2,7 @@ import asyncio
 from logging import getLogger
 from threading import Thread
 from time import time
-from typing import List, Dict, Callable, Any
+from typing import List, Dict, Callable, Any, Union
 
 from kivy.clock import mainthread, Clock
 from kivy.event import EventDispatcher
@@ -149,9 +149,9 @@ class TaxonBatchLoader(BatchLoader):
     def __init__(self, **kwargs):
         super().__init__(worker_callback=self.load_taxon, **kwargs)
 
-    async def load_taxon(self, taxon_id: int, parent_list: Widget = None, **kwargs) -> TaxonListItem:
+    async def load_taxon(self, taxon: Union[Taxon, int, dict], parent_list: Widget = None, **kwargs) -> TaxonListItem:
         """ Load information for a taxon into a TaxonListItem """
-        item = TaxonListItem(Taxon.from_id(taxon_id), **kwargs)
+        item = TaxonListItem(taxon, **kwargs)
         self.add_taxon_item(item, parent_list)
         await self.increment_progress()
         return item
