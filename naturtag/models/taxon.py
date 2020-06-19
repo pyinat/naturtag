@@ -137,5 +137,4 @@ def get_icon_path(id: int) -> Optional[str]:
     """ An iconic function to return an icon for an iconic taxon """
     if id not in ICONISH_TAXA:
         id = 0
-        print('NONICONIC:', id)
     return f'{ATLAS_APP_ICONS}/{ICONISH_TAXA[id]}'

@@ -2,10 +2,11 @@ import asyncio
 from logging import getLogger
 from threading import Thread
 from time import time
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Any
 
 from kivy.clock import mainthread, Clock
 from kivy.event import EventDispatcher
+from kivy.uix.widget import Widget
 
 from naturtag.app import get_app
 from naturtag.models import Taxon
@@ -77,7 +78,6 @@ class BatchRunner(EventDispatcher):
         while True:
             item, kwargs = await queue.get()
             results = await self.worker_callback(item, **kwargs)
-            print('Loaded', results)
             self.dispatch('on_load', results)
             queue.task_done()
 
@@ -87,6 +87,7 @@ class BatchRunner(EventDispatcher):
             await asyncio.sleep(0.5)
         for queue in self.queues:
             await queue.join()
+        self.queues = []
 
     def stop(self):
         """ Safely stop the event loop and thread """
@@ -104,7 +105,7 @@ class BatchRunner(EventDispatcher):
 
 
 class BatchLoader(BatchRunner):
-    """ BatchRunner used for loading items with periodic progress updates sent back to the UI """
+    """ Loads batches of items with periodic progress updates sent back to the UI """
     def __init__(self, **kwargs):
         super().__init__(runner_callback=self.run, **kwargs)
         self.event = None
@@ -143,12 +144,21 @@ class BatchLoader(BatchRunner):
         self.report_progress()
 
 
-class SleepyBatchLoader(BatchLoader):
-    """ BatchLoader for testing that just sleeps """
+class TaxonBatchLoader(BatchLoader):
+    """ Loads batches of TaxonListItems """
     def __init__(self, **kwargs):
-        super().__init__(worker_callback=self.yawn, **kwargs)
+        super().__init__(worker_callback=self.load_taxon, **kwargs)
 
-    async def yawn(self, item, **kwargs):
-        logger.info(kwargs)
-        await asyncio.sleep(item)
+    async def load_taxon(self, taxon_id: int, parent_list: Widget = None, **kwargs) -> TaxonListItem:
+        """ Load information for a taxon into a TaxonListItem """
+        item = TaxonListItem(Taxon.from_id(taxon_id), **kwargs)
+        self.add_taxon_item(item, parent_list)
         await self.increment_progress()
+        return item
+
+    @mainthread
+    def add_taxon_item(self, item: TaxonListItem, parent_list: Widget):
+        """ Add a TaxonListItem to its parent list and bind its click event """
+        if parent_list:
+            parent_list.add_widget(item)
+        get_app().bind_to_select_taxon(item)

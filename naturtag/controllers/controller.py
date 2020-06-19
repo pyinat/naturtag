@@ -4,4 +4,4 @@
 class Controller:
     """ Base class for screen controllers """
     def __init__(self, screen):
-        pass
+        self.status_bar = screen.status_bar
