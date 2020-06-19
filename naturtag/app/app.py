@@ -3,8 +3,6 @@ import os
 from logging import getLogger
 
 # Set GL backend before any kivy modules are imported
-from naturtag.inat_metadata import strip_url_by_type
-
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
 # Disable multitouch emulation before any other kivy modules are imported
@@ -15,6 +13,7 @@ from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from kivy.uix.image import Image
+from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 
 from naturtag.app.screens import HOME_SCREEN, Root, load_screens
@@ -36,7 +35,8 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.widgets import TaxonListItem
+from naturtag.inat_metadata import strip_url_by_type
+from naturtag.widgets import LoaderProgressBar, TaxonListItem
 
 
 logger = getLogger().getChild(__name__)
@@ -103,7 +103,7 @@ class NaturtagApp(MDApp, ControllerProxy):
     nav_drawer = ObjectProperty()
     screen_manager = ObjectProperty()
     toolbar = ObjectProperty()
-    status_bar = ObjectProperty()
+    progress_bar = ObjectProperty()
 
     def build(self):
         # Init screens and store references to them
@@ -114,10 +114,14 @@ class NaturtagApp(MDApp, ControllerProxy):
         # Init screen manager and nav elements
         self.nav_drawer = self.root.ids.nav_drawer
         self.screen_manager = self.root.ids.screen_manager
-        # self.status_bar = self.root.ids.status_bar
         self.toolbar = self.root.ids.toolbar
+        self.progress_bar = LoaderProgressBar(color=self.theme_cls.primary_color)
 
+        # Add all screens and their status bars
         for screen_name, screen in screens.items():
+            # TODO: Can't add a widget to multiple parent widgets! D:<
+            if screen_name == 'taxon': # hasattr(screen.ids, 'status_bar'):
+                screen.ids.status_bar.add_widget(self.progress_bar)
             self.screen_manager.add_widget(screen)
         self.set_theme_mode()
         # self.home()
@@ -153,7 +157,7 @@ class NaturtagApp(MDApp, ControllerProxy):
     def close_nav(self, *args):
         self.nav_drawer.set_state('close')
 
-    def switch_screen(self, screen_name):
+    def switch_screen(self, screen_name: str):
         # If we're leaving a screen with stored state, save it first
         # TODO: Also save stored taxa, but needs optimization first (async, only store if changed)
         if self.screen_manager.current in ['settings']:
@@ -167,6 +171,12 @@ class NaturtagApp(MDApp, ControllerProxy):
         """ Save any unsaved settings before exiting """
         self.settings_controller.save_settings()
         self.stop()
+
+    def start_progress(self, max: int, loader: Widget = None):
+        """ (Re)start the progress bar, and bind a BatchLoader's progress update events to it """
+        self.progress_bar.start(max)
+        loader.bind(on_progress=self.progress_bar.update)
+        loader.bind(on_complete=self.progress_bar.finish)
 
     def on_keyboard(self, window, key, scancode, codepoint, modifier):
         """ Handle keyboard shortcuts """
@@ -220,7 +230,7 @@ class NaturtagApp(MDApp, ControllerProxy):
                 self.image_selection_controller.inputs.observation_id_input.text = ''
                 self.image_selection_controller.inputs.taxon_id_input.text = str(taxon_id)
 
-    def update_toolbar(self, screen_name):
+    def update_toolbar(self, screen_name: str):
         """ Modify toolbar in-place so it can be shared by all screens """
         self.toolbar.title = screen_name.title().replace('_', ' ')
         if screen_name == HOME_SCREEN:
@@ -232,7 +242,7 @@ class NaturtagApp(MDApp, ControllerProxy):
             ['dots-vertical', self.open_settings],
         ]
 
-    def set_theme_mode(self, switch=None, is_active=None):
+    def set_theme_mode(self, switch=None, is_active: bool = None):
         """ Set light or dark themes, based on either toggle switch or settings """
         if is_active is None:
             is_active = self.settings_controller.display['dark_mode']

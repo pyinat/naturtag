@@ -53,27 +53,6 @@ class TaxonSelectionController(Controller):
         top_frequent_ids = list(self.frequent_taxa_ids.keys())[:MAX_DISPLAY_HISTORY]
         total_taxa = sum(map(len, (unique_history, self.starred_taxa_ids, top_frequent_ids)))
 
-        # TODO Move progress bar stuff to a separate class; add same instance to all statusbars
-        self.progress_bar = MDProgressBar(max=total_taxa)
-        self.status_bar.add_widget(self.progress_bar)
-
-        def update_progress(obj, value):
-            self.progress_bar.value = value
-
-        def finish_progress(*args):
-            # TODO: Make this an animation?
-            def remove_progress(*args):
-                self.progress_bar.color = 0, 0, 0, 0
-            self.progress_bar.color = .1, .8, .1, 1
-            Clock.schedule_once(remove_progress, 2)
-
-        def index_list_items(*args):
-            """ Add the finishing touches after all items have loaded """
-            for item in self.taxon_history_list.children:
-                self.taxon_history_map[item.taxon.id] = item
-            for item in self.starred_taxa_list.children:
-                self.bind_star(item)
-
         logger.info(
             'Taxon: Loading:\n'
             f'  * {len(unique_history)} unique taxa from history'
@@ -82,11 +61,17 @@ class TaxonSelectionController(Controller):
             f'  * {len(top_frequent_ids)} frequently viewed taxa'
         )
 
+        def index_list_items(*args):
+            """ Add the finishing touches after all items have loaded """
+            for item in self.taxon_history_list.children:
+                self.taxon_history_map[item.taxon.id] = item
+            for item in self.starred_taxa_list.children:
+                self.bind_star(item)
+
         # Set up batch loader + event bindings
         loader = TaxonBatchLoader()
-        loader.bind(on_progress=update_progress)
-        loader.bind(on_complete=finish_progress)
         loader.bind(on_complete=index_list_items)
+        get_app().start_progress(total_taxa, loader)
 
         # Start loading batches of TaxonListItems
         await loader.add_batch(unique_history, parent_list=self.taxon_history_list)
