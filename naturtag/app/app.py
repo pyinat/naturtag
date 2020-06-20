@@ -15,6 +15,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.image import Image
 from kivymd.app import MDApp
 
+from naturtag.app import alert
 from naturtag.app.screens import HOME_SCREEN, Root, load_screens
 from naturtag.constants import (
     INIT_WINDOW_POSITION,
@@ -208,6 +209,11 @@ class NaturtagApp(MDApp, ControllerProxy):
         taxon_id, observation_id = strip_url_by_type(value)
         if taxon_id:
             self.select_taxon(id=taxon_id)
+            alert(f'Taxon {taxon_id} selected')
+        if observation_id:
+            # self.select_observation(id=observation_id)
+            alert(f'Observation {observation_id} selected')
+
         if self.screen_manager.current == HOME_SCREEN:
             if observation_id:
                 self.image_selection_controller.inputs.observation_id_input.text = str(observation_id)
