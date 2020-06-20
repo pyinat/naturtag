@@ -75,6 +75,8 @@ class TaxonSelectionController(Controller):
         logger.info(f'Taxon: Loading {len(top_frequent_ids)} frequently viewed taxa')
         await loader.add_batch(top_frequent_ids, parent=self.frequent_taxa_list)
 
+        loader.start_thread()
+
     def update_history(self, taxon_id: int):
         """ Update history + frequency """
         self.taxon_history_ids.append(taxon_id)

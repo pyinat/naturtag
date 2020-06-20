@@ -2,14 +2,13 @@ import asyncio
 from logging import getLogger
 from threading import Thread
 from time import time
-from typing import List, Dict, Callable, Any, Union
+from typing import List, Dict, Callable, Any
 
 from kivy.clock import mainthread, Clock
 from kivy.event import EventDispatcher
 from kivy.uix.widget import Widget
 
 from naturtag.app import get_app
-from naturtag.models import Taxon
 from naturtag.widgets import TaxonListItem
 
 REPORT_RATE = 1/30  # Report progress to UI at 30 FPS
@@ -24,11 +23,12 @@ class BatchRunner(EventDispatcher):
         on_load: Called when a work item is processed
         on_complete: Called when all work items are processed
     """
-    def __init__(self, runner_callback: Callable, worker_callback: Callable, **kwargs):
+    def __init__(self, runner_callback: Callable, worker_callback: Callable, loop=None, **kwargs):
         """
         Args:
             runner_callback: Callback for main event loop entry point
             worker_callback: Callback to process work items
+            loop: Event loop to use (separate from main kivy event loop)
         """
         # Schedule all events to run on the main thread
         self.dispatch = mainthread(self.dispatch)
@@ -37,9 +37,10 @@ class BatchRunner(EventDispatcher):
         self.register_event_type('on_complete')
         super().__init__(**kwargs)
 
-        self.loop = None
+        self.loop = loop or get_app().bg_loop
         self.thread = None
         self.queues = []
+        self.worker_tasks = []
         self.runner_callback = runner_callback
         self.worker_callback = worker_callback
 
@@ -56,30 +57,31 @@ class BatchRunner(EventDispatcher):
             for item in items:
                 queue.put_nowait((item, kwargs))
             self.queues.append(queue)
-            asyncio.create_task(self.worker(queue))
 
-        while not self.loop:
-            await asyncio.sleep(0.05)
         self.loop.call_soon_threadsafe(_add_batch)
 
-    def start(self):
-        """ Start the background loader event loop and thread """
-        def start_loop():
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.loop.create_task(self.runner_callback())
-            self.loop.run_forever()
+    def start_thread(self):
+        """ Start the background loader event loop in a new thread """
+        def _start():
+            asyncio.run_coroutine_threadsafe(self.start(), self.loop)
+        Thread(target=_start).start()
 
-        self.thread = Thread(target=start_loop, daemon=True)
-        self.thread.start()
+    async def start(self):
+        """ Start the background loader event loop """
+        logger.info(f'Loader: Starting {len(self.queues)} batches')
+        for queue in self.queues:
+            task = asyncio.create_task(self.worker(queue))
+            self.worker_tasks.append(task)
+        await self.runner_callback()
 
     async def worker(self, queue: asyncio.Queue):
         """ Run a worker to process items on a single queue """
         while True:
             item, kwargs = await queue.get()
             results = await self.worker_callback(item, **kwargs)
-            self.dispatch('on_load', results)
+            # self.dispatch('on_load', results)
             queue.task_done()
+            await asyncio.sleep(0)
 
     async def join(self):
         """ Wait for all queues to be initialized and then processed """
@@ -87,18 +89,13 @@ class BatchRunner(EventDispatcher):
             await asyncio.sleep(0.1)
         for queue in self.queues:
             await queue.join()
-        self.queues = []
 
-    def stop(self):
-        """ Safely stop the event loop and thread """
-        pending = asyncio.all_tasks(loop=self.loop)
-        print('Processed:', self.items_complete, 'Remaining:', sum(q.qsize() for q in self.queues))
-        for task in pending:
-            print('Canceling:', task)
+    async def stop(self):
+        """ Safely stop the event loop """
+        logger.info('Loader: stopping workers')
+        for task in self.worker_tasks:
             task.cancel()
-        self.loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
-        self.loop.close()
-        self.thread.join()
+        self.loop.run_until_complete(asyncio.gather(*self.worker_tasks, return_exceptions=True))
 
     # Default handlers
     def on_load(self, *_): pass
@@ -114,7 +111,6 @@ class BatchLoader(BatchRunner):
         self.items_complete = None
         self.start_time = None
         self.lock = asyncio.Lock()
-        self.start()
 
     async def run(self):
         """ Run batches, wait to complete, and gracefully shut down """
@@ -122,7 +118,7 @@ class BatchLoader(BatchRunner):
         await self.join()
         self.stop_progress()
         self.dispatch('on_complete', None)
-        self.stop()
+        await self.stop()
 
     def start_progress(self):
         """ Schedule event to periodically report progress """
@@ -141,18 +137,19 @@ class BatchLoader(BatchRunner):
 
     def stop_progress(self):
         """ Unschedule progress event and log total execution time """
-        self.event.cancel()
-        logger.info(
-            f'Finished loading {self.items_complete} items '
-            f'in {time() - self.start_time} seconds'
-        )
+        if self.event:
+            self.event.cancel()
+            self.event = None
+            logger.info(
+                f'Loader: Finished loading {self.items_complete} items '
+                f'in {time() - self.start_time} seconds'
+            )
 
-    # TODO: Not yet working
     def cancel(self):
         """ Safely stop the event loop and thread (from another thread) """
+        logger.info(f'Loader: Canceling {len(self.queues)} batches')
         self.loop.call_soon_threadsafe(self.stop_progress)
-        for task in asyncio.all_tasks(loop=self.loop):
-            task.cancel()
+        asyncio.run_coroutine_threadsafe(self.stop(), self.loop)
 
 
 class WidgetBatchLoader(BatchLoader):

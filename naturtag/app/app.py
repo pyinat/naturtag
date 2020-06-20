@@ -1,6 +1,8 @@
 """ Main Kivy application """
+import asyncio
 import os
 from logging import getLogger
+from threading import Thread
 
 # Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
@@ -104,6 +106,10 @@ class NaturtagApp(MDApp, ControllerProxy):
     toolbar = ObjectProperty()
 
     def build(self):
+        # Create an event loop to be used by background loaders
+        self.bg_loop = asyncio.new_event_loop()
+        Thread(target=self.bg_loop.run_forever).start()
+
         # Init screens and store references to them
         screens = load_screens()
         self.root = Root()
@@ -117,8 +123,8 @@ class NaturtagApp(MDApp, ControllerProxy):
         for screen_name, screen in screens.items():
             self.screen_manager.add_widget(screen)
         self.set_theme_mode()
-        # self.home()
-        self.switch_screen('taxon')
+        self.home()
+        # self.switch_screen('taxon')
 
         # Set Window and theme settings
         position, left, top = INIT_WINDOW_POSITION

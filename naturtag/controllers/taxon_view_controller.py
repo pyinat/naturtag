@@ -1,13 +1,14 @@
 import asyncio
 from logging import getLogger
 import webbrowser
+from typing import List
 
 from kivymd.uix.list import OneLineListItem, ThreeLineAvatarIconListItem, ImageLeftWidget
 from naturtag.controllers import Controller, TaxonBatchLoader
 
 from naturtag.models import Taxon, get_icon_path
 from naturtag.app import get_app
-from naturtag.widgets import StarButton, TaxonListItem
+from naturtag.widgets import StarButton
 
 logger = getLogger().getChild(__name__)
 
@@ -132,6 +133,8 @@ class TaxonViewController(Controller):
         self.taxon_children.clear_widgets()
         await self.loader.add_batch(self.selected_taxon.child_taxa_ids, parent=self.taxon_children)
 
+        self.loader.start_thread()
+
     def on_star(self, button):
         """ Either add or remove a taxon from the starred list """
         if button.is_selected:
@@ -140,5 +143,5 @@ class TaxonViewController(Controller):
             get_app().remove_star(self.selected_taxon.id)
 
 
-def _get_label(text, items):
+def _get_label(text: str, items: List) -> str:
     return text + (f' ({len(items)})' if items else '')

@@ -95,6 +95,8 @@ class TaxonSearchController(Controller):
         await loader.add_batch(results, parent=self.search_results_list)
         self.search_results_tab.select()
 
+        loader.start_thread()
+
     def reset_all_search_inputs(self, *args):
         logger.info('Resetting search filters')
         self.taxon_search_input.reset()

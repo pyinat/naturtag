@@ -1,9 +1,11 @@
+from logging import getLogger
+
 from kivy.animation import Animation
-from kivy.clock import Clock
 from kivymd.uix.progressbar import MDProgressBar
 
 FINISHED_COLOR = .1, .8, .1, 1
 REMOVED_COLOR = 0, 0, 0, 0
+logger = getLogger().getChild(__name__)
 
 
 class LoaderProgressBar(MDProgressBar):
@@ -33,18 +35,20 @@ class LoaderProgressBar(MDProgressBar):
 
     def cancel(self):
         """ Cancel any currently running animation and unbind loader events """
-        if self.event:
-            self.event.cancel()
-            self.event = None
+        logger.debug(f'Progress canceled at {self.value}/{self.max}')
         if self.loader:
             self.loader.unbind(on_progress=self.update)
             self.loader.unbind(on_complete=self.finish)
+        if self.event:
+            self.event.cancel_all(self)
+            self.event = None
 
     def finish(self, *args):
         """ Finish the progress by changing color w/ animation and unbinding events """
         self.cancel()
         self.value = self.max
         self.color = FINISHED_COLOR
-        self.event = Animation(color=REMOVED_COLOR, duration=3, t='out_expo').start(self)
+        self.event = Animation(color=REMOVED_COLOR, duration=3, t='out_expo')
+        self.event.start(self)
 
 
