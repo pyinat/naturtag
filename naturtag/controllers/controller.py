@@ -7,6 +7,7 @@ class Controller:
     def __init__(self, screen):
         self.progress_bar = LoaderProgressBar()
         self.status_bar = screen.status_bar
+        self.loader = None
 
     def start_progress(self, max: int, loader: BatchLoader = None):
         """ (Re)start the progress bar, and bind a BatchLoader's progress update events to it """

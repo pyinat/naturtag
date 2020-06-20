@@ -92,7 +92,7 @@ class TaxonSearchController(Controller):
         self.search_results_list.clear_widgets()
 
         logger.info(f'Taxon: loading {len(results)} search results')
-        await loader.add_batch(results, parent_list=self.search_results_list)
+        await loader.add_batch(results, parent=self.search_results_list)
         self.search_results_tab.select()
 
     def reset_all_search_inputs(self, *args):

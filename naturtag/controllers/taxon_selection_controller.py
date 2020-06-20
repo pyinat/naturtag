@@ -69,11 +69,11 @@ class TaxonSelectionController(Controller):
             f'Taxon: Loading {len(unique_history)} unique taxa from history'
             f' (from {len(self.taxon_history_ids)} total)'
         )
-        await loader.add_batch(unique_history, parent_list=self.taxon_history_list)
+        await loader.add_batch(unique_history, parent=self.taxon_history_list)
         logger.info(f'Taxon: Loading {len(starred_taxa_ids)} starred taxa')
-        await loader.add_batch(starred_taxa_ids, parent_list=self.starred_taxa_list)
+        await loader.add_batch(starred_taxa_ids, parent=self.starred_taxa_list)
         logger.info(f'Taxon: Loading {len(top_frequent_ids)} frequently viewed taxa')
-        await loader.add_batch(top_frequent_ids, parent_list=self.frequent_taxa_list)
+        await loader.add_batch(top_frequent_ids, parent=self.frequent_taxa_list)
 
     def update_history(self, taxon_id: int):
         """ Update history + frequency """
