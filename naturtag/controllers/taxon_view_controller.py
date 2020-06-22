@@ -126,12 +126,12 @@ class TaxonViewController(Controller):
         logger.info(f'Taxon: Loading {len(self.selected_taxon.parent_taxa)} ancestors')
         self.taxon_ancestors_label.text = _get_label('Ancestors', self.selected_taxon.parent_taxa)
         self.taxon_ancestors.clear_widgets()
-        await self.loader.add_batch(self.selected_taxon.parent_taxa_ids, parent=self.taxon_ancestors)
+        self.loader.add_batch(self.selected_taxon.parent_taxa_ids, parent=self.taxon_ancestors)
 
         logger.info(f'Taxon: Loading {len(self.selected_taxon.child_taxa)} children')
         self.taxon_children_label.text = _get_label('Children', self.selected_taxon.child_taxa)
         self.taxon_children.clear_widgets()
-        await self.loader.add_batch(self.selected_taxon.child_taxa_ids, parent=self.taxon_children)
+        self.loader.add_batch(self.selected_taxon.child_taxa_ids, parent=self.taxon_children)
 
         self.loader.start_thread()
 

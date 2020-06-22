@@ -9,7 +9,8 @@ from kivy.event import EventDispatcher
 from kivy.uix.widget import Widget
 
 from naturtag.app import get_app
-from naturtag.widgets import TaxonListItem
+from naturtag.models import MetaMetadata
+from naturtag.widgets import TaxonListItem, ImageMetaTile
 
 REPORT_RATE = 1/30  # Report progress to UI at 30 FPS
 logger = getLogger().getChild(__name__)
@@ -44,13 +45,12 @@ class BatchRunner(EventDispatcher):
         self.runner_callback = runner_callback
         self.worker_callback = worker_callback
 
-    async def add_batch(self, items: List, **kwargs: Dict):
+    def add_batch(self, items: List, **kwargs: Dict):
         """ Add a batch of items to the queue (from another thread)
 
         Args:
             items: Items to be passed to worker callback
             kwargs: Optional keyword arguments to be passed to worker callback
-
         """
         def _add_batch():
             queue = asyncio.Queue()
@@ -79,7 +79,7 @@ class BatchRunner(EventDispatcher):
         while True:
             item, kwargs = await queue.get()
             results = await self.worker_callback(item, **kwargs)
-            # self.dispatch('on_load', results)
+            self.dispatch('on_load', results)
             queue.task_done()
             await asyncio.sleep(0)
 
@@ -160,6 +160,7 @@ class WidgetBatchLoader(BatchLoader):
 
     async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
         """ Load information for a new widget """
+        logger.debug(f'Processing item: {item}')
         widget = self.widget_cls(item, **kwargs)
         self.add_widget(widget, parent)
         await self.increment_progress()
@@ -181,3 +182,18 @@ class TaxonBatchLoader(WidgetBatchLoader):
         """ Add a TaxonListItem to its parent list and bind its click event """
         super().add_widget(widget, parent)
         mainthread(get_app().bind_to_select_taxon)(widget)
+
+
+class ImageBatchLoader(WidgetBatchLoader):
+    """ Loads batches of ImageMetaTiles """
+    def __init__(self, **kwargs):
+        super().__init__(widget_cls=ImageMetaTile, **kwargs)
+
+    def add_widget(self, widget: Widget, parent: Widget):
+        """ Add an ImageMetaTiles to its parent view and bind its click event """
+        super().add_widget(widget, parent)
+        self.bind_click(widget)
+
+    @mainthread
+    def bind_click(self, widget):
+        widget.bind(on_touch_down=get_app().image_selection_controller.on_image_click)

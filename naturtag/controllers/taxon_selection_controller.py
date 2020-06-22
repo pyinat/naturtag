@@ -52,7 +52,7 @@ class TaxonSelectionController(Controller):
         top_frequent_ids = list(self.frequent_taxa_ids.keys())[:MAX_DISPLAY_HISTORY]
         total_taxa = sum(map(len, (unique_history, self.starred_taxa_ids, top_frequent_ids)))
 
-        # Set up batch loader + event bindings
+        # Start progress bar with a new batch loader
         loader = TaxonBatchLoader()
         self.start_progress(total_taxa, loader)
 
@@ -69,11 +69,11 @@ class TaxonSelectionController(Controller):
             f'Taxon: Loading {len(unique_history)} unique taxa from history'
             f' (from {len(self.taxon_history_ids)} total)'
         )
-        await loader.add_batch(unique_history, parent=self.taxon_history_list)
+        loader.add_batch(unique_history, parent=self.taxon_history_list)
         logger.info(f'Taxon: Loading {len(starred_taxa_ids)} starred taxa')
-        await loader.add_batch(starred_taxa_ids, parent=self.starred_taxa_list)
+        loader.add_batch(starred_taxa_ids, parent=self.starred_taxa_list)
         logger.info(f'Taxon: Loading {len(top_frequent_ids)} frequently viewed taxa')
-        await loader.add_batch(top_frequent_ids, parent=self.frequent_taxa_list)
+        loader.add_batch(top_frequent_ids, parent=self.frequent_taxa_list)
 
         loader.start_thread()
 

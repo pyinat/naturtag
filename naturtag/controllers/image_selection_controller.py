@@ -2,6 +2,7 @@ import asyncio
 from logging import getLogger
 
 from naturtag.app import alert, get_app
+from naturtag.controllers import Controller, ImageBatchLoader
 from naturtag.image_glob import get_images_from_paths
 from naturtag.tagger import tag_images
 from naturtag.widgets import ImageMetaTile
@@ -9,9 +10,10 @@ from naturtag.widgets import ImageMetaTile
 logger = getLogger().getChild(__name__)
 
 
-class ImageSelectionController:
+class ImageSelectionController(Controller):
     """ Controller class to manage image selector screen """
-    def __init__(self, screen, **kwargs):
+    def __init__(self, screen):
+        super().__init__(screen)
         self.context_menu = screen.context_menu
         self.inputs = screen
         self.image_previews = screen.image_previews
@@ -41,13 +43,13 @@ class ImageSelectionController:
         """ Add one or more files and/or dirs selected via a FileChooser """
         self.add_images(self.file_chooser.selection)
 
-    def add_images(self, paths):
-        """ Add one or more files and/or dirs, with deduplication """
-        asyncio.run(self.load_images(paths))
-
     def add_image(self, path):
         """ Add an image to the current selection """
         self.add_images([path])
+
+    def add_images(self, paths):
+        """ Add one or more files and/or dirs, with deduplication """
+        asyncio.run(self.load_images(paths))
 
     async def load_images(self, paths):
         # Determine images to load, ignoring duplicates
@@ -58,13 +60,11 @@ class ImageSelectionController:
             return
         self.file_list.extend(new_images)
 
-        await asyncio.gather(*[self.load_image(path=path) for path in new_images])
-
-    async def load_image(self, path):
-        logger.info(f'Main: Loading image {path}')
-        img = ImageMetaTile(path)
-        img.bind(on_touch_down=self.on_image_click)
-        self.image_previews.add_widget(img)
+        # Start batch loader + progress bar
+        loader = ImageBatchLoader()
+        self.start_progress(len(new_images), loader)
+        loader.add_batch(new_images, parent=self.image_previews)
+        loader.start_thread()
 
     def open_native_file_chooser(self, dirs=False):
         """ A bit of a hack; uses a hidden tkinter window to open a native file chooser dialog """
