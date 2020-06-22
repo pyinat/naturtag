@@ -14,6 +14,7 @@ ICONS_DIR = join(ASSETS_DIR, 'iconic_taxa')
 DATA_DIR = join(user_data_dir(), 'Naturtag')
 
 # TODO: These may be useful as user-configurable settings
+TRIGGER_DELAY = 0.1
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']

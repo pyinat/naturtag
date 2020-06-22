@@ -5,6 +5,7 @@ from logging import getLogger
 from threading import Thread
 
 # Set GL backend before any kivy modules are imported
+from kivy.clock import Clock
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
 # Disable multitouch emulation before any other kivy modules are imported
@@ -27,7 +28,7 @@ from naturtag.constants import (
     ATLAS_APP_ICONS,
     BACKSPACE,
     ENTER,
-    F11,
+    F11, TRIGGER_DELAY,
 )
 from naturtag.controllers import (
     ImageSelectionController,
@@ -100,10 +101,17 @@ class NaturtagApp(MDApp, ControllerProxy):
     """ Manages window, theme, main screen and navigation state; other application logic is
     handled by Controller
     """
-    root = ObjectProperty()
-    nav_drawer = ObjectProperty()
-    screen_manager = ObjectProperty()
-    toolbar = ObjectProperty()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bg_loop = None
+        self.root = None
+        self.nav_drawer = None
+        self.screen_manager = None
+        self.toolbar = None
+
+        # Buffer + delayed trigger For collecting multiple files dropped at once
+        self.dropped_files = []
+        self.drop_trigger = Clock.create_trigger(self.process_dropped_files, TRIGGER_DELAY)
 
     def build(self):
         # Create an event loop to be used by background loaders
@@ -132,20 +140,23 @@ class NaturtagApp(MDApp, ControllerProxy):
         Window.left = left
         Window.top = top
         Window.size = INIT_WINDOW_SIZE
-        Window.bind(on_dropfile=lambda x, y: self.image_selection_controller.add_images(y))
         Window.bind(on_keyboard=self.on_keyboard)
         Window.bind(on_request_close=self.on_request_close)
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
 
+        # On_dropfile sends a single file at a time; this collects files dropped at the same time
+        Window.bind(on_dropfile=lambda _, path: self.dropped_files.append(path))
+        Window.bind(on_dropfile=self.drop_trigger)
+
         # Preload atlases so they're immediately available in Kivy cache
         Image(source=f'{ATLAS_APP_ICONS}/')
         # Image(source=f'{ATLAS_TAXON_ICONS}/')
-
-        # alert(  # TODO: make this disappear as soon as an image or another screen is selected
-        #     f'.{" " * 14}Drag and drop images or select them from the file chooser', duration=7
-        # )
         return self.root
+
+    def process_dropped_files(self, *args):
+        self.image_selection_controller.add_images(self.dropped_files)
+        self.dropped_files = []
 
     def home(self, *args):
         self.switch_screen(HOME_SCREEN)
