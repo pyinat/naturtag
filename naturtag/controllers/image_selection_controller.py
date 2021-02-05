@@ -93,8 +93,8 @@ class ImageSelectionController(Controller):
 
     def remove_image(self, image):
         """ Remove an image from file list and image previews """
-        logger.info(f'Main: Removing image {image.metadata_config.image_path}')
-        self.file_list.remove(image.metadata_config.image_path)
+        logger.info(f'Main: Removing image {image.metadata.image_path}')
+        self.file_list.remove(image.metadata.image_path)
         image.parent.remove_widget(image)
 
     def clear(self, *args):
@@ -129,12 +129,12 @@ class ImageSelectionController(Controller):
             self.context_menu.show(*get_app().root_window.mouse_pos)
             self.context_menu.ref = instance
             # Enable 'view taxon/observation' menu items, if applicable
-            self.context_menu.ids.view_taxon_ctx.disabled = not instance.metadata_config.taxon_id
+            self.context_menu.ids.view_taxon_ctx.disabled = not instance.metadata.taxon_id
             self.context_menu.ids.view_observation_ctx.disabled = (
-                not instance.metadata_config.observation_id
+                not instance.metadata.observation_id
             )
             self.context_menu.ids.copy_flickr_tags_ctx.disabled = (
-                not instance.metadata_config.keyword_meta.flickr_tags
+                not instance.metadata.keyword_meta.flickr_tags
             )
         # Middle-click: remove image
         elif touch.button == 'middle':
@@ -147,12 +147,12 @@ class ImageSelectionController(Controller):
     @staticmethod
     def view_taxon(instance):
         get_app().switch_screen('taxon')
-        get_app().select_taxon(id=instance.metadata_config.taxon_id)
+        get_app().select_taxon(id=instance.metadata.taxon_id)
 
     @staticmethod
     def view_metadata(instance):
         get_app().switch_screen('metadata')
-        get_app().select_metadata(instance.metadata_config)
+        get_app().select_metadata(instance.metadata)
 
     def run(self, *args):
         """ Run image tagging for selected images and input """
@@ -183,9 +183,9 @@ class ImageSelectionController(Controller):
         alert(f'{len(self.file_list)} images tagged with metadata for {selected_id}')
 
         # Update image previews with new metadata
-        previews = {img.metadata_config.image_path: img for img in self.image_previews.children}
+        previews = {img.metadata.image_path: img for img in self.image_previews.children}
         for metadata in all_metadata:
-            previews[metadata.image_path].metadata_config = metadata
+            previews[metadata.image_path].metadata = metadata
 
     @staticmethod
     def on_taxon_id(input):
