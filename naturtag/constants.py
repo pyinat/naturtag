@@ -100,6 +100,23 @@ ICONIC_TAXA = OrderedDict(
 )
 # Other not-quite-as-iconic icons to show
 ICONISH_TAXA = {**ICONIC_TAXA, 1: 'animalia', 0: 'unknown'}
+# TODO: More emoji for non-iconic taxa!
+ICONIC_EMOJI = {
+    0: '❓',
+    1: '🐾',
+    3: '🐦',
+    20978: '🐸',
+    26036: '🦎',
+    40151: '😺',
+    47178: '🐠',
+    47115: '🐌',
+    47119: '🕷️',
+    47158: '🦋',
+    47126: '🌿',
+    47170: '🍄',
+    48222: '🟢',
+    47686: '🦠',
+}
 PLACEHOLDER_ICON = f'{ATLAS_APP_ICONS}/unknown'
 
 # Specific XML namespaces to use terms from when processing DwC observation records

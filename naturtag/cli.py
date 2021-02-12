@@ -9,6 +9,7 @@ from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
+from naturtag.constants import ICONIC_EMOJI
 from naturtag.image_glob import glob_paths
 from naturtag.inat_metadata import strip_url
 from naturtag.tagger import tag_images
@@ -182,8 +183,37 @@ def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:
         return results[0]['id']
 
     # Multiple results
-    click.echo(f'Multiple matches found for "{taxon}"; Not yet implemented')
-    return None
+    taxon_table = format_taxa(results, verbose)
+    choices = click.Choice([str(t) for t in range(len(results))])
+
+    click.echo(f'Multiple matches found for "{taxon}"; please choose one:')
+    rprint(taxon_table)
+    taxon_index = click.prompt('Choice', type=choices, show_choices=False)
+    return results[int(taxon_index)]['id']
+
+
+def format_taxa(results, verbose: bool = False) -> Table:
+    """Format taxon autocomplete results into a table"""
+    table = Table(
+        Column('#', style='bold white'),
+        'Rank',
+        'Name',
+        'Common name',
+        box=SIMPLE_HEAVY,
+        header_style='bold cyan',
+    )
+    if verbose:
+        table.add_column('Matched term')
+        table.add_column('ID')
+
+    for i, t in enumerate(results):
+        icon = ICONIC_EMOJI.get(t['iconic_taxon_id'], ' ')
+        row = [str(i), t['rank'], f'{icon} {t["name"]}', t.get('preferred_common_name')]
+        if verbose:
+            row += [t['matched_term'], str(t['id'])]
+        table.add_row(*row)
+
+    return table
 
 
 # Main CLI entry point

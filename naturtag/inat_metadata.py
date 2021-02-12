@@ -115,8 +115,12 @@ def get_taxon_ancestors(taxon_id: int) -> List[Dict]:
 def get_taxon_with_ancestors(taxon_id: int) -> List[Dict]:
     """ Get a taxon with all its parents """
     logger.info(f'API: Fetching parents of taxon {taxon_id}')
-    r = get_taxa_by_id(taxon_id)
-    taxon = r['results'][0]
+    results = get_taxa_by_id(taxon_id).get('results', [])
+    if not results:
+        logger.info(f'API: taxon {taxon_id} not found')
+        return []
+
+    taxon = results[0]
     logger.info(f'API: {len(taxon["ancestors"])} parent taxa found')
     return taxon['ancestors'] + [taxon]
 
