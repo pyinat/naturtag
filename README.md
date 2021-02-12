@@ -1,5 +1,5 @@
 # Naturtag: an iNaturalist Image Tagger
-[![Build Status](https://travis-ci.org/JWCook/naturtag.svg?branch=dev)](https://travis-ci.org/JWCook/naturtag)
+[![Build status](https://github.com/JWCook/naturtag/workflows/Build/badge.svg)](https://github.com/JWCook/naturtag/actions)
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/latest/?badge=latest)
 ![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)
 ![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)
