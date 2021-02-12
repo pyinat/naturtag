@@ -3,6 +3,7 @@ from re import DOTALL, MULTILINE, compile
 
 import click
 from click_help_colors import HelpColorsCommand
+from rich import print as rprint
 
 from naturtag.image_glob import glob_paths
 from naturtag.inat_metadata import strip_url
@@ -32,6 +33,9 @@ def _strip_url(ctx, param, value):
 )
 @click.option('-d', '--darwin-core', is_flag=True, help='Generate Darwin Core metadata')
 @click.option(
+    '-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format'
+)
+@click.option(
     '-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords'
 )
 @click.option('-o', '--observation-id', help='Observation ID or URL', callback=_strip_url)
@@ -43,13 +47,14 @@ def _strip_url(ctx, param, value):
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
+    common_names,
+    create_xmp,
+    darwin_core,
+    flickr_format,
+    hierarchical,
+    image_paths,
     observation_id,
     taxon_id,
-    common_names,
-    darwin_core,
-    hierarchical,
-    create_xmp,
-    image_paths,
     verbose,
 ):
     """
@@ -140,9 +145,11 @@ def tag(
         glob_paths(image_paths),
     )
 
-    # If no images were specified, just print keywords
-    if not image_paths:
-        click.echo('\n'.join(keywords))
+    # If no images were specified (or if Flickr format is specified), print the keywords
+    if flickr_format:
+        print(' '.join(keywords))
+    elif not image_paths:
+        rprint('\n'.join([kw.replace('"', '') for kw in keywords]))
 
 
 # Main CLI entry point
