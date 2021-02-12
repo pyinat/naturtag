@@ -21,6 +21,7 @@ from naturtag.constants import (
     CACHE_PATH,
     COMMON_NAME_IGNORE_TERMS,
     DWC_NAMESPACES,
+    DWC_TAXON_TERMS,
     OBSERVATION_KEYS,
     RANKS,
     TAXON_KEYS,
@@ -54,10 +55,21 @@ def get_observation_taxon(observation_id: int) -> int:
 
 
 def get_observation_dwc_terms(observation_id: int) -> Dict[str, str]:
-    """ Get all DWC terms from an iNaturalist observation """
+    """ Get all DWC terms for an iNaturalist observation """
     logger.info(f'API: Getting Darwin Core terms for observation {observation_id}')
     obs_dwc = get_observations(id=observation_id, response_format='dwc')
     return convert_dwc_to_xmp(obs_dwc)
+
+
+def get_taxon_dwc_terms(taxon_id: int) -> Dict[str, str]:
+    """Get all DWC terms for an iNaturalist taxon.
+    Since there is no DWC format for ``GET /taxa``, we'll just search for a random observation
+    with this taxon ID, strip off the observation metadata, and keep only the taxon metadata.
+    """
+    logger.info(f'API: Getting Darwin Core terms for taxon {taxon_id}')
+    obs_dwc = get_observations(taxon_id=taxon_id, per_page=1, response_format='dwc')
+    dwc_xmp = convert_dwc_to_xmp(obs_dwc)
+    return {k: v for k, v in dwc_xmp.items() if k in DWC_TAXON_TERMS}
 
 
 # TODO: separate species, binomial, trinomial
@@ -103,8 +115,12 @@ def get_taxon_ancestors(taxon_id: int) -> List[Dict]:
 def get_taxon_with_ancestors(taxon_id: int) -> List[Dict]:
     """ Get a taxon with all its parents """
     logger.info(f'API: Fetching parents of taxon {taxon_id}')
-    r = get_taxa_by_id(taxon_id)
-    taxon = r['results'][0]
+    results = get_taxa_by_id(taxon_id).get('results', [])
+    if not results:
+        logger.info(f'API: taxon {taxon_id} not found')
+        return []
+
+    taxon = results[0]
     logger.info(f'API: {len(taxon["ancestors"])} parent taxa found')
     return taxon['ancestors'] + [taxon]
 

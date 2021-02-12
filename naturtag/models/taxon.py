@@ -113,7 +113,6 @@ class Taxon(BaseModel):
         if self._child_taxa is None:
             if not self.children:
                 self.update_from_full_record()
-            print(self.children)
             self._child_taxa = [Taxon.from_id(t['id']) for t in self.children]
             # Children may be different ranks; sort children by rank then name
             self._child_taxa.sort(key=get_child_idx)
@@ -124,8 +123,8 @@ class Taxon(BaseModel):
         return [taxon.id for taxon in self.child_taxa]
 
 
-def get_icon_path(id: int) -> Optional[str]:
+def get_icon_path(taxon_id: int) -> Optional[str]:
     """ An iconic function to return an icon for an iconic taxon """
-    if id not in ICONISH_TAXA:
-        id = 0
-    return f'{ATLAS_APP_ICONS}/{ICONISH_TAXA[id]}'
+    if taxon_id not in ICONISH_TAXA:
+        taxon_id = 0
+    return f'{ATLAS_APP_ICONS}/{ICONISH_TAXA[taxon_id]}'

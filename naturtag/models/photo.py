@@ -9,7 +9,7 @@ from naturtag.validation import format_const, format_dimensions
 
 @attr.s
 class Photo(BaseModel):
-    """A data class containing information about a photo"""
+    """A data class containing information about a remote observation photo"""
 
     attribution: str = kwarg
     flags: List = attr.ib(factory=list)
