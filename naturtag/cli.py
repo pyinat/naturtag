@@ -145,11 +145,13 @@ def tag(
         glob_paths(image_paths),
     )
 
-    # If no images were specified (or if Flickr format is specified), print the keywords
+    # Print keywords and/or DWC tags, if appropriate
     if flickr_format:
         print(' '.join(keywords))
-    elif not image_paths:
+    elif not image_paths or verbose:
         rprint('\n'.join([kw.replace('"', '') for kw in keywords]))
+    if verbose and darwin_core and metadata:
+        rprint(metadata)
 
 
 # Main CLI entry point

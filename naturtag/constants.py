@@ -110,17 +110,17 @@ DWC_NAMESPACES = {
 }
 
 # Basic DwC fields that can be added for a taxon without an observation
-MINIMAL_DWC_TERMS = [
-    'dwc:kingdom',
-    'dwc:phylum',
-    'dwc:class',
-    'dwc:order',
-    'dwc:family',
-    'dwc:genus',
-    'dwc:species',
-    'dwc:scientificName',
-    'dwc:taxonRank',
-    'dwc:taxonID',
+DWC_TAXON_TERMS = [
+    'Xmp.dwc.kingdom',
+    'Xmp.dwc.phylum',
+    'Xmp.dwc.class',
+    'Xmp.dwc.order',
+    'Xmp.dwc.family',
+    'Xmp.dwc.genus',
+    'Xmp.dwc.species',
+    'Xmp.dwc.scientificName',
+    'Xmp.dwc.taxonRank',
+    'Xmp.dwc.taxonID',
 ]
 
 COMMON_NAME_IGNORE_TERMS = [
