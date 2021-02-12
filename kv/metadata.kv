@@ -9,33 +9,48 @@
 
             Tab:
                 text: 'Combined'
-                TextInput:
-                    id: combined
-                    readonly: True
-                    multiline: True
+                ScrollViewY:
+                    TextInput:
+                        id: combined
+                        readonly: True
+                        multiline: True
+                        size_hint_y: None
+                        height: self.minimum_height
             Tab:
                 text: 'Keywords'
-                TextInput:
-                    id: keywords
-                    readonly: True
-                    multiline: True
+                ScrollViewY:
+                    TextInput:
+                        id: keywords
+                        readonly: True
+                        multiline: True
+                        size_hint_y: None
+                        height: self.minimum_height
             Tab:
                 text: 'EXIF'
-                TextInput:
-                    id: exif
-                    readonly: True
-                    multiline: True
+                ScrollViewY:
+                    TextInput:
+                        id: exif
+                        readonly: True
+                        multiline: True
+                        size_hint_y: None
+                        height: self.minimum_height
             Tab:
                 text: 'IPTC'
-                TextInput:
-                    id: iptc
-                    readonly: True
-                    multiline: True
+                ScrollViewY:
+                    TextInput:
+                        id: iptc
+                        readonly: True
+                        multiline: True
+                        size_hint_y: None
+                        height: self.minimum_height
             Tab:
                 text: 'XMP'
-                TextInput:
-                    id: xmp
-                    readonly: True
-                    multiline: True
+                ScrollViewY:
+                    TextInput:
+                        id: xmp
+                        readonly: True
+                        multiline: True
+                        size_hint_y: None
+                        height: self.minimum_height
         StatusBar:
             id: status_bar

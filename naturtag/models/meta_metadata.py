@@ -1,6 +1,6 @@
 from logging import getLogger
 from os.path import basename
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from naturtag.constants import IntTuple, StrTuple
 from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank
@@ -21,7 +21,6 @@ class MetaMetadata(ImageMetadata):
         self._min_rank = None
         self._simplified = None
         self._summary = None
-        self.combined = None
         self.keyword_meta = None
         self._update_derived_properties()
 
@@ -31,8 +30,15 @@ class MetaMetadata(ImageMetadata):
         self._min_rank = None
         self._simplified = None
         self._summary = None
-        self.combined = {**self.exif, **self.iptc, **self.xmp}
         self.keyword_meta = KeywordMetadata(self.combined)
+
+    @property
+    def combined(self) -> Dict[str, Any]:
+        return {**self.exif, **self.iptc, **self.xmp}
+
+    @property
+    def filtered_combined(self) -> Dict[str, Any]:
+        return {**self.filtered_exif, **self.iptc, **self.xmp}
 
     @property
     def inaturalist_ids(self) -> IntTuple:

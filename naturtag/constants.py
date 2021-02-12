@@ -23,7 +23,6 @@ IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 
 # Thumnbnail & cache settings
-EXIF_ORIENTATION_ID = '0x0112'
 THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
 THUMBNAIL_DEFAULT_FORMAT = 'png'
 THUMBNAIL_SIZE_SM = (75, 75)
@@ -34,6 +33,22 @@ THUMBNAIL_SIZES = {
     'medium': THUMBNAIL_SIZE_DEFAULT,
     'large': THUMBNAIL_SIZE_LG,
 }
+
+# Image metadata settings
+EXIF_HIDE_PREFIXES = [
+    'Exif.Image.PrintImageMatching',
+    'Exif.MakerNote',
+    'Exif.Olympus2.CameraID',
+    'Exif.OlympusCs.0x',
+    'Exif.OlympusCs.AFAreas',
+    'Exif.OlympusFi.0x',
+    'Exif.OlympusFi.ImageStabilization',
+    'Exif.OlympusFi.SceneDetectData',
+    'Exif.OlympusIp.0x',
+    'Exif.OlympusIp.FaceDetectArea',
+    'Exif.Photo.MakerNote',
+]
+EXIF_ORIENTATION_ID = '0x0112'
 
 # Atlas settings
 ATLAS_MAX_SIZE = 4096

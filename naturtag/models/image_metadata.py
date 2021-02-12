@@ -1,9 +1,12 @@
 from logging import getLogger
 from os.path import isfile, splitext
+from typing import Any, Dict
 
 from pyexiv2 import Image
 
 # Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
+from naturtag.constants import EXIF_HIDE_PREFIXES
+
 NEW_XMP_CONTENTS = """
 <?xpacket?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="">
@@ -60,8 +63,17 @@ class ImageMetadata:
     def has_sidecar(self):
         return isfile(self.xmp_path)
 
+    @property
+    def filtered_exif(self) -> Dict[str, Any]:
+        """Get EXIF tags, excluding some verbose manufacturer tags that aren't useful to display"""
+        return {
+            k: v
+            for k, v in self.exif.items()
+            if not any([k.startswith(prefix) for prefix in EXIF_HIDE_PREFIXES])
+        }
+
     @staticmethod
-    def read_exiv2_image(path):
+    def read_exiv2_image(path) -> Image:
         """
         Read an image with basic error handling. Note: Exiv2 ``RuntimeError`` usually means
         corrupted metadata. See: https://dev.exiv2.org/issues/637#note-1
