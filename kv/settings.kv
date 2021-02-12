@@ -10,34 +10,36 @@
                 OneLineListItem:
                     font_style: 'H5'
                     text: 'iNaturalist settings'
-                TwoLineListItem:
+                TwoLineIconListItem:
                     font_style: 'H6'
                     text: 'Username'
                     secondary_text: 'iNaturalist username used to filter observations'
+                    IconLeft:
+                        icon: 'account'
                 TextInputListItem:
                     id: username_input
-                    icon_right: 'account'
-                TwoLineListItem:
+                TwoLineIconListItem:
                     font_style: 'H6'
                     text: 'Locale'
                     secondary_text: 'Locale preference for species common names'
+                    IconLeft:
+                        icon: 'earth'
                 TextInputListItem:
                     id: locale_input
-                    icon_right: 'earth'
-                ThreeLineListItem:
+                ThreeLineIconListItem:
                     id: preferred_place_id_label
                     font_style: 'H6'
                     text: 'Preferred place ID'
                     secondary_text: 'Place preference for regional species common names'
                     tertiary_text: 'See [b][color=#00BED4]https://www.inaturalist.org/places[/color][/b] to search for your region'
+                    IconLeft:
+                        icon: 'city'
                 TextInputListItem:
                     id: preferred_place_id_input
-                    icon_right: 'city'
-                    input_filter: 'int'
                 TwoLineAvatarIconListItem:
                     font_style: 'H6'
                     text: 'Casual observations'
-                    secondary_text: 'Include casual observations in list of your observed species'
+                    secondary_text: 'Include casual observations in the list of your observed species'
                     IconLeft:
                         icon: 'cat'
                     SwitchListItemRight:

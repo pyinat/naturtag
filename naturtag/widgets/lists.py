@@ -7,11 +7,9 @@ from kivymd.uix.list import (
     ILeftBodyTouch,
     IRightBodyTouch,
     MDList,
-    OneLineListItem,
     ThreeLineAvatarIconListItem,
 )
 from kivymd.uix.selectioncontrol import MDSwitch
-from kivymd.uix.textfield import MDTextFieldRound
 
 from naturtag.app import alert, get_app
 from naturtag.models import Taxon
@@ -39,10 +37,6 @@ class SwitchListItemLeft(ILeftBodyTouch, MDSwitch):
 
 class SwitchListItemRight(IRightBodyTouch, MDSwitch):
     """ Switch that works as a list item """
-
-
-class TextInputListItem(OneLineListItem, MDTextFieldRound):
-    """ Text input that works as a list item """
 
 
 class TaxonListItem(ThreeLineAvatarIconListItem):

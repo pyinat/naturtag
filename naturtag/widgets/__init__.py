@@ -24,7 +24,6 @@ from naturtag.widgets.lists import (
     SwitchListItemLeft,
     SwitchListItemRight,
     TaxonListItem,
-    TextInputListItem,
     ThumbnailListItem,
 )
 from naturtag.widgets.menus import (

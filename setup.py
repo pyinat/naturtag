@@ -46,7 +46,7 @@ setup(
         'pillow>=7.0',
         'pyexiv2>=2.3.2',
         'python-dateutil',
-        'pyinaturalist~=0.12.0',
+        'pyinaturalist==0.13.0.dev166',
         'pyyaml',
         'requests',
         'requests-cache',
