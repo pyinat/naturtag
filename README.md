@@ -1,13 +1,16 @@
-# Naturtag: an iNaturalist Image Tagger
+# Naturtag
 [![Build status](https://github.com/JWCook/naturtag/workflows/Build/badge.svg)](https://github.com/JWCook/naturtag/actions)
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/latest/?badge=latest)
 ![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)
 ![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)
 
-A tool to browse and add iNaturalist taxonomy & observation metadata to local observation photos.
-This includes a command-line interface, a graphical interface, and can also be used as a
-python package.
+Naturtag is a tool to browse and add iNaturalist taxonomy & observation metadata to
+local observation photos. This includes a command-line interface, a graphical interface, and
+can also be used as a python package.
+
+See the CLI in action here:
+[![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
 
 # Contents
 
@@ -111,10 +114,13 @@ Usage: naturtag [OPTIONS] [IMAGES]...
 
 Options:
   -c, --common-names      Include common names for all ranks that have them
+  -d, --darwin-core       Generate Darwin Core metadata
+  -f, --flickr-format     Output tags in a Flickr-compatible format
   -h, --hierarchical      Generate pipe-delimited hierarchical keywords
   -o, --observation TEXT  Observation ID or URL
   -t, --taxon TEXT        Taxon ID or URL
   -x, --create-xmp        Create XMP sidecar file if it doesn't already exist
+  -v, --verbose           Show additional information
   --help                  Show this message and exit.
 ```
 

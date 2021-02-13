@@ -163,8 +163,8 @@ def tag(
         print(' '.join(keywords))
     elif not image_paths or verbose:
         rprint('\n'.join([kw.replace('"', '') for kw in keywords]))
-    if verbose and darwin_core and metadata:
-        rprint(metadata)
+        if darwin_core and metadata:
+            rprint(metadata)
 
 
 def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:

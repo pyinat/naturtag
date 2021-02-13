@@ -1,5 +1,3 @@
-import json
-
 # TODO: This screen is pretty ugly. Ideally this would be a collection of DataTables.
 from typing import Any, Dict, List
 
