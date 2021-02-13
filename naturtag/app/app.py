@@ -5,8 +5,6 @@ from logging import getLogger
 from threading import Thread
 
 # Set GL backend before any kivy modules are imported
-from kivy.clock import Clock
-
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 
 # Disable multitouch emulation before any other kivy modules are imported
@@ -14,6 +12,7 @@ from kivy.config import Config
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
+from kivy.clock import Clock
 from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
@@ -276,9 +275,5 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.toolbar.right_action_items[0] = [icon, self.toggle_fullscreen]
 
 
-def main():
-    NaturtagApp().run()
-
-
 if __name__ == '__main__':
-    main()
+    NaturtagApp().run()

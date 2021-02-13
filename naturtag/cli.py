@@ -67,25 +67,33 @@ def tag(
     verbose,
 ):
     """
-    Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
-    metadata.
+    Get taxonomy tags from an iNaturalist observation or taxon, and write them
+    either to the console or to local image metadata.
 
     \b
-    ### Data Sources
-    Either a taxon or observation may be specified, either by ID or URL.
+    ### Species & Observation IDs
+    Either a species or observation may be specified, either by ID or URL.
     For example, all of the following options will fetch the same taxonomy
     metadata:
     ```
-    -t 48978
-    -t https://www.inaturalist.org/taxa/48978-Dirona-picta
-    -o 45524803
-    -o https://www.inaturalist.org/observations/45524803
+    naturtag -t 48978
+    naturtag -t https://www.inaturalist.org/taxa/48978-Dirona-picta
+    naturtag -o 45524803
+    naturtag -o https://www.inaturalist.org/observations/45524803
     ```
 
     \b
-    The difference is that specifying a taxon (`-t`) will fetch only taxonomy
-    metadata, while specifying an observation (`-o`) will fetch taxonomy plus
-    observation metadata.
+    The difference is that specifying a species (`-t, --taxon`) will fetch only
+    taxonomy metadata, while specifying an observation (`-o, --observation`)
+    will fetch taxonomy plus observation metadata.
+
+    \b
+    ### Species Search
+    You may also search for species by name. If there are multiple results, you
+    will be prompted to choose from the top 10 search results:
+    ```
+    naturtag -t 'indigo bunting'
+    ```
 
     \b
     ### Images
