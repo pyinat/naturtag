@@ -89,10 +89,10 @@ def get_keywords(
     if common:
         keywords.extend(get_common_keywords(taxa))
 
-    keywords.append(f'inat:taxon_id={min_tax_id}')
+    keywords.append(f'inaturalist:taxon_id={min_tax_id}')
     keywords.append(f'dwc:taxonID={min_tax_id}')
     if observation_id:
-        keywords.append(f'inat:observation_id={observation_id}')
+        keywords.append(f'inaturalist:observation_id={observation_id}')
         keywords.append(f'dwc:catalogNumber={observation_id}')
 
     logger.info(f'API: {len(keywords)} total keywords generated')

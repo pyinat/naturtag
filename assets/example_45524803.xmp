@@ -80,8 +80,8 @@
      <rdf:li>"Nudipleuran Slugs"</rdf:li>
      <rdf:li>Nudibranchs</rdf:li>
      <rdf:li>"Colorful Dirona"</rdf:li>
-     <rdf:li>inat:taxon_id=48978</rdf:li>
-     <rdf:li>inat:observation_id=45524803</rdf:li>
+     <rdf:li>inaturalist:taxon_id=48978</rdf:li>
+     <rdf:li>inaturalist:observation_id=45524803</rdf:li>
     </rdf:Bag>
    </dc:subject>
   </rdf:Description>

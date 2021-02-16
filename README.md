@@ -38,8 +38,8 @@ See the CLI in action here:
 * [See Also](#see-also)
 
 ## Use Cases
-The purpose of this is to take some of the useful information from your own observations and
-embed it in your local photo collection.
+The purpose of this is to take some of the useful information from your own iNaturalist observations
+and embed it in your local photo collection.
 
 ### Metadata for local photo organization
 If you like the way you can search and filter your observations on iNaturalist.org and its mobile
@@ -214,7 +214,7 @@ Gastropods
 "Nudipleuran Slugs"
 Nudibranchs
 "Colorful Dirona"
-inat:taxon_id=48978
+inaturalist:taxon_id=48978
 ```
 
 Generate both keywords and DarwinCore metadata for an observation, and write to
@@ -237,8 +237,12 @@ No existing XMP sidecar file found for img00002.jpg; skipping
 This project also includes a graphical frontend, although it's very early in development.
 
 ## GUI Installation
-OS-specific builds will be coming soon, but for now running it requires a local python development
-environment. To install:
+My goal is to get this packaged into more convenient platform-specific builds
+(a `.exe` build for Windows, for example), but for now it can take a bit of work to get the GUI
+up and running. If you are interested in trying this out and you run into issues, please let me
+know and I can help.
+
+To install:
 ```
 pip install naturtag[ui]
 ```

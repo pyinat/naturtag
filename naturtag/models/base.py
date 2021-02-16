@@ -16,7 +16,7 @@ class BaseModel:
 
     @classmethod
     def from_dict(cls, json: Dict, partial=False):
-        """ Create a new model object from all or part of an API response """
+        """Create a new model object from either a full or partial API response object"""
         # Strip out Nones so we use our default factories instead (e.g. for empty lists)
         if not json:
             return cls()
