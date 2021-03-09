@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from naturtag.models import BaseModel, Taxon, User, aliased_kwarg, kwarg, timestamp
+from naturtag.models import BaseModel, ModelCollection, Taxon, User, aliased_kwarg, kwarg, timestamp
 
 
 @attr.s
@@ -27,7 +27,13 @@ class Identification(BaseModel):
     flags: List = attr.ib(factory=list)
     moderator_actions: List = attr.ib(factory=list)
     # observation: {}  # TODO: If this is needed, need to lazy load it
-    taxon: Taxon = attr.ib(converter=Taxon.from_dict, default=None)
-    user: User = attr.ib(converter=User.from_dict, default=None)
+    taxon: Taxon = attr.ib(converter=Taxon.from_json, default=None)
+    user: User = attr.ib(converter=User.from_json, default=None)
 
     # created_at_details: {}
+
+
+class Identifications(ModelCollection):
+    """A collection of identification records"""
+
+    model_cls = Identification

@@ -47,7 +47,7 @@ class TaxonViewController(Controller):
         if not any([taxon_obj, taxon_dict, id]):
             return
         if not taxon_obj:
-            taxon_obj = Taxon.from_dict(taxon_dict) if taxon_dict else Taxon.from_id(int(id))
+            taxon_obj = Taxon.from_json(taxon_dict) if taxon_dict else Taxon.from_id(int(id))
         # Don't need to do anything if this taxon is already selected
         if self.selected_taxon is not None and taxon_obj.id == self.selected_taxon.id:
             return

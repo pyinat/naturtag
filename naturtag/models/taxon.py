@@ -1,15 +1,15 @@
 import attr
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from pyinaturalist.node_api import get_taxa_by_id
 
 from naturtag.constants import ATLAS_APP_ICONS, ICONISH_TAXA, TAXON_BASE_URL
 from naturtag.inat_metadata import get_rank_idx
-from naturtag.models import BaseModel, Photo, kwarg
+from naturtag.models import BaseModel, ModelCollection, Photo, kwarg
 
 
 def convert_taxon_photos(taxon_photos):
-    return [Photo.from_dict(t['photo']) for t in taxon_photos]
+    return [Photo.from_json(t['photo']) for t in taxon_photos]
 
 
 @attr.s
@@ -48,7 +48,7 @@ class Taxon(BaseModel):
     children: List[Dict] = attr.ib(factory=list)
     conservation_statuses: List[str] = attr.ib(factory=list)
     current_synonymous_taxon_ids: List[int] = attr.ib(factory=list)
-    default_photo: Photo = attr.ib(converter=Photo.from_dict, default=None)
+    default_photo: Photo = attr.ib(converter=Photo.from_json, default=None)
     flag_counts: Dict = attr.ib(factory=dict)
     listed_taxa: List = attr.ib(factory=list)
     photos: List[Photo] = attr.ib(init=False, default=None)
@@ -66,7 +66,7 @@ class Taxon(BaseModel):
     def from_id(cls, id: int):
         """ Lookup and create a new Taxon object from an ID """
         r = get_taxa_by_id(id)
-        return cls.from_dict(r['results'][0])
+        return cls.from_json(r['results'][0])
 
     def update_from_full_record(self):
         t = Taxon.from_id(self.id)
@@ -91,7 +91,7 @@ class Taxon(BaseModel):
         if self._parent_taxa is None:
             if not self.ancestors:
                 self.update_from_full_record()
-            self._parent_taxa = [Taxon.from_dict(t, partial=True) for t in self.ancestors]
+            self._parent_taxa = [Taxon.from_json(t, partial=True) for t in self.ancestors]
         return self._parent_taxa
 
     @property
@@ -123,7 +123,13 @@ class Taxon(BaseModel):
         return [taxon.id for taxon in self.child_taxa]
 
 
-def get_icon_path(taxon_id: int) -> Optional[str]:
+class Taxa(ModelCollection):
+    """A collection of taxon records"""
+
+    model_cls = Taxon
+
+
+def get_icon_path(taxon_id: int) -> str:
     """ An iconic function to return an icon for an iconic taxon """
     if taxon_id not in ICONISH_TAXA:
         taxon_id = 0
