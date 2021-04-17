@@ -2,7 +2,7 @@ Naturtag: an iNaturalist Image Tagger
 =====================================
 
 This is the python package documentation for `naturtag <https://github.com/JWCook/naturtag>`_.
-For general usage information see the `README <https://github.com/JWCook/naturtag/blob/master/README.md>`_.
+For general usage information see the `README <https://github.com/JWCook/naturtag/blob/main/README.md>`_.
 
 .. toctree::
    :maxdepth: 2
