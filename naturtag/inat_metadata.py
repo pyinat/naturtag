@@ -33,8 +33,8 @@ from naturtag.validation import format_file_size
 # Patch requests to use CachedSession for pyinaturalist API calls
 makedirs(dirname(CACHE_PATH), exist_ok=True)
 requests_cache.install_cache(
+    CACHE_PATH,
     backend=CACHE_BACKEND,
-    cache_name=CACHE_PATH,
     expire_after=timedelta(hours=API_CACHE_EXPIRY_HOURS),
 )
 logger = getLogger().getChild(__name__)

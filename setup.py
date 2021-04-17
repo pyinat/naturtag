@@ -49,7 +49,7 @@ setup(
         'pyinaturalist==0.13.0.dev207',
         'pyyaml',
         'requests',
-        'requests-cache',
+        'requests-cache~=0.6.2',
         'rich',
         'xmltodict',
     ],
