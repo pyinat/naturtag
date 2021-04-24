@@ -48,7 +48,7 @@ def _strip_url_or_name(ctx, param, value):
     '-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords'
 )
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
-@click.option('-t', '--taxon', help='Taxon ID or URL', callback=_strip_url_or_name)
+@click.option('-t', '--taxon', help='Taxon name, ID, or URL', callback=_strip_url_or_name)
 @click.option(
     '-x', '--create-xmp', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
 )
