@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 from naturtag import __version__
 
 extras_require = {  # noqa
-    'app': ['kivy>=1.11', 'kivymd~=0.104.1', 'kivy-garden.contextmenu', 'pygments'],
+    'app': ['kivy>=2.0.0', 'kivymd~=0.104.1', 'kivy-garden.contextmenu'],
     'build': ['coveralls', 'twine', 'wheel'],
     'dev': [
         'black==20.8b1',
@@ -23,16 +23,7 @@ extras_require = {  # noqa
     ],
 }
 extras_require['all'] = list(chain.from_iterable(extras_require.values()))
-extras_require['app-win'] = [
-    'pypiwin32',
-    'kivy_deps.sdl2',
-    'kivy_deps.gstreamer',
-    'kivy_deps.angle',
-]
-extras_require['all-win'] = extras_require['all'] + extras_require['app-win']
 
-# To install kivy dev version on python 3.8:
-# pip install kivy[base] kivy_examples --pre --extra-index-url https://kivy.org/downloads/simple/
 
 setup(
     name='naturtag',
@@ -46,7 +37,7 @@ setup(
         'pillow>=7.0',
         'pyexiv2>=2.4.0',
         'python-dateutil',
-        'pyinaturalist==0.13.0.dev207',
+        'pyinaturalist==0.13.0.dev235',
         'pyyaml',
         'requests',
         'requests-cache~=0.6.2',
