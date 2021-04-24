@@ -40,9 +40,9 @@ class KeywordMetadata:
         keywords = [
             self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS
         ]
-        keywords = set(chain.from_iterable(keywords))
-        logger.info(f'{len(keywords)} unique keywords found')
-        return [k.replace('"', '') for k in keywords]
+        unique_keywords = set(chain.from_iterable(keywords))
+        logger.info(f'{len(unique_keywords)} unique keywords found')
+        return [k.replace('"', '') for k in unique_keywords]
 
     @staticmethod
     def _get_keyword_list(metadata: Dict[str, Any], tag: str) -> List[str]:

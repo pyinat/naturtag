@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from os.path import dirname, join
-from typing import Optional, Tuple
+from pathlib import Path
+from typing import IO, Dict, Iterable, Optional, Tuple, Union
 
 from appdirs import user_data_dir
 from pyinaturalist import DEFAULT_USER_AGENT
@@ -163,6 +164,7 @@ COMMON_NAME_IGNORE_TERMS = [
 ]
 
 # Type aliases
+Coordinates = Optional[Tuple[float, float]]
+JSON = Union[Dict, IO, Iterable[Dict], Path, str]
 IntTuple = Tuple[Optional[int], Optional[int]]
 StrTuple = Tuple[Optional[str], Optional[str]]
-Coordinates = Optional[Tuple[float, float]]

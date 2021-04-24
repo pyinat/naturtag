@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from naturtag.constants import CC_LICENSES, PHOTO_BASE_URL, PHOTO_INFO_BASE_URL, PHOTO_SIZES
-from naturtag.models import BaseModel, kwarg
+from naturtag.models import BaseModel, ModelCollection, kwarg
 from naturtag.validation import format_const, format_dimensions
 
 
@@ -14,7 +14,7 @@ class Photo(BaseModel):
     attribution: str = kwarg
     flags: List = attr.ib(factory=list)
     license_code: str = attr.ib(converter=format_const, default=None)  # Enum
-    original_dimensions: Tuple[int, int] = attr.ib(converter=format_dimensions, factory=dict)
+    original_dimensions: Tuple[int, int] = attr.ib(converter=format_dimensions, default=(0, 0))
 
     # URLs
     large_url: str = kwarg
@@ -31,6 +31,7 @@ class Photo(BaseModel):
         if not has_url:
             return
 
+        # TODO: there are multiple possible base URLs
         # Get a URL format string to get different photo sizes
         path = Path(self.url.rsplit('?', 1)[0])
         _url_format = f'{PHOTO_BASE_URL}/{self.id}/{{size}}{path.suffix}'
@@ -47,3 +48,9 @@ class Photo(BaseModel):
     def has_cc_license(self) -> bool:
         """Determine if this photo has a Creative Commons license"""
         return self.license_code in CC_LICENSES
+
+
+class Photos(ModelCollection):
+    """A collection of photos"""
+
+    model_cls = Photo

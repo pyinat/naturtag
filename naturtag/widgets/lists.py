@@ -54,7 +54,7 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
         if isinstance(taxon, int):
             taxon = Taxon.from_id(taxon)
         elif isinstance(taxon, dict):
-            taxon = Taxon.from_dict(taxon)
+            taxon = Taxon.from_json(taxon)
         self.taxon = taxon
 
         # Set click event unless disabled

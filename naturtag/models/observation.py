@@ -6,10 +6,22 @@ from uuid import UUID
 from pyinaturalist.node_api import get_observation
 
 from naturtag.constants import Coordinates
-from naturtag.models import BaseModel, Identification, Photo, Taxon, User, kwarg, timestamp
+from naturtag.models import (
+    BaseModel,
+    Identification,
+    Identifications,
+    ModelCollection,
+    Photo,
+    Photos,
+    Taxa,
+    Taxon,
+    User,
+    kwarg,
+    timestamp,
+)
 from naturtag.validation import convert_coord_pair
 
-coordinate_pair = attr.ib(converter=convert_coord_pair, default=None)
+coordinate_pair: Coordinates = attr.ib(converter=convert_coord_pair, default=None)
 
 
 @attr.s
@@ -61,12 +73,12 @@ class Observation(BaseModel):
     comments: List = attr.ib(factory=list)  # TODO: make separate model + condensed format
     faves: List = attr.ib(factory=list)
     flags: List = attr.ib(factory=list)
-    identifications: List[Identification] = attr.ib(
-        converter=Identification.from_dict_list, factory=list
+    identifications: ModelCollection[Identification] = attr.ib(
+        converter=Identifications.from_json, factory=list
     )
     ofvs: List = attr.ib(factory=list)
     outlinks: List = attr.ib(factory=list)
-    photos: List[Photo] = attr.ib(converter=Photo.from_dict_list, factory=list)
+    photos: ModelCollection[Photo] = attr.ib(converter=Photos.from_json, factory=list)
     place_ids: List = attr.ib(factory=list)
     preferences: Dict = attr.ib(factory=dict)
     project_ids: List = attr.ib(factory=list)
@@ -77,11 +89,11 @@ class Observation(BaseModel):
     reviewed_by: List = attr.ib(factory=list)
     sounds: List = attr.ib(factory=list)
     tags: List = attr.ib(factory=list)
-    taxon: Taxon = attr.ib(converter=Taxon.from_dict, default=None)
-    user: User = attr.ib(converter=User.from_dict, default=None)
+    taxon: Taxon = attr.ib(converter=Taxon.from_json, default=None)
+    user: User = attr.ib(converter=User.from_json, default=None)
     votes: List = attr.ib(factory=list)
 
-    # Additional response fields that are used by the web UI but are redundant here
+    # Additional response fields that are redundant here; just left here for reference
     # created_at_details: Dict = attr.ib(factory=dict)
     # created_time_zone: str = kwarg
     # geojson: Dict = attr.ib(factory=dict)
@@ -97,10 +109,60 @@ class Observation(BaseModel):
     def from_id(cls, id: int):
         """ Lookup and create a new Observation object from an ID """
         json = get_observation(id)
-        return cls.from_dict(json)
+        return cls.from_json(json)
 
     @property
     def thumbnail_url(self) -> Optional[str]:
         if not self.photos:
             return None
         return self.photos[0].thumbnail_url
+
+    # TODO: Return simplified dict
+    # def simplify(self) -> Dict:
+    #     pass
+
+    # TODO
+    # def __str__(self) -> str:
+    #     pass
+
+
+class Observations(ModelCollection):
+    """A collection of observation records"""
+
+    model_cls = Observation
+
+    # @classmethod
+    # def from_csv(cls, path):
+    #     """Load from a CSV export"""
+    #     pass
+
+    @property
+    def identifiers(self) -> List[User]:
+        """Get all unique identifiers"""
+        unique_users = {
+            ident.user.id: ident.user for obs in self.data for ident in obs.identifications
+        }
+        return list(unique_users.values())
+
+    @property
+    def taxa(self) -> Taxa:
+        """Get all unique taxa"""
+        unique_taxa = {obs.taxon.id: obs.taxon for obs in self.data}
+        return Taxa(unique_taxa.values())
+
+    @property
+    def thumbnail_urls(self) -> List[str]:
+        """Get thumbnails for all observation default photos"""
+        return [obs.thumbnail_url for obs in self.data if obs.thumbnail_url]
+
+    @property
+    def users(self) -> List[User]:
+        """Get all unique observers"""
+        unique_users = {obs.user.id: obs.user for obs in self.data}
+        return list(unique_users.values())
+
+    # def to_dataframe(self):
+    #     pass
+
+    # def to_csv(self, filename=None):
+    #     pass
