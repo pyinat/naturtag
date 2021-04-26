@@ -15,7 +15,7 @@ def convert_coord_pair(value: str) -> Coordinates:
 
 
 def convert_float(value: Any) -> Optional[float]:
-    """ Convert a value to a float, if valid; return ``None`` otherwise """
+    """Convert a value to a float, if valid; return ``None`` otherwise"""
     try:
         return float(value)
     except (TypeError, ValueError):

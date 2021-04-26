@@ -75,5 +75,5 @@ def get_images_from_paths(paths: Union[str, List[str]], recursive: bool = False)
 
 
 def is_image_path(path: str) -> bool:
-    """ Determine if a path points to a valid image of a supported type """
+    """Determine if a path points to a valid image of a supported type"""
     return isfile(path) and any(fnmatch(path.lower(), pattern) for pattern in IMAGE_FILETYPES)

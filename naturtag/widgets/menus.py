@@ -12,7 +12,7 @@ class ObjectContextMenu(ContextMenu):
 
 
 class AutoHideMenuItem(ButtonBehavior, ContextMenuText, AbstractMenuItemHoverable):
-    """ Menu item that hides its parent menu after selecting """
+    """Menu item that hides its parent menu after selecting"""
 
     def on_release(self, *args):
         super().on_release()

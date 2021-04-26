@@ -107,7 +107,7 @@ class Observation(BaseModel):
 
     @classmethod
     def from_id(cls, id: int):
-        """ Lookup and create a new Observation object from an ID """
+        """Lookup and create a new Observation object from an ID"""
         json = get_observation(id)
         return cls.from_json(json)
 

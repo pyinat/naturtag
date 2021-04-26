@@ -15,7 +15,7 @@ logger = getLogger().getChild(__name__)
 
 # TODO: Better name for this? Maybe 'TaxonQuickAccessController'?
 class TaxonSelectionController(Controller):
-    """ Controller class to manage selecting stored taxa """
+    """Controller class to manage selecting stored taxa"""
 
     def __init__(self, screen):
         super().__init__(screen)
@@ -111,7 +111,7 @@ class TaxonSelectionController(Controller):
         loader.start_thread()
 
     def update_history(self, taxon_id: int):
-        """ Update history + frequency """
+        """Update history + frequency"""
         self.taxon_history_ids.append(taxon_id)
 
         # If item already exists in history, move it from its previous position to the top
@@ -131,7 +131,7 @@ class TaxonSelectionController(Controller):
         self.frequent_taxa_list.sort()
 
     def add_star(self, taxon_id: int):
-        """ Add a taxon to Starred list """
+        """Add a taxon to Starred list"""
         logger.info(f'Adding taxon to starred: {taxon_id}')
         if taxon_id not in self.starred_taxa_ids:
             self.starred_taxa_ids.append(taxon_id)
@@ -141,7 +141,7 @@ class TaxonSelectionController(Controller):
         self.bind_star(item)
 
     def bind_star(self, item: TaxonListItem):
-        """ Bind click events on a starred taxon list item, including an X (remove) button """
+        """Bind click events on a starred taxon list item, including an X (remove) button"""
         item.bind(on_touch_down=self.on_starred_taxon_click)
         remove_button = StarButton(item.taxon.id, icon='close')
         remove_button.bind(on_release=lambda x: self.remove_star(x.taxon_id))
@@ -150,7 +150,7 @@ class TaxonSelectionController(Controller):
 
     # TODO: Also remove star from info section if this taxon happens to be currently selected
     def remove_star(self, taxon_id: int):
-        """ Remove a taxon from Starred list """
+        """Remove a taxon from Starred list"""
         logger.info(f'Removing taxon from starred: {taxon_id}')
         if taxon_id in self.starred_taxa_map:
             item = self.starred_taxa_map.pop(taxon_id)
@@ -158,11 +158,11 @@ class TaxonSelectionController(Controller):
             self.starred_taxa_list.remove_widget(item)
 
     def is_starred(self, taxon_id: int) -> bool:
-        """ Check if the specified taxon is in the Starred list """
+        """Check if the specified taxon is in the Starred list"""
         return taxon_id in self.starred_taxa_map
 
     def on_starred_taxon_click(self, instance, touch):
-        """ Event handler for clicking a item from starred taxa list """
+        """Event handler for clicking a item from starred taxa list"""
         if not instance.collide_point(*touch.pos):
             return
         # Right-click: Open context menu
@@ -178,7 +178,7 @@ class TaxonSelectionController(Controller):
             get_app().select_taxon(instance.taxon)
 
     def move_starred_to_top(self, instance):
-        """ Move a starred taxon to the top of the list, both in the UI and in persisted list """
+        """Move a starred taxon to the top of the list, both in the UI and in persisted list"""
         lst = self.starred_taxa_ids
         lst.append(lst.pop(lst.index(instance.taxon_id)))
         item = self.starred_taxa_map[instance.taxon_id]

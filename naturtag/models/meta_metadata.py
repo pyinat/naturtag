@@ -12,7 +12,7 @@ logger = getLogger().getChild(__name__)
 # TODO: Extract GPS info
 # TODO: __str__
 class MetaMetadata(ImageMetadata):
-    """ Class for parsing & organizing higher-level info derived from raw image metadata """
+    """Class for parsing & organizing higher-level info derived from raw image metadata"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,7 +25,7 @@ class MetaMetadata(ImageMetadata):
         self._update_derived_properties()
 
     def _update_derived_properties(self):
-        """ Reset/ update all secondary properties derived from base metadata formats """
+        """Reset/ update all secondary properties derived from base metadata formats"""
         self._inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
@@ -42,7 +42,7 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def inaturalist_ids(self) -> IntTuple:
-        """ Get taxon and/or observation IDs from metadata if available """
+        """Get taxon and/or observation IDs from metadata if available"""
         if self._inaturalist_ids is None:
             self._inaturalist_ids = get_inaturalist_ids(self.simplified)
         return self._inaturalist_ids
@@ -57,7 +57,7 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def min_rank(self) -> StrTuple:
-        """ Get the lowest (most specific) taxonomic rank from tags, if any """
+        """Get the lowest (most specific) taxonomic rank from tags, if any"""
         if self._min_rank is None:
             self._min_rank = get_min_rank(self.simplified)
         return self._min_rank
@@ -79,7 +79,7 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def summary(self) -> str:
-        """ Get a condensed summary of available metadata """
+        """Get a condensed summary of available metadata"""
         if self._summary is None:
             meta_types = {
                 'EXIF': bool(self.exif),
@@ -104,7 +104,7 @@ class MetaMetadata(ImageMetadata):
         return self._summary
 
     def update(self, new_metadata):
-        """ Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties """
+        """Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties"""
         super().update(new_metadata)
         self._update_derived_properties()
 

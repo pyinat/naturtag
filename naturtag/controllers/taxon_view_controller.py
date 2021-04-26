@@ -14,7 +14,7 @@ logger = getLogger().getChild(__name__)
 
 
 class TaxonViewController(Controller):
-    """ Controller class to manage displaying info about a selected taxon """
+    """Controller class to manage displaying info about a selected taxon"""
 
     def __init__(self, screen):
         super().__init__(screen)
@@ -40,7 +40,7 @@ class TaxonViewController(Controller):
         id: int = None,
         if_empty: bool = False,
     ):
-        """ Update taxon info display by either object, ID, partial record, or complete record """
+        """Update taxon info display by either object, ID, partial record, or complete record"""
         # Initialize from object, dict, or ID
         if if_empty and self.selected_taxon is not None:
             return
@@ -69,7 +69,7 @@ class TaxonViewController(Controller):
         )
 
     async def load_photo_section(self):
-        """ Load taxon photo + links """
+        """Load taxon photo + links"""
         logger.info('Taxon: Loading photo section')
         if self.selected_taxon.default_photo.medium_url:
             self.taxon_photo.source = self.selected_taxon.default_photo.medium_url
@@ -89,7 +89,7 @@ class TaxonViewController(Controller):
             self.taxon_parent_button.tooltip_text = ''
 
     async def load_basic_info_section(self):
-        """ Load basic info for the currently selected taxon """
+        """Load basic info for the currently selected taxon"""
         # Name, rank
         logger.info('Taxon: Loading basic info section')
         item = ThreeLineAvatarIconListItem(
@@ -120,7 +120,7 @@ class TaxonViewController(Controller):
             self.basic_info.add_widget(item)
 
     async def load_taxonomy(self):
-        """ Populate ancestors and children for the currently selected taxon """
+        """Populate ancestors and children for the currently selected taxon"""
         total_taxa = len(self.selected_taxon.parent_taxa) + len(self.selected_taxon.child_taxa)
 
         # Set up batch loader + event bindings
@@ -143,7 +143,7 @@ class TaxonViewController(Controller):
         self.loader.start_thread()
 
     def on_star(self, button):
-        """ Either add or remove a taxon from the starred list """
+        """Either add or remove a taxon from the starred list"""
         if button.is_selected:
             get_app().add_star(self.selected_taxon.id)
         else:

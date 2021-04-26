@@ -3,7 +3,7 @@ from kivymd.uix.menu import MDDropdownMenu
 
 
 class DropdownTextField(MDDropdownMenu):
-    """ A dropdown menu class that includes basic interaction with a text input field """
+    """A dropdown menu class that includes basic interaction with a text input field"""
 
     def __init__(self, *args, text_input=None, text_items=None, add_none_item=True, **kwargs):
         """
@@ -28,7 +28,7 @@ class DropdownTextField(MDDropdownMenu):
         super().__init__(*args, **kwargs)
 
     def open_on_focus(self, instance, *args):
-        """ Open the dropdown if the given instance has focus """
+        """Open the dropdown if the given instance has focus"""
         # Setting the text input before losing focus coerces the 'hint text' to behave as expected
         self.text_input.text = self.text_input.text or '  '
         if instance.focus:
@@ -41,7 +41,7 @@ class DropdownTextField(MDDropdownMenu):
             self.text_input.text = ''
 
     def on_select(self, dropdown_item):
-        """ On clicking a dropdown item, populate the text field's text """
+        """On clicking a dropdown item, populate the text field's text"""
         # Selecting the 'None' item removes any previous selection
         self.text_input.text = dropdown_item.text.replace('None', '')
         self.dismiss()

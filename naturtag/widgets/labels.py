@@ -20,7 +20,7 @@ class HideableTooltip(MDTooltip):
 
 
 class TooltipLabel(MDLabel, MDTooltip):
-    """ Label class with tooltip behavior """
+    """Label class with tooltip behavior"""
 
     # Bug workaround; a fix has been committed, but not released
     padding = ListProperty([0, 0, 0, 0])

@@ -12,7 +12,7 @@ logger = getLogger().getChild(__name__)
 
 
 class TaxonSearchController(Controller):
-    """ Controller class to manage taxon search """
+    """Controller class to manage taxon search"""
 
     def __init__(self, screen):
         super().__init__(screen)
@@ -56,7 +56,7 @@ class TaxonSearchController(Controller):
         return [t for t in self.iconic_taxa_filters.children if t.is_selected]
 
     def search(self, *args):
-        """ Run a search with the currently selected search parameters """
+        """Run a search with the currently selected search parameters"""
         asyncio.run(self._search())
 
     # TODO: Paginated results
@@ -73,7 +73,7 @@ class TaxonSearchController(Controller):
         await self.update_search_results(results)
 
     def get_search_parameters(self):
-        """ Get API-compatible search parameters from the input widgets """
+        """Get API-compatible search parameters from the input widgets"""
         params = {
             'q': self.taxon_search_input.text_input.text.strip(),
             'taxon_id': [t.taxon_id for t in self.selected_iconic_taxa],
@@ -87,7 +87,7 @@ class TaxonSearchController(Controller):
         return {k: v for k, v in params.items() if v}
 
     async def update_search_results(self, results):
-        """ Add taxon info from response to search results tab """
+        """Add taxon info from response to search results tab"""
         loader = TaxonBatchLoader()
         self.start_progress(len(results), loader)
         self.search_results_list.clear_widgets()
@@ -109,16 +109,16 @@ class TaxonSearchController(Controller):
 
     @staticmethod
     def on_select_iconic_taxon(button):
-        """ Handle clicking an iconic taxon; don't re-select the taxon if we're de-selecting it """
+        """Handle clicking an iconic taxon; don't re-select the taxon if we're de-selecting it"""
         if not button.is_selected:  # Note: this is the state *after* the click event
             get_app().select_taxon(id=button.taxon_id)
 
     @staticmethod
     def on_selection(instance, metadata: dict):
-        """ Handle clicking a taxon search result from the autocomplete dropdown """
+        """Handle clicking a taxon search result from the autocomplete dropdown"""
         get_app().select_taxon(taxon_dict=metadata)
 
     @staticmethod
     def on_taxon_id(text_input):
-        """ Handle entering a taxon ID and pressing Enter """
+        """Handle entering a taxon ID and pressing Enter"""
         get_app().select_taxon(id=int(text_input.text))

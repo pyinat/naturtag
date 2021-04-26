@@ -89,7 +89,7 @@ class ControllerProxy:
         self.taxon_selection_controller.post_init()
 
     def get_taxon_list_item(self, *args, **kwargs):
-        """ Get a new :py:class:`.TaxonListItem with event binding """
+        """Get a new :py:class:`.TaxonListItem with event binding"""
         item = TaxonListItem(*args, **kwargs)
         self.bind_to_select_taxon(item)
         return item
@@ -183,12 +183,12 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.close_nav()
 
     def on_request_close(self, *args):
-        """ Save any unsaved settings before exiting """
+        """Save any unsaved settings before exiting"""
         self.settings_controller.save_settings()
         self.stop()
 
     def on_keyboard(self, window, key, scancode, codepoint, modifier):
-        """ Handle keyboard shortcuts """
+        """Handle keyboard shortcuts"""
         if (modifier, key) == (['ctrl'], BACKSPACE):
             self.home()
         elif (modifier, key) == (['ctrl'], ENTER):
@@ -212,14 +212,14 @@ class NaturtagApp(MDApp, ControllerProxy):
 
     # TODO: current_screen_*() may be better organized as controller methods (inherited/overridden as needed)
     def current_screen_action(self):
-        """ Run the current screen's main action """
+        """Run the current screen's main action"""
         if self.screen_manager.current == HOME_SCREEN:
             self.image_selection_controller.run()
         elif self.screen_manager.current == 'taxon':
             self.taxon_search_controller.search()
 
     def current_screen_clear(self):
-        """ Clear the settings on the current screen, if applicable """
+        """Clear the settings on the current screen, if applicable"""
         if self.screen_manager.current == HOME_SCREEN:
             self.image_selection_controller.clear()
         elif self.screen_manager.current == 'taxon':
@@ -247,7 +247,7 @@ class NaturtagApp(MDApp, ControllerProxy):
         #         self.image_selection_controller.inputs.taxon_id_input.text = str(taxon_id)
 
     def update_toolbar(self, screen_name: str):
-        """ Modify toolbar in-place so it can be shared by all screens """
+        """Modify toolbar in-place so it can be shared by all screens"""
         self.toolbar.title = screen_name.title().replace('_', ' ')
         if screen_name == HOME_SCREEN:
             self.toolbar.left_action_items = [['menu', self.open_nav]]
@@ -259,13 +259,13 @@ class NaturtagApp(MDApp, ControllerProxy):
         ]
 
     def set_theme_mode(self, switch=None, is_active: bool = None):
-        """ Set light or dark themes, based on either toggle switch or settings """
+        """Set light or dark themes, based on either toggle switch or settings"""
         if is_active is None:
             is_active = self.settings_controller.display['dark_mode']
         self.theme_cls.theme_style = 'Dark' if is_active else 'Light'
 
     def toggle_fullscreen(self, *args):
-        """ Enable or disable fullscreen, and change icon"""
+        """Enable or disable fullscreen, and change icon"""
         if Window.fullscreen:
             Window.fullscreen = 0
             icon = 'fullscreen'

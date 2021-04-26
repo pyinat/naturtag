@@ -19,7 +19,7 @@ SELECTED_COLOR = (0.2, 0.6, 0.6, 0.4)
 
 
 class CachedAsyncImage(AsyncImage):
-    """ AsyncImage which, once loaded, caches the image for future use """
+    """AsyncImage which, once loaded, caches the image for future use"""
 
     def __init__(self, thumbnail_size: str = 'large', **kwargs):
         """
@@ -31,7 +31,7 @@ class CachedAsyncImage(AsyncImage):
         super().__init__(**kwargs)
 
     def _load_source(self, *args):
-        """ Before downloading remote image, first check for existing thumbnail """
+        """Before downloading remote image, first check for existing thumbnail"""
         # Differentiating between None and '' here to handle on_load being triggered multiple times
         if self.thumbnail_path is None:
             self.thumbnail_path = get_thumbnail_if_exists(self.source) or ''
@@ -41,7 +41,7 @@ class CachedAsyncImage(AsyncImage):
         super()._load_source(*args)
 
     def on_load(self, *args):
-        """ After loading, cache the downloaded image for future use, if not previously done """
+        """After loading, cache the downloaded image for future use, if not previously done"""
         if not get_thumbnail_if_exists(self.source):
             cache_async_thumbnail(self, size=self.thumbnail_size)
 
@@ -61,7 +61,7 @@ class CachedAsyncImage(AsyncImage):
 
 
 class IconicTaxaIcon(SmartTile):
-    """ Icon for an iconic taxon """
+    """Icon for an iconic taxon"""
 
     is_selected = BooleanProperty()
 
@@ -85,7 +85,7 @@ class IconicTaxaIcon(SmartTile):
 
 
 class ImageMetaTile(SmartTileWithLabel):
-    """ Class that contains an image thumbnail to display plus its associated metadata """
+    """Class that contains an image thumbnail to display plus its associated metadata"""
 
     metadata = ObjectProperty()
 
@@ -99,12 +99,12 @@ class ImageMetaTile(SmartTileWithLabel):
         alert('Tags copied to clipboard')
 
     def on_metadata(self, *args):
-        """ Triggered whenever metadata changes """
+        """Triggered whenever metadata changes"""
         self.text = self.metadata.summary
         self.set_box_color()
 
     def set_box_color(self):
-        """ Set the color of the image overlay box based on its metadata """
+        """Set the color of the image overlay box based on its metadata"""
 
         def set_alpha(rgba, alpha):
             return rgba[:3] + [alpha]

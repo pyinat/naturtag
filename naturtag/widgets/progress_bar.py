@@ -9,7 +9,7 @@ logger = getLogger().getChild(__name__)
 
 
 class LoaderProgressBar(MDProgressBar):
-    """ A progress bar with some extra features to sync with a BatchLoader """
+    """A progress bar with some extra features to sync with a BatchLoader"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -18,7 +18,7 @@ class LoaderProgressBar(MDProgressBar):
         self.loader = None
 
     def start(self, max=100, loader=None):
-        """ (Re)start the progress bar, and bind a BatchLoader's progress update events to it """
+        """(Re)start the progress bar, and bind a BatchLoader's progress update events to it"""
         self.cancel()
         self.value = 0
         self.max = max
@@ -31,11 +31,11 @@ class LoaderProgressBar(MDProgressBar):
             self.loader.bind(on_complete=self.finish)
 
     def update(self, obj, value):
-        """ Update progress value (for simpler event binding/unbinding) """
+        """Update progress value (for simpler event binding/unbinding)"""
         self.value = value
 
     def cancel(self):
-        """ Cancel any currently running animation and unbind loader events """
+        """Cancel any currently running animation and unbind loader events"""
         logger.debug(f'Progress canceled at {self.value}/{self.max}')
         if self.loader:
             self.loader.unbind(on_progress=self.update)
@@ -45,7 +45,7 @@ class LoaderProgressBar(MDProgressBar):
             self.event = None
 
     def finish(self, *args):
-        """ Finish the progress by changing color w/ animation and unbinding events """
+        """Finish the progress by changing color w/ animation and unbinding events"""
         self.cancel()
         self.value = self.max
         self.color = FINISHED_COLOR

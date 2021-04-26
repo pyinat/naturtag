@@ -24,7 +24,7 @@ logger = getLogger(__name__)
 
 # TODO: Track whether state changed since last write; if not, don't write on close
 class SettingsController(Controller):
-    """ Controller class to manage Settings screen, and reading from and writing to settings file """
+    """Controller class to manage Settings screen, and reading from and writing to settings file"""
 
     def __init__(self, settings_screen):
         self.screen = settings_screen
@@ -49,7 +49,7 @@ class SettingsController(Controller):
         self.update_control_widgets()
 
     def add_control_widget(self, widget: Widget, setting_name: str, section: str):
-        """ Add a control widget from another screen, so its state will be stored with app settings """
+        """Add a control widget from another screen, so its state will be stored with app settings"""
         self.controls[setting_name] = widget
         value = self.settings_dict.get(section, {}).get(setting_name)
         self.set_control_value(setting_name, value)
@@ -72,14 +72,14 @@ class SettingsController(Controller):
         )
 
     def update_control_widgets(self):
-        """ Update state of settings controls in UI with values from settings file """
+        """Update state of settings controls in UI with values from settings file"""
         logger.info(f'Settings: Loading settings: {self.settings_dict}')
         for k, section in self.settings_dict.items():
             for setting_name, value in section.items():
                 self.set_control_value(setting_name, value)
 
     def save_settings(self):
-        """ Save the current state of the control widgets to settings file """
+        """Save the current state of the control widgets to settings file"""
         logger.info(f'Settings: Saving settings: {self.settings_dict}')
         for k, section in self.settings_dict.items():
             for setting_name in section.keys():
@@ -91,18 +91,18 @@ class SettingsController(Controller):
         write_stored_taxa(self._stored_taxa)
 
     def get_control_value(self, setting_name):
-        """ Get the value of the control widget corresponding to a setting """
+        """Get the value of the control widget corresponding to a setting"""
         control_widget, property, _ = self.get_control_widget(setting_name)
         return getattr(control_widget, property) if control_widget else None
 
     def set_control_value(self, setting_name, value):
-        """ Set the value of the control widget corresponding to a setting """
+        """Set the value of the control widget corresponding to a setting"""
         control_widget, property, setting_type = self.get_control_widget(setting_name)
         if control_widget:
             setattr(control_widget, property, setting_type(value))
 
     def get_control_widget(self, setting_name):
-        """  Find the widget corresponding to a setting and detect its type (bool, str, int) """
+        """Find the widget corresponding to a setting and detect its type (bool, str, int)"""
         # The setting (from file) may not have a corresponding widget on the Settings screen
         if setting_name not in self.controls:
             return None, None, None

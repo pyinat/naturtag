@@ -64,7 +64,7 @@ class Taxon(BaseModel):
 
     @classmethod
     def from_id(cls, id: int):
-        """ Lookup and create a new Taxon object from an ID """
+        """Lookup and create a new Taxon object from an ID"""
         r = get_taxa_by_id(id)
         return cls.from_json(r['results'][0])
 
@@ -87,7 +87,7 @@ class Taxon(BaseModel):
 
     @property
     def parent_taxa(self) -> List:
-        """ Get this taxon's ancestors as Taxon objects (in descending order of rank) """
+        """Get this taxon's ancestors as Taxon objects (in descending order of rank)"""
         if self._parent_taxa is None:
             if not self.ancestors:
                 self.update_from_full_record()
@@ -100,12 +100,12 @@ class Taxon(BaseModel):
 
     @property
     def parent(self):
-        """ Return immediate parent, if any """
+        """Return immediate parent, if any"""
         return self.parent_taxa[-1] if self.parent_taxa else None
 
     @property
     def child_taxa(self) -> List:
-        """ Get this taxon's children as Taxon objects (in descending order of rank) """
+        """Get this taxon's children as Taxon objects (in descending order of rank)"""
 
         def get_child_idx(taxon):
             return get_rank_idx(taxon.rank), taxon.name
@@ -130,7 +130,7 @@ class Taxa(ModelCollection):
 
 
 def get_icon_path(taxon_id: int) -> str:
-    """ An iconic function to return an icon for an iconic taxon """
+    """An iconic function to return an icon for an iconic taxon"""
     if taxon_id not in ICONISH_TAXA:
         taxon_id = 0
     return f'{ATLAS_APP_ICONS}/{ICONISH_TAXA[taxon_id]}'

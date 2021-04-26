@@ -46,7 +46,7 @@ def get_http_cache_size() -> str:
 
 
 def get_observation_taxon(observation_id: int) -> int:
-    """ Get the current taxon ID for the given observation """
+    """Get the current taxon ID for the given observation"""
     logger.info(f'API: Fetching observation {observation_id}')
     obs = get_observation(observation_id)
     if obs.get('community_tax_id') and obs['community_tax_id'] != obs['taxon']['id']:
@@ -55,7 +55,7 @@ def get_observation_taxon(observation_id: int) -> int:
 
 
 def get_observation_dwc_terms(observation_id: int) -> Dict[str, str]:
-    """ Get all DWC terms for an iNaturalist observation """
+    """Get all DWC terms for an iNaturalist observation"""
     logger.info(f'API: Getting Darwin Core terms for observation {observation_id}')
     obs_dwc = get_observations(id=observation_id, response_format='dwc')
     return convert_dwc_to_xmp(obs_dwc)
@@ -79,7 +79,7 @@ def get_keywords(
     common: bool = False,
     hierarchical: bool = False,
 ) -> List[str]:
-    """ Get all taxonomic keywords for a given observation or taxon """
+    """Get all taxonomic keywords for a given observation or taxon"""
     min_tax_id = taxon_id or get_observation_taxon(observation_id)
     taxa = get_taxon_with_ancestors(min_tax_id)
 
@@ -100,7 +100,7 @@ def get_keywords(
 
 
 def get_taxon_children(taxon_id: int) -> List[Dict]:
-    """ Get a taxon's children """
+    """Get a taxon's children"""
     logger.info(f'API: Fetching children of taxon {taxon_id}')
     r = get_taxa(parent_id=taxon_id)
     logger.info(f'API: {len(r["results"])} child taxa found')
@@ -108,12 +108,12 @@ def get_taxon_children(taxon_id: int) -> List[Dict]:
 
 
 def get_taxon_ancestors(taxon_id: int) -> List[Dict]:
-    """ Get a taxon's parents """
+    """Get a taxon's parents"""
     return get_taxon_with_ancestors(taxon_id)[:-1]
 
 
 def get_taxon_with_ancestors(taxon_id: int) -> List[Dict]:
-    """ Get a taxon with all its parents """
+    """Get a taxon with all its parents"""
     logger.info(f'API: Fetching parents of taxon {taxon_id}')
     results = get_taxa_by_id(taxon_id).get('results', [])
     if not results:
@@ -157,7 +157,7 @@ def get_observation_from_metadata(metadata) -> Tuple[Dict, Dict]:
 
 
 def get_taxon_from_metadata(metadata) -> Optional[Dict]:
-    """ Fetch taxon record from MetaMetadata object: either by ID or rank + name """
+    """Fetch taxon record from MetaMetadata object: either by ID or rank + name"""
     rank, name = metadata.min_rank
     params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank': rank, 'q': name}
     logger.info(f'API: Querying taxon by: {params}')
@@ -170,7 +170,7 @@ def get_taxon_from_metadata(metadata) -> Optional[Dict]:
 
 
 def get_taxonomy_keywords(taxa: List[Dict]) -> List[str]:
-    """ Format a list of taxa into rank keywords """
+    """Format a list of taxa into rank keywords"""
     return [quote(f'taxonomy:{t["rank"]}={t["name"]}') for t in taxa]
 
 
@@ -226,7 +226,7 @@ def get_rank_idx(rank: str) -> int:
 
 
 def get_inaturalist_ids(metadata):
-    """ Look for taxon and/or observation IDs from metadata if available """
+    """Look for taxon and/or observation IDs from metadata if available"""
     # Get first non-None value from specified keys, if any; otherwise return None
     def _first_match(d, keys):
         id = next(filter(None, map(d.get, keys)), None)
@@ -240,7 +240,7 @@ def get_inaturalist_ids(metadata):
 
 
 def get_min_rank(metadata: Dict[str, str]) -> StrTuple:
-    """ Get the lowest (most specific) taxonomic rank from tags, if any """
+    """Get the lowest (most specific) taxonomic rank from tags, if any"""
     for rank in RANKS:
         if rank in metadata:
             logger.info(f'API: Found minimum rank: {rank} = {metadata[rank]}')
@@ -249,7 +249,7 @@ def get_min_rank(metadata: Dict[str, str]) -> StrTuple:
 
 
 def quote(s: str) -> str:
-    """ Surround keyword in quotes if it contains whitespace """
+    """Surround keyword in quotes if it contains whitespace"""
     return f'"{s}"' if ' ' in s else s
 
 
@@ -302,7 +302,7 @@ def get_ids_from_url(value: str) -> IntTuple:
 
 
 def strip_url(value: str) -> Optional[int]:
-    """ If a URL is provided containing an ID, return just the ID """
+    """If a URL is provided containing an ID, return just the ID"""
     try:
         return int(value.split('/')[-1].split('-')[0]) if value else None
     except (TypeError, ValueError):

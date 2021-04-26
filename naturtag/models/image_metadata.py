@@ -18,7 +18,7 @@ logger = getLogger().getChild(__name__)
 
 
 class ImageMetadata:
-    """ Class for reading & writing basic image metadata """
+    """Class for reading & writing basic image metadata"""
 
     def __init__(self, image_path):
         self.image_path = image_path.decode() if isinstance(image_path, bytes) else image_path
@@ -26,7 +26,7 @@ class ImageMetadata:
         self.exif, self.iptc, self.xmp = self.read_metadata()
 
     def read_metadata(self):
-        """ Read all formats of metadata from image + sidecar file """
+        """Read all formats of metadata from image + sidecar file"""
         exif, iptc, xmp = self._safe_read_metadata(self.image_path)
         if isfile(self.xmp_path):
             s_exif, s_iptc, s_xmp = self._safe_read_metadata(self.xmp_path)
@@ -41,7 +41,7 @@ class ImageMetadata:
         return exif, iptc, xmp
 
     def _safe_read_metadata(self, path, encoding='utf-8'):
-        """ Attempt to read metadata, with error handling """
+        """Attempt to read metadata, with error handling"""
         logger.info(f'Reading metadata from: {path} ({encoding})')
         img = self.read_exiv2_image(path)
         if not img:
@@ -85,7 +85,7 @@ class ImageMetadata:
             return None
 
     def create_xmp_sidecar(self):
-        """ Create a new XMP sidecar file if one does not already exist """
+        """Create a new XMP sidecar file if one does not already exist"""
         if isfile(self.xmp_path):
             return
         logger.info(f'Creating new XMP sidecar file: {self.xmp_path}')
@@ -93,7 +93,7 @@ class ImageMetadata:
             f.write(NEW_XMP_CONTENTS.strip())
 
     def update(self, new_metadata):
-        """ Update arbitrary EXIF, IPTC, and/or XMP metadata """
+        """Update arbitrary EXIF, IPTC, and/or XMP metadata"""
         logger.info(f'Updating with {len(new_metadata)} tags')
 
         def _filter_tags(prefix):
@@ -105,7 +105,7 @@ class ImageMetadata:
         self.xmp.update(_filter_tags('Xmp.'))
 
     def write(self, create_xmp_sidecar=True):
-        """ Write current metadata to image and sidecar """
+        """Write current metadata to image and sidecar"""
         self._write(self.image_path)
         if create_xmp_sidecar:
             self.create_xmp_sidecar()
@@ -115,7 +115,7 @@ class ImageMetadata:
             logger.info(f'No existing XMP sidecar file found for {self.image_path}; skipping')
 
     def _write(self, path):
-        """ Write current metadata to a single path """
+        """Write current metadata to a single path"""
         logger.info(f'Writing tags to {path}')
         img = self.read_exiv2_image(path)
         # TODO: Possible workaround to enable overwriting corrupted metadata?

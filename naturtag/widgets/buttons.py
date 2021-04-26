@@ -29,8 +29,8 @@ class StarButton(IconRightWidget):
 
 
 class TooltipFloatingButton(MDFloatingActionButton, MDTooltip):
-    """ Floating action button class with tooltip behavior """
+    """Floating action button class with tooltip behavior"""
 
 
 class TooltipIconButton(MDRoundFlatIconButton, MDTooltip):
-    """ Flat button class with icon and tooltip behavior """
+    """Flat button class with icon and tooltip behavior"""

@@ -6,7 +6,7 @@ from naturtag.controllers.batch_loader import BatchLoader
 
 
 class SleepyBatchLoader(BatchLoader):
-    """ BatchLoader for testing that just sleeps """
+    """BatchLoader for testing that just sleeps"""
 
     def __init__(self, **kwargs):
         super().__init__(worker_callback=self.yawn, **kwargs)

@@ -67,7 +67,7 @@ class AutocompleteSearch(MDBoxLayout, TextFieldWrapper):
         Clock.schedule_once(lambda *x: self.post_init(text_input_kwargs or {}))
 
     def post_init(self, text_input_kwargs):
-        """ Finish initialization after populating children (otherwise self.ids will be empty """
+        """Finish initialization after populating children (otherwise self.ids will be empty"""
         self.text_input = self.ids.text_input
         self.text_input.bind(
             text=lambda *x: self.trigger(),
@@ -85,20 +85,20 @@ class AutocompleteSearch(MDBoxLayout, TextFieldWrapper):
         self.ids.dropdown_layout.bind(on_selection=lambda *x: self.update_selection(*x))
 
     def on_text_focus(self, instance, *args):
-        """ Re-open dropdown after clicking on input again (if there are previous results) """
+        """Re-open dropdown after clicking on input again (if there are previous results)"""
         if instance.focus:
             logger.debug('Opening dropdown on text focus')
             self.dropdown_container.open()
 
     def callback(self, *args):
-        """ Autocompletion callback, rate-limited by ``AUTOCOMPLETE_DELAY`` milliseconds """
+        """Autocompletion callback, rate-limited by ``AUTOCOMPLETE_DELAY`` milliseconds"""
         logger.debug('Populating autocomplete results')
         search_str = self.text_input.text
         if len(search_str) < AUTOCOMPLETE_MIN_CHARS:
             return
 
         def get_row(item):
-            """ Return a row for dropdown list; use optional metadata if provided """
+            """Return a row for dropdown list; use optional metadata if provided"""
             if isinstance(item, Mapping):
                 return item
             return {'text': item, 'suggestion_text': item, 'metadata': {}}
@@ -110,13 +110,13 @@ class AutocompleteSearch(MDBoxLayout, TextFieldWrapper):
 
     # TODO: formatting for suggestion_text; smaller text + different color
     def update_selection(self, instance, suggestion_text, metadata):
-        """ Intermediate handler to update suggestion text based on dropdown selection """
+        """Intermediate handler to update suggestion text based on dropdown selection"""
         self.text_input.suggestion_text = '    ' + suggestion_text
         self.dispatch('on_selection', metadata)
         Clock.schedule_once(self.dropdown_container.dismiss, 0.2)
 
     def on_selection(self, metadata):
-        """  Called when a result is selected from the dropdown list """
+        """Called when a result is selected from the dropdown list"""
 
     async def get_autocomplete(self, search_str):
         """
@@ -143,7 +143,7 @@ class AutocompleteSearch(MDBoxLayout, TextFieldWrapper):
         return [{'text': f'Text: {search_str}'}] + [{'text': f'Text: {i}'} for i in range(9)]
 
     def reset(self, *args):
-        """ Reset inputs and autocomplete results """
+        """Reset inputs and autocomplete results"""
         self.text_input.text = ''
         self.text_input.suggestion_text = ''
         self.dropdown_view.data = []
@@ -180,7 +180,7 @@ class DropdownContainer(MDCard):
             self.resize_layout()
 
     def resize_layout(self):
-        """ Adjust size of layout to fit contents """
+        """Adjust size of layout to fit contents"""
         self.start_coords = self.caller.to_window(*self.caller.pos)
         self.layout.size_hint_min_y = ROW_SIZE * len(self.view.data)
         # If data hasn't been set yet, resize again when set
@@ -188,7 +188,7 @@ class DropdownContainer(MDCard):
             self._resize_complete = True
 
     def open(self):
-        """ Open dropdown """
+        """Open dropdown"""
         logger.debug(f'Opening dropdown at {self.layout.center_x}, {self.layout.center_y}')
         if not self._resize_complete:
             self.resize_layout()
@@ -198,14 +198,14 @@ class DropdownContainer(MDCard):
         self.is_open = True
 
     def on_touch_down(self, touch):
-        """ Close the dropdown if we click off of it """
+        """Close the dropdown if we click off of it"""
         if not self.is_open or self.view.collide_point(*touch.pos):
             super().on_touch_down(touch)
         else:
             self.dismiss()
 
     def dismiss(self, *args):
-        """ Close dropdown, and temporarily store data and remove from RecycleView to resize it """
+        """Close dropdown, and temporarily store data and remove from RecycleView to resize it"""
         if self.view.data:
             self._data = self.view.data
             self.view.data = []
@@ -227,7 +227,7 @@ class DropdownLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
         self.register_event_type('on_selection')
 
     def on_selection(self, suggestion_text, metadata):
-        """  Called when a result is selected from the dropdown list """
+        """Called when a result is selected from the dropdown list"""
 
 
 class DropdownItem(RecycleDataViewBehavior, MDLabel):
@@ -243,7 +243,7 @@ class DropdownItem(RecycleDataViewBehavior, MDLabel):
     metadata = DictProperty()
 
     def refresh_view_attrs(self, rv, index, data):
-        """ Catch and handle view changes """
+        """Catch and handle view changes"""
         self.index = index
         return super().refresh_view_attrs(rv, index, data)
 
@@ -261,16 +261,16 @@ class DropdownItem(RecycleDataViewBehavior, MDLabel):
             return True
 
     def apply_selection(self, dropdown_view, index, is_selected):
-        """ Respond to the selection of items in the view """
+        """Respond to the selection of items in the view"""
         self.is_selected = is_selected
 
 
 class SearchInput(MDTextField):
-    """ A text input field for autocomplete search """
+    """A text input field for autocomplete search"""
 
     # TODO: Not yet working as intended
     def keyboard_on_key_down(self, window, keycode, text, modifiers):
-        """ Select an autocomplete match with the tab key """
+        """Select an autocomplete match with the tab key"""
         if self.suggestion_text and keycode[1] == 'tab':
             self.insert_text(self.suggestion_text + ' ')
             return True

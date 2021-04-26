@@ -39,7 +39,7 @@ logger = getLogger().getChild(__name__)
 
 
 def get_resource_path_if_exists(atlas_category, id):
-    """ If the specified ID exists in the atlas, return the full path """
+    """If the specified ID exists in the atlas, return the full path"""
     atlas_path = ATLAS_CATEGORIES.get(atlas_category)
     atlas = get_atlas(atlas_path)
     if id in atlas.textures:
@@ -49,7 +49,7 @@ def get_resource_path_if_exists(atlas_category, id):
 
 
 def get_atlas(atlas_path):
-    """ Get atlas from the Kivy cache if present, otherwise initialize it """
+    """Get atlas from the Kivy cache if present, otherwise initialize it"""
     from kivy.atlas import Atlas
     from kivy.cache import Cache
 
@@ -177,7 +177,7 @@ def _max_factor(n, factor, max_size):
 
 
 def _largest_factor_pair(n):
-    """ Get the largest pair of factors for the given number """
+    """Get the largest pair of factors for the given number"""
     for i in reversed(range(1, int(n ** 0.5) + 1)):
         if n % i == 0:
             return i, int(n / i)
@@ -185,7 +185,7 @@ def _largest_factor_pair(n):
 
 
 def preload_iconic_taxa_thumbnails():
-    """ Pre-download taxon thumbnails for iconic taxa and descendants down to 2 ranks below """
+    """Pre-download taxon thumbnails for iconic taxa and descendants down to 2 ranks below"""
     for id, name in list(PRELOAD_TAXA.items()):
         min_rank = 'family'
         if name == 'mammalia':

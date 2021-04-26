@@ -20,7 +20,7 @@ HEADER = compile(r'^#+\s*(.*)$', MULTILINE)
 
 
 def colorize_help_text(text):
-    """ An ugly hack to make help text prettier """
+    """An ugly hack to make help text prettier"""
     text = HEADER.sub(click.style(r'\1:', 'blue'), text)
     text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
     text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)

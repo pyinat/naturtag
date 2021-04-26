@@ -62,7 +62,7 @@ class BatchRunner(EventDispatcher):
         self.loop.call_soon_threadsafe(_add_batch)
 
     def start_thread(self):
-        """ Start the background loader event loop in a new thread """
+        """Start the background loader event loop in a new thread"""
 
         def _start():
             asyncio.run_coroutine_threadsafe(self.start(), self.loop)
@@ -70,7 +70,7 @@ class BatchRunner(EventDispatcher):
         Thread(target=_start).start()
 
     async def start(self):
-        """ Start the background loader event loop """
+        """Start the background loader event loop"""
         logger.info(f'Loader: Starting {len(self.queues)} batches')
         for queue in self.queues:
             task = asyncio.create_task(self.worker(queue))
@@ -78,7 +78,7 @@ class BatchRunner(EventDispatcher):
         await self.runner_callback()
 
     async def worker(self, queue: asyncio.Queue):
-        """ Run a worker to process items on a single queue """
+        """Run a worker to process items on a single queue"""
         while True:
             item, kwargs = await queue.get()
             results = await self.worker_callback(item, **kwargs)
@@ -87,14 +87,14 @@ class BatchRunner(EventDispatcher):
             await asyncio.sleep(0)
 
     async def join(self):
-        """ Wait for all queues to be initialized and then processed """
+        """Wait for all queues to be initialized and then processed"""
         while not self.queues:
             await asyncio.sleep(0.1)
         for queue in self.queues:
             await queue.join()
 
     async def stop(self):
-        """ Safely stop the event loop """
+        """Safely stop the event loop"""
         logger.info('Loader: stopping workers')
         for task in self.worker_tasks:
             task.cancel()
@@ -112,7 +112,7 @@ class BatchRunner(EventDispatcher):
 
 
 class BatchLoader(BatchRunner):
-    """ Loads batches of items with periodic progress updates sent back to the UI """
+    """Loads batches of items with periodic progress updates sent back to the UI"""
 
     def __init__(self, **kwargs):
         super().__init__(runner_callback=self.run, **kwargs)
@@ -122,7 +122,7 @@ class BatchLoader(BatchRunner):
         self.lock = asyncio.Lock()
 
     async def run(self):
-        """ Run batches, wait to complete, and gracefully shut down """
+        """Run batches, wait to complete, and gracefully shut down"""
         self.start_progress()
         await self.join()
         self.stop_progress()
@@ -130,22 +130,22 @@ class BatchLoader(BatchRunner):
         await self.stop()
 
     def start_progress(self):
-        """ Schedule event to periodically report progress """
+        """Schedule event to periodically report progress"""
         self.start_time = time()
         self.items_complete = 0
         self.event = Clock.schedule_interval(self.report_progress, REPORT_RATE)
 
     async def increment_progress(self):
-        """ Async-safe function to increment progress """
+        """Async-safe function to increment progress"""
         async with self.lock:
             self.items_complete += 1
 
     def report_progress(self, *_):
-        """ Report how many items have been loaded so far """
+        """Report how many items have been loaded so far"""
         self.dispatch('on_progress', self.items_complete)
 
     def stop_progress(self):
-        """ Unschedule progress event and log total execution time """
+        """Unschedule progress event and log total execution time"""
         if self.event:
             self.event.cancel()
             self.event = None
@@ -155,21 +155,21 @@ class BatchLoader(BatchRunner):
             )
 
     def cancel(self):
-        """ Safely stop the event loop and thread (from another thread) """
+        """Safely stop the event loop and thread (from another thread)"""
         logger.info(f'Loader: Canceling {len(self.queues)} batches')
         self.loop.call_soon_threadsafe(self.stop_progress)
         asyncio.run_coroutine_threadsafe(self.stop(), self.loop)
 
 
 class WidgetBatchLoader(BatchLoader):
-    """ Generic loader for widgets that perform some sort of I/O on initialization  """
+    """Generic loader for widgets that perform some sort of I/O on initialization"""
 
     def __init__(self, widget_cls, **kwargs):
         super().__init__(worker_callback=self.load_widget, **kwargs)
         self.widget_cls = widget_cls
 
     async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
-        """ Load information for a new widget """
+        """Load information for a new widget"""
         logger.debug(f'Processing item: {item}')
         widget = self.widget_cls(item, **kwargs)
         self.add_widget(widget, parent)
@@ -178,31 +178,31 @@ class WidgetBatchLoader(BatchLoader):
 
     @mainthread
     def add_widget(self, widget: Widget, parent: Widget):
-        """ Add a widget to its parent on the main thread """
+        """Add a widget to its parent on the main thread"""
         if parent:
             parent.add_widget(widget)
 
 
 class TaxonBatchLoader(WidgetBatchLoader):
-    """ Loads batches of TaxonListItems """
+    """Loads batches of TaxonListItems"""
 
     def __init__(self, **kwargs):
         super().__init__(widget_cls=TaxonListItem, **kwargs)
 
     def add_widget(self, widget: Widget, parent: Widget):
-        """ Add a TaxonListItem to its parent list and bind its click event """
+        """Add a TaxonListItem to its parent list and bind its click event"""
         super().add_widget(widget, parent)
         mainthread(get_app().bind_to_select_taxon)(widget)
 
 
 class ImageBatchLoader(WidgetBatchLoader):
-    """ Loads batches of ImageMetaTiles """
+    """Loads batches of ImageMetaTiles"""
 
     def __init__(self, **kwargs):
         super().__init__(widget_cls=ImageMetaTile, **kwargs)
 
     def add_widget(self, widget: Widget, parent: Widget):
-        """ Add an ImageMetaTiles to its parent view and bind its click event """
+        """Add an ImageMetaTiles to its parent view and bind its click event"""
         super().add_widget(widget, parent)
         self.bind_click(widget)
 

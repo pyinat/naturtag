@@ -7,7 +7,7 @@ extras_require = {  # noqa
     'app': ['kivy>=2.0.0', 'kivymd~=0.104.1', 'kivy-garden.contextmenu'],
     'build': ['coveralls', 'twine', 'wheel'],
     'dev': [
-        'black==20.8b1',
+        'black==21.4b0',
         'flake8',
         'isort',
         'mypy',

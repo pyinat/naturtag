@@ -31,12 +31,12 @@ def cache_async_thumbnail(async_image, **kwargs):
 
 
 def get_any_thumbnail(source: str, size: str = 'small') -> str:
-    """ Get the path of a thumbnail stored inside either an atlas or the thumbnail cache """
+    """Get the path of a thumbnail stored inside either an atlas or the thumbnail cache"""
     return get_atlas_thumbnail_if_exists(source, size) or get_thumbnail(source)
 
 
 def get_any_thumbnail_if_exists(source: str, size: str = 'small') -> str:
-    """ Get the path of a thumbnail stored inside either an atlas or the thumbnail cache """
+    """Get the path of a thumbnail stored inside either an atlas or the thumbnail cache"""
     return get_atlas_thumbnail_if_exists(source, size) or get_thumbnail_if_exists(source)
 
 

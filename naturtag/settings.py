@@ -49,7 +49,7 @@ def write_settings(new_config: Dict[str, Any]):
 
 
 def reset_defaults():
-    """ Reset settings to defaults """
+    """Reset settings to defaults"""
     logger.info(f'Settings: Resetting {CONFIG_PATH} to defaults')
     makedirs(DATA_DIR, exist_ok=True)
     copyfile(DEFAULT_CONFIG_PATH, CONFIG_PATH)

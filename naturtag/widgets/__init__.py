@@ -7,7 +7,7 @@ See widgets.kv for non-behavioral widget settings
 
 # Not sure where else to put thus
 def truncate(text: str) -> str:
-    """ Truncate a label string to not exceed maximum length """
+    """Truncate a label string to not exceed maximum length"""
     if len(text) > MAX_LABEL_CHARS:
         text = text[: MAX_LABEL_CHARS - 2] + '...'
     return text

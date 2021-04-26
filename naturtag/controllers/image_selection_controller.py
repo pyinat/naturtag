@@ -10,7 +10,7 @@ logger = getLogger().getChild(__name__)
 
 
 class ImageSelectionController(Controller):
-    """ Controller class to manage image selector screen """
+    """Controller class to manage image selector screen"""
 
     def __init__(self, screen):
         super().__init__(screen)
@@ -44,15 +44,15 @@ class ImageSelectionController(Controller):
         get_app().add_control_widget(self.file_chooser, 'start_dir', 'photos')
 
     def add_file_chooser_images(self, *args):
-        """ Add one or more files and/or dirs selected via a FileChooser """
+        """Add one or more files and/or dirs selected via a FileChooser"""
         self.add_images(self.file_chooser.selection)
 
     def add_image(self, path):
-        """ Add an image to the current selection """
+        """Add an image to the current selection"""
         self.add_images([path])
 
     def add_images(self, paths):
-        """ Add one or more files and/or dirs, with deduplication """
+        """Add one or more files and/or dirs, with deduplication"""
         asyncio.run(self.load_images(paths))
 
     async def load_images(self, paths):
@@ -73,7 +73,7 @@ class ImageSelectionController(Controller):
         loader.start_thread()
 
     def open_native_file_chooser(self, dirs=False):
-        """ A bit of a hack; uses a hidden tkinter window to open a native file chooser dialog """
+        """A bit of a hack; uses a hidden tkinter window to open a native file chooser dialog"""
         from tkinter import Tk
         from tkinter.filedialog import askdirectory, askopenfilenames
 
@@ -92,13 +92,13 @@ class ImageSelectionController(Controller):
         self.inputs.observation_id_input.text = str(observation_id)
 
     def remove_image(self, image):
-        """ Remove an image from file list and image previews """
+        """Remove an image from file list and image previews"""
         logger.info(f'Main: Removing image {image.metadata.image_path}')
         self.file_list.remove(image.metadata.image_path)
         image.parent.remove_widget(image)
 
     def clear(self, *args):
-        """ Clear all image selections (selected files, previews, and inputs) """
+        """Clear all image selections (selected files, previews, and inputs)"""
         logger.info('Main: Clearing image selections')
         self.file_list = []
         self.inputs.observation_id_input.text = ''
@@ -121,7 +121,7 @@ class ImageSelectionController(Controller):
         )
 
     def on_image_click(self, instance, touch):
-        """ Event handler for clicking an image """
+        """Event handler for clicking an image"""
         if not instance.collide_point(*touch.pos):
             return
         # Right-click: Open context menu for the image
@@ -155,7 +155,7 @@ class ImageSelectionController(Controller):
         get_app().select_metadata(instance.metadata)
 
     def run(self, *args):
-        """ Run image tagging for selected images and input """
+        """Run image tagging for selected images and input"""
         if not self.file_list:
             alert('Select images to tag')
             return
@@ -189,6 +189,6 @@ class ImageSelectionController(Controller):
 
     @staticmethod
     def on_taxon_id(input):
-        """ Handle entering a taxon ID and pressing Enter """
+        """Handle entering a taxon ID and pressing Enter"""
         get_app().switch_screen('taxon')
         get_app().select_taxon(id=int(input.text))

@@ -66,7 +66,7 @@ def get_thumbnail_if_exists(source: str) -> Optional[str]:
 
 
 def get_thumbnail_hash(source: str) -> str:
-    """ Get a unique string based on the source to use as a filename or atlas resource ID """
+    """Get a unique string based on the source to use as a filename or atlas resource ID"""
     if not isinstance(source, bytes):
         source = source.encode()
     return md5(source).hexdigest()
@@ -117,7 +117,7 @@ def get_format(source: str) -> str:
 
 
 def generate_thumbnail_from_url(url: str, size: str):
-    """ Like :py:func:`.generate_thumbnail`, but downloads an image from a URL """
+    """Like :py:func:`.generate_thumbnail`, but downloads an image from a URL"""
     logger.info(f'Downloading: {url}')
     r = requests.get(url, stream=True)
     if r.status_code == 200:
@@ -130,7 +130,7 @@ def generate_thumbnail_from_url(url: str, size: str):
 
 
 def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
-    """ Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path """
+    """Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path"""
     image_bytes.seek(0)
     fmt = get_format(source)
     thumbnail_path = get_thumbnail_path(source)

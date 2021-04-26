@@ -9,7 +9,7 @@ from naturtag.models import MetaMetadata
 
 
 class MetadataViewController(Controller):
-    """ Controller class to manage image metadata screen """
+    """Controller class to manage image metadata screen"""
 
     def __init__(self, screen, **kwargs):
         super().__init__(screen)
