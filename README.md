@@ -69,11 +69,8 @@ If you have any suggestions, questions, or requests, please
 on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
 
 This is currently just a small hobby project, and still fairly unpolished. All the features
-described below are functional, however, and more are being actively worked on.
-
-I plan to work on this long enough to prove whether or not the concept is useful as part
-of a naturalist/photographer/hobbyist's workflow; if so, there is a long list of features
-I'd like to continue adding onto this.
+described below are functional, however, and plenty more are planned. I am intermittently working
+on this while maintaining a number of other libraries that are (or will be) used in Naturtag.
 
 # Python Package
 See [naturtag documentation on ReadTheDocs](https://naturtag.readthedocs.io) for details on the
@@ -81,7 +78,6 @@ python package, which lets you use most of naturtag's features in your own scrip
 
 Generic iNaturalist data access features that aren't specific to naturtag are contributed upstream
 to [pyinaturalist](https://pyinaturalist.readthedocs.io/en/stable/).
-
 
 # CLI
 
