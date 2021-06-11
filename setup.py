@@ -17,7 +17,7 @@ extras_require = {  # noqa
         'kivy_examples',
         'memory_profiler',
         'prettyprinter',
-        'Sphinx~=3.2.1',
+        'Sphinx>=3.2.1,<4.1.0',
         'sphinx-rtd-theme',
         'sphinxcontrib-apidoc',
     ],
