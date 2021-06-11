@@ -3,6 +3,7 @@ __pycache__
 *.egg-info/
 *.sw*
 .mypy_cache/
+.venv
 .vim/
 .vscode/
 _build/
