@@ -37,9 +37,7 @@ class KeywordMetadata:
             return []
 
         # All keywords will be combined and re-sorted, to account for errors in other programs
-        keywords = [
-            self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS
-        ]
+        keywords = [self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
         unique_keywords = set(chain.from_iterable(keywords))
         logger.info(f'{len(unique_keywords)} unique keywords found')
         return [k.replace('"', '') for k in unique_keywords]

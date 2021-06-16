@@ -61,8 +61,6 @@ class CacheController(Controller):
 
         out.text = f'Request cache size: {get_http_cache_size()}'
         num_thumbs, thumbnail_total_size = get_thumbnail_cache_size()
-        out.secondary_text = (
-            f'Thumbnail cache size: {num_thumbs} files totaling {thumbnail_total_size}'
-        )
+        out.secondary_text = f'Thumbnail cache size: {num_thumbs} files totaling {thumbnail_total_size}'
         history, _, frequent, _ = get_app().settings_controller.stored_taxa
         out.tertiary_text = f'History: {len(history)} items ({len(frequent)} unique)'

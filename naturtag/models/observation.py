@@ -1,8 +1,8 @@
-import attr
 from datetime import datetime
 from typing import Dict, List, Optional
 from uuid import UUID
 
+import attr
 from pyinaturalist.node_api import get_observation
 
 from naturtag.constants import Coordinates
@@ -139,9 +139,7 @@ class Observations(ModelCollection):
     @property
     def identifiers(self) -> List[User]:
         """Get all unique identifiers"""
-        unique_users = {
-            ident.user.id: ident.user for obs in self.data for ident in obs.identifications
-        }
+        unique_users = {ident.user.id: ident.user for obs in self.data for ident in obs.identifications}
         return list(unique_users.values())
 
     @property

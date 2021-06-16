@@ -80,8 +80,8 @@ class ImageMetadata:
         """
         try:
             return Image(path)
-        except RuntimeError as exc:
-            logger.error(f'Failed to read corrupted metadata from {path}:\n  {str(exc)}')
+        except RuntimeError:
+            logger.exception(f'Failed to read corrupted metadata from {path}')
             return None
 
     def create_xmp_sidecar(self):

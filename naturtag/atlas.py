@@ -95,9 +95,7 @@ def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg)
     image_paths = list(filter_images_by_size(image_paths, src_x, src_y, min_x, min_y))
     logger.info(f'{len(image_paths)} images found')
 
-    atlas_size = get_atlas_dimensions(
-        len(image_paths), src_x, src_y, padding=padding, **limit_kwarg
-    )
+    atlas_size = get_atlas_dimensions(len(image_paths), src_x, src_y, padding=padding, **limit_kwarg)
     logger.info(f'Calculated atlas size: {atlas_size}')
     if atlas_size != (0, 0):
         Atlas.create(atlas_name, image_paths, atlas_size, padding=padding)

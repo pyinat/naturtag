@@ -1,7 +1,8 @@
 """Type conversion, validation, and formatting utilities"""
 from datetime import datetime
-from dateutil.parser import parse as parse_date
 from typing import Any, Dict, Optional, Tuple, Union
+
+from dateutil.parser import parse as parse_date
 
 from naturtag.constants import Coordinates
 

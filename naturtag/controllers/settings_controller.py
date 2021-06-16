@@ -35,9 +35,7 @@ class SettingsController(Controller):
         if self.inaturalist['locale'] is None:
             self.inaturalist['locale'] = getdefaultlocale()[0]
 
-        self.screen.preferred_place_id_label.bind(
-            on_release=lambda *x: webbrowser.open(PLACES_BASE_URL)
-        )
+        self.screen.preferred_place_id_label.bind(on_release=lambda *x: webbrowser.open(PLACES_BASE_URL))
         self.screen.dark_mode_chk.bind(active=MDApp.get_running_app().set_theme_mode)
         self.screen.reset_default_button.bind(on_release=self.clear_settings)
 
@@ -123,9 +121,7 @@ class SettingsController(Controller):
 
     def is_observed_taxa_expired(self):
         """Determine if local cache of user-observed taxa has expired"""
-        return is_expired(
-            self._stored_taxa.get("last_updated_observations"), OBS_CACHE_EXPIRY_HOURS
-        )
+        return is_expired(self._stored_taxa.get("last_updated_observations"), OBS_CACHE_EXPIRY_HOURS)
 
     def update_observed_taxa(self, observed_taxa_ids: Dict[int, int]):
         """Save updated user-observed taxa"""

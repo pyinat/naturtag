@@ -1,6 +1,7 @@
-import attr
 from pathlib import Path
 from typing import List, Tuple
+
+import attr
 
 from naturtag.constants import CC_LICENSES, PHOTO_BASE_URL, PHOTO_INFO_BASE_URL, PHOTO_SIZES
 from naturtag.models import BaseModel, ModelCollection, kwarg
