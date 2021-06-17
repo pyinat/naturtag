@@ -13,12 +13,13 @@ on:
         description: 'Version number for pre-releases; defaults to build number'
         required: false
         default: ''
+env:
+  LATEST_PY_VERSION: '3.9'
 
 
 # Deploy pre-release builds from 'pre-release' branch, and stable builds on tags only
 jobs:
   release:
-    needs: [test, analyze]
     if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/pre-release'
     runs-on: ubuntu-18.04
     steps:

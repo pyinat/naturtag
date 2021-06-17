@@ -2,10 +2,10 @@ name: Build
 
 on:
   push:
-    branches: [main, dev, pre-release]
+    branches: [main]
     tags: ['v*']
   pull_request:
-    branches: [main, dev]
+    branches: [main]
   workflow_dispatch:
 env:
   LATEST_PY_VERSION: '3.9'
