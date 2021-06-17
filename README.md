@@ -1,11 +1,15 @@
-# Naturtag: an iNaturalist Image Tagger
-[![Build Status](https://travis-ci.org/JWCook/naturtag.svg?branch=dev)](https://travis-ci.org/JWCook/naturtag)
+# Naturtag
+[![Build status](https://github.com/JWCook/naturtag/workflows/Build/badge.svg)](https://github.com/JWCook/naturtag/actions)
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/latest/?badge=latest)
 ![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)
+![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)
 
-A tool to browse and add iNaturalist taxonomy & observation metadata to local observation photos.
-This includes a command-line interface, a graphical interface, and can also be used as a
-python package.
+Naturtag is a tool for tagging local observation photos with iNaturalist taxonomy & observation metadata.
+This includes a **command-line interface**, a **graphical interface**, and can also be used as a **python package**.
+
+See the CLI in action here:
+[![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
 
 # Contents
 
@@ -34,90 +38,108 @@ python package.
 * [See Also](#see-also)
 
 ## Use Cases
-The purpose of this is to take some of the useful information from your own observations and
-embed it in your local photo collection.
+The purpose of this is to take some of the useful information from your own iNaturalist observations
+and embed it in your local photo collection.
 
-### Metadata for other biodiversity tools
-This can improve interoperability with other tools and systems that interact with biodiversity
-data. For example, in addition to iNaturalist you may submit observations of certain species to
-another biodiversity observation platform with a more specific focus, such as eBird, BugGuide, or
-Mushroom Observer. For that use case, this tool supports
-[Simple Darwin Core](https://dwc.tdwg.org/simple).
+### Metadata for local photo organization
+If you like the way you can search and filter your observations on iNaturalist.org and its mobile
+apps, and you wish you could do that with your local photos, naturtag can help.
+It can tag your photos with **hierarchical keywords**, which can then be used in a photo viewer or
+DAM such as **Lightroom**, [**FastPictureViewer**](https://www.fastpictureviewer.com), or
+[**XnViewMP**](https://www.xnview.com/en/xnviewmp).
 
 ### Metadata for photo hosting
-This can also simplify tagging photos for photo hosting sites like Flickr. For that use case, this
+Naturtag can also simplify tagging photos for photo hosting sites like Flickr. For that use case, this
 tool generates keywords in the same format as
 [iNaturalist's Flickr Tagger](https://www.inaturalist.org/taxa/flickr_tagger).
 
-### Metadata for local organization
-Finally, this can enable you to search and filter your local photo collection by type of organism
-like you can in the iNaturalist web UI or mobile apps. For that use case, a photo viewer or DAM
-that supports **hierarchical keywords** is recommended, such as Lightroom,
-[FastPictureViewer](https://www.fastpictureviewer.com), or
-[XnViewMP](https://www.xnview.com/en/xnviewmp).
+### Metadata for other biodiversity tools
+Finally, naturtag can improve interoperability with other tools and systems that interact with biodiversity
+data. For example, in addition to iNaturalist you may submit observations of certain species to
+another biodiversity observation platform with a more specific focus, such as
+**eBird**, **BugGuide**, or **Mushroom Observer**. For that use case, this tool supports
+[Simple Darwin Core](https://dwc.tdwg.org/simple).
 
 # Development Status
 See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and
 current progress.
 
-This is currently just an experimental hobby project, and not very polished. All the
-features described below are functional, however.
+If you have any suggestions, questions, or requests, please
+[create an issue](https://github.com/JWCook/naturtag/issues/new/choose), or ping me (**@jcook**)
+on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
 
-I plan to work on this long enough to prove whether or not the concept is useful as part
-of a naturalist/photographer/hobbyist's workflow; if so, there is a long list of features
-I'd like to continue adding onto this.
+This is currently just a small hobby project, and still fairly unpolished. All the features
+described below are functional, however, and plenty more are planned. I am intermittently working
+on this while maintaining a number of other libraries that are (or will be) used in Naturtag.
 
 # Python Package
-See [documentation on ReadTheDocs](https://naturtag.readthedocs.io) for details on the python package.:w
+See [naturtag documentation on ReadTheDocs](https://naturtag.readthedocs.io) for details on the
+python package, which lets you use most of naturtag's features in your own scripts or applications.
 
+Generic iNaturalist data access features that aren't specific to naturtag are contributed upstream
+to [pyinaturalist](https://pyinaturalist.readthedocs.io/en/stable/).
 
 # CLI
 
 ## CLI Installation
-This project depends on [exiv2](https://www.exiv2.org/download.html). Example install commands:
+Install the latest stable version with pip:
 ```bash
-apt install exiv2   # Debian-based
-dnf install exiv2   # Fedora-based
-brew install exiv2  # MacOS
+pip install naturtag
 ```
 
-Then, install the python package:
+Or, if you would like to use the latest development version:
 ```bash
-pip install git+https://github.com/JWCook/naturtag.git
+pip install --pre naturtag
 ```
+
+To run on python 3.7, you will also need the
+[`importlib-metadata`](https://docs.python.org/3/library/importlib.metadata.html)
+backport:
+```bash
+pip install importlib-metadata
+```
+For python 3.8+, this is included in the standard library.
 
 ## CLI Usage
 This package provides the command `naturtag`, also aliased to `nt`.
 
-```
+```yaml
 Usage: naturtag [OPTIONS] [IMAGES]...
 
   Get taxonomy tags from an iNaturalist observation or taxon, and write them
-  to local image metadata.
+  either to the console or to local image metadata.
 
 Options:
   -c, --common-names      Include common names for all ranks that have them
+  -d, --darwin-core       Generate Darwin Core metadata
+  -f, --flickr-format     Output tags in a Flickr-compatible format
   -h, --hierarchical      Generate pipe-delimited hierarchical keywords
   -o, --observation TEXT  Observation ID or URL
   -t, --taxon TEXT        Taxon ID or URL
   -x, --create-xmp        Create XMP sidecar file if it doesn't already exist
+  -v, --verbose           Show additional information
   --help                  Show this message and exit.
 ```
 
-### Data Sources
-Either a taxon or observation may be specified, either by ID or URL.
-For example, all of the following options will fetch the same taxonomy
-metadata:
+### Species & Observation IDs
+Either a species or observation may be specified, either by ID or URL.
+For example, all the following options will fetch the same taxonomy metadata:
 ```
--t 48978
--t https://www.inaturalist.org/taxa/48978-Dirona-picta
--o 45524803
--o https://www.inaturalist.org/observations/45524803
+naturtag -t 48978
+naturtag -t https://www.inaturalist.org/taxa/48978-Dirona-picta
+naturtag -o 45524803
+naturtag -o https://www.inaturalist.org/observations/45524803
 ```
 
-The difference is that specifying a taxon (`-t`) will fetch only taxonomy
-metadata, while specifying an observation (`-o`) will fetch taxonomy plus
-observation metadata.
+The difference is that specifying a species (`-t, --taxon`) will fetch only
+taxonomy metadata, while specifying an observation (`-o, --observation`)
+will fetch taxonomy plus observation metadata.
+
+### Species Search
+You may also search for species by name, for example `naturtag -t cardinal`.
+If there are multiple results, you will be prompted to choose from the top 10 search results:
+
+![Screenshot](assets/screenshots/cli-taxon-search.png)
 
 ### Images
 Multiple paths are supported, as well as glob patterns, for example:
@@ -143,7 +165,7 @@ If specified (`-h`), hierarchical keywords will be generated. These will be
 interpreted as a tree structure by image viewers that support them.
 
 For example, the following keywords:
-```
+```bash
 Animalia
 Animalia|Arthropoda
 Animalia|Arthropoda|Chelicerata
@@ -161,8 +183,8 @@ Animalia
 ### Examples
 
 Just generate keywords from a taxon, without writing to a file:
-```bash
-naturtag -ct 48978
+```ini
+$ naturtag -ct 48978
 Fetching taxon 48978
 12 parent taxa found
 22 keywords generated
@@ -188,7 +210,7 @@ Gastropods
 "Nudipleuran Slugs"
 Nudibranchs
 "Colorful Dirona"
-inat:taxon_id=48978
+inaturalist:taxon_id=48978
 ```
 
 Generate both keywords and DarwinCore metadata for an observation, and write to
@@ -208,17 +230,26 @@ No existing XMP sidecar file found for img00002.jpg; skipping
 [See example of XMP metadata generated by this command](assets/example_45524803.xmp).
 
 # GUI
-This project also includes a graphical frontend, although it very early in development.
+This project also includes a graphical frontend, although it's very early in development.
 
 ## GUI Installation
-OS-specific builds will be coming soon, but for now running it requires a local python development
-environment. To install:
+My goal is to get this packaged into more convenient platform-specific builds
+(a `.exe` build for Windows, for example), but for now it can take a bit of work to get the GUI
+up and running. If you are interested in trying this out and you run into issues, please let me
+know and I can help.
+
+To install:
 ```
 pip install naturtag[ui]
 ```
 Some additional dependencies are required on Windows:
 ```
 pip install naturtag[ui-win]
+```
+
+To launch, run:
+```
+python -m naturtag.ui
 ```
 
 ##  GUI Usage
@@ -229,17 +260,18 @@ The basic UI components are shown below:
 
 1. Drag & drop images or folders into the window.
 2. Or, select files via the file browser on the right
-3. Enter an iNaturalist observation ID or taxon ID
+3. Enter an iNaturalist observation ID or taxon ID (iNaturalist URLs also work here)
 4. Click the 'Run' button in the lower-left to tag the selected images
 
 Other things to do:
 * **Middle-click** an image to remove it
-* **Right-click** an image for a menu of more actions
+* **Right-click** an image for a context menu with more actions
 * See [Metadata](#metadata) for more details
 
-### Taxon Search
-If you don't already know the taxon ID, click the 'Find a Species' button to go to the taxon
-search screen. You can start with searching by name, with autocompletion support:
+### Species Search
+In the likely event that you don't already know the taxon ID, click the
+'Find a Species' button to go to the taxon search screen. You can start with searching by name,
+with autocompletion support:
 
 ![Screenshot](assets/screenshots/gui-taxon-search.png)
 
@@ -262,8 +294,8 @@ and it will be saved in the ★ tab. These items can be re-ordered via **Right-c
 **Right-click** an image and select **Copy Flickr tags** to copy keyword tags compatible with Flickr.
 ![Screenshot](assets/screenshots/gui-image-context-menu.png)
 
-Also, a very simple (and ugly) metadata view is included, mainly for debugging purposes.
-To open it, **Right-click** an image and select **View metadata**.
+Also, a very simple metadata view is included. To open it, **Right-click** an image and select
+**View metadata**.
 
 ![Screenshot](assets/screenshots/gui-metadata.png)
 
@@ -279,16 +311,18 @@ See [CLI Usage](#cli-usage) for more details on these settings.
 ### Keyboard Shortcuts
 Some keyboard shortcuts are included for convenience:
 
-Key(s)          | Action                 | Screen
-----------------|------------------------|----------
-F11             | Toggle fullscreen      | All
-Ctrl+Enter      | Run image tagger       | Image selection
-Ctrl+Enter      | Run taxon search       | Taxon search
-Shift+Ctrl+X    | Clear selected images  | Image selection
-Shift+Ctrl+X    | Clear search filters   | Taxon search
-Ctrl+S          | Open settings screen   | All
-Ctrl+Backspace  | Return to main screen  | All
-Ctrl+Q          | Quit                   | All
+Key(s)          | Action                    | Screen
+----            |----                       |----------
+F11             | Toggle fullscreen         | All
+Ctrl+O          | Open file chooser         | Image selection
+Shift+Ctrl+O    | Open file chooser (dirs)  | Image selection
+Ctrl+Enter      | Run image tagger          | Image selection
+Ctrl+Enter      | Run taxon search          | Taxon search
+Shift+Ctrl+X    | Clear selected images     | Image selection
+Shift+Ctrl+X    | Clear search filters      | Taxon search
+Ctrl+S          | Open settings screen      | All
+Ctrl+Backspace  | Return to main screen     | All
+Ctrl+Q          | Quit                      | All
 
 # See Also
 * For generating keyword _collections_, see the related tool

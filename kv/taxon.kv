@@ -1,5 +1,7 @@
 #:import CachedAsyncImage naturtag.widgets.CachedAsyncImage
+#:import PLACEHOLDER_ICON naturtag.constants.PLACEHOLDER_ICON
 #:import RANKS naturtag.constants.RANKS
+
 
 <TaxonScreen>:
     name: 'taxon'
@@ -15,10 +17,10 @@
                 # Taxon selection: search, history, etc.
                 MDTabs:
                     id: taxon_selection_tabs
+                    background_color: app.theme_cls.primary_color
                     size_hint_x: .4
                     size_hint_min_x: dp(500)
                     size_hint_max_x: dp(700)
-                    background_color: app.theme_cls.primary_color
                     TaxonSearchTab:
                         id: search_tab
                     TaxonSearchResultsTab:
@@ -27,6 +29,8 @@
                         id: history_tab
                     FrequentTaxaTab:
                         id: frequent_tab
+                    ObservedTaxaTab:
+                        id: observed_tab
                     StarredTaxaTab:
                         id: starred_tab
 
@@ -48,6 +52,7 @@
                             CachedAsyncImage:
                                 id: selected_taxon_photo
                                 size_hint_max_y: dp(500)
+                                source: PLACEHOLDER_ICON
                         MDBoxLayout:
                             size_hint_max_x:  dp(500)
                             orientation: 'vertical'

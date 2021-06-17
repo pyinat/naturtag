@@ -6,18 +6,17 @@ from time import sleep
 from PIL import Image
 
 from naturtag.constants import (
-    ATLAS_TAXON_ICONS,
-    ATLAS_TAXON_PHOTOS,
     ATLAS_LOCAL_PHOTOS,
     ATLAS_MAX_SIZE,
-    CC_LICENSES,
-    THUMBNAILS_DIR,
+    ATLAS_TAXON_ICONS,
+    ATLAS_TAXON_PHOTOS,
+    ICONIC_TAXA,
     THUMBNAIL_SIZE_DEFAULT,
-    THUMBNAIL_SIZE_SM,
     THUMBNAIL_SIZE_LG,
+    THUMBNAIL_SIZE_SM,
+    THUMBNAILS_DIR,
 )
 from naturtag.image_glob import get_images_from_paths
-from naturtag.constants import ICONIC_TAXA
 from naturtag.models import Taxon
 from naturtag.thumbnails import generate_thumbnail_from_url, get_thumbnail_if_exists
 
@@ -40,7 +39,7 @@ logger = getLogger().getChild(__name__)
 
 
 def get_resource_path_if_exists(atlas_category, id):
-    """ If the specified ID exists in the atlas, return the full path """
+    """If the specified ID exists in the atlas, return the full path"""
     atlas_path = ATLAS_CATEGORIES.get(atlas_category)
     atlas = get_atlas(atlas_path)
     if id in atlas.textures:
@@ -50,7 +49,7 @@ def get_resource_path_if_exists(atlas_category, id):
 
 
 def get_atlas(atlas_path):
-    """ Get atlas from the Kivy cache if present, otherwise initialize it """
+    """Get atlas from the Kivy cache if present, otherwise initialize it"""
     from kivy.atlas import Atlas
     from kivy.cache import Cache
 
@@ -77,7 +76,7 @@ def build_local_photo_atlas(dir=THUMBNAILS_DIR):
 
 
 def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg):
-    """ Build a Kivy  Kivy :py:class:`~kivy.atlas.Atlas`
+    """Build a Kivy  Kivy :py:class:`~kivy.atlas.Atlas`
 
     Args:
         image_paths (list): Paths to images and/or image directories
@@ -96,16 +95,14 @@ def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg)
     image_paths = list(filter_images_by_size(image_paths, src_x, src_y, min_x, min_y))
     logger.info(f'{len(image_paths)} images found')
 
-    atlas_size = get_atlas_dimensions(
-        len(image_paths), src_x, src_y, padding=padding, **limit_kwarg
-    )
+    atlas_size = get_atlas_dimensions(len(image_paths), src_x, src_y, padding=padding, **limit_kwarg)
     logger.info(f'Calculated atlas size: {atlas_size}')
     if atlas_size != (0, 0):
         Atlas.create(atlas_name, image_paths, atlas_size, padding=padding)
 
 
 def filter_images_by_size(image_paths, max_x, max_y, min_x, min_y):
-    """ Get all images from the specified paths that are within specified dimensions.
+    """Get all images from the specified paths that are within specified dimensions.
     See also :py:func:`.get_images_from_paths`
 
     Args:
@@ -127,7 +124,7 @@ def filter_images_by_size(image_paths, max_x, max_y, min_x, min_y):
 
 
 def get_atlas_dimensions(n_images, x, y, padding=2, max_size=None, max_bins=None, max_per_bin=None):
-    """ Get the ideal dimensions of a Kivy :py:class:`~kivy.atlas.Atlas` in which to store images
+    """Get the ideal dimensions of a Kivy :py:class:`~kivy.atlas.Atlas` in which to store images
     of mostly uniform size.
     'Ideal' in this case means the smallest rectangle, with minimal wasted space, with closest to
     square x and y dimensions, and within specified limit of dimensions, # of bins, or
@@ -169,7 +166,7 @@ def get_atlas_dimensions(n_images, x, y, padding=2, max_size=None, max_bins=None
 
 
 def _max_factor(n, factor, max_size):
-    """ Return the largest factor within the provided max;
+    """Return the largest factor within the provided max;
     e.g., the most images of size n thet can fit in max_size
     """
     if max_size is None or n * factor <= max_size:
@@ -178,7 +175,7 @@ def _max_factor(n, factor, max_size):
 
 
 def _largest_factor_pair(n):
-    """ Get the largest pair of factors for the given number """
+    """Get the largest pair of factors for the given number"""
     for i in reversed(range(1, int(n ** 0.5) + 1)):
         if n % i == 0:
             return i, int(n / i)
@@ -186,7 +183,7 @@ def _largest_factor_pair(n):
 
 
 def preload_iconic_taxa_thumbnails():
-    """ Pre-download taxon thumbnails for iconic taxa and descendants down to 2 ranks below """
+    """Pre-download taxon thumbnails for iconic taxa and descendants down to 2 ranks below"""
     for id, name in list(PRELOAD_TAXA.items()):
         min_rank = 'family'
         if name == 'mammalia':
@@ -199,12 +196,14 @@ def preload_iconic_taxa_thumbnails():
 
 def preload_thumnails(taxon, min_rank='family', depth=0):
     logger.info(f'Processing: {taxon.rank} {taxon.name} at depth {depth}')
-    thumnail_exists = taxon.photo_url and get_thumbnail_if_exists(taxon.photo_url)
+    thumnail_exists = taxon.default_photo.medium_url and get_thumbnail_if_exists(
+        taxon.default_photo.medium_url
+    )
 
     # Only preload images that can be redistributed under Creative Commons
-    if taxon.has_cc_photo and not thumnail_exists:
-        generate_thumbnail_from_url(taxon.photo_url, 'large')
-        generate_thumbnail_from_url(taxon.thumbnail_url, 'small')
+    if taxon.default_photo.has_cc_license and not thumnail_exists:
+        generate_thumbnail_from_url(taxon.default_photo.medium_url, 'large')
+        generate_thumbnail_from_url(taxon.default_photo.thumbnail_url, 'small')
         sleep(IMAGE_DOWNLOAD_DELAY)
 
     if taxon.rank not in [min_rank, 'species', 'subspecies']:

@@ -8,15 +8,18 @@
     padding: dp(20)
     TabHeader:
         text: 'Search'
+    TaxonAutocompleteSearch:
+        id: taxon_search_input
+        hint_text: 'Taxon name'
+        helper_text: 'Enter a scientific or common name'
     ScrollViewY:
+        size_hint_min_y: 500
         MDBoxLayout:
             orientation: 'vertical'
             IntField:
                 id: taxon_id_input
                 hint_text: 'Taxon ID'
                 helper_text: 'Enter an iNaturalist taxon ID'
-            TaxonAutocompleteSearch:
-                id: taxon_search_input
             SectionHeader:
                 text: 'Categories'
                 tooltip_text: 'Iconic taxa categories to browse or filter searches with'
@@ -70,24 +73,6 @@
         MDList:
             id: search_results_list
 
-# Autocomplete search layout with input + dropdown
-<TaxonAutocompleteSearch>:
-    input: text_input
-    dropdown: dropdown
-    size_hint_x: 1
-    BoxLayout:
-        SearchInput:
-            id: text_input
-            hint_text: 'Taxon Name'
-            helper_text: 'Enter a scientific or common name'
-            helper_text_mode: 'on_focus'
-        MDIconButton:
-            id: search_input_clear_button
-            icon: 'close-circle-outline'
-            size_hint_max_x: dp(20)
-
-    AutocompleteDropdown:
-        id: dropdown
 
  # Iconic taxa 'Categories' selector
 <IconicTaxaLayout@MDGridLayout>:

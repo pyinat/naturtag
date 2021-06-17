@@ -17,6 +17,8 @@
 		size_hint_max_y: 100
 
     # Main view populated with currently selected screen
+    # TODO: In next kivymd release, change to:
+	# MDNavigationLayout:
 	NavigationLayout:
 		title: app.title
 		md_bg_color: app.theme_cls.primary_color
@@ -81,6 +83,12 @@
 						app.switch_screen('settings')
 					IconLeftWidget:
 						icon: 'settings'
+				OneLineIconListItem:
+					text: 'Cache'
+					on_press:
+						app.switch_screen('cache')
+					IconLeftWidget:
+						icon: 'content-save-edit'
 				OneLineIconListItem:
 					text: 'Exit'
 					on_press:

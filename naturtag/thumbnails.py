@@ -1,23 +1,24 @@
 """ Utilities for generating and retrieving image thumbnails """
 from hashlib import md5
 from io import BytesIO, IOBase
-from os import makedirs
-from os.path import dirname, isfile, join, normpath, splitext
-from shutil import copyfileobj
 from logging import getLogger
+from os import makedirs, scandir
+from os.path import dirname, getsize, isfile, join, normpath, splitext
+from shutil import copyfileobj, rmtree
 from typing import BinaryIO, Optional, Tuple, Union
 
+import requests
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
-import requests
 
 from naturtag.constants import (
     EXIF_ORIENTATION_ID,
-    THUMBNAILS_DIR,
+    THUMBNAIL_DEFAULT_FORMAT,
     THUMBNAIL_SIZE_DEFAULT,
     THUMBNAIL_SIZES,
-    THUMBNAIL_DEFAULT_FORMAT,
+    THUMBNAILS_DIR,
 )
+from naturtag.validation import format_file_size
 
 logger = getLogger().getChild(__name__)
 
@@ -65,12 +66,14 @@ def get_thumbnail_if_exists(source: str) -> Optional[str]:
 
 
 def get_thumbnail_hash(source: str) -> str:
-    """ Get a unique string based on the source to use as a filename or atlas resource ID """
-    return md5(source.encode()).hexdigest()
+    """Get a unique string based on the source to use as a filename or atlas resource ID"""
+    if not isinstance(source, bytes):
+        source = source.encode()
+    return md5(source).hexdigest()
 
 
 def get_thumbnail_size(size: str) -> Tuple[int, int]:
-    """ Get one of the predefined thumbnail dimensions from a size string
+    """Get one of the predefined thumbnail dimensions from a size string
 
     Args:
         size: One of: 'small', 'medium', 'large'
@@ -114,7 +117,7 @@ def get_format(source: str) -> str:
 
 
 def generate_thumbnail_from_url(url: str, size: str):
-    """ Like :py:func:`.generate_thumbnail`, but downloads an image from a URL """
+    """Like :py:func:`.generate_thumbnail`, but downloads an image from a URL"""
     logger.info(f'Downloading: {url}')
     r = requests.get(url, stream=True)
     if r.status_code == 200:
@@ -127,7 +130,7 @@ def generate_thumbnail_from_url(url: str, size: str):
 
 
 def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
-    """ Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path """
+    """Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path"""
     image_bytes.seek(0)
     fmt = get_format(source)
     thumbnail_path = get_thumbnail_path(source)
@@ -140,11 +143,11 @@ def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
 
 
 def generate_thumbnail(
-        source: Union[BinaryIO, str],
-        thumbnail_path: str,
-        fmt: str=None,
-        size: str='medium',
-        default_flip: bool=True,
+    source: Union[BinaryIO, str],
+    thumbnail_path: str,
+    fmt: str = None,
+    size: str = 'medium',
+    default_flip: bool = True,
 ):
     """
     Generate and store a thumbnail from the source image
@@ -177,7 +180,7 @@ def generate_thumbnail(
         return source
 
 
-def get_orientated_image(source, default_flip: bool=True) -> Image:
+def get_orientated_image(source, default_flip: bool = True) -> Image:
     """
     Load and rotate/transpose image according to EXIF orientation, if any. If missing orientation
     and the image was fetched from iNat, it will be vertically mirrored. (?)
@@ -194,9 +197,25 @@ def get_orientated_image(source, default_flip: bool=True) -> Image:
     return image
 
 
+def get_thumbnail_cache_size() -> Tuple[int, str]:
+    """Get the current size of the thumbnail cache, in number of files and human-readable
+    total file size
+    """
+    files = [f for f in scandir(THUMBNAILS_DIR) if isfile(f)]
+    file_size = sum(getsize(f) for f in files)
+    return len(files), format_file_size(file_size)
+
+
+def delete_thumbnails():
+    """Delete call cached thumbnails"""
+    rmtree(THUMBNAILS_DIR)
+    makedirs(THUMBNAILS_DIR)
+
+
 def flip_all(path: str):
-    """ Vertically flip all images in a directory. Mainly for debugging purposes. """
+    """Vertically flip all images in a directory. Mainly for debugging purposes."""
     from naturtag.image_glob import get_images_from_dir
+
     for source in get_images_from_dir(path):
         image = Image.open(source)
         image = flip(image)
@@ -205,8 +224,8 @@ def flip_all(path: str):
 
 
 def to_monochrome(source, fmt):
-    """ Convert an image to monochrome """
+    """Convert an image to monochrome"""
     img = Image.open(source)
-    img.convert('1')
+    img.convert(mode='1')
     img.save(source, format=fmt.replace('jpg', 'jpeg') if fmt else None)
     return source

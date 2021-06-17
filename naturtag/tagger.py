@@ -1,6 +1,6 @@
 """ Combined entry point for both CLI and GUI """
+from naturtag.inat_metadata import get_keywords, get_observation_dwc_terms, get_taxon_dwc_terms
 from naturtag.models.meta_metadata import MetaMetadata
-from naturtag.inat_metadata import get_keywords, get_observation_dwc_terms
 
 
 def tag_images(
@@ -17,14 +17,16 @@ def tag_images(
         hierarchical=hierarchical,
     )
     # TODO: Simplify this a bit
-    # TODO: Also get DwC taxonomy metadata if only a taxon ID is provided
+    all_metadata = []
     dwc_metadata = {}
-    if observation_id and images and darwin_core:
+    if observation_id and darwin_core:
         dwc_metadata = get_observation_dwc_terms(observation_id)
+    elif taxon_id and darwin_core:
+        dwc_metadata = get_taxon_dwc_terms(taxon_id)
     for image_path in images:
-        tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar)
+        all_metadata.append(tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar))
 
-    return keywords, dwc_metadata
+    return all_metadata, keywords, dwc_metadata
 
 
 def tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar):
@@ -32,3 +34,4 @@ def tag_image(image_path, keywords, dwc_metadata, create_xmp_sidecar):
     metadata.update_keywords(keywords)
     metadata.update(dwc_metadata)
     metadata.write(create_xmp_sidecar=create_xmp_sidecar)
+    return metadata

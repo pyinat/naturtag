@@ -1,16 +1,19 @@
 from logging import getLogger
 from os.path import basename
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
+from naturtag.constants import IntTuple, StrTuple
 from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank
-from naturtag.models import ImageMetadata, KeywordMetadata, KEYWORD_TAGS, HIER_KEYWORD_TAGS
+from naturtag.models import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
 
 logger = getLogger().getChild(__name__)
 
 
 # TODO: Extract GPS info
+# TODO: __str__
 class MetaMetadata(ImageMetadata):
-    """ Class for parsing & organizing info derived from basic image metadata """
+    """Class for parsing & organizing higher-level info derived from raw image metadata"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Define lazy-loaded properties
@@ -18,22 +21,28 @@ class MetaMetadata(ImageMetadata):
         self._min_rank = None
         self._simplified = None
         self._summary = None
-        self.combined = None
         self.keyword_meta = None
         self._update_derived_properties()
 
     def _update_derived_properties(self):
-        """ Reset/ update all secondary properties derived from base metadata formats """
+        """Reset/ update all secondary properties derived from base metadata formats"""
         self._inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
         self._summary = None
-        self.combined = {**self.exif, **self.iptc, **self.xmp}
         self.keyword_meta = KeywordMetadata(self.combined)
 
     @property
-    def inaturalist_ids(self) -> Tuple[Optional[int], Optional[int]]:
-        """ Get taxon and/or observation IDs from metadata if available """
+    def combined(self) -> Dict[str, Any]:
+        return {**self.exif, **self.iptc, **self.xmp}
+
+    @property
+    def filtered_combined(self) -> Dict[str, Any]:
+        return {**self.filtered_exif, **self.iptc, **self.xmp}
+
+    @property
+    def inaturalist_ids(self) -> IntTuple:
+        """Get taxon and/or observation IDs from metadata if available"""
         if self._inaturalist_ids is None:
             self._inaturalist_ids = get_inaturalist_ids(self.simplified)
         return self._inaturalist_ids
@@ -47,10 +56,10 @@ class MetaMetadata(ImageMetadata):
         return self.inaturalist_ids[1]
 
     @property
-    def min_rank(self) -> Optional[str]:
-        """ Get the lowest (most specific) taxonomic rank from tags, if any """
+    def min_rank(self) -> StrTuple:
+        """Get the lowest (most specific) taxonomic rank from tags, if any"""
         if self._min_rank is None:
-            self._min_rank = get_min_rank(self.simplified) or (None, None)
+            self._min_rank = get_min_rank(self.simplified)
         return self._min_rank
 
     @property
@@ -70,13 +79,13 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def summary(self) -> str:
-        """ Get a condensed summary of available metadata """
+        """Get a condensed summary of available metadata"""
         if self._summary is None:
             meta_types = {
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
                 'XMP': bool(self.xmp),
-                'SIDECAR': bool(self.xmp_path),
+                'SIDECAR': self.has_sidecar,
             }
             meta_special = {
                 'TAX': self.has_taxon,
@@ -95,7 +104,7 @@ class MetaMetadata(ImageMetadata):
         return self._summary
 
     def update(self, new_metadata):
-        """ Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties """
+        """Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties"""
         super().update(new_metadata)
         self._update_derived_properties()
 
@@ -123,7 +132,4 @@ def simplify_keys(mapping: Dict[str, str]) -> Dict[str, str]:
     Returns:
         Dict with simplified/deduplicated keys
     """
-    return {
-        k.lower().replace('_', '').split(':')[-1]: v
-        for k, v in mapping.items()
-    }
+    return {k.lower().replace('_', '').split(':')[-1]: v for k, v in mapping.items()}

@@ -1,4 +1,4 @@
-from kivy.properties import NumericProperty, BooleanProperty
+from kivy.properties import BooleanProperty, NumericProperty
 from kivymd.uix.button import MDFloatingActionButton, MDRoundFlatIconButton
 from kivymd.uix.list import IconRightWidget
 from kivymd.uix.tooltip import MDTooltip
@@ -8,6 +8,7 @@ class StarButton(IconRightWidget):
     """
     Selectable icon button that optionally toggles between 'selected' and 'unselected' star icons
     """
+
     taxon_id = NumericProperty()
     is_selected = BooleanProperty()
 
@@ -28,8 +29,8 @@ class StarButton(IconRightWidget):
 
 
 class TooltipFloatingButton(MDFloatingActionButton, MDTooltip):
-    """ Floating action button class with tooltip behavior """
+    """Floating action button class with tooltip behavior"""
 
 
 class TooltipIconButton(MDRoundFlatIconButton, MDTooltip):
-    """ Flat button class with icon and tooltip behavior """
+    """Flat button class with icon and tooltip behavior"""

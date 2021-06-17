@@ -8,9 +8,10 @@ from naturtag.widgets import truncate
 
 
 class Tab(MDBoxLayout, MDTabsBase):
-    """ Class for a tab in a MDTabs view"""
+    """Class for a tab in a MDTabs view"""
+
     def select(self):
-        """ Switch to this tab in the tabs view """
+        """Switch to this tab in the tabs view"""
         # Yep, just making the label push its own button; there doesn't seem to be a better way
         self.tab_label.state = 'down'
         self.tab_label.dispatch('on_release')
@@ -19,15 +20,15 @@ class Tab(MDBoxLayout, MDTabsBase):
 
 # TODO: Not working
 class TooltipTab(MDBoxLayout, MDTabsBase):
-    """ Class for a tab in a MDTabs view"""
+    """Class for a tab in a MDTabs view"""
+
     tooltip_text = StringProperty()
 
     def __init__(self, **kwargs):
-        self.padding = (0,0,0,0)
+        self.padding = (0, 0, 0, 0)
         self.tab_label = TooltipTabLabel(tab=self, tooltip_text=truncate(self.tooltip_text))
         Widget.__init__(self, **kwargs)
 
 
 class TooltipTabLabel(MDTabsLabel, MDTooltip):
-    """ Tab Label for MDTabs with tooltop behavior """
-
+    """Tab Label for MDTabs with tooltop behavior"""
