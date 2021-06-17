@@ -1,6 +1,7 @@
-import attr
 from datetime import datetime
 from typing import List
+
+import attr
 
 from naturtag.models import BaseModel, aliased_kwarg, kwarg, timestamp
 

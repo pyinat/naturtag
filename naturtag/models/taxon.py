@@ -1,6 +1,6 @@
-import attr
 from typing import Dict, List
 
+import attr
 from pyinaturalist.node_api import get_taxa_by_id
 
 from naturtag.constants import ATLAS_APP_ICONS, ICONISH_TAXA, TAXON_BASE_URL

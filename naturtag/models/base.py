@@ -1,4 +1,3 @@
-import attr
 import json
 from collections import UserList
 from logging import getLogger
@@ -6,6 +5,7 @@ from os.path import expanduser
 from pathlib import Path
 from typing import IO, Dict, Generic, List, Type, TypeVar, Union
 
+import attr
 from pyinaturalist.response_format import try_datetime
 
 from naturtag.constants import JSON

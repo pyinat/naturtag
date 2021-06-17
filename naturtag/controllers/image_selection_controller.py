@@ -28,9 +28,7 @@ class ImageSelectionController(Controller):
         self.context_menu.ids.copy_flickr_tags_ctx.bind(
             on_release=lambda x: x.selected_image.copy_flickr_tags()
         )
-        self.context_menu.ids.remove_ctx.bind(
-            on_release=lambda x: self.remove_image(x.selected_image)
-        )
+        self.context_menu.ids.remove_ctx.bind(on_release=lambda x: self.remove_image(x.selected_image))
 
         # Other widget events
         self.inputs.taxon_id_input.bind(on_text_validate=self.on_taxon_id)
@@ -59,9 +57,7 @@ class ImageSelectionController(Controller):
         # Determine images to load, ignoring duplicates
         images = get_images_from_paths(paths, recursive=self.input_dict['recursive'])
         new_images = list(set(images) - set(self.file_list))
-        logger.info(
-            f'Main: Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)'
-        )
+        logger.info(f'Main: Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
         if not new_images:
             return
         self.file_list.extend(new_images)
@@ -130,9 +126,7 @@ class ImageSelectionController(Controller):
             self.context_menu.ref = instance
             # Enable 'view taxon/observation' menu items, if applicable
             self.context_menu.ids.view_taxon_ctx.disabled = not instance.metadata.taxon_id
-            self.context_menu.ids.view_observation_ctx.disabled = (
-                not instance.metadata.observation_id
-            )
+            self.context_menu.ids.view_observation_ctx.disabled = not instance.metadata.observation_id
             self.context_menu.ids.copy_flickr_tags_ctx.disabled = (
                 not instance.metadata.keyword_meta.flickr_tags
             )

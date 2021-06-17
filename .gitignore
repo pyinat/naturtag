@@ -2,6 +2,7 @@ __pycache__
 .idea/
 *.egg-info/
 *.sw*
+.venv
 .mypy_cache/
 .venv
 .vim/
@@ -11,6 +12,7 @@ build/
 pip-wheel-metadata/
 dist/
 docs/modules/
+downloads/
 libs/
 venv/
 sample_data/
