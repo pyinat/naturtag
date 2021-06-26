@@ -621,7 +621,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pyexiv2"
-version = "2.5.0"
+version = "2.6.2"
 description = "Read/Write metadata(including EXIF, IPTC, XMP), comment and ICC Profile embedded in digital images."
 category = "main"
 optional = false
@@ -1625,22 +1625,21 @@ pycparser = [
     {file = "pycparser-2.20.tar.gz", hash = "sha256:2d475327684562c3a96cc71adf7dc8c4f0565175cf86b6d7a404ff4c771f15f0"},
 ]
 pyexiv2 = [
-    {file = "pyexiv2-2.5.0-cp35-none-macosx_10_14_x86_64.whl", hash = "sha256:7fab947b7b6a34947573db845b2d5637e214df6413e05f0c6eb016c768537787"},
-    {file = "pyexiv2-2.5.0-cp35-none-manylinux1_x86_64.whl", hash = "sha256:cdab46bc5fa148244d3158f3777cb78970cb043bc9b69eba78953bf1d558b1e3"},
-    {file = "pyexiv2-2.5.0-cp35-none-win_amd64.whl", hash = "sha256:c4ff751432f8fef3f4f2eb3617ded7fc6e3cdd280ed1f69fa1d4b24f03a46115"},
-    {file = "pyexiv2-2.5.0-cp36-none-macosx_10_14_x86_64.whl", hash = "sha256:85cefeb70012dd2ba19da0aa0bb571aad03146af3cae06d7ea681555d562547d"},
-    {file = "pyexiv2-2.5.0-cp36-none-manylinux1_x86_64.whl", hash = "sha256:af469af90115cb4223f896144f5b5d7aad7388a6382f7c16468a6f6da32782ec"},
-    {file = "pyexiv2-2.5.0-cp36-none-win_amd64.whl", hash = "sha256:d685427dd2d67bb5bebe68fca2e3e06287b3b39bded4a130e1f30cc04b2a59ea"},
-    {file = "pyexiv2-2.5.0-cp37-none-macosx_10_14_x86_64.whl", hash = "sha256:d4298ae5285f20190f64ebed8be805f86ab88fb332af7f356f8cc3fd16207b2e"},
-    {file = "pyexiv2-2.5.0-cp37-none-manylinux1_x86_64.whl", hash = "sha256:5a7613e776a8af28106ae092a84b9e0c7da915511f4891c27ec7a670842d6468"},
-    {file = "pyexiv2-2.5.0-cp37-none-win_amd64.whl", hash = "sha256:9d98964a24cee893383f547982a759641e0e8a3f3500f88abaf2eb15bf33f5c6"},
-    {file = "pyexiv2-2.5.0-cp38-none-macosx_10_14_x86_64.whl", hash = "sha256:3800979355e7c289d34dee04bdce03a0cdb2d1c929052a541201730dd1ff49a3"},
-    {file = "pyexiv2-2.5.0-cp38-none-manylinux1_x86_64.whl", hash = "sha256:5fddf62391c20a57664e2c3d927e60ef984c65c1437767fa5135f1b9efd14400"},
-    {file = "pyexiv2-2.5.0-cp38-none-win_amd64.whl", hash = "sha256:44af25456aeff9d48a1c382ea9c6ed8229baa9450619cc5e288203aa5c717403"},
-    {file = "pyexiv2-2.5.0-cp39-none-macosx_10_14_x86_64.whl", hash = "sha256:1197e1b4837676a98f1df2bd1c297b3040baa88a0caee569cfe48b808d585d9d"},
-    {file = "pyexiv2-2.5.0-cp39-none-manylinux1_x86_64.whl", hash = "sha256:fa42317be8500599b81dda983a0527ab9895b890a924f6d593b63e177c087f64"},
-    {file = "pyexiv2-2.5.0-cp39-none-win_amd64.whl", hash = "sha256:1ffa7c599a121671ce3984f86f20fa4a30fbc37713cfbca00ba450017a4a475e"},
-    {file = "pyexiv2-2.5.0.tar.gz", hash = "sha256:a86e68de0706da6402609bc8be1c643344efe8807c85ecb6779abc219afa1e5e"},
+    {file = "pyexiv2-2.6.2-cp35-none-macosx_10_14_x86_64.macosx_11_0_x86_64.whl", hash = "sha256:d650636cf82510b2ad55c3862c874d8703c69db508368b7090c36c42efbb7765"},
+    {file = "pyexiv2-2.6.2-cp35-none-manylinux2014_x86_64.whl", hash = "sha256:9f97bf7425d97023639fcbccb642826d3d0359916886c5bc38495ca4870b0b42"},
+    {file = "pyexiv2-2.6.2-cp35-none-win_amd64.whl", hash = "sha256:e5778ded7b0ef65f88c27546734863dc3d0b6f70317682cccdb5c2983c738d60"},
+    {file = "pyexiv2-2.6.2-cp36-none-macosx_10_14_x86_64.macosx_11_0_x86_64.whl", hash = "sha256:938fda0e8ce4746b60697c2b766646f63127371236977ebce83c48c2e19fa294"},
+    {file = "pyexiv2-2.6.2-cp36-none-manylinux2014_x86_64.whl", hash = "sha256:e9f1cc25e8be08f5f5a536926c7f3374c6d0b872bd5d1656b1df6733e04488d1"},
+    {file = "pyexiv2-2.6.2-cp36-none-win_amd64.whl", hash = "sha256:0560bab4f9970a6d977d42ce3ad62825a3522804de054efdbb66f8ddb7228b28"},
+    {file = "pyexiv2-2.6.2-cp37-none-macosx_10_14_x86_64.macosx_11_0_x86_64.whl", hash = "sha256:0ebc73c01b0818057c61d97efeba051948b52f3c12af94542cb7c9a2d7d28dd2"},
+    {file = "pyexiv2-2.6.2-cp37-none-manylinux2014_x86_64.whl", hash = "sha256:92a6c11c0605917a30ecaaa37965b507376ad39bddc3d600c4cb4513b8763254"},
+    {file = "pyexiv2-2.6.2-cp37-none-win_amd64.whl", hash = "sha256:632d1fea6c537450580d68dad8de27e0839b922ed4c10cc7ffe413095abdc62c"},
+    {file = "pyexiv2-2.6.2-cp38-none-macosx_10_14_x86_64.macosx_11_0_x86_64.whl", hash = "sha256:bea441dee922c9caf911f19e8ee306a0064911605ed24ebe593db32eb1679f05"},
+    {file = "pyexiv2-2.6.2-cp38-none-manylinux2014_x86_64.whl", hash = "sha256:65300e659d4283486accce4823c26b07a634c9e821dd4a38e52d34303ffc53ba"},
+    {file = "pyexiv2-2.6.2-cp38-none-win_amd64.whl", hash = "sha256:bf3d0256961aeb25690b2b02fe60fadadc5a7159a952cf502cf782a28c1e271a"},
+    {file = "pyexiv2-2.6.2-cp39-none-macosx_10_14_x86_64.macosx_11_0_x86_64.whl", hash = "sha256:9b794b13c90f2cbdca9e7f459e9d56fd6f4d4dabb5a80a564a6a862daab05bf9"},
+    {file = "pyexiv2-2.6.2-cp39-none-manylinux2014_x86_64.whl", hash = "sha256:8e45037873ecb0003de2cabbe8b99f55dbcb5826a3cce993403e927c9baafea5"},
+    {file = "pyexiv2-2.6.2-cp39-none-win_amd64.whl", hash = "sha256:e0e8479736a05ab1c43f46d669ca84b0ea396c7d2705384f141dafe9e7f7d628"},
 ]
 pyflakes = [
     {file = "pyflakes-2.3.1-py2.py3-none-any.whl", hash = "sha256:7893783d01b8a89811dd72d7dfd4d84ff098e5eed95cfa8905b22bbffe52efc3"},
