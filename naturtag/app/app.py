@@ -81,6 +81,7 @@ class ControllerProxy:
         self.remove_star = self.taxon_selection_controller.remove_star
         self.save_settings = self.settings_controller.save_settings
         self.select_metadata = self.metadata_view_controller.select_metadata
+        self.select_observation_from_photo = self.image_selection_controller.select_observation_from_photo
         self.select_taxon = self.taxon_view_controller.select_taxon
         self.select_taxon_from_photo = self.image_selection_controller.select_taxon_from_photo
         self.update_history = self.taxon_selection_controller.update_history
@@ -229,10 +230,10 @@ class NaturtagApp(MDApp, ControllerProxy):
         value = Clipboard.paste()
         taxon_id, observation_id = get_ids_from_url(value)
         if taxon_id:
-            self.select_taxon(id=taxon_id)
+            self.select_taxon_from_photo(taxon_id)
             alert(f'Taxon {taxon_id} selected')
         if observation_id:
-            # self.select_observation(id=observation_id)
+            self.select_observation_from_photo(observation_id)
             alert(f'Observation {observation_id} selected')
 
         # TODO: With improved taxon & observation screen, the ID search fields may no longer be useful
