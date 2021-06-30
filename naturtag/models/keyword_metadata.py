@@ -36,7 +36,7 @@ class KeywordMetadata:
         if not metadata:
             return []
 
-        # All keywords will be combined and re-sorted, to account for errors in other programs
+        # All keywords will be combined and re-sorted, to account for errors in image editors, etc.
         keywords = [self._get_keyword_list(metadata, tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
         unique_keywords = set(chain.from_iterable(keywords))
         logger.info(f'{len(unique_keywords)} unique keywords found')
@@ -61,9 +61,8 @@ class KeywordMetadata:
         return dict([kw.split('=') for kw in kv_keywords])
 
     def get_hierarchical_keywords(self) -> List[str]:
-        """
-        Get all hierarchical keywords as flat strings.
-        Also Account for root node (single value without '|')
+        """Get all hierarchical keywords as flat strings.
+        Also account for root node (single value without '|')
         """
         hier_keywords = [kw for kw in self.keywords if '|' in kw]
         if hier_keywords:

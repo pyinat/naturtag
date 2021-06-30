@@ -4,9 +4,9 @@ from typing import Any, Dict
 
 from pyexiv2 import Image
 
-# Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
 from naturtag.constants import EXIF_HIDE_PREFIXES
 
+# Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
 NEW_XMP_CONTENTS = """
 <?xpacket?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="">

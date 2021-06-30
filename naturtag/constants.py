@@ -1,11 +1,9 @@
-from collections import OrderedDict
 from os.path import dirname, join
 from pathlib import Path
 from typing import IO, Dict, Iterable, Optional, Tuple, Union
 
 from appdirs import user_data_dir
 from pyinaturalist import DEFAULT_USER_AGENT
-from pyinaturalist.request_params import CC_LICENSES, RANKS  # noqa: F401
 
 from naturtag import __version__
 
@@ -97,42 +95,6 @@ F11 = 292
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
 
-# Iconic taxa, aka common taxon search categories, in the same order as shown on the iNar web UI
-ICONIC_TAXA = OrderedDict(
-    [
-        (3, 'aves'),
-        (20978, 'amphibia'),
-        (26036, 'reptilia'),
-        (40151, 'mammalia'),
-        (47178, 'actinopterygii'),
-        (47115, 'mollusca'),
-        (47119, 'arachnida'),
-        (47158, 'insecta'),
-        (47126, 'plantae'),
-        (47170, 'fungi'),
-        (48222, 'chromista'),
-        (47686, 'protozoa'),
-    ]
-)
-# Other not-quite-as-iconic icons to show
-ICONISH_TAXA = {**ICONIC_TAXA, 1: 'animalia', 0: 'unknown'}
-# TODO: More emoji for non-iconic taxa!
-ICONIC_EMOJI = {
-    0: '❓',
-    1: '🐾',
-    3: '🐦',
-    20978: '🐸',
-    26036: '🦎',
-    40151: '😺',
-    47178: '🐠',
-    47115: '🐌',
-    47119: '🕷️',
-    47158: '🦋',
-    47126: '🌿',
-    47170: '🍄',
-    48222: '🟢',
-    47686: '🦠',
-}
 PLACEHOLDER_ICON = f'{ATLAS_APP_ICONS}/unknown'
 
 # Specific XML namespaces to use terms from when processing DwC observation records

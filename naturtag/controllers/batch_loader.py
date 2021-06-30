@@ -95,7 +95,7 @@ class BatchRunner(EventDispatcher):
 
     async def stop(self):
         """Safely stop the event loop"""
-        logger.info('Loader: stopping workers')
+        logger.info(f'Loader: stopping {len(self.worker_tasks)} workers')
         for task in self.worker_tasks:
             task.cancel()
         self.loop.run_until_complete(asyncio.gather(*self.worker_tasks, return_exceptions=True))

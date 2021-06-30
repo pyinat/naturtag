@@ -66,7 +66,7 @@ class IconicTaxaIcon(SmartTile):
     is_selected = BooleanProperty()
 
     def __init__(self, taxon_id, **kwargs):
-        super().__init__(source=get_icon_path(taxon_id), allow_stretch=False, **kwargs)
+        super().__init__(source=get_icon_path(taxon_id), **kwargs)
         self.is_selected = False
         self.box_color = DESELECTED_COLOR
         self.taxon_id = taxon_id

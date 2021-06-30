@@ -4,12 +4,12 @@ from typing import Optional
 
 import click
 from click_help_colors import HelpColorsCommand
-from pyinaturalist.node_api import get_taxa_autocomplete
+from pyinaturalist.constants import ICONIC_EMOJI
+from pyinaturalist.v1 import get_taxa_autocomplete
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
-from naturtag.constants import ICONIC_EMOJI
 from naturtag.image_glob import glob_paths
 from naturtag.inat_metadata import strip_url
 from naturtag.tagger import tag_images
@@ -196,6 +196,7 @@ def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:
     return results[int(taxon_index)]['id']
 
 
+# TODO: Use table formatting from pyinaturalist, add matched_term
 def format_taxa(results, verbose: bool = False) -> Table:
     """Format taxon autocomplete results into a table"""
     table = Table(
