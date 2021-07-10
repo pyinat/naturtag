@@ -39,7 +39,7 @@ pyinaturalist = "^0.13.0"
 python-dateutil = ">=2.0"
 pyyaml = "^5.4.1"
 requests = ">=2.20"
-requests-cache = "~=0.6.4"
+requests-cache = ">=0.6.4,<0.8.0"
 rich = ">=10.0"
 xmltodict = "^0.12.0"
 
