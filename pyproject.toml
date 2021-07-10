@@ -53,7 +53,7 @@ kivymd = {version = "^0.104.2", optional = true}
 m2r2 = { version = ">=0.2.7", optional = true }
 sphinx = { version = "^4.0.2", optional = true }
 sphinx-autodoc-typehints = { version = "^1.11", optional = true }
-sphinx-copybutton = { version = "^0.3", optional = true }
+sphinx-copybutton = { version = ">=0.3,<0.5", optional = true }
 sphinx-rtd-theme = {version = "^0.5.2", optional = true}
 sphinxcontrib-apidoc = { version = "^0.3", optional = true }
 
