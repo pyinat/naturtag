@@ -3,7 +3,7 @@ name = "alabaster"
 version = "0.7.12"
 description = "A configurable sidebar-enabled Sphinx theme"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 
 [[package]]
@@ -41,7 +41,7 @@ name = "babel"
 version = "2.9.1"
 description = "Internationalization utilities"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
@@ -205,7 +205,7 @@ name = "docutils"
 version = "0.16"
 description = "Docutils -- Python Documentation Utilities"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
@@ -265,7 +265,7 @@ name = "imagesize"
 version = "1.2.0"
 description = "Getting image size from png/jpeg/jpeg2000/gif file"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
@@ -331,7 +331,7 @@ name = "jinja2"
 version = "3.0.1"
 description = "A very fast and expressive template engine."
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -466,7 +466,7 @@ name = "markupsafe"
 version = "2.0.1"
 description = "Safely add untrusted strings to HTML/XML markup."
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.6"
 
 [[package]]
@@ -647,22 +647,23 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "pyinaturalist"
-version = "0.13.0"
+version = "0.14.0"
 description = "iNaturalist API client for python"
 category = "main"
 optional = false
 python-versions = ">=3.6,<4.0"
 
 [package.dependencies]
+attrs = ">=21.2.0"
 keyring = ">=22.3"
 pyrate-limiter = ">=2.3.3"
 python-dateutil = ">=2.0"
 python-forge = ">=18.6.0"
 requests = ">=2.20"
-sphinx-rtd-theme = "0.5.2"
+rich = ">=10.0"
 
 [package.extras]
-docs = ["docutils (==0.16)", "m2r2 (>=0.2.7)", "Sphinx (>=4.0.1,<5.0.0)", "sphinx-automodapi (>=0.13)", "sphinx-autodoc-typehints (>=1.11,<2.0)", "sphinx-copybutton (>=0.3,<0.4)", "sphinxcontrib-apidoc (>=0.3,<0.4)"]
+docs = ["furo (>=2021.6.24-beta.37)", "linkify-it-py (>=1.0.1,<2.0.0)", "myst-parser (>=0.15.1,<0.16.0)", "nbsphinx (>=0.8.5,<0.9.0)", "sphinx (>=4.0.2,<5.0.0)", "sphinx-automodapi (>=0.13)", "sphinx-autodoc-typehints (>=1.11,<2.0)", "sphinx-copybutton (>=0.3,<0.5)", "sphinx-inline-tabs (>=2021.4.11-beta.9,<2022.0.0)", "sphinxcontrib-apidoc (>=0.3,<0.4)"]
 
 [[package]]
 name = "pyparsing"
@@ -787,7 +788,7 @@ name = "pytz"
 version = "2021.1"
 description = "World timezone definitions, modern and historical"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 
 [[package]]
@@ -907,7 +908,7 @@ name = "snowballstemmer"
 version = "2.1.0"
 description = "This package provides 29 stemmers for 28 languages generated from Snowball algorithms."
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 
 [[package]]
@@ -915,7 +916,7 @@ name = "sphinx"
 version = "4.0.3"
 description = "Python documentation generator"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -976,7 +977,7 @@ name = "sphinx-rtd-theme"
 version = "0.5.2"
 description = "Read the Docs theme for Sphinx"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 
 [package.dependencies]
@@ -1003,7 +1004,7 @@ name = "sphinxcontrib-applehelp"
 version = "1.0.2"
 description = "sphinxcontrib-applehelp is a sphinx extension which outputs Apple help books"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1015,7 +1016,7 @@ name = "sphinxcontrib-devhelp"
 version = "1.0.2"
 description = "sphinxcontrib-devhelp is a sphinx extension which outputs Devhelp document."
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1027,7 +1028,7 @@ name = "sphinxcontrib-htmlhelp"
 version = "2.0.0"
 description = "sphinxcontrib-htmlhelp is a sphinx extension which renders HTML help files"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.6"
 
 [package.extras]
@@ -1039,7 +1040,7 @@ name = "sphinxcontrib-jsmath"
 version = "1.0.1"
 description = "A sphinx extension which renders display math in HTML via JavaScript"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1050,7 +1051,7 @@ name = "sphinxcontrib-qthelp"
 version = "1.0.3"
 description = "sphinxcontrib-qthelp is a sphinx extension which outputs QtHelp document."
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1062,7 +1063,7 @@ name = "sphinxcontrib-serializinghtml"
 version = "1.1.5"
 description = "sphinxcontrib-serializinghtml is a sphinx extension which outputs \"serialized\" HTML files (json and pickle)."
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1180,7 +1181,7 @@ docs = ["m2r2", "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphi
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "eb70929c620a1c34fff11d21ca27baa760bed8b03a1c7e5a79fd5895d5ef9a40"
+content-hash = "425a62bf0e24b959d8da605a1d3cd2310b4c4e33e9406711cb045e66b4a7e328"
 
 [metadata.files]
 alabaster = [
@@ -1573,6 +1574,11 @@ pbr = [
     {file = "pbr-5.6.0.tar.gz", hash = "sha256:42df03e7797b796625b1029c0400279c7c34fd7df24a7d7818a1abb5b38710dd"},
 ]
 pillow = [
+    {file = "Pillow-8.3.1-1-cp36-cp36m-win_amd64.whl", hash = "sha256:fd7eef578f5b2200d066db1b50c4aa66410786201669fb76d5238b007918fb24"},
+    {file = "Pillow-8.3.1-1-cp37-cp37m-win_amd64.whl", hash = "sha256:75e09042a3b39e0ea61ce37e941221313d51a9c26b8e54e12b3ececccb71718a"},
+    {file = "Pillow-8.3.1-1-cp38-cp38-win_amd64.whl", hash = "sha256:c0e0550a404c69aab1e04ae89cca3e2a042b56ab043f7f729d984bf73ed2a093"},
+    {file = "Pillow-8.3.1-1-cp39-cp39-win_amd64.whl", hash = "sha256:479ab11cbd69612acefa8286481f65c5dece2002ffaa4f9db62682379ca3bb77"},
+    {file = "Pillow-8.3.1-1-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:f156d6ecfc747ee111c167f8faf5f4953761b5e66e91a4e6767e548d0f80129c"},
     {file = "Pillow-8.3.1-cp36-cp36m-macosx_10_10_x86_64.whl", hash = "sha256:196560dba4da7a72c5e7085fccc5938ab4075fd37fe8b5468869724109812edd"},
     {file = "Pillow-8.3.1-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:29c9569049d04aaacd690573a0398dbd8e0bf0255684fee512b413c2142ab723"},
     {file = "Pillow-8.3.1-cp36-cp36m-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:c088a000dfdd88c184cc7271bfac8c5b82d9efa8637cd2b68183771e3cf56f04"},
@@ -1658,8 +1664,8 @@ pygments = [
     {file = "Pygments-2.9.0.tar.gz", hash = "sha256:a18f47b506a429f6f4b9df81bb02beab9ca21d0a5fee38ed15aef65f0545519f"},
 ]
 pyinaturalist = [
-    {file = "pyinaturalist-0.13.0-py3-none-any.whl", hash = "sha256:434aaa9d309dcb34ab20fae5578f7c4def890ccbc95ea362d61dbbc40fe97bce"},
-    {file = "pyinaturalist-0.13.0.tar.gz", hash = "sha256:65c89cada23f116cf721e9ef45c064fd9942cd2b73138fd3d2e23c9df2814e19"},
+    {file = "pyinaturalist-0.14.0-py3-none-any.whl", hash = "sha256:fa091b0025cc173984764e050d8cb93c1e7cf3de018576f5022ab44a1eb2972e"},
+    {file = "pyinaturalist-0.14.0.tar.gz", hash = "sha256:cb246aef4af88bf7f4939b78ab02fabd92b066050d0da2beeb88c30ce4af695e"},
 ]
 pyparsing = [
     {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
