@@ -61,7 +61,7 @@ black = "21.8b0"
 flake8 = "^3.9"
 isort = "5.9.2" # locked until issue #1762 is fixed
 mypy = "^0.910"
-pre-commit = "^2.12"
+pre-commit = "^2.15"
 prettyprinter = "^0.18.0"
 pytest = "^6.2"
 pytest-cov = ">=2.11"
