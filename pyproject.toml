@@ -38,7 +38,7 @@ pyexiv2 = ">=2.6.2"
 pyinaturalist = "~=0.14.0"
 pyyaml = "^5.4.1"
 requests = ">=2.20"
-requests-cache = ">=0.6.4,<0.8.0"
+requests-cache = ">=0.6.4,<0.9.0"
 rich = ">=10.0"
 xmltodict = "^0.12.0"
 
