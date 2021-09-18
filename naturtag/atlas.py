@@ -4,13 +4,13 @@ from math import ceil
 from time import sleep
 
 from PIL import Image
+from pyinaturalist.constants import ICONIC_TAXA
 
 from naturtag.constants import (
     ATLAS_LOCAL_PHOTOS,
     ATLAS_MAX_SIZE,
     ATLAS_TAXON_ICONS,
     ATLAS_TAXON_PHOTOS,
-    ICONIC_TAXA,
     THUMBNAIL_SIZE_DEFAULT,
     THUMBNAIL_SIZE_LG,
     THUMBNAIL_SIZE_SM,

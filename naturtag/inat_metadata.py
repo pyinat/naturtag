@@ -7,13 +7,9 @@ from typing import Dict, List, Optional, Tuple
 
 import requests_cache
 import xmltodict
-from pyinaturalist.node_api import (
-    get_observation,
-    get_observation_species_counts,
-    get_taxa,
-    get_taxa_by_id,
-)
-from pyinaturalist.rest_api import get_observations
+from pyinaturalist.constants import RANKS
+from pyinaturalist.v0 import get_observations
+from pyinaturalist.v1 import get_observation, get_observation_species_counts, get_taxa, get_taxa_by_id
 
 from naturtag.constants import (
     API_CACHE_EXPIRY_HOURS,
@@ -23,7 +19,6 @@ from naturtag.constants import (
     DWC_NAMESPACES,
     DWC_TAXON_TERMS,
     OBSERVATION_KEYS,
-    RANKS,
     TAXON_KEYS,
     IntTuple,
     StrTuple,
@@ -46,7 +41,7 @@ def get_http_cache_size() -> str:
 
 
 def get_observation_taxon(observation_id: int) -> int:
-    """Get the current taxon ID for the given observation"""
+    """Get the current taxon ID for the given observation ID"""
     logger.info(f'API: Fetching observation {observation_id}')
     obs = get_observation(observation_id)
     if obs.get('community_tax_id') and obs['community_tax_id'] != obs['taxon']['id']:

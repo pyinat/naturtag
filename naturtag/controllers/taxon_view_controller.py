@@ -75,8 +75,8 @@ class TaxonViewController(Controller):
             self.taxon_photo.source = self.selected_taxon.default_photo.medium_url
 
         # Configure link to iNaturalist page
-        self.taxon_link.bind(on_release=lambda *x: webbrowser.open(self.selected_taxon.uri))
-        self.taxon_link.tooltip_text = self.selected_taxon.uri
+        self.taxon_link.bind(on_release=lambda *x: webbrowser.open(self.selected_taxon.url))
+        self.taxon_link.tooltip_text = self.selected_taxon.url
         self.taxon_link.disabled = False
 
         # Configure 'View parent' button
@@ -133,12 +133,12 @@ class TaxonViewController(Controller):
         logger.info(f'Taxon: Loading {len(self.selected_taxon.parent_taxa)} ancestors')
         self.taxon_ancestors_label.text = _get_label('Ancestors', self.selected_taxon.parent_taxa)
         self.taxon_ancestors.clear_widgets()
-        self.loader.add_batch(self.selected_taxon.parent_taxa_ids, parent=self.taxon_ancestors)
+        self.loader.add_batch(self.selected_taxon.ancestor_ids, parent=self.taxon_ancestors)
 
         logger.info(f'Taxon: Loading {len(self.selected_taxon.child_taxa)} children')
         self.taxon_children_label.text = _get_label('Children', self.selected_taxon.child_taxa)
         self.taxon_children.clear_widgets()
-        self.loader.add_batch(self.selected_taxon.child_taxa_ids, parent=self.taxon_children)
+        self.loader.add_batch(self.selected_taxon.child_ids, parent=self.taxon_children)
 
         self.loader.start_thread()
 
