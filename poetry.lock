@@ -921,7 +921,7 @@ docs = ["furo (==2021.8.17b43)", "myst-parser (>=0.15.1,<0.16.0)", "sphinx (>=4.
 
 [[package]]
 name = "rich"
-version = "10.10.0"
+version = "10.11.0"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
@@ -1414,6 +1414,8 @@ cryptography = [
     {file = "cryptography-3.4.8-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:34dae04a0dce5730d8eb7894eab617d8a70d0c97da76b905de9efb7128ad7085"},
     {file = "cryptography-3.4.8-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1eb7bb0df6f6f583dd8e054689def236255161ebbcf62b226454ab9ec663746b"},
     {file = "cryptography-3.4.8-cp36-abi3-manylinux_2_24_x86_64.whl", hash = "sha256:9965c46c674ba8cc572bc09a03f4c649292ee73e1b683adb1ce81e82e9a6a0fb"},
+    {file = "cryptography-3.4.8-cp36-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:3c4129fc3fdc0fa8e40861b5ac0c673315b3c902bbdc05fc176764815b43dd1d"},
+    {file = "cryptography-3.4.8-cp36-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:695104a9223a7239d155d7627ad912953b540929ef97ae0c34c7b8bf30857e89"},
     {file = "cryptography-3.4.8-cp36-abi3-win32.whl", hash = "sha256:21ca464b3a4b8d8e86ba0ee5045e103a1fcfac3b39319727bc0fc58c09c6aff7"},
     {file = "cryptography-3.4.8-cp36-abi3-win_amd64.whl", hash = "sha256:3520667fda779eb788ea00080124875be18f2d8f0848ec00733c0ec3bb8219fc"},
     {file = "cryptography-3.4.8-pp36-pypy36_pp73-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:d2a6e5ef66503da51d2110edf6c403dc6b494cc0082f85db12f54e9c5d4c3ec5"},
@@ -1913,8 +1915,8 @@ requests-ratelimiter = [
     {file = "requests_ratelimiter-0.2.1-py3-none-any.whl", hash = "sha256:67ddb03c86c12fd41c3c8c204ccaf72553459ba37ab73a2b99312447fcd1e34a"},
 ]
 rich = [
-    {file = "rich-10.10.0-py3-none-any.whl", hash = "sha256:0b8cbcb0b8d476a7f002feaed9f35e51615f673c6c291d76ddf0c555574fd3c7"},
-    {file = "rich-10.10.0.tar.gz", hash = "sha256:bacf58b25fea6b920446fe4e7abdc6c7664c4530c4098e7a1bc79b16b8551dfa"},
+    {file = "rich-10.11.0-py3-none-any.whl", hash = "sha256:44bb3f9553d00b3c8938abf89828df870322b9ba43caf3b12bb7758debdc6dec"},
+    {file = "rich-10.11.0.tar.gz", hash = "sha256:016fa105f34b69c434e7f908bb5bd7fefa9616efdb218a2917117683a6394ce5"},
 ]
 secretstorage = [
     {file = "SecretStorage-3.3.1-py3-none-any.whl", hash = "sha256:422d82c36172d88d6a0ed5afdec956514b189ddbfb72fefab0c8a1cee4eaf71f"},
