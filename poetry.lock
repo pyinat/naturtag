@@ -64,7 +64,7 @@ testing = ["pytest (>=4.6)", "pytest-flake8", "pytest-cov", "pytest-black (>=0.3
 
 [[package]]
 name = "black"
-version = "21.8b0"
+version = "21.10b0"
 description = "The uncompromising code formatter."
 category = "dev"
 optional = false
@@ -85,9 +85,9 @@ typing-extensions = [
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
-d = ["aiohttp (>=3.6.0)", "aiohttp-cors (>=0.4.0)"]
+d = ["aiohttp (>=3.7.4)"]
 jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
-python2 = ["typed-ast (>=1.4.2)"]
+python2 = ["typed-ast (>=1.4.3)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
@@ -1245,7 +1245,7 @@ docs = ["m2r2", "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphi
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "ab4239c1207c2ba7eaa01d50c238a3ff4efae5e2e05be37d0c844feb89b11784"
+content-hash = "4ae9558b8738b3d477c969214783616c75181151d86a7231b5e3b069360cf8cc"
 
 [metadata.files]
 alabaster = [
@@ -1273,8 +1273,8 @@ babel = [
     {file = "backports.entry_points_selectable-1.1.0.tar.gz", hash = "sha256:988468260ec1c196dab6ae1149260e2f5472c9110334e5d51adcb77867361f6a"},
 ]
 black = [
-    {file = "black-21.8b0-py3-none-any.whl", hash = "sha256:2a0f9a8c2b2a60dbcf1ccb058842fb22bdbbcb2f32c6cc02d9578f90b92ce8b7"},
-    {file = "black-21.8b0.tar.gz", hash = "sha256:570608d28aa3af1792b98c4a337dbac6367877b47b12b88ab42095cfc1a627c2"},
+    {file = "black-21.10b0-py3-none-any.whl", hash = "sha256:6eb7448da9143ee65b856a5f3676b7dda98ad9abe0f87fce8c59291f15e82a5b"},
+    {file = "black-21.10b0.tar.gz", hash = "sha256:a9952229092e325fe5f3dae56d81f639b23f7131eb840781947e4b2886030f33"},
 ]
 certifi = [
     {file = "certifi-2021.5.30-py2.py3-none-any.whl", hash = "sha256:50b1e4f8446b06f41be7dd6338db18e0990601dce795c2b1686458aa7e8fa7d8"},
