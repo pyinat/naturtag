@@ -60,7 +60,7 @@ sphinxcontrib-apidoc = { version = "^0.3", optional = true }
 black = "21.10b0"
 flake8 = "^4.0"
 isort = "5.10.0" # locked until issue #1762 is fixed
-mypy = "^0.910"
+mypy = "^0.931"
 pre-commit = "^2.16"
 prettyprinter = "^0.18.0"
 pytest = "^6.2"
