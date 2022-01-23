@@ -34,7 +34,7 @@ KV = '''\
         on_text: app.submit_pulse_text(args[1])
     BoxLayout:
         Label:
-            id: pulse_listener  
+            id: pulse_listener
 '''
 
 
