@@ -6,7 +6,8 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
 
 Naturtag is a tool for tagging local observation photos with iNaturalist taxonomy & observation metadata.
-This includes a **command-line interface**, a **graphical interface**, and can also be used as a **python package**.
+This includes a basic **command-line interface**, an experimental **graphical interface**, and can
+also be used as a **python package**.
 
 See the CLI in action here:
 [![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
@@ -61,16 +62,16 @@ another biodiversity observation platform with a more specific focus, such as
 [Simple Darwin Core](https://dwc.tdwg.org/simple).
 
 # Development Status
+This is currently just a small hobby project, and still fairly unpolished. While this repo hasn't
+seen much progress lately, I am actively working on other iNaturalist-related projects that naturtag
+will benefit from, mainly [pyinaturalist](https://pyinaturalist.readthedocs.io).
+
 See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and
 current progress.
 
 If you have any suggestions, questions, or requests, please
 [create an issue](https://github.com/JWCook/naturtag/issues/new/choose), or ping me (**@jcook**)
 on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
-
-This is currently just a small hobby project, and still fairly unpolished. All the features
-described below are functional, however, and plenty more are planned. I am intermittently working
-on this while maintaining a number of other libraries that are (or will be) used in Naturtag.
 
 # Python Package
 See [naturtag documentation on ReadTheDocs](https://naturtag.readthedocs.io) for details on the
