@@ -2,7 +2,7 @@ from os.path import dirname, join
 from pathlib import Path
 from typing import IO, Dict, Iterable, Optional, Tuple, Union
 
-from appdirs import user_data_dir
+from platformdirs import user_data_dir
 from pyinaturalist import DEFAULT_USER_AGENT
 
 from naturtag import __version__
