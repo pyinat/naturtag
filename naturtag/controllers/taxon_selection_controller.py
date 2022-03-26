@@ -14,6 +14,7 @@ logger = getLogger().getChild(__name__)
 
 
 # TODO: Better name for this? Maybe 'TaxonQuickAccessController'?
+# TODO: Use requests-cache expiration settings instead of manual refresh in refresh_observed_taxa()
 class TaxonSelectionController(Controller):
     """Controller class to manage selecting stored taxa"""
 
@@ -185,7 +186,6 @@ class TaxonSelectionController(Controller):
         self.starred_taxa_list.remove_widget(item)
         self.starred_taxa_list.add_widget(item, len(self.starred_taxa_list.children))
 
-    # TODO: Only refresh if 'expired'
     def refresh_observed_taxa(self):
         """Get all user-observed taxa, if a username has been provided"""
         username = get_app().settings_controller.username

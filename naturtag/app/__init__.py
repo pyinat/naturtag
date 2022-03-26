@@ -4,7 +4,7 @@ from kivymd.uix.snackbar import Snackbar
 
 def alert(text, **kwargs):
     """Show a popup 'snackbar' message"""
-    Snackbar(text=text, **kwargs).show()
+    Snackbar(text=text, **kwargs).open()
 
 
 def get_app():

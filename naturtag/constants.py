@@ -60,6 +60,7 @@ ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOC
 
 # Cache settings
 CACHE_FILE = join(DATA_DIR, 'api_cache.db')
+OBS_CACHE_EXPIRY_HOURS = 48
 
 # Config files
 CONFIG_PATH = join(DATA_DIR, 'settings.yml')
