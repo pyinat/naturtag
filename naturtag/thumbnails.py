@@ -56,10 +56,10 @@ def get_thumbnail_if_exists(source: str) -> Optional[str]:
 
     thumbnail_path = get_thumbnail_path(source)
     if isfile(thumbnail_path):
-        logger.debug(f'Found existing thumbnail for {source}')
+        logger.debug(f'Thumbnails: Found existing thumbnail for {source}')
         return thumbnail_path
     elif normpath(dirname(source)) == normpath(THUMBNAILS_DIR) or source.startswith('atlas://'):
-        logger.debug(f'Image is already a thumbnail: {source}')
+        logger.debug(f'Thumbnails: Image is already a thumbnail: {source}')
         return source
     else:
         return None
@@ -118,7 +118,7 @@ def get_format(source: str) -> str:
 
 def generate_thumbnail_from_url(url: str, size: str):
     """Like :py:func:`.generate_thumbnail`, but downloads an image from a URL"""
-    logger.info(f'Downloading: {url}')
+    logger.info(f'Thumbnails: Downloading: {url}')
     r = requests.get(url, stream=True)
     if r.status_code == 200:
         image_bytes = BytesIO()
@@ -126,7 +126,7 @@ def generate_thumbnail_from_url(url: str, size: str):
         copyfileobj(r.raw, image_bytes)
         generate_thumbnail_from_bytes(image_bytes, url, size=size, default_flip=False)
     else:
-        logger.info(f'Request failed: {str(r)}')
+        logger.info(f'Thumbnails: Request failed: {str(r)}')
 
 
 def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
@@ -138,7 +138,7 @@ def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
     if len(image_bytes.getvalue()) > 0:
         return generate_thumbnail(image_bytes, thumbnail_path, fmt=fmt, **kwargs)
     else:
-        logger.error(f'Failed to save image bytes to thumbnail for {source}')
+        logger.error(f'Thumbnails: Failed to save image bytes to thumbnail for {source}')
         return None
 
 
@@ -162,7 +162,7 @@ def generate_thumbnail(
         str: The path of the new thumbnail
     """
     target_size = get_thumbnail_size(size)
-    logger.info(f'Generating {target_size} thumbnail for {source}:\n  {thumbnail_path}')
+    logger.info(f'Thumbnails: Generating {target_size} thumbnail for {source}:\n  {thumbnail_path}')
 
     # Resize if necessary, or just copy the image to the cache if it's already thumbnail size
     try:
@@ -170,13 +170,13 @@ def generate_thumbnail(
         if image.size[0] > target_size[0] or image.size[1] > target_size[1]:
             image.thumbnail(target_size)
         else:
-            logger.debug(f'Image is already thumbnail size: ({image.size})')
+            logger.debug(f'Thumbnails: Image is already thumbnail size: ({image.size})')
         image.save(thumbnail_path, format=fmt.replace('jpg', 'jpeg') if fmt else None)
         return thumbnail_path
 
     # If we're unable to generate a thumbnail, just return the original image source
     except RuntimeError:
-        logger.exception('Failed to generate thumbnail')
+        logger.exception('Thumbnails: Failed to generate thumbnail')
         return source
 
 

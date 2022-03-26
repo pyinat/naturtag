@@ -9,6 +9,7 @@ from kivy.event import EventDispatcher
 from kivy.uix.widget import Widget
 
 from naturtag.app import get_app
+from naturtag.inat_metadata import get_taxon
 from naturtag.widgets import ImageMetaTile, TaxonListItem
 
 REPORT_RATE = 1 / 30  # Report progress to UI at 30 FPS
@@ -16,7 +17,7 @@ logger = getLogger().getChild(__name__)
 
 
 class BatchRunner(EventDispatcher):
-    """Runs batches of tasks asynchronously in a separate thread from the main GUI thread
+    """Runs batches of IO-bound tasks asynchronously, in a separate thread from the main UI thread
 
     Events:
         on_progress: Called periodically to report progress
@@ -64,14 +65,14 @@ class BatchRunner(EventDispatcher):
     def start_thread(self):
         """Start the background loader event loop in a new thread"""
 
-        def _start():
-            asyncio.run_coroutine_threadsafe(self.start(), self.loop)
+        def start_wrapper():
+            asyncio.run_coroutine_threadsafe(self.start_workers(), self.loop)
 
-        Thread(target=_start).start()
+        Thread(target=start_wrapper).start()
 
-    async def start(self):
-        """Start the background loader event loop"""
-        logger.info(f'Loader: Starting {len(self.queues)} batches')
+    async def start_workers(self):
+        """Start running workers in the the background loader event loop"""
+        logger.info(f'BatchRunner: Starting {len(self.queues)} batches')
         for queue in self.queues:
             task = asyncio.create_task(self.worker(queue))
             self.worker_tasks.append(task)
@@ -95,7 +96,7 @@ class BatchRunner(EventDispatcher):
 
     async def stop(self):
         """Safely stop the event loop"""
-        logger.info(f'Loader: stopping {len(self.worker_tasks)} workers')
+        logger.info(f'BatchRunner: stopping {len(self.worker_tasks)} workers')
         for task in self.worker_tasks:
             task.cancel()
         self.loop.run_until_complete(asyncio.gather(*self.worker_tasks, return_exceptions=True))
@@ -146,17 +147,18 @@ class BatchLoader(BatchRunner):
 
     def stop_progress(self):
         """Unschedule progress event and log total execution time"""
+        self.report_progress()
         if self.event:
             self.event.cancel()
             self.event = None
             logger.info(
-                f'Loader: Finished loading {self.items_complete} items '
-                f'in {time() - self.start_time} seconds'
+                f'BatchLoader: Finished loading {self.items_complete} items '
+                f'in {time() - self.start_time:0.2f} seconds'
             )
 
     def cancel(self):
         """Safely stop the event loop and thread (from another thread)"""
-        logger.info(f'Loader: Canceling {len(self.queues)} batches')
+        logger.info(f'BatchLoader: Canceling {len(self.queues)} batches')
         self.loop.call_soon_threadsafe(self.stop_progress)
         asyncio.run_coroutine_threadsafe(self.stop(), self.loop)
 
@@ -170,9 +172,11 @@ class WidgetBatchLoader(BatchLoader):
 
     async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
         """Load information for a new widget"""
-        logger.debug(f'Processing item: {item}')
+        logger.debug(f'BatchLoader: Processing item: {item}')
         widget = self.widget_cls(item, **kwargs)
         self.add_widget(widget, parent)
+
+        logger.debug(f'BatchLoader: Item complete: {item}')
         await self.increment_progress()
         return widget
 
@@ -189,10 +193,16 @@ class TaxonBatchLoader(WidgetBatchLoader):
     def __init__(self, **kwargs):
         super().__init__(widget_cls=TaxonListItem, **kwargs)
 
-    def add_widget(self, widget: Widget, parent: Widget):
-        """Add a TaxonListItem to its parent list and bind its click event"""
-        super().add_widget(widget, parent)
-        mainthread(get_app().bind_to_select_taxon)(widget)
+    async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
+        """Fetch a Taxon by ID, add a TaxonListItem to its parent list, and bind its click event"""
+        taxon = get_taxon(item)
+        widget = await super().load_widget(taxon, parent, **kwargs)
+        self.bind_click(widget)
+        return widget
+
+    @mainthread
+    def bind_click(self, widget):
+        get_app().bind_to_select_taxon(widget)
 
 
 class ImageBatchLoader(WidgetBatchLoader):
@@ -201,10 +211,11 @@ class ImageBatchLoader(WidgetBatchLoader):
     def __init__(self, **kwargs):
         super().__init__(widget_cls=ImageMetaTile, **kwargs)
 
-    def add_widget(self, widget: Widget, parent: Widget):
-        """Add an ImageMetaTiles to its parent view and bind its click event"""
-        super().add_widget(widget, parent)
+    async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
+        """Add an ImageMetaTile to its parent view and bind its click event"""
+        widget = await super().load_widget(item, parent, **kwargs)
         self.bind_click(widget)
+        return widget
 
     @mainthread
     def bind_click(self, widget):

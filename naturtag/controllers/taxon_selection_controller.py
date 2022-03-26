@@ -84,10 +84,10 @@ class TaxonSelectionController(Controller):
         loader = TaxonBatchLoader()
         self.start_progress(total_taxa, loader)
 
-        # Add the finishing touches after all items have loaded
+        # Add callback to index items after they have all been loaded
         def index_list_items(*args):
-            for item in self.taxon_history_list.children:
-                self.taxon_history_map[item.taxon.id] = item
+            # for item in self.taxon_history_list.children:
+            #     self.taxon_history_map[item.taxon.id] = item
             for item in self.starred_taxa_list.children:
                 self.bind_star(item)
 
@@ -98,7 +98,13 @@ class TaxonSelectionController(Controller):
             f'Taxon: Loading {len(unique_history_ids)} unique taxa from history'
             f' (from {len(self.taxon_history_ids)} total)'
         )
-        loader.add_batch(unique_history_ids, parent=self.taxon_history_list)
+        # loader.add_batch(unique_history_ids, parent=self.taxon_history_list)
+        # TODO: Temporary workaround while BatchLoader is borken
+        for taxon_id in unique_history_ids:
+            widget = get_app().get_taxon_list_item(taxon_id)
+            self.taxon_history_list.add_widget(widget)
+            self.taxon_history_map[widget.taxon.id] = widget
+
         logger.info(f'Taxon: Loading {len(starred_taxa_ids)} starred taxa')
         loader.add_batch(starred_taxa_ids, parent=self.starred_taxa_list, highlight_observed=False)
         logger.info(f'Taxon: Loading {len(top_frequent_ids)} frequently viewed taxa')
@@ -174,7 +180,7 @@ class TaxonSelectionController(Controller):
         # Middle-click: remove item
         elif touch.button == 'middle':
             self.remove_star(instance.taxon.id)
-        # Left-cliok: select taxon
+        # Left-click: select taxon
         else:
             get_app().select_taxon(instance.taxon)
 

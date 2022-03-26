@@ -3,8 +3,10 @@ import asyncio
 import os
 from logging import getLogger
 from threading import Thread
+from typing import Union
 
 from naturtag.atlas import get_atlas
+from naturtag.models.taxon import Taxon
 
 # Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
@@ -42,7 +44,7 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.inat_metadata import get_ids_from_url
+from naturtag.inat_metadata import get_ids_from_url, get_taxon
 from naturtag.widgets import TaxonListItem
 
 logger = getLogger().getChild(__name__)
@@ -92,9 +94,9 @@ class ControllerProxy:
         self.image_selection_controller.post_init()
         self.taxon_selection_controller.post_init()
 
-    def get_taxon_list_item(self, *args, **kwargs):
+    def get_taxon_list_item(self, taxon: Union[Taxon, int, dict], **kwargs):
         """Get a new :py:class:`.TaxonListItem with event binding"""
-        item = TaxonListItem(*args, **kwargs)
+        item = TaxonListItem(get_taxon(taxon), **kwargs)
         self.bind_to_select_taxon(item)
         return item
 

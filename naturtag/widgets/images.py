@@ -36,7 +36,7 @@ class CachedAsyncImage(AsyncImage):
         if self.thumbnail_path is None:
             self.thumbnail_path = get_thumbnail_if_exists(self.source) or ''
             if self.thumbnail_path:
-                logger.debug(f'Found {self.source} in cache: {self.thumbnail_path}')
+                logger.debug(f'CachedAsyncImage: Found {self.source} in cache: {self.thumbnail_path}')
                 self.source = self.thumbnail_path
         super()._load_source(*args)
 
@@ -47,12 +47,12 @@ class CachedAsyncImage(AsyncImage):
 
     def get_image_bytes(self):
         if not (self._coreimage.image and self._coreimage.image.texture):
-            logger.warning(f'Texture for {self.source} not loaded')
+            logger.warning(f'CachedAsyncImage: Texture for {self.source} not loaded')
             return None
 
         # thumbnail_path = get_thumbnail_path(self.source)
         ext = get_format(self.source)
-        logger.debug(f'Getting image data downloaded from {self.source}; format {ext}')
+        logger.debug(f'CachedAsyncImage: Getting image data from {self.source}; format {ext}')
 
         # Load inner 'texture' bytes into a file-like object that PIL can read
         image_bytes = BytesIO()

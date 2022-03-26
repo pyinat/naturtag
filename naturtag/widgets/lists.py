@@ -1,4 +1,4 @@
-from typing import Union
+from logging import getLogger
 
 from kivy.core.clipboard import Clipboard
 from kivymd.uix.list import (
@@ -14,6 +14,8 @@ from kivymd.uix.selectioncontrol import MDSwitch
 from naturtag.app import alert, get_app
 from naturtag.models import Taxon
 from naturtag.widgets import CachedAsyncImage
+
+logger = getLogger().getChild(__name__)
 
 
 class SortableList(MDList):
@@ -44,17 +46,11 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
 
     def __init__(
         self,
-        taxon: Union[Taxon, int, dict] = None,
+        taxon: Taxon = None,
         disable_button: bool = False,
         highlight_observed: bool = True,
         **kwargs,
     ):
-        if not taxon:
-            raise ValueError('Must provide either a taxon object or ID')
-        if isinstance(taxon, int):
-            taxon = Taxon.from_id(taxon)
-        elif isinstance(taxon, dict):
-            taxon = Taxon.from_json(taxon)
         self.taxon = taxon
 
         # Set click event unless disabled
@@ -62,8 +58,10 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
             self.bind(on_touch_down=self._on_touch_down)
         self.disable_button = disable_button
 
+        # TODO: When run from BatchLoader, this appears to just hang and never complete!?
+        # Problem may be in ButtonBehavior class?
         super().__init__(
-            font_style='H6',
+            # font_style='H6',
             text=taxon.name,
             secondary_text=taxon.rank,
             tertiary_text=taxon.preferred_common_name,
@@ -71,6 +69,7 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
         )
 
         # Add thumbnail
+        logger.debug(f'TaxonListItem: Loading image {taxon.default_photo.thumbnail_url}')
         self.add_widget(ThumbnailListItem(source=taxon.default_photo.thumbnail_url or taxon.icon_path))
         # Add user icon if taxon has been observed by the user
         if highlight_observed and get_app().is_observed(taxon.id):

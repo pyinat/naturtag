@@ -61,11 +61,8 @@ class TaxonSearchController(Controller):
         asyncio.run(self._search())
 
     # TODO: Paginated results
+    # TODO: Run in separate thread?
     async def _search(self):
-        # TODO: To make async HTTP requests, Pick one of: grequests, aiohttp, twisted, tornado...
-        # async def _get_taxa(params):
-        #     return get_taxa(**params)['results']
-
         params = self.get_search_parameters()
         logger.info(f'Searching taxa with parameters: {params}')
         # results = await _get_taxa(params)
@@ -108,6 +105,7 @@ class TaxonSearchController(Controller):
         self.min_rank_input.text = ''
         self.max_rank_input.text = ''
 
+    # TODO: Ctrl-click to select
     @staticmethod
     def on_select_iconic_taxon(button):
         """Handle clicking an iconic taxon; don't re-select the taxon if we're de-selecting it"""
