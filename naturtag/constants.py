@@ -57,6 +57,7 @@ ATLAS_LOCAL_PHOTOS = ATLAS_DIR / 'local_photos'
 ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
 
 APP_ICONS_DIR = ASSETS_DIR / 'iconic_taxa'
+APP_LOGO = str(ASSETS_DIR / 'logo.png')
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
 
 # Cache settings

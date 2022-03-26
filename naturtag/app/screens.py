@@ -1,6 +1,5 @@
 """ Screen classes used by the app """
 from logging import getLogger
-from os.path import join
 from typing import Any
 
 from kivy.lang import Builder
@@ -75,6 +74,6 @@ def load_screens() -> dict[str, Any]:
 
 def load_kv(name: str):
     """Load an individual kv file by name"""
-    path = join(KV_SRC_DIR, f'{name}.kv')
-    Builder.load_file(path)
+    path = KV_SRC_DIR / f'{name}.kv'
+    Builder.load_file(str(path))
     logger.debug(f'Init: Loaded {path}')

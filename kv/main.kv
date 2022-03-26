@@ -1,5 +1,5 @@
 #:kivy 1.11
-#:import ASSETS_DIR naturtag.constants.ASSETS_DIR
+#:import APP_LOGO naturtag.constants.APP_LOGO
 #:import IMAGE_FILETYPES naturtag.constants.IMAGE_FILETYPES
 #:import version naturtag.__version__
 #:import Transition kivy.uix.screenmanager.NoTransition
@@ -51,7 +51,7 @@
 				x: root.parent.x
 				pos_hint: {'top': 1}
 				FitImage:
-					source: f'{ASSETS_DIR}naturtag-logo.png'
+					source: APP_LOGO
 
 			MDIconButton:
 				icon: 'close'
@@ -80,7 +80,7 @@
 					on_press:
 						app.switch_screen('settings')
 					IconLeftWidget:
-						icon: 'settings'
+						icon: 'cog'
 				OneLineIconListItem:
 					text: 'Cache'
 					on_press:
