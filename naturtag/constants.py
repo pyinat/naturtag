@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import IO, Dict, Iterable, Optional, Tuple, Union
 
 from platformdirs import user_data_dir
-from pyinaturalist import DEFAULT_USER_AGENT
 
 from naturtag import __version__
 
@@ -60,10 +59,7 @@ ATLAS_APP_ICONS = f'{ATLAS_BASE}/app_icons'
 ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
 
 # Cache settings
-CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
-API_CACHE_EXPIRY_HOURS = 0
-OBS_CACHE_EXPIRY_HOURS = 48
-CACHE_BACKEND = 'sqlite'
+CACHE_FILE = join(DATA_DIR, 'api_cache.db')
 
 # Config files
 CONFIG_PATH = join(DATA_DIR, 'settings.yml')
@@ -77,7 +73,7 @@ PHOTO_BASE_URL = 'https://static.inaturalist.org/photos'
 PHOTO_INFO_BASE_URL = 'https://www.inaturalist.org/photos'
 PLACES_BASE_URL = 'https://www.inaturalist.org/places'
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
-USER_AGENT = f'naturtag/{__version__}; {DEFAULT_USER_AGENT}'.lower()
+USER_AGENT = f'naturtag/{__version__}'.lower()
 
 # Theme/window settings
 INIT_WINDOW_POSITION = ('custom', 100, 100)

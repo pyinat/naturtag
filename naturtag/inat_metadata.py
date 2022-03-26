@@ -1,20 +1,14 @@
 """ Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations """
-from datetime import timedelta
 from logging import getLogger
-from os import makedirs
-from os.path import dirname, getsize
+from os.path import getsize, isfile
 from typing import Dict, List, Optional, Tuple
 
-import requests_cache
 import xmltodict
-from pyinaturalist.constants import RANKS
+from pyinaturalist.constants import CACHE_FILE, RANKS
 from pyinaturalist.v0 import get_observations
 from pyinaturalist.v1 import get_observation, get_observation_species_counts, get_taxa, get_taxa_by_id
 
 from naturtag.constants import (
-    API_CACHE_EXPIRY_HOURS,
-    CACHE_BACKEND,
-    CACHE_PATH,
     COMMON_NAME_IGNORE_TERMS,
     DWC_NAMESPACES,
     DWC_TAXON_TERMS,
@@ -25,19 +19,13 @@ from naturtag.constants import (
 )
 from naturtag.validation import format_file_size
 
-# Patch requests to use CachedSession for pyinaturalist API calls
-makedirs(dirname(CACHE_PATH), exist_ok=True)
-requests_cache.install_cache(
-    CACHE_PATH,
-    backend=CACHE_BACKEND,
-    expire_after=timedelta(hours=API_CACHE_EXPIRY_HOURS),
-)
 logger = getLogger().getChild(__name__)
 
 
-def get_http_cache_size() -> str:
-    """Get the current size of the HTTP request cache, in human-readable format"""
-    return format_file_size(getsize(f'{CACHE_PATH}.{CACHE_BACKEND}'))
+def get_cache_size() -> str:
+    """Get the current size of the API request cache, in human-readable format"""
+    n_bytes = getsize(CACHE_FILE) if isfile(CACHE_FILE) else 0
+    return format_file_size(n_bytes)
 
 
 def get_observation_taxon(observation_id: int) -> int:
