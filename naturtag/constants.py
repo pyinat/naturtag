@@ -1,17 +1,16 @@
-from os.path import dirname, join
 from pathlib import Path
 from typing import IO, Iterable, Optional, Union
 
 from platformdirs import user_data_dir
+from pyinaturalist import ICONIC_TAXA
 
 from naturtag import __version__
 
 # Resource directories
-PKG_DIR = dirname(dirname(__file__))
-ASSETS_DIR = join(PKG_DIR, 'assets', '')
-KV_SRC_DIR = join(PKG_DIR, 'kv')
-ICONS_DIR = join(ASSETS_DIR, 'iconic_taxa')
-DATA_DIR = join(user_data_dir(), 'Naturtag')
+PKG_DIR = Path(__file__).parent.parent
+ASSETS_DIR = PKG_DIR / 'assets'
+KV_SRC_DIR = PKG_DIR / 'kv'
+DATA_DIR = Path(user_data_dir()) / 'Naturtag'
 
 # TODO: These may be useful as user-configurable settings
 TRIGGER_DELAY = 0.1
@@ -21,7 +20,7 @@ IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 
 # Thumnbnail & cache settings
-THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
+THUMBNAILS_DIR = DATA_DIR / 'thumbnails'
 THUMBNAIL_DEFAULT_FORMAT = 'png'
 THUMBNAIL_SIZE_SM = (75, 75)
 THUMBNAIL_SIZE_DEFAULT = (200, 200)
@@ -50,22 +49,24 @@ EXIF_ORIENTATION_ID = '0x0112'
 
 # Atlas settings
 ATLAS_MAX_SIZE = 4096
-ATLAS_BASE = 'atlas://../../assets/atlas'  # Path is relative to Kivy app.py
-ATLAS_PATH = join(ASSETS_DIR, 'atlas', 'taxon_icons.atlas')
-ATLAS_TAXON_ICONS = f'{ATLAS_BASE}/taxon_icons'
-ATLAS_TAXON_PHOTOS = f'{ATLAS_BASE}/taxon_photos'
-ATLAS_LOCAL_PHOTOS = f'{ATLAS_BASE}/local_photos'
-ATLAS_APP_ICONS = f'{ATLAS_BASE}/app_icons'
+ATLAS_DIR = ASSETS_DIR / 'atlas'
+ATLAS_APP_ICONS = ATLAS_DIR / 'app_icons'
+ATLAS_TAXON_ICONS = ATLAS_DIR / 'taxon_icons'
+ATLAS_TAXON_PHOTOS = ATLAS_DIR / 'taxon_photos'
+ATLAS_LOCAL_PHOTOS = ATLAS_DIR / 'local_photos'
 ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
 
+APP_ICONS_DIR = ASSETS_DIR / 'iconic_taxa'
+SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
+
 # Cache settings
-CACHE_FILE = join(DATA_DIR, 'api_cache.db')
+CACHE_FILE = DATA_DIR / 'api_cache.db'
 OBS_CACHE_EXPIRY_HOURS = 48
 
 # Config files
-CONFIG_PATH = join(DATA_DIR, 'settings.yml')
-DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
-STORED_TAXA_PATH = join(DATA_DIR, 'stored_taxa.json')
+CONFIG_PATH = DATA_DIR / 'settings.yml'
+DEFAULT_CONFIG_PATH = PKG_DIR / 'default_settings.yml'
+STORED_TAXA_PATH = DATA_DIR / 'stored_taxa.json'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 
 # URLs / API settings

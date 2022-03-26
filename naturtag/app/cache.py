@@ -3,7 +3,7 @@ from logging import getLogger
 
 from kivy.core.image import Image
 
-from naturtag.atlas import get_resource_path_if_exists
+from naturtag.atlas import get_atlas_uri_if_exists
 from naturtag.thumbnails import (
     generate_thumbnail_from_bytes,
     get_thumbnail,
@@ -49,7 +49,7 @@ def get_atlas_thumbnail_if_exists(source: str, size: str) -> str:
     Returns:
         str: `atlas://` path, if found; otherwise ``None``
     """
-    return get_resource_path_if_exists(size, get_thumbnail_hash(source))
+    return get_atlas_uri_if_exists(size, get_thumbnail_hash(source))
 
 
 # TODO: Not quite working as intended

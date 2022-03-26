@@ -1,10 +1,11 @@
 import asyncio
 from logging import getLogger
 
-from pyinaturalist.constants import ICONIC_TAXA, RANKS
+from pyinaturalist.constants import RANKS
 from pyinaturalist.v1 import get_taxa
 
 from naturtag.app import get_app
+from naturtag.constants import SELECTABLE_ICONIC_TAXA
 from naturtag.controllers import Controller, TaxonBatchLoader
 from naturtag.widgets import DropdownTextField, IconicTaxaIcon
 
@@ -30,7 +31,7 @@ class TaxonSearchController(Controller):
         self.iconic_taxa_filters = screen.search_tab.ids.iconic_taxa
 
         # 'Categories' (iconic taxa) icons
-        for id in ICONIC_TAXA:
+        for id in SELECTABLE_ICONIC_TAXA:
             icon = IconicTaxaIcon(id)
             icon.bind(on_release=self.on_select_iconic_taxon)
             self.iconic_taxa_filters.add_widget(icon)

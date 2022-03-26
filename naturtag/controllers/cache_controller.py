@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 
 
 class CacheController(Controller):
-    """Controller class to manage Settings screen, and reading from and writing to settings file"""
+    """Controller class to manage application caches"""
 
     def __init__(self, cache_screen):
         self.screen = cache_screen

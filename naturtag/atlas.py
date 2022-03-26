@@ -1,12 +1,15 @@
 """ Utilities for intelligently combining thumbnail images into a Kivy Atlas """
 from logging import getLogger
 from math import ceil
+from pathlib import Path
 from time import sleep
+from typing import Union
 
 from PIL import Image
 from pyinaturalist.constants import ICONIC_TAXA
 
 from naturtag.constants import (
+    APP_ICONS_DIR,
     ATLAS_LOCAL_PHOTOS,
     ATLAS_MAX_SIZE,
     ATLAS_TAXON_ICONS,
@@ -17,7 +20,6 @@ from naturtag.constants import (
     THUMBNAILS_DIR,
 )
 from naturtag.image_glob import get_images_from_paths
-from naturtag.models import Taxon
 from naturtag.thumbnails import generate_thumbnail_from_url, get_thumbnail_if_exists
 
 # Current organization of altas files by thumb size; this may change in the future
@@ -38,27 +40,44 @@ IMAGE_DOWNLOAD_DELAY = 1
 logger = getLogger().getChild(__name__)
 
 
-def get_resource_path_if_exists(atlas_category, id):
-    """If the specified ID exists in the atlas, return the full path"""
-    atlas_path = ATLAS_CATEGORIES.get(atlas_category)
-    atlas = get_atlas(atlas_path)
-    if id in atlas.textures:
-        logger.debug(f'Found {id} in atlas')
-        return f'{atlas_path}/{id}'
-    return None
+def get_atlas(atlas_path: Union[Path, str]):
+    """Get atlas from the Kivy cache if present, otherwise initialize it
 
+    Note: atlas path format varies by usage:
 
-def get_atlas(atlas_path):
-    """Get atlas from the Kivy cache if present, otherwise initialize it"""
+    * Format for Atlas():  `/path/file.atlas`
+    * Format for Image():  `atlas://path/file
+    * See: https://kivy.org/doc/stable/api-kivy.atlas.html#manual-usage-of-the-atlas
+    """
     from kivy.atlas import Atlas
     from kivy.cache import Cache
 
-    atlas = Cache.get('kv.atlas', atlas_path.replace('atlas://', ''))
+    atlas_path = f'{atlas_path}.atlas'
+    atlas = Cache.get('kv.atlas', atlas_path)
     if not atlas:
-        logger.info(f'Initializing atlas "{atlas_path}"')
-        atlas = Atlas(f'{atlas_path}.atlas')
+        logger.info(f'Atlas: Initializing atlas "{atlas_path}"')
+        atlas = Atlas(atlas_path)
         Cache.append('kv.atlas', atlas_path, atlas)
     return atlas
+
+
+def get_atlas_uri(atlas_path: Union[Path, str], image_id: str):
+    """Get an Atlas URI by path and image ID (without validation)"""
+    return f'atlas://{atlas_path}/{image_id}'
+
+
+def get_atlas_uri_if_exists(atlas_category: str, image_id: str):
+    """Get an Atlas URI by size category and image ID, if it exists"""
+    atlas_path = ATLAS_CATEGORIES.get(atlas_category)
+    atlas = get_atlas(atlas_path)
+    if image_id in atlas.textures:
+        logger.debug(f'Atlas: Found {image_id} in atlas')
+        return f'atlas://{atlas_path}/{image_id}'
+    return None
+
+
+def build_app_icon_atlas(dir=APP_ICONS_DIR):
+    build_atlas(dir, *THUMBNAIL_SIZE_SM, 'app_icons', max_size=ATLAS_MAX_SIZE)
 
 
 def build_taxon_icon_atlas(dir=THUMBNAILS_DIR):
@@ -91,12 +110,12 @@ def build_atlas(image_paths, src_x, src_y, atlas_name, padding=2, **limit_kwarg)
     # size category is over twice the size of the next smallest one
     min_x = ceil(src_x / 2)
     min_y = ceil(src_y / 2)
-    logger.info(f'Searching for images of dimensions ({min_x}-{src_x}) x ({min_y}-{src_y})...')
+    logger.info(f'Atlas: Searching for images of dimensions ({min_x}-{src_x}) x ({min_y}-{src_y})...')
     image_paths = list(filter_images_by_size(image_paths, src_x, src_y, min_x, min_y))
-    logger.info(f'{len(image_paths)} images found')
+    logger.info(f'Atlas: {len(image_paths)} images found')
 
     atlas_size = get_atlas_dimensions(len(image_paths), src_x, src_y, padding=padding, **limit_kwarg)
-    logger.info(f'Calculated atlas size: {atlas_size}')
+    logger.info(f'Atlas: Calculated atlas size: {atlas_size}')
     if atlas_size != (0, 0):
         Atlas.create(atlas_name, image_paths, atlas_size, padding=padding)
 
@@ -184,18 +203,20 @@ def _largest_factor_pair(n):
 
 def preload_iconic_taxa_thumbnails():
     """Pre-download taxon thumbnails for iconic taxa and descendants down to 2 ranks below"""
+    from naturtag.models import Taxon
+
     for id, name in list(PRELOAD_TAXA.items()):
         min_rank = 'family'
         if name == 'mammalia':
             min_rank = 'genus'
         if name in ['chromista', 'animalia']:
             min_rank = 'class'
-        logger.info(f'Processing iconic taxon: {name} down to {min_rank} level')
+        logger.info(f'Atlas: Processing iconic taxon: {name} down to {min_rank} level')
         preload_thumnails(Taxon(id=id), min_rank=min_rank)
 
 
 def preload_thumnails(taxon, min_rank='family', depth=0):
-    logger.info(f'Processing: {taxon.rank} {taxon.name} at depth {depth}')
+    logger.info(f'Atlas: Processing: {taxon.rank} {taxon.name} at depth {depth}')
     thumnail_exists = taxon.default_photo.medium_url and get_thumbnail_if_exists(
         taxon.default_photo.medium_url
     )
@@ -211,7 +232,7 @@ def preload_thumnails(taxon, min_rank='family', depth=0):
         for i, child in enumerate(taxon.child_taxa):
             # Skip child if it's already loaded in another category
             if child.id not in PRELOAD_TAXA:
-                logger.info(f'Child {i}/{n_children}')
+                logger.info(f'Atlas: Child {i}/{n_children}')
                 preload_thumnails(child, min_rank, depth=depth + 1)
 
 

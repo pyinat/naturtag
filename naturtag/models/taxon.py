@@ -2,6 +2,7 @@ import attr
 from pyinaturalist import ICONIC_TAXA, define_model, get_taxa_by_id
 from pyinaturalist.models import Taxon as BaseTaxon
 
+from naturtag.atlas import get_atlas_uri
 from naturtag.constants import ATLAS_APP_ICONS
 
 
@@ -54,4 +55,5 @@ def get_icon_path(taxon_id: int) -> str:
     """An iconic function to return an icon for an iconic taxon"""
     if taxon_id not in ICONIC_TAXA:
         taxon_id = 0
-    return f'{ATLAS_APP_ICONS}/{ICONIC_TAXA[taxon_id]}'
+    image_id = ICONIC_TAXA[taxon_id].lower()
+    return get_atlas_uri(ATLAS_APP_ICONS, image_id)
