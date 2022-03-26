@@ -1,6 +1,6 @@
 from logging import getLogger
 from os.path import isfile, splitext
-from typing import Any, Dict
+from typing import Any
 
 from pyexiv2 import Image
 
@@ -64,7 +64,7 @@ class ImageMetadata:
         return isfile(self.xmp_path)
 
     @property
-    def filtered_exif(self) -> Dict[str, Any]:
+    def filtered_exif(self) -> dict[str, Any]:
         """Get EXIF tags, excluding some verbose manufacturer tags that aren't useful to display"""
         return {
             k: v

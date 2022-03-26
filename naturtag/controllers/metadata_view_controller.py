@@ -1,5 +1,5 @@
 # TODO: This screen is pretty ugly. Ideally this would be a collection of DataTables.
-from typing import Any, Dict, List
+from typing import Any
 
 from kivy.metrics import dp
 from kivymd.uix.datatables import MDDataTable
@@ -37,7 +37,7 @@ class MetadataViewController(Controller):
         self.xmp_tab.add_widget(self.get_metadata_table(metadata.xmp))
 
     @staticmethod
-    def get_metadata_table(metadata_dict: Dict[str, Any]) -> MDDataTable:
+    def get_metadata_table(metadata_dict: dict[str, Any]) -> MDDataTable:
         return MDDataTable(
             column_data=[("Tag", dp(50)), ("Value", dp(350))],
             use_pagination=True,
@@ -47,7 +47,7 @@ class MetadataViewController(Controller):
         )
 
     @staticmethod
-    def get_keyword_table(keyword_list: List[str]) -> MDDataTable:
+    def get_keyword_table(keyword_list: list[str]) -> MDDataTable:
         return MDDataTable(
             column_data=[("Keyword", dp(400))],
             use_pagination=True,

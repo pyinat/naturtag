@@ -8,15 +8,15 @@ on:
     branches: [main]
   workflow_dispatch:
 env:
-  LATEST_PY_VERSION: '3.9'
-  COVERAGE_ARGS: '--cov --cov-report=term --cov-report=html'
+  LATEST_PY_VERSION: '3.10'
+  COVERAGE_ARGS: '--cov --cov-report=term --cov-report=xml'
 
 jobs:
   test:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.9, '3.10']
 
     steps:
       - uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: poetry install -v -E all
-
+      # TODO: Run these with pre-commit
       - name: Run style checks, type checks, and linting
         run: |
           source $VENV
@@ -78,11 +78,8 @@ jobs:
           isort --check --diff .
           flake8 naturtag
         # mypy naturtag
-      - name: Generate and send code coverage report to Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # TODO: Upload coverage report to codecov... once there's actual coverage to report
+      - name: Run unit tests
         run: |
           source $VENV
           pytest ${{ env.COVERAGE_ARGS }} test
-        # pip install coveralls
-        # coveralls --service=github

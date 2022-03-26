@@ -1,5 +1,3 @@
-from typing import List
-
 import attr
 from pyinaturalist import ICONIC_TAXA, define_model, get_taxa_by_id
 from pyinaturalist.models import Taxon as BaseTaxon
@@ -27,7 +25,7 @@ class Taxon(BaseTaxon):
         return get_icon_path(self.iconic_taxon_id)
 
     @property
-    def parent_taxa(self) -> List['Taxon']:
+    def parent_taxa(self) -> list['Taxon']:
         """Get this taxon's ancestors (in descending order of rank)"""
         if not self.ancestors and self.partial:
             self.update_from_full_record()
@@ -40,7 +38,7 @@ class Taxon(BaseTaxon):
         return self.parent_taxa[-1] if self.parent_taxa else None
 
     @property
-    def child_taxa(self) -> List['Taxon']:
+    def child_taxa(self) -> list['Taxon']:
         """Get this taxon's children (in descending order of rank)"""
         if not self.children and self.partial:
             self.update_from_full_record()
@@ -48,7 +46,7 @@ class Taxon(BaseTaxon):
         return self.children or []
 
     @property
-    def child_ids(self) -> List[int]:
+    def child_ids(self) -> list[int]:
         return [t.id for t in self.child_taxa]
 
 

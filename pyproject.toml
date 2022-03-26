@@ -28,7 +28,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 attrs = ">=21.2"
 click = ">=8.0"
 click-help-colors = ">=0.9"
@@ -57,13 +57,14 @@ sphinxcontrib-apidoc = { version = "^0.3", optional = true }
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
+coverage = "^6.3"
 flake8 = "^4.0"
 isort = "^5.10.1"
 mypy = "^0.931"
 pre-commit = "^2.16"
 prettyprinter = "^0.18.0"
 pytest = "^7.0"
-pytest-cov = ">=2.11"
+pytest-cov = ">=3.0"
 pytest-xdist = ">=2.2"
 types-python-dateutil = ">=0.1"
 types-requests = ">=0.1"

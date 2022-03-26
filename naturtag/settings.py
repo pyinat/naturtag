@@ -5,7 +5,7 @@ from logging import getLogger
 from os import makedirs
 from os.path import isfile
 from shutil import copyfile
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -15,7 +15,7 @@ from naturtag.validation import convert_int_dict
 logger = getLogger().getChild(__name__)
 
 
-def read_settings() -> Dict[str, Any]:
+def read_settings() -> dict[str, Any]:
     """Read settings from the settings file
 
     Returns:
@@ -28,7 +28,7 @@ def read_settings() -> Dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def write_settings(new_config: Dict[str, Any]):
+def write_settings(new_config: dict[str, Any]):
     """Write updated settings to the settings file
 
     Args:
@@ -56,7 +56,7 @@ def reset_defaults():
 
 
 # TODO: Separately store loaded history, new history for session; only write (append) new history
-def read_stored_taxa() -> Dict:
+def read_stored_taxa() -> dict:
     """Read taxon view history, starred, and frequency
 
     Returns:
@@ -75,7 +75,7 @@ def read_stored_taxa() -> Dict:
     return stored_taxa
 
 
-def write_stored_taxa(stored_taxa: Dict):
+def write_stored_taxa(stored_taxa: dict):
     """Write taxon view history to file, along with stats on most frequently viewed taxa
 
     Args:

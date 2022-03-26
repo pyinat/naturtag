@@ -2,7 +2,6 @@ import webbrowser
 from datetime import datetime
 from locale import getdefaultlocale
 from logging import getLogger
-from typing import Dict, List, Tuple
 
 from kivy.uix.widget import Widget
 from kivymd.app import MDApp
@@ -61,7 +60,7 @@ class SettingsController(Controller):
         alert('Settings have been reset to defaults')
 
     @property
-    def stored_taxa(self) -> Tuple[List[int], List[int], Dict[int, int], Dict[int, int]]:
+    def stored_taxa(self) -> tuple[list[int], list[int], dict[int, int], dict[int, int]]:
         return (
             self._stored_taxa['history'],
             self._stored_taxa['starred'],
@@ -123,7 +122,7 @@ class SettingsController(Controller):
         """Determine if local cache of user-observed taxa has expired"""
         return is_expired(self._stored_taxa.get("last_updated_observations"), OBS_CACHE_EXPIRY_HOURS)
 
-    def update_observed_taxa(self, observed_taxa_ids: Dict[int, int]):
+    def update_observed_taxa(self, observed_taxa_ids: dict[int, int]):
         """Save updated user-observed taxa"""
         self._stored_taxa["observed"] = observed_taxa_ids
         self._stored_taxa["last_updated_observations"] = datetime.now().isoformat()

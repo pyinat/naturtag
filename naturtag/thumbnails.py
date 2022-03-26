@@ -5,7 +5,7 @@ from logging import getLogger
 from os import makedirs, scandir
 from os.path import dirname, getsize, isfile, join, normpath, splitext
 from shutil import copyfileobj, rmtree
-from typing import BinaryIO, Optional, Tuple, Union
+from typing import BinaryIO, Optional, Union
 
 import requests
 from PIL import Image
@@ -72,7 +72,7 @@ def get_thumbnail_hash(source: str) -> str:
     return md5(source).hexdigest()
 
 
-def get_thumbnail_size(size: str) -> Tuple[int, int]:
+def get_thumbnail_size(size: str) -> tuple[int, int]:
     """Get one of the predefined thumbnail dimensions from a size string
 
     Args:
@@ -197,7 +197,7 @@ def get_orientated_image(source, default_flip: bool = True) -> Image:
     return image
 
 
-def get_thumbnail_cache_size() -> Tuple[int, str]:
+def get_thumbnail_cache_size() -> tuple[int, str]:
     """Get the current size of the thumbnail cache, in number of files and human-readable
     total file size
     """

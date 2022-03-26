@@ -1,7 +1,7 @@
 """ Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations """
 from logging import getLogger
 from os.path import getsize, isfile
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 import xmltodict
 from pyinaturalist.constants import CACHE_FILE, RANKS
@@ -37,14 +37,14 @@ def get_observation_taxon(observation_id: int) -> int:
     return obs['taxon']['id']
 
 
-def get_observation_dwc_terms(observation_id: int) -> Dict[str, str]:
+def get_observation_dwc_terms(observation_id: int) -> dict[str, str]:
     """Get all DWC terms for an iNaturalist observation"""
     logger.info(f'API: Getting Darwin Core terms for observation {observation_id}')
     obs_dwc = get_observations(id=observation_id, response_format='dwc')
     return convert_dwc_to_xmp(obs_dwc)
 
 
-def get_taxon_dwc_terms(taxon_id: int) -> Dict[str, str]:
+def get_taxon_dwc_terms(taxon_id: int) -> dict[str, str]:
     """Get all DWC terms for an iNaturalist taxon.
     Since there is no DWC format for ``GET /taxa``, we'll just search for a random observation
     with this taxon ID, strip off the observation metadata, and keep only the taxon metadata.
@@ -61,7 +61,7 @@ def get_keywords(
     taxon_id: int = None,
     common: bool = False,
     hierarchical: bool = False,
-) -> List[str]:
+) -> list[str]:
     """Get all taxonomic keywords for a given observation or taxon"""
     min_tax_id = taxon_id or get_observation_taxon(observation_id)
     taxa = get_taxon_with_ancestors(min_tax_id)
@@ -82,7 +82,7 @@ def get_keywords(
     return keywords
 
 
-def get_taxon_children(taxon_id: int) -> List[Dict]:
+def get_taxon_children(taxon_id: int) -> list[dict]:
     """Get a taxon's children"""
     logger.info(f'API: Fetching children of taxon {taxon_id}')
     r = get_taxa(parent_id=taxon_id)
@@ -90,12 +90,12 @@ def get_taxon_children(taxon_id: int) -> List[Dict]:
     return r['results']
 
 
-def get_taxon_ancestors(taxon_id: int) -> List[Dict]:
+def get_taxon_ancestors(taxon_id: int) -> list[dict]:
     """Get a taxon's parents"""
     return get_taxon_with_ancestors(taxon_id)[:-1]
 
 
-def get_taxon_with_ancestors(taxon_id: int) -> List[Dict]:
+def get_taxon_with_ancestors(taxon_id: int) -> list[dict]:
     """Get a taxon with all its parents"""
     logger.info(f'API: Fetching parents of taxon {taxon_id}')
     results = get_taxa_by_id(taxon_id).get('results', [])
@@ -110,7 +110,7 @@ def get_taxon_with_ancestors(taxon_id: int) -> List[Dict]:
 
 # TODO: This should be reorganized somehow, I don't quite like the look if it;
 #  image_metadata module depends on this module and vice versa (kinda)
-def get_taxon_and_obs_from_metadata(metadata) -> Tuple[Dict, Dict]:
+def get_taxon_and_obs_from_metadata(metadata) -> tuple[dict, dict]:
     logger.info(f'API: Searching for matching taxon and/or observation for {metadata.image_path}')
     taxon, observation = get_observation_from_metadata(metadata)
     if not taxon and metadata.has_taxon:
@@ -120,7 +120,7 @@ def get_taxon_and_obs_from_metadata(metadata) -> Tuple[Dict, Dict]:
     return taxon, observation
 
 
-def get_observation_from_metadata(metadata) -> Tuple[Dict, Dict]:
+def get_observation_from_metadata(metadata) -> tuple[dict, dict]:
     if not metadata.observation_id:
         logger.info('API: No observation ID specified')
         return None, None
@@ -139,7 +139,7 @@ def get_observation_from_metadata(metadata) -> Tuple[Dict, Dict]:
     return taxon, observation
 
 
-def get_taxon_from_metadata(metadata) -> Optional[Dict]:
+def get_taxon_from_metadata(metadata) -> Optional[dict]:
     """Fetch taxon record from MetaMetadata object: either by ID or rank + name"""
     rank, name = metadata.min_rank
     params = {'id': metadata.taxon_id} if metadata.taxon_id else {'rank': rank, 'q': name}
@@ -152,12 +152,12 @@ def get_taxon_from_metadata(metadata) -> Optional[Dict]:
         return None
 
 
-def get_taxonomy_keywords(taxa: List[Dict]) -> List[str]:
+def get_taxonomy_keywords(taxa: list[dict]) -> list[str]:
     """Format a list of taxa into rank keywords"""
     return [quote(f'taxonomy:{t["rank"]}={t["name"]}') for t in taxa]
 
 
-def get_common_keywords(taxa: List[Dict]) -> List[str]:
+def get_common_keywords(taxa: list[dict]) -> list[str]:
     """Format a list of taxa into common name keywords.
     Filters out terms that aren't useful to keep as tags
     """
@@ -173,7 +173,7 @@ def get_common_keywords(taxa: List[Dict]) -> List[str]:
     return common_keywords
 
 
-def get_observed_taxa(username: str, include_casual: bool = False) -> Dict[int, int]:
+def get_observed_taxa(username: str, include_casual: bool = False) -> dict[int, int]:
     """Get counts of taxa observed by the user, ordered by number of observations descending"""
     if not username:
         return {}
@@ -188,14 +188,14 @@ def get_observed_taxa(username: str, include_casual: bool = False) -> Dict[int, 
 
 
 # TODO: Also include common names in hierarchy?
-def get_hierarchical_keywords(keywords: List) -> List[str]:
+def get_hierarchical_keywords(keywords: list) -> list[str]:
     hier_keywords = [keywords[0]]
     for rank_name in keywords[1:]:
         hier_keywords.append(f'{hier_keywords[-1]}|{rank_name}')
     return hier_keywords
 
 
-def sort_taxonomy_keywords(keywords: List[str]) -> List[str]:
+def sort_taxonomy_keywords(keywords: list[str]) -> list[str]:
     """Sort keywords by taxonomic rank, where applicable"""
 
     def _get_rank_idx(tag):
@@ -222,7 +222,7 @@ def get_inaturalist_ids(metadata):
     return taxon_id, observation_id
 
 
-def get_min_rank(metadata: Dict[str, str]) -> StrTuple:
+def get_min_rank(metadata: dict[str, str]) -> StrTuple:
     """Get the lowest (most specific) taxonomic rank from tags, if any"""
     for rank in RANKS:
         if rank in metadata:
@@ -236,7 +236,7 @@ def quote(s: str) -> str:
     return f'"{s}"' if ' ' in s else s
 
 
-def convert_dwc_to_xmp(dwc: str) -> Dict[str, str]:
+def convert_dwc_to_xmp(dwc: str) -> dict[str, str]:
     """
     Get all DWC terms from XML content containing a SimpleDarwinRecordSet, and format them as
     XMP tags. For example: ``'dwc:species' -> 'Xmp.dwc.species'``

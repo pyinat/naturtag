@@ -1,7 +1,6 @@
 import asyncio
 import webbrowser
 from logging import getLogger
-from typing import List
 
 from kivymd.uix.list import ImageLeftWidget, OneLineListItem, ThreeLineAvatarIconListItem
 
@@ -150,5 +149,5 @@ class TaxonViewController(Controller):
             get_app().remove_star(self.selected_taxon.id)
 
 
-def _get_label(text: str, items: List) -> str:
+def _get_label(text: str, items: list) -> str:
     return text + (f' ({len(items)})' if items else '')

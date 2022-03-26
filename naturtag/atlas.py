@@ -176,7 +176,7 @@ def _max_factor(n, factor, max_size):
 
 def _largest_factor_pair(n):
     """Get the largest pair of factors for the given number"""
-    for i in reversed(range(1, int(n ** 0.5) + 1)):
+    for i in reversed(range(1, int(n**0.5) + 1)):
         if n % i == 0:
             return i, int(n / i)
     return n, 1

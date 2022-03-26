@@ -93,14 +93,6 @@ Or, if you would like to use the latest development version:
 pip install --pre naturtag
 ```
 
-To run on python 3.7, you will also need the
-[`importlib-metadata`](https://docs.python.org/3/library/importlib.metadata.html)
-backport:
-```bash
-pip install importlib-metadata
-```
-For python 3.8+, this is included in the standard library.
-
 ## CLI Usage
 This package provides the command `naturtag`, also aliased to `nt`.
 

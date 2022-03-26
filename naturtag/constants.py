@@ -1,6 +1,6 @@
 from os.path import dirname, join
 from pathlib import Path
-from typing import IO, Dict, Iterable, Optional, Tuple, Union
+from typing import IO, Iterable, Optional, Union
 
 from platformdirs import user_data_dir
 
@@ -122,7 +122,7 @@ COMMON_NAME_IGNORE_TERMS = [
 ]
 
 # Type aliases
-Coordinates = Optional[Tuple[float, float]]
-JSON = Union[Dict, IO, Iterable[Dict], Path, str]
-IntTuple = Tuple[Optional[int], Optional[int]]
-StrTuple = Tuple[Optional[str], Optional[str]]
+Coordinates = Optional[tuple[float, float]]
+JSON = Union[dict, IO, Iterable[dict], Path, str]
+IntTuple = tuple[Optional[int], Optional[int]]
+StrTuple = tuple[Optional[str], Optional[str]]
