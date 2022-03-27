@@ -21,14 +21,15 @@ SELECTED_COLOR = (0.2, 0.6, 0.6, 0.4)
 class CachedAsyncImage(AsyncImage):
     """AsyncImage which, once loaded, caches the image for future use"""
 
-    def __init__(self, thumbnail_size: str = 'large', **kwargs):
+    def __init__(self, thumbnail_size: str = 'large', source: str = None, **kwargs):
         """
         Args:
             size : Size of thumbnail to cache
         """
         self.thumbnail_size = thumbnail_size
         self.thumbnail_path = None
-        super().__init__(**kwargs)
+        logger.debug(f'CachedAsyncImage: Loading image: {source}')
+        super().__init__(source=source, **kwargs)
 
     def _load_source(self, *args):
         """Before downloading remote image, first check for existing thumbnail"""

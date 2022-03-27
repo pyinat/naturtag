@@ -44,7 +44,7 @@ class TaxonSelectionController(Controller):
         self.starred_taxa_list = screen.starred_tab.ids.starred_taxa_list
 
     def post_init(self):
-        Clock.schedule_once(lambda *x: asyncio.run(self.init_stored_taxa()), 1)
+        Clock.schedule_once(lambda *x: asyncio.create_task(self.init_stored_taxa()), 1)
 
     async def init_stored_taxa(self):
         """Load taxon history, starred, and frequently viewed items"""
@@ -86,8 +86,8 @@ class TaxonSelectionController(Controller):
 
         # Add callback to index items after they have all been loaded
         def index_list_items(*args):
-            # for item in self.taxon_history_list.children:
-            #     self.taxon_history_map[item.taxon.id] = item
+            for item in self.taxon_history_list.children:
+                self.taxon_history_map[item.taxon.id] = item
             for item in self.starred_taxa_list.children:
                 self.bind_star(item)
 
@@ -98,24 +98,24 @@ class TaxonSelectionController(Controller):
             f'Taxon: Loading {len(unique_history_ids)} unique taxa from history'
             f' (from {len(self.taxon_history_ids)} total)'
         )
-        # loader.add_batch(unique_history_ids, parent=self.taxon_history_list)
+        await loader.add_batch(unique_history_ids, parent=self.taxon_history_list)
         # TODO: Temporary workaround while BatchLoader is borken
-        for taxon_id in unique_history_ids:
-            widget = get_app().get_taxon_list_item(taxon_id)
-            self.taxon_history_list.add_widget(widget)
-            self.taxon_history_map[widget.taxon.id] = widget
+        # for taxon_id in unique_history_ids:
+        #     widget = get_app().get_taxon_list_item(taxon_id)
+        #     self.taxon_history_list.add_widget(widget)
+        #     self.taxon_history_map[widget.taxon.id] = widget
 
         logger.info(f'Taxon: Loading {len(starred_taxa_ids)} starred taxa')
-        loader.add_batch(starred_taxa_ids, parent=self.starred_taxa_list, highlight_observed=False)
+        await loader.add_batch(starred_taxa_ids, parent=self.starred_taxa_list, highlight_observed=False)
         logger.info(f'Taxon: Loading {len(top_frequent_ids)} frequently viewed taxa')
-        loader.add_batch(top_frequent_ids, parent=self.frequent_taxa_list)
+        await loader.add_batch(top_frequent_ids, parent=self.frequent_taxa_list)
         logger.info(
             f'Taxon: Loading {len(top_observed_ids)} user-observed taxa'
             f' (from {len(self.observed_taxa_ids)} total)'
         )
-        loader.add_batch(top_observed_ids, parent=self.observed_taxa_list)
+        await loader.add_batch(top_observed_ids, parent=self.observed_taxa_list)
 
-        loader.start_thread()
+        await loader.start()
 
     def update_history(self, taxon_id: int):
         """Update history + frequency"""
@@ -219,10 +219,10 @@ class TaxonSelectionController(Controller):
         self.start_progress(len(top_observed_ids), loader)
         self.observed_taxa_list.clear_widgets()
         logger.info(f'Taxon: loading {len(top_observed_ids)} user-observed taxa')
-        loader.add_batch(top_observed_ids, parent=self.observed_taxa_list)
+        await loader.add_batch(top_observed_ids, parent=self.observed_taxa_list)
 
         loader.bind(on_complete=lambda *args: self.observed_taxa_list.sort())
-        loader.start_thread()
+        await loader.start()
 
     @staticmethod
     def set_taxon_sort_key(taxon_list, taxon_mapping):

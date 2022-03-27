@@ -65,8 +65,8 @@ class ImageSelectionController(Controller):
         # Start batch loader + progress bar
         loader = ImageBatchLoader()
         self.start_progress(len(new_images), loader)
-        loader.add_batch(new_images, parent=self.image_previews)
-        loader.start_thread()
+        await loader.add_batch(new_images, parent=self.image_previews)
+        await loader.start()
 
     def open_native_file_chooser(self, dirs=False):
         """A bit of a hack; uses a hidden tkinter window to open a native file chooser dialog"""

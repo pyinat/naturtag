@@ -2,7 +2,6 @@
 import asyncio
 import os
 from logging import getLogger
-from threading import Thread
 from typing import Union
 
 from naturtag.atlas import get_atlas
@@ -124,9 +123,6 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.drop_trigger = Clock.create_trigger(self.process_dropped_files, TRIGGER_DELAY)
 
     def build(self):
-        # Create an event loop to be used by background loaders
-        self.bg_loop = asyncio.new_event_loop()
-        Thread(target=self.bg_loop.run_forever).start()
         self.theme_cls.theme_style = 'Dark'
 
         # Init screens and store references to them
@@ -282,4 +278,6 @@ class NaturtagApp(MDApp, ControllerProxy):
 
 
 if __name__ == '__main__':
-    NaturtagApp().run()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(NaturtagApp().async_run(async_lib='asyncio'))
+    loop.close()

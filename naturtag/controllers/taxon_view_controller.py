@@ -54,7 +54,7 @@ class TaxonViewController(Controller):
         logger.info(f'Taxon: Selecting taxon {taxon_obj.id}')
         self.basic_info.clear_widgets()
         self.selected_taxon = taxon_obj
-        asyncio.run(self.load_taxon_info())
+        asyncio.create_task(self.load_taxon_info())
 
         # Add to taxon history, and update taxon id on image selector screen
         get_app().update_history(self.selected_taxon.id)
@@ -124,7 +124,7 @@ class TaxonViewController(Controller):
 
         # Set up batch loader + event bindings
         if self.loader:
-            self.loader.cancel()
+            await self.loader.stop()
         self.loader = TaxonBatchLoader()
         self.start_progress(total_taxa, self.loader)
 
@@ -132,14 +132,14 @@ class TaxonViewController(Controller):
         logger.info(f'Taxon: Loading {len(self.selected_taxon.parent_taxa)} ancestors')
         self.taxon_ancestors_label.text = _get_label('Ancestors', self.selected_taxon.parent_taxa)
         self.taxon_ancestors.clear_widgets()
-        self.loader.add_batch(self.selected_taxon.ancestor_ids, parent=self.taxon_ancestors)
+        await self.loader.add_batch(self.selected_taxon.ancestor_ids, parent=self.taxon_ancestors)
 
         logger.info(f'Taxon: Loading {len(self.selected_taxon.child_taxa)} children')
         self.taxon_children_label.text = _get_label('Children', self.selected_taxon.child_taxa)
         self.taxon_children.clear_widgets()
-        self.loader.add_batch(self.selected_taxon.child_ids, parent=self.taxon_children)
+        await self.loader.add_batch(self.selected_taxon.child_ids, parent=self.taxon_children)
 
-        self.loader.start_thread()
+        await self.loader.start()
 
     def on_star(self, button):
         """Either add or remove a taxon from the starred list"""
