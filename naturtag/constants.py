@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 from typing import IO, Iterable, Optional, Union
 
@@ -61,8 +62,15 @@ APP_LOGO = str(ASSETS_DIR / 'logo.png')
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
 
 # Cache settings
-CACHE_FILE = DATA_DIR / 'api_cache.db'
+# CACHE_FILE = DATA_DIR / 'api_cache.db'
 OBS_CACHE_EXPIRY_HOURS = 48
+CACHE_EXPIRATION = {
+    'api.inaturalist.org/v*/observations*': timedelta(days=2),
+    'api.inaturalist.org/v*/taxa*': timedelta(days=60),
+    'static.inaturalist.org/*': -1,
+    'inaturalist-open-data.s3.amazonaws.com/*': -1,
+    '*': timedelta(hours=1),
+}
 
 # Config files
 CONFIG_PATH = DATA_DIR / 'settings.yml'

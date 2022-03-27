@@ -20,12 +20,14 @@ from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
+from pyinaturalist import ClientSession, iNatClient
 
 from naturtag.app import alert
 from naturtag.app.screens import HOME_SCREEN, Root, load_screens
 from naturtag.constants import (
     ATLAS_APP_ICONS,
     BACKSPACE,
+    CACHE_EXPIRATION,
     ENTER,
     F11,
     INIT_WINDOW_POSITION,
@@ -43,7 +45,8 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.inat_metadata import get_ids_from_url, get_taxon
+from naturtag.controllers.taxon_loader import get_taxon, get_taxon_list_item, get_taxon_thumbnail
+from naturtag.inat_metadata import get_ids_from_url
 from naturtag.widgets import TaxonListItem
 
 logger = getLogger().getChild(__name__)
@@ -95,9 +98,13 @@ class ControllerProxy:
 
     def get_taxon_list_item(self, taxon: Union[Taxon, int, dict], **kwargs):
         """Get a new :py:class:`.TaxonListItem with event binding"""
-        item = TaxonListItem(get_taxon(taxon), **kwargs)
-        self.bind_to_select_taxon(item)
-        return item
+        # return get_taxon_list_item(self.client, taxon)    taxon = get_taxon(client, taxon)
+        taxon = get_taxon(self.client, taxon)
+        image = get_taxon_thumbnail(self.client.session, taxon)
+        return TaxonListItem(taxon=taxon, image=image, **kwargs)
+        # item = TaxonListItem(get_taxon(self.client, taxon), **kwargs)
+        # self.bind_to_select_taxon(item)
+        # return item
 
     def bind_to_select_taxon(self, item):
         # If TaxonListItem's disable_button is set, don't set button action
@@ -124,6 +131,14 @@ class NaturtagApp(MDApp, ControllerProxy):
 
     def build(self):
         self.theme_cls.theme_style = 'Dark'
+
+        # Session and client objects for iNat API requests
+        self.session = ClientSession(
+            cache_control=False,
+            urls_expire_after=CACHE_EXPIRATION,
+            per_host=True,
+        )
+        self.client = iNatClient(session=self.session)
 
         # Init screens and store references to them
         screens = load_screens()
