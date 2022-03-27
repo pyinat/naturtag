@@ -1,4 +1,4 @@
-""" Utilities for intelligently combining thumbnail images into a Kivy Atlas """
+"""Utilities for intelligently combining thumbnail images into a Kivy Atlas"""
 from logging import getLogger
 from math import ceil
 from pathlib import Path
@@ -20,7 +20,12 @@ from naturtag.constants import (
     THUMBNAILS_DIR,
 )
 from naturtag.image_glob import get_images_from_paths
-from naturtag.thumbnails import generate_thumbnail_from_url, get_thumbnail_if_exists
+from naturtag.thumbnails import (
+    generate_thumbnail_from_url,
+    get_thumbnail,
+    get_thumbnail_hash,
+    get_thumbnail_if_exists,
+)
 
 # Current organization of altas files by thumb size; this may change in the future
 ATLAS_CATEGORIES = {
@@ -74,6 +79,32 @@ def get_atlas_uri_if_exists(atlas_category: str, image_id: str):
         logger.debug(f'Atlas: Found {image_id} in atlas')
         return f'atlas://{atlas_path}/{image_id}'
     return None
+
+
+def get_any_thumbnail(source: str, size: str = 'small') -> str:
+    """Get the path of a thumbnail stored inside either an atlas or the thumbnail cache"""
+    return get_atlas_thumbnail_if_exists(source, size) or get_thumbnail(source)
+
+
+def get_any_thumbnail_if_exists(source: str, size: str = 'small') -> str:
+    """Get the path of a thumbnail stored inside either an atlas or the thumbnail cache"""
+    return get_atlas_thumbnail_if_exists(source, size) or get_thumbnail_if_exists(source)
+
+
+def get_atlas_thumbnail_if_exists(source: str, size: str) -> str:
+    """Get the path of a thumbnail stored inside an atlas, if available
+
+    Args:
+        source (str): File path or URI for image source
+
+    Returns:
+        str: `atlas://` path, if found; otherwise ``None``
+    """
+    return get_atlas_uri_if_exists(size, get_thumbnail_hash(source))
+
+
+# Utilities for generating an Atlas
+# ---------------------------------
 
 
 def build_app_icon_atlas(dir=APP_ICONS_DIR):

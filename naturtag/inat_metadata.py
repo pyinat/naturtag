@@ -1,7 +1,7 @@
 """ Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations """
 from logging import getLogger
 from os.path import getsize, isfile
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import xmltodict
 from pyinaturalist.constants import CACHE_FILE, RANKS
@@ -17,8 +17,10 @@ from naturtag.constants import (
     IntTuple,
     StrTuple,
 )
-from naturtag.models import Taxon
 from naturtag.validation import format_file_size
+
+if TYPE_CHECKING:
+    from naturtag.models import Taxon
 
 logger = getLogger().getChild(__name__)
 
@@ -83,10 +85,12 @@ def get_keywords(
     return keywords
 
 
-def get_taxon(taxon: Union[Taxon, int, dict]) -> Taxon:
+def get_taxon(taxon: Union['Taxon', int, dict]) -> 'Taxon':
     """Get Taxon object by either ID, dict, or existing instance"""
     # if not taxon:
     #     raise ValueError('Must provide either a taxon object or ID')
+    from naturtag.models import Taxon
+
     logger.debug(f'Taxon: Loading: {taxon}')
 
     if isinstance(taxon, int):

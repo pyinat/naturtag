@@ -2,20 +2,40 @@
 from io import BytesIO
 from logging import getLogger
 
+import requests
 from kivy.core.clipboard import Clipboard
+from kivy.core.image import Image as CoreImage
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 
 from naturtag.app import alert
-from naturtag.app.cache import cache_async_thumbnail
 from naturtag.models import MetaMetadata, get_icon_path
-from naturtag.thumbnails import get_format, get_thumbnail, get_thumbnail_if_exists
+from naturtag.thumbnails import (
+    generate_thumbnail_from_bytes,
+    get_format,
+    get_thumbnail,
+    get_thumbnail_if_exists,
+)
 
 logger = getLogger().getChild(__name__)
 
 DESELECTED_COLOR = (0, 0, 0, 0)
 SELECTED_COLOR = (0.2, 0.6, 0.6, 0.4)
+
+
+# TODO: Caching
+# TODO: Run in background thread
+# TODO: Placeholder image or spinner
+class CustomImage(AsyncImage):
+    def __init__(self, source: str = None, **kwargs):
+        super().__init__(source='', **kwargs)
+        response = requests.get(source)
+        ext = source.split('.')[-1]
+        img_data = BytesIO(response.content)
+
+        self.texture = CoreImage(img_data, ext=ext).texture
+        self.reload()
 
 
 class CachedAsyncImage(AsyncImage):
@@ -44,7 +64,8 @@ class CachedAsyncImage(AsyncImage):
     def on_load(self, *args):
         """After loading, cache the downloaded image for future use, if not previously done"""
         if not get_thumbnail_if_exists(self.source):
-            cache_async_thumbnail(self, size=self.thumbnail_size)
+            image_bytes, _ = self.get_image_bytes()
+            generate_thumbnail_from_bytes(image_bytes, self.source, size=self.thumbnail_size)
 
     def get_image_bytes(self):
         if not (self._coreimage.image and self._coreimage.image.texture):

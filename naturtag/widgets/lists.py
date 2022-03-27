@@ -13,7 +13,7 @@ from kivymd.uix.selectioncontrol import MDSwitch
 
 from naturtag.app import alert, get_app
 from naturtag.models import Taxon
-from naturtag.widgets import CachedAsyncImage
+from naturtag.widgets import CustomImage
 
 logger = getLogger().getChild(__name__)
 
@@ -58,10 +58,8 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
             self.bind(on_touch_down=self._on_touch_down)
         self.disable_button = disable_button
 
-        # TODO: When run from BatchLoader, this appears to just hang and never complete!?
-        # Problem may be in ButtonBehavior class?
         super().__init__(
-            # font_style='H6',
+            font_style='H6',
             text=taxon.name,
             secondary_text=taxon.rank,
             tertiary_text=taxon.preferred_common_name,
@@ -85,8 +83,7 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
             super().on_touch_down(touch)
 
 
-class ThumbnailListItem(CachedAsyncImage, ILeftBody):
-    """Class that contains a taxon thumbnail to be used in a list item"""
-
-    def __init__(self, **kwargs):
-        super().__init__(thumbnail_size='small', **kwargs)
+# class ThumbnailListItem(CachedAsyncImage, ILeftBody):
+# class ThumbnailListItem(ImageLeftWidget):
+class ThumbnailListItem(CustomImage, ILeftBody):
+    """List item that contains a taxon thumbnail"""

@@ -5,7 +5,7 @@ from logging import getLogger
 from os import makedirs, scandir
 from os.path import dirname, getsize, isfile, join, normpath, splitext
 from shutil import copyfileobj, rmtree
-from typing import BinaryIO, Optional, Union
+from typing import IO, BinaryIO, Optional, Union
 
 import requests
 from PIL import Image
@@ -129,7 +129,7 @@ def generate_thumbnail_from_url(url: str, size: str):
         logger.info(f'Thumbnails: Request failed: {str(r)}')
 
 
-def generate_thumbnail_from_bytes(image_bytes, source: str, **kwargs):
+def generate_thumbnail_from_bytes(image_bytes: IO, source: str, **kwargs):
     """Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path"""
     image_bytes.seek(0)
     fmt = get_format(source)
@@ -221,11 +221,3 @@ def flip_all(path: str):
         image = flip(image)
         image.save(source)
         image.close()
-
-
-def to_monochrome(source, fmt):
-    """Convert an image to monochrome"""
-    img = Image.open(source)
-    img.convert(mode='1')
-    img.save(source, format=fmt.replace('jpg', 'jpeg') if fmt else None)
-    return source
