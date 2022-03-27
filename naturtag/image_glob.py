@@ -3,14 +3,14 @@ from glob import glob
 from itertools import chain
 from logging import getLogger
 from os.path import expanduser, isdir, isfile, join
-from typing import List, Union
+from typing import Union
 
 from naturtag.constants import IMAGE_FILETYPES
 
 logger = getLogger().getChild(__name__)
 
 
-def glob_paths(path_patterns: List[str]) -> List[str]:
+def glob_paths(path_patterns: list[str]) -> list[str]:
     """
     Given one to many glob patterns, expand all into a list of matching files
 
@@ -27,7 +27,7 @@ def glob_paths(path_patterns: List[str]) -> List[str]:
     )
 
 
-def get_images_from_dir(dir: str, recursive: bool = False) -> List[str]:
+def get_images_from_dir(dir: str, recursive: bool = False) -> list[str]:
     """
     Get all images of supported filetypes from the selected directory.
 
@@ -44,7 +44,7 @@ def get_images_from_dir(dir: str, recursive: bool = False) -> List[str]:
     return paths
 
 
-def get_images_from_paths(paths: Union[str, List[str]], recursive: bool = False) -> List[str]:
+def get_images_from_paths(paths: Union[str, list[str]], recursive: bool = False) -> list[str]:
     """
     Get all images of supported filetypes from one or more dirs and/or image paths
 

@@ -1,8 +1,6 @@
-import logging
-import traceback
 from concurrent.futures import ThreadPoolExecutor, TimeoutError, as_completed
 from os import environ, makedirs
-from os.path import exists, join
+from os.path import exists
 from random import choice
 from time import time
 

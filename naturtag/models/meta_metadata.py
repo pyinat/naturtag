@@ -1,6 +1,6 @@
 from logging import getLogger
 from os.path import basename
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from naturtag.constants import IntTuple, StrTuple
 from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank
@@ -33,11 +33,11 @@ class MetaMetadata(ImageMetadata):
         self.keyword_meta = KeywordMetadata(self.combined)
 
     @property
-    def combined(self) -> Dict[str, Any]:
+    def combined(self) -> dict[str, Any]:
         return {**self.exif, **self.iptc, **self.xmp}
 
     @property
-    def filtered_combined(self) -> Dict[str, Any]:
+    def filtered_combined(self) -> dict[str, Any]:
         return {**self.filtered_exif, **self.iptc, **self.xmp}
 
     @property
@@ -67,7 +67,7 @@ class MetaMetadata(ImageMetadata):
         return bool(self.taxon_id or all(self.min_rank))
 
     @property
-    def simplified(self) -> Dict[str, str]:
+    def simplified(self) -> dict[str, str]:
         """
         Get simplified/deduplicated key-value pairs from a combination of keywords + basic metadata
         """
@@ -116,12 +116,12 @@ class MetaMetadata(ImageMetadata):
         self.update(KeywordMetadata(keywords=keywords).tags)
 
 
-def get_tagged_image_metadata(paths: List[str]) -> Dict[str, MetaMetadata]:
+def get_tagged_image_metadata(paths: list[str]) -> dict[str, MetaMetadata]:
     all_image_metadata = (MetaMetadata(path) for path in paths)
     return {m.image_path: m for m in all_image_metadata if m.taxon_id or m.observation_id}
 
 
-def simplify_keys(mapping: Dict[str, str]) -> Dict[str, str]:
+def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
     """
     Simplify/deduplicate dict keys, to reduce variations in similarly-named keys
 
@@ -130,6 +130,6 @@ def simplify_keys(mapping: Dict[str, str]) -> Dict[str, str]:
         {'superfamily': 'Panorpida'}
 
     Returns:
-        Dict with simplified/deduplicated keys
+        dict with simplified/deduplicated keys
     """
     return {k.lower().replace('_', '').split(':')[-1]: v for k, v in mapping.items()}

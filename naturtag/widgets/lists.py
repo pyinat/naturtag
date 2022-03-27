@@ -1,4 +1,4 @@
-from typing import Union
+from logging import getLogger
 
 from kivy.core.clipboard import Clipboard
 from kivymd.uix.list import (
@@ -13,7 +13,9 @@ from kivymd.uix.selectioncontrol import MDSwitch
 
 from naturtag.app import alert, get_app
 from naturtag.models import Taxon
-from naturtag.widgets import CachedAsyncImage
+from naturtag.widgets import CustomImage
+
+logger = getLogger().getChild(__name__)
 
 
 class SortableList(MDList):
@@ -44,17 +46,11 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
 
     def __init__(
         self,
-        taxon: Union[Taxon, int, dict] = None,
+        taxon: Taxon = None,
         disable_button: bool = False,
         highlight_observed: bool = True,
         **kwargs,
     ):
-        if not taxon:
-            raise ValueError('Must provide either a taxon object or ID')
-        if isinstance(taxon, int):
-            taxon = Taxon.from_id(taxon)
-        elif isinstance(taxon, dict):
-            taxon = Taxon.from_json(taxon)
         self.taxon = taxon
 
         # Set click event unless disabled
@@ -87,8 +83,7 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
             super().on_touch_down(touch)
 
 
-class ThumbnailListItem(CachedAsyncImage, ILeftBody):
-    """Class that contains a taxon thumbnail to be used in a list item"""
-
-    def __init__(self, **kwargs):
-        super().__init__(thumbnail_size='small', **kwargs)
+# class ThumbnailListItem(CachedAsyncImage, ILeftBody):
+# class ThumbnailListItem(ImageLeftWidget):
+class ThumbnailListItem(CustomImage, ILeftBody):
+    """List item that contains a taxon thumbnail"""

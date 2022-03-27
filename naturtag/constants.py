@@ -1,18 +1,16 @@
-from os.path import dirname, join
 from pathlib import Path
-from typing import IO, Dict, Iterable, Optional, Tuple, Union
+from typing import IO, Iterable, Optional, Union
 
-from appdirs import user_data_dir
-from pyinaturalist import DEFAULT_USER_AGENT
+from platformdirs import user_data_dir
+from pyinaturalist import ICONIC_TAXA
 
 from naturtag import __version__
 
 # Resource directories
-PKG_DIR = dirname(dirname(__file__))
-ASSETS_DIR = join(PKG_DIR, 'assets', '')
-KV_SRC_DIR = join(PKG_DIR, 'kv')
-ICONS_DIR = join(ASSETS_DIR, 'iconic_taxa')
-DATA_DIR = join(user_data_dir(), 'Naturtag')
+PKG_DIR = Path(__file__).parent.parent
+ASSETS_DIR = PKG_DIR / 'assets'
+KV_SRC_DIR = PKG_DIR / 'kv'
+DATA_DIR = Path(user_data_dir()) / 'Naturtag'
 
 # TODO: These may be useful as user-configurable settings
 TRIGGER_DELAY = 0.1
@@ -22,7 +20,7 @@ IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 
 # Thumnbnail & cache settings
-THUMBNAILS_DIR = join(DATA_DIR, 'thumbnails')
+THUMBNAILS_DIR = DATA_DIR / 'thumbnails'
 THUMBNAIL_DEFAULT_FORMAT = 'png'
 THUMBNAIL_SIZE_SM = (75, 75)
 THUMBNAIL_SIZE_DEFAULT = (200, 200)
@@ -51,24 +49,25 @@ EXIF_ORIENTATION_ID = '0x0112'
 
 # Atlas settings
 ATLAS_MAX_SIZE = 4096
-ATLAS_BASE = 'atlas://../../assets/atlas'  # Path is relative to Kivy app.py
-ATLAS_PATH = join(ASSETS_DIR, 'atlas', 'taxon_icons.atlas')
-ATLAS_TAXON_ICONS = f'{ATLAS_BASE}/taxon_icons'
-ATLAS_TAXON_PHOTOS = f'{ATLAS_BASE}/taxon_photos'
-ATLAS_LOCAL_PHOTOS = f'{ATLAS_BASE}/local_photos'
-ATLAS_APP_ICONS = f'{ATLAS_BASE}/app_icons'
+ATLAS_DIR = ASSETS_DIR / 'atlas'
+ATLAS_APP_ICONS = ATLAS_DIR / 'app_icons'
+ATLAS_TAXON_ICONS = ATLAS_DIR / 'taxon_icons'
+ATLAS_TAXON_PHOTOS = ATLAS_DIR / 'taxon_photos'
+ATLAS_LOCAL_PHOTOS = ATLAS_DIR / 'local_photos'
 ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
 
+APP_ICONS_DIR = ASSETS_DIR / 'iconic_taxa'
+APP_LOGO = str(ASSETS_DIR / 'logo.png')
+SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
+
 # Cache settings
-CACHE_PATH = join(DATA_DIR, 'inaturalist_api_cache')
-API_CACHE_EXPIRY_HOURS = 0
+CACHE_FILE = DATA_DIR / 'api_cache.db'
 OBS_CACHE_EXPIRY_HOURS = 48
-CACHE_BACKEND = 'sqlite'
 
 # Config files
-CONFIG_PATH = join(DATA_DIR, 'settings.yml')
-DEFAULT_CONFIG_PATH = join(PKG_DIR, 'default_settings.yml')
-STORED_TAXA_PATH = join(DATA_DIR, 'stored_taxa.json')
+CONFIG_PATH = DATA_DIR / 'settings.yml'
+DEFAULT_CONFIG_PATH = PKG_DIR / 'default_settings.yml'
+STORED_TAXA_PATH = DATA_DIR / 'stored_taxa.json'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 
 # URLs / API settings
@@ -77,7 +76,7 @@ PHOTO_BASE_URL = 'https://static.inaturalist.org/photos'
 PHOTO_INFO_BASE_URL = 'https://www.inaturalist.org/photos'
 PLACES_BASE_URL = 'https://www.inaturalist.org/places'
 TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
-USER_AGENT = f'naturtag/{__version__}; {DEFAULT_USER_AGENT}'.lower()
+USER_AGENT = f'naturtag/{__version__}'.lower()
 
 # Theme/window settings
 INIT_WINDOW_POSITION = ('custom', 100, 100)
@@ -126,7 +125,7 @@ COMMON_NAME_IGNORE_TERMS = [
 ]
 
 # Type aliases
-Coordinates = Optional[Tuple[float, float]]
-JSON = Union[Dict, IO, Iterable[Dict], Path, str]
-IntTuple = Tuple[Optional[int], Optional[int]]
-StrTuple = Tuple[Optional[str], Optional[str]]
+Coordinates = Optional[tuple[float, float]]
+JSON = Union[dict, IO, Iterable[dict], Path, str]
+IntTuple = tuple[Optional[int], Optional[int]]
+StrTuple = tuple[Optional[str], Optional[str]]

@@ -17,7 +17,8 @@ class DropdownTextField(MDDropdownMenu):
         if add_none_item:
             kwargs['items'].insert(0, {'text': 'None'})
 
-        kwargs['callback'] = self.on_select
+        # TODO: broken with a recent kivy or kivymd update
+        # kwargs['callback'] = self.on_select
         kwargs['caller'] = text_input
         kwargs.setdefault('max_height', 400)
         kwargs.setdefault('width_mult', 4)

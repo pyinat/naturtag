@@ -269,9 +269,9 @@ class SearchInput(MDTextField):
     """A text input field for autocomplete search"""
 
     # TODO: Not yet working as intended
-    def keyboard_on_key_down(self, window, keycode, text, modifiers):
-        """Select an autocomplete match with the tab key"""
-        if self.suggestion_text and keycode[1] == 'tab':
-            self.insert_text(self.suggestion_text + ' ')
-            return True
-        return super().keyboard_on_key_down(window, keycode, text, modifiers)
+    # def keyboard_on_key_down(self, window, keycode, text, modifiers):
+    #     """Select an autocomplete match with the tab key"""
+    #     if self.suggestion_text and keycode[1] == 'tab':
+    #         self.insert_text(self.suggestion_text + ' ')
+    #         return True
+    #     return super().keyboard_on_key_down(window, keycode, text, modifiers)

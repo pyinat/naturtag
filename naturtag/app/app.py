@@ -2,7 +2,10 @@
 import asyncio
 import os
 from logging import getLogger
-from threading import Thread
+from typing import Union
+
+from naturtag.atlas import get_atlas
+from naturtag.models.taxon import Taxon
 
 # Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
@@ -16,7 +19,6 @@ from kivy.clock import Clock
 from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
-from kivy.uix.image import Image
 from kivymd.app import MDApp
 
 from naturtag.app import alert
@@ -41,7 +43,7 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.inat_metadata import get_ids_from_url
+from naturtag.inat_metadata import get_ids_from_url, get_taxon
 from naturtag.widgets import TaxonListItem
 
 logger = getLogger().getChild(__name__)
@@ -91,9 +93,9 @@ class ControllerProxy:
         self.image_selection_controller.post_init()
         self.taxon_selection_controller.post_init()
 
-    def get_taxon_list_item(self, *args, **kwargs):
+    def get_taxon_list_item(self, taxon: Union[Taxon, int, dict], **kwargs):
         """Get a new :py:class:`.TaxonListItem with event binding"""
-        item = TaxonListItem(*args, **kwargs)
+        item = TaxonListItem(get_taxon(taxon), **kwargs)
         self.bind_to_select_taxon(item)
         return item
 
@@ -121,9 +123,6 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.drop_trigger = Clock.create_trigger(self.process_dropped_files, TRIGGER_DELAY)
 
     def build(self):
-        # Create an event loop to be used by background loaders
-        self.bg_loop = asyncio.new_event_loop()
-        Thread(target=self.bg_loop.run_forever).start()
         self.theme_cls.theme_style = 'Dark'
 
         # Init screens and store references to them
@@ -136,7 +135,7 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.screen_manager = self.root.ids.screen_manager
         self.toolbar = self.root.ids.toolbar
 
-        for screen_name, screen in screens.items():
+        for screen in screens.values():
             self.screen_manager.add_widget(screen)
         self.set_theme_mode()
         self.home()
@@ -153,13 +152,13 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
 
-        # On_dropfile sends a single file at a time; this collects files dropped at the same time
+        # on_dropfile sends a single file at a time; this collects files dropped at the same time
         Window.bind(on_dropfile=lambda _, path: self.dropped_files.append(path))
         Window.bind(on_dropfile=self.drop_trigger)
 
         # Preload atlases so they're immediately available in Kivy cache
-        Image(source=f'{ATLAS_APP_ICONS}/')
-        # Image(source=f'{ATLAS_TAXON_ICONS}/')
+        get_atlas(ATLAS_APP_ICONS)
+        # get_atlas(ATLAS_TAXON_ICONS)
         return self.root
 
     def process_dropped_files(self, *args):
@@ -279,4 +278,6 @@ class NaturtagApp(MDApp, ControllerProxy):
 
 
 if __name__ == '__main__':
-    NaturtagApp().run()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(NaturtagApp().async_run(async_lib='asyncio'))
+    loop.close()

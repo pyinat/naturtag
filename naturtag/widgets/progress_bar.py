@@ -36,7 +36,8 @@ class LoaderProgressBar(MDProgressBar):
 
     def cancel(self):
         """Cancel any currently running animation and unbind loader events"""
-        logger.debug(f'Progress canceled at {self.value}/{self.max}')
+        if self.value < self.max:
+            logger.debug(f'Progress canceled at {self.value}/{self.max}')
         if self.loader:
             self.loader.unbind(on_progress=self.update)
             self.loader.unbind(on_complete=self.finish)

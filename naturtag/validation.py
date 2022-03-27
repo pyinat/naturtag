@@ -1,6 +1,6 @@
 """Type conversion, validation, and formatting utilities"""
 from datetime import datetime
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from dateutil.parser import parse as parse_date
 
@@ -23,7 +23,7 @@ def convert_float(value: Any) -> Optional[float]:
         return None
 
 
-def convert_int_dict(int_dict) -> Dict[int, int]:
+def convert_int_dict(int_dict) -> dict[int, int]:
     """Convert JSON string keys to ints"""
     return {try_int(k): try_int(v) for k, v in int_dict.items()}
 
@@ -39,7 +39,7 @@ def format_const(value: str) -> str:
     return str(value).upper().replace('_', '-')
 
 
-def format_dimensions(dimensions: Union[Tuple[int, int], Dict[str, int]]) -> Tuple[int, int]:
+def format_dimensions(dimensions: Union[tuple[int, int], dict[str, int]]) -> tuple[int, int]:
     """Slightly simplify 'dimensions' response attribute into ``(width, height)`` tuple"""
     if isinstance(dimensions, tuple):
         return dimensions

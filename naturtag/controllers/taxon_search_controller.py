@@ -1,10 +1,11 @@
 import asyncio
 from logging import getLogger
 
-from pyinaturalist.constants import ICONIC_TAXA, RANKS
+from pyinaturalist.constants import RANKS
 from pyinaturalist.v1 import get_taxa
 
 from naturtag.app import get_app
+from naturtag.constants import SELECTABLE_ICONIC_TAXA
 from naturtag.controllers import Controller, TaxonBatchLoader
 from naturtag.widgets import DropdownTextField, IconicTaxaIcon
 
@@ -30,7 +31,7 @@ class TaxonSearchController(Controller):
         self.iconic_taxa_filters = screen.search_tab.ids.iconic_taxa
 
         # 'Categories' (iconic taxa) icons
-        for id in ICONIC_TAXA:
+        for id in SELECTABLE_ICONIC_TAXA:
             icon = IconicTaxaIcon(id)
             icon.bind(on_release=self.on_select_iconic_taxon)
             self.iconic_taxa_filters.add_widget(icon)
@@ -60,11 +61,8 @@ class TaxonSearchController(Controller):
         asyncio.run(self._search())
 
     # TODO: Paginated results
+    # TODO: Run in separate thread?
     async def _search(self):
-        # TODO: To make async HTTP requests, Pick one of: grequests, aiohttp, twisted, tornado...
-        # async def _get_taxa(params):
-        #     return get_taxa(**params)['results']
-
         params = self.get_search_parameters()
         logger.info(f'Searching taxa with parameters: {params}')
         # results = await _get_taxa(params)
@@ -93,10 +91,10 @@ class TaxonSearchController(Controller):
         self.search_results_list.clear_widgets()
 
         logger.info(f'Taxon: loading {len(results)} search results')
-        loader.add_batch(results, parent=self.search_results_list)
+        await loader.add_batch(results, parent=self.search_results_list)
         self.search_results_tab.select()
 
-        loader.start_thread()
+        loader.start()
 
     def reset_all_search_inputs(self, *args):
         logger.info('Resetting search filters')
@@ -107,6 +105,7 @@ class TaxonSearchController(Controller):
         self.min_rank_input.text = ''
         self.max_rank_input.text = ''
 
+    # TODO: Ctrl-click to select
     @staticmethod
     def on_select_iconic_taxon(button):
         """Handle clicking an iconic taxon; don't re-select the taxon if we're de-selecting it"""

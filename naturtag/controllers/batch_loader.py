@@ -1,81 +1,75 @@
 import asyncio
 from logging import getLogger
-from threading import Thread
 from time import time
 from typing import Any, Callable, Iterable
 
-from kivy.clock import Clock, mainthread
+from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.uix.widget import Widget
 
 from naturtag.app import get_app
+from naturtag.inat_metadata import get_taxon
 from naturtag.widgets import ImageMetaTile, TaxonListItem
 
 REPORT_RATE = 1 / 30  # Report progress to UI at 30 FPS
 logger = getLogger().getChild(__name__)
 
 
-class BatchRunner(EventDispatcher):
-    """Runs batches of tasks asynchronously in a separate thread from the main GUI thread
+class BatchLoader(EventDispatcher):
+    """Runs batches of IO-bound tasks asynchronously, with periodic progress updates
 
     Events:
-        on_progress: Called periodically to report progress
+        on_progress: Called periodically to report progress to the UI
         on_load: Called when a work item is processed
         on_complete: Called when all work items are processed
     """
 
-    def __init__(self, runner_callback: Callable, worker_callback: Callable, loop=None, **kwargs):
+    def __init__(self, worker_callback: Callable, **kwargs):
         """
         Args:
             runner_callback: Callback for main event loop entry point
             worker_callback: Callback to process work items
             loop: Event loop to use (separate from main kivy event loop)
         """
-        # Schedule all events to run on the main thread
-        self.dispatch = mainthread(self.dispatch)
         self.register_event_type('on_progress')
         self.register_event_type('on_load')
         self.register_event_type('on_complete')
         super().__init__(**kwargs)
 
-        self.loop = loop or get_app().bg_loop
-        self.thread = None
+        self.items_complete = None
+        self.lock = asyncio.Lock()
+        self.loop = asyncio.get_running_loop()
+        self.progress_event = None
         self.queues = []
+        self.start_time = None
         self.worker_tasks = []
-        self.runner_callback = runner_callback
         self.worker_callback = worker_callback
 
-    def add_batch(self, items: Iterable, **kwargs):
-        """Add a batch of items to the queue (from another thread)
+    async def add_batch(self, items: Iterable, **kwargs):
+        """Add a batch of items to the queue
 
         Args:
             items: Items to be passed to worker callback
             kwargs: Optional keyword arguments to be passed to worker callback
         """
-
-        def _add_batch():
-            queue = asyncio.Queue()
-            for item in items:
-                queue.put_nowait((item, kwargs))
-            self.queues.append(queue)
-
-        self.loop.call_soon_threadsafe(_add_batch)
-
-    def start_thread(self):
-        """Start the background loader event loop in a new thread"""
-
-        def _start():
-            asyncio.run_coroutine_threadsafe(self.start(), self.loop)
-
-        Thread(target=_start).start()
+        queue = asyncio.Queue()
+        for item in items:
+            queue.put_nowait((item, kwargs))
+        # task = asyncio.create_task(self.worker(queue))
+        # self.worker_tasks.append(task)
+        self.queues.append(queue)
 
     async def start(self):
-        """Start the background loader event loop"""
-        logger.info(f'Loader: Starting {len(self.queues)} batches')
+        """Run batches, wait to complete, and gracefully shut down"""
+        logger.info(f'BatchLoader: Starting {len(self.queues)} batches')
         for queue in self.queues:
             task = asyncio.create_task(self.worker(queue))
             self.worker_tasks.append(task)
-        await self.runner_callback()
+        self.start_progress()
+
+        await self.join()
+        self.stop_progress()
+        self.dispatch('on_complete', None)
 
     async def worker(self, queue: asyncio.Queue):
         """Run a worker to process items on a single queue"""
@@ -94,46 +88,18 @@ class BatchRunner(EventDispatcher):
             await queue.join()
 
     async def stop(self):
-        """Safely stop the event loop"""
-        logger.info(f'Loader: stopping {len(self.worker_tasks)} workers')
+        """Safely stop all running tasks"""
+        logger.info(f'BatchLoader: Stopping {len(self.worker_tasks)} workers')
+        self.stop_progress()
         for task in self.worker_tasks:
             task.cancel()
-        self.loop.run_until_complete(asyncio.gather(*self.worker_tasks, return_exceptions=True))
-
-    # Default handlers
-    def on_load(self, *_):
-        pass
-
-    def on_complete(self, *_):
-        pass
-
-    def on_progress(self, *_):
-        pass
-
-
-class BatchLoader(BatchRunner):
-    """Loads batches of items with periodic progress updates sent back to the UI"""
-
-    def __init__(self, **kwargs):
-        super().__init__(runner_callback=self.run, **kwargs)
-        self.event = None
-        self.items_complete = None
-        self.start_time = None
-        self.lock = asyncio.Lock()
-
-    async def run(self):
-        """Run batches, wait to complete, and gracefully shut down"""
-        self.start_progress()
-        await self.join()
-        self.stop_progress()
-        self.dispatch('on_complete', None)
-        await self.stop()
+        await asyncio.gather(*self.worker_tasks, return_exceptions=True)
 
     def start_progress(self):
         """Schedule event to periodically report progress"""
         self.start_time = time()
         self.items_complete = 0
-        self.event = Clock.schedule_interval(self.report_progress, REPORT_RATE)
+        self.progress_event = Clock.schedule_interval(self.report_progress, REPORT_RATE)
 
     async def increment_progress(self):
         """Async-safe function to increment progress"""
@@ -146,19 +112,24 @@ class BatchLoader(BatchRunner):
 
     def stop_progress(self):
         """Unschedule progress event and log total execution time"""
-        if self.event:
-            self.event.cancel()
-            self.event = None
+        self.report_progress()
+        if self.progress_event:
+            self.progress_event.cancel()
+            self.progress_event = None
             logger.info(
-                f'Loader: Finished loading {self.items_complete} items '
-                f'in {time() - self.start_time} seconds'
+                f'BatchLoader: Finished loading {self.items_complete} items '
+                f'in {time() - self.start_time:0.2f} seconds'
             )
 
-    def cancel(self):
-        """Safely stop the event loop and thread (from another thread)"""
-        logger.info(f'Loader: Canceling {len(self.queues)} batches')
-        self.loop.call_soon_threadsafe(self.stop_progress)
-        asyncio.run_coroutine_threadsafe(self.stop(), self.loop)
+    # Default handlers
+    def on_load(self, *_):
+        pass
+
+    def on_complete(self, *_):
+        pass
+
+    def on_progress(self, *_):
+        pass
 
 
 class WidgetBatchLoader(BatchLoader):
@@ -170,17 +141,12 @@ class WidgetBatchLoader(BatchLoader):
 
     async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
         """Load information for a new widget"""
-        logger.debug(f'Processing item: {item}')
+        logger.debug(f'BatchLoader: Processing item: {item}')
         widget = self.widget_cls(item, **kwargs)
-        self.add_widget(widget, parent)
-        await self.increment_progress()
-        return widget
-
-    @mainthread
-    def add_widget(self, widget: Widget, parent: Widget):
-        """Add a widget to its parent on the main thread"""
         if parent:
             parent.add_widget(widget)
+        await self.increment_progress()
+        return widget
 
 
 class TaxonBatchLoader(WidgetBatchLoader):
@@ -189,10 +155,12 @@ class TaxonBatchLoader(WidgetBatchLoader):
     def __init__(self, **kwargs):
         super().__init__(widget_cls=TaxonListItem, **kwargs)
 
-    def add_widget(self, widget: Widget, parent: Widget):
-        """Add a TaxonListItem to its parent list and bind its click event"""
-        super().add_widget(widget, parent)
-        mainthread(get_app().bind_to_select_taxon)(widget)
+    async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
+        """Fetch a Taxon by ID, add a TaxonListItem to its parent list, and bind its click event"""
+        taxon = get_taxon(item)
+        widget = await super().load_widget(taxon, parent, **kwargs)
+        get_app().bind_to_select_taxon(widget)
+        return widget
 
 
 class ImageBatchLoader(WidgetBatchLoader):
@@ -201,11 +169,8 @@ class ImageBatchLoader(WidgetBatchLoader):
     def __init__(self, **kwargs):
         super().__init__(widget_cls=ImageMetaTile, **kwargs)
 
-    def add_widget(self, widget: Widget, parent: Widget):
-        """Add an ImageMetaTiles to its parent view and bind its click event"""
-        super().add_widget(widget, parent)
-        self.bind_click(widget)
-
-    @mainthread
-    def bind_click(self, widget):
+    async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
+        """Add an ImageMetaTile to its parent view and bind its click event"""
+        widget = await super().load_widget(item, parent, **kwargs)
         widget.bind(on_touch_down=get_app().image_selection_controller.on_image_click)
+        return widget

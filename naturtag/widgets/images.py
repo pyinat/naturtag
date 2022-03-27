@@ -2,15 +2,21 @@
 from io import BytesIO
 from logging import getLogger
 
+import requests
 from kivy.core.clipboard import Clipboard
+from kivy.core.image import Image as CoreImage
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 
 from naturtag.app import alert
-from naturtag.app.cache import cache_async_thumbnail
 from naturtag.models import MetaMetadata, get_icon_path
-from naturtag.thumbnails import get_format, get_thumbnail, get_thumbnail_if_exists
+from naturtag.thumbnails import (
+    generate_thumbnail_from_bytes,
+    get_format,
+    get_thumbnail,
+    get_thumbnail_if_exists,
+)
 
 logger = getLogger().getChild(__name__)
 
@@ -18,17 +24,32 @@ DESELECTED_COLOR = (0, 0, 0, 0)
 SELECTED_COLOR = (0.2, 0.6, 0.6, 0.4)
 
 
+# TODO: Caching
+# TODO: Run in background thread
+# TODO: Placeholder image or spinner
+class CustomImage(AsyncImage):
+    def __init__(self, source: str = None, **kwargs):
+        super().__init__(source='', **kwargs)
+        response = requests.get(source)
+        ext = source.split('.')[-1]
+        img_data = BytesIO(response.content)
+
+        self.texture = CoreImage(img_data, ext=ext).texture
+        self.reload()
+
+
 class CachedAsyncImage(AsyncImage):
     """AsyncImage which, once loaded, caches the image for future use"""
 
-    def __init__(self, thumbnail_size: str = 'large', **kwargs):
+    def __init__(self, thumbnail_size: str = 'large', source: str = None, **kwargs):
         """
         Args:
             size : Size of thumbnail to cache
         """
         self.thumbnail_size = thumbnail_size
         self.thumbnail_path = None
-        super().__init__(**kwargs)
+        logger.debug(f'CachedAsyncImage: Loading image: {source}')
+        super().__init__(source=source, **kwargs)
 
     def _load_source(self, *args):
         """Before downloading remote image, first check for existing thumbnail"""
@@ -36,23 +57,24 @@ class CachedAsyncImage(AsyncImage):
         if self.thumbnail_path is None:
             self.thumbnail_path = get_thumbnail_if_exists(self.source) or ''
             if self.thumbnail_path:
-                logger.debug(f'Found {self.source} in cache: {self.thumbnail_path}')
+                logger.debug(f'CachedAsyncImage: Found {self.source} in cache: {self.thumbnail_path}')
                 self.source = self.thumbnail_path
         super()._load_source(*args)
 
     def on_load(self, *args):
         """After loading, cache the downloaded image for future use, if not previously done"""
         if not get_thumbnail_if_exists(self.source):
-            cache_async_thumbnail(self, size=self.thumbnail_size)
+            image_bytes, _ = self.get_image_bytes()
+            generate_thumbnail_from_bytes(image_bytes, self.source, size=self.thumbnail_size)
 
     def get_image_bytes(self):
         if not (self._coreimage.image and self._coreimage.image.texture):
-            logger.warning(f'Texture for {self.source} not loaded')
+            logger.warning(f'CachedAsyncImage: Texture for {self.source} not loaded')
             return None
 
         # thumbnail_path = get_thumbnail_path(self.source)
         ext = get_format(self.source)
-        logger.debug(f'Getting image data downloaded from {self.source}; format {ext}')
+        logger.debug(f'CachedAsyncImage: Getting image data from {self.source}; format {ext}')
 
         # Load inner 'texture' bytes into a file-like object that PIL can read
         image_bytes = BytesIO()

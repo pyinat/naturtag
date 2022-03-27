@@ -5,14 +5,14 @@ from kivy.clock import Clock
 
 from naturtag.app import alert, get_app
 from naturtag.controllers import Controller
-from naturtag.inat_metadata import get_http_cache_size
+from naturtag.inat_metadata import get_cache_size
 from naturtag.thumbnails import delete_thumbnails, get_thumbnail_cache_size
 
 logger = getLogger(__name__)
 
 
 class CacheController(Controller):
-    """Controller class to manage Settings screen, and reading from and writing to settings file"""
+    """Controller class to manage application caches"""
 
     def __init__(self, cache_screen):
         self.screen = cache_screen
@@ -59,7 +59,7 @@ class CacheController(Controller):
         """Populate 'Cache Size' sections with calculated totals"""
         out = self.screen.cache_size_output
 
-        out.text = f'Request cache size: {get_http_cache_size()}'
+        out.text = f'Request cache size: {get_cache_size()}'
         num_thumbs, thumbnail_total_size = get_thumbnail_cache_size()
         out.secondary_text = f'Thumbnail cache size: {num_thumbs} files totaling {thumbnail_total_size}'
         history, _, frequent, _ = get_app().settings_controller.stored_taxa

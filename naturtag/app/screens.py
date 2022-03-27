@@ -1,7 +1,6 @@
 """ Screen classes used by the app """
 from logging import getLogger
-from os.path import join
-from typing import Any, Dict
+from typing import Any
 
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
@@ -61,7 +60,7 @@ SCREENS = {
 }
 
 
-def load_screens() -> Dict[str, Any]:
+def load_screens() -> dict[str, Any]:
     """Initialize screen components and screens, and store references to them"""
     for component_name in SCREEN_COMPONENTS:
         load_kv(component_name)
@@ -75,6 +74,6 @@ def load_screens() -> Dict[str, Any]:
 
 def load_kv(name: str):
     """Load an individual kv file by name"""
-    path = join(KV_SRC_DIR, f'{name}.kv')
-    Builder.load_file(path)
+    path = KV_SRC_DIR / f'{name}.kv'
+    Builder.load_file(str(path))
     logger.debug(f'Init: Loaded {path}')
