@@ -8,7 +8,6 @@ from kivy.event import EventDispatcher
 from kivy.uix.widget import Widget
 
 from naturtag.app import get_app
-from naturtag.controllers.taxon_loader import get_taxon, get_taxon_list_item, get_taxon_thumbnail
 from naturtag.widgets import ImageMetaTile, TaxonListItem
 
 REPORT_RATE = 1 / 30  # Report progress to UI at 30 FPS
@@ -158,7 +157,12 @@ class TaxonBatchLoader(WidgetBatchLoader):
     async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
         """Fetch a Taxon by ID, add a TaxonListItem to its parent list, and bind its click event"""
         logger.debug(f'BatchLoader: Processing item: {item}')
-        widget = await get_taxon_list_item(get_app().client, item)
+        widget = TaxonListItem(**kwargs)
+        get_app().load_taxon(item, widget)
+
+        # widget = await super().load_widget(None, parent, **kwargs)
+        # widget = await get_taxon_list_item(get_app().client, item)
+
         # taxon = get_taxon(get_app().client, item)
         # image = get_taxon_thumbnail(self.client.session, taxon)
         # widget = await super().load_widget(taxon, parent, image=image, **kwargs)

@@ -45,7 +45,7 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.controllers.taxon_loader import get_taxon, get_taxon_list_item, get_taxon_thumbnail
+from naturtag.controllers.taxon_loader import TaxonBGLoader, get_taxon, get_taxon_thumbnail
 from naturtag.inat_metadata import get_ids_from_url
 from naturtag.widgets import TaxonListItem
 
@@ -64,6 +64,7 @@ class ControllerProxy:
     taxon_selection_controller = ObjectProperty()
     taxon_view_controller = ObjectProperty()
     settings_controller = ObjectProperty()
+    taxon_loader = ObjectProperty()
 
     def init_controllers(self, screens):
         # Init controllers with references to nested screen objects
@@ -75,6 +76,20 @@ class ControllerProxy:
         self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
         self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
         # observation_search_controller = ObservationSearchController(screens['observation'].ids)
+
+        # Session and client objects for iNat API requests
+        self.client = iNatClient(
+            session=ClientSession(
+                cache_control=False,
+                urls_expire_after=CACHE_EXPIRATION,
+                per_host=True,
+            )
+        )
+
+        # Background loader thread
+        self.taxon_loader = TaxonBGLoader(self.client)
+        self.taxon_loader.start()
+        self.load_taxon = self.taxon_loader.load_taxon
 
         # Proxy methods
         self.add_control_widget = self.settings_controller.add_control_widget
@@ -96,6 +111,7 @@ class ControllerProxy:
         self.image_selection_controller.post_init()
         self.taxon_selection_controller.post_init()
 
+    # TODO: Replace with background loader thread
     def get_taxon_list_item(self, taxon: Union[Taxon, int, dict], **kwargs):
         """Get a new :py:class:`.TaxonListItem with event binding"""
         # return get_taxon_list_item(self.client, taxon)    taxon = get_taxon(client, taxon)
@@ -131,14 +147,6 @@ class NaturtagApp(MDApp, ControllerProxy):
 
     def build(self):
         self.theme_cls.theme_style = 'Dark'
-
-        # Session and client objects for iNat API requests
-        self.session = ClientSession(
-            cache_control=False,
-            urls_expire_after=CACHE_EXPIRATION,
-            per_host=True,
-        )
-        self.client = iNatClient(session=self.session)
 
         # Init screens and store references to them
         screens = load_screens()
@@ -202,6 +210,7 @@ class NaturtagApp(MDApp, ControllerProxy):
     def on_request_close(self, *args):
         """Save any unsaved settings before exiting"""
         self.settings_controller.save_settings()
+        self.taxon_loader.stop()
         self.stop()
 
     def on_keyboard(self, window, key, scancode, codepoint, modifier):

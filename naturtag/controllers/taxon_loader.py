@@ -1,7 +1,9 @@
 """Not sure where else these functions should go"""
 from io import BytesIO
 from logging import getLogger
-from threading import Thread
+from queue import Queue
+from threading import Event, Thread
+from time import sleep
 from typing import Union
 
 from kivy.clock import mainthread
@@ -17,7 +19,45 @@ from naturtag.widgets import TaxonListItem
 logger = getLogger().getChild(__name__)
 
 
-# TODO: Run a single background thread that accepts tasks from a queue
+# TODO: Increment progress when queue item completes
+class TaxonBGLoader(Thread):
+    def __init__(self, client: iNatClient):
+        super().__init__()
+        self.client = client
+        self.queue = Queue()
+        self._stop_event = Event()
+
+    def load_taxon(self, taxon_input: Union[Taxon, int, dict], list_item: TaxonListItem):
+        logger.info(f'TaxonBGLoader: Enqueuing taxon: {taxon_input}')
+        self.queue.put((taxon_input, list_item))
+
+    def stop(self):
+        logger.info(f'TaxonBGLoader: Canceling {self.queue.qsize()} tasks')
+        self.queue.queue.clear()
+        self._stop_event.set()
+        self.join()
+
+    def run(self):
+        while True:
+            if self._stop_event.is_set():
+                break
+            elif not self.queue.empty():
+                taxon_input, list_item = self.queue.get()
+                logger.info(f'TaxonBGLoader: Loading taxon: {taxon_input}')
+                self._load_taxon_list_item(taxon_input, list_item)
+                self.queue.task_done()
+                logger.info(f'TaxonBGLoader: Loaded taxon: {taxon_input}')
+            else:
+                sleep(0.2)
+
+    def _load_taxon_list_item(self, taxon, list_item):
+        taxon = get_taxon(self.client, taxon)
+        image = get_taxon_thumbnail(self.client.session, taxon)
+        mainthread(list_item.set_taxon)(taxon)
+        mainthread(list_item.set_image)(image)
+        mainthread(get_app().bind_to_select_taxon)(list_item)
+
+
 async def get_taxon_list_item(
     client: iNatClient, taxon_input: Union[Taxon, int, dict], **kwargs
 ) -> TaxonListItem:
@@ -25,23 +65,14 @@ async def get_taxon_list_item(
 
     def _load_taxon():
         taxon = get_taxon(client, taxon_input)
-        mainthread(list_item.set_taxon)(taxon)
-
         image = get_taxon_thumbnail(client.session, taxon)
+        mainthread(list_item.set_taxon)(taxon)
         mainthread(list_item.set_image)(image)
         mainthread(get_app().bind_to_select_taxon)(list_item)
 
     thread = Thread(target=_load_taxon)
     thread.start()
     return list_item
-
-
-# def _load_taxon_list_item(client, taxon, list_item):
-#     taxon = get_taxon(client, taxon)
-#     image = get_taxon_thumbnail(client.session, taxon)
-#     list_item.set_taxon(taxon)
-#     list_item.set_image(image)
-#     return TaxonListItem(taxon, image=image)
 
 
 def get_taxon(client: iNatClient, taxon: Union[BaseTaxon, int, dict]) -> Taxon:
@@ -60,6 +91,6 @@ def get_taxon(client: iNatClient, taxon: Union[BaseTaxon, int, dict]) -> Taxon:
 def get_taxon_thumbnail(session: Session, taxon: Taxon) -> CoreImage:
     url = taxon.default_photo.thumbnail_url or taxon.icon_path
     response = session.get(url)
-    ext = url.split('.')[-1]
+    ext = url.split('.')[-1].lower().replace('jpeg', 'jpg')
     img_data = BytesIO(response.content)
     return CoreImage(img_data, ext=ext)
