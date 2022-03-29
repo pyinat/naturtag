@@ -5,6 +5,7 @@ from queue import Queue
 from threading import Event, Thread
 from time import sleep
 from typing import Union
+from urllib.parse import urlparse
 
 from kivy.clock import mainthread
 from kivy.core.image import Image as CoreImage
@@ -88,9 +89,18 @@ def get_taxon(client: iNatClient, taxon: Union[BaseTaxon, int, dict]) -> Taxon:
     return taxon
 
 
+# TODO: If some image URLs don't have a filename/extension, use Content-Type instead
 def get_taxon_thumbnail(session: Session, taxon: Taxon) -> CoreImage:
-    url = taxon.default_photo.thumbnail_url or taxon.icon_path
+    if not taxon.default_photo:
+        return CoreImage(taxon.icon_path)
+
+    url = taxon.default_photo.thumbnail_url
     response = session.get(url)
-    ext = url.split('.')[-1].lower().replace('jpeg', 'jpg')
     img_data = BytesIO(response.content)
-    return CoreImage(img_data, ext=ext)
+    return CoreImage(img_data, ext=_get_url_ext(url))
+
+
+def _get_url_ext(url: str):
+    path = urlparse(url).path
+    path = path.lower().replace('jpeg', 'jpg')
+    return path.split('.')[-1]

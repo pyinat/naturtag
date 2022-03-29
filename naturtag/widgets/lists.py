@@ -7,6 +7,7 @@ from kivymd.uix.list import (
     IconRightWidget,
     ILeftBody,
     ILeftBodyTouch,
+    ImageLeftWidget,
     IRightBodyTouch,
     MDList,
     ThreeLineAvatarIconListItem,
@@ -14,8 +15,8 @@ from kivymd.uix.list import (
 from kivymd.uix.selectioncontrol import MDSwitch
 
 from naturtag.app import alert, get_app
+from naturtag.constants import TAXON_ICON_PLACEHOLDER
 from naturtag.models import Taxon
-from naturtag.widgets import CustomImage
 
 logger = getLogger().getChild(__name__)
 
@@ -57,19 +58,15 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
     ):
         self.disable_button = disable_button
         self.highlight_observed = highlight_observed
-        super().__init__(font_style='H6', **kwargs)
-        # super().__init__(
-        #     font_style='H6',
-        #     text=taxon.name,
-        #     secondary_text=taxon.rank,
-        #     tertiary_text=taxon.preferred_common_name,
-        #     **kwargs,
-        # )
+        super().__init__(font_style='H6', text='Loading...', **kwargs)
 
         if taxon:
             self.set_taxon(taxon)
         if image:
             self.set_image(image)
+        # Placeholder thumbnail
+        else:
+            self.add_widget(ImageLeftWidget(source=TAXON_ICON_PLACEHOLDER))
 
         # Set right-click event unless disabled
         if not disable_button:
@@ -87,6 +84,7 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
             self.add_widget(IconRightWidget(icon='account-search'))
 
     def set_image(self, image: CoreImage):
+        self.ids._left_container.clear_widgets()
         self.add_widget(ThumbnailListItem(image=image))
 
     def _on_touch_down(self, instance, touch):
@@ -100,13 +98,16 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
             super().on_touch_down(touch)
 
 
-# class ThumbnailListItem(CachedAsyncImage, ILeftBody):
 # class ThumbnailListItem(ImageLeftWidget):
+# class ThumbnailListItem(CachedAsyncImage, ILeftBody):
 # class ThumbnailListItem(CustomImage, ILeftBody):
 class ThumbnailListItem(AsyncImage, ILeftBody):
-    """List item that contains a taxon thumbnail"""
+    """List item that contains a taxon thumbnail. Can be initialized from either a source or
+    existing Image object.
+    """
 
-    def __init__(self, image: CoreImage = None, **kwargs):
-        super().__init__(source='', **kwargs)
-        self.texture = image.texture
-        self.reload()
+    def __init__(self, source: str = '', image: CoreImage = None, **kwargs):
+        super().__init__(source=source, **kwargs)
+        if image:
+            self.texture = image.texture
+            self.reload()
