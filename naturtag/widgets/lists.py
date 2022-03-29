@@ -51,6 +51,7 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
     def __init__(
         self,
         taxon: Taxon = None,
+        taxon_id: int = None,
         image: CoreImage = None,
         disable_button: bool = False,
         highlight_observed: bool = True,
@@ -58,13 +59,19 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
     ):
         self.disable_button = disable_button
         self.highlight_observed = highlight_observed
+        self.taxon = taxon
         super().__init__(font_style='H6', text='Loading...', **kwargs)
 
+        # Set either full taxon object or placeholder
         if taxon:
             self.set_taxon(taxon)
+        elif taxon_id:
+            self.taxon = Taxon(id=taxon_id)
+            self.secondary_text = f'Taxon ID: {taxon_id}'
+
+        # Set either thumbnail or placeholder icon
         if image:
             self.set_image(image)
-        # Placeholder thumbnail
         else:
             self.add_widget(ImageLeftWidget(source=TAXON_ICON_PLACEHOLDER))
 

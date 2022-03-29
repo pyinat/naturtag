@@ -2,10 +2,6 @@
 import asyncio
 import os
 from logging import getLogger
-from typing import Union
-
-from naturtag.atlas import get_atlas
-from naturtag.models.taxon import Taxon
 
 # Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
@@ -24,6 +20,7 @@ from pyinaturalist import ClientSession, iNatClient
 
 from naturtag.app import alert
 from naturtag.app.screens import HOME_SCREEN, Root, load_screens
+from naturtag.atlas import get_atlas
 from naturtag.constants import (
     ATLAS_APP_ICONS,
     BACKSPACE,
@@ -46,7 +43,7 @@ from naturtag.controllers import (
     TaxonViewController,
 )
 from naturtag.inat_metadata import get_ids_from_url
-from naturtag.loaders.taxon_loader import TaxonBGLoader, get_taxon, get_taxon_thumbnail
+from naturtag.loaders import TaxonBGThread
 from naturtag.widgets import TaxonListItem
 
 logger = getLogger().getChild(__name__)
@@ -64,7 +61,7 @@ class ControllerProxy:
     taxon_selection_controller = ObjectProperty()
     taxon_view_controller = ObjectProperty()
     settings_controller = ObjectProperty()
-    taxon_loader = ObjectProperty()
+    taxon_bg_thread = ObjectProperty()
 
     def init_controllers(self, screens):
         # Init controllers with references to nested screen objects
@@ -87,9 +84,8 @@ class ControllerProxy:
         )
 
         # Background loader thread
-        self.taxon_loader = TaxonBGLoader(self.client)
-        self.taxon_loader.start()
-        self.load_taxon = self.taxon_loader.load_taxon
+        self.taxon_bg_thread = TaxonBGThread(self.client)
+        self.taxon_bg_thread.start()
 
         # Proxy methods
         self.add_control_widget = self.settings_controller.add_control_widget
@@ -111,16 +107,11 @@ class ControllerProxy:
         self.image_selection_controller.post_init()
         self.taxon_selection_controller.post_init()
 
-    # TODO: Replace with background loader thread
-    def get_taxon_list_item(self, taxon: Union[Taxon, int, dict], **kwargs):
-        """Get a new :py:class:`.TaxonListItem with event binding"""
-        # return get_taxon_list_item(self.client, taxon)    taxon = get_taxon(client, taxon)
-        taxon = get_taxon(self.client, taxon)
-        image = get_taxon_thumbnail(self.client.session, taxon)
-        return TaxonListItem(taxon=taxon, image=image, **kwargs)
-        # item = TaxonListItem(get_taxon(self.client, taxon), **kwargs)
-        # self.bind_to_select_taxon(item)
-        # return item
+    def get_taxon_list_item(self, taxon_id: int, **kwargs):
+        """Load a new :py:class:`.TaxonListItem`"""
+        item = TaxonListItem(taxon_id=taxon_id, **kwargs)
+        self.taxon_bg_thread.load_taxon(taxon_id, item)
+        return item
 
     def bind_to_select_taxon(self, item):
         # If TaxonListItem's disable_button is set, don't set button action
@@ -210,7 +201,7 @@ class NaturtagApp(MDApp, ControllerProxy):
     def on_request_close(self, *args):
         """Save any unsaved settings before exiting"""
         self.settings_controller.save_settings()
-        self.taxon_loader.stop()
+        self.taxon_bg_thread.stop()
         self.stop()
 
     def on_keyboard(self, window, key, scancode, codepoint, modifier):
