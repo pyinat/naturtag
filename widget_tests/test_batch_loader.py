@@ -2,7 +2,7 @@ import asyncio
 
 from kivymd.uix.progressbar import MDProgressBar
 
-from naturtag.controllers.batch_loader import BatchLoader
+from naturtag.loaders.batch_loader import BatchLoader
 
 
 class SleepyBatchLoader(BatchLoader):

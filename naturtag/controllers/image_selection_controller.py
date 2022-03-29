@@ -2,8 +2,9 @@ import asyncio
 from logging import getLogger
 
 from naturtag.app import alert, get_app
-from naturtag.controllers import Controller, ImageBatchLoader
+from naturtag.controllers import Controller
 from naturtag.image_glob import get_images_from_paths
+from naturtag.loaders import ImageBatchLoader
 from naturtag.tagger import tag_images
 
 logger = getLogger().getChild(__name__)

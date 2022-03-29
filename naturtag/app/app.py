@@ -45,8 +45,8 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.controllers.taxon_loader import TaxonBGLoader, get_taxon, get_taxon_thumbnail
 from naturtag.inat_metadata import get_ids_from_url
+from naturtag.loaders.taxon_loader import TaxonBGLoader, get_taxon, get_taxon_thumbnail
 from naturtag.widgets import TaxonListItem
 
 logger = getLogger().getChild(__name__)

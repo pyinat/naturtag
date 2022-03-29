@@ -6,7 +6,8 @@ from pyinaturalist.v1 import get_taxa
 
 from naturtag.app import get_app
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
-from naturtag.controllers import Controller, TaxonBatchLoader
+from naturtag.controllers import Controller
+from naturtag.loaders import TaxonBatchLoader
 from naturtag.widgets import DropdownTextField, IconicTaxaIcon
 
 logger = getLogger().getChild(__name__)
