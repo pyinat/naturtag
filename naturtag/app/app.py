@@ -166,9 +166,9 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
 
-        # on_dropfile sends a single file at a time; this collects files dropped at the same time
-        Window.bind(on_dropfile=lambda _, path: self.dropped_files.append(path))
-        Window.bind(on_dropfile=self.drop_trigger)
+        # on_drop_file sends a single file at a time; this collects files dropped at the same time
+        Window.bind(on_drop_file=lambda _, path, *args: self.dropped_files.append(path))
+        Window.bind(on_drop_file=self.drop_trigger)
 
         # Preload atlases so they're immediately available in Kivy cache
         get_atlas(ATLAS_APP_ICONS)

@@ -52,7 +52,7 @@ class ImageSelectionController(Controller):
 
     def add_images(self, paths):
         """Add one or more files and/or dirs, with deduplication"""
-        asyncio.run(self.load_images(paths))
+        asyncio.create_task(self.load_images(paths))
 
     async def load_images(self, paths):
         # Determine images to load, ignoring duplicates

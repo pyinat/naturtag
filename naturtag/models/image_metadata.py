@@ -120,7 +120,11 @@ class ImageMetadata:
         img = self.read_exiv2_image(path)
         # TODO: Possible workaround to enable overwriting corrupted metadata?
         if img:
-            img.modify_exif(self.exif)
+            simple_exif = {}
+            for k, v in self.exif.items():
+                simple_exif[k] = ','.join(v) if isinstance(v, list) else v
+
+            img.modify_exif(simple_exif)
             img.modify_iptc(self.iptc)
             img.modify_xmp(self.xmp)
             img.close()
