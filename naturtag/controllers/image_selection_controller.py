@@ -2,8 +2,9 @@ import asyncio
 from logging import getLogger
 
 from naturtag.app import alert, get_app
-from naturtag.controllers import Controller, ImageBatchLoader
+from naturtag.controllers import Controller
 from naturtag.image_glob import get_images_from_paths
+from naturtag.loaders import ImageBatchLoader
 from naturtag.tagger import tag_images
 
 logger = getLogger().getChild(__name__)
@@ -51,7 +52,7 @@ class ImageSelectionController(Controller):
 
     def add_images(self, paths):
         """Add one or more files and/or dirs, with deduplication"""
-        asyncio.run(self.load_images(paths))
+        asyncio.create_task(self.load_images(paths))
 
     async def load_images(self, paths):
         # Determine images to load, ignoring duplicates

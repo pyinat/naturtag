@@ -1,10 +1,13 @@
 from logging import getLogger
 
 from kivy.core.clipboard import Clipboard
+from kivy.core.image import Image as CoreImage
+from kivy.uix.image import AsyncImage
 from kivymd.uix.list import (
     IconRightWidget,
     ILeftBody,
     ILeftBodyTouch,
+    ImageLeftWidget,
     IRightBodyTouch,
     MDList,
     ThreeLineAvatarIconListItem,
@@ -12,8 +15,8 @@ from kivymd.uix.list import (
 from kivymd.uix.selectioncontrol import MDSwitch
 
 from naturtag.app import alert, get_app
+from naturtag.constants import TAXON_ICON_PLACEHOLDER
 from naturtag.models import Taxon
-from naturtag.widgets import CustomImage
 
 logger = getLogger().getChild(__name__)
 
@@ -41,36 +44,55 @@ class SwitchListItemRight(IRightBodyTouch, MDSwitch):
     """Switch that works as a list item"""
 
 
+# TODO: Create placeholder item with 'loading taxon {id}', then update with full info/image?
 class TaxonListItem(ThreeLineAvatarIconListItem):
     """Class that displays condensed taxon info as a list item"""
 
     def __init__(
         self,
         taxon: Taxon = None,
+        taxon_id: int = None,
+        image: CoreImage = None,
         disable_button: bool = False,
         highlight_observed: bool = True,
         **kwargs,
     ):
+        self.disable_button = disable_button
+        self.highlight_observed = highlight_observed
         self.taxon = taxon
+        super().__init__(font_style='H6', text='Loading...', **kwargs)
 
-        # Set click event unless disabled
+        # Set either full taxon object or placeholder
+        if taxon:
+            self.set_taxon(taxon)
+        elif taxon_id:
+            self.taxon = Taxon(id=taxon_id)
+            self.secondary_text = f'Taxon ID: {taxon_id}'
+
+        # Set either thumbnail or placeholder icon
+        if image:
+            self.set_image(image)
+        else:
+            self.add_widget(ImageLeftWidget(source=TAXON_ICON_PLACEHOLDER))
+
+        # Set right-click event unless disabled
         if not disable_button:
             self.bind(on_touch_down=self._on_touch_down)
-        self.disable_button = disable_button
 
-        super().__init__(
-            font_style='H6',
-            text=taxon.name,
-            secondary_text=taxon.rank,
-            tertiary_text=taxon.preferred_common_name,
-            **kwargs,
-        )
+    def set_taxon(self, taxon: Taxon):
+        """Update taxon info"""
+        self.taxon = taxon
+        self.text = taxon.name
+        self.secondary_text = taxon.rank
+        self.tertiary_text = taxon.preferred_common_name
 
-        # Add thumbnail
-        self.add_widget(ThumbnailListItem(source=taxon.default_photo.thumbnail_url or taxon.icon_path))
         # Add user icon if taxon has been observed by the user
-        if highlight_observed and get_app().is_observed(taxon.id):
+        if self.highlight_observed and get_app().is_observed(taxon.id):
             self.add_widget(IconRightWidget(icon='account-search'))
+
+    def set_image(self, image: CoreImage):
+        self.ids._left_container.clear_widgets()
+        self.add_widget(ThumbnailListItem(image=image))
 
     def _on_touch_down(self, instance, touch):
         """Copy text on right-click"""
@@ -83,7 +105,16 @@ class TaxonListItem(ThreeLineAvatarIconListItem):
             super().on_touch_down(touch)
 
 
-# class ThumbnailListItem(CachedAsyncImage, ILeftBody):
 # class ThumbnailListItem(ImageLeftWidget):
-class ThumbnailListItem(CustomImage, ILeftBody):
-    """List item that contains a taxon thumbnail"""
+# class ThumbnailListItem(CachedAsyncImage, ILeftBody):
+# class ThumbnailListItem(CustomImage, ILeftBody):
+class ThumbnailListItem(AsyncImage, ILeftBody):
+    """List item that contains a taxon thumbnail. Can be initialized from either a source or
+    existing Image object.
+    """
+
+    def __init__(self, source: str = '', image: CoreImage = None, **kwargs):
+        super().__init__(source=source, **kwargs)
+        if image:
+            self.texture = image.texture
+            self.reload()

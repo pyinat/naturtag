@@ -2,10 +2,6 @@
 import asyncio
 import os
 from logging import getLogger
-from typing import Union
-
-from naturtag.atlas import get_atlas
-from naturtag.models.taxon import Taxon
 
 # Set GL backend before any kivy modules are imported
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
@@ -20,12 +16,15 @@ from kivy.core.clipboard import Clipboard
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from kivymd.app import MDApp
+from pyinaturalist import ClientSession, iNatClient
 
 from naturtag.app import alert
 from naturtag.app.screens import HOME_SCREEN, Root, load_screens
+from naturtag.atlas import get_atlas
 from naturtag.constants import (
     ATLAS_APP_ICONS,
     BACKSPACE,
+    CACHE_EXPIRATION,
     ENTER,
     F11,
     INIT_WINDOW_POSITION,
@@ -43,7 +42,8 @@ from naturtag.controllers import (
     TaxonSelectionController,
     TaxonViewController,
 )
-from naturtag.inat_metadata import get_ids_from_url, get_taxon
+from naturtag.inat_metadata import get_ids_from_url
+from naturtag.loaders import TaxonBGThread
 from naturtag.widgets import TaxonListItem
 
 logger = getLogger().getChild(__name__)
@@ -61,6 +61,7 @@ class ControllerProxy:
     taxon_selection_controller = ObjectProperty()
     taxon_view_controller = ObjectProperty()
     settings_controller = ObjectProperty()
+    taxon_bg_thread = ObjectProperty()
 
     def init_controllers(self, screens):
         # Init controllers with references to nested screen objects
@@ -72,6 +73,19 @@ class ControllerProxy:
         self.taxon_selection_controller = TaxonSelectionController(screens['taxon'].ids)
         self.taxon_view_controller = TaxonViewController(screens['taxon'].ids)
         # observation_search_controller = ObservationSearchController(screens['observation'].ids)
+
+        # Session and client objects for iNat API requests
+        self.client = iNatClient(
+            session=ClientSession(
+                cache_control=False,
+                urls_expire_after=CACHE_EXPIRATION,
+                per_host=True,
+            )
+        )
+
+        # Background loader thread
+        self.taxon_bg_thread = TaxonBGThread(self.client)
+        self.taxon_bg_thread.start()
 
         # Proxy methods
         self.add_control_widget = self.settings_controller.add_control_widget
@@ -93,10 +107,10 @@ class ControllerProxy:
         self.image_selection_controller.post_init()
         self.taxon_selection_controller.post_init()
 
-    def get_taxon_list_item(self, taxon: Union[Taxon, int, dict], **kwargs):
-        """Get a new :py:class:`.TaxonListItem with event binding"""
-        item = TaxonListItem(get_taxon(taxon), **kwargs)
-        self.bind_to_select_taxon(item)
+    def get_taxon_list_item(self, taxon_id: int, **kwargs):
+        """Load a new :py:class:`.TaxonListItem`"""
+        item = TaxonListItem(taxon_id=taxon_id, **kwargs)
+        self.taxon_bg_thread.load_taxon(taxon_id, item)
         return item
 
     def bind_to_select_taxon(self, item):
@@ -152,9 +166,9 @@ class NaturtagApp(MDApp, ControllerProxy):
         self.theme_cls.primary_palette = MD_PRIMARY_PALETTE
         self.theme_cls.accent_palette = MD_ACCENT_PALETTE
 
-        # on_dropfile sends a single file at a time; this collects files dropped at the same time
-        Window.bind(on_dropfile=lambda _, path: self.dropped_files.append(path))
-        Window.bind(on_dropfile=self.drop_trigger)
+        # on_drop_file sends a single file at a time; this collects files dropped at the same time
+        Window.bind(on_drop_file=lambda _, path, *args: self.dropped_files.append(path))
+        Window.bind(on_drop_file=self.drop_trigger)
 
         # Preload atlases so they're immediately available in Kivy cache
         get_atlas(ATLAS_APP_ICONS)
@@ -187,6 +201,7 @@ class NaturtagApp(MDApp, ControllerProxy):
     def on_request_close(self, *args):
         """Save any unsaved settings before exiting"""
         self.settings_controller.save_settings()
+        self.taxon_bg_thread.stop()
         self.stop()
 
     def on_keyboard(self, window, key, scancode, codepoint, modifier):

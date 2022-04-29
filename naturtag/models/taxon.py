@@ -6,9 +6,21 @@ from naturtag.atlas import get_atlas_uri
 from naturtag.constants import ATLAS_APP_ICONS
 
 
+# TODO: Move copy() to pyinaturalist.Taxon, reuse in load_full_record()
+# TODO: Is there a better way to do this? Like static functions instaed of Taxon subclass?
 @define_model
 class Taxon(BaseTaxon):
+    """Taxon subclass with some additional features specific to Naturtag"""
+
     partial: bool = attr.field(default=True)
+
+    @classmethod
+    def copy(cls, taxon: BaseTaxon) -> 'Taxon':
+        new_taxon = cls()
+        for key in attr.fields_dict(BaseTaxon).keys():
+            key = key.lstrip('_')  # Use getters/setters for LazyProperty instead of temp attrs
+            setattr(new_taxon, key, getattr(taxon, key))
+        return new_taxon
 
     @property
     def icon_path(self) -> str:

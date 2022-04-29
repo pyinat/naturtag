@@ -1,5 +1,5 @@
 from naturtag.app import get_app
-from naturtag.controllers import BatchLoader
+from naturtag.loaders import BatchLoader
 from naturtag.widgets import LoaderProgressBar
 
 

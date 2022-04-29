@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 from typing import IO, Iterable, Optional, Union
 
@@ -55,14 +56,22 @@ ATLAS_TAXON_ICONS = ATLAS_DIR / 'taxon_icons'
 ATLAS_TAXON_PHOTOS = ATLAS_DIR / 'taxon_photos'
 ATLAS_LOCAL_PHOTOS = ATLAS_DIR / 'local_photos'
 ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
+TAXON_ICON_PLACEHOLDER = f'atlas://{ATLAS_APP_ICONS}/unknown'
 
 APP_ICONS_DIR = ASSETS_DIR / 'iconic_taxa'
 APP_LOGO = str(ASSETS_DIR / 'logo.png')
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
 
 # Cache settings
-CACHE_FILE = DATA_DIR / 'api_cache.db'
+# CACHE_FILE = DATA_DIR / 'api_cache.db'
 OBS_CACHE_EXPIRY_HOURS = 48
+CACHE_EXPIRATION = {
+    'api.inaturalist.org/v*/observations*': timedelta(days=2),
+    'api.inaturalist.org/v*/taxa*': timedelta(days=60),
+    'static.inaturalist.org/*': -1,
+    'inaturalist-open-data.s3.amazonaws.com/*': -1,
+    '*': timedelta(hours=1),
+}
 
 # Config files
 CONFIG_PATH = DATA_DIR / 'settings.yml'

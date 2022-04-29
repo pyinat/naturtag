@@ -7,10 +7,6 @@ from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.uix.widget import Widget
 
-from naturtag.app import get_app
-from naturtag.inat_metadata import get_taxon
-from naturtag.widgets import ImageMetaTile, TaxonListItem
-
 REPORT_RATE = 1 / 30  # Report progress to UI at 30 FPS
 logger = getLogger().getChild(__name__)
 
@@ -146,31 +142,4 @@ class WidgetBatchLoader(BatchLoader):
         if parent:
             parent.add_widget(widget)
         await self.increment_progress()
-        return widget
-
-
-class TaxonBatchLoader(WidgetBatchLoader):
-    """Loads batches of TaxonListItems"""
-
-    def __init__(self, **kwargs):
-        super().__init__(widget_cls=TaxonListItem, **kwargs)
-
-    async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
-        """Fetch a Taxon by ID, add a TaxonListItem to its parent list, and bind its click event"""
-        taxon = get_taxon(item)
-        widget = await super().load_widget(taxon, parent, **kwargs)
-        get_app().bind_to_select_taxon(widget)
-        return widget
-
-
-class ImageBatchLoader(WidgetBatchLoader):
-    """Loads batches of ImageMetaTiles"""
-
-    def __init__(self, **kwargs):
-        super().__init__(widget_cls=ImageMetaTile, **kwargs)
-
-    async def load_widget(self, item: Any, parent: Widget = None, **kwargs) -> Widget:
-        """Add an ImageMetaTile to its parent view and bind its click event"""
-        widget = await super().load_widget(item, parent, **kwargs)
-        widget.bind(on_touch_down=get_app().image_selection_controller.on_image_click)
         return widget

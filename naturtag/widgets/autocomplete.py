@@ -103,10 +103,14 @@ class AutocompleteSearch(MDBoxLayout, TextFieldWrapper):
                 return item
             return {'text': item, 'suggestion_text': item, 'metadata': {}}
 
-        matches = asyncio.run(self.get_autocomplete(search_str))
-        logger.info(f'Found {len(matches)} matches for search string "{search_str}"')
-        self.dropdown_view.data = [get_row(i) for i in matches]
-        self.dropdown_container.open()
+        # TODO: temporary hack
+        async def find_matches():
+            matches = await self.get_autocomplete(search_str)
+            logger.info(f'Found {len(matches)} matches for search string "{search_str}"')
+            self.dropdown_view.data = [get_row(i) for i in matches]
+            self.dropdown_container.open()
+
+        asyncio.create_task(find_matches())
 
     # TODO: formatting for suggestion_text; smaller text + different color
     def update_selection(self, instance, suggestion_text, metadata):
