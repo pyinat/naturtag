@@ -12,8 +12,9 @@ ICONS_DIR = ASSETS_DIR / 'material_icons'
 logger = getLogger(__name__)
 
 
+# TODO: Is there a better way to connect these buttons to callbacks (slots)?
 class Toolbar(QToolBar):
-    def __init__(self, parent: QWidget, load_file_callback: Callable):
+    def __init__(self, parent: QWidget, load_file_callback: Callable, run_callback: Callable):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
         self.setMovable(False)
@@ -23,11 +24,10 @@ class Toolbar(QToolBar):
 
         # get_button('&Run', 'control.png', self.on_toolbar_click, self)
         self.run_button = self.add_button(
-            '&Run', 'ic_play_arrow_black_24dp.png', 'Run a thing', self.on_toolbar_click
+            '&Run', 'ic_play_arrow_black_24dp.png', 'Run a thing', run_callback
         )
         self.addSeparator()
 
-        # TODO: use signal corretly
         self.open_button = self.add_button(
             '&Open', 'ic_insert_photo_black_24dp.png', 'Open images', load_file_callback
         )
@@ -42,6 +42,11 @@ class Toolbar(QToolBar):
             '&History', 'ic_history_black_24dp.png', 'View history', self.on_toolbar_click
         )
         self.history_button.setCheckable(True)
+        self.addSeparator()
+
+        self.settings_button = self.add_button(
+            '&Settings', 'ic_settings_black_24dp.png', 'Settings', self.on_toolbar_click
+        )
 
     def add_button(self, name: str, icon: str, tooltip: str, callback: Callable) -> QAction:
         button_action = QAction(QIcon(str(ICONS_DIR / icon)), name, self)

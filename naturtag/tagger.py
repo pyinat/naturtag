@@ -4,7 +4,13 @@ from naturtag.models.meta_metadata import MetaMetadata
 
 
 def tag_images(
-    observation_id, taxon_id, common_names, darwin_core, hierarchical, create_xmp_sidecar, images
+    observation_id: int,
+    taxon_id: int,
+    common_names: bool = False,
+    darwin_core: bool = False,
+    hierarchical: bool = False,
+    create_xmp_sidecar: bool = False,
+    images: list[str] = None,
 ):
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
