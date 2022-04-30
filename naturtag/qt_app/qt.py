@@ -5,7 +5,7 @@ from typing import Callable
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import QRectF, QSize, Qt, Signal
-from PySide6.QtGui import QAction, QDropEvent, QIcon, QImage, QPixmap
+from PySide6.QtGui import QAction, QDropEvent, QIcon, QImage, QKeySequence, QPixmap, QShortcut
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
     QApplication,
@@ -29,14 +29,23 @@ from PySide6.QtWidgets import (
     QStatusBar,
     QTextEdit,
     QToolBar,
+    QToolTip,
     QVBoxLayout,
     QWidget,
 )
 from qt_material import apply_stylesheet
 
-from naturtag.constants import ASSETS_DIR
+from naturtag.constants import APP_ICONS_DIR, ASSETS_DIR, IMAGE_FILETYPES
 
 ICONS_DIR = ASSETS_DIR / 'material_icons'
+TEST_IMAGES = [
+    APP_ICONS_DIR / 'amphibia.png',
+    APP_ICONS_DIR / 'animalia.png',
+    APP_ICONS_DIR / 'arachnida.png',
+    APP_ICONS_DIR / 'aves.png',
+    APP_ICONS_DIR / 'fungi.png',
+    APP_ICONS_DIR / 'insecta.png',
+]
 logger = getLogger(__name__)
 basicConfig(level='DEBUG')
 
@@ -62,19 +71,19 @@ class QtImageViewer(QGraphicsView):
         form.setLayout(self.layout)
         self.scene.addItem(form)
 
-    def clear_image(self):
-        if self.has_image():
-            self.scene.removeItem(self._pixmapHandle)
-            self._pixmapHandle = None
-
-    def file_from_file_dialog(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, 'Open image file:')
-        self.load_file(file_name)
+    def load_file_dialog(self):
+        file_names, _ = QFileDialog.getOpenFileNames(
+            self,
+            'Open image files:',
+            filter=f'Image files ({" ".join(IMAGE_FILETYPES)})',
+        )
+        for file_name in file_names:
+            self.load_file(file_name)
 
     def load_file(self, file_path: str):
         '''Load an image from a file path or URI'''
         # TODO: Support Windows file URIs
-        file_path = unquote(urlparse(file_path).path)
+        file_path = unquote(urlparse(str(file_path)).path)
         if not isfile(file_path):
             return
 
@@ -100,6 +109,7 @@ class Thumbnail(QLabel):
     def __init__(self, file_path: str):
         super().__init__()
         self.setPixmap(QPixmap(file_path))
+        self.setToolTip(file_path)
         # Can't be used with pixmap?
         # self.setFrameShape(QFrame.StyledPanel)
         # self.setFrameShadow(QFrame.Raised)
@@ -139,26 +149,45 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
 
         button_action_2 = get_button(
-            '&Paste', 'ic_content_paste_black_24dp.png', 'Paste a thing', self.on_toolbar_click, self
+            '&Open', 'ic_insert_photo_black_24dp.png', 'Open images', self.viewer.load_file_dialog, self
         )
-        button_action_2.setCheckable(True)
         toolbar.addAction(button_action_2)
         toolbar.addSeparator()
 
         button_action_3 = get_button(
-            '&History', 'ic_history_black_24dp.png', 'View history', self.on_toolbar_click, self
+            '&Paste', 'ic_content_paste_black_24dp.png', 'Paste a thing', self.on_toolbar_click, self
         )
         button_action_3.setCheckable(True)
         toolbar.addAction(button_action_3)
+        toolbar.addSeparator()
+
+        button_action_4 = get_button(
+            '&History', 'ic_history_black_24dp.png', 'View history', self.on_toolbar_click, self
+        )
+        button_action_4.setCheckable(True)
+        toolbar.addAction(button_action_4)
 
         # Menu bar
         menu = self.menuBar()
         file_menu = menu.addMenu('&File')
         file_menu.addAction(button_action_1)
+        file_menu.addAction(button_action_2)
         file_submenu = file_menu.addMenu('Submenu')
-        file_submenu.addAction(button_action_2)
+        file_submenu.addAction(button_action_3)
+        file_submenu.addAction(button_action_4)
 
+        # Status bar
         self.setStatusBar(QStatusBar(self))
+
+        # Keyboard shortcuts
+        shortcut = QShortcut(QKeySequence('Ctrl+O'), self)
+        shortcut.activated.connect(self.viewer.load_file_dialog)
+        shortcut2 = QShortcut(QKeySequence('Ctrl+Q'), self)
+        shortcut2.activated.connect(QApplication.instance().quit)
+
+        # Load test images
+        for file_path in TEST_IMAGES:
+            self.viewer.load_file(file_path)
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
