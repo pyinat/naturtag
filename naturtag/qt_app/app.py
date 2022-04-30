@@ -43,27 +43,25 @@ basicConfig(level='DEBUG')
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        # self.resize(1600, 1000)
         self.resize(1000, 700)
-        self.setWindowTitle('QT Material Demo')
-        self.setAcceptDrops(True)
+        self.setWindowTitle('QT Image Viewer Demo')
 
+        # Layout
         pagelayout = QVBoxLayout()
-        # toolbar_layout = QHBoxLayout()
-
-        label = QLabel('Hello!\nThis is a demo!')
-        label.setAlignment(Qt.AlignCenter)
-        pagelayout.addWidget(label)
-        self.viewer = ImageViewer()
-        pagelayout.addWidget(self.viewer)
-
         widget = QWidget()
         widget.setLayout(pagelayout)
         self.setCentralWidget(widget)
 
-        # Toolbar
-        self.toolbar = Toolbar('My main toolbar', self.viewer)
+        label = QLabel('Hello!\nThis is a demo!')
+        label.setAlignment(Qt.AlignCenter)
+        self.viewer = ImageViewer()
+        pagelayout.addWidget(label)
+        pagelayout.addWidget(self.viewer)
+
+        # Toolbar + status bar
+        self.toolbar = Toolbar('My main toolbar', self.viewer.load_file_dialog)
         self.addToolBar(self.toolbar)
+        self.setStatusBar(QStatusBar(self))
 
         # Menu bar
         menu = self.menuBar()
@@ -74,8 +72,8 @@ class MainWindow(QMainWindow):
         file_submenu.addAction(self.toolbar.paste_button)
         file_submenu.addAction(self.toolbar.history_button)
 
-        # Status bar
-        self.setStatusBar(QStatusBar(self))
+        settings_menu = menu.addMenu('&Settings')
+        settings_menu.addAction(self.toolbar.settings_button)
 
         # Keyboard shortcuts
         shortcut = QShortcut(QKeySequence('Ctrl+O'), self)
@@ -84,15 +82,15 @@ class MainWindow(QMainWindow):
         shortcut2.activated.connect(QApplication.instance().quit)
 
         # Load test images
-        for file_path in TEST_IMAGES:
-            self.viewer.load_file(file_path)
-
-    def dragEnterEvent(self, event):
-        event.acceptProposedAction()
-
-    def dropEvent(self, event: QDropEvent):
-        self.viewer.load_file(event.mimeData().text())
-        event.acceptProposedAction()
+        for file_path in [
+            'amphibia.png',
+            'animalia.png',
+            'arachnida.png',
+            'aves.png',
+            'fungi.png',
+            'insecta.png',
+        ]:
+            self.viewer.load_file(APP_ICONS_DIR / file_path)
 
 
 if __name__ == '__main__':

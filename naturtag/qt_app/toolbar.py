@@ -13,13 +13,12 @@ logger = getLogger(__name__)
 
 
 class Toolbar(QToolBar):
-    def __init__(self, parent: QWidget, viewer: ImageViewer):
+    def __init__(self, parent: QWidget, load_file_callback: Callable):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
         self.setMovable(False)
         self.setFloatable(False)
         self.setAllowedAreas(Qt.TopToolBarArea)
-        self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setStyleSheet('#toolbar { border: none; background-color: transparent; }')
 
         # get_button('&Run', 'control.png', self.on_toolbar_click, self)
@@ -30,9 +29,8 @@ class Toolbar(QToolBar):
 
         # TODO: use signal corretly
         self.open_button = self.add_button(
-            '&Open', 'ic_insert_photo_black_24dp.png', 'Open images', viewer.load_file_dialog
+            '&Open', 'ic_insert_photo_black_24dp.png', 'Open images', load_file_callback
         )
-        self.addSeparator()
 
         self.paste_button = self.add_button(
             '&Paste', 'ic_content_paste_black_24dp.png', 'Paste a thing', self.on_toolbar_click

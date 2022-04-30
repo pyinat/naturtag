@@ -25,11 +25,10 @@ class ImageViewer(QGraphicsView):
 
     def __init__(self):
         super().__init__()
-
-        self.setAcceptDrops(True)
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
         self.layout = QGraphicsGridLayout()
+        self.setAcceptDrops(True)
 
         self.aspectRatioMode = Qt.KeepAspectRatio
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -77,9 +76,13 @@ class ImageViewer(QGraphicsView):
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
 
+    def dragMoveEvent(self, event):
+        event.acceptProposedAction()
+
     def dropEvent(self, event: QDropEvent):
         event.acceptProposedAction()
-        self.load_file(event.mimeData().text())
+        for file_path in event.mimeData().text().splitlines():
+            self.load_file(file_path)
 
 
 class LocalThumbnail(QLabel):
