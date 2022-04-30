@@ -50,7 +50,10 @@ class MainWindow(QMainWindow):
 
         # Toolbar + status bar
         self.toolbar = Toolbar(
-            'My main toolbar', load_file_callback=self.viewer.load_file_dialog, run_callback=self.run
+            'My main toolbar',
+            load_file_callback=self.viewer.load_file_dialog,
+            run_callback=self.run,
+            clear_callback=self.clear,
         )
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
@@ -61,6 +64,7 @@ class MainWindow(QMainWindow):
         file_menu = menu.addMenu('&File')
         file_menu.addAction(self.toolbar.run_button)
         file_menu.addAction(self.toolbar.open_button)
+        file_menu.addAction(self.toolbar.clear_button)
         file_submenu = file_menu.addMenu('Submenu')
         file_submenu.addAction(self.toolbar.paste_button)
         file_submenu.addAction(self.toolbar.history_button)
@@ -126,6 +130,12 @@ class MainWindow(QMainWindow):
         # previews = {img.metadata.image_path: img for img in self.image_previews.children}
         # for metadata in all_metadata:
         #     previews[metadata.image_path].metadata = metadata
+
+    def clear(self):
+        """Clear all images and input"""
+        self.viewer.clear()
+        self.input_obs_id.setText('')
+        self.input_taxon_id.setText('')
 
 
 if __name__ == '__main__':

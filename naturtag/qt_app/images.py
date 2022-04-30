@@ -27,20 +27,12 @@ class ImageViewer(QGraphicsView):
         super().__init__()
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
-        self.layout = QGraphicsGridLayout()
         self.setAcceptDrops(True)
+        self.clear()
 
         self.aspectRatioMode = Qt.KeepAspectRatio
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        form = QGraphicsWidget()
-        form.setLayout(self.layout)
-        self.scene.addItem(form)
-
-        self.img_row = 0
-        self.img_col = 0
-        self.images = {}
 
     def load_file_dialog(self):
         file_names, _ = QFileDialog.getOpenFileNames(
@@ -72,6 +64,19 @@ class ImageViewer(QGraphicsView):
         if self.img_col == 4:
             self.img_col = 0
             self.img_row += 1
+
+    # TODO: Do previously added widgets get garbage collected?
+    def clear(self):
+        """Clear all images from the viewer"""
+        self.scene.clear()
+        self.layout = QGraphicsGridLayout()
+        form = QGraphicsWidget()
+        form.setLayout(self.layout)
+        self.scene.addItem(form)
+
+        self.img_row = 0
+        self.img_col = 0
+        self.images = {}
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()

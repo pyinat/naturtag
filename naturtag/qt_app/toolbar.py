@@ -6,7 +6,6 @@ from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QToolBar, QWidget
 
 from naturtag.constants import ASSETS_DIR
-from naturtag.qt_app.images import ImageViewer
 
 ICONS_DIR = ASSETS_DIR / 'material_icons'
 logger = getLogger(__name__)
@@ -14,7 +13,13 @@ logger = getLogger(__name__)
 
 # TODO: Is there a better way to connect these buttons to callbacks (slots)?
 class Toolbar(QToolBar):
-    def __init__(self, parent: QWidget, load_file_callback: Callable, run_callback: Callable):
+    def __init__(
+        self,
+        parent: QWidget,
+        load_file_callback: Callable,
+        run_callback: Callable,
+        clear_callback: Callable,
+    ):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
         self.setMovable(False)
@@ -31,11 +36,12 @@ class Toolbar(QToolBar):
         self.open_button = self.add_button(
             '&Open', 'ic_insert_photo_black_24dp.png', 'Open images', load_file_callback
         )
-
         self.paste_button = self.add_button(
             '&Paste', 'ic_content_paste_black_24dp.png', 'Paste a thing', self.on_toolbar_click
         )
-        self.paste_button.setCheckable(True)
+        self.clear_button = self.add_button(
+            '&Clear', 'baseline_clear_black_24dp.png', 'Clear open images', clear_callback
+        )
         self.addSeparator()
 
         self.history_button = self.add_button(
