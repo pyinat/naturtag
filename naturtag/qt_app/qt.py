@@ -36,6 +36,8 @@ from PySide6.QtWidgets import (
 from qt_material import apply_stylesheet
 
 from naturtag.constants import APP_ICONS_DIR, ASSETS_DIR, IMAGE_FILETYPES
+from naturtag.models import MetaMetadata
+from naturtag.thumbnails import get_thumbnail
 
 ICONS_DIR = ASSETS_DIR / 'material_icons'
 TEST_IMAGES = [
@@ -62,6 +64,7 @@ class QtImageViewer(QGraphicsView):
         self.layout = QGraphicsGridLayout()
         self.img_row = 0
         self.img_col = 0
+        self.images = {}
 
         self.aspectRatioMode = Qt.KeepAspectRatio
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -85,11 +88,16 @@ class QtImageViewer(QGraphicsView):
         # TODO: Support Windows file URIs
         file_path = unquote(urlparse(str(file_path)).path)
         if not isfile(file_path):
+            logger.info(f'File does not exist: {file_path}')
+            return
+        elif file_path in self.images:
+            logger.info(f'Image already loaded: {file_path}')
             return
 
         logger.info(f'Loading {file_path} at ({self.img_row}, {self.img_col})')
-        label_item = self.scene.addWidget(Thumbnail(file_path))
-        self.layout.addItem(label_item, self.img_row, self.img_col)
+        thumbnail = self.scene.addWidget(LocalThumbnail(file_path))
+        self.layout.addItem(thumbnail, self.img_row, self.img_col)
+        self.images[file_path] = thumbnail
 
         # I need to manually manage a grid layout? Oh joy
         self.img_col += 1
@@ -105,11 +113,15 @@ class QtImageViewer(QGraphicsView):
         self.load_file(event.mimeData().text())
 
 
-class Thumbnail(QLabel):
+class LocalThumbnail(QLabel):
+    """Displays a thumbnail of a local image and contains associated metadata"""
+
     def __init__(self, file_path: str):
         super().__init__()
-        self.setPixmap(QPixmap(file_path))
-        self.setToolTip(file_path)
+        self.metadata = MetaMetadata(file_path)
+        self.setPixmap(QPixmap(get_thumbnail(file_path)))
+        self.setToolTip(f'{file_path}\n{self.metadata.summary}')
+
         # Can't be used with pixmap?
         # self.setFrameShape(QFrame.StyledPanel)
         # self.setFrameShadow(QFrame.Raised)

@@ -1,3 +1,4 @@
+# TODO: Store thumbnails in SQLite db instead of separate files
 """ Utilities for generating and retrieving image thumbnails """
 from hashlib import md5
 from io import BytesIO, IOBase
