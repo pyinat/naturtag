@@ -1,8 +1,7 @@
 import sys
 from logging import getLogger
 
-from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QAction, QIcon, QKeySequence, QShortcut
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QGroupBox,
@@ -12,16 +11,16 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QStatusBar,
     QTabWidget,
-    QToolBar,
     QVBoxLayout,
     QWidget,
 )
 from qt_material import apply_stylesheet
+from qtawesome import icon as fa_icon
 
 from naturtag.constants import APP_ICONS_DIR
 from naturtag.qt_app.images import ImageViewer
 from naturtag.qt_app.logger import init_handler
-from naturtag.qt_app.toolbar import Toolbar, get_icon
+from naturtag.qt_app.toolbar import Toolbar
 from naturtag.tagger import tag_images
 
 logger = getLogger(__name__)
@@ -39,10 +38,10 @@ class MainWindow(QMainWindow):
         root.setLayout(page_layout)
         tabs = QTabWidget()
         self.setCentralWidget(tabs)
-        tabs.addTab(root, get_icon('ic_add_a_photo_black_24dp'), 'Photos')
-        tabs.addTab(QWidget(), 'Observation')
-        tabs.addTab(QWidget(), 'Taxon')
-        log_tab_idx = tabs.addTab(init_handler().widget, 'Logs')
+        tabs.addTab(root, fa_icon('fa.camera'), 'Photos')
+        tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
+        tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
+        log_tab_idx = tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
         tabs.setTabVisible(log_tab_idx, False)
 
         # Input group
@@ -82,7 +81,7 @@ class MainWindow(QMainWindow):
             tabs.setTabVisible(idx, not tabs.isTabVisible(idx))
 
         # Button to enable log tab
-        button_action = QAction(get_icon('ic_build_black_24dp'), '&View Logs', self)
+        button_action = QAction(fa_icon('fa.file-text-o'), '&View Logs', self)
         button_action.setStatusTip('View Logs')
         button_action.setCheckable(True)
         button_action.triggered.connect(lambda: toggle_tab(log_tab_idx))

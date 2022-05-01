@@ -892,6 +892,31 @@ python-versions = ">=3.7"
 Jinja2 = "*"
 
 [[package]]
+name = "qtawesome"
+version = "1.1.1"
+description = "FontAwesome icons in PyQt and PySide applications"
+category = "main"
+optional = true
+python-versions = ">=3.6"
+
+[package.dependencies]
+qtpy = "*"
+
+[[package]]
+name = "qtpy"
+version = "2.0.1"
+description = "Provides an abstraction layer on top of the various Qt bindings (PyQt5/6 and PySide2/6)."
+category = "main"
+optional = true
+python-versions = ">=3.6"
+
+[package.dependencies]
+packaging = "*"
+
+[package.extras]
+test = ["pytest (>=6.0.0)", "pytest-cov (>=3.0.0)", "pytest-qt"]
+
+[[package]]
 name = "requests"
 version = "2.27.1"
 description = "Python HTTP for Humans."
@@ -1277,15 +1302,15 @@ docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-all = ["kivy", "kivymd", "kivy-garden.contextmenu", "pyside6", "qt-material"]
+all = ["kivy", "kivymd", "kivy-garden.contextmenu", "pyside6", "qt-material", "qtawesome"]
 docs = ["m2r2", "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-rtd-theme", "sphinxcontrib-apidoc"]
 kv = ["kivy", "kivymd", "kivy-garden.contextmenu"]
-qt = ["pyside6", "qt-material"]
+qt = ["pyside6", "qt-material", "qtawesome"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "af4cb81303c202edd2a1a3d8dbdfc1b229e0189aa44b3505b43edb2924afba98"
+content-hash = "793c81d3e492e72f4b41a7f0fc3e858a68594f2a21750b3ede7c64c9aa142509"
 
 [metadata.files]
 alabaster = [
@@ -1914,6 +1939,14 @@ pyyaml = [
 qt-material = [
     {file = "qt-material-2.10.tar.gz", hash = "sha256:7c4584a1f9e69ef072b10e48e48aaa62bf5ad41b68735db1eaccd65925f8ed86"},
     {file = "qt_material-2.10-py3-none-any.whl", hash = "sha256:ea749f708d3d90dc19a3cdfda9c96abb4d878ed44e6fb17f0f442528c1bb78f6"},
+]
+qtawesome = [
+    {file = "QtAwesome-1.1.1-py3-none-any.whl", hash = "sha256:27d2e2bcb34cb5c9a7f61c29f34b24bf89ef50c79ffff7a76effe59bf781fcee"},
+    {file = "QtAwesome-1.1.1.tar.gz", hash = "sha256:ec02e200231fa68a146a93845890aa0432a7edcba14bf811ff6975cf9acdab5d"},
+]
+qtpy = [
+    {file = "QtPy-2.0.1-py3-none-any.whl", hash = "sha256:d93f2c98e97387fcc9d623d509772af5b6c15ab9d8f9f4c5dfbad9a73ad34812"},
+    {file = "QtPy-2.0.1.tar.gz", hash = "sha256:adfd073ffbd2de81dc7aaa0b983499ef5c59c96adcfdcc9dea60d42ca885eb8f"},
 ]
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
