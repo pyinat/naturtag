@@ -55,7 +55,7 @@ class Toolbar(QToolBar):
         )
 
     def add_button(self, name: str, icon: str, tooltip: str, callback: Callable) -> QAction:
-        button_action = QAction(QIcon(str(ICONS_DIR / icon)), name, self)
+        button_action = QAction(get_icon(icon), name, self)
         button_action.setStatusTip(tooltip)
         button_action.triggered.connect(callback)
         self.addAction(button_action)
@@ -64,3 +64,7 @@ class Toolbar(QToolBar):
     def on_toolbar_click(self, s):
         """Placeholder"""
         logger.info(f'Click; checked: {s}')
+
+
+def get_icon(filename: str) -> QIcon:
+    return QIcon(str(ICONS_DIR / filename))

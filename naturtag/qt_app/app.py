@@ -1,7 +1,8 @@
 import sys
 from logging import getLogger
 
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QGroupBox,
@@ -11,6 +12,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QStatusBar,
     QTabWidget,
+    QToolBar,
     QVBoxLayout,
     QWidget,
 )
@@ -19,7 +21,7 @@ from qt_material import apply_stylesheet
 from naturtag.constants import APP_ICONS_DIR
 from naturtag.qt_app.images import ImageViewer
 from naturtag.qt_app.logger import init_handler
-from naturtag.qt_app.toolbar import Toolbar
+from naturtag.qt_app.toolbar import Toolbar, get_icon
 from naturtag.tagger import tag_images
 
 logger = getLogger(__name__)
@@ -37,10 +39,11 @@ class MainWindow(QMainWindow):
         root.setLayout(page_layout)
         tabs = QTabWidget()
         self.setCentralWidget(tabs)
-        tabs.addTab(root, 'Photos')
+        tabs.addTab(root, get_icon('ic_add_a_photo_black_24dp'), 'Photos')
         tabs.addTab(QWidget(), 'Observation')
         tabs.addTab(QWidget(), 'Taxon')
-        tabs.addTab(init_handler().widget, 'Logs')
+        log_tab_idx = tabs.addTab(init_handler().widget, 'Logs')
+        tabs.setTabVisible(log_tab_idx, False)
 
         # Input group
         input_layout = QHBoxLayout()
@@ -74,6 +77,16 @@ class MainWindow(QMainWindow):
         # file_submenu = file_menu.addMenu('Submenu')
         # file_submenu.addAction(self.toolbar.paste_button)
         # file_submenu.addAction(self.toolbar.history_button)
+
+        def toggle_tab(idx):
+            tabs.setTabVisible(idx, not tabs.isTabVisible(idx))
+
+        # Button to enable log tab
+        button_action = QAction(get_icon('ic_build_black_24dp'), '&View Logs', self)
+        button_action.setStatusTip('View Logs')
+        button_action.setCheckable(True)
+        button_action.triggered.connect(lambda: toggle_tab(log_tab_idx))
+        settings_menu.addAction(button_action)
 
         # Keyboard shortcuts
         shortcut = QShortcut(QKeySequence('Ctrl+O'), self)
