@@ -1,23 +1,16 @@
 import sys
-from logging import basicConfig, getLogger
+from logging import getLogger
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QAction, QDropEvent, QKeySequence, QShortcut
-from PySide6.QtUiTools import QUiLoader
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
-    QFrame,
-    QGridLayout,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QMainWindow,
-    QPlainTextEdit,
-    QPushButton,
-    QStackedLayout,
     QStatusBar,
-    QTextEdit,
-    QToolTip,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -25,11 +18,11 @@ from qt_material import apply_stylesheet
 
 from naturtag.constants import APP_ICONS_DIR
 from naturtag.qt_app.images import ImageViewer
+from naturtag.qt_app.logger import init_handler
 from naturtag.qt_app.toolbar import Toolbar
 from naturtag.tagger import tag_images
 
 logger = getLogger(__name__)
-basicConfig(level='DEBUG')
 
 
 class MainWindow(QMainWindow):

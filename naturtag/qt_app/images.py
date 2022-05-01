@@ -1,4 +1,4 @@
-from logging import basicConfig, getLogger
+from logging import getLogger
 from os.path import isfile
 from urllib.parse import unquote, urlparse
 
