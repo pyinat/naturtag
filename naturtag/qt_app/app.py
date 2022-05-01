@@ -14,8 +14,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from qt_material import apply_stylesheet
 from qtawesome import icon as fa_icon
+from qtmodern import styles
+from qtmodern.windows import ModernWindow
 
 from naturtag.constants import APP_ICONS_DIR
 from naturtag.qt_app.images import ImageViewer
@@ -28,7 +29,7 @@ logger = getLogger(__name__)
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
         self.resize(1024, 768)
         self.setWindowTitle('QT Image Viewer Demo')
 
@@ -158,7 +159,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    apply_stylesheet(app, theme='dark_lightgreen.xml')
-    window = MainWindow()
+    styles.dark(app)
+    # styles.light(app)
+    window = ModernWindow(MainWindow())
     window.show()
     sys.exit(app.exec())

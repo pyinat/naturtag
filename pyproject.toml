@@ -43,8 +43,8 @@ xmltodict = "^0.12.0"
 
 # QT test UI
 pyside6 = {version = "^6.3.0", optional = true}
-qt-material = {version = "^2.10", optional = true}
 qtawesome = {version = "^1.1.1", optional = true}
+qtmodern = {version = "^0.2", optional = true}
 
 # UI dependencies
 kivy = {version = "^=2.1.0", optional = true}
@@ -78,9 +78,9 @@ types-requests = ">=0.1"
 # 'memory_profiler'
 
 [tool.poetry.extras]
-all = ["kivy", "kivymd", "kivy-garden.contextmenu", "pyside6", "qt-material", "qtawesome"]
+all = ["kivy", "kivymd", "kivy-garden.contextmenu", "pyside6", "qtawesome", "qtmodern"]
 kv = ["kivy", "kivymd", "kivy-garden.contextmenu"]
-qt =  ["pyside6", "qt-material", "qtawesome"]
+qt =  ["pyside6", "qtawesome", "qtmodern"]
 docs = ["m2r2", "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-rtd-theme",
         "sphinxcontrib-apidoc"]
 

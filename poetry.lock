@@ -881,17 +881,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "qt-material"
-version = "2.10"
-description = "Material inspired stylesheet for PySide2, PySide6, PyQt5 and PyQt6."
-category = "main"
-optional = true
-python-versions = ">=3.7"
-
-[package.dependencies]
-Jinja2 = "*"
-
-[[package]]
 name = "qtawesome"
 version = "1.1.1"
 description = "FontAwesome icons in PyQt and PySide applications"
@@ -901,6 +890,17 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 qtpy = "*"
+
+[[package]]
+name = "qtmodern"
+version = "0.2.0"
+description = "Qt Widgets Modern User Interface"
+category = "main"
+optional = true
+python-versions = "*"
+
+[package.dependencies]
+qtpy = ">=1.3.1"
 
 [[package]]
 name = "qtpy"
@@ -1302,15 +1302,15 @@ docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-all = ["kivy", "kivymd", "kivy-garden.contextmenu", "pyside6", "qt-material", "qtawesome"]
+all = ["kivy", "kivymd", "kivy-garden.contextmenu", "pyside6", "qtawesome", "qtmodern"]
 docs = ["m2r2", "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-rtd-theme", "sphinxcontrib-apidoc"]
 kv = ["kivy", "kivymd", "kivy-garden.contextmenu"]
-qt = ["pyside6", "qt-material", "qtawesome"]
+qt = ["pyside6", "qtawesome", "qtmodern"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "793c81d3e492e72f4b41a7f0fc3e858a68594f2a21750b3ede7c64c9aa142509"
+content-hash = "12dcfe970991bda1e7cc5852c62597715261850b36a8394ee67a6ca34054b3b4"
 
 [metadata.files]
 alabaster = [
@@ -1936,13 +1936,13 @@ pyyaml = [
     {file = "PyYAML-6.0-cp39-cp39-win_amd64.whl", hash = "sha256:b3d267842bf12586ba6c734f89d1f5b871df0273157918b0ccefa29deb05c21c"},
     {file = "PyYAML-6.0.tar.gz", hash = "sha256:68fb519c14306fec9720a2a5b45bc9f0c8d1b9c72adf45c37baedfcd949c35a2"},
 ]
-qt-material = [
-    {file = "qt-material-2.10.tar.gz", hash = "sha256:7c4584a1f9e69ef072b10e48e48aaa62bf5ad41b68735db1eaccd65925f8ed86"},
-    {file = "qt_material-2.10-py3-none-any.whl", hash = "sha256:ea749f708d3d90dc19a3cdfda9c96abb4d878ed44e6fb17f0f442528c1bb78f6"},
-]
 qtawesome = [
     {file = "QtAwesome-1.1.1-py3-none-any.whl", hash = "sha256:27d2e2bcb34cb5c9a7f61c29f34b24bf89ef50c79ffff7a76effe59bf781fcee"},
     {file = "QtAwesome-1.1.1.tar.gz", hash = "sha256:ec02e200231fa68a146a93845890aa0432a7edcba14bf811ff6975cf9acdab5d"},
+]
+qtmodern = [
+    {file = "qtmodern-0.2.0-py3-none-any.whl", hash = "sha256:57e62617656494a9d8a27ac3bd51ae3ae61a265f43b92d6f6ea59dc8bed2179d"},
+    {file = "qtmodern-0.2.0.tar.gz", hash = "sha256:d433a54fbb400d49790aff65d35f203de2a8cc67795ac5bb04c5e766433fafae"},
 ]
 qtpy = [
     {file = "QtPy-2.0.1-py3-none-any.whl", hash = "sha256:d93f2c98e97387fcc9d623d509772af5b6c15ab9d8f9f4c5dfbad9a73ad34812"},
