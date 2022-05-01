@@ -17,7 +17,7 @@ DATA_DIR = Path(user_data_dir()) / 'Naturtag'
 TRIGGER_DELAY = 0.1
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3
-IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
+IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 
 # Thumnbnail & cache settings

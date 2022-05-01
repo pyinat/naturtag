@@ -17,6 +17,7 @@ class Toolbar(QToolBar):
         load_file_callback: Callable,
         run_callback: Callable,
         clear_callback: Callable,
+        paste_callback: Callable,
     ):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
@@ -31,7 +32,7 @@ class Toolbar(QToolBar):
 
         self.open_button = self.add_button('&Open', 'fa.photo', 'Open images', load_file_callback)
         self.paste_button = self.add_button(
-            '&Paste', 'fa5s.paste', 'Paste a thing', self.on_toolbar_click
+            '&Paste', 'fa5s.paste', 'Paste photos or iNaturalist URLs', paste_callback
         )
         self.clear_button = self.add_button('&Clear', 'fa.remove', 'Clear open images', clear_callback)
         self.addSeparator()

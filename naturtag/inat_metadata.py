@@ -2,6 +2,7 @@
 from logging import getLogger
 from os.path import getsize, isfile
 from typing import Optional
+from urllib.parse import urlparse
 
 import xmltodict
 from pyinaturalist.constants import CACHE_FILE, RANKS
@@ -287,6 +288,7 @@ def get_ids_from_url(value: str) -> IntTuple:
 def strip_url(value: str) -> Optional[int]:
     """If a URL is provided containing an ID, return just the ID"""
     try:
-        return int(value.split('/')[-1].split('-')[0]) if value else None
+        path = urlparse(value).path
+        return int(path.split('/')[-1].split('-')[0])
     except (TypeError, ValueError):
         return None

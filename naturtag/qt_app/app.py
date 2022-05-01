@@ -1,7 +1,7 @@
 import sys
 from logging import getLogger
 
-from PySide6.QtGui import QAction, QKeySequence, QShortcut
+from PySide6.QtGui import QAction, QIntValidator, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QGroupBox,
@@ -19,6 +19,7 @@ from qtmodern import styles
 from qtmodern.windows import ModernWindow
 
 from naturtag.constants import APP_ICONS_DIR
+from naturtag.inat_metadata import get_ids_from_url
 from naturtag.qt_app.images import ImageViewer
 from naturtag.qt_app.logger import init_handler
 from naturtag.qt_app.toolbar import Toolbar
@@ -61,6 +62,7 @@ class MainWindow(QMainWindow):
             load_file_callback=self.viewer.load_file_dialog,
             run_callback=self.run,
             clear_callback=self.clear,
+            paste_callback=self.paste,
         )
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
@@ -93,39 +95,43 @@ class MainWindow(QMainWindow):
         shortcut.activated.connect(self.viewer.load_file_dialog)
         shortcut2 = QShortcut(QKeySequence('Ctrl+Q'), self)
         shortcut2.activated.connect(QApplication.instance().quit)
+        shortcut2 = QShortcut(QKeySequence('Ctrl+V'), self)
+        shortcut2.activated.connect(self.paste)
 
         # Input fields
         self.input_obs_id = QLineEdit()
         self.input_obs_id.setClearButtonEnabled(True)
+        self.input_obs_id.setValidator(QIntValidator())
         input_layout.addWidget(QLabel('Observation ID:'))
         input_layout.addWidget(self.input_obs_id)
 
         self.input_taxon_id = QLineEdit()
         self.input_taxon_id.setClearButtonEnabled(True)
+        self.input_taxon_id.setValidator(QIntValidator())
         input_layout.addWidget(QLabel('Taxon ID:'))
         input_layout.addWidget(self.input_taxon_id)
 
         # Load test images
-        for file_path in [
+        filenames = [
             'amphibia.png',
             'animalia.png',
             'arachnida.png',
             'aves.png',
             'fungi.png',
             'insecta.png',
-        ]:
-            self.viewer.load_file(APP_ICONS_DIR / file_path)
+        ]
+        self.viewer.load_images([APP_ICONS_DIR / filename for filename in filenames])
 
-    def run(self, *args):
+    def run(self):
         """Run image tagging for selected images and input"""
         obs_id, taxon_id = self.input_obs_id.text(), self.input_taxon_id.text()
         files = list(self.viewer.images.keys())
 
         if not files:
-            self.statusbar.showMessage('Select images to tag')
+            self.info('Select images to tag')
             return
         if not (obs_id or taxon_id):
-            self.statusbar.showMessage('Select either an observation or an organism to tag images with')
+            self.info('Select either an observation or an organism to tag images with')
             return
 
         selected_id = f'Observation ID: {obs_id}' if obs_id else f'Taxon ID: {taxon_id}'
@@ -143,7 +149,7 @@ class MainWindow(QMainWindow):
             # metadata_settings['create_xmp'],
             images=files,
         )
-        self.statusbar.showMessage(f'{len(files)} images tagged with metadata for {selected_id}')
+        self.info(f'{len(files)} images tagged with metadata for {selected_id}')
 
         # Update image previews with new metadata
         # previews = {img.metadata.image_path: img for img in self.image_previews.children}
@@ -155,6 +161,26 @@ class MainWindow(QMainWindow):
         self.viewer.clear()
         self.input_obs_id.setText('')
         self.input_taxon_id.setText('')
+
+    def info(self, message: str):
+        """Show a message both in the status bar and in the logs"""
+        self.statusbar.showMessage(message)
+        logger.info(message)
+
+    def paste(self):
+        """Paste either image paths or taxon/observation URLs"""
+        text = QApplication.clipboard().text()
+        logger.debug(f'Pasted: {text}')
+
+        taxon_id, observation_id = get_ids_from_url(text)
+        if observation_id:
+            self.input_obs_id.setText(str(observation_id))
+            self.info(f'Observation {observation_id} selected')
+        elif taxon_id:
+            self.input_taxon_id.setText(str(taxon_id))
+            self.info(f'Taxon {taxon_id} selected')
+        else:
+            self.viewer.load_images(text.splitlines())
 
 
 if __name__ == '__main__':

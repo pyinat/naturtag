@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.constants import IMAGE_FILETYPES
+from naturtag.image_glob import get_images_from_paths
 from naturtag.models import MetaMetadata
 from naturtag.thumbnails import get_thumbnail
 
@@ -29,22 +30,33 @@ class ImageViewer(QGraphicsView):
         self.setScene(self.scene)
         self.setAcceptDrops(True)
         self.clear()
+        self.images: dict[str, LocalThumbnail] = {}
 
         self.aspectRatioMode = Qt.KeepAspectRatio
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def load_file_dialog(self):
-        file_names, _ = QFileDialog.getOpenFileNames(
+        file_paths, _ = QFileDialog.getOpenFileNames(
             self,
             'Open image files:',
             filter=f'Image files ({" ".join(IMAGE_FILETYPES)})',
         )
-        for file_name in file_names:
-            self.load_file(file_name)
+        self.load_images(file_paths)
 
-    def load_file(self, file_path: str):
-        '''Load an image from a file path or URI'''
+    def load_images(self, paths: list[str]):
+        # Determine images to load, ignoring duplicates
+        images = get_images_from_paths(paths, recursive=True)
+        new_images = list(set(images) - set(self.images.keys()))
+        logger.info(f'Main: Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
+        if not new_images:
+            return
+
+        for file_path in new_images:
+            self.load_image(file_path)
+
+    def load_image(self, file_path: str):
+        """Load an image from a file path or URI"""
         # TODO: Support Windows file URIs
         file_path = unquote(urlparse(str(file_path)).path)
         if not isfile(file_path):
@@ -87,7 +99,7 @@ class ImageViewer(QGraphicsView):
     def dropEvent(self, event: QDropEvent):
         event.acceptProposedAction()
         for file_path in event.mimeData().text().splitlines():
-            self.load_file(file_path)
+            self.load_image(file_path)
 
 
 class LocalThumbnail(QLabel):
