@@ -28,16 +28,27 @@ logger = getLogger(__name__)
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.resize(1000, 700)
+        self.resize(1024, 768)
         self.setWindowTitle('QT Image Viewer Demo')
 
-        # Layout
+        # Tabbed layout
         page_layout = QVBoxLayout()
-        widget = QWidget()
-        widget.setLayout(page_layout)
-        self.setCentralWidget(widget)
+        root = QWidget()
+        root.setLayout(page_layout)
+        tabs = QTabWidget()
+        self.setCentralWidget(tabs)
+        tabs.addTab(root, 'Photos')
+        tabs.addTab(QWidget(), 'Observation')
+        tabs.addTab(QWidget(), 'Taxon')
+        tabs.addTab(init_handler().widget, 'Logs')
+
+        # Input group
         input_layout = QHBoxLayout()
-        page_layout.addLayout(input_layout)
+        groupBox = QGroupBox('Input')
+        groupBox.setLayout(input_layout)
+        page_layout.addWidget(groupBox)
+
+        # Viewer
         self.viewer = ImageViewer()
         page_layout.addWidget(self.viewer)
 
@@ -58,12 +69,11 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.toolbar.run_button)
         file_menu.addAction(self.toolbar.open_button)
         file_menu.addAction(self.toolbar.clear_button)
-        file_submenu = file_menu.addMenu('Submenu')
-        file_submenu.addAction(self.toolbar.paste_button)
-        file_submenu.addAction(self.toolbar.history_button)
-
         settings_menu = menu.addMenu('&Settings')
         settings_menu.addAction(self.toolbar.settings_button)
+        # file_submenu = file_menu.addMenu('Submenu')
+        # file_submenu.addAction(self.toolbar.paste_button)
+        # file_submenu.addAction(self.toolbar.history_button)
 
         # Keyboard shortcuts
         shortcut = QShortcut(QKeySequence('Ctrl+O'), self)
@@ -71,11 +81,14 @@ class MainWindow(QMainWindow):
         shortcut2 = QShortcut(QKeySequence('Ctrl+Q'), self)
         shortcut2.activated.connect(QApplication.instance().quit)
 
-        # Input
+        # Input fields
         self.input_obs_id = QLineEdit()
-        self.input_taxon_id = QLineEdit()
+        self.input_obs_id.setClearButtonEnabled(True)
         input_layout.addWidget(QLabel('Observation ID:'))
         input_layout.addWidget(self.input_obs_id)
+
+        self.input_taxon_id = QLineEdit()
+        self.input_taxon_id.setClearButtonEnabled(True)
         input_layout.addWidget(QLabel('Taxon ID:'))
         input_layout.addWidget(self.input_taxon_id)
 
