@@ -2,7 +2,7 @@ from logging import getLogger
 from os.path import isfile
 from urllib.parse import unquote, urlparse
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QDropEvent, QPixmap
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QGraphicsView,
     QGraphicsWidget,
     QLabel,
+    QWidget,
 )
 
 from naturtag.constants import IMAGE_FILETYPES
@@ -67,9 +68,13 @@ class ImageViewer(QGraphicsView):
             return
 
         logger.info(f'Loading {file_path} at ({self.img_row}, {self.img_col})')
-        thumbnail = self.scene.addWidget(LocalThumbnail(file_path))
-        self.layout.addItem(thumbnail, self.img_row, self.img_col)
-        self.images[file_path] = thumbnail
+        thumbnail = LocalThumbnail(file_path)
+        logger.info(thumbnail.deleted)
+        # thumbnail.deleted.connect(self.on_photo_delete)
+
+        thumb_proxy = self.scene.addWidget(LocalThumbnail(file_path))
+        self.layout.addItem(thumb_proxy, self.img_row, self.img_col)
+        self.images[file_path] = thumb_proxy
 
         # I need to manually manage a grid layout? Oh joy
         self.img_col += 1
@@ -77,7 +82,6 @@ class ImageViewer(QGraphicsView):
             self.img_col = 0
             self.img_row += 1
 
-    # TODO: Do previously added widgets get garbage collected?
     def clear(self):
         """Clear all images from the viewer"""
         self.scene.clear()
@@ -101,16 +105,49 @@ class ImageViewer(QGraphicsView):
         for file_path in event.mimeData().text().splitlines():
             self.load_image(file_path)
 
+    # TODO: Why is this not working
+    # @Slot(str)
+    # def on_photo_delete(self, file_path: str):
+    #     logger.warning(f'Deleting {file_path}')
+    #     del self.images[file_path]
+
+
+class Button(QWidget):
+
+    clicked = Signal(Qt.MouseButton)
+
+    ...
+
+    def mousePressEvent(self, event):
+        self.clicked.emit(event.button())
+
 
 class LocalThumbnail(QLabel):
     """Displays a thumbnail of a local image and contains associated metadata"""
 
+    deleted = Signal(str)
+
     def __init__(self, file_path: str):
         super().__init__()
         self.metadata = MetaMetadata(file_path)
+        self.file_path = file_path
         self.setPixmap(QPixmap(get_thumbnail(file_path)))
         self.setToolTip(f'{file_path}\n{self.metadata.summary}')
 
         # Can't be used with pixmap?
         # self.setFrameShape(QFrame.StyledPanel)
         # self.setFrameShadow(QFrame.Raised)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            logger.info("mouseReleaseEvent LEFT")
+        elif event.button() == Qt.MiddleButton:
+            logger.info("mouseReleaseEvent MIDDLE")
+            # self.deleted.emit(self.file_path)
+            # self.setParent(None)
+            # self.deleteLater()
+        elif event.button() == Qt.RightButton:
+            logger.info("mouseReleaseEvent RIGHT")
+
+    def mousePressEvent(self, _):
+        pass
