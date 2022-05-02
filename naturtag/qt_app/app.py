@@ -35,12 +35,13 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('QT Image Viewer Demo')
 
         # Tabbed layout
-        page_layout = QVBoxLayout()
-        root = QWidget()
-        root.setLayout(page_layout)
         tabs = QTabWidget()
         self.setCentralWidget(tabs)
-        tabs.addTab(root, fa_icon('fa.camera'), 'Photos')
+
+        photo_layout = QVBoxLayout()
+        photo_root = QWidget()
+        photo_root.setLayout(photo_layout)
+        tabs.addTab(photo_root, fa_icon('fa.camera'), 'Photos')
         tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
         tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
         log_tab_idx = tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
@@ -50,11 +51,11 @@ class MainWindow(QMainWindow):
         input_layout = QHBoxLayout()
         groupBox = QGroupBox('Input')
         groupBox.setLayout(input_layout)
-        page_layout.addWidget(groupBox)
+        photo_layout.addWidget(groupBox)
 
         # Viewer
         self.viewer = ImageViewer()
-        page_layout.addWidget(self.viewer)
+        photo_layout.addWidget(self.viewer)
 
         # Toolbar + status bar
         self.toolbar = Toolbar(

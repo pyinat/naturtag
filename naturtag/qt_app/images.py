@@ -2,21 +2,23 @@ from logging import getLogger
 from os.path import isfile
 from urllib.parse import unquote, urlparse
 
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QDropEvent, QPixmap
 from PySide6.QtWidgets import (
     QFileDialog,
-    QGraphicsGridLayout,
+    QGraphicsLinearLayout,
     QGraphicsScene,
     QGraphicsView,
     QGraphicsWidget,
     QLabel,
+    QSizePolicy,
     QWidget,
 )
 
 from naturtag.constants import IMAGE_FILETYPES
 from naturtag.image_glob import get_images_from_paths
 from naturtag.models import MetaMetadata
+from naturtag.qt_app.layouts import FlowLayout
 from naturtag.thumbnails import get_thumbnail
 
 logger = getLogger(__name__)
@@ -36,6 +38,38 @@ class ImageViewer(QGraphicsView):
         self.aspectRatioMode = Qt.KeepAspectRatio
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    def clear(self):
+        """Clear all images from the viewer"""
+        self.scene.clear()
+        root = QGraphicsWidget()
+
+        # policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # policy.setHorizontalStretch(1)
+        # policy.setVerticalStretch(1)
+        # root.setSizePolicy(policy)
+        self.root_layout = QGraphicsLinearLayout(Qt.Vertical)
+        self.flow_layout = FlowLayout()
+        self.root_layout.addItem(self.flow_layout)
+        root.setLayout(self.root_layout)
+        self.scene.addItem(root)
+
+        self.img_row = 0
+        self.img_col = 0
+        self.images = {}
+
+        logger.warning('**************')
+        logger.warning('Root min: ' + str(root.sizeHint(Qt.SizeHint.MinimumSize)))
+        logger.warning('Root max: ' + str(root.sizeHint(Qt.SizeHint.MaximumSize)))
+        logger.warning('Root pref: ' + str(root.sizeHint(Qt.SizeHint.PreferredSize)))
+
+        # TODO: Set root widget size to correct parent size
+        root.setMaximumSize(QSize(1000, 700))
+
+        logger.warning(self.flow_layout.sizeHint(Qt.SizeHint.MinimumSize))
+        logger.warning(self.flow_layout.sizeHint(Qt.SizeHint.MaximumSize))
+        logger.warning(self.flow_layout.sizeHint(Qt.SizeHint.PreferredSize))
+        # root.setMaximumSize(self.flow_layout.sizeHint(Qt.SizeHint.MinimumSize))
 
     def load_file_dialog(self):
         file_paths, _ = QFileDialog.getOpenFileNames(
@@ -73,26 +107,14 @@ class ImageViewer(QGraphicsView):
         # thumbnail.deleted.connect(self.on_photo_delete)
 
         thumb_proxy = self.scene.addWidget(LocalThumbnail(file_path))
-        self.layout.addItem(thumb_proxy, self.img_row, self.img_col)
+        self.flow_layout.addItem(thumb_proxy)
         self.images[file_path] = thumb_proxy
 
         # I need to manually manage a grid layout? Oh joy
-        self.img_col += 1
-        if self.img_col == 4:
-            self.img_col = 0
-            self.img_row += 1
-
-    def clear(self):
-        """Clear all images from the viewer"""
-        self.scene.clear()
-        self.layout = QGraphicsGridLayout()
-        form = QGraphicsWidget()
-        form.setLayout(self.layout)
-        self.scene.addItem(form)
-
-        self.img_row = 0
-        self.img_col = 0
-        self.images = {}
+        # self.img_col += 1
+        # if self.img_col == 4:
+        #     self.img_col = 0
+        #     self.img_row += 1
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
