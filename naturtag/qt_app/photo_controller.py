@@ -30,9 +30,10 @@ class PhotoController(QWidget):
 
         # Input group
         input_layout = QHBoxLayout()
-        groupBox = QGroupBox('Input')
-        groupBox.setLayout(input_layout)
-        photo_layout.addWidget(groupBox)
+        group_box = QGroupBox('Input')
+        group_box.setFixedHeight(80)
+        group_box.setLayout(input_layout)
+        photo_layout.addWidget(group_box)
 
         # Viewer
         self.viewer = ImageViewer()

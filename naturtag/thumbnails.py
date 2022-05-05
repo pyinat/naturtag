@@ -168,6 +168,7 @@ def generate_thumbnail(
     # Resize if necessary, or just copy the image to the cache if it's already thumbnail size
     try:
         image = get_orientated_image(source, default_flip=default_flip)
+        image = crop_square(image)
         if image.size[0] > target_size[0] or image.size[1] > target_size[1]:
             image.thumbnail(target_size)
         else:
@@ -179,6 +180,23 @@ def generate_thumbnail(
     except RuntimeError:
         logger.exception('Thumbnails: Failed to generate thumbnail')
         return source
+
+
+def crop_square(image: Image) -> Image:
+    """Crop an image into a square (retaining dimension of short edge)"""
+    width, height = image.size
+    short_edge = min(width, height)
+    if width == height:
+        return image
+
+    return image.crop(
+        (
+            (width - short_edge) // 2,
+            (height - short_edge) // 2,
+            (width + short_edge) // 2,
+            (height + short_edge) // 2,
+        )
+    )
 
 
 def get_orientated_image(source, default_flip: bool = True) -> Image:
