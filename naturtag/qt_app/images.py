@@ -117,8 +117,8 @@ class LocalThumbnail(QWidget):
         # Filename
         self.info = QLabel(self.file_path.name)
         self.info.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
-        self.info.setAlignment(Qt.AlignRight)
-        self.info.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
+        self.info.setAlignment(Qt.AlignLeft)
+        self.info.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);font-size: 10pt;')
         layout.addWidget(self.info)
 
     def mouseReleaseEvent(self, event):

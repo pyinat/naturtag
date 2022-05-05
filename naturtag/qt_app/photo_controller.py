@@ -39,6 +39,7 @@ class PhotoController(QWidget):
         self.viewer = ImageViewer()
         photo_layout.addWidget(self.viewer)
 
+        # TODO: Deselect input fields after clicking anywhere else
         # Input fields
         self.input_obs_id = QLineEdit()
         self.input_obs_id.setClearButtonEnabled(True)
@@ -80,6 +81,8 @@ class PhotoController(QWidget):
             images=files,
         )
         self.info(f'{len(files)} images tagged with metadata for {selected_id}')
+        logger.info(sorted(list(self.viewer.images.keys())))
+        logger.info(sorted([metadata.image_path for metadata in all_metadata]))
 
         # Update image previews with new metadata
         # previews = {img.metadata.image_path: img for img in self.image_previews.children}

@@ -15,6 +15,7 @@ from naturtag.constants import (
     DWC_TAXON_TERMS,
     OBSERVATION_KEYS,
     TAXON_KEYS,
+    Coordinates,
     IntTuple,
     StrTuple,
 )
@@ -29,6 +30,12 @@ def get_cache_size() -> str:
     return format_file_size(n_bytes)
 
 
+def get_observation_coordinates(observation_id: int) -> Optional[Coordinates]:
+    """Get the current taxon ID for the given observation ID"""
+    obs = get_observation(observation_id)
+    return obs.get('location')
+
+
 def get_observation_taxon(observation_id: int) -> int:
     """Get the current taxon ID for the given observation ID"""
     logger.info(f'API: Fetching observation {observation_id}')
@@ -38,6 +45,7 @@ def get_observation_taxon(observation_id: int) -> int:
     return obs['taxon']['id']
 
 
+# TODO: Use pyinaturalist_convert.dwc for this
 def get_observation_dwc_terms(observation_id: int) -> dict[str, str]:
     """Get all DWC terms for an iNaturalist observation"""
     logger.info(f'API: Getting Darwin Core terms for observation {observation_id}')
@@ -45,6 +53,7 @@ def get_observation_dwc_terms(observation_id: int) -> dict[str, str]:
     return convert_dwc_to_xmp(obs_dwc)
 
 
+# TODO: Use pyinaturalist_convert.dwc for this
 def get_taxon_dwc_terms(taxon_id: int) -> dict[str, str]:
     """Get all DWC terms for an iNaturalist taxon.
     Since there is no DWC format for ``GET /taxa``, we'll just search for a random observation

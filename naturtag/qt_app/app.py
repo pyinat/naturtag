@@ -20,8 +20,8 @@ logger = getLogger(__name__)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.resize(1024, 768)
-        self.setWindowTitle('QT Image Viewer Demo')
+        self.resize(1024, 1024)
+        self.setWindowTitle('Naturtag')
 
         # Tabbed layout
         tabs = QTabWidget()
@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
         self._add_shortcut('Ctrl+Shift+X', self.photo_controller.clear)
 
         # Load demo images
-        self.photo_controller.viewer.load_images(DEMO_IMAGES.glob('*.jpg'))
+        self.photo_controller.viewer.load_images(sorted(DEMO_IMAGES.glob('*.jpg')))
 
     def _add_shortcut(self, keys: str, callback: Callable):
         shortcut = QShortcut(QKeySequence(keys), self)

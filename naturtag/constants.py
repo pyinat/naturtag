@@ -1,9 +1,10 @@
+# flake8: noqa: F401
 from datetime import timedelta
 from pathlib import Path
 from typing import IO, Iterable, Optional, Union
 
 from platformdirs import user_data_dir
-from pyinaturalist import ICONIC_TAXA
+from pyinaturalist.constants import ICONIC_TAXA, Coordinates
 
 from naturtag import __version__
 
@@ -134,7 +135,6 @@ COMMON_NAME_IGNORE_TERMS = [
 ]
 
 # Type aliases
-Coordinates = tuple[float, float]
 JSON = Union[dict, IO, Iterable[dict], Path, str]
 IntTuple = tuple[Optional[int], Optional[int]]
 StrTuple = tuple[Optional[str], Optional[str]]

@@ -1,9 +1,15 @@
-import re
 from logging import getLogger
 from os.path import basename
 from typing import Any, Optional
 
 from naturtag.constants import Coordinates, IntTuple, StrTuple
+from naturtag.gps import (
+    convert_dwc_coords,
+    convert_exif_coords,
+    convert_xmp_coords,
+    to_exif_coords,
+    to_xmp_coords,
+)
 from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank
 from naturtag.models import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
 
@@ -48,9 +54,9 @@ class MetaMetadata(ImageMetadata):
         """Get coordinates as decimal degrees from EXIF or XMP metadata"""
         if self._coordinates is None:
             self._coordinates = (
-                get_dwc_coords(self.xmp)
-                or get_exif_coords(self.exif)
-                or get_xmp_coords(self.xmp)
+                convert_dwc_coords(self.xmp)
+                or convert_exif_coords(self.exif)
+                or convert_xmp_coords(self.xmp)
                 or NULL_COORDS
             )
         return self._coordinates
@@ -127,6 +133,16 @@ class MetaMetadata(ImageMetadata):
         super().update(new_metadata)
         self._update_derived_properties()
 
+    def update_coordinates(self, coordinates: Coordinates):
+        if not coordinates:
+            return
+        self._coordinates = coordinates
+        print(coordinates)
+        print(to_exif_coords(coordinates))
+        print(to_xmp_coords(coordinates))
+        self.exif.update(to_exif_coords(coordinates))
+        self.xmp.update(to_xmp_coords(coordinates))
+
     def update_keywords(self, keywords):
         """
         Update only keyword metadata.
@@ -152,68 +168,3 @@ def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
         dict with simplified/deduplicated keys
     """
     return {k.lower().replace('_', '').split(':')[-1]: v for k, v in mapping.items()}
-
-
-# TODO: Maybe these could be moved to pyinaturalist-convert?
-def get_exif_coords(metadata: dict) -> Optional[Coordinates]:
-    """Translate Exif.GPSInfo into decimal degrees, if available"""
-    try:
-        return (
-            _get_exif_coord(
-                metadata['Exif.GPSInfo.GPSLatitude'],
-                metadata.get('Exif.GPSInfo.GPSLatitudeRef', 'N'),
-            ),
-            _get_exif_coord(
-                metadata['Exif.GPSInfo.GPSLongitude'],
-                metadata.get('Exif.GPSInfo.GPSLongitudeRef', 'W'),
-            ),
-        )
-    except (IndexError, KeyError):
-        return None
-
-
-def get_xmp_coords(metadata: dict) -> Optional[Coordinates]:
-    """Translate Xmp.exif.GPS into decimal degrees, if available"""
-    try:
-        return (
-            _get_xmp_coord(metadata['Xmp.exif.GPSLatitude']),
-            _get_xmp_coord(metadata['Xmp.exif.GPSLongitude']),
-        )
-    except (IndexError, KeyError):
-        return None
-
-
-def get_dwc_coords(metadata: dict) -> Optional[Coordinates]:
-    """Get coordinates from XMP-formatted DwC, if available"""
-    try:
-        return (
-            float(metadata['Xmp.dwc.decimalLatitude']),
-            float(metadata['Xmp.dwc.decimalLongitude']),
-        )
-    except (KeyError, ValueError):
-        return None
-
-
-def _dms_to_decimal(degrees: int, minutes: int, seconds: int, direction: str) -> float:
-    return (degrees + (minutes / 60) + (seconds / 3600)) * (-1 if direction in ['S', 'W'] else 1)
-
-
-def _get_exif_coord(value: str, direction: str) -> Optional[float]:
-    """Translate a value from Exif.GPSInfo into decimal degrees.
-    Example: '41/1 32/1 251889/10000'
-    """
-    tokens = [int(n) for n in re.split('[/\s]', value)]
-    dms = (tokens[0] / tokens[1], tokens[2] / tokens[3], tokens[4] / tokens[5])
-    return _dms_to_decimal(*dms, direction)
-
-
-def _get_xmp_coord(value: str) -> Optional[float]:
-    """Translate a value from XMP-formatted EXIF GPSInfo into decimal degrees.
-    Example: '41,37.1054862N'
-    """
-    match = re.match('(\d+),(\d+)\.(\d+)(\w)', value)
-    if not match:
-        return None
-
-    groups = match.groups()
-    return _dms_to_decimal(int(groups[0]), int(groups[1]), int(groups[2]), groups[3])
