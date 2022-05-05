@@ -41,16 +41,19 @@ class MetaMetadata(ImageMetadata):
         return {**self.filtered_exif, **self.iptc, **self.xmp}
 
     @property
-    def has_taxon(self) -> bool:
-        return bool(self.taxon_id or all(self.min_rank))
+    def has_any_tags(self) -> bool:
+        return bool(self.exif or self.iptc or self.xmp)
+
+    def has_gps(self) -> bool:
+        return False  # TODO
 
     @property
     def has_observation(self) -> bool:
         return bool(self.observation_id)
 
     @property
-    def has_gps(self) -> bool:
-        return False  # TODO
+    def has_taxon(self) -> bool:
+        return bool(self.taxon_id or all(self.min_rank))
 
     @property
     def inaturalist_ids(self) -> IntTuple:

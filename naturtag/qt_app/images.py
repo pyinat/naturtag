@@ -114,7 +114,7 @@ class LocalThumbnail(QWidget):
         self.info = QLabel(self.file_path.name)
         self.info.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
         self.info.setAlignment(Qt.AlignRight)
-        self.info.setStyleSheet('background-color: rgba(0, 0, 0, 0.2);')
+        self.info.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
         layout.addWidget(self.info)
 
     def mouseReleaseEvent(self, event):
@@ -144,15 +144,14 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout = QHBoxLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
-        self.setGeometry(9, img_size.height() - 10, 120, 20)
+        self.setGeometry(9, img_size.height() - 10, 100, 20)
 
         metadata = parent.metadata
         self._add_icon('mdi.bird', active=metadata.has_taxon)
         self._add_icon('fa.binoculars', active=metadata.has_observation)
         self._add_icon('fa.map-marker', active=metadata.has_gps)
-        self._add_icon('mdi.alpha-e-circle', active=metadata.exif)
-        self._add_icon('mdi.alpha-i-circle', active=metadata.iptc)
-        self._add_icon('mdi.xml', active=metadata.xmp)
+        self._add_icon('fa.tags', active=metadata.has_any_tags)
+        self._add_icon('mdi.xml', active=metadata.has_sidecar)
 
     def _add_icon(self, icon_str: str, active: bool = False):
         icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
