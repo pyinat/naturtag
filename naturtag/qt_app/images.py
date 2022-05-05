@@ -27,7 +27,6 @@ class ImageViewer(QWidget):
 
     def clear(self):
         """Clear all images from the viewer"""
-        logger.debug('Clearing images')
         del self.images
         self.images = {}
         self.flow_layout.clear()
@@ -44,7 +43,7 @@ class ImageViewer(QWidget):
         # Determine images to load, ignoring duplicates
         images = get_images_from_paths(paths, recursive=True)
         new_images = list(set(images) - set(self.images.keys()))
-        logger.info(f'Main: Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
+        logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
         if not new_images:
             return
 
