@@ -2,7 +2,7 @@ from logging import getLogger
 from os.path import isfile
 from urllib.parse import unquote, urlparse
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QDropEvent, QPixmap
 from PySide6.QtWidgets import QFileDialog, QLabel, QWidget
 
@@ -64,7 +64,7 @@ class ImageViewer(QWidget):
 
         logger.info(f'Loading {file_path}')
         thumbnail = LocalThumbnail(file_path)
-        # thumbnail.deleted.connect(self.on_photo_delete)
+        thumbnail.removed.connect(self.on_image_removed)
         self.flow_layout.addWidget(thumbnail)
         self.images[file_path] = thumbnail
 
@@ -79,17 +79,16 @@ class ImageViewer(QWidget):
         for file_path in event.mimeData().text().splitlines():
             self.load_image(file_path)
 
-    # TODO: Why is this not working
-    # @Slot(str)
-    # def on_photo_delete(self, file_path: str):
-    #     logger.warning(f'Deleting {file_path}')
-    #     del self.images[file_path]
+    @Slot(str)
+    def on_image_removed(self, file_path: str):
+        logger.debug(f'Removing {file_path}')
+        del self.images[file_path]
 
 
 class LocalThumbnail(QLabel):
     """Displays a thumbnail of a local image and contains associated metadata"""
 
-    deleted = Signal(str)
+    removed = Signal(str)
 
     def __init__(self, file_path: str):
         super().__init__()
@@ -105,11 +104,11 @@ class LocalThumbnail(QLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             logger.info("mouseReleaseEvent LEFT")
+        # Middle click: Remove image
         elif event.button() == Qt.MiddleButton:
-            logger.info("mouseReleaseEvent MIDDLE")
-            # self.deleted.emit(self.file_path)
-            # self.setParent(None)
-            # self.deleteLater()
+            self.removed.emit(self.file_path)
+            self.setParent(None)
+            self.deleteLater()
         elif event.button() == Qt.RightButton:
             logger.info("mouseReleaseEvent RIGHT")
 

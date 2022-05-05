@@ -94,10 +94,14 @@ class MainWindow(QMainWindow):
         # Keyboard shortcuts
         shortcut = QShortcut(QKeySequence('Ctrl+O'), self)
         shortcut.activated.connect(self.viewer.load_file_dialog)
+        shortcut2 = QShortcut(QKeySequence('Ctrl+R'), self)
+        shortcut2.activated.connect(self.run)
         shortcut2 = QShortcut(QKeySequence('Ctrl+Q'), self)
         shortcut2.activated.connect(QApplication.instance().quit)
         shortcut2 = QShortcut(QKeySequence('Ctrl+V'), self)
         shortcut2.activated.connect(self.paste)
+        shortcut2 = QShortcut(QKeySequence('Ctrl+Shift+X'), self)
+        shortcut2.activated.connect(self.clear)
 
         # Input fields
         self.input_obs_id = QLineEdit()
