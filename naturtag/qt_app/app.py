@@ -8,11 +8,12 @@ from qtawesome import icon as fa_icon
 from qtmodern import styles
 from qtmodern.windows import ModernWindow
 
-from naturtag.constants import APP_ICONS_DIR
+from naturtag.constants import ASSETS_DIR
 from naturtag.qt_app.logger import init_handler
 from naturtag.qt_app.photo_controller import PhotoController
 from naturtag.qt_app.toolbar import Toolbar
 
+DEMO_IMAGES = ASSETS_DIR / 'demo_images'
 logger = getLogger(__name__)
 
 
@@ -74,16 +75,8 @@ class MainWindow(QMainWindow):
         self._add_shortcut('Ctrl+V', self.photo_controller.paste)
         self._add_shortcut('Ctrl+Shift+X', self.photo_controller.clear)
 
-        # Load test images
-        filenames = [
-            'amphibia.png',
-            'animalia.png',
-            'arachnida.png',
-            'aves.png',
-            'fungi.png',
-            'insecta.png',
-        ]
-        self.photo_controller.viewer.load_images([APP_ICONS_DIR / filename for filename in filenames])
+        # Load demo images
+        self.photo_controller.viewer.load_images(DEMO_IMAGES.glob('*.jpg'))
 
     def _add_shortcut(self, keys: str, callback: Callable):
         shortcut = QShortcut(QKeySequence(keys), self)

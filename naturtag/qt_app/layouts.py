@@ -23,7 +23,8 @@ class FlowLayout(QLayout):
 
     def clear(self):
         while item := self.takeAt(0):
-            item.widget().setParent(None)
+            if item.widget():
+                item.widget().setParent(None)
 
     def addItem(self, item):
         self._items.append(item)
@@ -40,7 +41,6 @@ class FlowLayout(QLayout):
     def takeAt(self, index):
         if 0 <= index < len(self._items):
             item = self._items.pop(index)
-            self.invalidate()
             return item
         return None
 

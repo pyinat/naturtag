@@ -1,16 +1,20 @@
 from logging import getLogger
 from os.path import isfile
+from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QDropEvent, QPixmap
-from PySide6.QtWidgets import QFileDialog, QLabel, QWidget
+from PySide6.QtWidgets import QFileDialog, QLabel, QVBoxLayout, QWidget
 
-from naturtag.constants import IMAGE_FILETYPES
+from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
 from naturtag.models import MetaMetadata
 from naturtag.qt_app.layouts import FlowLayout
 from naturtag.thumbnails import get_thumbnail
+
+# from qtawesome import icon as fa_icon
+
 
 logger = getLogger(__name__)
 
@@ -84,30 +88,43 @@ class ImageViewer(QWidget):
         del self.images[file_path]
 
 
-class LocalThumbnail(QLabel):
-    """Displays a thumbnail of a local image and contains associated metadata"""
-
+class LocalThumbnail(QWidget):
     removed = Signal(str)
 
     def __init__(self, file_path: str):
         super().__init__()
         self.metadata = MetaMetadata(file_path)
-        self.file_path = file_path
-        self.setPixmap(QPixmap(get_thumbnail(file_path)))
+        self.file_path = Path(file_path)
         self.setToolTip(f'{file_path}\n{self.metadata.summary}')
+        self.setStyleSheet('background-color: rgba(0, 0, 0, 0.2);')
+        layout = QVBoxLayout(self)
+        layout.setSpacing(0)
 
-        # Can't be used with pixmap?
-        # self.setFrameShape(QFrame.StyledPanel)
-        # self.setFrameShadow(QFrame.Raised)
+        self.image = QLabel(self)
+        self.image.setPixmap(QPixmap(get_thumbnail(file_path)))
+        self.image.setAlignment(Qt.AlignCenter)
+        self.image.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
+        self.image.setMaximumHeight(THUMBNAIL_SIZE_DEFAULT[1])
+        self.image.setStyleSheet('background-color: rgba(0, 0, 0, 0.2);')
+        layout.addWidget(self.image)
+
+        # self.info = QLabel(fa_icon("fa.play"))
+        self.info = QLabel(self.metadata.summary)
+        self.info.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
+        self.info.setAlignment(Qt.AlignRight)
+        self.info.setStyleSheet('background-color: rgba(0, 0.5, 0.5, 0.5);\ncolor: white;')
+        layout.addWidget(self.info)
 
     def mouseReleaseEvent(self, event):
+        # TODO: Left click: expand
         if event.button() == Qt.LeftButton:
             logger.info("mouseReleaseEvent LEFT")
         # Middle click: Remove image
         elif event.button() == Qt.MiddleButton:
-            self.removed.emit(self.file_path)
+            self.removed.emit(str(self.file_path))
             self.setParent(None)
             self.deleteLater()
+        # TODO: Right click: context menu
         elif event.button() == Qt.RightButton:
             logger.info("mouseReleaseEvent RIGHT")
 

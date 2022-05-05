@@ -82,25 +82,17 @@ class MetaMetadata(ImageMetadata):
         """Get a condensed summary of available metadata"""
         if self._summary is None:
             meta_types = {
+                # 'GPS': self.gps,
+                'TAX': self.has_taxon,
+                'OBS': self.observation_id,
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
                 'XMP': bool(self.xmp),
                 'SIDECAR': self.has_sidecar,
             }
-            meta_special = {
-                'TAX': self.has_taxon,
-                'OBS': self.observation_id,
-                # 'GPS': self.gps,
-            }
-            logger.info(f'Metadata summary: {meta_types} {meta_special}')
-
-            self._summary = '\n'.join(
-                [
-                    basename(self.image_path),
-                    ' | '.join([k for k, v in meta_special.items() if v]),
-                    ' | '.join([k for k, v in meta_types.items() if v]),
-                ]
-            )
+            meta_types_str = ' | '.join([k for k, v in meta_types.items() if v])
+            self._summary = f'{basename(self.image_path)}\n{meta_types_str}'
+            logger.debug(f'Metadata summary: {self._summary}')
         return self._summary
 
     def update(self, new_metadata):
