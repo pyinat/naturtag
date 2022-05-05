@@ -1,15 +1,16 @@
+import re
 from logging import getLogger
 from os.path import basename
 from typing import Any, Optional
 
-from naturtag.constants import IntTuple, StrTuple
+from naturtag.constants import Coordinates, IntTuple, StrTuple
 from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank
 from naturtag.models import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
 
+NULL_COORDS = (0, 0)
 logger = getLogger().getChild(__name__)
 
 
-# TODO: Extract GPS info
 # TODO: __str__
 class MetaMetadata(ImageMetadata):
     """Class for parsing & organizing higher-level info derived from raw image metadata"""
@@ -17,6 +18,7 @@ class MetaMetadata(ImageMetadata):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Define lazy-loaded properties
+        self._coordinates = None
         self._inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
@@ -26,6 +28,7 @@ class MetaMetadata(ImageMetadata):
 
     def _update_derived_properties(self):
         """Reset/ update all secondary properties derived from base metadata formats"""
+        self._coordinates = None
         self._inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
@@ -41,11 +44,24 @@ class MetaMetadata(ImageMetadata):
         return {**self.filtered_exif, **self.iptc, **self.xmp}
 
     @property
+    def coordinates(self) -> Optional[Coordinates]:
+        """Get coordinates as decimal degrees from EXIF or XMP metadata"""
+        if self._coordinates is None:
+            self._coordinates = (
+                get_dwc_coords(self.xmp)
+                or get_exif_coords(self.exif)
+                or get_xmp_coords(self.xmp)
+                or NULL_COORDS
+            )
+        return self._coordinates
+
+    @property
     def has_any_tags(self) -> bool:
         return bool(self.exif or self.iptc or self.xmp)
 
-    def has_gps(self) -> bool:
-        return False  # TODO
+    @property
+    def has_coordinates(self) -> bool:
+        return self.coordinates and self.coordinates != NULL_COORDS
 
     @property
     def has_observation(self) -> bool:
@@ -95,7 +111,7 @@ class MetaMetadata(ImageMetadata):
             meta_types = {
                 'TAX': self.has_taxon,
                 'OBS': self.has_observation,
-                'GPS': self.has_gps,
+                'GPS': self.has_coordinates,
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
                 'XMP': bool(self.xmp),
@@ -136,3 +152,68 @@ def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
         dict with simplified/deduplicated keys
     """
     return {k.lower().replace('_', '').split(':')[-1]: v for k, v in mapping.items()}
+
+
+# TODO: Maybe these could be moved to pyinaturalist-convert?
+def get_exif_coords(metadata: dict) -> Optional[Coordinates]:
+    """Translate Exif.GPSInfo into decimal degrees, if available"""
+    try:
+        return (
+            _get_exif_coord(
+                metadata['Exif.GPSInfo.GPSLatitude'],
+                metadata.get('Exif.GPSInfo.GPSLatitudeRef', 'N'),
+            ),
+            _get_exif_coord(
+                metadata['Exif.GPSInfo.GPSLongitude'],
+                metadata.get('Exif.GPSInfo.GPSLongitudeRef', 'W'),
+            ),
+        )
+    except (IndexError, KeyError):
+        return None
+
+
+def get_xmp_coords(metadata: dict) -> Optional[Coordinates]:
+    """Translate Xmp.exif.GPS into decimal degrees, if available"""
+    try:
+        return (
+            _get_xmp_coord(metadata['Xmp.exif.GPSLatitude']),
+            _get_xmp_coord(metadata['Xmp.exif.GPSLongitude']),
+        )
+    except (IndexError, KeyError):
+        return None
+
+
+def get_dwc_coords(metadata: dict) -> Optional[Coordinates]:
+    """Get coordinates from XMP-formatted DwC, if available"""
+    try:
+        return (
+            float(metadata['Xmp.dwc.decimalLatitude']),
+            float(metadata['Xmp.dwc.decimalLongitude']),
+        )
+    except (KeyError, ValueError):
+        return None
+
+
+def _dms_to_decimal(degrees: int, minutes: int, seconds: int, direction: str) -> float:
+    return (degrees + (minutes / 60) + (seconds / 3600)) * (-1 if direction in ['S', 'W'] else 1)
+
+
+def _get_exif_coord(value: str, direction: str) -> Optional[float]:
+    """Translate a value from Exif.GPSInfo into decimal degrees.
+    Example: '41/1 32/1 251889/10000'
+    """
+    tokens = [int(n) for n in re.split('[/\s]', value)]
+    dms = (tokens[0] / tokens[1], tokens[2] / tokens[3], tokens[4] / tokens[5])
+    return _dms_to_decimal(*dms, direction)
+
+
+def _get_xmp_coord(value: str) -> Optional[float]:
+    """Translate a value from XMP-formatted EXIF GPSInfo into decimal degrees.
+    Example: '41,37.1054862N'
+    """
+    match = re.match('(\d+),(\d+)\.(\d+)(\w)', value)
+    if not match:
+        return None
+
+    groups = match.groups()
+    return _dms_to_decimal(int(groups[0]), int(groups[1]), int(groups[2]), groups[3])

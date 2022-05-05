@@ -8,7 +8,7 @@ from naturtag.constants import Coordinates
 
 
 # TODO: This could be moved to pyinaturalist.response_format
-def convert_coord_pair(value: str) -> Coordinates:
+def convert_coord_pair(value: str) -> Optional[Coordinates]:
     if str(value).count(',') != 1:
         return None
     lat, long = str(value).split(',')

@@ -134,7 +134,7 @@ COMMON_NAME_IGNORE_TERMS = [
 ]
 
 # Type aliases
-Coordinates = Optional[tuple[float, float]]
+Coordinates = tuple[float, float]
 JSON = Union[dict, IO, Iterable[dict], Path, str]
 IntTuple = tuple[Optional[int], Optional[int]]
 StrTuple = tuple[Optional[str], Optional[str]]

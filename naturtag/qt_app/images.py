@@ -98,6 +98,10 @@ class LocalThumbnail(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(0)
 
+        logger.info(self.metadata.exif.get('Exif.GPSInfo'))
+        logger.info(self.metadata.exif.get('Exif.GPSInfo.GPSLatitude'))
+        logger.info(type(self.metadata.exif.get('Exif.GPSInfo.GPSLatitude')))
+
         # Image
         self.image = QLabel(self)
         self.image.setPixmap(QPixmap(get_thumbnail(file_path)))
@@ -146,12 +150,11 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(9, img_size.height() - 10, 100, 20)
 
-        metadata = parent.metadata
-        self._add_icon('mdi.bird', active=metadata.has_taxon)
-        self._add_icon('fa.binoculars', active=metadata.has_observation)
-        self._add_icon('fa.map-marker', active=metadata.has_gps)
-        self._add_icon('fa.tags', active=metadata.has_any_tags)
-        self._add_icon('mdi.xml', active=metadata.has_sidecar)
+        self._add_icon('mdi.bird', active=parent.metadata.has_taxon)
+        self._add_icon('fa.binoculars', active=parent.metadata.has_observation)
+        self._add_icon('fa.map-marker', active=parent.metadata.has_coordinates)
+        self._add_icon('fa.tags', active=parent.metadata.has_any_tags)
+        self._add_icon('mdi.xml', active=parent.metadata.has_sidecar)
 
     def _add_icon(self, icon_str: str, active: bool = False):
         icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')

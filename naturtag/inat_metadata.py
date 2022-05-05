@@ -209,7 +209,7 @@ def get_rank_idx(rank: str) -> int:
     return RANKS.index(rank) if rank in RANKS else 0
 
 
-def get_inaturalist_ids(metadata):
+def get_inaturalist_ids(metadata: dict) -> tuple[Optional[int], Optional[int]]:
     """Look for taxon and/or observation IDs from metadata if available"""
     # Get first non-None value from specified keys, if any; otherwise return None
     def _first_match(d, keys):
