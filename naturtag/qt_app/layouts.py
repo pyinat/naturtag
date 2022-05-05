@@ -1,43 +1,47 @@
-"""Source: https://doc.qt.io/qtforpython/examples/example_widgets_layouts_flowlayout.html"""
-from functools import reduce
+"""Source:
+* https://doc.qt.io/qtforpython/examples/example_widgets_layouts_flowlayout.html
+* Many hours of frustration
+"""
 from logging import getLogger
-from typing import Union
 
-from PySide6.QtCore import QMargins, QPoint, QRect, QRectF, QSize, QSizeF, Qt
-from PySide6.QtWidgets import QGraphicsLayout, QSizePolicy
+from PySide6.QtCore import QPoint, QRect, QSize, Qt
+from PySide6.QtWidgets import QLayout
 
 logger = getLogger(__name__)
 
 
-class FlowLayout(QGraphicsLayout):
+class FlowLayout(QLayout):
     def __init__(self, parent=None):
         super().__init__(parent)
         if parent is not None:
             self.setContentsMargins(0, 0, 0, 0)
-        self._spacing = 5.0
-        self._item_list = []
+        self._spacing = 4.0
+        self._items = []
 
     def __del__(self):
-        item = self.takeAt(0)
-        while item:
-            item = self.takeAt(0)
+        self.clear()
+
+    def clear(self):
+        while item := self.takeAt(0):
+            item.widget().setParent(None)
 
     def addItem(self, item):
-        self._item_list.append(item)
+        self._items.append(item)
         self.invalidate()
 
     def count(self):
-        return len(self._item_list)
+        return len(self._items)
 
     def itemAt(self, index):
-        if 0 <= index < len(self._item_list):
-            return self._item_list[index]
+        if 0 <= index < len(self._items):
+            return self._items[index]
         return None
 
     def takeAt(self, index):
-        if 0 <= index < len(self._item_list):
+        if 0 <= index < len(self._items):
+            item = self._items.pop(index)
             self.invalidate()
-            return self._item_list.pop(index)
+            return item
         return None
 
     def expandingDirections(self):
@@ -47,25 +51,17 @@ class FlowLayout(QGraphicsLayout):
         return True
 
     def heightForWidth(self, width):
-        return self._do_layout(QRectF(0, 0, width, 0), apply_geom=False)
-
-    def invalidate(self) -> None:
-        self.updateGeometry()
-        super().invalidate()
+        return self._do_layout(QRect(0, 0, width, 0), apply_geom=False)
 
     def setGeometry(self, rect):
-        # breakpoint()
         super().setGeometry(rect)
         self._do_layout(rect)
 
-    def sizeHint(self, which: Qt.SizeHint, constraint: QSizeF = None):
+    def sizeHint(self, which: Qt.SizeHint = None, constraint: QSize = None):
+        which = which or Qt.MinimumSize
         if which == Qt.SizeHint.MinimumSize:
-            if constraint:
-                logger.warning("Const:" + str(constraint))
             return self.minimumSize()
         elif which == Qt.SizeHint.MaximumSize:
-            if constraint:
-                logger.warning("Const:" + str(constraint))
             return self.maximumSize()
         elif which == Qt.SizeHint.PreferredSize:
             return self.preferredSize(constraint)
@@ -73,31 +69,30 @@ class FlowLayout(QGraphicsLayout):
             raise NotImplementedError(f'{which}, {constraint}')
 
     def minimumSize(self):
-        size = QSizeF()
-        for item in self._item_list:
+        size = QSize()
+        for item in self._items:
             size = size.expandedTo(item.minimumSize())
 
         top = self.getContentsMargins()[1]  # Returns left, top, right, bottom
-        return size + QSizeF(2 * top, 2 * top)
+        return size + QSize(2 * top, 2 * top)
 
     def maximumSize(self):
-        size = QSizeF()
-        for item in self._item_list:
+        size = QSize()
+        for item in self._items:
             size = size.expandedTo(item.maximumSize())
 
-        top = self.getContentsMargins()[1]  # Returns left, top, right, bottom
-        return size + QSizeF(2 * top, 2 * top)
+        top = self.getContentsMargins()[1]
+        return size + QSize(2 * top, 2 * top)
 
-    def preferredSize(self, constraint: QSizeF = None):
-        max_width = constraint.width() if constraint and constraint.width() >= 0 else 16777215
+    def preferredSize(self, constraint: QSize = None):
+        max_width = constraint.width() if constraint and constraint.width() >= 0 else 1440
         max_height = self.heightForWidth(max_width)
-        # h = reduce(QRectF.united, res, QRectF()).size()
-        size = QSizeF(max_width, max_height)
-        # for item in self._item_list:
-        #     size = size.expandedTo(item.preferredSize())
+        size = QSize(max_width, max_height)
+        for item in self._items:
+            size = size.expandedTo(item.preferredSize())
 
-        top = self.getContentsMargins()[1]  # Returns left, top, right, bottom
-        return size + QSizeF(2 * top, 2 * top)
+        top = self.getContentsMargins()[1]
+        return size + QSize(2 * top, 2 * top)
 
     def spacing(self) -> float:
         return self._spacing
@@ -111,28 +106,19 @@ class FlowLayout(QGraphicsLayout):
         line_height = 0
         spacing = self.spacing()
 
-        logger.warning(rect)
-        for i, item in enumerate(self._item_list):
-            size = item.sizeHint(Qt.SizeHint.PreferredSize)
-            style = item.widget().style()
-            button = QSizePolicy.PushButton
-            space_x = spacing  # + style.layoutSpacing(button, button, Qt.Horizontal)
-            space_y = spacing  # + style.layoutSpacing(button, button, Qt.Vertical)
-            next_x = x + size.width() + space_x
+        for item in self._items:
+            size = item.sizeHint()
+            next_x = x + size.width() + spacing
 
             # Overflow to next line
-            logger.debug(
-                f'Checking: {next_x}, {space_x}, {rect.right()}, {line_height}, {next_x - space_x > rect.right() and line_height > 0}'
-            )
-            if next_x - space_x > rect.right() and line_height > 0:
+            if next_x - spacing > rect.right() and line_height > 0:
                 x = rect.x()
-                y = y + line_height + space_y
-                next_x = x + size.width() + space_x
+                y += line_height + spacing
+                next_x = x + size.width() + spacing
                 line_height = 0
 
             if apply_geom:
-                logger.info(f'Setting item {i} to {x}, {y}, {size}')
-                item.setGeometry(QRectF(QPoint(x, y), size))
+                item.setGeometry(QRect(QPoint(x, y), size))
 
             x = next_x
             line_height = max(line_height, size.height())

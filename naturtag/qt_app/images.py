@@ -2,18 +2,9 @@ from logging import getLogger
 from os.path import isfile
 from urllib.parse import unquote, urlparse
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QDropEvent, QPixmap
-from PySide6.QtWidgets import (
-    QFileDialog,
-    QGraphicsLinearLayout,
-    QGraphicsScene,
-    QGraphicsView,
-    QGraphicsWidget,
-    QLabel,
-    QSizePolicy,
-    QWidget,
-)
+from PySide6.QtWidgets import QFileDialog, QLabel, QWidget
 
 from naturtag.constants import IMAGE_FILETYPES
 from naturtag.image_glob import get_images_from_paths
@@ -24,52 +15,22 @@ from naturtag.thumbnails import get_thumbnail
 logger = getLogger(__name__)
 
 
-class ImageViewer(QGraphicsView):
+class ImageViewer(QWidget):
     file_changed = Signal(str)
 
     def __init__(self):
         super().__init__()
-        self.scene = QGraphicsScene()
-        self.setScene(self.scene)
         self.setAcceptDrops(True)
-        self.clear()
         self.images: dict[str, LocalThumbnail] = {}
-
-        self.aspectRatioMode = Qt.KeepAspectRatio
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.flow_layout = FlowLayout()
+        self.setLayout(self.flow_layout)
 
     def clear(self):
         """Clear all images from the viewer"""
-        self.scene.clear()
-        root = QGraphicsWidget()
-
-        # policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # policy.setHorizontalStretch(1)
-        # policy.setVerticalStretch(1)
-        # root.setSizePolicy(policy)
-        self.root_layout = QGraphicsLinearLayout(Qt.Vertical)
-        self.flow_layout = FlowLayout()
-        self.root_layout.addItem(self.flow_layout)
-        root.setLayout(self.root_layout)
-        self.scene.addItem(root)
-
-        self.img_row = 0
-        self.img_col = 0
+        logger.debug('Clearing images')
+        del self.images
         self.images = {}
-
-        logger.warning('**************')
-        logger.warning('Root min: ' + str(root.sizeHint(Qt.SizeHint.MinimumSize)))
-        logger.warning('Root max: ' + str(root.sizeHint(Qt.SizeHint.MaximumSize)))
-        logger.warning('Root pref: ' + str(root.sizeHint(Qt.SizeHint.PreferredSize)))
-
-        # TODO: Set root widget size to correct parent size
-        root.setMaximumSize(QSize(1000, 700))
-
-        logger.warning(self.flow_layout.sizeHint(Qt.SizeHint.MinimumSize))
-        logger.warning(self.flow_layout.sizeHint(Qt.SizeHint.MaximumSize))
-        logger.warning(self.flow_layout.sizeHint(Qt.SizeHint.PreferredSize))
-        # root.setMaximumSize(self.flow_layout.sizeHint(Qt.SizeHint.MinimumSize))
+        self.flow_layout.clear()
 
     def load_file_dialog(self):
         file_paths, _ = QFileDialog.getOpenFileNames(
@@ -101,20 +62,11 @@ class ImageViewer(QGraphicsView):
             logger.info(f'Image already loaded: {file_path}')
             return
 
-        logger.info(f'Loading {file_path} at ({self.img_row}, {self.img_col})')
+        logger.info(f'Loading {file_path}')
         thumbnail = LocalThumbnail(file_path)
-        logger.info(thumbnail.deleted)
         # thumbnail.deleted.connect(self.on_photo_delete)
-
-        thumb_proxy = self.scene.addWidget(LocalThumbnail(file_path))
-        self.flow_layout.addItem(thumb_proxy)
-        self.images[file_path] = thumb_proxy
-
-        # I need to manually manage a grid layout? Oh joy
-        # self.img_col += 1
-        # if self.img_col == 4:
-        #     self.img_col = 0
-        #     self.img_row += 1
+        self.flow_layout.addWidget(thumbnail)
+        self.images[file_path] = thumbnail
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -132,16 +84,6 @@ class ImageViewer(QGraphicsView):
     # def on_photo_delete(self, file_path: str):
     #     logger.warning(f'Deleting {file_path}')
     #     del self.images[file_path]
-
-
-class Button(QWidget):
-
-    clicked = Signal(Qt.MouseButton)
-
-    ...
-
-    def mousePressEvent(self, event):
-        self.clicked.emit(event.button())
 
 
 class LocalThumbnail(QLabel):
