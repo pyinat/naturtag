@@ -15,7 +15,6 @@ class FlowLayout(QLayout):
         super().__init__(parent)
         if parent is not None:
             self.setContentsMargins(0, 0, 0, 0)
-        self._spacing = 4.0
         self._items = []
 
     def __del__(self):

@@ -41,6 +41,18 @@ class MetaMetadata(ImageMetadata):
         return {**self.filtered_exif, **self.iptc, **self.xmp}
 
     @property
+    def has_taxon(self) -> bool:
+        return bool(self.taxon_id or all(self.min_rank))
+
+    @property
+    def has_observation(self) -> bool:
+        return bool(self.observation_id)
+
+    @property
+    def has_gps(self) -> bool:
+        return False  # TODO
+
+    @property
     def inaturalist_ids(self) -> IntTuple:
         """Get taxon and/or observation IDs from metadata if available"""
         if self._inaturalist_ids is None:
@@ -63,10 +75,6 @@ class MetaMetadata(ImageMetadata):
         return self._min_rank
 
     @property
-    def has_taxon(self) -> bool:
-        return bool(self.taxon_id or all(self.min_rank))
-
-    @property
     def simplified(self) -> dict[str, str]:
         """
         Get simplified/deduplicated key-value pairs from a combination of keywords + basic metadata
@@ -82,9 +90,9 @@ class MetaMetadata(ImageMetadata):
         """Get a condensed summary of available metadata"""
         if self._summary is None:
             meta_types = {
-                # 'GPS': self.gps,
                 'TAX': self.has_taxon,
-                'OBS': self.observation_id,
+                'OBS': self.has_observation,
+                'GPS': self.has_gps,
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
                 'XMP': bool(self.xmp),

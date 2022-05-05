@@ -5,16 +5,14 @@ from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QDropEvent, QPixmap
-from PySide6.QtWidgets import QFileDialog, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from qtawesome import icon as fa_icon
 
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
 from naturtag.models import MetaMetadata
 from naturtag.qt_app.layouts import FlowLayout
 from naturtag.thumbnails import get_thumbnail
-
-# from qtawesome import icon as fa_icon
-
 
 logger = getLogger(__name__)
 
@@ -27,6 +25,7 @@ class ImageViewer(QWidget):
         self.setAcceptDrops(True)
         self.images: dict[str, LocalThumbnail] = {}
         self.flow_layout = FlowLayout()
+        self.flow_layout.setSpacing(4)
         self.setLayout(self.flow_layout)
 
     def clear(self):
@@ -96,23 +95,26 @@ class LocalThumbnail(QWidget):
         self.metadata = MetaMetadata(file_path)
         self.file_path = Path(file_path)
         self.setToolTip(f'{file_path}\n{self.metadata.summary}')
-        self.setStyleSheet('background-color: rgba(0, 0, 0, 0.2);')
         layout = QVBoxLayout(self)
         layout.setSpacing(0)
 
+        # Image
         self.image = QLabel(self)
         self.image.setPixmap(QPixmap(get_thumbnail(file_path)))
         self.image.setAlignment(Qt.AlignCenter)
         self.image.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
         self.image.setMaximumHeight(THUMBNAIL_SIZE_DEFAULT[1])
-        self.image.setStyleSheet('background-color: rgba(0, 0, 0, 0.2);')
         layout.addWidget(self.image)
 
-        # self.info = QLabel(fa_icon("fa.play"))
-        self.info = QLabel(self.metadata.summary)
+        # Metadata icons
+        icons = ThumbnailMetaIcons(self)
+        icons.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
+
+        # Filename
+        self.info = QLabel(self.file_path.name)
         self.info.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
         self.info.setAlignment(Qt.AlignRight)
-        self.info.setStyleSheet('background-color: rgba(0, 0.5, 0.5, 0.5);\ncolor: white;')
+        self.info.setStyleSheet('background-color: rgba(0, 0, 0, 0.2);')
         layout.addWidget(self.info)
 
     def mouseReleaseEvent(self, event):
@@ -130,3 +132,31 @@ class LocalThumbnail(QWidget):
 
     def mousePressEvent(self, _):
         pass
+
+
+class ThumbnailMetaIcons(QLabel):
+    """Icons overlayed on top of a thumbnail to indicate what types of metadata are available"""
+
+    def __init__(self, parent: LocalThumbnail):
+        super().__init__(parent)
+        img_size = parent.image.sizeHint()
+
+        self.icon_layout = QHBoxLayout(self)
+        self.icon_layout.setAlignment(Qt.AlignLeft)
+        self.icon_layout.setContentsMargins(0, 0, 0, 0)
+        self.setGeometry(9, img_size.height() - 10, 120, 20)
+
+        metadata = parent.metadata
+        self._add_icon('mdi.bird', active=metadata.has_taxon)
+        self._add_icon('fa.binoculars', active=metadata.has_observation)
+        self._add_icon('fa.map-marker', active=metadata.has_gps)
+        self._add_icon('mdi.alpha-e-circle', active=metadata.exif)
+        self._add_icon('mdi.alpha-i-circle', active=metadata.iptc)
+        self._add_icon('mdi.xml', active=metadata.xmp)
+
+    def _add_icon(self, icon_str: str, active: bool = False):
+        icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
+        icon_label = QLabel(self)
+        icon_label.setPixmap(icon.pixmap(16, 16))
+        icon_label.setStyleSheet('background-color: rgba(0, 0, 0, 0);')
+        self.icon_layout.addWidget(icon_label)
