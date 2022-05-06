@@ -100,6 +100,7 @@ class ImageWindow(QWidget):
         layout.addWidget(self.image)
         self.setLayout(layout)
 
+        # Press escape to close window
         shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         shortcut.activated.connect(self.close)
 

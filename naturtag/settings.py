@@ -37,7 +37,7 @@ class Settings:
     # iNaturalist
     casual_observations: bool = field(default=True)
     locale: str = field(default='en_US')
-    preferred_place_id: int = field(default=1)
+    preferred_place_id: int = field(default=1, converter=int)
     username: str = field(default='')
 
     # Metadata

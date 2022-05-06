@@ -41,7 +41,6 @@ class PhotoController(QWidget):
         self.viewer = ImageViewer()
         photo_layout.addWidget(self.viewer)
 
-        # TODO: Deselect input fields after clicking anywhere else
         # Input fields
         self.input_obs_id = QLineEdit()
         self.input_obs_id.setClearButtonEnabled(True)

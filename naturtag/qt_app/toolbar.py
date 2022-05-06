@@ -24,6 +24,7 @@ class Toolbar(QToolBar):
         paste_callback: Callable,
         fullscreen_callback: Callable,
         log_callback: Callable,
+        settings_callback: Callable,
     ):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
@@ -66,7 +67,7 @@ class Toolbar(QToolBar):
             '&Settings',
             tooltip='Settings',
             icon='fa.gear',
-            callback=self._placeholder,
+            callback=settings_callback,
         )
 
         spacer = QWidget()

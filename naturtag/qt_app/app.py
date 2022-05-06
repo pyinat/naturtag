@@ -10,6 +10,7 @@ from qtmodern.windows import ModernWindow
 from naturtag.constants import ASSETS_DIR
 from naturtag.qt_app.logger import init_handler
 from naturtag.qt_app.photo_controller import PhotoController
+from naturtag.qt_app.settings_menu import SettingsMenu
 from naturtag.qt_app.toolbar import Toolbar
 from naturtag.settings import Settings
 
@@ -45,6 +46,7 @@ class MainWindow(QMainWindow):
             paste_callback=self.photo_controller.paste,
             fullscreen_callback=self.toggle_fullscreen,
             log_callback=self.toggle_log_tab,
+            settings_callback=self.show_settings,
         )
 
         # Menu bar and status bar
@@ -55,10 +57,6 @@ class MainWindow(QMainWindow):
 
         # Load demo images
         self.photo_controller.viewer.load_images(sorted(DEMO_IMAGES.glob('*.jpg')))
-
-    def closeEvent(self, event):
-        self.settings.write()
-        event.accept()
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""
@@ -71,6 +69,10 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
+
+    def show_settings(self):
+        self.settings_menu = SettingsMenu(self.settings)
+        self.settings_menu.show()
 
     def toggle_fullscreen(self) -> bool:
         """Toggle fullscreen, and change icon for toolbar fullscreen button"""
