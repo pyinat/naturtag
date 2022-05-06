@@ -4,9 +4,18 @@ from os.path import isfile
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtGui import QAction, QDropEvent, QKeySequence, QPixmap, QShortcut
-from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QLabel, QMenu, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QMenu,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 from qtawesome import icon as fa_icon
 
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
@@ -25,17 +34,18 @@ class ImageViewer(QWidget):
         super().__init__()
         self.setAcceptDrops(True)
         self.images: dict[str, LocalThumbnail] = {}
+        self.image_window = ImageWindow()
         self.flow_layout = FlowLayout()
         self.flow_layout.setSpacing(4)
         self.setLayout(self.flow_layout)
 
     def clear(self):
         """Clear all images from the viewer"""
-        del self.images
         self.images = {}
         self.flow_layout.clear()
 
     def load_file_dialog(self):
+        """Show a file chooser dialog"""
         file_paths, _ = QFileDialog.getOpenFileNames(
             self,
             'Open image files:',
@@ -44,7 +54,7 @@ class ImageViewer(QWidget):
         self.load_images(file_paths)
 
     def load_images(self, paths: list[str]):
-        # Determine images to load, ignoring duplicates
+        """Load multiple images, and ignore any duplicates"""
         images = get_images_from_paths(paths, recursive=True)
         new_images = list(set(images) - set(self.images.keys()))
         logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
@@ -68,6 +78,7 @@ class ImageViewer(QWidget):
         logger.info(f'Loading {file_path}')
         thumbnail = LocalThumbnail(file_path)
         thumbnail.removed.connect(self.remove_image)
+        thumbnail.selected.connect(self.select_image)
         self.flow_layout.addWidget(thumbnail)
         self.images[file_path] = thumbnail
 
@@ -84,29 +95,24 @@ class ImageViewer(QWidget):
 
     @Slot(str)
     def remove_image(self, file_path: str):
-        logger.debug(f'Removing {file_path}')
         del self.images[file_path]
 
-
-# TODO: Use left/right keys navigate to other files in ImageViewer
-class ImageWindow(QWidget):
-    """Display a full-size image as a separate window"""
-
-    def __init__(self, file_path: str):
-        super().__init__()
-        self.image = QLabel()
-        self.image.setPixmap(QPixmap(file_path))
-        layout = QVBoxLayout()
-        layout.addWidget(self.image)
-        self.setLayout(layout)
-
-        # Press escape to close window
-        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
-        shortcut.activated.connect(self.close)
+    @Slot(str)
+    def select_image(self, file_path: str):
+        self.image_window.select_image(file_path, list(self.images.keys()))
 
 
 class LocalThumbnail(QWidget):
+    """A tile that generates, caches, and displays a thumbnail for a local image file.
+    Contains icons representing its metadata types, and the following mouse actions:
+
+    * Left click: Show full image
+    * Middle click: Remove image
+    * Right click: Show context menu
+    """
+
     removed = Signal(str)
+    selected = Signal(str)
 
     def __init__(self, file_path: str):
         super().__init__()
@@ -144,14 +150,8 @@ class LocalThumbnail(QWidget):
         """Placeholder to accept mouse press events"""
 
     def mouseReleaseEvent(self, event):
-        """
-        * Left click: show full image
-        * Middle click: remove image
-        * Right click: show context menu
-        """
         if event.button() == Qt.LeftButton:
-            self.window = ImageWindow(self.file_path)
-            self.window.showFullScreen()
+            self.select()
         elif event.button() == Qt.MiddleButton:
             self.remove()
 
@@ -160,9 +160,14 @@ class LocalThumbnail(QWidget):
         # alert('Tags copied to clipboard')
 
     def remove(self):
+        logger.debug(f'Removing image {self.file_path}')
         self.removed.emit(str(self.file_path))
         self.setParent(None)
         self.deleteLater()
+
+    def select(self):
+        logger.debug(f'Selecting image {self.file_path}')
+        self.selected.emit(str(self.file_path))
 
     def update_metadata(self, metadata: MetaMetadata):
         self.metadata = metadata
@@ -231,3 +236,84 @@ class ThumbnailMetaIcons(QLabel):
         icon_label.setPixmap(icon.pixmap(16, 16))
         icon_label.setStyleSheet('background-color: rgba(0, 0, 0, 0);')
         self.icon_layout.addWidget(icon_label)
+
+
+class ImageWindow(QWidget):
+    """Display a full-size image as a separate window
+
+    Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.image_paths: list[str] = []
+        self.selected_path = None
+
+        self.image = PixmapLabel()
+        self.image.setFixedSize(QApplication.primaryScreen().availableSize())
+        self.image.setAlignment(Qt.AlignCenter)
+        self.image_layout = QVBoxLayout(self)
+        self.image_layout.addWidget(self.image)
+        self.image_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Keyboard shortcuts
+        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        shortcut.activated.connect(self.close)
+        shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
+        shortcut.activated.connect(self.select_next_image)
+        shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
+        shortcut.activated.connect(self.select_prev_image)
+
+    def select_image(self, file_path: str, image_paths: list[str]):
+        """Open window to a selected image, and save other available image paths for navigation"""
+        self.selected_path = file_path
+        self.image_paths = image_paths
+        self.image.setPixmap(QPixmap(file_path))
+        self.showFullScreen()
+
+    def select_image_idx(self, idx: int):
+        """Select an image by index, with wraparound"""
+        if idx < 0:
+            idx = len(self.image_paths) - 1
+        elif idx >= len(self.image_paths):
+            idx = 0
+
+        logger.debug(f'Selecting image {idx}: {self.selected_path}')
+        self.selected_path = self.image_paths[idx]
+        self.image.setPixmap(QPixmap(self.selected_path))
+
+    def select_next_image(self):
+        self.select_image_idx(self.image_paths.index(self.selected_path) + 1)
+
+    def select_prev_image(self):
+        self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
+
+
+class PixmapLabel(QLabel):
+    """A QLabel containing a pixmap that preserves its aspect ratio when resizing"""
+
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.setMinimumSize(1, 1)
+        self.setScaledContents(False)
+        self._pixmap = None
+
+    def setPixmap(self, pixmap: QPixmap):
+        self._pixmap = pixmap
+        super().setPixmap(self.scaledPixmap())
+
+    def heightForWidth(self, width: int) -> int:
+        if self._pixmap:
+            return (self._pixmap.height() * width) / self._pixmap.width()
+        else:
+            return self.height()
+
+    def sizeHint(self) -> QSize:
+        return QSize(self.width(), self.heightForWidth(self.width()))
+
+    def scaledPixmap(self) -> QPixmap:
+        return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
+    def resizeEvent(self):
+        if self._pixmap:
+            super().setPixmap(self.scaledPixmap())
