@@ -84,10 +84,9 @@ class PhotoController(QWidget):
         logger.info(sorted(list(self.viewer.images.keys())))
         logger.info(sorted([metadata.image_path for metadata in all_metadata]))
 
-        # Update image previews with new metadata
-        # previews = {img.metadata.image_path: img for img in self.image_previews.children}
-        # for metadata in all_metadata:
-        #     previews[metadata.image_path].metadata = metadata
+        for metadata in all_metadata:
+            image = self.viewer.images[metadata.image_path]
+            image.update_metadata(metadata)
 
     def clear(self):
         """Clear all images and input"""

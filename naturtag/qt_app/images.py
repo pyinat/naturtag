@@ -137,6 +137,14 @@ class LocalThumbnail(QWidget):
     def mousePressEvent(self, _):
         pass
 
+    def update_metadata(self, metadata: MetaMetadata):
+        self.metadata = metadata
+        self.icons.refresh_icons(metadata)
+        self.setToolTip(f'{self.file_path}\n{self.metadata.summary}')
+        # self.icons.setParent(None)
+        # self.icons = ThumbnailMetaIcons(self)
+        # self.icons.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
+
 
 class ThumbnailMetaIcons(QLabel):
     """Icons overlayed on top of a thumbnail to indicate what types of metadata are available"""
@@ -150,11 +158,17 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(9, img_size.height() - 10, 100, 20)
 
-        self._add_icon('mdi.bird', active=parent.metadata.has_taxon)
-        self._add_icon('fa.binoculars', active=parent.metadata.has_observation)
-        self._add_icon('fa.map-marker', active=parent.metadata.has_coordinates)
-        self._add_icon('fa.tags', active=parent.metadata.has_any_tags)
-        self._add_icon('mdi.xml', active=parent.metadata.has_sidecar)
+        self.refresh_icons(parent.metadata)
+
+    def refresh_icons(self, metadata: MetaMetadata):
+        while (child := self.icon_layout.takeAt(0)) != None:
+            child.widget().deleteLater()
+
+        self._add_icon('mdi.bird', active=metadata.has_taxon)
+        self._add_icon('fa.binoculars', active=metadata.has_observation)
+        self._add_icon('fa.map-marker', active=metadata.has_coordinates)
+        self._add_icon('fa.tags', active=metadata.has_any_tags)
+        self._add_icon('mdi.xml', active=metadata.has_sidecar)
 
     def _add_icon(self, icon_str: str, active: bool = False):
         icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
