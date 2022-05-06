@@ -98,10 +98,6 @@ class LocalThumbnail(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(0)
 
-        logger.info(self.metadata.exif.get('Exif.GPSInfo'))
-        logger.info(self.metadata.exif.get('Exif.GPSInfo.GPSLatitude'))
-        logger.info(type(self.metadata.exif.get('Exif.GPSInfo.GPSLatitude')))
-
         # Image
         self.image = QLabel(self)
         self.image.setPixmap(QPixmap(get_thumbnail(file_path)))
@@ -111,8 +107,8 @@ class LocalThumbnail(QWidget):
         layout.addWidget(self.image)
 
         # Metadata icons
-        icons = ThumbnailMetaIcons(self)
-        icons.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
+        self.icons = ThumbnailMetaIcons(self)
+        self.icons.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
 
         # Filename
         self.info = QLabel(self.file_path.name)

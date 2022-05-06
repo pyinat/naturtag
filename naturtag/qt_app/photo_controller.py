@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 
 from naturtag.inat_metadata import get_ids_from_url
 from naturtag.qt_app.images import ImageViewer
+from naturtag.settings import Settings
 from naturtag.tagger import tag_images
 
 logger = getLogger(__name__)
@@ -22,8 +23,9 @@ logger = getLogger(__name__)
 class PhotoController(QWidget):
     """Controller for selecting and tagging local image files"""
 
-    def __init__(self, info_callback: Callable):
+    def __init__(self, settings: Settings, info_callback: Callable):
         super().__init__()
+        self.settings = settings
         photo_layout = QVBoxLayout()
         self.setLayout(photo_layout)
         self.info = info_callback
@@ -74,10 +76,10 @@ class PhotoController(QWidget):
         all_metadata, _, _ = tag_images(
             obs_id,
             taxon_id,
-            # metadata_settings['common_names'],
-            # metadata_settings['darwin_core'],
-            # metadata_settings['hierarchical_keywords'],
-            # metadata_settings['create_xmp'],
+            self.settings.common_names,
+            self.settings.darwin_core,
+            self.settings.hierarchical_keywords,
+            self.settings.create_xmp,
             images=files,
         )
         self.info(f'{len(files)} images tagged with metadata for {selected_id}')

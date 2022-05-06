@@ -2,57 +2,78 @@
 import json
 from collections import Counter, OrderedDict
 from logging import getLogger
-from os import makedirs
-from os.path import isfile
-from shutil import copyfile
-from typing import Any
+from pathlib import Path
 
 import yaml
+from attr import define, field
+from cattr import Converter
+from cattr.preconf import pyyaml
 
-from naturtag.constants import CONFIG_PATH, DATA_DIR, DEFAULT_CONFIG_PATH, STORED_TAXA_PATH
+from naturtag.constants import CONFIG_PATH, STORED_TAXA_PATH
 from naturtag.validation import convert_int_dict
 
 logger = getLogger().getChild(__name__)
 
 
-def read_settings() -> dict[str, Any]:
-    """Read settings from the settings file
-
-    Returns:
-        Stored config state
-    """
-    if not isfile(CONFIG_PATH):
-        reset_defaults()
-    logger.info(f'Settings: Reading settings from {CONFIG_PATH}')
-    with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f)
+def make_converter() -> Converter:
+    converter = pyyaml.make_converter()
+    converter.register_unstructure_hook(Path, str)
+    converter.register_structure_hook(Path, lambda obj, cls: Path(obj))
+    return converter
 
 
-def write_settings(new_config: dict[str, Any]):
-    """Write updated settings to the settings file
-
-    Args:
-        new_config (dict): Updated config state
-    """
-    # First re-read current config, in case it changed on disk (manual edits)
-    # And update on a per-section basis so we don't overwrite with an empty section
-    settings = read_settings()
-    logger.info(f'Settings: Writing settings to {CONFIG_PATH}')
-    for k, v in new_config.items():
-        logger.debug(f'Settings: Writing {k}={v}')
-        settings.setdefault(k, {})
-        settings[k].update(v)
-    logger.info('Settings: Done')
-
-    with open(CONFIG_PATH, 'w') as f:
-        yaml.safe_dump(settings, f)
+YamlConverter = make_converter()
 
 
-def reset_defaults():
-    """Reset settings to defaults"""
-    logger.info(f'Settings: Resetting {CONFIG_PATH} to defaults')
-    makedirs(DATA_DIR, exist_ok=True)
-    copyfile(DEFAULT_CONFIG_PATH, CONFIG_PATH)
+@define
+class Settings:
+    # Display
+    dark_mode: bool = field(default=False)
+    # TODO:
+    # md_primary_palette: str = field(default='Teal')
+    # md_accent_palette: str = field(default='Cyan')
+
+    # iNaturalist
+    casual_observations: bool = field(default=True)
+    locale: str = field(default='en_US')
+    preferred_place_id: int = field(default=1)
+    username: str = field(default='')
+
+    # Metadata
+    common_names: bool = field(default=True)
+    create_xmp: bool = field(default=True)
+    darwin_core: bool = field(default=True)
+    hierarchical_keywords: bool = field(default=False)
+
+    # Photos
+    default_dir: Path = field(default=Path('~').expanduser(), converter=Path)
+    # TODO:
+    # data_dir: Path = field(default=DATA_DIR, converter=Path)
+    # favorite_dirs: list[Path] = field(factory=list)
+
+    @classmethod
+    def read(cls) -> 'Settings':
+        """Read settings from config file"""
+        if not CONFIG_PATH.is_file():
+            return cls()
+
+        logger.info(f'Settings: Reading settings from {CONFIG_PATH}')
+        with open(CONFIG_PATH) as f:
+            settings_dict = yaml.safe_load(f)
+            return YamlConverter.structure(settings_dict, cl=cls)
+
+    def write(self):
+        """Write settings to config file"""
+        logger.info(f'Writing settings to {CONFIG_PATH}')
+        CONFIG_PATH.mkdir(parents=True, exist_ok=True)
+        settings_dict = YamlConverter.unstructure(self)
+        with open(CONFIG_PATH, 'w') as f:
+            yaml.safe_dump(settings_dict, f)
+
+    @classmethod
+    def reset_defaults(cls) -> 'Settings':
+        cls().write()
+        return cls.read()
 
 
 # TODO: Separately store loaded history, new history for session; only write (append) new history
@@ -62,7 +83,7 @@ def read_stored_taxa() -> dict:
     Returns:
         Stored taxon view history, starred, and frequency
     """
-    if not isfile(STORED_TAXA_PATH):
+    if not STORED_TAXA_PATH.is_file():
         stored_taxa = {}
     else:
         with open(STORED_TAXA_PATH) as f:

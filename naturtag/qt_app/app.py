@@ -12,6 +12,7 @@ from naturtag.constants import ASSETS_DIR
 from naturtag.qt_app.logger import init_handler
 from naturtag.qt_app.photo_controller import PhotoController
 from naturtag.qt_app.toolbar import Toolbar
+from naturtag.settings import Settings
 
 DEMO_IMAGES = ASSETS_DIR / 'demo_images'
 logger = getLogger(__name__)
@@ -23,16 +24,18 @@ class MainWindow(QMainWindow):
         self.resize(1024, 1024)
         self.setWindowTitle('Naturtag')
 
+        # Controllers & Settings
+        self.settings = Settings.read()
+        self.photo_controller = PhotoController(self.settings, self.info)
+
         # Tabbed layout
         tabs = QTabWidget()
-        self.setCentralWidget(tabs)
-
-        self.photo_controller = PhotoController(self.info)
         tabs.addTab(self.photo_controller, fa_icon('fa.camera'), 'Photos')
         tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
         tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
         log_tab_idx = tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
         tabs.setTabVisible(log_tab_idx, False)
+        self.setCentralWidget(tabs)
 
         # Toolbar + status bar
         self.toolbar = Toolbar(

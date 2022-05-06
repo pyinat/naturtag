@@ -76,7 +76,6 @@ CACHE_EXPIRATION = {
 
 # Config files
 CONFIG_PATH = DATA_DIR / 'settings.yml'
-DEFAULT_CONFIG_PATH = PKG_DIR / 'default_settings.yml'
 STORED_TAXA_PATH = DATA_DIR / 'stored_taxa.json'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 
