@@ -3,7 +3,7 @@ from typing import Callable
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QToolBar, QWidget
+from PySide6.QtWidgets import QSizePolicy, QToolBar, QWidget
 from qtawesome import icon as fa_icon
 
 logger = getLogger(__name__)
@@ -18,6 +18,7 @@ class Toolbar(QToolBar):
         run_callback: Callable,
         clear_callback: Callable,
         paste_callback: Callable,
+        fullscreen_callback: Callable,
     ):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
@@ -26,8 +27,7 @@ class Toolbar(QToolBar):
         self.setAllowedAreas(Qt.TopToolBarArea)
         self.setStyleSheet('#toolbar { border: none; background-color: transparent; }')
 
-        # get_button('&Run', 'control.png', self.on_toolbar_click, self)
-        self.run_button = self.add_button('&Run', 'fa.play', 'Run a thing', run_callback)
+        self.run_button = self.add_button('&Run', 'fa.play', 'Apply tags to images', run_callback)
         self.addSeparator()
 
         self.open_button = self.add_button('&Open', 'fa.photo', 'Open images', load_file_callback)
@@ -37,13 +37,15 @@ class Toolbar(QToolBar):
         self.clear_button = self.add_button('&Clear', 'fa.remove', 'Clear open images', clear_callback)
         self.addSeparator()
 
-        self.history_button = self.add_button(
-            '&History', 'fa5s.history', 'View history', self.on_toolbar_click
-        )
-        self.history_button.setCheckable(True)
-        self.addSeparator()
+        self.settings_button = self.add_button('&Settings', 'fa.gear', 'Settings', self._placeholder)
 
-        self.settings_button = self.add_button('&Settings', 'fa.gear', 'Settings', self.on_toolbar_click)
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.addWidget(spacer)
+
+        self.fullscreen_button = self.add_button(
+            '&Fullscreen', 'mdi.fullscreen', 'Toggle fullscreen mode', fullscreen_callback
+        )
 
     def add_button(self, name: str, icon: str, tooltip: str, callback: Callable) -> QAction:
         button_action = QAction(fa_icon(icon), name, self)
@@ -52,6 +54,5 @@ class Toolbar(QToolBar):
         self.addAction(button_action)
         return button_action
 
-    def on_toolbar_click(self, s):
-        """Placeholder"""
+    def _placeholder(self, s):
         logger.info(f'Click; checked: {s}')

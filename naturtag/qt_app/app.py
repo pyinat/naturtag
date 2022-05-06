@@ -2,6 +2,7 @@ import sys
 from logging import getLogger
 from typing import Callable
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget, QWidget
 from qtawesome import icon as fa_icon
@@ -44,6 +45,7 @@ class MainWindow(QMainWindow):
             run_callback=self.photo_controller.run,
             clear_callback=self.photo_controller.clear,
             paste_callback=self.photo_controller.paste,
+            fullscreen_callback=self.toggle_fullscreen,
         )
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
@@ -77,6 +79,7 @@ class MainWindow(QMainWindow):
         self._add_shortcut('Ctrl+R', self.photo_controller.run)
         self._add_shortcut('Ctrl+V', self.photo_controller.paste)
         self._add_shortcut('Ctrl+Shift+X', self.photo_controller.clear)
+        self._add_shortcut(Qt.Key_F11, self.toggle_fullscreen)
 
         # Load demo images
         self.photo_controller.viewer.load_images(sorted(DEMO_IMAGES.glob('*.jpg')))
@@ -96,6 +99,19 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
+
+    def toggle_fullscreen(self) -> bool:
+        """Toggle fullscreen, and change icon for toolbar fullscreen button"""
+        if not self.isFullScreen():
+            self._flags = self.windowFlags()
+            self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowType_Mask)
+            self.showFullScreen()
+            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen-exit'))
+        else:
+            self.setWindowFlags(self._flags)
+            self.showNormal()
+            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen'))
+        return self.isFullScreen()
 
 
 if __name__ == '__main__':
