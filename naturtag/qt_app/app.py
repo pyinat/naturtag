@@ -1,9 +1,7 @@
 import sys
 from logging import getLogger
-from typing import Callable
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget, QWidget
 from qtawesome import icon as fa_icon
 from qtmodern import styles
@@ -30,15 +28,15 @@ class MainWindow(QMainWindow):
         self.photo_controller = PhotoController(self.settings, self.info)
 
         # Tabbed layout
-        tabs = QTabWidget()
-        tabs.addTab(self.photo_controller, fa_icon('fa.camera'), 'Photos')
-        tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
-        tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
-        log_tab_idx = tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
-        tabs.setTabVisible(log_tab_idx, False)
-        self.setCentralWidget(tabs)
+        self.tabs = QTabWidget()
+        self.tabs.addTab(self.photo_controller, fa_icon('fa.camera'), 'Photos')
+        self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
+        self.tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
+        self.log_tab_idx = self.tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
+        self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
+        self.setCentralWidget(self.tabs)
 
-        # Toolbar + status bar
+        # Toolbar
         self.toolbar = Toolbar(
             'My main toolbar',
             load_file_callback=self.photo_controller.viewer.load_file_dialog,
@@ -46,47 +44,21 @@ class MainWindow(QMainWindow):
             clear_callback=self.photo_controller.clear,
             paste_callback=self.photo_controller.paste,
             fullscreen_callback=self.toggle_fullscreen,
+            log_callback=self.toggle_log_tab,
         )
+
+        # Menu bar and status bar
+        self.toolbar.populate_menu(self.menuBar(), self.settings)
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
 
-        # Menu bar
-        menu = self.menuBar()
-        file_menu = menu.addMenu('&File')
-        file_menu.addAction(self.toolbar.run_button)
-        file_menu.addAction(self.toolbar.open_button)
-        file_menu.addAction(self.toolbar.clear_button)
-        settings_menu = menu.addMenu('&Settings')
-        settings_menu.addAction(self.toolbar.settings_button)
-        # file_submenu = file_menu.addMenu('Submenu')
-        # file_submenu.addAction(self.toolbar.paste_button)
-        # file_submenu.addAction(self.toolbar.history_button)
-
-        def toggle_tab(idx):
-            tabs.setTabVisible(idx, not tabs.isTabVisible(idx))
-
-        # Button to enable log tab
-        button_action = QAction(fa_icon('fa.file-text-o'), '&View Logs', self)
-        button_action.setStatusTip('View Logs')
-        button_action.setCheckable(True)
-        button_action.triggered.connect(lambda: toggle_tab(log_tab_idx))
-        settings_menu.addAction(button_action)
-
-        # Keyboard shortcuts
-        self._add_shortcut('Ctrl+O', self.photo_controller.viewer.load_file_dialog)
-        self._add_shortcut('Ctrl+Q', QApplication.instance().quit)
-        self._add_shortcut('Ctrl+R', self.photo_controller.run)
-        self._add_shortcut('Ctrl+V', self.photo_controller.paste)
-        self._add_shortcut('Ctrl+Shift+X', self.photo_controller.clear)
-        self._add_shortcut(Qt.Key_F11, self.toggle_fullscreen)
-
         # Load demo images
         self.photo_controller.viewer.load_images(sorted(DEMO_IMAGES.glob('*.jpg')))
 
-    def _add_shortcut(self, keys: str, callback: Callable):
-        shortcut = QShortcut(QKeySequence(keys), self)
-        shortcut.activated.connect(callback)
+    def closeEvent(self, event):
+        self.settings.write()
+        event.accept()
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""
@@ -112,6 +84,12 @@ class MainWindow(QMainWindow):
             self.showNormal()
             self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen'))
         return self.isFullScreen()
+
+    def toggle_log_tab(self):
+        tab_visible = not self.tabs.isTabVisible(self.log_tab_idx)
+        self.tabs.setTabVisible(self.log_tab_idx, tab_visible)
+        self.settings.show_logs = tab_visible
+        self.settings.write()
 
 
 if __name__ == '__main__':

@@ -29,6 +29,7 @@ YamlConverter = make_converter()
 class Settings:
     # Display
     dark_mode: bool = field(default=False)
+    show_logs: bool = field(default=False)
     # TODO:
     # md_primary_palette: str = field(default='Teal')
     # md_accent_palette: str = field(default='Cyan')
@@ -65,7 +66,7 @@ class Settings:
     def write(self):
         """Write settings to config file"""
         logger.info(f'Writing settings to {CONFIG_PATH}')
-        CONFIG_PATH.mkdir(parents=True, exist_ok=True)
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         settings_dict = YamlConverter.unstructure(self)
         with open(CONFIG_PATH, 'w') as f:
             yaml.safe_dump(settings_dict, f)
