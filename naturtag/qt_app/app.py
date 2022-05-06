@@ -3,7 +3,7 @@ from logging import getLogger
 from typing import Callable
 
 from PySide6.QtGui import QAction, QKeySequence, QShortcut
-from PySide6.QtWidgets import QApplication, QMainWindow, QStatusBar, QTabWidget, QWidget
+from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget, QWidget
 from qtawesome import icon as fa_icon
 from qtmodern import styles
 from qtmodern.windows import ModernWindow
@@ -86,6 +86,13 @@ class MainWindow(QMainWindow):
         """Show a message both in the status bar and in the logs"""
         self.statusbar.showMessage(message)
         logger.info(message)
+
+    def mousePressEvent(self, event):
+        """Deselect focus from text edit fields when clicking anywhere else on the window"""
+        focused_widget = QApplication.focusWidget()
+        if isinstance(focused_widget, QLineEdit):
+            focused_widget.clearFocus()
+        super().mousePressEvent(event)
 
 
 if __name__ == '__main__':
