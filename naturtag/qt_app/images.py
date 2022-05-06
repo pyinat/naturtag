@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QDropEvent, QPixmap
+from PySide6.QtGui import QDropEvent, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from qtawesome import icon as fa_icon
 
@@ -87,6 +87,22 @@ class ImageViewer(QWidget):
         del self.images[file_path]
 
 
+# TODO: Use left/right keys navigate to other files in ImageViewer
+class ImageWindow(QWidget):
+    """Display a full-size image as a separate window"""
+
+    def __init__(self, file_path: str):
+        super().__init__()
+        self.image = QLabel()
+        self.image.setPixmap(QPixmap(file_path))
+        layout = QVBoxLayout()
+        layout.addWidget(self.image)
+        self.setLayout(layout)
+
+        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        shortcut.activated.connect(self.close)
+
+
 class LocalThumbnail(QWidget):
     removed = Signal(str)
 
@@ -94,6 +110,7 @@ class LocalThumbnail(QWidget):
         super().__init__()
         self.metadata = MetaMetadata(file_path)
         self.file_path = Path(file_path)
+        self.window = None
         self.setToolTip(f'{file_path}\n{self.metadata.summary}')
         layout = QVBoxLayout(self)
         layout.setSpacing(0)
@@ -118,10 +135,11 @@ class LocalThumbnail(QWidget):
         layout.addWidget(self.info)
 
     def mouseReleaseEvent(self, event):
-        # TODO: Left click: expand
+        # Left click: show full image
         if event.button() == Qt.LeftButton:
-            logger.info("mouseReleaseEvent LEFT")
-        # Middle click: Remove image
+            self.window = ImageWindow(self.file_path)
+            self.window.showFullScreen()
+        # Middle click: remove image
         elif event.button() == Qt.MiddleButton:
             self.removed.emit(str(self.file_path))
             self.setParent(None)
@@ -157,7 +175,7 @@ class ThumbnailMetaIcons(QLabel):
         self.refresh_icons(parent.metadata)
 
     def refresh_icons(self, metadata: MetaMetadata):
-        while (child := self.icon_layout.takeAt(0)) != None:
+        while (child := self.icon_layout.takeAt(0)) is not None:
             child.widget().deleteLater()
 
         self._add_icon('mdi.bird', active=metadata.has_taxon)
