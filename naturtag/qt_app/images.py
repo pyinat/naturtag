@@ -1,11 +1,12 @@
+import webbrowser
 from logging import getLogger
 from os.path import isfile
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QDropEvent, QKeySequence, QPixmap, QShortcut
-from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtGui import QAction, QDropEvent, QKeySequence, QPixmap, QShortcut
+from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QLabel, QMenu, QVBoxLayout, QWidget
 from qtawesome import icon as fa_icon
 
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
@@ -18,7 +19,7 @@ logger = getLogger(__name__)
 
 
 class ImageViewer(QWidget):
-    file_changed = Signal(str)
+    """Container for displaying local image thumbnails & info"""
 
     def __init__(self):
         super().__init__()
@@ -66,7 +67,7 @@ class ImageViewer(QWidget):
 
         logger.info(f'Loading {file_path}')
         thumbnail = LocalThumbnail(file_path)
-        thumbnail.removed.connect(self.on_image_removed)
+        thumbnail.removed.connect(self.remove_image)
         self.flow_layout.addWidget(thumbnail)
         self.images[file_path] = thumbnail
 
@@ -82,7 +83,7 @@ class ImageViewer(QWidget):
             self.load_image(file_path)
 
     @Slot(str)
-    def on_image_removed(self, file_path: str):
+    def remove_image(self, file_path: str):
         logger.debug(f'Removing {file_path}')
         del self.images[file_path]
 
@@ -128,36 +129,75 @@ class LocalThumbnail(QWidget):
         self.icons.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
 
         # Filename
-        self.info = QLabel(self.file_path.name)
-        self.info.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
-        self.info.setAlignment(Qt.AlignLeft)
-        self.info.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);font-size: 10pt;')
-        layout.addWidget(self.info)
+        self.label = QLabel(self.file_path.name)
+        self.label.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
+        self.label.setAlignment(Qt.AlignLeft)
+        self.label.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);font-size: 10pt;')
+        layout.addWidget(self.label)
+
+    def contextMenuEvent(self, e):
+        context_menu = ThumbnailContextMenu(self)
+        context_menu.exec(e.globalPos())
+
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
 
     def mouseReleaseEvent(self, event):
-        # Left click: show full image
+        """
+        * Left click: show full image
+        * Middle click: remove image
+        * Right click: show context menu
+        """
         if event.button() == Qt.LeftButton:
             self.window = ImageWindow(self.file_path)
             self.window.showFullScreen()
-        # Middle click: remove image
         elif event.button() == Qt.MiddleButton:
-            self.removed.emit(str(self.file_path))
-            self.setParent(None)
-            self.deleteLater()
-        # TODO: Right click: context menu
-        elif event.button() == Qt.RightButton:
-            logger.info("mouseReleaseEvent RIGHT")
+            self.remove()
 
-    def mousePressEvent(self, _):
-        pass
+    def copy_flickr_tags(self):
+        QApplication.clipboard().setText(self.metadata.keyword_meta.flickr_tags)
+        # alert('Tags copied to clipboard')
+
+    def remove(self):
+        self.removed.emit(str(self.file_path))
+        self.setParent(None)
+        self.deleteLater()
 
     def update_metadata(self, metadata: MetaMetadata):
         self.metadata = metadata
         self.icons.refresh_icons(metadata)
         self.setToolTip(f'{self.file_path}\n{self.metadata.summary}')
-        # self.icons.setParent(None)
-        # self.icons = ThumbnailMetaIcons(self)
-        # self.icons.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
+
+
+class ThumbnailContextMenu(QMenu):
+    """Context menu for local image thumbnails"""
+
+    def __init__(self, thumbnail: LocalThumbnail):
+        super().__init__()
+        meta = thumbnail.metadata
+
+        action = QAction(fa_icon('fa.binoculars'), 'View Observation', thumbnail)
+        action.setStatusTip(f'View observation {meta.observation_id} on inaturalist.org')
+        action.setEnabled(meta.has_observation)
+        action.triggered.connect(lambda: webbrowser.open(meta.observation_url))
+        self.addAction(action)
+
+        action = QAction(fa_icon('fa5s.spider'), 'View Taxon', thumbnail)
+        action.setStatusTip(f'View taxon {meta.taxon_id} on inaturalist.org')
+        action.setEnabled(meta.has_taxon)
+        action.triggered.connect(lambda: webbrowser.open(meta.taxon_url))
+        self.addAction(action)
+
+        action = QAction(fa_icon('fa5.copy'), 'Copy Flickr tags', thumbnail)
+        action.setStatusTip('Copy Flickr-compatible taxon tags to clipboard')
+        action.setEnabled(meta.has_taxon)
+        action.triggered.connect(thumbnail.copy_flickr_tags)
+        self.addAction(action)
+
+        action = QAction(fa_icon('fa.remove'), 'Remove image', thumbnail)
+        action.setStatusTip('Remove this image from the selection')
+        action.triggered.connect(thumbnail.remove)
+        self.addAction(action)
 
 
 class ThumbnailMetaIcons(QLabel):

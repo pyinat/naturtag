@@ -2,6 +2,8 @@ from logging import getLogger
 from os.path import basename
 from typing import Any, Optional
 
+from pyinaturalist import INAT_BASE_URL
+
 from naturtag.constants import Coordinates, IntTuple, StrTuple
 from naturtag.gps import (
     convert_dwc_coords,
@@ -85,12 +87,20 @@ class MetaMetadata(ImageMetadata):
         return self._inaturalist_ids
 
     @property
+    def observation_id(self) -> Optional[int]:
+        return self.inaturalist_ids[1]
+
+    @property
+    def observation_url(self) -> str:
+        return f'{INAT_BASE_URL}/observations/{self.observation_id or ""}'
+
+    @property
     def taxon_id(self) -> Optional[int]:
         return self.inaturalist_ids[0]
 
     @property
-    def observation_id(self) -> Optional[int]:
-        return self.inaturalist_ids[1]
+    def taxon_url(self) -> str:
+        return f'{INAT_BASE_URL}/taxa/{self.taxon_id or ""}'
 
     @property
     def min_rank(self) -> StrTuple:
@@ -137,9 +147,6 @@ class MetaMetadata(ImageMetadata):
         if not coordinates:
             return
         self._coordinates = coordinates
-        print(coordinates)
-        print(to_exif_coords(coordinates))
-        print(to_xmp_coords(coordinates))
         self.exif.update(to_exif_coords(coordinates))
         self.xmp.update(to_xmp_coords(coordinates))
 
