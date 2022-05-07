@@ -1,11 +1,9 @@
-from logging import basicConfig
 from re import DOTALL, MULTILINE, compile
 from typing import Optional
 
 import click
 from click_help_colors import HelpColorsCommand
-from pyinaturalist.constants import ICONIC_EMOJI
-from pyinaturalist.v1 import get_taxa_autocomplete
+from pyinaturalist import ICONIC_EMOJI, enable_logging, get_taxa_autocomplete
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
@@ -150,9 +148,9 @@ def tag(
             ctx.exit()
 
     if verbose:
-        basicConfig(level='DEBUG')
+        enable_logging(level='DEBUG')
 
-    _, keywords, metadata = tag_images(
+    metadata_list = tag_images(
         observation,
         taxon,
         common_names,
@@ -161,14 +159,19 @@ def tag(
         create_xmp,
         glob_paths(image_paths),
     )
+    if not metadata_list:
+        return
 
-    # Print keywords and/or DWC tags, if appropriate
+    # Print keywords if specified
+    keyword_meta = metadata_list[0].keyword_meta
     if flickr_format:
-        print(' '.join(keywords))
+        print(' '.join(keyword_meta.flickr_tags))
     elif not image_paths or verbose:
-        rprint('\n'.join([kw.replace('"', '') for kw in keywords]))
-        if darwin_core and metadata:
-            rprint(metadata)
+        rprint('\n'.join(keyword_meta.normal_keywords))
+        if hierarchical:
+            rprint(keyword_meta.hier_keyword_tree_str)
+        else:
+            rprint('\n'.join([kw.replace('"', '') for kw in keyword_meta.kv_keyword_list]))
 
 
 def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:

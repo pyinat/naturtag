@@ -54,13 +54,6 @@ SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Ani
 
 # Cache settings
 OBS_CACHE_EXPIRY_HOURS = 48
-CACHE_EXPIRATION = {
-    'api.inaturalist.org/v*/observations*': timedelta(days=2),
-    'api.inaturalist.org/v*/taxa*': timedelta(days=60),
-    'static.inaturalist.org/*': -1,
-    'inaturalist-open-data.s3.amazonaws.com/*': -1,
-    '*': timedelta(hours=1),
-}
 
 # Config files
 CONFIG_PATH = DATA_DIR / 'settings.yml'
@@ -81,11 +74,6 @@ INIT_WINDOW_SIZE = (1500, 900)
 MD_PRIMARY_PALETTE = 'Teal'
 MD_ACCENT_PALETTE = 'Cyan'
 MAX_LABEL_CHARS = 80
-
-# Key codes; reference: https://gist.github.com/Enteleform/a2e4daf9c302518bf31fcc2b35da4661
-BACKSPACE = 8
-ENTER = 13
-F11 = 292
 
 # Simplified tags without formatting variations
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']

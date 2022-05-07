@@ -15,14 +15,7 @@ class Taxon(BaseTaxon):
 
     partial: bool = attr.field(default=True)
 
-    @classmethod
-    def copy(cls, taxon: BaseTaxon) -> 'Taxon':
-        new_taxon = cls()
-        for key in attr.fields_dict(BaseTaxon).keys():
-            key = key.lstrip('_')  # Use getters/setters for LazyProperty instead of temp attrs
-            setattr(new_taxon, key, getattr(taxon, key))
-        return new_taxon
-
+    # TODO: Can use and cache .icon_url instead
     @property
     def icon_path(self) -> str:
         return get_icon_path(self.iconic_taxon_id)
@@ -44,7 +37,7 @@ class Taxon(BaseTaxon):
     def child_taxa(self) -> list['Taxon']:
         """Get this taxon's children (in descending order of rank)"""
         if not self.children and self.partial:
-            self.update_from_full_record()
+            self.load_full_record()
             self.partial = False
         return self.children or []
 

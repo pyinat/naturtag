@@ -20,10 +20,6 @@ from pyinaturalist import ClientSession, iNatClient
 
 from naturtag.constants import (
     ATLAS_APP_ICONS,
-    BACKSPACE,
-    CACHE_EXPIRATION,
-    ENTER,
-    F11,
     INIT_WINDOW_POSITION,
     INIT_WINDOW_SIZE,
     MD_ACCENT_PALETTE,
@@ -42,9 +38,15 @@ from naturtag.controllers import (
 from naturtag.inat_metadata import get_ids_from_url
 from naturtag.kv_app import alert
 from naturtag.kv_app.atlas import get_atlas
+from naturtag.kv_app.loaders import TaxonBGThread
 from naturtag.kv_app.screens import HOME_SCREEN, Root, load_screens
-from naturtag.loaders import TaxonBGThread
-from naturtag.widgets import TaxonListItem
+from naturtag.kv_app.widgets import TaxonListItem
+
+# Key codes; reference: https://gist.github.com/Enteleform/a2e4daf9c302518bf31fcc2b35da4661
+BACKSPACE = 8
+ENTER = 13
+F11 = 292
+
 
 logger = getLogger().getChild(__name__)
 
@@ -75,13 +77,7 @@ class ControllerProxy:
         # observation_search_controller = ObservationSearchController(screens['observation'].ids)
 
         # Session and client objects for iNat API requests
-        self.client = iNatClient(
-            session=ClientSession(
-                cache_control=False,
-                urls_expire_after=CACHE_EXPIRATION,
-                per_host=True,
-            )
-        )
+        self.client = iNatClient(session=ClientSession(cache_control=False))
 
         # Background loader thread
         self.taxon_bg_thread = TaxonBGThread(self.client)

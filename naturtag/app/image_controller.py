@@ -70,7 +70,7 @@ class ImageController(QWidget):
         logger.info(f'Tagging {len(files)} images with metadata for {selected_id}')
 
         # TODO: Handle write errors (like file locked) and show dialog
-        all_metadata, _, _ = tag_images(
+        all_metadata = tag_images(
             obs_id,
             taxon_id,
             self.settings.common_names,

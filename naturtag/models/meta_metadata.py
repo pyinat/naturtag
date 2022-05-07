@@ -2,9 +2,9 @@ from logging import getLogger
 from os.path import basename
 from typing import Any, Optional
 
-from pyinaturalist import INAT_BASE_URL
+from pyinaturalist.constants import INAT_BASE_URL, RANKS
 
-from naturtag.constants import Coordinates, IntTuple, StrTuple
+from naturtag.constants import OBSERVATION_KEYS, TAXON_KEYS, Coordinates, IntTuple, StrTuple
 from naturtag.gps import (
     convert_dwc_coords,
     convert_exif_coords,
@@ -12,7 +12,6 @@ from naturtag.gps import (
     to_exif_coords,
     to_xmp_coords,
 )
-from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank
 from naturtag.models import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
 
 NULL_COORDS = (0, 0)
@@ -138,8 +137,18 @@ class MetaMetadata(ImageMetadata):
             logger.debug(f'Metadata summary: {self._summary}')
         return self._summary
 
+    def merge(self, other: 'MetaMetadata') -> 'MetaMetadata':
+        """Update metadata from another instance"""
+        self.exif.update(other.exif)
+        self.xmp.update(other.xmp)
+        self.iptc.update(other.iptc)
+        self._update_derived_properties()
+        return self
+
     def update(self, new_metadata: dict):
         """Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties"""
+        if not new_metadata:
+            return
         super().update(new_metadata)
         self._update_derived_properties()
 
@@ -158,9 +167,27 @@ class MetaMetadata(ImageMetadata):
         self.update(KeywordMetadata(keywords=keywords).tags)
 
 
-def get_tagged_image_metadata(paths: list[str]) -> dict[str, MetaMetadata]:
-    all_image_metadata = (MetaMetadata(path) for path in paths)
-    return {m.image_path: m for m in all_image_metadata if m.taxon_id or m.observation_id}
+def get_inaturalist_ids(metadata: dict) -> tuple[Optional[int], Optional[int]]:
+    """Look for taxon and/or observation IDs from metadata if available"""
+    # Get first non-None value from specified keys, if any; otherwise return None
+    def _first_match(d, keys):
+        id = next(filter(None, map(d.get, keys)), None)
+        return int(id) if id else None
+
+    # Check all possible keys for valid taxon and observation IDs
+    taxon_id = _first_match(metadata, TAXON_KEYS)
+    observation_id = _first_match(metadata, OBSERVATION_KEYS)
+    logger.info(f'Taxon ID: {taxon_id} | Observation ID: {observation_id}')
+    return taxon_id, observation_id
+
+
+def get_min_rank(metadata: dict[str, str]) -> StrTuple:
+    """Get the lowest (most specific) taxonomic rank from tags, if any"""
+    for rank in RANKS:
+        if rank in metadata:
+            logger.info(f'Found minimum rank: {rank} = {metadata[rank]}')
+            return rank, metadata[rank]
+    return None, None
 
 
 def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
