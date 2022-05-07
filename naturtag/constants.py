@@ -81,25 +81,8 @@ OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
 
 
 # Specific XML namespaces to use terms from when processing DwC observation records
-# Note: exiv2 will automatically add recognized namespaces when adding properties
-DWC_NAMESPACES = {
-    "dcterms": "http://purl.org/dc/terms/",
-    "dwc": "http://rs.tdwg.org/dwc/terms/",
-}
-
-# Basic DwC fields that can be added for a taxon without an observation
-DWC_TAXON_TERMS = [
-    'Xmp.dwc.kingdom',
-    'Xmp.dwc.phylum',
-    'Xmp.dwc.class',
-    'Xmp.dwc.order',
-    'Xmp.dwc.family',
-    'Xmp.dwc.genus',
-    'Xmp.dwc.species',
-    'Xmp.dwc.scientificName',
-    'Xmp.dwc.taxonRank',
-    'Xmp.dwc.taxonID',
-]
+# Note: exiv2 will automatically add recognized namespace URLs when adding properties
+DWC_NAMESPACES = ['dcterms', 'dwc']
 
 COMMON_NAME_IGNORE_TERMS = [
     ',',

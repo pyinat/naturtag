@@ -97,7 +97,7 @@ class ImageController(QWidget):
         text = QApplication.clipboard().text()
         logger.debug(f'Pasted: {text}')
 
-        taxon_id, observation_id = get_ids_from_url(text)
+        observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
             self.input_obs_id.setText(str(observation_id))
             self.info(f'Observation {observation_id} selected')

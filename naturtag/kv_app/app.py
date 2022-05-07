@@ -240,7 +240,7 @@ class NaturtagApp(MDApp, ControllerProxy):
 
     def current_screen_paste(self):
         value = Clipboard.paste()
-        taxon_id, observation_id = get_ids_from_url(value)
+        observation_id, taxon_id = get_ids_from_url(value)
         if taxon_id:
             self.select_taxon_from_photo(taxon_id)
             alert(f'Taxon {taxon_id} selected')

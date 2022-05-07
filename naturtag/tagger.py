@@ -1,4 +1,4 @@
-""" Combined entry point for both CLI and GUI """
+"""Main entry point for tagging images for both CLI and GUI"""
 from naturtag.inat_metadata import get_inat_metadata
 from naturtag.models.meta_metadata import MetaMetadata
 
