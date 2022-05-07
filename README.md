@@ -31,7 +31,7 @@ See the CLI in action here:
     * [Installation](#gui-installation)
     * [Usage](#gui-usage)
     * [Image Selection and Tagging](#image-selection-and-tagging)
-    * [Taxon Search](#taxon-search)
+    * [Species Search](#species-search)
     * [Saved Species](#saved-species)
     * [Metadata](#metadata)
     * [Settings](#settings)
@@ -62,16 +62,15 @@ another biodiversity observation platform with a more specific focus, such as
 [Simple Darwin Core](https://dwc.tdwg.org/simple).
 
 # Development Status
-This is currently just a small hobby project, and still fairly unpolished. While this repo hasn't
-seen much progress lately, I am actively working on other iNaturalist-related projects that naturtag
-will benefit from, mainly [pyinaturalist](https://pyinaturalist.readthedocs.io).
-
-See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and
-current progress.
-
-If you have any suggestions, questions, or requests, please
-[create an issue](https://github.com/JWCook/naturtag/issues/new/choose), or ping me (**@jcook**)
-on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
+* This is currently just a small hobby project, and still fairly unpolished.
+* See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and current progress.
+* If you have any suggestions, questions, or requests, please
+  [create an issue](https://github.com/JWCook/naturtag/issues/new/choose), or ping me (**@jcook**)
+  on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
+* I am actively working on other libraries that naturtag will benefit from, including
+  [requests-cache](https://requests-cache.readthedocs.io),
+  [pyinaturalist](https://pyinaturalist.readthedocs.io), and
+  [pyinaturalist-convert](https://github.com/JWCook/pyinaturalist-convert).
 
 # Python Package
 See [naturtag documentation on ReadTheDocs](https://naturtag.readthedocs.io) for details on the
