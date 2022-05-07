@@ -11,6 +11,7 @@ from typing import IO, BinaryIO, Optional, Union
 import requests
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
+from pyinaturalist.converters import format_file_size
 
 from naturtag.constants import (
     EXIF_ORIENTATION_ID,
@@ -19,7 +20,6 @@ from naturtag.constants import (
     THUMBNAIL_SIZES,
     THUMBNAILS_DIR,
 )
-from naturtag.validation import format_file_size
 
 logger = getLogger().getChild(__name__)
 

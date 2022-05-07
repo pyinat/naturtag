@@ -1,8 +1,8 @@
 """ Basic utilities for reading and writing settings from config files """
-import json
 from collections import Counter, OrderedDict
 from logging import getLogger
 from pathlib import Path
+from typing import Optional
 
 import yaml
 from attr import define, field
@@ -10,7 +10,6 @@ from cattr import Converter
 from cattr.preconf import pyyaml
 
 from naturtag.constants import CONFIG_PATH, STORED_TAXA_PATH
-from naturtag.validation import convert_int_dict
 
 logger = getLogger().getChild(__name__)
 
@@ -25,8 +24,42 @@ def make_converter() -> Converter:
 YamlConverter = make_converter()
 
 
+class YamlMixin:
+    """Attrs class mixin that converts to and from a YAML file"""
+
+    path: Path
+
+    @classmethod
+    def read(cls) -> 'YamlMixin':
+        """Read settings from config file"""
+        if not cls.path.is_file():
+            return cls()
+
+        logger.info(f'Reading {cls.__name__} from {cls.path}')
+        with open(cls.path) as f:
+            attrs_dict = yaml.safe_load(f)
+            return YamlConverter.structure(attrs_dict, cl=cls)
+
+    def write(self):
+        """Write settings to config file"""
+        logger.info(f'Writing {self.__class__.__name__} to {self.path}')
+        logger.debug(str(self))
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+
+        attrs_dict = YamlConverter.unstructure(self)
+        with open(self.path, 'w') as f:
+            yaml.safe_dump(attrs_dict, f)
+
+    @classmethod
+    def reset_defaults(cls) -> 'YamlMixin':
+        cls().write()
+        return cls.read()
+
+
 @define
-class Settings:
+class Settings(YamlMixin):
+    path = CONFIG_PATH
+
     # Display
     dark_mode: bool = field(default=False)
     show_logs: bool = field(default=False)
@@ -52,67 +85,33 @@ class Settings:
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
     # favorite_dirs: list[Path] = field(factory=list)
 
-    @classmethod
-    def read(cls) -> 'Settings':
-        """Read settings from config file"""
-        if not CONFIG_PATH.is_file():
-            return cls()
 
-        logger.info(f'Settings: Reading settings from {CONFIG_PATH}')
-        with open(CONFIG_PATH) as f:
-            settings_dict = yaml.safe_load(f)
-            return YamlConverter.structure(settings_dict, cl=cls)
+@define
+class UserTaxa(YamlMixin):
+    """Relevant taxon IDs stored for the current user"""
 
-    def write(self):
-        """Write settings to config file"""
-        logger.info(f'Writing settings to {CONFIG_PATH}')
-        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        settings_dict = YamlConverter.unstructure(self)
-        with open(CONFIG_PATH, 'w') as f:
-            yaml.safe_dump(settings_dict, f)
+    path = Path(str(STORED_TAXA_PATH).replace('json', 'yml'))
 
-    @classmethod
-    def reset_defaults(cls) -> 'Settings':
-        cls().write()
-        return cls.read()
+    history: list[int] = field(factory=list)
+    starred: list[int] = field(factory=list)
+    observed: dict[int, int] = field(factory=dict)
+    _frequent: Optional[dict[int, int]] = None
 
+    @property
+    def frequent(self) -> dict[int, int]:
+        if self._frequent is None:
+            self._frequent = OrderedDict(Counter(self.history).most_common())
+        return self._frequent
 
-# TODO: Separately store loaded history, new history for session; only write (append) new history
-def read_stored_taxa() -> dict:
-    """Read taxon view history, starred, and frequency
+    def append_history(self, taxon_id: int):
+        self.history.append(taxon_id)
+        self._frequent = None
 
-    Returns:
-        Stored taxon view history, starred, and frequency
-    """
-    if not STORED_TAXA_PATH.is_file():
-        stored_taxa = {}
-    else:
-        with open(STORED_TAXA_PATH) as f:
-            stored_taxa = json.load(f)
-
-    stored_taxa.setdefault('history', [])
-    stored_taxa.setdefault('starred', [])
-    stored_taxa['frequent'] = convert_int_dict(stored_taxa.get('frequent', {}))
-    stored_taxa['observed'] = convert_int_dict(stored_taxa.get('observed', {}))
-    return stored_taxa
-
-
-def write_stored_taxa(stored_taxa: dict):
-    """Write taxon view history to file, along with stats on most frequently viewed taxa
-
-    Args:
-        Complete taxon history (including previously stored history)
-    """
-    # Do a recount/resort before writing
-    stored_taxa["frequent"] = OrderedDict(Counter(stored_taxa["history"]).most_common())
-
-    logger.info(
-        'Settings: Writing stored taxa: '
-        f'{len(stored_taxa["history"])} history items, '
-        f'{len(stored_taxa["starred"])} starred items, '
-        f'{len(stored_taxa["frequent"])} frequent items, '
-        f'{len(stored_taxa["observed"])} observed items'
-    )
-    with open(STORED_TAXA_PATH, 'w') as f:
-        json.dump(stored_taxa, f, indent=4)
-    logger.info('Settings: Done')
+    def __str__(self):
+        sizes = [
+            f'History: {len(self.history)}',
+            f'Starred: {len(self.starred)}',
+            f'Frequent: {len(self.frequent)}',
+            f'Observed: {len(self.observed)}',
+        ]
+        return '\n'.join(sizes)

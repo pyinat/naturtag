@@ -3,12 +3,13 @@ from datetime import datetime
 from locale import getdefaultlocale
 from logging import getLogger
 
+from dateutil.parser import parse as parse_date
 from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 
 from naturtag.constants import OBS_CACHE_EXPIRY_HOURS, PLACES_BASE_URL
-from naturtag.controllers import Controller
 from naturtag.kv_app import alert
+from naturtag.kv_app.controllers import Controller
 from naturtag.settings import (
     read_settings,
     read_stored_taxa,
@@ -16,7 +17,6 @@ from naturtag.settings import (
     write_settings,
     write_stored_taxa,
 )
-from naturtag.validation import is_expired
 
 logger = getLogger(__name__)
 
@@ -151,3 +151,15 @@ class SettingsController(Controller):
     @property
     def display(self):
         return self.settings_dict['display']
+
+
+def is_expired(timestamp, expiry_hours):
+    """Determine if a timestamp is older than a given expiration length"""
+    try:
+        last_updated = parse_date(timestamp)
+    except (TypeError, ValueError):
+        return True
+
+    delta = datetime.now() - last_updated
+    elapsed_hours = delta.total_seconds() / 60 / 60
+    return int(elapsed_hours) >= expiry_hours
