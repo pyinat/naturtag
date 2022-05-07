@@ -1,38 +1,55 @@
-from os.path import abspath
-from kivy_deps import sdl2, angle
-from kivymd import hooks_path as kivymd_hooks_path
-from PyInstaller.compat import is_win, is_linux, is_darwin
+from pathlib import Path
 
+from PyInstaller.compat import is_darwin, is_linux, is_win
+
+BUILD_PY_VERSION = '3.10'
 PROJECT_NAME = 'naturtag'
+PROJECT_DIR = Path('.').absolute()
+ASSETS_DIR = PROJECT_DIR / 'assets'
+PACKAGE_DIR = PROJECT_DIR / 'naturtag'
+# LIB_DIR = PROJECT_DIR / 'lib'
+
+LOCAL_VENV_DIR = Path('~/.virtualenvs/naturtag').expanduser().absolute()
+CI_VENV_DIR = PROJECT_DIR / '.venv'
+VENV_DIR = CI_VENV_DIR if CI_VENV_DIR.is_dir() else LOCAL_VENV_DIR
+
+LIB_DIR_WIN = VENV_DIR / 'Lib' / 'site-packages' / 'pyexiv2' / 'lib'
+LIB_DIR_NIX = VENV_DIR / 'lib' / f'python{BUILD_PY_VERSION}' / 'site-packages' / 'pyexiv2' / 'lib'
 
 # Define platform-specific dependencies
 binaries = []
 hiddenimports = []
-kivy_bins = []
 if is_win:
     binaries = [
-        # ( 'lib\\exiv2.dll', '.' ),
-        # ( 'lib\\exiv2api.pyd', '.' ),
-        ('venv\\Lib\\site-packages\\pyexiv2\\lib\\exiv2.dll', '.'),
-        ('venv\\Lib\\site-packages\\pyexiv2\\lib\\win64-py37\\exiv2api.pyd', '.'),
+        (str(LIB_DIR_WIN / 'exiv2.dll'), '.'),
+        (str(LIB_DIR_WIN / f'py{BUILD_PY_VERSION}-win' / 'exiv2api.pyd'), '.'),
     ]
     hiddenimports = ['win32timezone']
-    kivy_bins = [Tree(p) for p in (sdl2.dep_bins + angle.dep_bins)]
-
-print(kivy_bins[0])
+elif is_darwin:
+    binaries = [
+        (str(LIB_DIR_NIX / 'libexiv2.dylib'), '.'),
+        (str(LIB_DIR_NIX / f'py{BUILD_PY_VERSION}-darwin' / 'exiv2api.so'), '.'),
+    ]
+elif is_linux:
+    binaries = [
+        (str(LIB_DIR_NIX / 'libexiv2.so'), '.'),
+        (str(LIB_DIR_NIX / f'py{BUILD_PY_VERSION}-linux' / 'exiv2api.so'), '.'),
+    ]
+else:
+    raise NotImplementedError
 
 a = Analysis(
-    [f'{PROJECT_NAME}\\app\\app.py'],
-    pathex=[abspath('.')],
+    [str(PACKAGE_DIR / 'qt_app' / 'app.py')],
+    pathex=[str(PROJECT_DIR)],
     binaries=binaries,
     datas=[
-        ('assets\\*.png' , 'assets'),
-        ('assets\\atlas\\*' , 'assets\\atlas'),
-        ('kv\\*.kv', 'kv'),
-        ('libs\\garden\\garden.contextmenu\\*', 'kivy_garden\\contextmenu'),
+        (str(ASSETS_DIR / '*.png'), 'assets'),
     ],
-    hiddenimports=hiddenimports,
-    hookspath=[kivymd_hooks_path],
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[PROJECT_DIR / 'coverage'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=None,
@@ -50,14 +67,18 @@ exe = EXE(
     strip=False,
     upx=True,
     console=True,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
 )
 coll = COLLECT(
     exe,
-    Tree(f'{PROJECT_NAME}\\'),
+    Tree(f'{PROJECT_NAME}/'),
     a.binaries,
     a.zipfiles,
     a.datas,
-    *kivy_bins,
     name=PROJECT_NAME,
     strip=False,
     upx=True,

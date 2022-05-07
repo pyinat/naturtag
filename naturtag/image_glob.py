@@ -3,6 +3,7 @@ from glob import glob
 from itertools import chain
 from logging import getLogger
 from os.path import expanduser, isdir, isfile, join
+from pathlib import Path
 from typing import Union
 
 from naturtag.constants import IMAGE_FILETYPES
@@ -44,7 +45,7 @@ def get_images_from_dir(dir: str, recursive: bool = False) -> list[str]:
     return paths
 
 
-def get_images_from_paths(paths: Union[str, list[str]], recursive: bool = False) -> list[str]:
+def get_images_from_paths(paths: Union[str, bytes, Path], recursive: bool = False) -> list[str]:
     """
     Get all images of supported filetypes from one or more dirs and/or image paths
 
@@ -56,12 +57,10 @@ def get_images_from_paths(paths: Union[str, list[str]], recursive: bool = False)
          Combined list of image file paths
     """
     image_paths = []
-    paths = [paths] if isinstance(paths, (str, bytes)) else paths
     logger.info(f'Getting images from paths: {paths}')
 
     for path in paths:
-        if isinstance(path, bytes):
-            path = path.decode('utf-8')
+        path = path.decode('utf-8') if isinstance(path, bytes) else str(path)
         if isdir(path):
             image_paths.extend(get_images_from_dir(path, recursive=recursive))
         elif is_image_path(path):

@@ -2,6 +2,7 @@
 from logging import getLogger
 from os.path import getsize, isfile
 from typing import Optional
+from urllib.parse import urlparse
 
 import xmltodict
 from pyinaturalist.constants import CACHE_FILE, RANKS
@@ -14,6 +15,7 @@ from naturtag.constants import (
     DWC_TAXON_TERMS,
     OBSERVATION_KEYS,
     TAXON_KEYS,
+    Coordinates,
     IntTuple,
     StrTuple,
 )
@@ -28,6 +30,12 @@ def get_cache_size() -> str:
     return format_file_size(n_bytes)
 
 
+def get_observation_coordinates(observation_id: int) -> Optional[Coordinates]:
+    """Get the current taxon ID for the given observation ID"""
+    obs = get_observation(observation_id)
+    return obs.get('location')
+
+
 def get_observation_taxon(observation_id: int) -> int:
     """Get the current taxon ID for the given observation ID"""
     logger.info(f'API: Fetching observation {observation_id}')
@@ -37,6 +45,7 @@ def get_observation_taxon(observation_id: int) -> int:
     return obs['taxon']['id']
 
 
+# TODO: Use pyinaturalist_convert.dwc for this
 def get_observation_dwc_terms(observation_id: int) -> dict[str, str]:
     """Get all DWC terms for an iNaturalist observation"""
     logger.info(f'API: Getting Darwin Core terms for observation {observation_id}')
@@ -44,6 +53,7 @@ def get_observation_dwc_terms(observation_id: int) -> dict[str, str]:
     return convert_dwc_to_xmp(obs_dwc)
 
 
+# TODO: Use pyinaturalist_convert.dwc for this
 def get_taxon_dwc_terms(taxon_id: int) -> dict[str, str]:
     """Get all DWC terms for an iNaturalist taxon.
     Since there is no DWC format for ``GET /taxa``, we'll just search for a random observation
@@ -208,7 +218,7 @@ def get_rank_idx(rank: str) -> int:
     return RANKS.index(rank) if rank in RANKS else 0
 
 
-def get_inaturalist_ids(metadata):
+def get_inaturalist_ids(metadata: dict) -> tuple[Optional[int], Optional[int]]:
     """Look for taxon and/or observation IDs from metadata if available"""
     # Get first non-None value from specified keys, if any; otherwise return None
     def _first_match(d, keys):
@@ -287,6 +297,7 @@ def get_ids_from_url(value: str) -> IntTuple:
 def strip_url(value: str) -> Optional[int]:
     """If a URL is provided containing an ID, return just the ID"""
     try:
-        return int(value.split('/')[-1].split('-')[0]) if value else None
+        path = urlparse(value).path
+        return int(path.split('/')[-1].split('-')[0])
     except (TypeError, ValueError):
         return None

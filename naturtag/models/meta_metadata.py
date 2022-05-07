@@ -2,14 +2,23 @@ from logging import getLogger
 from os.path import basename
 from typing import Any, Optional
 
-from naturtag.constants import IntTuple, StrTuple
+from pyinaturalist import INAT_BASE_URL
+
+from naturtag.constants import Coordinates, IntTuple, StrTuple
+from naturtag.gps import (
+    convert_dwc_coords,
+    convert_exif_coords,
+    convert_xmp_coords,
+    to_exif_coords,
+    to_xmp_coords,
+)
 from naturtag.inat_metadata import get_inaturalist_ids, get_min_rank
 from naturtag.models import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
 
+NULL_COORDS = (0, 0)
 logger = getLogger().getChild(__name__)
 
 
-# TODO: Extract GPS info
 # TODO: __str__
 class MetaMetadata(ImageMetadata):
     """Class for parsing & organizing higher-level info derived from raw image metadata"""
@@ -17,6 +26,7 @@ class MetaMetadata(ImageMetadata):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Define lazy-loaded properties
+        self._coordinates = None
         self._inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
@@ -26,6 +36,7 @@ class MetaMetadata(ImageMetadata):
 
     def _update_derived_properties(self):
         """Reset/ update all secondary properties derived from base metadata formats"""
+        self._coordinates = None
         self._inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
@@ -41,6 +52,34 @@ class MetaMetadata(ImageMetadata):
         return {**self.filtered_exif, **self.iptc, **self.xmp}
 
     @property
+    def coordinates(self) -> Optional[Coordinates]:
+        """Get coordinates as decimal degrees from EXIF or XMP metadata"""
+        if self._coordinates is None:
+            self._coordinates = (
+                convert_dwc_coords(self.xmp)
+                or convert_exif_coords(self.exif)
+                or convert_xmp_coords(self.xmp)
+                or NULL_COORDS
+            )
+        return self._coordinates
+
+    @property
+    def has_any_tags(self) -> bool:
+        return bool(self.exif or self.iptc or self.xmp)
+
+    @property
+    def has_coordinates(self) -> bool:
+        return self.coordinates and self.coordinates != NULL_COORDS
+
+    @property
+    def has_observation(self) -> bool:
+        return bool(self.observation_id)
+
+    @property
+    def has_taxon(self) -> bool:
+        return bool(self.taxon_id or all(self.min_rank))
+
+    @property
     def inaturalist_ids(self) -> IntTuple:
         """Get taxon and/or observation IDs from metadata if available"""
         if self._inaturalist_ids is None:
@@ -48,12 +87,20 @@ class MetaMetadata(ImageMetadata):
         return self._inaturalist_ids
 
     @property
+    def observation_id(self) -> Optional[int]:
+        return self.inaturalist_ids[1]
+
+    @property
+    def observation_url(self) -> str:
+        return f'{INAT_BASE_URL}/observations/{self.observation_id or ""}'
+
+    @property
     def taxon_id(self) -> Optional[int]:
         return self.inaturalist_ids[0]
 
     @property
-    def observation_id(self) -> Optional[int]:
-        return self.inaturalist_ids[1]
+    def taxon_url(self) -> str:
+        return f'{INAT_BASE_URL}/taxa/{self.taxon_id or ""}'
 
     @property
     def min_rank(self) -> StrTuple:
@@ -61,10 +108,6 @@ class MetaMetadata(ImageMetadata):
         if self._min_rank is None:
             self._min_rank = get_min_rank(self.simplified)
         return self._min_rank
-
-    @property
-    def has_taxon(self) -> bool:
-        return bool(self.taxon_id or all(self.min_rank))
 
     @property
     def simplified(self) -> dict[str, str]:
@@ -82,31 +125,30 @@ class MetaMetadata(ImageMetadata):
         """Get a condensed summary of available metadata"""
         if self._summary is None:
             meta_types = {
+                'TAX': self.has_taxon,
+                'OBS': self.has_observation,
+                'GPS': self.has_coordinates,
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
                 'XMP': bool(self.xmp),
                 'SIDECAR': self.has_sidecar,
             }
-            meta_special = {
-                'TAX': self.has_taxon,
-                'OBS': self.observation_id,
-                # 'GPS': self.gps,
-            }
-            logger.info(f'Metadata summary: {meta_types} {meta_special}')
-
-            self._summary = '\n'.join(
-                [
-                    basename(self.image_path),
-                    ' | '.join([k for k, v in meta_special.items() if v]),
-                    ' | '.join([k for k, v in meta_types.items() if v]),
-                ]
-            )
+            meta_types_str = ' | '.join([k for k, v in meta_types.items() if v])
+            self._summary = f'{basename(self.image_path)}\n{meta_types_str}'
+            logger.debug(f'Metadata summary: {self._summary}')
         return self._summary
 
     def update(self, new_metadata):
         """Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties"""
         super().update(new_metadata)
         self._update_derived_properties()
+
+    def update_coordinates(self, coordinates: Coordinates):
+        if not coordinates:
+            return
+        self._coordinates = coordinates
+        self.exif.update(to_exif_coords(coordinates))
+        self.xmp.update(to_xmp_coords(coordinates))
 
     def update_keywords(self, keywords):
         """

@@ -1,9 +1,10 @@
+# flake8: noqa: F401
 from datetime import timedelta
 from pathlib import Path
 from typing import IO, Iterable, Optional, Union
 
 from platformdirs import user_data_dir
-from pyinaturalist import ICONIC_TAXA
+from pyinaturalist.constants import ICONIC_TAXA, Coordinates
 
 from naturtag import __version__
 
@@ -17,7 +18,7 @@ DATA_DIR = Path(user_data_dir()) / 'Naturtag'
 TRIGGER_DELAY = 0.1
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3
-IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif']
+IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 
 # Thumnbnail & cache settings
@@ -75,7 +76,6 @@ CACHE_EXPIRATION = {
 
 # Config files
 CONFIG_PATH = DATA_DIR / 'settings.yml'
-DEFAULT_CONFIG_PATH = PKG_DIR / 'default_settings.yml'
 STORED_TAXA_PATH = DATA_DIR / 'stored_taxa.json'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 
@@ -134,7 +134,6 @@ COMMON_NAME_IGNORE_TERMS = [
 ]
 
 # Type aliases
-Coordinates = Optional[tuple[float, float]]
 JSON = Union[dict, IO, Iterable[dict], Path, str]
 IntTuple = tuple[Optional[int], Optional[int]]
 StrTuple = tuple[Optional[str], Optional[str]]

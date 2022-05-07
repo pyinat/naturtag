@@ -306,15 +306,13 @@ Some keyboard shortcuts are included for convenience:
 
 Key(s)          | Action                    | Screen
 ----            |----                       |----------
-F11             | Toggle fullscreen         | All
 Ctrl+O          | Open file chooser         | Image selection
-Shift+Ctrl+O    | Open file chooser (dirs)  | Image selection
+Ctrl+V          | Paste photos or iNat URLs | Image selection
 Ctrl+Enter      | Run image tagger          | Image selection
-Ctrl+Enter      | Run taxon search          | Taxon search
 Shift+Ctrl+X    | Clear selected images     | Image selection
+Ctrl+Enter      | Run taxon search          | Taxon search
 Shift+Ctrl+X    | Clear search filters      | Taxon search
-Ctrl+S          | Open settings screen      | All
-Ctrl+Backspace  | Return to main screen     | All
+F11             | Toggle fullscreen         | All
 Ctrl+Q          | Quit                      | All
 
 # See Also
