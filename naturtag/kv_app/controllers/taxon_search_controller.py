@@ -4,9 +4,9 @@ from logging import getLogger
 from pyinaturalist.constants import RANKS
 from pyinaturalist.v1 import get_taxa
 
-from naturtag.app import get_app
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
 from naturtag.controllers import Controller
+from naturtag.kv_app import get_app
 from naturtag.loaders import TaxonBatchLoader
 from naturtag.widgets import DropdownTextField, IconicTaxaIcon
 

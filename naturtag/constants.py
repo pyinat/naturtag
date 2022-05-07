@@ -11,17 +11,16 @@ from naturtag import __version__
 # Resource directories
 PKG_DIR = Path(__file__).parent.parent
 ASSETS_DIR = PKG_DIR / 'assets'
-KV_SRC_DIR = PKG_DIR / 'kv'
 DATA_DIR = Path(user_data_dir()) / 'Naturtag'
 
-# TODO: These may be useful as user-configurable settings
+# Autocomplete settings
 TRIGGER_DELAY = 0.1
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3
+
+# Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
-
-# Thumnbnail & cache settings
 THUMBNAILS_DIR = DATA_DIR / 'thumbnails'
 THUMBNAIL_DEFAULT_FORMAT = 'png'
 THUMBNAIL_SIZE_SM = (75, 75)
@@ -49,22 +48,11 @@ EXIF_HIDE_PREFIXES = [
 ]
 EXIF_ORIENTATION_ID = '0x0112'
 
-# Atlas settings
-ATLAS_MAX_SIZE = 4096
-ATLAS_DIR = ASSETS_DIR / 'atlas'
-ATLAS_APP_ICONS = ATLAS_DIR / 'app_icons'
-ATLAS_TAXON_ICONS = ATLAS_DIR / 'taxon_icons'
-ATLAS_TAXON_PHOTOS = ATLAS_DIR / 'taxon_photos'
-ATLAS_LOCAL_PHOTOS = ATLAS_DIR / 'local_photos'
-ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
-TAXON_ICON_PLACEHOLDER = f'atlas://{ATLAS_APP_ICONS}/unknown'
-
-APP_ICONS_DIR = ASSETS_DIR / 'iconic_taxa'
+ICONIC_TAXA_DIR = ASSETS_DIR / 'iconic_taxa'
 APP_LOGO = str(ASSETS_DIR / 'logo.png')
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
 
 # Cache settings
-# CACHE_FILE = DATA_DIR / 'api_cache.db'
 OBS_CACHE_EXPIRY_HOURS = 48
 CACHE_EXPIRATION = {
     'api.inaturalist.org/v*/observations*': timedelta(days=2),
@@ -103,7 +91,6 @@ F11 = 292
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
 
-PLACEHOLDER_ICON = f'{ATLAS_APP_ICONS}/unknown'
 
 # Specific XML namespaces to use terms from when processing DwC observation records
 # Note: exiv2 will automatically add recognized namespaces when adding properties

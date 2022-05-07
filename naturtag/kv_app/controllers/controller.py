@@ -1,4 +1,4 @@
-from naturtag.app import get_app
+from naturtag.kv_app import get_app
 from naturtag.loaders import BatchLoader
 from naturtag.widgets import LoaderProgressBar
 

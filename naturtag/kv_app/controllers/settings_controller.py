@@ -6,9 +6,9 @@ from logging import getLogger
 from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 
-from naturtag.app import alert
 from naturtag.constants import OBS_CACHE_EXPIRY_HOURS, PLACES_BASE_URL
 from naturtag.controllers import Controller
+from naturtag.kv_app import alert
 from naturtag.settings import (
     read_settings,
     read_stored_taxa,

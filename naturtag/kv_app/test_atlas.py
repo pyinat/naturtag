@@ -1,9 +1,10 @@
 import pytest
 
-from naturtag.atlas import get_atlas_dimensions
+from naturtag.kv_app.atlas import get_atlas_dimensions
 
 
 # Test various combinations of inputs and limits
+@pytest.mark.skip
 @pytest.mark.parametrize(
     'n_images, x, y, limit_kwarg, expected_dimensions',
     [

@@ -12,8 +12,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from naturtag.app.image_gallery import ImageGallery
 from naturtag.inat_metadata import get_ids_from_url
-from naturtag.qt_app.image_gallery import ImageGallery
 from naturtag.settings import Settings
 from naturtag.tagger import tag_images
 

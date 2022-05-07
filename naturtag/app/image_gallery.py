@@ -9,11 +9,11 @@ from PySide6.QtGui import QAction, QDropEvent, QPixmap
 from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QLabel, QMenu, QVBoxLayout, QWidget
 from qtawesome import icon as fa_icon
 
+from naturtag.app.image_window import ImageWindow
+from naturtag.app.layouts import FlowLayout
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
 from naturtag.models import MetaMetadata
-from naturtag.qt_app.image_window import ImageWindow
-from naturtag.qt_app.layouts import FlowLayout
 from naturtag.thumbnails import get_thumbnail
 
 logger = getLogger(__name__)

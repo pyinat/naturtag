@@ -34,8 +34,8 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 
-from naturtag.app.screens import load_kv
 from naturtag.constants import AUTOCOMPLETE_DELAY, AUTOCOMPLETE_MIN_CHARS
+from naturtag.kv_app.screens import load_kv
 from naturtag.widgets import TextFieldWrapper
 
 PADDING = dp(50)

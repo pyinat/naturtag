@@ -4,10 +4,10 @@ from logging import getLogger
 
 from kivy.clock import Clock
 
-from naturtag.app import alert, get_app
 from naturtag.constants import MAX_DISPLAY_HISTORY
 from naturtag.controllers import Controller
 from naturtag.inat_metadata import get_observed_taxa
+from naturtag.kv_app import alert, get_app
 from naturtag.loaders import TaxonBatchLoader
 from naturtag.widgets import StarButton, TaxonListItem
 

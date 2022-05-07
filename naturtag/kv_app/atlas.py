@@ -9,11 +9,8 @@ from PIL import Image
 from pyinaturalist.constants import ICONIC_TAXA
 
 from naturtag.constants import (
-    APP_ICONS_DIR,
-    ATLAS_LOCAL_PHOTOS,
-    ATLAS_MAX_SIZE,
-    ATLAS_TAXON_ICONS,
-    ATLAS_TAXON_PHOTOS,
+    ASSETS_DIR,
+    ICONIC_TAXA_DIR,
     THUMBNAIL_SIZE_DEFAULT,
     THUMBNAIL_SIZE_LG,
     THUMBNAIL_SIZE_SM,
@@ -26,6 +23,17 @@ from naturtag.thumbnails import (
     get_thumbnail_hash,
     get_thumbnail_if_exists,
 )
+
+# Atlas settings
+ATLAS_MAX_SIZE = 4096
+ATLAS_DIR = ASSETS_DIR / 'atlas'
+ATLAS_APP_ICONS = ATLAS_DIR / 'app_icons'
+ATLAS_TAXON_ICONS = ATLAS_DIR / 'taxon_icons'
+ATLAS_TAXON_PHOTOS = ATLAS_DIR / 'taxon_photos'
+ATLAS_LOCAL_PHOTOS = ATLAS_DIR / 'local_photos'
+ALL_ATLASES = [ATLAS_APP_ICONS, ATLAS_TAXON_ICONS, ATLAS_TAXON_PHOTOS, ATLAS_LOCAL_PHOTOS]
+TAXON_ICON_PLACEHOLDER = f'atlas://{ATLAS_APP_ICONS}/unknown'
+
 
 # Current organization of altas files by thumb size; this may change in the future
 ATLAS_CATEGORIES = {
@@ -107,7 +115,7 @@ def get_atlas_thumbnail_if_exists(source: str, size: str) -> str:
 # ---------------------------------
 
 
-def build_app_icon_atlas(dir=APP_ICONS_DIR):
+def build_app_icon_atlas(dir=ICONIC_TAXA_DIR):
     build_atlas(dir, *THUMBNAIL_SIZE_SM, 'app_icons', max_size=ATLAS_MAX_SIZE)
 
 

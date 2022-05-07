@@ -2,7 +2,7 @@ from typing import Any
 
 from kivy.uix.widget import Widget
 
-from naturtag.app import get_app
+from naturtag.kv_app import get_app
 from naturtag.loaders import WidgetBatchLoader
 from naturtag.widgets import ImageMetaTile
 

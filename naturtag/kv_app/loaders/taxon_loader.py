@@ -10,7 +10,7 @@ from kivy.uix.widget import Widget
 from pyinaturalist import iNatClient
 from requests import Response, Session
 
-from naturtag.app import get_app
+from naturtag.kv_app import get_app
 from naturtag.loaders import BackgroundThread, BatchLoader
 from naturtag.models import Taxon
 from naturtag.widgets import TaxonListItem

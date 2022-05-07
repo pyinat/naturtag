@@ -14,8 +14,8 @@ from kivymd.uix.list import (
 )
 from kivymd.uix.selectioncontrol import MDSwitch
 
-from naturtag.app import alert, get_app
 from naturtag.constants import TAXON_ICON_PLACEHOLDER
+from naturtag.kv_app import alert, get_app
 from naturtag.models import Taxon
 
 logger = getLogger().getChild(__name__)

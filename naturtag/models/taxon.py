@@ -1,13 +1,14 @@
+from pathlib import Path
+
 import attr
 from pyinaturalist import ICONIC_TAXA, define_model
 from pyinaturalist.models import Taxon as BaseTaxon
 
-from naturtag.atlas import get_atlas_uri
-from naturtag.constants import ATLAS_APP_ICONS
+from naturtag.constants import ICONIC_TAXA_DIR
 
 
 # TODO: Move copy() to pyinaturalist.Taxon, reuse in load_full_record()
-# TODO: Is there a better way to do this? Like static functions instaed of Taxon subclass?
+# TODO: Is there a better way to do this? Like static functions instead of Taxon subclass?
 @define_model
 class Taxon(BaseTaxon):
     """Taxon subclass with some additional features specific to Naturtag"""
@@ -52,9 +53,9 @@ class Taxon(BaseTaxon):
         return [t.id for t in self.child_taxa]
 
 
-def get_icon_path(taxon_id: int) -> str:
+def get_icon_path(taxon_id: int) -> Path:
     """An iconic function to return an icon for an iconic taxon"""
     if taxon_id not in ICONIC_TAXA:
         taxon_id = 0
-    image_id = ICONIC_TAXA[taxon_id].lower()
-    return get_atlas_uri(ATLAS_APP_ICONS, image_id)
+    image_name = ICONIC_TAXA[taxon_id].lower()
+    return ICONIC_TAXA_DIR / f'{image_name}.png'

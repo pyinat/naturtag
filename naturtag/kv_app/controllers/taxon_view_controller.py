@@ -4,8 +4,8 @@ from logging import getLogger
 
 from kivymd.uix.list import ImageLeftWidget, OneLineListItem, ThreeLineAvatarIconListItem
 
-from naturtag.app import get_app
 from naturtag.controllers import Controller
+from naturtag.kv_app import get_app
 from naturtag.loaders import TaxonBatchLoader
 from naturtag.models import Taxon, get_icon_path
 from naturtag.widgets import StarButton

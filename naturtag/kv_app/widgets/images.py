@@ -9,7 +9,7 @@ from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.image import AsyncImage
 from kivymd.uix.imagelist import SmartTile, SmartTileWithLabel
 
-from naturtag.app import alert
+from naturtag.kv_app import alert
 from naturtag.models import MetaMetadata, get_icon_path
 from naturtag.thumbnails import (
     generate_thumbnail_from_bytes,
