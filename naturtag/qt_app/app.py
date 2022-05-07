@@ -8,13 +8,12 @@ from qtmodern import styles
 from qtmodern.windows import ModernWindow
 
 from naturtag.constants import ASSETS_DIR
+from naturtag.qt_app.image_controller import ImageController
 from naturtag.qt_app.logger import init_handler
-from naturtag.qt_app.photo_controller import PhotoController
 from naturtag.qt_app.settings_menu import SettingsMenu
 from naturtag.qt_app.toolbar import Toolbar
 from naturtag.settings import Settings
 
-DEMO_IMAGES = ASSETS_DIR / 'demo_images'
 logger = getLogger(__name__)
 
 
@@ -26,11 +25,11 @@ class MainWindow(QMainWindow):
 
         # Controllers & Settings
         self.settings = Settings.read()
-        self.photo_controller = PhotoController(self.settings, self.info)
+        self.image_controller = ImageController(self.settings, self.info)
 
         # Tabbed layout
         self.tabs = QTabWidget()
-        self.tabs.addTab(self.photo_controller, fa_icon('fa.camera'), 'Photos')
+        self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
         self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
         self.tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
         self.log_tab_idx = self.tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
@@ -39,11 +38,11 @@ class MainWindow(QMainWindow):
 
         # Toolbar
         self.toolbar = Toolbar(
-            'My main toolbar',
-            load_file_callback=self.photo_controller.viewer.load_file_dialog,
-            run_callback=self.photo_controller.run,
-            clear_callback=self.photo_controller.clear,
-            paste_callback=self.photo_controller.paste,
+            self,
+            load_file_callback=self.image_controller.gallery.load_file_dialog,
+            run_callback=self.image_controller.run,
+            clear_callback=self.image_controller.clear,
+            paste_callback=self.image_controller.paste,
             fullscreen_callback=self.toggle_fullscreen,
             log_callback=self.toggle_log_tab,
             settings_callback=self.show_settings,
@@ -56,7 +55,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusbar)
 
         # Load demo images
-        self.photo_controller.viewer.load_images(sorted(DEMO_IMAGES.glob('*.jpg')))
+        self.image_controller.gallery.load_images((ASSETS_DIR / 'demo_images').glob('*.jpg'))
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""

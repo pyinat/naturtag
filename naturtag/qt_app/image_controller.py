@@ -13,14 +13,14 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.inat_metadata import get_ids_from_url
-from naturtag.qt_app.images import ImageViewer
+from naturtag.qt_app.image_gallery import ImageGallery
 from naturtag.settings import Settings
 from naturtag.tagger import tag_images
 
 logger = getLogger(__name__)
 
 
-class PhotoController(QWidget):
+class ImageController(QWidget):
     """Controller for selecting and tagging local image files"""
 
     def __init__(self, settings: Settings, info_callback: Callable):
@@ -38,8 +38,8 @@ class PhotoController(QWidget):
         photo_layout.addWidget(group_box)
 
         # Viewer
-        self.viewer = ImageViewer()
-        photo_layout.addWidget(self.viewer)
+        self.gallery = ImageGallery()
+        photo_layout.addWidget(self.gallery)
 
         # Input fields
         self.input_obs_id = QLineEdit()
@@ -57,7 +57,7 @@ class PhotoController(QWidget):
     def run(self):
         """Run image tagging for selected images and input"""
         obs_id, taxon_id = self.input_obs_id.text(), self.input_taxon_id.text()
-        files = list(self.viewer.images.keys())
+        files = list(self.gallery.images.keys())
 
         if not files:
             self.info('Select images to tag')
@@ -82,16 +82,16 @@ class PhotoController(QWidget):
             images=files,
         )
         self.info(f'{len(files)} images tagged with metadata for {selected_id}')
-        logger.info(sorted(list(self.viewer.images.keys())))
+        logger.info(sorted(list(self.gallery.images.keys())))
         logger.info(sorted([metadata.image_path for metadata in all_metadata]))
 
         for metadata in all_metadata:
-            image = self.viewer.images[metadata.image_path]
+            image = self.gallery.images[metadata.image_path]
             image.update_metadata(metadata)
 
     def clear(self):
         """Clear all images and input"""
-        self.viewer.clear()
+        self.gallery.clear()
         self.input_obs_id.setText('')
         self.input_taxon_id.setText('')
         self.info('Images cleared')
@@ -109,4 +109,4 @@ class PhotoController(QWidget):
             self.input_taxon_id.setText(str(taxon_id))
             self.info(f'Taxon {taxon_id} selected')
         else:
-            self.viewer.load_images(text.splitlines())
+            self.gallery.load_images(text.splitlines())
