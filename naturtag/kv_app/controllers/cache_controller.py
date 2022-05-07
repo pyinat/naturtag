@@ -1,11 +1,13 @@
 from logging import getLogger
+from os.path import getsize, isfile
 
 import requests_cache
 from kivy.clock import Clock
+from pyinaturalist.constants import CACHE_FILE
+from pyinaturalist.converters import format_file_size
 
-from naturtag.controllers import Controller
-from naturtag.inat_metadata import get_cache_size
 from naturtag.kv_app import alert, get_app
+from naturtag.kv_app.controllers import Controller
 from naturtag.thumbnails import delete_thumbnails, get_thumbnail_cache_size
 
 logger = getLogger(__name__)
@@ -64,3 +66,9 @@ class CacheController(Controller):
         out.secondary_text = f'Thumbnail cache size: {num_thumbs} files totaling {thumbnail_total_size}'
         history, _, frequent, _ = get_app().settings_controller.stored_taxa
         out.tertiary_text = f'History: {len(history)} items ({len(frequent)} unique)'
+
+
+def get_cache_size() -> str:
+    """Get the current size of the API request cache, in human-readable format"""
+    n_bytes = getsize(CACHE_FILE) if isfile(CACHE_FILE) else 0
+    return format_file_size(n_bytes)

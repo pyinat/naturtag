@@ -2,7 +2,7 @@ from itertools import chain
 from logging import getLogger
 from typing import Any
 
-from naturtag.inat_metadata import quote, sort_taxonomy_keywords
+from naturtag.inat_metadata import _quote, sort_taxonomy_keywords
 
 # All tags that support regular and hierarchical keyword lists
 KEYWORD_TAGS = [
@@ -82,7 +82,7 @@ class KeywordMetadata:
     @property
     def flickr_tags(self):
         """Get all taxonomy and normal keywords as quoted, space-separated tags compatible with Flickr"""
-        return ' '.join([quote(kw) for kw in self.kv_keyword_list + self.normal_keywords])
+        return ' '.join([_quote(kw) for kw in self.kv_keyword_list + self.normal_keywords])
 
     @property
     def hier_keyword_tree(self) -> dict[str, Any]:

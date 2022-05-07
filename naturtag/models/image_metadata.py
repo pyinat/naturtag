@@ -20,13 +20,15 @@ logger = getLogger().getChild(__name__)
 class ImageMetadata:
     """Class for reading & writing basic image metadata"""
 
-    def __init__(self, image_path):
+    def __init__(self, image_path: str = None):
         self.image_path = image_path.decode() if isinstance(image_path, bytes) else image_path
-        self.xmp_path = splitext(self.image_path)[0] + '.xmp'
+        self.xmp_path = splitext(image_path)[0] + '.xmp' if image_path else None
         self.exif, self.iptc, self.xmp = self.read_metadata()
 
     def read_metadata(self):
         """Read all formats of metadata from image + sidecar file"""
+        if not self.image_path:
+            return {}, {}, {}
         exif, iptc, xmp = self._safe_read_metadata(self.image_path)
         if isfile(self.xmp_path):
             s_exif, s_iptc, s_xmp = self._safe_read_metadata(self.xmp_path)
@@ -92,7 +94,7 @@ class ImageMetadata:
         with open(self.xmp_path, 'w') as f:
             f.write(NEW_XMP_CONTENTS.strip())
 
-    def update(self, new_metadata):
+    def update(self, new_metadata: dict):
         """Update arbitrary EXIF, IPTC, and/or XMP metadata"""
         logger.info(f'Updating with {len(new_metadata)} tags')
 

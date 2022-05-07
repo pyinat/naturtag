@@ -138,7 +138,7 @@ class MetaMetadata(ImageMetadata):
             logger.debug(f'Metadata summary: {self._summary}')
         return self._summary
 
-    def update(self, new_metadata):
+    def update(self, new_metadata: dict):
         """Update arbitrary EXIF, IPTC, and/or XMP metadata, and reset/update derived properties"""
         super().update(new_metadata)
         self._update_derived_properties()

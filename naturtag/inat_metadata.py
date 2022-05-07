@@ -1,16 +1,14 @@
 """Tools to get keyword tags (e.g., for XMP metadata) from iNaturalist observations"""
 # TODO: Refactor using iNatClient and models
+# TODO: Get separate keywords for species, binomial, and trinomial
 from logging import getLogger
-from os.path import getsize, isfile
 from typing import TYPE_CHECKING, Optional
 from urllib.parse import urlparse
 
 import xmltodict
-from pyinaturalist import Observation, Taxon, iNatClient
-from pyinaturalist.constants import CACHE_FILE, RANKS
-from pyinaturalist.converters import format_file_size
+from pyinaturalist import RANKS, Observation, Taxon, iNatClient
 from pyinaturalist.v0 import get_observations
-from pyinaturalist.v1 import get_observation, get_observation_species_counts, get_taxa, get_taxa_by_id
+from pyinaturalist.v1 import get_observation
 
 from naturtag.constants import (
     COMMON_NAME_IGNORE_TERMS,
@@ -29,26 +27,49 @@ if TYPE_CHECKING:
 inat_client = iNatClient()
 logger = getLogger().getChild(__name__)
 
+# Queries
+# -------
 
-def get_cache_size() -> str:
-    """Get the current size of the API request cache, in human-readable format"""
-    n_bytes = getsize(CACHE_FILE) if isfile(CACHE_FILE) else 0
-    return format_file_size(n_bytes)
+
+def get_keywords(
+    observation_id: int = None,
+    taxon_id: int = None,
+    common: bool = False,
+    hierarchical: bool = False,
+    locale: str = None,  # TODO
+) -> list[str]:
+    """Get all taxonomic keywords for a given observation or taxon"""
+    observation, taxon = None, None
+    if observation_id:
+        observation = inat_client.observations.from_id(observation_id).one()
+        taxon_id = observation.taxon.id  # Still need to get full ancestry
+    taxon = inat_client.taxa.from_id(taxon_id).one()
+    if not taxon:
+        logger.warning(f'No taxon found: {taxon_id}')
+        return []
+
+    # Get all specified keyword categories
+    keywords = get_taxonomy_keywords(taxon)
+    if hierarchical:
+        keywords.extend(get_hierarchical_keywords(keywords))
+    if common:
+        keywords.extend(get_common_keywords(taxon))
+
+    # Add IDs
+    keywords.append(f'inaturalist:taxon_id={taxon_id}')
+    keywords.append(f'dwc:taxonID={taxon_id}')
+    if observation_id:
+        keywords.append(f'inaturalist:observation_id={observation_id}')
+        keywords.append(f'dwc:catalogNumber={observation_id}')
+
+    logger.info(f'{len(keywords)} total keywords generated')
+    return keywords
 
 
 def get_observation_coordinates(observation_id: int) -> Optional[Coordinates]:
     """Get the current taxon ID for the given observation ID"""
     obs = get_observation(observation_id)
     return obs.get('location')
-
-
-def get_observation_taxon(observation_id: int) -> int:
-    """Get the current taxon ID for the given observation ID"""
-    logger.info(f'Fetching observation {observation_id}')
-    obs = get_observation(observation_id)
-    if obs.get('community_tax_id') and obs['community_tax_id'] != obs['taxon']['id']:
-        logger.warning('Community ID does not match selected taxon')
-    return obs['taxon']['id']
 
 
 # TODO: Use pyinaturalist_convert.dwc for this
@@ -71,57 +92,20 @@ def get_taxon_dwc_terms(taxon_id: int) -> dict[str, str]:
     return {k: v for k, v in dwc_xmp.items() if k in DWC_TAXON_TERMS}
 
 
-# TODO: separate species, binomial, trinomial
-def get_keywords(
-    observation_id: int = None,
-    taxon_id: int = None,
-    common: bool = False,
-    hierarchical: bool = False,
-) -> list[str]:
-    """Get all taxonomic keywords for a given observation or taxon"""
-    min_tax_id = taxon_id or get_observation_taxon(observation_id)
-    taxa = get_taxon_with_ancestors(min_tax_id)
+# def get_taxon_with_ancestors(taxon_id: int) -> Optional[Taxon]:
+#     """Get a taxon with all its parents"""
+#     logger.info(f'Fetching parents of taxon {taxon_id}')
+#     taxon = inat_client.taxa.from_id(taxon_id).one()
 
-    keywords = get_taxonomy_keywords(taxa)
-    if hierarchical:
-        keywords.extend(get_hierarchical_keywords(keywords))
-    if common:
-        keywords.extend(get_common_keywords(taxa))
+#     if not taxon:
+#         logger.info(f'taxon {taxon_id} not found')
+#         return None
 
-    keywords.append(f'inaturalist:taxon_id={min_tax_id}')
-    keywords.append(f'dwc:taxonID={min_tax_id}')
-    if observation_id:
-        keywords.append(f'inaturalist:observation_id={observation_id}')
-        keywords.append(f'dwc:catalogNumber={observation_id}')
-
-    logger.info(f'{len(keywords)} total keywords generated')
-    return keywords
-
-
-def get_taxon_children(taxon_id: int) -> list[dict]:
-    """Get a taxon's children"""
-    logger.info(f'Fetching children of taxon {taxon_id}')
-    r = get_taxa(parent_id=taxon_id)
-    logger.info(f'{len(r["results"])} child taxa found')
-    return r['results']
-
-
-def get_taxon_ancestors(taxon_id: int) -> list[dict]:
-    """Get a taxon's parents"""
-    return get_taxon_with_ancestors(taxon_id)[:-1]
-
-
-def get_taxon_with_ancestors(taxon_id: int) -> list[dict]:
-    """Get a taxon with all its parents"""
-    logger.info(f'Fetching parents of taxon {taxon_id}')
-    results = get_taxa_by_id(taxon_id).get('results', [])
-    if not results:
-        logger.info(f'taxon {taxon_id} not found')
-        return []
-
-    taxon = results[0]
-    logger.info(f'{len(taxon["ancestors"])} parent taxa found')
-    return taxon['ancestors'] + [taxon]
+#     if taxon:
+#         logger.info(f'{len(taxon.ancestors)} parent taxa found')
+#     else:
+#         logger.info(f'taxon {taxon_id} not found')
+#     return taxon
 
 
 def get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observation]:
@@ -138,40 +122,43 @@ def get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observat
     return taxon, observation
 
 
-def get_taxonomy_keywords(taxa: list[dict]) -> list[str]:
+def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> dict[int, int]:
+    """Get counts of taxa observed by the user, ordered by number of observations descending"""
+    if not username:
+        return {}
+    taxon_counts = inat_client.observations.species_counts(
+        user_login=username,
+        verifiable=None if include_casual else True,  # False will return *only* casual observations
+        **kwargs,
+    )
+    logger.info(f'{len(taxon_counts)} user-observed taxa found')
+    taxon_counts = sorted(taxon_counts, key=lambda x: x.count, reverse=True)
+    return {t.id: t.count for t in taxon_counts}
+
+
+#  Keyword stuff
+# --------------
+
+
+def get_taxonomy_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into rank keywords"""
-    return [quote(f'taxonomy:{t["rank"]}={t["name"]}') for t in taxa]
+    return [_quote(f'taxonomy:{t.rank}={t.name}') for t in [taxon, *taxon.ancestors]]
 
 
-def get_common_keywords(taxa: list[dict]) -> list[str]:
+def get_common_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into common name keywords.
     Filters out terms that aren't useful to keep as tags
     """
-    keywords = [t.get('preferred_common_name', '') for t in taxa]
+    keywords = [t.preferred_common_name for t in [taxon, *taxon.ancestors]]
 
     def is_ignored(kw):
         return any([ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS])
 
-    common_keywords = [quote(kw) for kw in keywords if kw and not is_ignored(kw)]
-    logger.info(f'{len(keywords) - len(common_keywords)} out of {len(keywords)} common names ignored')
-    return common_keywords
-
-
-def get_observed_taxa(username: str, include_casual: bool = False) -> dict[int, int]:
-    """Get counts of taxa observed by the user, ordered by number of observations descending"""
-    if not username:
-        return {}
-    logger.info(f'Searching for user-observed taxa (casual: {include_casual})')
-    response = get_observation_species_counts(
-        user_login=username,
-        verifiable=None if include_casual else True,  # False will return *only* casual observations
-    )
-    logger.info(f'{len(response["results"])} user-observed taxa found')
-    observed_taxa = {r['taxon']['id']: r['count'] for r in response['results']}
-    return dict(sorted(observed_taxa.items(), key=lambda x: x[1], reverse=True))
+    return [_quote(kw) for kw in keywords if kw and not is_ignored(kw)]
 
 
 def get_hierarchical_keywords(keywords: list) -> list[str]:
+    """Translate sorted taxonomy keywords into pipe-delimited hierarchical keywords"""
     hier_keywords = [keywords[0]]
     for rank_name in keywords[1:]:
         hier_keywords.append(f'{hier_keywords[-1]}|{rank_name}')
@@ -181,14 +168,42 @@ def get_hierarchical_keywords(keywords: list) -> list[str]:
 def sort_taxonomy_keywords(keywords: list[str]) -> list[str]:
     """Sort keywords by taxonomic rank, where applicable"""
 
-    def _get_rank_idx(tag):
-        return get_rank_idx(tag.split(':')[-1].split('=')[0])
+    def get_rank_idx(tag: str) -> int:
+        rank = tag.split(':')[-1].split('=')[0]
+        return RANKS.index(rank) if rank in RANKS else 0
 
-    return sorted(keywords, key=_get_rank_idx, reverse=True)
+    return sorted(keywords, key=get_rank_idx, reverse=True)
 
 
-def get_rank_idx(rank: str) -> int:
-    return RANKS.index(rank) if rank in RANKS else 0
+def convert_dwc_to_xmp(dwc: str) -> dict[str, str]:
+    """
+    Get all DWC terms from XML content containing a SimpleDarwinRecordSet, and format them as
+    XMP tags. For example: ``'dwc:species' -> 'Xmp.dwc.species'``
+    """
+    # Get inner record as a dict, if it exists
+    xml_dict = xmltodict.parse(dwc)
+    dwr = xml_dict.get('dwr:SimpleDarwinRecordSet', {}).get('dwr:SimpleDarwinRecord')
+    if not dwr:
+        logger.warning('No SimpleDarwinRecord found')
+        return {}
+
+    # iNat sometimes includes duplicate occurrence IDs
+    if isinstance(dwr['dwc:occurrenceID'], list):
+        dwr['dwc:occurrenceID'] = dwr['dwc:occurrenceID'][0]
+
+    def _format_term(k):
+        namespace, term = k.split(':')
+        return f'Xmp.{namespace}.{term}'
+
+    def _include_term(k):
+        return k.split(':')[0] in DWC_NAMESPACES
+
+    # Format as XMP tags
+    return {_format_term(k): v for k, v in dwr.items() if _include_term(k)}
+
+
+# Other utilities
+# ---------------
 
 
 def get_inaturalist_ids(metadata: dict) -> tuple[Optional[int], Optional[int]]:
@@ -214,39 +229,6 @@ def get_min_rank(metadata: dict[str, str]) -> StrTuple:
     return None, None
 
 
-def quote(s: str) -> str:
-    """Surround keyword in quotes if it contains whitespace"""
-    return f'"{s}"' if ' ' in s else s
-
-
-def convert_dwc_to_xmp(dwc: str) -> dict[str, str]:
-    """
-    Get all DWC terms from XML content containing a SimpleDarwinRecordSet, and format them as
-    XMP tags. For example: ``'dwc:species' -> 'Xmp.dwc.species'``
-    """
-    # Get inner record as a dict, if it exists
-    xml_dict = xmltodict.parse(dwc)
-    dwr = xml_dict.get('dwr:SimpleDarwinRecordSet', {}).get('dwr:SimpleDarwinRecord')
-    if not dwr:
-        logger.warning('No SimpleDarwinRecord found')
-        return {}
-
-    # iNat sometimes includes duplicate occurrence IDs
-    if isinstance(dwr['dwc:occurrenceID'], list):
-        dwr['dwc:occurrenceID'] = dwr['dwc:occurrenceID'][0]
-
-    def _format_term(k):
-        ns, term = k.split(':')
-        return f'Xmp.{ns}.{term}'
-
-    def _include_term(k):
-        ns = k.split(':')[0]
-        return ns in DWC_NAMESPACES
-
-    # Format as XMP tags
-    return {_format_term(k): v for k, v in dwr.items() if _include_term(k)}
-
-
 def get_ids_from_url(value: str) -> IntTuple:
     """If a URL is provided containing an ID, return the taxon and/or observation ID.
     If it's an observation, fetch its taxon ID as well.
@@ -256,6 +238,7 @@ def get_ids_from_url(value: str) -> IntTuple:
     """
     taxon_id, observation_id = None, None
     id = strip_url(value)
+
     # TODO: Update after finishing Observation model
     if 'observation' in value:
         observation_id = id
@@ -274,3 +257,8 @@ def strip_url(value: str) -> Optional[int]:
         return int(path.split('/')[-1].split('-')[0])
     except (TypeError, ValueError):
         return None
+
+
+def _quote(s: str) -> str:
+    """Surround keyword in quotes if it contains whitespace"""
+    return f'"{s}"' if ' ' in s else s
