@@ -1,4 +1,6 @@
 from logging import getLogger
+from pathlib import Path
+from typing import Union
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QKeySequence, QPixmap, QShortcut
@@ -61,11 +63,16 @@ class ImageWindow(QWidget):
 class PixmapLabel(QLabel):
     """A QLabel containing a pixmap that preserves its aspect ratio when resizing"""
 
-    def __init__(self, parent: QWidget = None):
+    def __init__(self, parent: QWidget = None, pixmap: QPixmap = None, path: Union[str, Path] = None):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
+
+        if path:
+            pixmap = QPixmap(str(path))
+        if pixmap:
+            self.setPixmap(pixmap)
 
     def setPixmap(self, pixmap: QPixmap):
         self._pixmap = pixmap
@@ -84,6 +91,6 @@ class PixmapLabel(QLabel):
         assert self._pixmap is not None
         return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
-    def resizeEvent(self):
+    def resizeEvent(self, _):
         if self._pixmap:
             super().setPixmap(self.scaledPixmap())

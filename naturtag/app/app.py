@@ -10,6 +10,7 @@ from qtmodern.windows import ModernWindow
 from naturtag.app.image_controller import ImageController
 from naturtag.app.logger import init_handler
 from naturtag.app.settings_menu import SettingsMenu
+from naturtag.app.taxon_controller import TaxonController
 from naturtag.app.toolbar import Toolbar
 from naturtag.constants import ASSETS_DIR
 from naturtag.settings import Settings
@@ -26,12 +27,13 @@ class MainWindow(QMainWindow):
         # Controllers & Settings
         self.settings = Settings.read()
         self.image_controller = ImageController(self.settings, self.info)
+        self.taxon_controller = TaxonController(self.settings, self.info)
 
         # Tabbed layout
         self.tabs = QTabWidget()
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
-        self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
-        self.tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
+        self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observations')
+        self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
         self.log_tab_idx = self.tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
         self.setCentralWidget(self.tabs)
