@@ -1,20 +1,13 @@
-# Configuration file for the Sphinx documentation builder
-
-# Add the project source directory to the path
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath('..'))
-from naturtag import __version__
+"""Config file for Sphinx documentation"""
+from importlib.metadata import version as pkg_version
 
 # Basic config
 project = 'Naturtag'
-copyright = '2021, Jordan Cook'
+copyright = '2022, Jordan Cook'
 author = 'Jordan Cook'
-version = __version__
 html_static_path = ['_static']
 templates_path = ['_templates']
-exclude_patterns = []
+version = release = pkg_version('pyinaturalist-convert')
 
 # Sphinx extension modules
 extensions = [
@@ -27,7 +20,7 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    'click': ('https://click.palletsprojects.com/en/8.x/', None),
+    'click': ('https://click.palletsprojects.com/en/latest/', None),
     'kivy': ('https://kivy.org/doc/stable', None),
     'kivymd': ('https://kivymd.readthedocs.io/en/latest', None),
     'pillow': ('https://pillow.readthedocs.io/en/stable', None),

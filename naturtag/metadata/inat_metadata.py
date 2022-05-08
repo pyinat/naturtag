@@ -40,7 +40,9 @@ def tag_images(
         hierarchical=hierarchical,
     )
 
-    if not images:
+    if not inat_metadata:
+        return []
+    elif not images:
         return [inat_metadata]
     return [tag_image(image_path, inat_metadata, create_sidecar) for image_path in glob_paths(images)]
 

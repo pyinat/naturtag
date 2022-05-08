@@ -6,7 +6,7 @@ from logging import getLogger
 from os import makedirs, scandir
 from os.path import dirname, getsize, isfile, join, normpath, splitext
 from shutil import copyfileobj, rmtree
-from typing import IO, BinaryIO, Optional, Union
+from typing import BinaryIO, Optional, Union
 
 import requests
 from PIL import Image
@@ -66,7 +66,7 @@ def get_thumbnail_if_exists(source: str) -> Optional[str]:
         return None
 
 
-def get_thumbnail_hash(source: str) -> str:
+def get_thumbnail_hash(source: Union[bytes, str]) -> str:
     """Get a unique string based on the source to use as a filename or atlas resource ID"""
     if not isinstance(source, bytes):
         source = source.encode()
@@ -130,7 +130,7 @@ def generate_thumbnail_from_url(url: str, size: str):
         logger.info(f'Thumbnails: Request failed: {str(r)}')
 
 
-def generate_thumbnail_from_bytes(image_bytes: IO, source: str, **kwargs):
+def generate_thumbnail_from_bytes(image_bytes: BytesIO, source: str, **kwargs):
     """Like :py:func:`.generate_thumbnail`, but takes raw image bytes instead of a path"""
     image_bytes.seek(0)
     fmt = get_format(source)

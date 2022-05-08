@@ -68,7 +68,7 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def has_coordinates(self) -> bool:
-        return self.coordinates and self.coordinates != NULL_COORDS
+        return bool(self.coordinates) and self.coordinates != NULL_COORDS
 
     @property
     def has_observation(self) -> bool:
@@ -132,8 +132,8 @@ class MetaMetadata(ImageMetadata):
                 'XMP': bool(self.xmp),
                 'SIDECAR': self.has_sidecar,
             }
-            meta_types_str = ' | '.join([k for k, v in meta_types.items() if v])
-            self._summary = f'{basename(self.image_path)}\n{meta_types_str}'
+            self._summary = f'{basename(self.image_path)}\n' if self.image_path else ''
+            self._summary += ' | '.join([k for k, v in meta_types.items() if v])
             logger.debug(f'Metadata summary: {self._summary}')
         return self._summary
 

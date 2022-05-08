@@ -31,7 +31,7 @@ class KeywordMetadata:
         self.hier_keywords = self._get_hierarchical_keywords()
         self.normal_keywords = self._get_normal_keywords()
 
-    def _get_combined_keywords(self, metadata: dict[str, Any]) -> list[str]:
+    def _get_combined_keywords(self, metadata: dict[str, Any] = None) -> list[str]:
         """Get keywords from all metadata formats"""
         if not metadata:
             return []
@@ -90,7 +90,7 @@ class KeywordMetadata:
     @property
     def hier_keyword_tree(self) -> dict[str, Any]:
         """Get all hierarchical keywords as a nested dict"""
-        kw_tree = {}
+        kw_tree: dict[str, Any] = {}
 
         def append_nodes(tree, kw_tokens):
             tree_node = tree

@@ -1,6 +1,6 @@
 from logging import getLogger
 from os.path import isfile, splitext
-from typing import Any
+from typing import Any, Union
 
 from pyexiv2 import Image
 
@@ -20,9 +20,9 @@ logger = getLogger().getChild(__name__)
 class ImageMetadata:
     """Class for reading & writing basic image metadata"""
 
-    def __init__(self, image_path: str = None):
+    def __init__(self, image_path: Union[bytes, str] = None):
         self.image_path = image_path.decode() if isinstance(image_path, bytes) else image_path
-        self.xmp_path = splitext(image_path)[0] + '.xmp' if image_path else None
+        self.xmp_path = splitext(self.image_path)[0] + '.xmp' if self.image_path else None
         self.exif, self.iptc, self.xmp = self.read_metadata()
 
     def read_metadata(self):

@@ -90,12 +90,12 @@ def _decimal_to_dms(dd: float) -> tuple[int, int, float]:
     return int(degrees), int(minutes), seconds
 
 
-def _dms_to_decimal(degrees: int, minutes: int, seconds: int, direction: str) -> float:
+def _dms_to_decimal(degrees: float, minutes: float, seconds: float, direction: str) -> float:
     dd = degrees + (minutes / 60) + (seconds / 3600)
     return dd * (-1 if direction in ['S', 'E'] else 1)
 
 
-def _ddm_to_decimal(degrees: int, minutes: float, direction: str) -> float:
+def _ddm_to_decimal(degrees: float, minutes: float, direction: str) -> float:
     dd = degrees + (minutes / 60)
     return dd * (-1 if direction in ['S', 'E'] else 1)
 
