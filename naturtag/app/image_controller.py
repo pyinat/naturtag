@@ -13,9 +13,8 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.app.image_gallery import ImageGallery
-from naturtag.inat_metadata import get_ids_from_url
+from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
-from naturtag.tagger import tag_images
 
 logger = getLogger(__name__)
 

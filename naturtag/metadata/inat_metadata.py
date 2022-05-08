@@ -12,10 +12,44 @@ from pyinaturalist import Observation, Taxon, iNatClient
 from pyinaturalist_convert import to_dwc
 
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, DWC_NAMESPACES, IntTuple
-from naturtag.models import MetaMetadata
+from naturtag.metadata import MetaMetadata
 
 inat_client = iNatClient()
 logger = getLogger().getChild(__name__)
+
+
+def tag_images(
+    observation_id: int,
+    taxon_id: int,
+    common_names: bool = False,
+    darwin_core: bool = False,
+    hierarchical: bool = False,
+    create_sidecar: bool = False,
+    images: list[str] = None,
+) -> list[MetaMetadata]:
+    """
+    Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
+    metadata. See :py:func:`~naturtag.cli.tag` for details.
+    """
+    inat_metadata = get_inat_metadata(
+        observation_id=observation_id,
+        taxon_id=taxon_id,
+        common_names=common_names,
+        darwin_core=darwin_core,
+        hierarchical=hierarchical,
+    )
+
+    if not images:
+        return [inat_metadata]
+    return [tag_image(image_path, inat_metadata, create_sidecar) for image_path in images]
+
+
+def tag_image(
+    image_path: str, inat_metadata: MetaMetadata, create_sidecar: bool = False
+) -> MetaMetadata:
+    img_metadata = MetaMetadata(image_path).merge(inat_metadata)
+    img_metadata.write(create_sidecar=create_sidecar)
+    return img_metadata
 
 
 def get_inat_metadata(

@@ -12,7 +12,7 @@ from naturtag.gps import (
     to_exif_coords,
     to_xmp_coords,
 )
-from naturtag.models import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
+from naturtag.metadata import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
 
 NULL_COORDS = (0, 0)
 logger = getLogger().getChild(__name__)

@@ -14,7 +14,7 @@ from naturtag.app.image_window import ImageWindow
 from naturtag.app.layouts import FlowLayout
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
-from naturtag.models import MetaMetadata
+from naturtag.metadata import MetaMetadata
 from naturtag.thumbnails import get_thumbnail
 
 logger = getLogger(__name__)

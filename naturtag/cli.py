@@ -9,8 +9,7 @@ from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
 from naturtag.image_glob import glob_paths
-from naturtag.inat_metadata import strip_url
-from naturtag.tagger import tag_images
+from naturtag.metadata.inat_metadata import strip_url, tag_images
 
 CODE_BLOCK = compile(r'```\n(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
