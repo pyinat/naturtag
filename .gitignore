@@ -7,6 +7,8 @@ __pycache__
 .venv
 .vim/
 .vscode/
+.coverage
+.coverage.*
 _build/
 build/
 pip-wheel-metadata/
