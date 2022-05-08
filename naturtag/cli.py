@@ -8,8 +8,8 @@ from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
-from naturtag.image_glob import glob_paths
-from naturtag.metadata.inat_metadata import strip_url, tag_images
+from naturtag.metadata import tag_images
+from naturtag.metadata.inat_metadata import strip_url
 
 CODE_BLOCK = compile(r'```\n(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
@@ -43,14 +43,14 @@ def _strip_url_or_name(ctx, param, value):
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
 @click.option('-t', '--taxon', help='Taxon name, ID, or URL', callback=_strip_url_or_name)
 @click.option(
-    '-x', '--create-xmp', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
+    '-x', '--create-sidecar', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
 )
 @click.option('-v', '--verbose', is_flag=True, help='Show additional information')
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
     common_names,
-    create_xmp,
+    create_sidecar,
     darwin_core,
     flickr_format,
     hierarchical,
@@ -152,11 +152,11 @@ def tag(
     metadata_list = tag_images(
         observation,
         taxon,
-        common_names,
-        darwin_core,
-        hierarchical,
-        create_xmp,
-        glob_paths(image_paths),
+        common_names=common_names,
+        darwin_core=darwin_core,
+        hierarchical=hierarchical,
+        create_sidecar=create_sidecar,
+        images=image_paths,
     )
     if not metadata_list:
         return

@@ -9,7 +9,7 @@ from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
 
-from naturtag.constants import CONFIG_PATH, STORED_TAXA_PATH
+from naturtag.constants import CONFIG_PATH, USER_TAXA_PATH
 
 logger = getLogger().getChild(__name__)
 
@@ -75,7 +75,7 @@ class Settings(YamlMixin):
 
     # Metadata
     common_names: bool = field(default=True)
-    create_xmp: bool = field(default=True)
+    create_sidecar: bool = field(default=True)
     darwin_core: bool = field(default=True)
     hierarchical_keywords: bool = field(default=False)
 
@@ -90,7 +90,7 @@ class Settings(YamlMixin):
 class UserTaxa(YamlMixin):
     """Relevant taxon IDs stored for the current user"""
 
-    path = Path(str(STORED_TAXA_PATH).replace('json', 'yml'))
+    path = USER_TAXA_PATH
 
     history: list[int] = field(factory=list)
     starred: list[int] = field(factory=list)

@@ -2,9 +2,9 @@ from logging import getLogger
 from os.path import basename
 from typing import Any, Optional
 
-from pyinaturalist.constants import INAT_BASE_URL, RANKS
+from pyinaturalist.constants import INAT_BASE_URL, RANKS, Coordinates
 
-from naturtag.constants import OBSERVATION_KEYS, TAXON_KEYS, Coordinates, IntTuple, StrTuple
+from naturtag.constants import OBSERVATION_KEYS, TAXON_KEYS, IntTuple, StrTuple
 from naturtag.gps import (
     convert_dwc_coords,
     convert_exif_coords,

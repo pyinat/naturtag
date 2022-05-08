@@ -98,12 +98,6 @@ source = ['naturtag']
 profile = 'black'
 line_length = 105
 skip_gitignore = true
-skip = [
-    'naturtag/app/__init__.py',
-    'naturtag/models/__init__.py',
-    'naturtag/controllers/__init__.py',
-    'naturtag/widgets/__init__.py',
-]
 known_first_party = ['test']
 
 [tool.mypy]

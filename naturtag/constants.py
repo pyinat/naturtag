@@ -1,12 +1,9 @@
 # flake8: noqa: F401
-from datetime import timedelta
 from pathlib import Path
-from typing import IO, Iterable, Optional, Union
+from typing import Optional
 
 from platformdirs import user_data_dir
-from pyinaturalist.constants import ICONIC_TAXA, Coordinates
-
-from naturtag import __version__
+from pyinaturalist.constants import ICONIC_TAXA
 
 # Resource directories
 PKG_DIR = Path(__file__).parent.parent
@@ -52,37 +49,18 @@ ICONIC_TAXA_DIR = ASSETS_DIR / 'iconic_taxa'
 APP_LOGO = str(ASSETS_DIR / 'logo.png')
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
 
-# Cache settings
-OBS_CACHE_EXPIRY_HOURS = 48
-
 # Config files
 CONFIG_PATH = DATA_DIR / 'settings.yml'
-STORED_TAXA_PATH = DATA_DIR / 'stored_taxa.json'
+USER_TAXA_PATH = DATA_DIR / 'stored_taxa.yml'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 
-# URLs / API settings
-OBSERVATION_BASE_URL = 'https://www.inaturalist.org/observations'
-PHOTO_BASE_URL = 'https://static.inaturalist.org/photos'
-PHOTO_INFO_BASE_URL = 'https://www.inaturalist.org/photos'
-PLACES_BASE_URL = 'https://www.inaturalist.org/places'
-TAXON_BASE_URL = 'https://www.inaturalist.org/taxa'
-USER_AGENT = f'naturtag/{__version__}'.lower()
-
 # Theme/window settings
-INIT_WINDOW_POSITION = ('custom', 100, 100)
 INIT_WINDOW_SIZE = (1500, 900)
-MD_PRIMARY_PALETTE = 'Teal'
-MD_ACCENT_PALETTE = 'Cyan'
 MAX_LABEL_CHARS = 80
 
 # Simplified tags without formatting variations
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
-
-
-# Specific XML namespaces to use terms from when processing DwC observation records
-# Note: exiv2 will automatically add recognized namespace URLs when adding properties
-DWC_NAMESPACES = ['dcterms', 'dwc']
 
 COMMON_NAME_IGNORE_TERMS = [
     ',',
@@ -92,6 +70,5 @@ COMMON_NAME_IGNORE_TERMS = [
 ]
 
 # Type aliases
-JSON = Union[dict, IO, Iterable[dict], Path, str]
 IntTuple = tuple[Optional[int], Optional[int]]
 StrTuple = tuple[Optional[str], Optional[str]]

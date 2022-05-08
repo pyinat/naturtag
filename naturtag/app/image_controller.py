@@ -72,10 +72,10 @@ class ImageController(QWidget):
         all_metadata = tag_images(
             obs_id,
             taxon_id,
-            self.settings.common_names,
-            self.settings.darwin_core,
-            self.settings.hierarchical_keywords,
-            self.settings.create_xmp,
+            common_names=self.settings.common_names,
+            darwin_core=self.settings.darwin_core,
+            hierarchical=self.settings.hierarchical_keywords,
+            create_sidecar=self.settings.create_sidecar,
             images=files,
         )
         self.info(f'{len(files)} images tagged with metadata for {selected_id}')

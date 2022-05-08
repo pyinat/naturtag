@@ -48,8 +48,6 @@ def convert_dwc_coords(metadata: dict) -> Optional[Coordinates]:
 def to_exif_coords(coords: Coordinates) -> dict[str, str]:
     """Convert decimal degrees to Exif.GPSInfo coordinates (DMS)"""
     metadata = {}
-    print(1, coords)
-    print(2, _decimal_to_dms(coords[0]), _decimal_to_dms(coords[1]))
 
     degrees, minutes, seconds = _decimal_to_dms(coords[0])
     seconds = int(seconds * 10000)

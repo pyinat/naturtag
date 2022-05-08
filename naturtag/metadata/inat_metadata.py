@@ -1,9 +1,8 @@
-"""Tools to get keyword tags from iNaturalist observations"""
+"""Tools to translate iNaturalist observations and taxa into image metadata"""
 # TODO: Get separate keywords for species, binomial, and trinomial
 # TODO: Get common names for specified locale (requires using different endpoints)
 # TODO: Handle observation with no taxon ID?
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
-# TODO: Refactor usage of get_ids_from_url() it doesn't require an extra query
 from logging import getLogger
 from typing import Optional
 from urllib.parse import urlparse
@@ -11,10 +10,12 @@ from urllib.parse import urlparse
 from pyinaturalist import Observation, Taxon, iNatClient
 from pyinaturalist_convert import to_dwc
 
-from naturtag.constants import COMMON_NAME_IGNORE_TERMS, DWC_NAMESPACES, IntTuple
+from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple
+from naturtag.image_glob import glob_paths
 from naturtag.metadata import MetaMetadata
 
-inat_client = iNatClient()
+DWC_NAMESPACES = ['dcterms', 'dwc']
+INAT_CLIENT = iNatClient()
 logger = getLogger().getChild(__name__)
 
 
@@ -41,7 +42,7 @@ def tag_images(
 
     if not images:
         return [inat_metadata]
-    return [tag_image(image_path, inat_metadata, create_sidecar) for image_path in images]
+    return [tag_image(image_path, inat_metadata, create_sidecar) for image_path in glob_paths(images)]
 
 
 def tag_image(
@@ -65,11 +66,11 @@ def get_inat_metadata(
 
     # Get observation and/or taxon records
     if observation_id:
-        observation = inat_client.observations.from_id(observation_id).one()
+        observation = INAT_CLIENT.observations.from_id(observation_id).one()
         taxon_id = observation.taxon.id
 
     # Observation.taxon doesn't include ancestors, so we always need to fetch the full taxon record
-    taxon = inat_client.taxa.from_id(taxon_id).one()
+    taxon = INAT_CLIENT.taxa.from_id(taxon_id).one()
     if not taxon:
         logger.warning(f'No taxon found: {taxon_id}')
         return None
@@ -100,7 +101,7 @@ def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> 
     """Get counts of taxa observed by the user, ordered by number of observations descending"""
     if not username:
         return {}
-    taxon_counts = inat_client.observations.species_counts(
+    taxon_counts = INAT_CLIENT.observations.species_counts(
         user_login=username,
         verifiable=None if include_casual else True,  # False will return *only* casual observations
         **kwargs,
@@ -116,10 +117,10 @@ def get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observat
     taxon, observation = None, None
 
     if metadata.has_observation:
-        observation = inat_client.observations.from_id(metadata.observation_id).one()
+        observation = INAT_CLIENT.observations.from_id(metadata.observation_id).one()
         taxon = observation.taxon
     elif metadata.has_taxon:
-        taxon = inat_client.taxa.from_id(metadata.taxon_id)
+        taxon = INAT_CLIENT.taxa.from_id(metadata.taxon_id)
 
     return taxon, observation
 
@@ -160,6 +161,8 @@ def get_hierarchical_keywords(keywords: list) -> list[str]:
 def get_dwc_terms(observation: Observation = None, taxon: Taxon = None) -> dict[str, str]:
     """Convert either an observation or taxon into XMP-formatted Darwin Core terms"""
 
+    # Get terms only for specific namespaces
+    # Note: exiv2 will automatically add recognized XML namespace URLs when adding properties
     def format_key(k):
         namespace, term = k.split(':')
         return f'Xmp.{namespace}.{term}' if namespace in DWC_NAMESPACES else None
@@ -169,20 +172,18 @@ def get_dwc_terms(observation: Observation = None, taxon: Taxon = None) -> dict[
     return {format_key(k): v for k, v in dwc.items() if format_key(k)}
 
 
-def get_ids_from_url(value: str) -> IntTuple:
-    """If a URL is provided containing an ID, return the taxon and/or observation ID.
-    If it's an observation, fetch its taxon ID as well.
+def get_ids_from_url(url: str) -> IntTuple:
+    """If a URL is provided containing an ID, return the taxon or observation ID.
 
     Returns:
-        taxon_id, observation_id
+        ``(observation_id, taxon_id)``
     """
     observation_id, taxon_id = None, None
-    id = strip_url(value)
+    id = strip_url(url)
 
-    if 'observation' in value:
-        obs = inat_client.observations.from_id(id).one()
-        observation_id, taxon_id = id, obs.taxon.id
-    elif 'taxa' in value:
+    if 'observation' in url:
+        observation_id = id
+    elif 'taxa' in url:
         taxon_id = id
 
     return observation_id, taxon_id
