@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.resize(1024, 1024)
         self.setWindowTitle('Naturtag')
+        log_handler = init_handler()
 
         # Controllers & Settings
         self.settings = Settings.read()
@@ -34,7 +35,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
         self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observations')
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
-        self.log_tab_idx = self.tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
+        self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
         self.setCentralWidget(self.tabs)
 

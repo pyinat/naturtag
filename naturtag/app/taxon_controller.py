@@ -1,3 +1,5 @@
+from logging import getLogger
+from time import time
 from typing import Callable
 
 from pyinaturalist import Taxon
@@ -15,8 +17,12 @@ from PySide6.QtWidgets import (
 
 from naturtag.app.image_window import PixmapLabel
 from naturtag.constants import ASSETS_DIR
+from naturtag.metadata.inat_metadata import INAT_CLIENT
 from naturtag.settings import Settings
-from naturtag.thumbnails import get_thumbnail
+
+# from naturtag.thumbnails import get_thumbnail
+
+logger = getLogger(__name__)
 
 PLACEHOLDER_IMG_PATH = str(ASSETS_DIR / 'demo_images' / '78513963.jpg')
 
@@ -43,9 +49,13 @@ class TaxonController(QWidget):
 
     def __init__(self, settings: Settings, info_callback: Callable):
         super().__init__()
+        start = time()
+
         self.settings = settings
         root_layout = QHBoxLayout()
         self.setLayout(root_layout)
+        # self.selected_taxon: Taxon = None
+        self.selected_taxon: Taxon = INAT_CLIENT.taxa.from_id(47792).one()
         self.info = info_callback
 
         input_layout = QVBoxLayout()
@@ -101,7 +111,7 @@ class TaxonController(QWidget):
         selected_taxon_layout = QHBoxLayout()
         selected_taxon_layout.setAlignment(Qt.AlignTop)
         results_layout.addLayout(selected_taxon_layout)
-        img = PixmapLabel(path=PLACEHOLDER_IMG_PATH)
+        img = PixmapLabel(taxon=self.selected_taxon)
         img.setMinimumWidth(200)
         img.setMaximumWidth(400)
         selected_taxon_layout.addWidget(img)
@@ -110,9 +120,11 @@ class TaxonController(QWidget):
         taxon_details_layout.setAlignment(Qt.AlignTop)
         selected_taxon_layout.addLayout(taxon_details_layout)
         taxon_details_layout.addWidget(QLabel('Taxon details'))
-        taxon_details_layout.addWidget(QLabel('ID: 47792'))
-        taxon_details_layout.addWidget(QLabel('Observations: 730000'))
-        taxon_details_layout.addWidget(QLabel('Child species: 6323'))
+        taxon_details_layout.addWidget(QLabel(f'ID: {self.selected_taxon.id}'))
+        taxon_details_layout.addWidget(QLabel(f'Observations: {self.selected_taxon.observations_count}'))
+        taxon_details_layout.addWidget(
+            QLabel(f'Child species: {self.selected_taxon.complete_species_count}')
+        )
 
         taxonomy_layout = QHBoxLayout()
         results_layout.addLayout(taxonomy_layout)
@@ -123,7 +135,9 @@ class TaxonController(QWidget):
         header = QLabel('Ancestors')
         header.setFont(header_font)
         ancestors_layout.addWidget(header)
-        for taxon in ancestors:
+        # for taxon in ancestors:
+        #     ancestors_layout.addWidget(TaxonInfoCard(taxon=taxon))
+        for taxon in self.selected_taxon.ancestors:
             ancestors_layout.addWidget(TaxonInfoCard(taxon=taxon))
 
         children_layout = QVBoxLayout()
@@ -133,8 +147,10 @@ class TaxonController(QWidget):
         header.setFont(header_font)
         children_layout.addWidget(header)
 
-        for taxon in children:
+        for taxon in self.selected_taxon.children:
             children_layout.addWidget(TaxonInfoCard(taxon=taxon))
+
+        logger.info(f'Initialized taxon page in {time() - start:.2f}s')
 
 
 class TaxonInfoCard(QWidget):
@@ -143,8 +159,7 @@ class TaxonInfoCard(QWidget):
         card_layout = QHBoxLayout()
         self.setLayout(card_layout)
 
-        # img = PixmapLabel(path=get_thumbnail(taxon.default_photo.thumbnail_url))
-        img = PixmapLabel(path=get_thumbnail(PLACEHOLDER_IMG_PATH))
+        img = PixmapLabel(taxon=taxon)
         img.setFixedWidth(75)
         card_layout.addWidget(img)
 

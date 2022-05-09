@@ -2,9 +2,12 @@ from logging import getLogger
 from pathlib import Path
 from typing import Union
 
+from pyinaturalist import Photo, Taxon
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+
+from naturtag.metadata.inat_metadata import INAT_CLIENT
 
 logger = getLogger(__name__)
 
@@ -60,10 +63,22 @@ class ImageWindow(QWidget):
         self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
 
 
+def _get_taxon_photo(taxon: Taxon):
+    photo = taxon.default_photo or Photo(url=taxon.icon_url)
+    return INAT_CLIENT.session.get(photo.url, stream=True).content, photo.mimetype.replace('image/', '')
+
+
 class PixmapLabel(QLabel):
     """A QLabel containing a pixmap that preserves its aspect ratio when resizing"""
 
-    def __init__(self, parent: QWidget = None, pixmap: QPixmap = None, path: Union[str, Path] = None):
+    def __init__(
+        self,
+        parent: QWidget = None,
+        pixmap: QPixmap = None,
+        path: Union[str, Path] = None,
+        # url: str = None,
+        taxon: Taxon = None,
+    ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
@@ -71,6 +86,10 @@ class PixmapLabel(QLabel):
 
         if path:
             pixmap = QPixmap(str(path))
+        elif taxon:
+            data, ext = _get_taxon_photo(taxon)
+            pixmap = QPixmap()
+            pixmap.loadFromData(data, format=ext)
         if pixmap:
             self.setPixmap(pixmap)
 
