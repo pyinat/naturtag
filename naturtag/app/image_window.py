@@ -63,11 +63,6 @@ class ImageWindow(QWidget):
         self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
 
 
-def _get_taxon_photo(taxon: Taxon):
-    photo = taxon.default_photo or Photo(url=taxon.icon_url)
-    return INAT_CLIENT.session.get(photo.url, stream=True).content, photo.mimetype.replace('image/', '')
-
-
 class PixmapLabel(QLabel):
     """A QLabel containing a pixmap that preserves its aspect ratio when resizing"""
 
@@ -76,14 +71,15 @@ class PixmapLabel(QLabel):
         parent: QWidget = None,
         pixmap: QPixmap = None,
         path: Union[str, Path] = None,
-        # url: str = None,
         taxon: Taxon = None,
     ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
+        self.setPixmap(pixmap, path, taxon)
 
+    def setPixmap(self, pixmap: QPixmap = None, path: Union[str, Path] = None, taxon: Taxon = None):
         if path:
             pixmap = QPixmap(str(path))
         elif taxon:
@@ -91,11 +87,8 @@ class PixmapLabel(QLabel):
             pixmap = QPixmap()
             pixmap.loadFromData(data, format=ext)
         if pixmap:
-            self.setPixmap(pixmap)
-
-    def setPixmap(self, pixmap: QPixmap):
-        self._pixmap = pixmap
-        super().setPixmap(self.scaledPixmap())
+            self._pixmap = pixmap
+            super().setPixmap(self.scaledPixmap())
 
     def heightForWidth(self, width: int) -> int:
         if self._pixmap:
@@ -113,3 +106,8 @@ class PixmapLabel(QLabel):
     def resizeEvent(self, _):
         if self._pixmap:
             super().setPixmap(self.scaledPixmap())
+
+
+def _get_taxon_photo(taxon: Taxon):
+    photo = taxon.default_photo or Photo(url=taxon.icon_url)
+    return INAT_CLIENT.session.get(photo.url, stream=True).content, photo.mimetype.replace('image/', '')
