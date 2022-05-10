@@ -1,9 +1,9 @@
 from logging import getLogger
 from time import time
-from typing import Callable
+from typing import Callable, Iterator
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QGroupBox,
@@ -17,7 +17,6 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.app.image_window import PixmapLabel
-from naturtag.constants import ASSETS_DIR
 from naturtag.metadata.inat_metadata import INAT_CLIENT
 from naturtag.settings import Settings
 
@@ -25,11 +24,13 @@ from naturtag.settings import Settings
 
 logger = getLogger(__name__)
 
-PLACEHOLDER_IMG_PATH = str(ASSETS_DIR / 'demo_images' / '78513963.jpg')
 
-HEADER_FONT = QFont()
-HEADER_FONT.setWeight(QFont.Bold)
-HEADER_FONT.setPointSize(16)
+H1_FONT = QFont()
+H1_FONT.setWeight(QFont.Bold)
+H1_FONT.setPointSize(20)
+H2_FONT = QFont()
+H2_FONT.setWeight(QFont.Bold)
+H2_FONT.setPointSize(16)
 
 
 ancestors = [
@@ -50,8 +51,6 @@ class TaxonController(QWidget):
 
     def __init__(self, settings: Settings, info_callback: Callable):
         super().__init__()
-        start = time()
-
         self.settings = settings
         root_layout = QHBoxLayout()
         self.setLayout(root_layout)
@@ -66,7 +65,7 @@ class TaxonController(QWidget):
         autocomplete_layout.setAlignment(Qt.AlignTop)
         group_box = QGroupBox('Search')
         group_box.setFixedWidth(400)
-        group_box.setFont(HEADER_FONT)
+        group_box.setFont(H2_FONT)
         group_box.setLayout(autocomplete_layout)
         input_layout.addWidget(group_box)
 
@@ -84,7 +83,7 @@ class TaxonController(QWidget):
         categories_layout = QVBoxLayout()
         group_box = QGroupBox('Categories')
         group_box.setFixedWidth(400)
-        group_box.setFont(HEADER_FONT)
+        group_box.setFont(H2_FONT)
         group_box.setLayout(categories_layout)
         input_layout.addWidget(group_box)
 
@@ -96,7 +95,7 @@ class TaxonController(QWidget):
         rank_layout = QVBoxLayout()
         group_box = QGroupBox('Rank')
         group_box.setFixedWidth(400)
-        group_box.setFont(HEADER_FONT)
+        group_box.setFont(H2_FONT)
         group_box.setLayout(rank_layout)
         input_layout.addWidget(group_box)
 
@@ -106,129 +105,163 @@ class TaxonController(QWidget):
 
         # -----------------
 
-        # Search results
+        # Selected taxon
         results_layout = QVBoxLayout()
         root_layout.addLayout(results_layout)
 
-        self.selected_taxon_layout = QHBoxLayout()
-        self.selected_taxon_layout.setAlignment(Qt.AlignTop)
-        results_layout.addLayout(self.selected_taxon_layout)
+        self.selected_taxon_title = QLabel('Selected Taxon')
+        self.selected_taxon_title.setFont(H2_FONT)
+        results_layout.addWidget(self.selected_taxon_title)
 
-        self.selected_taxon_image = PixmapLabel()
-        self.selected_taxon_image.setMinimumWidth(200)
-        self.selected_taxon_image.setMaximumWidth(400)
-        self.selected_taxon_layout.addWidget(self.selected_taxon_image)
+        self.taxon_info = TaxonInfoSection()
+        results_layout.addLayout(self.taxon_info)
 
-        self.taxon_details_layout = QVBoxLayout()
-        self.taxon_details_layout.setAlignment(Qt.AlignTop)
-        self.selected_taxon_layout.addLayout(self.taxon_details_layout)
+        self.taxonomy = TaxonomySection()
+        results_layout.addLayout(self.taxonomy)
 
-        taxonomy_layout = QHBoxLayout()
-        results_layout.addLayout(taxonomy_layout)
+        self.select_taxon(47792)
+
+    def select_taxon(self, taxon_id: int = None, taxon: Taxon = None):
+        """Update taxon info display"""
+        # Don't need to do anything if this taxon is already selected
+        id = taxon_id or taxon.id
+        if self.selected_taxon is not None and id == self.selected_taxon.id:
+            return
+
+        logger.info(f'Selecting taxon {id}')
+        start = time()
+        if taxon_id and not taxon:
+            taxon = INAT_CLIENT.taxa.from_id(taxon_id).one()
+        self.selected_taxon = taxon
+
+        common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
+        self.selected_taxon_title.setText(f'{taxon.name}{common_name}')
+
+        self.taxon_info.load(taxon)
+        self.taxonomy.load(taxon)
+
+        # Clicking on a taxon card will select it
+        for card in self.taxonomy.taxon_cards:
+            card.clicked.connect(self.select_taxon)
+        logger.info(f'Loaded taxon {taxon.id} {time() - start:.2f}s')
+
+
+class TaxonInfoSection(QHBoxLayout):
+    """Section to display selected taxon photo and basic info"""
+
+    def __init__(self):
+        super().__init__()
+
+        self.setAlignment(Qt.AlignTop)
+
+        self.image = PixmapLabel()
+        self.image.setMinimumWidth(200)
+        self.image.setMaximumWidth(400)
+        self.addWidget(self.image)
+
+        self.icon = PixmapLabel()
+        self.icon.setFixedSize(75, 75)
+
+        self.details = QVBoxLayout()
+        self.details.setAlignment(Qt.AlignTop)
+        self.details.addWidget(self.icon)
+        self.addLayout(self.details)
+
+    def load(self, taxon: Taxon):
+        # Photo and iconic taxon icon
+        self.image.setPixmap(taxon=taxon)
+        self.icon.setPixmap(url=taxon.icon_url)
+
+        # Other attributes
+        self.details.addWidget(QLabel(f'ID: {taxon.id}'))
+        self.details.addWidget(QLabel(f'Rank: {taxon.rank}'))
+        self.details.addWidget(QLabel(f'Observations: {taxon.observations_count}'))
+        self.details.addWidget(QLabel(f'Child species: {taxon.complete_species_count}'))
+
+
+class TaxonomySection(QHBoxLayout):
+    """Section to display ancestors and children of selected taxon"""
+
+    def __init__(self):
+        super().__init__()
 
         # Ancestors
         self.ancestors_layout = QVBoxLayout()
         self.ancestors_layout.setAlignment(Qt.AlignTop)
         self.ancestors_group = QGroupBox('Ancestors')
         self.ancestors_group.setFixedWidth(400)
-        self.ancestors_group.setFont(HEADER_FONT)
+        self.ancestors_group.setFont(H2_FONT)
         self.ancestors_group.setLayout(self.ancestors_layout)
-        taxonomy_layout.addWidget(self.ancestors_group)
+        self.addWidget(self.ancestors_group)
 
         # Children
         self.children_layout = QVBoxLayout()
         self.children_layout.setAlignment(Qt.AlignTop)
         self.children_group = QGroupBox('Children')
         self.children_group.setFixedWidth(400)
-        self.children_group.setFont(HEADER_FONT)
+        self.children_group.setFont(H2_FONT)
         self.children_group.setLayout(self.children_layout)
-        taxonomy_layout.addWidget(self.children_group)
+        self.addWidget(self.children_group)
 
-        test_taxon = INAT_CLIENT.taxa.from_id(47792).one()
-        self.select_taxon(test_taxon)
-        logger.info(f'Initialized taxon page in {time() - start:.2f}s')
-
-    def select_taxon(self, taxon: Taxon):
-        """Update taxon info display"""
-        # Don't need to do anything if this taxon is already selected
-        if self.selected_taxon is not None and taxon.id == self.selected_taxon.id:
-            return
-
-        logger.info(f'Selecting taxon {taxon.id}')
-        self.selected_taxon = taxon
-
-        self.load_basic_info()
-        self.load_taxonomy()
-
-    def load_basic_info(self):
-        """Load taxon photo + basic info"""
-        self.selected_taxon_image.setPixmap(taxon=self.selected_taxon)
-
-        # Name, rank
-        # item = ThreeLineAvatarIconListItem(
-        #     text=self.selected_taxon.name,
-        #     secondary_text=self.selected_taxon.rank.title(),
-        #     tertiary_text=self.selected_taxon.preferred_common_name,
-        # )
-
-        # Icon (if available)
-        # icon_path = get_icon_path(self.selected_taxon.iconic_taxon_id)
-        # if icon_path:
-        #     item.add_widget(ImageLeftWidget(source=icon_path))
-        # self.basic_info.add_widget(item)
-
-        # Other attributes
-        clear_layout(self.taxon_details_layout)
-        self.taxon_details_layout.addWidget(QLabel('Taxon details'))
-        self.taxon_details_layout.addWidget(QLabel(f'ID: {self.selected_taxon.id}'))
-        self.taxon_details_layout.addWidget(
-            QLabel(f'Observations: {self.selected_taxon.observations_count}')
-        )
-        self.taxon_details_layout.addWidget(
-            QLabel(f'Child species: {self.selected_taxon.complete_species_count}')
-        )
-
-    def load_taxonomy(self):
+    def load(self, taxon: Taxon):
         """Populate taxon ancestors and children"""
-        logger.info(
-            f'Loading {len(self.selected_taxon.ancestors)} ancestors '
-            f'and {len(self.selected_taxon.children)} children'
-        )
+        logger.info(f'Loading {len(taxon.ancestors)} ancestors and {len(taxon.children)} children')
 
         def get_label(text: str, items: list) -> str:
             return text + (f' ({len(items)})' if items else '')
 
         # Load ancestors
-        self.ancestors_group.setTitle(get_label('Ancestors', self.selected_taxon.ancestors))
+        self.ancestors_group.setTitle(get_label('Ancestors', taxon.ancestors))
         clear_layout(self.ancestors_layout)
-        for taxon in self.selected_taxon.ancestors:
-            self.ancestors_layout.addWidget(TaxonInfoCard(taxon=taxon))
+        for t in taxon.ancestors:
+            self.ancestors_layout.addWidget(TaxonInfoCard(taxon=t))
 
         # Load children
-        self.children_group.setTitle(get_label('Children', self.selected_taxon.children))
+        self.children_group.setTitle(get_label('Children', taxon.children))
         clear_layout(self.children_layout)
-        for taxon in self.selected_taxon.children:
-            self.children_layout.addWidget(TaxonInfoCard(taxon=taxon))
+        for t in taxon.children:
+            self.children_layout.addWidget(TaxonInfoCard(taxon=t))
+
+    @property
+    def taxon_cards(self) -> Iterator['TaxonInfoCard']:
+        for item in self.ancestors_group.children():
+            if isinstance(item, TaxonInfoCard):
+                yield item
+        for item in self.children_group.children():
+            if isinstance(item, TaxonInfoCard):
+                yield item
 
 
 class TaxonInfoCard(QWidget):
+    clicked = Signal(int)
+
     def __init__(self, taxon: Taxon):
         super().__init__()
         card_layout = QHBoxLayout()
         self.setLayout(card_layout)
+        self.taxon_id = taxon.id
+        print('Taxon ID:', self.taxon_id)
 
+        # Image
         img = PixmapLabel(taxon=taxon)
         img.setFixedWidth(75)
         card_layout.addWidget(img)
 
+        # Details
+        title = QLabel(taxon.name)
+        title.setFont(H2_FONT)
         details_layout = QVBoxLayout()
         card_layout.addLayout(details_layout)
-
-        title = QLabel(taxon.name)
-        title.setFont(HEADER_FONT)
         details_layout.addWidget(title)
         details_layout.addWidget(QLabel(taxon.rank))
         details_layout.addWidget(QLabel(taxon.preferred_common_name))
+
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit(self.taxon_id)
 
 
 def clear_layout(layout: QLayout):

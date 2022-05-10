@@ -72,20 +72,27 @@ class PixmapLabel(QLabel):
         pixmap: QPixmap = None,
         path: Union[str, Path] = None,
         taxon: Taxon = None,
+        url: str = None,
     ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
-        self.setPixmap(pixmap, path, taxon)
+        self.setPixmap(pixmap, path, taxon, url)
 
-    def setPixmap(self, pixmap: QPixmap = None, path: Union[str, Path] = None, taxon: Taxon = None):
+    def setPixmap(
+        self,
+        pixmap: QPixmap = None,
+        path: Union[str, Path] = None,
+        taxon: Taxon = None,
+        url: str = None,
+    ):
         if path:
             pixmap = QPixmap(str(path))
         elif taxon:
-            data, ext = _get_taxon_photo(taxon)
-            pixmap = QPixmap()
-            pixmap.loadFromData(data, format=ext)
+            pixmap = _get_image(taxon.default_photo or Photo(url=taxon.icon_url))
+        elif url:
+            pixmap = _get_image(Photo(url=url))
         if pixmap:
             self._pixmap = pixmap
             super().setPixmap(self.scaledPixmap())
@@ -108,6 +115,9 @@ class PixmapLabel(QLabel):
             super().setPixmap(self.scaledPixmap())
 
 
-def _get_taxon_photo(taxon: Taxon):
-    photo = taxon.default_photo or Photo(url=taxon.icon_url)
-    return INAT_CLIENT.session.get(photo.url, stream=True).content, photo.mimetype.replace('image/', '')
+# TODO: Simplify this with changes to Photo model
+def _get_image(photo: Photo) -> QPixmap:
+    data = INAT_CLIENT.session.get(photo.url, stream=True).content
+    pixmap = QPixmap()
+    pixmap.loadFromData(data, format=photo.mimetype.replace('image/', ''))
+    return pixmap
