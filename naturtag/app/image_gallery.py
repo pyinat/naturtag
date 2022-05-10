@@ -4,14 +4,13 @@ from os.path import isfile
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-# from pyinaturalist.models import Observation, Taxon
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QAction, QDropEvent, QPixmap
-from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QLabel, QMenu, QVBoxLayout, QWidget
+from PySide6.QtGui import QAction, QDropEvent, QKeySequence, QPixmap, QShortcut
+from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
 from qtawesome import icon as fa_icon
 
-from naturtag.app.image_window import ImageWindow
-from naturtag.app.layouts import FlowLayout
+from naturtag.app.images import PixmapLabel
+from naturtag.app.layouts import FlowLayout, HorizontalLayout, VerticalLayout
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
 from naturtag.metadata import MetaMetadata
@@ -95,6 +94,57 @@ class ImageGallery(QWidget):
         self.image_window.select_image(file_path, list(self.images.keys()))
 
 
+class ImageWindow(QWidget):
+    """Display a single full-size image at a time as a separate window
+
+    Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.image_paths: list[str] = []
+        self.selected_path = None
+
+        self.image = PixmapLabel()
+        self.image.setFixedSize(QApplication.primaryScreen().availableSize())
+        self.image.setAlignment(Qt.AlignCenter)
+        self.image_layout = VerticalLayout(self)
+        self.image_layout.addWidget(self.image)
+        self.image_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Keyboard shortcuts
+        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        shortcut.activated.connect(self.close)
+        shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
+        shortcut.activated.connect(self.select_next_image)
+        shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
+        shortcut.activated.connect(self.select_prev_image)
+
+    def select_image(self, file_path: str, image_paths: list[str]):
+        """Open window to a selected image, and save other available image paths for navigation"""
+        self.selected_path = file_path
+        self.image_paths = image_paths
+        self.image.setPixmap(QPixmap(file_path))
+        self.showFullScreen()
+
+    def select_image_idx(self, idx: int):
+        """Select an image by index, with wraparound"""
+        if idx < 0:
+            idx = len(self.image_paths) - 1
+        elif idx >= len(self.image_paths):
+            idx = 0
+
+        logger.debug(f'Selecting image {idx}: {self.selected_path}')
+        self.selected_path = self.image_paths[idx]
+        self.image.setPixmap(QPixmap(self.selected_path))
+
+    def select_next_image(self):
+        self.select_image_idx(self.image_paths.index(self.selected_path) + 1)
+
+    def select_prev_image(self):
+        self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
+
+
 class LocalThumbnail(QWidget):
     """A tile that generates, caches, and displays a thumbnail for a local image file.
     Contains icons representing its metadata types, and the following mouse actions:
@@ -116,7 +166,7 @@ class LocalThumbnail(QWidget):
         self.taxon = None
         self.observation = None
 
-        layout = QVBoxLayout(self)
+        layout = VerticalLayout(self)
         layout.setSpacing(0)
 
         # Image
@@ -209,7 +259,7 @@ class ThumbnailMetaIcons(QLabel):
         super().__init__(parent)
         img_size = parent.image.sizeHint()
 
-        self.icon_layout = QHBoxLayout(self)
+        self.icon_layout = HorizontalLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(9, img_size.height() - 10, 100, 20)

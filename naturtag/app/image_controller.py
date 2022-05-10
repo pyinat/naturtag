@@ -2,17 +2,10 @@ from logging import getLogger
 from typing import Callable
 
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import (
-    QApplication,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QWidget
 
 from naturtag.app.image_gallery import ImageGallery
+from naturtag.app.layouts import HorizontalLayout, VerticalLayout
 from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
 
@@ -25,12 +18,12 @@ class ImageController(QWidget):
     def __init__(self, settings: Settings, info_callback: Callable):
         super().__init__()
         self.settings = settings
-        photo_layout = QVBoxLayout()
+        photo_layout = VerticalLayout()
         self.setLayout(photo_layout)
         self.info = info_callback
 
         # Input group
-        input_layout = QHBoxLayout()
+        input_layout = HorizontalLayout()
         group_box = QGroupBox('Input')
         group_box.setFixedHeight(80)
         group_box.setLayout(input_layout)

@@ -5,25 +5,33 @@
 from logging import getLogger
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt
-from PySide6.QtWidgets import QLayout
+from PySide6.QtWidgets import QHBoxLayout, QLayout, QVBoxLayout
 
 logger = getLogger(__name__)
 
 
-class FlowLayout(QLayout):
+class LayoutMixin:
+    """Layout mixin with some extra convenience methods"""
+
+    def __del__(self):
+        try:
+            self.clear()
+        except RuntimeError:
+            pass
+
+    def clear(self):
+        for i in reversed(range(self.count())):
+            child = self.takeAt(i)
+            if child.widget():
+                child.widget().deleteLater()
+
+
+class FlowLayout(LayoutMixin, QLayout):
     def __init__(self, parent=None):
         super().__init__(parent)
         if parent is not None:
             self.setContentsMargins(0, 0, 0, 0)
         self._items = []
-
-    def __del__(self):
-        self.clear()
-
-    def clear(self):
-        while item := self.takeAt(0):
-            if item.widget():
-                item.widget().setParent(None)
 
     def addItem(self, item):
         self._items.append(item)
@@ -123,3 +131,11 @@ class FlowLayout(QLayout):
             line_height = max(line_height, size.height())
 
         return y + line_height - rect.y()
+
+
+class HorizontalLayout(LayoutMixin, QHBoxLayout):
+    pass
+
+
+class VerticalLayout(LayoutMixin, QVBoxLayout):
+    pass

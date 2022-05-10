@@ -35,7 +35,9 @@ class SettingsMenu(QWidget):
         self.add_section(
             'Metadata',
             self.get_bool_setting('common_names', 'Include common names in taxonomy keywords'),
-            self.get_bool_setting('create_xmp', "Create XMP sidecar files if they don't already exist"),
+            self.get_bool_setting(
+                'create_sidecar', "Create XMP sidecar files if they don't already exist"
+            ),
             self.get_bool_setting(
                 'darwin_core', 'Convert species/observation metadata into XMP Darwin Core metadata'
             ),
