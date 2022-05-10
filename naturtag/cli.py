@@ -1,18 +1,15 @@
-from logging import basicConfig
 from re import DOTALL, MULTILINE, compile
 from typing import Optional
 
 import click
 from click_help_colors import HelpColorsCommand
-from pyinaturalist.constants import ICONIC_EMOJI
-from pyinaturalist.v1 import get_taxa_autocomplete
+from pyinaturalist import ICONIC_EMOJI, enable_logging, get_taxa_autocomplete
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
-from naturtag.image_glob import glob_paths
-from naturtag.inat_metadata import strip_url
-from naturtag.tagger import tag_images
+from naturtag.metadata import tag_images
+from naturtag.metadata.inat_metadata import strip_url
 
 CODE_BLOCK = compile(r'```\n(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
@@ -46,14 +43,14 @@ def _strip_url_or_name(ctx, param, value):
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
 @click.option('-t', '--taxon', help='Taxon name, ID, or URL', callback=_strip_url_or_name)
 @click.option(
-    '-x', '--create-xmp', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
+    '-x', '--create-sidecar', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
 )
 @click.option('-v', '--verbose', is_flag=True, help='Show additional information')
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
     common_names,
-    create_xmp,
+    create_sidecar,
     darwin_core,
     flickr_format,
     hierarchical,
@@ -150,25 +147,30 @@ def tag(
             ctx.exit()
 
     if verbose:
-        basicConfig(level='DEBUG')
+        enable_logging(level='DEBUG')
 
-    _, keywords, metadata = tag_images(
+    metadata_list = tag_images(
         observation,
         taxon,
-        common_names,
-        darwin_core,
-        hierarchical,
-        create_xmp,
-        glob_paths(image_paths),
+        common_names=common_names,
+        darwin_core=darwin_core,
+        hierarchical=hierarchical,
+        create_sidecar=create_sidecar,
+        images=image_paths,
     )
+    if not metadata_list:
+        return
 
-    # Print keywords and/or DWC tags, if appropriate
+    # Print keywords if specified
+    keyword_meta = metadata_list[0].keyword_meta
     if flickr_format:
-        print(' '.join(keywords))
+        print(' '.join(keyword_meta.flickr_tags))
     elif not image_paths or verbose:
-        rprint('\n'.join([kw.replace('"', '') for kw in keywords]))
-        if darwin_core and metadata:
-            rprint(metadata)
+        rprint('\n'.join(keyword_meta.normal_keywords))
+        if hierarchical:
+            rprint(keyword_meta.hier_keyword_tree_str)
+        else:
+            rprint('\n'.join([kw.replace('"', '') for kw in keyword_meta.kv_keyword_list]))
 
 
 def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:

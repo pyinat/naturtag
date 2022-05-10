@@ -7,12 +7,15 @@ __pycache__
 .venv
 .vim/
 .vscode/
+.coverage
+.coverage.*
 _build/
 build/
 pip-wheel-metadata/
 dist/
 docs/modules/
 downloads/
+kv/
 libs/
 venv/
 sample_data/

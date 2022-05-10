@@ -81,6 +81,7 @@ class PixmapLabel(QLabel):
         return QSize(self.width(), self.heightForWidth(self.width()))
 
     def scaledPixmap(self) -> QPixmap:
+        assert self._pixmap is not None
         return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
     def resizeEvent(self):

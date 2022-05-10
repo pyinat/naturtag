@@ -1,0 +1,101 @@
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 4.4.0-Exiv2">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+    xmlns:exif="http://ns.adobe.com/exif/1.0/"
+   dwc:occurrenceID="https://www.inaturalist.org/observations/49459966"
+   dwc:basisOfRecord="HumanObservation"
+   dwc:institutionCode="iNaturalist"
+   dwc:collectionCode="Observations"
+   dwc:datasetName="iNaturalist research-grade observations"
+   dwc:catalogNumber="49459966"
+   dwc:recordedBy="Jordan Cook"
+   dwc:identifiedBy="Jordan Cook"
+   dwc:captive="wild"
+   dwc:eventDate="2020-06-06T15:40:00-05:00"
+   dwc:eventTime="20:40:00Z"
+   dwc:verbatimEventDate="2020/06/06 3:40 PM CDT"
+   dwc:verbatimLocality="Rolling Thunder Prairie, Warren County, Iowa"
+   dwc:decimalLatitude="41.1990265685"
+   dwc:decimalLongitude="-93.6572535501"
+   dwc:coordinateUncertaintyInMeters="10"
+   dwc:geodeticDatum="EPSG:4326"
+   dwc:countryCode="US"
+   dwc:stateProvince="Iowa"
+   dwc:identificationID="109946898"
+   dwc:dateIdentified="2020-06-13T16:57:18Z"
+   dwc:taxonID="202860"
+   dwc:scientificName="Chrysopilus ornatus"
+   dwc:taxonRank="species"
+   dwc:kingdom="Animalia"
+   dwc:phylum="Arthropoda"
+   dwc:class="Insecta"
+   dwc:order="Diptera"
+   dwc:family="Rhagionidae"
+   dwc:genus="Chrysopilus"
+   dwc:inaturalistLogin="jkcook"
+   dwc:sex="female"
+   dwc:lifeStage="adult"
+   exif:GPSLatitude="41,11.9415933N"
+   exif:GPSLongitude="93,39.4352117E">
+   <dcterms:modified>
+    <rdf:Seq>
+     <rdf:li>2021-04-05T15:00:04Z</rdf:li>
+    </rdf:Seq>
+   </dcterms:modified>
+   <dcterms:references>
+    <rdf:Bag>
+     <rdf:li>https://www.inaturalist.org/observations/49459966</rdf:li>
+    </rdf:Bag>
+   </dcterms:references>
+   <dcterms:license>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0/</rdf:li>
+    </rdf:Alt>
+   </dcterms:license>
+   <dcterms:rightsHolder>
+    <rdf:Seq>
+     <rdf:li>Jordan Cook</rdf:li>
+    </rdf:Seq>
+   </dcterms:rightsHolder>
+   <dc:subject>
+    <rdf:Seq>
+     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
+     <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
+     <rdf:li>taxonomy:class=Insecta</rdf:li>
+     <rdf:li>taxonomy:subclass=Pterygota</rdf:li>
+     <rdf:li>taxonomy:order=Diptera</rdf:li>
+     <rdf:li>taxonomy:suborder=Brachycera</rdf:li>
+     <rdf:li>taxonomy:infraorder=Orthorrhapha</rdf:li>
+     <rdf:li>taxonomy:parvorder=Tabanomorpha</rdf:li>
+     <rdf:li>taxonomy:family=Rhagionidae</rdf:li>
+     <rdf:li>taxonomy:subfamily=Chrysopilinae</rdf:li>
+     <rdf:li>taxonomy:genus=Chrysopilus</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Hexapods</rdf:li>
+     <rdf:li>Insects</rdf:li>
+     <rdf:li>Flies</rdf:li>
+     <rdf:li>"Brachyceran Flies"</rdf:li>
+     <rdf:li>"Orthorrhaphan Flies"</rdf:li>
+     <rdf:li>"Snipe Flies"</rdf:li>
+     <rdf:li>"Ornate Snipe Fly"</rdf:li>
+     <rdf:li>inaturalist:taxon_id=202860</rdf:li>
+     <rdf:li>dwc:taxonID=202860</rdf:li>
+     <rdf:li>inaturalist:observation_id=49459966</rdf:li>
+     <rdf:li>dwc:catalogNumber=49459966</rdf:li>
+    </rdf:Seq>
+   </dc:subject>
+   <lr:hierarchicalSubject>
+    <rdf:Seq/>
+   </lr:hierarchicalSubject>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>

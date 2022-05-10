@@ -45,9 +45,14 @@ jobs:
           naturtag -cdo 45524803
           naturtag -cdt 48978
       - name: Run unit tests
-        run: poetry run pytest test
+        run: poetry run pytest ${{ env.COVERAGE_ARGS }} test
 
-  # Run code analysis checks, reports, etc.
+      # TODO: Upload coverage report to codecov... once there's actual coverage to report
+      # - name: "Upload coverage report to Codecov"
+      #   if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
+      #   uses: codecov/codecov-action@v3
+
+  # Run code analysis checks via pre-commit hooks
   analyze:
     runs-on: ubuntu-latest
     steps:
@@ -55,31 +60,5 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
-      - uses: snok/install-poetry@v1.3.1
-        with:
-          version: 1.2.0a2
-          virtualenvs-in-project: true
-
-      # Cache packages and reuse until lockfile changes
-      - name: Cache python packages
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ env.LATEST_PY_VERSION }}-${{ hashFiles('poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: poetry install -v -E all
-      # TODO: Run these with pre-commit
-      - name: Run style checks, type checks, and linting
-        run: |
-          source $VENV
-          black --check --diff .
-          isort --check --diff .
-          flake8 naturtag
-        # mypy naturtag
-      # TODO: Upload coverage report to codecov... once there's actual coverage to report
-      - name: Run unit tests
-        run: |
-          source $VENV
-          pytest ${{ env.COVERAGE_ARGS }} test
+      - name: Run style checks & linting
+        uses: pre-commit/action@v2.0.3

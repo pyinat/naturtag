@@ -7,56 +7,55 @@
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
-   dwc:occurrenceID="https://www.inaturalist.org/observations/49454455"
+   dwc:occurrenceID="https://www.inaturalist.org/observations/36370373"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
    dwc:collectionCode="Observations"
    dwc:datasetName="iNaturalist research-grade observations"
-   dwc:catalogNumber="49454455"
-   dwc:occurrenceRemarks="🐝💛🧡"
+   dwc:catalogNumber="36370373"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jordan Cook"
+   dwc:identifiedBy="Jonathan Hoskins"
    dwc:captive="wild"
-   dwc:eventDate="2020-06-06T15:52:00-05:00"
-   dwc:eventTime="15:52-0600"
-   dwc:verbatimEventDate="2020-06-06 15:52:00-06:00"
-   dwc:verbatimLocality=" Rolling Thunder Prairie, Warren County, Iowa "
-   dwc:decimalLatitude="41.1989907799"
-   dwc:decimalLongitude="-93.6572785001"
-   dwc:coordinateUncertaintyInMeters="10"
+   dwc:eventDate="2019-11-28T15:15:00-06:00"
+   dwc:eventTime="21:15:00Z"
+   dwc:verbatimEventDate="2019/11/28 3:15 PM CST"
+   dwc:verbatimLocality="Stone County, MO, USA"
+   dwc:decimalLatitude="36.5578291939"
+   dwc:decimalLongitude="-93.4679448499"
+   dwc:coordinateUncertaintyInMeters="200"
    dwc:geodeticDatum="EPSG:4326"
    dwc:countryCode="US"
-   dwc:stateProvince="Iowa"
-   dwc:identificationID="109938326"
-   dwc:dateIdentified="2020-06-13T11:18:04-05:00"
-   dwc:taxonID="47219"
-   dwc:scientificName="Apis mellifera"
+   dwc:stateProvince="Missouri"
+   dwc:identificationID="79882425"
+   dwc:dateIdentified="2019-12-06T21:51:37Z"
+   dwc:identificationRemarks="Noting the extensive dark markings on the scutum (&quot;shield&quot; of the thorax&quot;) and around the ocelli. Photo #11 in particular shows an excellent view of the coarser ridging on the propodeum (rear slope of the thorax)."
+   dwc:taxonID="370906"
+   dwc:scientificName="Polistes rubiginosus"
    dwc:taxonRank="species"
    dwc:kingdom="Animalia"
    dwc:phylum="Arthropoda"
    dwc:class="Insecta"
    dwc:order="Hymenoptera"
-   dwc:family="Apidae"
-   dwc:genus="Apis"
+   dwc:family="Vespidae"
+   dwc:genus="Polistes"
    dwc:inaturalistLogin="jkcook"
-   dwc:occurrenceDetails="https://www.inaturalist.org/observations/49454455"
-   dwc:establishmentMeans="wild"
-   dcterms:description="🐝💛🧡"
-   exif:GPSLatitude="41,11.9394467N"
-   exif:GPSLongitude="93,39.4367100E">
+   dwc:sex="female"
+   dwc:lifeStage="adult"
+   exif:GPSLatitude="36,33.4697500N"
+   exif:GPSLongitude="93,28.0766900E">
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2020-09-06 19:30:52-05:00</rdf:li>
+     <rdf:li>2019-12-06T23:48:22Z</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
     <rdf:Bag>
-     <rdf:li>https://www.inaturalist.org/observations/49454455</rdf:li>
+     <rdf:li>https://www.inaturalist.org/observations/36370373</rdf:li>
     </rdf:Bag>
    </dcterms:references>
    <dcterms:license>
     <rdf:Alt>
-     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0</rdf:li>
+     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0/</rdf:li>
     </rdf:Alt>
    </dcterms:license>
    <dcterms:rightsHolder>
@@ -66,7 +65,7 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -75,27 +74,25 @@
      <rdf:li>taxonomy:order=Hymenoptera</rdf:li>
      <rdf:li>taxonomy:suborder=Apocrita</rdf:li>
      <rdf:li>taxonomy:infraorder=Aculeata</rdf:li>
-     <rdf:li>taxonomy:superfamily=Apoidea</rdf:li>
-     <rdf:li>taxonomy:epifamily=Anthophila</rdf:li>
-     <rdf:li>taxonomy:family=Apidae</rdf:li>
-     <rdf:li>taxonomy:subfamily=Apinae</rdf:li>
-     <rdf:li>taxonomy:tribe=Apini</rdf:li>
-     <rdf:li>taxonomy:genus=Apis</rdf:li>
-     <rdf:li>taxonomy:subgenus=Apis</rdf:li>
-     <rdf:li>"Western Honey Bee"</rdf:li>
+     <rdf:li>taxonomy:superfamily=Vespoidea</rdf:li>
+     <rdf:li>taxonomy:family=Vespidae</rdf:li>
+     <rdf:li>taxonomy:subfamily=Polistinae</rdf:li>
+     <rdf:li>taxonomy:tribe=Polistini</rdf:li>
+     <rdf:li>taxonomy:genus=Polistes</rdf:li>
+     <rdf:li>taxonomy:subgenus=Fuscopolistes</rdf:li>
+     <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
      <rdf:li>Hexapods</rdf:li>
      <rdf:li>Insects</rdf:li>
-     <rdf:li>Bees</rdf:li>
-     <rdf:li>"Apine Bees"</rdf:li>
-     <rdf:li>"Honey Bees"</rdf:li>
-     <rdf:li>"Honey Bees"</rdf:li>
-     <rdf:li>"Cavity-nesting Honey Bees"</rdf:li>
-     <rdf:li>inaturalist:taxon_id=47219</rdf:li>
-     <rdf:li>dwc:taxonID=47219</rdf:li>
-     <rdf:li>inaturalist:observation_id=49454455</rdf:li>
-     <rdf:li>dwc:catalogNumber=49454455</rdf:li>
+     <rdf:li>"Vespoid Wasps"</rdf:li>
+     <rdf:li>"Paper Wasps"</rdf:li>
+     <rdf:li>"Umbrella Paper Wasps"</rdf:li>
+     <rdf:li>"fuscatus-group Paper Wasps"</rdf:li>
+     <rdf:li>inaturalist:taxon_id=370906</rdf:li>
+     <rdf:li>dwc:taxonID=370906</rdf:li>
+     <rdf:li>inaturalist:observation_id=36370373</rdf:li>
+     <rdf:li>dwc:catalogNumber=36370373</rdf:li>
     </rdf:Seq>
    </dc:subject>
    <dc:creator>

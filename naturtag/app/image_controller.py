@@ -12,10 +12,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from naturtag.inat_metadata import get_ids_from_url
-from naturtag.qt_app.image_gallery import ImageGallery
+from naturtag.app.image_gallery import ImageGallery
+from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
-from naturtag.tagger import tag_images
 
 logger = getLogger(__name__)
 
@@ -70,20 +69,16 @@ class ImageController(QWidget):
         logger.info(f'Tagging {len(files)} images with metadata for {selected_id}')
 
         # TODO: Handle write errors (like file locked) and show dialog
-        # TODO: Application settings
-        # metadata_settings = get_app().settings_controller.metadata
-        all_metadata, _, _ = tag_images(
+        all_metadata = tag_images(
             obs_id,
             taxon_id,
-            self.settings.common_names,
-            self.settings.darwin_core,
-            self.settings.hierarchical_keywords,
-            self.settings.create_xmp,
+            common_names=self.settings.common_names,
+            darwin_core=self.settings.darwin_core,
+            hierarchical=self.settings.hierarchical_keywords,
+            create_sidecar=self.settings.create_sidecar,
             images=files,
         )
         self.info(f'{len(files)} images tagged with metadata for {selected_id}')
-        logger.info(sorted(list(self.gallery.images.keys())))
-        logger.info(sorted([metadata.image_path for metadata in all_metadata]))
 
         for metadata in all_metadata:
             image = self.gallery.images[metadata.image_path]
@@ -101,7 +96,7 @@ class ImageController(QWidget):
         text = QApplication.clipboard().text()
         logger.debug(f'Pasted: {text}')
 
-        taxon_id, observation_id = get_ids_from_url(text)
+        observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
             self.input_obs_id.setText(str(observation_id))
             self.info(f'Observation {observation_id} selected')

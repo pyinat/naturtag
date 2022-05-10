@@ -4,16 +4,17 @@ from os.path import isfile
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+# from pyinaturalist.models import Observation, Taxon
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QAction, QDropEvent, QPixmap
 from PySide6.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QLabel, QMenu, QVBoxLayout, QWidget
 from qtawesome import icon as fa_icon
 
+from naturtag.app.image_window import ImageWindow
+from naturtag.app.layouts import FlowLayout
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
-from naturtag.models import MetaMetadata
-from naturtag.qt_app.image_window import ImageWindow
-from naturtag.qt_app.layouts import FlowLayout
+from naturtag.metadata import MetaMetadata
 from naturtag.thumbnails import get_thumbnail
 
 logger = getLogger(__name__)
@@ -112,6 +113,9 @@ class LocalThumbnail(QWidget):
         self.file_path = Path(file_path)
         self.window = None
         self.setToolTip(f'{file_path}\n{self.metadata.summary}')
+        self.taxon = None
+        self.observation = None
+
         layout = QVBoxLayout(self)
         layout.setSpacing(0)
 

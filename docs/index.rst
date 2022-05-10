@@ -9,9 +9,8 @@ For general usage information see the `README <https://github.com/JWCook/naturta
    :caption: Contents:
 
    modules/naturtag
-   modules/naturtag.models
-   modules/naturtag.ui
-
+   modules/naturtag.app
+   modules/naturtag.metadata
 
 
 Indices and tables
