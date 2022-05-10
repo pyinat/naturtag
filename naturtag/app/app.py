@@ -2,14 +2,13 @@ import sys
 from logging import getLogger
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget, QWidget
-from qtawesome import icon as fa_icon
-from qtmodern import styles
+from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QPushButton, QStatusBar, QTabWidget
 from qtmodern.windows import ModernWindow
 
 from naturtag.app.image_controller import ImageController
 from naturtag.app.logger import init_handler
 from naturtag.app.settings_menu import SettingsMenu
+from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.taxon_controller import TaxonController
 from naturtag.app.toolbar import Toolbar
 from naturtag.constants import ASSETS_DIR
@@ -19,21 +18,21 @@ logger = getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, settings: Settings):
         super().__init__()
         self.resize(1024, 1024)
         self.setWindowTitle('Naturtag')
         log_handler = init_handler()
 
         # Controllers & Settings
-        self.settings = Settings.read()
+        self.settings = settings
         self.image_controller = ImageController(self.settings, self.info)
         self.taxon_controller = TaxonController(self.settings, self.info)
 
         # Tabbed layout
         self.tabs = QTabWidget()
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
-        self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observations')
+        # self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observations')
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
         self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
@@ -57,8 +56,14 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
 
+        # Debug
+        button = QPushButton('Reload QSS')
+        button.clicked.connect(self.reload_qss)
+        self.taxon_controller.input_layout.addWidget(button)
+
         # Load demo images
-        self.image_controller.gallery.load_images((ASSETS_DIR / 'demo_images').glob('*.jpg'))
+        demo_images = (ASSETS_DIR / 'demo_images').glob('*.jpg')
+        self.image_controller.gallery.load_images(demo_images)  # type: ignore
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""
@@ -95,13 +100,16 @@ class MainWindow(QMainWindow):
         self.settings.show_logs = tab_visible
         self.settings.write()
 
+    def reload_qss(self):
+        set_stylesheet(self)
+
 
 def main():
     app = QApplication(sys.argv)
-    styles.dark(app)
-    # styles.light(app)
+    settings = Settings.read()
+    set_theme(dark_mode=settings.dark_mode)
 
-    window = ModernWindow(MainWindow())
+    window = ModernWindow(MainWindow(settings))
     window.show()
     sys.exit(app.exec())
 

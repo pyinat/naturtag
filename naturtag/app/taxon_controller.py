@@ -4,7 +4,6 @@ from typing import Callable, Iterable, Iterator
 
 from pyinaturalist import Taxon
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QListWidget, QScrollArea, QWidget
 
 from naturtag.app.images import PixmapLabel
@@ -13,14 +12,6 @@ from naturtag.metadata.inat_metadata import INAT_CLIENT
 from naturtag.settings import Settings
 
 logger = getLogger(__name__)
-
-
-H1_FONT = QFont()
-H1_FONT.setWeight(QFont.Bold)
-H1_FONT.setPointSize(20)
-H2_FONT = QFont()
-H2_FONT.setWeight(QFont.Bold)
-H2_FONT.setPointSize(16)
 
 
 class TaxonController(QWidget):
@@ -34,17 +25,16 @@ class TaxonController(QWidget):
         self.selected_taxon: Taxon = None
         self.info = info_callback
 
-        input_layout = VerticalLayout()
-        root_layout.addLayout(input_layout)
+        self.input_layout = VerticalLayout()
+        root_layout.addLayout(self.input_layout)
 
         # Taxon name autocomplete
         autocomplete_layout = VerticalLayout()
         autocomplete_layout.setAlignment(Qt.AlignTop)
         group_box = QGroupBox('Search')
         group_box.setFixedWidth(400)
-        group_box.setFont(H2_FONT)
         group_box.setLayout(autocomplete_layout)
-        input_layout.addWidget(group_box)
+        self.input_layout.addWidget(group_box)
 
         self.input_taxon_search = QLineEdit()
         self.input_taxon_search.setClearButtonEnabled(True)
@@ -56,14 +46,12 @@ class TaxonController(QWidget):
         autocomplete_results.setFixedHeight(300)
         autocomplete_layout.addWidget(autocomplete_results)
 
-        # Iconic taxa (category) inputs
+        # Category inputs
         categories_layout = VerticalLayout()
         group_box = QGroupBox('Categories')
         group_box.setFixedWidth(400)
-        group_box.setFont(H2_FONT)
         group_box.setLayout(categories_layout)
-        input_layout.addWidget(group_box)
-
+        self.input_layout.addWidget(group_box)
         categories_layout.addWidget(QLabel('1'))
         categories_layout.addWidget(QLabel('2'))
         categories_layout.addWidget(QLabel('3'))
@@ -72,24 +60,15 @@ class TaxonController(QWidget):
         rank_layout = VerticalLayout()
         group_box = QGroupBox('Rank')
         group_box.setFixedWidth(400)
-        group_box.setFont(H2_FONT)
         group_box.setLayout(rank_layout)
-        input_layout.addWidget(group_box)
-
+        self.input_layout.addWidget(group_box)
         rank_layout.addWidget(QLabel('1'))
         rank_layout.addWidget(QLabel('2'))
         rank_layout.addWidget(QLabel('3'))
 
-        # -----------------
-
         # Selected taxon
         results_layout = VerticalLayout()
         root_layout.addLayout(results_layout)
-
-        self.selected_taxon_title = QLabel('Selected Taxon')
-        self.selected_taxon_title.setFont(H2_FONT)
-        results_layout.addWidget(self.selected_taxon_title)
-
         self.taxon_info = TaxonInfoSection()
         results_layout.addLayout(self.taxon_info)
         self.taxonomy = TaxonomySection()
@@ -111,9 +90,6 @@ class TaxonController(QWidget):
         assert taxon is not None
         self.selected_taxon = taxon
 
-        common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
-        self.selected_taxon_title.setText(f'{taxon.name}{common_name}')
-
         self.taxon_info.load(taxon)
         self.taxonomy.load(taxon)
 
@@ -129,26 +105,31 @@ class TaxonInfoSection(HorizontalLayout):
     def __init__(self):
         super().__init__()
 
+        self.group = QGroupBox('Selected Taxon')
+        inner_layout = HorizontalLayout(self.group)
+        self.addWidget(self.group)
         self.setAlignment(Qt.AlignTop)
 
         self.image = PixmapLabel()
         self.image.setMinimumWidth(200)
         self.image.setMaximumWidth(400)
-        self.addWidget(self.image)
+        inner_layout.addWidget(self.image)
 
-        self.icon_layout = HorizontalLayout()
-        self.icon_layout.setAlignment(Qt.AlignTop)
         self.icon = PixmapLabel()
         self.icon.setFixedSize(75, 75)
-        self.icon_layout.addWidget(self.icon)
-        self.addLayout(self.icon_layout)
+        icon_layout = HorizontalLayout()
+        icon_layout.setAlignment(Qt.AlignTop)
+        icon_layout.addWidget(self.icon)
+        inner_layout.addLayout(icon_layout)
 
         self.details = VerticalLayout()
         self.details.setAlignment(Qt.AlignTop)
-        self.addLayout(self.details)
+        inner_layout.addLayout(self.details)
 
     def load(self, taxon: Taxon):
-        # Photo and iconic taxon icon
+        # Label, photo ,and iconic taxon icon
+        common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
+        self.group.setTitle(f'{taxon.name}{common_name}')
         self.image.setPixmap(taxon=taxon)
         self.icon.setPixmap(url=taxon.icon_url)
 
@@ -168,13 +149,11 @@ class TaxonomySection(HorizontalLayout):
 
         self.ancestors_group = QGroupBox('Ancestors')
         self.ancestors_group.setFixedWidth(400)
-        self.ancestors_group.setFont(H2_FONT)
         self.ancestors_layout = TaxonList(self.ancestors_group)
         self.addWidget(self.ancestors_group)
 
         self.children_group = QGroupBox('Children')
         self.children_group.setFixedWidth(400)
-        self.children_group.setFont(H2_FONT)
         self.children_layout = TaxonList(self.children_group)
         self.addWidget(self.children_group)
 
@@ -240,7 +219,6 @@ class TaxonInfoCard(QWidget):
         card_layout = HorizontalLayout()
         self.setLayout(card_layout)
         self.taxon_id = taxon.id
-        print('Taxon ID:', self.taxon_id)
 
         # Image
         img = PixmapLabel(taxon=taxon)
@@ -249,7 +227,6 @@ class TaxonInfoCard(QWidget):
 
         # Details
         title = QLabel(taxon.name)
-        title.setFont(H2_FONT)
         details_layout = VerticalLayout()
         card_layout.addLayout(details_layout)
         details_layout.addWidget(title)

@@ -2,15 +2,16 @@ import webbrowser
 from logging import getLogger
 from os.path import isfile
 from pathlib import Path
+from typing import Iterable
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QAction, QDropEvent, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
-from qtawesome import icon as fa_icon
 
 from naturtag.app.images import PixmapLabel
 from naturtag.app.layouts import FlowLayout, HorizontalLayout, VerticalLayout
+from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
 from naturtag.metadata import MetaMetadata
@@ -45,7 +46,7 @@ class ImageGallery(QWidget):
         )
         self.load_images(file_paths)
 
-    def load_images(self, paths: list[str]):
+    def load_images(self, paths: Iterable[str]):
         """Load multiple images, and ignore any duplicates"""
         images = get_images_from_paths(paths, recursive=True)
         new_images = list(set(images) - set(self.images.keys()))
@@ -277,6 +278,7 @@ class ThumbnailMetaIcons(QLabel):
         self._add_icon('mdi.xml', active=metadata.has_sidecar)
 
     def _add_icon(self, icon_str: str, active: bool = False):
+        # TODO: Use palette, figure out setting icon state
         icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
         icon_label = QLabel(self)
         icon_label.setPixmap(icon.pixmap(16, 16))

@@ -57,6 +57,7 @@ MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 # Theme/window settings
 INIT_WINDOW_SIZE = (1500, 900)
 MAX_LABEL_CHARS = 80
+QSS_PATH = ASSETS_DIR / 'style.qss'
 
 # Simplified tags without formatting variations
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']

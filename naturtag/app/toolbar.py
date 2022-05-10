@@ -4,8 +4,8 @@ from typing import Callable
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import QApplication, QMenu, QSizePolicy, QToolBar, QWidget
-from qtawesome import icon as fa_icon
 
+from naturtag.app.style import fa_icon
 from naturtag.settings import Settings
 
 logger = getLogger(__name__)

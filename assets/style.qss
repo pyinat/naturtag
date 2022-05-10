@@ -1,0 +1,18 @@
+/* QMenu::icon {
+    color: palette(brightText);
+} */
+
+QGroupBox {
+    font: bold 18px;
+    border: 2px solid palette(midlight);
+    border-radius: 6px;
+    margin-top: 8px;
+    padding:5px;
+}
+
+QGroupBox::title {
+    subcontrol-origin:  margin;
+    subcontrol-position: top left;
+    left: 7px;
+    padding: 0px 5px 0px 5px;
+ }

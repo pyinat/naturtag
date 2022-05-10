@@ -44,6 +44,7 @@ a = Analysis(
     binaries=binaries,
     datas=[
         (str(ASSETS_DIR / '*.png'), 'assets'),
+        (str(ASSETS_DIR / '*.qss'), 'assets'),
     ],
     hiddenimports=[],
     hookspath=[],

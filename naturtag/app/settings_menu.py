@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from naturtag.app.style import set_theme
 from naturtag.settings import Settings
 
 
@@ -46,6 +47,14 @@ class SettingsMenu(QWidget):
             ),
         )
 
+        theme_checkbox = self._get_checkbox('dark_mode')
+        theme_checkbox.stateChanged.connect(lambda state: set_theme(state == Qt.Checked))
+        item_layout = QHBoxLayout()
+        item_layout.addWidget(theme_checkbox)
+        item_layout.addWidget(QLabel('Dark mode'))
+        item_layout.setAlignment(Qt.AlignLeft)
+        self.add_section('Display', item_layout)
+
         # Press escape to close window
         shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         shortcut.activated.connect(self.close)
@@ -76,6 +85,7 @@ class SettingsMenu(QWidget):
         """Get a widget and label for a text setting"""
         item_layout = QHBoxLayout()
         item_layout.addWidget(QLabel(description))
+        item_layout.addStretch()
         item_layout.addWidget(self._get_line_edit(setting_attr, validator))
         item_layout.setAlignment(Qt.AlignLeft)
         return item_layout
