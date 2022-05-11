@@ -11,7 +11,7 @@ from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.taxon_controller import TaxonController
 from naturtag.app.toolbar import Toolbar
-from naturtag.constants import ASSETS_DIR
+from naturtag.constants import ASSETS_DIR, INIT_WINDOW_SIZE
 from naturtag.settings import Settings
 
 logger = getLogger(__name__)
@@ -20,14 +20,18 @@ logger = getLogger(__name__)
 class MainWindow(QMainWindow):
     def __init__(self, settings: Settings):
         super().__init__()
-        self.resize(1024, 1024)
+        self.resize(*INIT_WINDOW_SIZE)
         self.setWindowTitle('Naturtag')
         log_handler = init_handler()
 
         # Controllers & Settings
         self.settings = settings
-        self.image_controller = ImageController(self.settings, self.info)
-        self.taxon_controller = TaxonController(self.settings, self.info)
+        self.image_controller = ImageController(self.settings)
+        self.taxon_controller = TaxonController(self.settings)
+        self.image_controller.message.connect(self.info)
+        self.image_controller.gallery.message.connect(self.info)
+        self.taxon_controller.message.connect(self.info)
+        self.taxon_controller.selection.connect(self.image_controller.select_taxon)
 
         # Tabbed layout
         self.tabs = QTabWidget()
@@ -39,16 +43,15 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.tabs)
 
         # Toolbar
-        self.toolbar = Toolbar(
-            self,
-            load_file_callback=self.image_controller.gallery.load_file_dialog,
-            run_callback=self.image_controller.run,
-            clear_callback=self.image_controller.clear,
-            paste_callback=self.image_controller.paste,
-            fullscreen_callback=self.toggle_fullscreen,
-            log_callback=self.toggle_log_tab,
-            settings_callback=self.show_settings,
-        )
+        self.toolbar = Toolbar(self)
+        self.toolbar.run_button.triggered.connect(self.image_controller.run)
+        self.toolbar.open_button.triggered.connect(self.image_controller.gallery.load_file_dialog)
+        self.toolbar.paste_button.triggered.connect(self.image_controller.paste)
+        self.toolbar.clear_button.triggered.connect(self.image_controller.clear)
+        self.toolbar.fullscreen_button.triggered.connect(self.toggle_fullscreen)
+        self.toolbar.settings_button.triggered.connect(self.show_settings)
+        self.toolbar.logs_button.triggered.connect(self.toggle_log_tab)
+        self.toolbar.exit_button.triggered.connect(QApplication.instance().quit)
 
         # Menu bar and status bar
         self.toolbar.populate_menu(self.menuBar(), self.settings)

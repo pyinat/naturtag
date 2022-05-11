@@ -1,6 +1,7 @@
 from logging import getLogger
-from typing import Callable
 
+from pyinaturalist import Taxon
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QWidget
 
@@ -15,12 +16,13 @@ logger = getLogger(__name__)
 class ImageController(QWidget):
     """Controller for selecting and tagging local image files"""
 
-    def __init__(self, settings: Settings, info_callback: Callable):
+    message = Signal(str)
+
+    def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings
         photo_layout = VerticalLayout()
         self.setLayout(photo_layout)
-        self.info = info_callback
 
         # Input group
         input_layout = HorizontalLayout()
@@ -98,3 +100,9 @@ class ImageController(QWidget):
             self.info(f'Taxon {taxon_id} selected')
         else:
             self.gallery.load_images(text.splitlines())
+
+    def select_taxon(self, taxon: Taxon):
+        self.input_taxon_id.setText(str(taxon.id))
+
+    def info(self, message: str):
+        self.message.emit(message)

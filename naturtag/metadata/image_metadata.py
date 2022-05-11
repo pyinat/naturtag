@@ -44,7 +44,7 @@ class ImageMetadata:
 
     def _safe_read_metadata(self, path, encoding='utf-8'):
         """Attempt to read metadata, with error handling"""
-        logger.info(f'Reading metadata from: {path} ({encoding})')
+        logger.debug(f'Reading metadata from: {path} ({encoding})')
         img = self.read_exiv2_image(path)
         if not img:
             return {}, {}, {}
@@ -90,13 +90,13 @@ class ImageMetadata:
         """Create a new XMP sidecar file if one does not already exist"""
         if isfile(self.xmp_path):
             return
-        logger.info(f'Creating new XMP sidecar file: {self.xmp_path}')
+        logger.debug(f'Creating new XMP sidecar file: {self.xmp_path}')
         with open(self.xmp_path, 'w') as f:
             f.write(NEW_XMP_CONTENTS.strip())
 
     def update(self, new_metadata: dict):
         """Update arbitrary EXIF, IPTC, and/or XMP metadata"""
-        logger.info(f'Updating with {len(new_metadata)} tags')
+        logger.debug(f'Updating with {len(new_metadata)} tags')
 
         def _filter_tags(prefix):
             return {k: v for k, v in new_metadata.items() if k.startswith(prefix)}
@@ -114,7 +114,7 @@ class ImageMetadata:
         if isfile(self.xmp_path):
             self._write(self.xmp_path)
         else:
-            logger.info(f'No existing XMP sidecar file found for {self.image_path}; skipping')
+            logger.debug(f'No existing XMP sidecar file found for {self.image_path}; skipping')
 
     def _write(self, path):
         """Write current metadata to a single path"""

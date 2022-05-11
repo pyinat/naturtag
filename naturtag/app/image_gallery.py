@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Iterable
 from urllib.parse import unquote, urlparse
 
-from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtGui import QAction, QDropEvent, QKeySequence, QPixmap, QShortcut
+from PySide6.QtCore import Qt, QUrl, Signal, Slot
+from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
 
 from naturtag.app.images import PixmapLabel
@@ -22,6 +22,8 @@ logger = getLogger(__name__)
 
 class ImageGallery(QWidget):
     """Container for displaying local image thumbnails & info"""
+
+    message = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -50,10 +52,10 @@ class ImageGallery(QWidget):
         """Load multiple images, and ignore any duplicates"""
         images = get_images_from_paths(paths, recursive=True)
         new_images = list(set(images) - set(self.images.keys()))
-        logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
         if not new_images:
             return
 
+        logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
         for file_path in sorted(new_images):
             self.load_image(file_path)
 
@@ -72,6 +74,7 @@ class ImageGallery(QWidget):
         thumbnail = LocalThumbnail(file_path)
         thumbnail.removed.connect(self.remove_image)
         thumbnail.selected.connect(self.select_image)
+        thumbnail.copied.connect(self.message.emit)
         self.flow_layout.addWidget(thumbnail)
         self.images[file_path] = thumbnail
 
@@ -157,6 +160,7 @@ class LocalThumbnail(QWidget):
 
     removed = Signal(str)
     selected = Signal(str)
+    copied = Signal(str)
 
     def __init__(self, file_path: str):
         super().__init__()
@@ -164,7 +168,6 @@ class LocalThumbnail(QWidget):
         self.file_path = Path(file_path)
         self.window = None
         self.setToolTip(f'{file_path}\n{self.metadata.summary}')
-        self.taxon = None
         self.observation = None
 
         layout = VerticalLayout(self)
@@ -204,7 +207,12 @@ class LocalThumbnail(QWidget):
 
     def copy_flickr_tags(self):
         QApplication.clipboard().setText(self.metadata.keyword_meta.flickr_tags)
-        # alert('Tags copied to clipboard')
+        id_str = (
+            f'observation {self.metadata.observation_id}'
+            if self.metadata.has_observation
+            else f'taxon {self.metadata.taxon_id}'
+        )
+        self.copied.emit(f'Tags for {id_str} copied to clipboard')
 
     def remove(self):
         logger.debug(f'Removing image {self.file_path}')
@@ -220,6 +228,9 @@ class LocalThumbnail(QWidget):
         self.metadata = metadata
         self.icons.refresh_icons(metadata)
         self.setToolTip(f'{self.file_path}\n{self.metadata.summary}')
+
+    def open_directory(self):
+        QDesktopServices.openUrl(QUrl(self.file_path.parent.as_uri()))
 
 
 class ThumbnailContextMenu(QMenu):
@@ -247,6 +258,11 @@ class ThumbnailContextMenu(QMenu):
         action.triggered.connect(thumbnail.copy_flickr_tags)
         self.addAction(action)
 
+        action = QAction(fa_icon('fa5s.folder-open'), 'Open containing folder', thumbnail)
+        action.setStatusTip(f'Open containing folder: {thumbnail.file_path.parent}')
+        action.triggered.connect(thumbnail.open_directory)
+        self.addAction(action)
+
         action = QAction(fa_icon('fa.remove'), 'Remove image', thumbnail)
         action.setStatusTip('Remove this image from the selection')
         action.triggered.connect(thumbnail.remove)
@@ -268,6 +284,7 @@ class ThumbnailMetaIcons(QLabel):
         self.refresh_icons(parent.metadata)
 
     def refresh_icons(self, metadata: MetaMetadata):
+        """Update icons based on types of metadata available"""
         while (child := self.icon_layout.takeAt(0)) is not None:
             child.widget().deleteLater()
 

@@ -1,6 +1,6 @@
 from logging import getLogger
 from time import time
-from typing import Callable, Iterable, Iterator
+from typing import Iterable, Iterator
 
 from pyinaturalist import Taxon
 from PySide6.QtCore import Qt, Signal
@@ -15,18 +15,63 @@ logger = getLogger(__name__)
 
 
 class TaxonController(QWidget):
-    """Controller for searching taxa"""
+    """Controller for searching and viewing taxa"""
 
-    def __init__(self, settings: Settings, info_callback: Callable):
+    message = Signal(str)
+    selection = Signal(Taxon)
+
+    def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings
         root_layout = HorizontalLayout()
         self.setLayout(root_layout)
         self.selected_taxon: Taxon = None
-        self.info = info_callback
 
-        self.input_layout = VerticalLayout()
+        # Search inputs
+        self.input_layout = SearchInputs()
         root_layout.addLayout(self.input_layout)
+
+        # Selected taxon info
+        self.taxon_info = TaxonInfoSection()
+        self.taxonomy = TaxonomySection()
+        taxon_layout = VerticalLayout()
+        taxon_layout.addLayout(self.taxon_info)
+        taxon_layout.addLayout(self.taxonomy)
+        root_layout.addLayout(taxon_layout)
+
+        self.select_taxon(47792)
+
+    def select_taxon(self, taxon_id: int = None, taxon: Taxon = None):
+        """Update taxon info display"""
+        # Don't need to do anything if this taxon is already selected
+        id = taxon_id or getattr(taxon, 'id', None)
+        if self.selected_taxon and self.selected_taxon.id == id:
+            return
+
+        # Fetch taxon record if not already done
+        logger.info(f'Selecting taxon {id}')
+        start = time()
+        if taxon_id and not taxon:
+            taxon = INAT_CLIENT.taxa.from_id(taxon_id).one()
+        assert taxon is not None
+        self.selected_taxon = taxon
+        self.selection.emit(taxon)
+
+        self.taxon_info.load(taxon)
+        self.taxonomy.load(taxon)
+        for card in self.taxonomy.taxa:
+            card.clicked.connect(self.select_taxon)
+        logger.debug(f'Loaded taxon {taxon.id} in {time() - start:.2f}s')
+
+    def info(self, message: str):
+        self.message.emit(message)
+
+
+class SearchInputs(VerticalLayout):
+    """Taxon search inputs"""
+
+    def __init__(self):
+        super().__init__()
 
         # Taxon name autocomplete
         autocomplete_layout = VerticalLayout()
@@ -34,7 +79,7 @@ class TaxonController(QWidget):
         group_box = QGroupBox('Search')
         group_box.setFixedWidth(400)
         group_box.setLayout(autocomplete_layout)
-        self.input_layout.addWidget(group_box)
+        self.addWidget(group_box)
 
         self.input_taxon_search = QLineEdit()
         self.input_taxon_search.setClearButtonEnabled(True)
@@ -51,7 +96,7 @@ class TaxonController(QWidget):
         group_box = QGroupBox('Categories')
         group_box.setFixedWidth(400)
         group_box.setLayout(categories_layout)
-        self.input_layout.addWidget(group_box)
+        self.addWidget(group_box)
         categories_layout.addWidget(QLabel('1'))
         categories_layout.addWidget(QLabel('2'))
         categories_layout.addWidget(QLabel('3'))
@@ -61,42 +106,10 @@ class TaxonController(QWidget):
         group_box = QGroupBox('Rank')
         group_box.setFixedWidth(400)
         group_box.setLayout(rank_layout)
-        self.input_layout.addWidget(group_box)
+        self.addWidget(group_box)
         rank_layout.addWidget(QLabel('1'))
         rank_layout.addWidget(QLabel('2'))
         rank_layout.addWidget(QLabel('3'))
-
-        # Selected taxon
-        results_layout = VerticalLayout()
-        root_layout.addLayout(results_layout)
-        self.taxon_info = TaxonInfoSection()
-        results_layout.addLayout(self.taxon_info)
-        self.taxonomy = TaxonomySection()
-        results_layout.addLayout(self.taxonomy)
-
-        self.select_taxon(47792)
-
-    def select_taxon(self, taxon_id: int = None, taxon: Taxon = None):
-        """Update taxon info display"""
-        # Don't need to do anything if this taxon is already selected
-        id = taxon_id or getattr(taxon, 'id', None)
-        if self.selected_taxon and self.selected_taxon.id == id:
-            return
-
-        logger.info(f'Selecting taxon {id}')
-        start = time()
-        if taxon_id and not taxon:
-            taxon = INAT_CLIENT.taxa.from_id(taxon_id).one()
-        assert taxon is not None
-        self.selected_taxon = taxon
-
-        self.taxon_info.load(taxon)
-        self.taxonomy.load(taxon)
-
-        # Clicking on a taxon card will select it
-        for card in self.taxonomy.taxa:
-            card.clicked.connect(self.select_taxon)
-        logger.info(f'Loaded taxon {taxon.id} in {time() - start:.2f}s')
 
 
 class TaxonInfoSection(HorizontalLayout):
