@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
         # Debug
         button = QPushButton('Reload QSS')
         button.clicked.connect(self.reload_qss)
-        self.taxon_controller.input_layout.addWidget(button)
+        self.taxon_controller.inputs.addWidget(button)
 
         # Load demo images
         demo_images = (ASSETS_DIR / 'demo_images').glob('*.jpg')

@@ -4,8 +4,10 @@ from typing import Iterable, Iterator
 
 from pyinaturalist import Taxon
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QListWidget, QScrollArea, QWidget
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget
 
+from naturtag.app.autocomplete import TaxonAutocomplete
 from naturtag.app.images import PixmapLabel
 from naturtag.app.layouts import HorizontalLayout, VerticalLayout
 from naturtag.metadata.inat_metadata import INAT_CLIENT
@@ -28,8 +30,9 @@ class TaxonController(QWidget):
         self.selected_taxon: Taxon = None
 
         # Search inputs
-        self.input_layout = SearchInputs()
-        root_layout.addLayout(self.input_layout)
+        self.inputs = SearchInputs()
+        root_layout.addLayout(self.inputs)
+        self.inputs.autocomplete.selection.connect(self.select_taxon)
 
         # Selected taxon info
         self.taxon_info = TaxonInfoSection()
@@ -52,7 +55,7 @@ class TaxonController(QWidget):
         logger.info(f'Selecting taxon {id}')
         start = time()
         if taxon_id and not taxon:
-            taxon = INAT_CLIENT.taxa.from_id(taxon_id).one()
+            taxon = INAT_CLIENT.taxa(taxon_id)
         assert taxon is not None
         self.selected_taxon = taxon
         self.selection.emit(taxon)
@@ -74,22 +77,13 @@ class SearchInputs(VerticalLayout):
         super().__init__()
 
         # Taxon name autocomplete
-        autocomplete_layout = VerticalLayout()
-        autocomplete_layout.setAlignment(Qt.AlignTop)
+        self.autocomplete = TaxonAutocomplete()
+        self.autocomplete.setAlignment(Qt.AlignTop)
         group_box = QGroupBox('Search')
         group_box.setFixedWidth(400)
-        group_box.setLayout(autocomplete_layout)
+        group_box.setLayout(self.autocomplete)
+        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.addWidget(group_box)
-
-        self.input_taxon_search = QLineEdit()
-        self.input_taxon_search.setClearButtonEnabled(True)
-        autocomplete_layout.addWidget(self.input_taxon_search)
-
-        autocomplete_results = QListWidget()
-        autocomplete_results.addItems([f'result {i+1}' for i in range(10)])
-        # autocomplete_results.setVisible(False)
-        autocomplete_results.setFixedHeight(300)
-        autocomplete_layout.addWidget(autocomplete_results)
 
         # Category inputs
         categories_layout = VerticalLayout()
@@ -125,7 +119,8 @@ class TaxonInfoSection(HorizontalLayout):
 
         self.image = PixmapLabel()
         self.image.setMinimumWidth(200)
-        self.image.setMaximumWidth(400)
+        self.image.setMaximumWidth(600)
+        self.image.setMaximumHeight(600)
         inner_layout.addWidget(self.image)
 
         self.icon = PixmapLabel()
@@ -143,7 +138,10 @@ class TaxonInfoSection(HorizontalLayout):
         # Label, photo ,and iconic taxon icon
         common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
         self.group.setTitle(f'{taxon.name}{common_name}')
-        self.image.setPixmap(taxon=taxon)
+        if taxon.default_photo:
+            self.image.setPixmap(url=taxon.default_photo.medium_url)
+        else:
+            self.image.clear()
         self.icon.setPixmap(url=taxon.icon_url)
 
         # Other attributes
@@ -240,6 +238,11 @@ class TaxonInfoCard(QWidget):
 
         # Details
         title = QLabel(taxon.name)
+        font = QFont()
+        font.setPixelSize(16)
+        font.setBold(True)
+        font.setItalic(True)
+        title.setFont(font)
         details_layout = VerticalLayout()
         card_layout.addLayout(details_layout)
         details_layout.addWidget(title)

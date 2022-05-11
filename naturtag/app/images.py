@@ -42,9 +42,12 @@ class PixmapLabel(QLabel):
             pixmap = _get_image(taxon.default_photo or Photo(url=taxon.icon_url))
         elif url:
             pixmap = _get_image(Photo(url=url))
-        if pixmap:
+        if pixmap is not None:
             self._pixmap = pixmap
             super().setPixmap(self.scaledPixmap())
+
+    def clear(self):
+        self.setPixmap(QPixmap())
 
     def heightForWidth(self, width: int) -> int:
         if self._pixmap:
