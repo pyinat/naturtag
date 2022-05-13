@@ -475,7 +475,7 @@ python-versions = "*"
 
 [[package]]
 name = "nox"
-version = "2021.10.1"
+version = "2022.1.7"
 description = "Flexible test automation."
 category = "dev"
 optional = false
@@ -702,7 +702,6 @@ macholib = {version = ">=1.8", markers = "sys_platform == \"darwin\""}
 pefile = {version = ">=2017.8.1", markers = "sys_platform == \"win32\""}
 pyinstaller-hooks-contrib = ">=2020.6"
 pywin32-ctypes = {version = ">=0.2.0", markers = "sys_platform == \"win32\""}
-setuptools = "*"
 
 [package.extras]
 encryption = ["tinyaes (>=1.0.0)"]
@@ -721,7 +720,7 @@ name = "pyparsing"
 version = "3.0.8"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6.8"
 
 [package.extras]
@@ -1012,19 +1011,6 @@ python-versions = ">=3.6"
 [package.dependencies]
 cryptography = ">=2.0"
 jeepney = ">=0.6"
-
-[[package]]
-name = "setuptools"
-version = "62.1.0"
-description = "Easily download, build, install, upgrade, and uninstall Python packages"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-
-[package.extras]
-docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinxcontrib-towncrier", "furo"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-enabler (>=1.0.1)", "pytest-perf", "mock", "flake8-2020", "virtualenv (>=13.0.0)", "wheel", "pip (>=19.1)", "jaraco.envs (>=2.2)", "pytest-xdist", "jaraco.path (>=3.2.0)", "build", "filelock (>=3.4.0)", "pip-run (>=8.8)", "ini2toml[lite] (>=0.9)", "tomli-w (>=1.0.0)", "pytest-black (>=0.3.7)", "pytest-cov", "pytest-mypy (>=0.9.1)"]
-testing-integration = ["pytest", "pytest-xdist", "pytest-enabler", "virtualenv (>=13.0.0)", "tomli", "wheel", "jaraco.path (>=3.2.0)", "jaraco.envs (>=2.2)", "build", "filelock (>=3.4.0)"]
 
 [[package]]
 name = "shiboken6"
@@ -1333,7 +1319,7 @@ ui = ["pyside6", "qtawesome", "qtmodern"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "8def37e121d4594967674f62ed465b064c7c92f8f9a275dbe1a7bebd12b461b4"
+content-hash = "14ce5bec87520103476cf26486fbaf66e6d71f2cbe4d0a836a16b4cef07520db"
 
 [metadata.files]
 alabaster = [
@@ -1674,8 +1660,8 @@ nodeenv = [
     {file = "nodeenv-1.6.0.tar.gz", hash = "sha256:3ef13ff90291ba2a4a7a4ff9a979b63ffdd00a464dbe04acf0ea6471517a4c2b"},
 ]
 nox = [
-    {file = "nox-2021.10.1-py3-none-any.whl", hash = "sha256:1bb224fb09c26c482932f0e3038ef01c27b4025d559066443a4da1f96daad01a"},
-    {file = "nox-2021.10.1.tar.gz", hash = "sha256:0a1c735d5e90fa234046b58a5ad61d08bc13ae77ab213da9b58d5cc2d25023ae"},
+    {file = "nox-2022.1.7-py3-none-any.whl", hash = "sha256:efee12f02d39405b16d68f60e7a06fe1fc450ae58669d6cdda8c7f48e3bae9e3"},
+    {file = "nox-2022.1.7.tar.gz", hash = "sha256:b375238cebb0b9df2fab74b8d0ce1a50cd80df60ca2e13f38f539454fcd97d7e"},
 ]
 nox-poetry = [
     {file = "nox-poetry-0.9.0.tar.gz", hash = "sha256:ea48fa535cd048854da35af7c6c3e92046fbed9b9023bb81193fb4d2d3a47c92"},
@@ -1928,10 +1914,6 @@ rich = [
 secretstorage = [
     {file = "SecretStorage-3.3.2-py3-none-any.whl", hash = "sha256:755dc845b6ad76dcbcbc07ea3da75ae54bb1ea529eb72d15f83d26499a5df319"},
     {file = "SecretStorage-3.3.2.tar.gz", hash = "sha256:0a8eb9645b320881c222e827c26f4cfcf55363e8b374a021981ef886657a912f"},
-]
-setuptools = [
-    {file = "setuptools-62.1.0-py3-none-any.whl", hash = "sha256:26ead7d1f93efc0f8c804d9fafafbe4a44b179580a7105754b245155f9af05a8"},
-    {file = "setuptools-62.1.0.tar.gz", hash = "sha256:47c7b0c0f8fc10eec4cf1e71c6fdadf8decaa74ffa087e68cd1c20db7ad6a592"},
 ]
 shiboken6 = [
     {file = "shiboken6-6.3.0-cp36-abi3-macosx_10_9_universal2.whl", hash = "sha256:ead1cee2fea2566321e725a50070c40a9e67aaa015a20a84a39a9e72ff9b426e"},
