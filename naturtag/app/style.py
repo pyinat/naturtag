@@ -23,7 +23,7 @@ logger = getLogger(__name__)
 
 def fa_icon(icon_name, **kwargs):
     """Get a FontAwesome icon, with a default color from the current app's palette"""
-    kwargs.setdefault('color', get_palette().brightText().color())
+    kwargs.setdefault('color', get_palette().highlight().color())
     return icon(icon_name, **kwargs)
 
 
@@ -55,11 +55,12 @@ def dark_palette() -> QPalette:
     base = {
         QPalette.AlternateBase: (66, 66, 66),
         QPalette.Base: (42, 42, 42),
-        QPalette.BrightText: YELLOWGREEN_LIGHT,
+        QPalette.BrightText: (180, 180, 180),
         QPalette.Button: (53, 53, 53),
         QPalette.ButtonText: (180, 180, 180),
         QPalette.Dark: (35, 35, 35),
-        QPalette.Highlight: (42, 130, 218),
+        # QPalette.Highlight: (42, 130, 218),
+        QPalette.Highlight: YELLOWGREEN_LIGHT,
         QPalette.HighlightedText: (180, 180, 180),
         QPalette.Light: (180, 180, 180),
         QPalette.Link: (56, 252, 196),
@@ -99,12 +100,13 @@ def light_palette() -> QPalette:
         QPalette.Midlight: (200, 200, 200),
         QPalette.Dark: (225, 225, 225),
         QPalette.Text: (0, 0, 0),
-        QPalette.BrightText: YELLOWGREEN_DARK,
+        QPalette.BrightText: (0, 0, 0),
         QPalette.ButtonText: (0, 0, 0),
         QPalette.Base: (237, 237, 237),
         QPalette.Window: (240, 240, 240),
         QPalette.Shadow: (20, 20, 20),
-        QPalette.Highlight: (76, 163, 224),
+        # QPalette.Highlight: (76, 163, 224),
+        QPalette.Highlight: YELLOWGREEN_DARK,
         QPalette.HighlightedText: (0, 0, 0),
         QPalette.Link: (0, 162, 232),
         QPalette.AlternateBase: (225, 225, 225),

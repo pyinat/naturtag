@@ -11,8 +11,8 @@ from PySide6.QtWidgets import QHBoxLayout, QLayout, QStyle, QStyleOption, QVBoxL
 logger = getLogger(__name__)
 
 
-class LayoutMixin:
-    """Layout mixin with some extra convenience methods"""
+class ClearMixin:
+    """Layout/widget mixin with some extra convenience methods"""
 
     def __del__(self):
         try:
@@ -27,7 +27,7 @@ class LayoutMixin:
                 child.widget().deleteLater()
 
 
-class FlowLayout(LayoutMixin, QLayout):
+class FlowLayout(ClearMixin, QLayout):
     def __init__(self, parent=None):
         super().__init__(parent)
         if parent is not None:
@@ -134,11 +134,11 @@ class FlowLayout(LayoutMixin, QLayout):
         return y + line_height - rect.y()
 
 
-class HorizontalLayout(LayoutMixin, QHBoxLayout):
+class HorizontalLayout(ClearMixin, QHBoxLayout):
     pass
 
 
-class VerticalLayout(LayoutMixin, QVBoxLayout):
+class VerticalLayout(ClearMixin, QVBoxLayout):
     pass
 
 

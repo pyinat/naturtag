@@ -7,9 +7,21 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel, QWidget
 
+from naturtag.app.style import fa_icon
 from naturtag.metadata.inat_metadata import INAT_CLIENT
 
 logger = getLogger(__name__)
+
+
+class IconLabel(QLabel):
+    """A QLabel for displaying an icon"""
+
+    def __init__(self, icon_str: str, parent: QWidget = None, size: int = 20, active: bool = True):
+        super().__init__(parent)
+
+        # TODO: Use palette, figure out setting icon state
+        icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
+        self.setPixmap(icon.pixmap(size, size))
 
 
 class PixmapLabel(QLabel):

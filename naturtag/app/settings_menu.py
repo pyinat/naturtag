@@ -1,122 +1,180 @@
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIntValidator, QKeySequence, QShortcut, QValidator
-from PySide6.QtWidgets import (
-    QCheckBox,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLayout,
-    QLineEdit,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFont, QIntValidator, QKeySequence, QShortcut, QValidator
+from PySide6.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
+from naturtag.app.images import IconLabel
 from naturtag.app.style import set_theme
+from naturtag.app.toggle_switch import ToggleSwitch
 from naturtag.settings import Settings
 
 
-# TODO: Make this less ugly
 # TODO: Put setting descriptions in attrs metadata in Settings class
 class SettingsMenu(QWidget):
+    """Application settings menu, with input widgets connected to values in settings file"""
+
+    message = Signal(str)
+
     def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings
-        self.layout = QVBoxLayout(self)
+        self.settings_layout = QVBoxLayout(self)
 
-        self.add_section(
-            'iNaturalist',
-            self.get_text_setting('username', 'Your iNaturalist username'),
-            self.get_text_setting('locale', 'Locale preference for species common names'),
-            self.get_int_setting(
-                'preferred_place_id', 'Place preference for regional species common names'
-            ),
-            self.get_bool_setting('casual_observations', 'Include casual observations'),
+        inat = self.add_section('iNaturalist')
+        inat.addLayout(
+            TextSetting(
+                settings,
+                icon_str='fa.user',
+                setting_attr='username',
+                description='Your iNaturalist username',
+            )
+        )
+        inat.addLayout(
+            TextSetting(
+                settings,
+                icon_str='fa.globe',
+                setting_attr='locale',
+                description='Locale preference for species common names',
+            )
+        )
+        inat.addLayout(
+            TextSetting(
+                settings,
+                icon_str='mdi.home-city-outline',
+                setting_attr='preferred_place_id',
+                description='Place preference for regional species common names',
+                validator=QIntValidator(),
+            )
+        )
+        inat.addLayout(
+            ToggleSetting(
+                settings,
+                icon_str='mdi6.cat',
+                setting_attr='casual_observations',
+                description='Include casual observations in searches',
+            )
         )
 
-        self.add_section(
-            'Metadata',
-            self.get_bool_setting('common_names', 'Include common names in taxonomy keywords'),
-            self.get_bool_setting(
-                'create_sidecar', "Create XMP sidecar files if they don't already exist"
-            ),
-            self.get_bool_setting(
-                'darwin_core', 'Convert species/observation metadata into XMP Darwin Core metadata'
-            ),
-            self.get_bool_setting(
-                'hierarchical_keywords', 'Generate pipe-delimited hierarchical keywords'
-            ),
+        metadata = self.add_section('Metadata')
+        metadata.addLayout(
+            ToggleSetting(
+                settings,
+                icon_str='fa.language',
+                setting_attr='common_names',
+                description='Include common names in taxonomy keywords',
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                settings,
+                icon_str='mdi.xml',
+                setting_attr='darwin_core',
+                description='Convert species/observation metadata into XMP Darwin Core metadata',
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                settings,
+                icon_str='ph.files-fill',
+                setting_attr='create_sidecar',
+                description="Create XMP sidecar files if they don't already exist",
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                settings,
+                icon_str='mdi.file-tree',
+                setting_attr='hierarchical_keywords',
+                description='Generate pipe-delimited hierarchical keyword tags',
+            )
         )
 
-        theme_checkbox = self._get_checkbox('dark_mode')
-        theme_checkbox.stateChanged.connect(lambda state: set_theme(state == Qt.Checked))
-        item_layout = QHBoxLayout()
-        item_layout.addWidget(theme_checkbox)
-        item_layout.addWidget(QLabel('Dark mode'))
-        item_layout.setAlignment(Qt.AlignLeft)
-        self.add_section('Display', item_layout)
+        display = self.add_section('Display')
+        dark_mode = ToggleSetting(
+            settings,
+            icon_str='mdi.theme-light-dark',
+            setting_attr='dark_mode',
+        )
+        dark_mode.switch.clicked.connect(lambda checked: set_theme(dark_mode=checked))
+        display.addLayout(dark_mode)
 
-        # Press escape to close window
+        # Press escape to save and close window
         shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         shortcut.activated.connect(self.close)
 
     def closeEvent(self, event):
         """Save settings when closing the window"""
         self.settings.write()
+        self.message.emit('Settings saved')
         event.accept()
 
-    def add_section(self, name: str, *items: list[QLayout]):
+    def add_section(self, name: str):
         """Add a section containing a group of related settings"""
         section_layout = QVBoxLayout()
         group_box = QGroupBox(name)
         group_box.setLayout(section_layout)
-        self.layout.addWidget(group_box)
-
-        for item in items:
-            section_layout.addLayout(item)
+        self.settings_layout.addWidget(group_box)
         return section_layout
 
-    def get_int_setting(self, setting_attr: str, description: str):
-        """Get a widget and label for an integer setting"""
-        return self.get_text_setting(setting_attr, description, QIntValidator())
 
-    def get_text_setting(
-        self, setting_attr: str, description: str, validator: QValidator = None
-    ) -> QLayout:
-        """Get a widget and label for a text setting"""
-        item_layout = QHBoxLayout()
-        item_layout.addWidget(QLabel(description))
-        item_layout.addStretch()
-        item_layout.addWidget(self._get_line_edit(setting_attr, validator))
-        item_layout.setAlignment(Qt.AlignLeft)
-        return item_layout
+class SettingLayout(QHBoxLayout):
+    """Layout for an icon, description, and input widget for a single setting"""
 
-    def get_bool_setting(self, setting_attr: str, description: str) -> QLayout:
-        """Get a widget and label for a boolean setting"""
-        item_layout = QHBoxLayout()
-        item_layout.addWidget(self._get_checkbox(setting_attr))
-        item_layout.addWidget(QLabel(description))
-        item_layout.setAlignment(Qt.AlignLeft)
-        return item_layout
+    def __init__(self, icon_str: str, setting_attr: str, description: str = None):
+        super().__init__()
+        self.setAlignment(Qt.AlignLeft)
+        self.addWidget(IconLabel(icon_str, size=32))
 
-    def _get_line_edit(self, setting_attr: str, validator: QValidator = None) -> QLineEdit:
-        widget = QLineEdit()
-        widget.setText(str(getattr(self.settings, setting_attr)))
-        if validator:
-            widget.setValidator(validator)
+        label_layout = QVBoxLayout()
+        label = QLabel(setting_attr.replace('_', ' ').title())
+        # TODO: Style with QSS
+        font = QFont()
+        font.setPixelSize(16)
+        font.setBold(True)
+        label.setFont(font)
+        label_layout.addWidget(label)
+
+        if description:
+            label_layout.addWidget(QLabel(description))
+        self.addLayout(label_layout)
+        self.addStretch()
+
+
+class TextSetting(SettingLayout):
+    """Text input setting"""
+
+    def __init__(
+        self,
+        settings: Settings,
+        icon_str: str,
+        setting_attr: str,
+        description: str = None,
+        validator: QValidator = None,
+    ):
+        super().__init__(icon_str, setting_attr, description)
 
         def set_text(text):
-            setattr(self.settings, setting_attr, text)
+            setattr(settings, setting_attr, text)
 
+        widget = QLineEdit()
+        widget.setFixedWidth(150)
+        widget.setText(str(getattr(settings, setting_attr)))
         widget.textChanged.connect(set_text)
-        return widget
+        if validator:
+            widget.setValidator(validator)
+        self.addWidget(widget)
 
-    def _get_checkbox(self, setting_attr: str) -> QCheckBox:
-        widget = QCheckBox()
-        setting_value = getattr(self.settings, setting_attr)
-        widget.setCheckState(Qt.Checked if setting_value else Qt.Unchecked)
 
-        def set_state(state):
-            setattr(self.settings, setting_attr, state == Qt.Checked)
+class ToggleSetting(SettingLayout):
+    """Boolean setting with toggle switch"""
 
-        widget.stateChanged.connect(set_state)
-        return widget
+    def __init__(self, settings: Settings, icon_str: str, setting_attr: str, description: str = None):
+        super().__init__(icon_str, setting_attr, description)
+
+        def set_state(checked: bool):
+            setattr(settings, setting_attr, checked)
+
+        self.switch = ToggleSwitch()
+        setting_value = getattr(settings, setting_attr)
+        self.switch.setChecked(setting_value)
+        self.switch.clicked.connect(set_state)
+        self.addWidget(self.switch)

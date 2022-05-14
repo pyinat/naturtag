@@ -10,7 +10,7 @@ from PySide6.QtCore import Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
 
-from naturtag.app.images import PixmapLabel
+from naturtag.app.images import IconLabel, PixmapLabel
 from naturtag.app.layouts import FlowLayout, HorizontalLayout, StylableWidget, VerticalLayout
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
@@ -306,18 +306,9 @@ class ThumbnailMetaIcons(QLabel):
 
     def refresh_icons(self, metadata: MetaMetadata):
         """Update icons based on types of metadata available"""
-        while (child := self.icon_layout.takeAt(0)) is not None:
-            child.widget().deleteLater()
-
-        self._add_icon('mdi.bird', active=metadata.has_taxon)
-        self._add_icon('fa.binoculars', active=metadata.has_observation)
-        self._add_icon('fa.map-marker', active=metadata.has_coordinates)
-        self._add_icon('fa.tags', active=metadata.has_any_tags)
-        self._add_icon('mdi.xml', active=metadata.has_sidecar)
-
-    def _add_icon(self, icon_str: str, active: bool = False):
-        # TODO: Use palette, figure out setting icon state
-        icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
-        icon_label = QLabel(self)
-        icon_label.setPixmap(icon.pixmap(20, 20))
-        self.icon_layout.addWidget(icon_label)
+        self.icon_layout.clear()
+        self.icon_layout.addWidget(IconLabel('mdi.bird', active=metadata.has_taxon))
+        self.icon_layout.addWidget(IconLabel('fa.binoculars', active=metadata.has_observation))
+        self.icon_layout.addWidget(IconLabel('fa.map-marker', active=metadata.has_coordinates))
+        self.icon_layout.addWidget(IconLabel('fa.tags', active=metadata.has_any_tags))
+        self.icon_layout.addWidget(IconLabel('mdi.xml', active=metadata.has_sidecar))

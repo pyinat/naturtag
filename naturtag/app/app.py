@@ -27,10 +27,12 @@ class MainWindow(QMainWindow):
 
         # Controllers & Settings
         self.settings = settings
+        self.settings_menu = SettingsMenu(self.settings)
+        self.settings_menu.message.connect(self.info)
         self.image_controller = ImageController(self.settings)
-        self.taxon_controller = TaxonController(self.settings)
         self.image_controller.message.connect(self.info)
         self.image_controller.gallery.message.connect(self.info)
+        self.taxon_controller = TaxonController(self.settings)
         self.taxon_controller.message.connect(self.info)
         self.taxon_controller.selection.connect(self.image_controller.select_taxon)
 
@@ -81,7 +83,6 @@ class MainWindow(QMainWindow):
         super().mousePressEvent(event)
 
     def show_settings(self):
-        self.settings_menu = SettingsMenu(self.settings)
         self.settings_menu.show()
 
     def toggle_fullscreen(self) -> bool:
