@@ -22,7 +22,7 @@ class QtRichHandler(RichHandler):
         self.widget.setReadOnly(True)
         self.widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.widget.setAttribute(Qt.WA_StyledBackground, True)
-        self.widget.setStyleSheet('background-color: #ceddf0;')
+        self.widget.setObjectName('log_container')
 
         self.console.record = True
         self.console.width = 120

@@ -10,7 +10,6 @@ from naturtag.settings import Settings
 logger = getLogger(__name__)
 
 
-# TODO: Is there a better way to connect these buttons to callbacks (slots)?
 class Toolbar(QToolBar):
     """Main toolbar and keyboard shortcut definitions. Actions are reused by app menu."""
 
@@ -20,7 +19,6 @@ class Toolbar(QToolBar):
         self.setMovable(False)
         self.setFloatable(False)
         self.setAllowedAreas(Qt.TopToolBarArea)
-        self.setStyleSheet('#toolbar { border: none; background-color: transparent; }')
 
         self.run_button = self.add_button(
             '&Run', tooltip='Apply tags to images', icon='fa.play', shortcut='Ctrl+R'

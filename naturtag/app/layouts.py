@@ -5,7 +5,8 @@
 from logging import getLogger
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt
-from PySide6.QtWidgets import QHBoxLayout, QLayout, QVBoxLayout
+from PySide6.QtGui import QPainter
+from PySide6.QtWidgets import QHBoxLayout, QLayout, QStyle, QStyleOption, QVBoxLayout, QWidget
 
 logger = getLogger(__name__)
 
@@ -138,4 +139,19 @@ class HorizontalLayout(LayoutMixin, QHBoxLayout):
 
 
 class VerticalLayout(LayoutMixin, QVBoxLayout):
+    pass
+
+
+class StyleMixin:
+    def paintEvent(self, event):
+        """Allow custom widgets to be styled with QSS"""
+        super().paintEvent(event)
+        opt = QStyleOption()
+        opt.initFrom(self)
+        painter = QPainter(self)
+        style = self.style()
+        style.drawPrimitive(QStyle.PE_Widget, opt, painter, self)
+
+
+class StylableWidget(StyleMixin, QWidget):
     pass

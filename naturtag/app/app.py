@@ -2,7 +2,8 @@ import sys
 from logging import getLogger
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QPushButton, QStatusBar, QTabWidget
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
 from qtmodern.windows import ModernWindow
 
 from naturtag.app.image_controller import ImageController
@@ -60,9 +61,8 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusbar)
 
         # Debug
-        button = QPushButton('Reload QSS')
-        button.clicked.connect(self.reload_qss)
-        self.taxon_controller.inputs.addWidget(button)
+        shortcut = QShortcut(QKeySequence("F5"), self)
+        shortcut.activated.connect(self.reload_qss)
 
         # Load demo images
         demo_images = (ASSETS_DIR / 'demo_images').glob('*.jpg')

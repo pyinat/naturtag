@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidg
 
 from naturtag.app.autocomplete import TaxonAutocomplete
 from naturtag.app.images import PixmapLabel
-from naturtag.app.layouts import HorizontalLayout, VerticalLayout
+from naturtag.app.layouts import HorizontalLayout, StylableWidget, VerticalLayout
 from naturtag.metadata.inat_metadata import INAT_CLIENT
 from naturtag.settings import Settings
 
@@ -222,7 +222,7 @@ class TaxonList(VerticalLayout):
             self.add_taxon(taxon)
 
 
-class TaxonInfoCard(QWidget):
+class TaxonInfoCard(StylableWidget):
     clicked = Signal(int)
 
     def __init__(self, taxon: Taxon):

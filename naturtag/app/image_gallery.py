@@ -1,8 +1,9 @@
+import re
 import webbrowser
 from logging import getLogger
 from os.path import isfile
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, QUrl, Signal, Slot
@@ -10,7 +11,7 @@ from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QKeySequence, Q
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
 
 from naturtag.app.images import PixmapLabel
-from naturtag.app.layouts import FlowLayout, HorizontalLayout, VerticalLayout
+from naturtag.app.layouts import FlowLayout, HorizontalLayout, StylableWidget, VerticalLayout
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
@@ -31,7 +32,7 @@ class ImageGallery(QWidget):
         self.images: dict[str, LocalThumbnail] = {}
         self.image_window = ImageWindow()
         self.flow_layout = FlowLayout()
-        self.flow_layout.setSpacing(4)
+        self.flow_layout.setSpacing(0)
         self.setLayout(self.flow_layout)
 
     def clear(self):
@@ -149,7 +150,7 @@ class ImageWindow(QWidget):
         self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
 
 
-class LocalThumbnail(QWidget):
+class LocalThumbnail(StylableWidget):
     """A tile that generates, caches, and displays a thumbnail for a local image file.
     Contains icons representing its metadata types, and the following mouse actions:
 
@@ -168,6 +169,7 @@ class LocalThumbnail(QWidget):
         self.file_path = Path(file_path)
         self.window = None
         self.setToolTip(f'{file_path}\n{self.metadata.summary}')
+        self.setContentsMargins(2, 2, 2, 2)
         self.observation = None
 
         layout = VerticalLayout(self)
@@ -183,13 +185,15 @@ class LocalThumbnail(QWidget):
 
         # Metadata icons
         self.icons = ThumbnailMetaIcons(self)
-        self.icons.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);')
+        self.icons.setObjectName('metadata-icons')
 
         # Filename
-        self.label = QLabel(self.file_path.name)
+        text = re.sub('([_-])', '\\1\u200b', self.file_path.name)  # To allow word wrapping
+        self.label = QLabel(text)
         self.label.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
+        self.label.setMinimumHeight(40)
         self.label.setAlignment(Qt.AlignLeft)
-        self.label.setStyleSheet('background-color: rgba(0, 0, 0, 0.5);font-size: 10pt;')
+        self.label.setWordWrap(True)
         layout.addWidget(self.label)
 
     def contextMenuEvent(self, e):
@@ -238,34 +242,51 @@ class ThumbnailContextMenu(QMenu):
 
     def __init__(self, thumbnail: LocalThumbnail):
         super().__init__()
+        self.thumbnail = thumbnail
         meta = thumbnail.metadata
 
-        action = QAction(fa_icon('fa.binoculars'), 'View Observation', thumbnail)
-        action.setStatusTip(f'View observation {meta.observation_id} on inaturalist.org')
-        action.setEnabled(meta.has_observation)
-        action.triggered.connect(lambda: webbrowser.open(meta.observation_url))
-        self.addAction(action)
+        self._add_action(
+            icon='fa.binoculars',
+            text='View Observation',
+            tooltip=f'View observation {meta.observation_id} on inaturalist.org',
+            enabled=meta.has_observation,
+            callback=lambda: webbrowser.open(meta.observation_url),
+        )
+        self._add_action(
+            icon='fa5s.spider',
+            text='View Taxon',
+            tooltip=f'View taxon {meta.taxon_id} on inaturalist.org',
+            enabled=meta.has_taxon,
+            callback=lambda: webbrowser.open(meta.taxon_url),
+        )
+        self._add_action(
+            icon='fa5.copy',
+            text='Copy Flickr tags',
+            tooltip='Copy Flickr-compatible taxon tags to clipboard',
+            enabled=meta.has_taxon,
+            callback=thumbnail.copy_flickr_tags,
+        )
+        self._add_action(
+            icon='fa5s.folder-open',
+            text='Open containing folder',
+            tooltip=f'Open containing folder: {thumbnail.file_path.parent}',
+            callback=thumbnail.open_directory,
+        )
+        self._add_action(
+            icon='fa.remove',
+            text='Remove image',
+            tooltip='Remove this image from the selection',
+            callback=thumbnail.remove,
+        )
 
-        action = QAction(fa_icon('fa5s.spider'), 'View Taxon', thumbnail)
-        action.setStatusTip(f'View taxon {meta.taxon_id} on inaturalist.org')
-        action.setEnabled(meta.has_taxon)
-        action.triggered.connect(lambda: webbrowser.open(meta.taxon_url))
-        self.addAction(action)
-
-        action = QAction(fa_icon('fa5.copy'), 'Copy Flickr tags', thumbnail)
-        action.setStatusTip('Copy Flickr-compatible taxon tags to clipboard')
-        action.setEnabled(meta.has_taxon)
-        action.triggered.connect(thumbnail.copy_flickr_tags)
-        self.addAction(action)
-
-        action = QAction(fa_icon('fa5s.folder-open'), 'Open containing folder', thumbnail)
-        action.setStatusTip(f'Open containing folder: {thumbnail.file_path.parent}')
-        action.triggered.connect(thumbnail.open_directory)
-        self.addAction(action)
-
-        action = QAction(fa_icon('fa.remove'), 'Remove image', thumbnail)
-        action.setStatusTip('Remove this image from the selection')
-        action.triggered.connect(thumbnail.remove)
+    def _add_action(
+        self, icon: str, text: str, tooltip: str, enabled: bool = True, callback: Callable = None
+    ):
+        action = QAction(fa_icon(icon), text, self.thumbnail)
+        action.setStatusTip(tooltip)
+        action.setEnabled(enabled)
+        if callback:
+            action.triggered.connect(callback)
         self.addAction(action)
 
 
@@ -279,7 +300,7 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout = HorizontalLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
-        self.setGeometry(9, img_size.height() - 10, 100, 20)
+        self.setGeometry(11, img_size.height() - 9, 116, 20)
 
         self.refresh_icons(parent.metadata)
 
@@ -298,6 +319,5 @@ class ThumbnailMetaIcons(QLabel):
         # TODO: Use palette, figure out setting icon state
         icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
         icon_label = QLabel(self)
-        icon_label.setPixmap(icon.pixmap(16, 16))
-        icon_label.setStyleSheet('background-color: rgba(0, 0, 0, 0);')
+        icon_label.setPixmap(icon.pixmap(20, 20))
         self.icon_layout.addWidget(icon_label)
