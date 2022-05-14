@@ -7,11 +7,15 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget
 
-from naturtag.app.autocomplete import TaxonAutocomplete
-from naturtag.app.images import PixmapLabel
-from naturtag.app.layouts import HorizontalLayout, StylableWidget, VerticalLayout
-from naturtag.metadata.inat_metadata import INAT_CLIENT
+from naturtag.metadata import INAT_CLIENT
 from naturtag.settings import Settings
+from naturtag.widgets import (
+    HorizontalLayout,
+    PixmapLabel,
+    StylableWidget,
+    TaxonAutocomplete,
+    VerticalLayout,
+)
 
 logger = getLogger(__name__)
 

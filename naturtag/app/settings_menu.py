@@ -2,10 +2,9 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont, QIntValidator, QKeySequence, QShortcut, QValidator
 from PySide6.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
-from naturtag.app.images import IconLabel
 from naturtag.app.style import set_theme
-from naturtag.app.toggle_switch import ToggleSwitch
 from naturtag.settings import Settings
+from naturtag.widgets import IconLabel, ToggleSwitch
 
 
 # TODO: Put setting descriptions in attrs metadata in Settings class

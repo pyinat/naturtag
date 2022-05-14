@@ -1,10 +1,10 @@
 from logging import getLogger
 
-from pyinaturalist_convert.fts import DATA_DIR, TaxonAutocompleter
+from pyinaturalist_convert import DATA_DIR, TaxonAutocompleter
 from PySide6.QtCore import QStringListModel, Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit
 
-from naturtag.app.layouts import VerticalLayout
+from naturtag.widgets import VerticalLayout
 
 logger = getLogger(__name__)
 DB_FILE = DATA_DIR / 'taxa.db'

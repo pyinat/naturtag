@@ -7,13 +7,13 @@ from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, 
 from qtmodern.windows import ModernWindow
 
 from naturtag.app.image_controller import ImageController
-from naturtag.app.logger import init_handler
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.taxon_controller import TaxonController
 from naturtag.app.toolbar import Toolbar
 from naturtag.constants import ASSETS_DIR, INIT_WINDOW_SIZE
 from naturtag.settings import Settings
+from naturtag.widgets import init_handler
 
 logger = getLogger(__name__)
 

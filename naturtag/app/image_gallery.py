@@ -10,13 +10,19 @@ from PySide6.QtCore import Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
 
-from naturtag.app.images import IconLabel, PixmapLabel
-from naturtag.app.layouts import FlowLayout, HorizontalLayout, StylableWidget, VerticalLayout
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_images_from_paths
 from naturtag.metadata import MetaMetadata
 from naturtag.thumbnails import get_thumbnail
+from naturtag.widgets import (
+    FlowLayout,
+    HorizontalLayout,
+    IconLabel,
+    PixmapLabel,
+    StylableWidget,
+    VerticalLayout,
+)
 
 logger = getLogger(__name__)
 
