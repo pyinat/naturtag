@@ -5,7 +5,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QWidget
 
-from naturtag.app.image_gallery import ImageGallery
+from naturtag.controllers.image_gallery import ImageGallery
 from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
 from naturtag.widgets import HorizontalLayout, VerticalLayout

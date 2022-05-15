@@ -7,12 +7,11 @@ from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
 from qtmodern.windows import ModernWindow
 
-from naturtag.app.image_controller import ImageController
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
-from naturtag.app.taxon_controller import TaxonController
 from naturtag.app.toolbar import Toolbar
 from naturtag.constants import ASSETS_DIR, INIT_WINDOW_SIZE
+from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings
 from naturtag.widgets import init_handler
 
@@ -27,6 +26,7 @@ class MainWindow(QMainWindow):
         log_handler = init_handler('DEBUG')  # TODO: Configurable log level
 
         # Controllers & Settings
+        # TODO: Global access to settings instead of passing it around?
         self.settings = settings
         self.settings_menu = SettingsMenu(self.settings)
         self.settings_menu.message.connect(self.info)
@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusbar)
 
         # Debug
-        shortcut = QShortcut(QKeySequence("F5"), self)
+        shortcut = QShortcut(QKeySequence('F5'), self)
         shortcut.activated.connect(self.reload_qss)
 
         # Load demo images

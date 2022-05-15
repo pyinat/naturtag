@@ -1,122 +1,15 @@
+"""Components for displaying taxon info"""
 from logging import getLogger
-from time import time
 from typing import Iterable, Iterator
 
-from pyinaturalist import IconPhoto, Taxon
-from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QFont, QIcon, QKeySequence, QShortcut
-from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QScrollArea, QSizePolicy, QWidget
+from pyinaturalist import Taxon
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QWidget
 
-from naturtag.constants import SELECTABLE_ICONIC_TAXA
-from naturtag.metadata import INAT_CLIENT
-from naturtag.settings import Settings
-from naturtag.widgets import (
-    GridLayout,
-    HorizontalLayout,
-    PixmapLabel,
-    StylableWidget,
-    TaxonAutocomplete,
-    VerticalLayout,
-)
+from naturtag.widgets import HorizontalLayout, PixmapLabel, StylableWidget, VerticalLayout
 
 logger = getLogger(__name__)
-
-
-class TaxonController(QWidget):
-    """Controller for searching and viewing taxa"""
-
-    message = Signal(str)
-    selection = Signal(Taxon)
-
-    def __init__(self, settings: Settings):
-        super().__init__()
-        self.settings = settings
-        root_layout = HorizontalLayout()
-        self.setLayout(root_layout)
-        self.selected_taxon: Taxon = None
-
-        # Search inputs
-        self.inputs = SearchInputs()
-        root_layout.addLayout(self.inputs)
-        self.inputs.autocomplete.selection.connect(self.select_taxon)
-
-        # Debug
-        shortcut = QShortcut(QKeySequence('F9'), self)
-        shortcut.activated.connect(
-            lambda: logger.info(self.inputs.category_filters.selected_iconic_taxa)
-        )
-        shortcut = QShortcut(QKeySequence('F10'), self)
-        shortcut.activated.connect(self.inputs.category_filters.reset)
-
-        # Selected taxon info
-        self.taxon_info = TaxonInfoSection()
-        self.taxonomy = TaxonomySection()
-        taxon_layout = VerticalLayout()
-        taxon_layout.addLayout(self.taxon_info)
-        taxon_layout.addLayout(self.taxonomy)
-        root_layout.addLayout(taxon_layout)
-
-        self.select_taxon(47792)
-
-    def select_taxon(self, taxon_id: int = None, taxon: Taxon = None):
-        """Update taxon info display"""
-        # Don't need to do anything if this taxon is already selected
-        id = taxon_id or getattr(taxon, 'id', None)
-        if self.selected_taxon and self.selected_taxon.id == id:
-            return
-
-        # Fetch taxon record if not already done
-        logger.info(f'Selecting taxon {id}')
-        start = time()
-        if taxon_id and not taxon:
-            taxon = INAT_CLIENT.taxa(taxon_id)
-        assert taxon is not None
-        self.selected_taxon = taxon
-        self.selection.emit(taxon)
-
-        self.taxon_info.load(taxon)
-        self.taxonomy.load(taxon)
-        for card in self.taxonomy.taxa:
-            card.clicked.connect(self.select_taxon)
-        logger.debug(f'Loaded taxon {taxon.id} in {time() - start:.2f}s')
-
-    def info(self, message: str):
-        self.message.emit(message)
-
-
-class SearchInputs(VerticalLayout):
-    """Taxon search inputs"""
-
-    def __init__(self):
-        super().__init__()
-
-        # Taxon name autocomplete
-        self.autocomplete = TaxonAutocomplete()
-        self.autocomplete.setAlignment(Qt.AlignTop)
-        group_box = QGroupBox('Search')
-        group_box.setFixedWidth(400)
-        group_box.setLayout(self.autocomplete)
-        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        self.addWidget(group_box)
-
-        # Category inputs
-        categories = VerticalLayout()
-        group_box = QGroupBox('Categories')
-        group_box.setFixedWidth(400)
-        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        group_box.setLayout(categories)
-        self.addWidget(group_box)
-        self.category_filters = IconicTaxaFilters()
-        categories.addLayout(self.category_filters)
-
-        # Rank inputs
-        rank_layout = VerticalLayout()
-        group_box = QGroupBox('Rank')
-        group_box.setFixedWidth(400)
-        group_box.setLayout(rank_layout)
-        self.addWidget(group_box)
-
-        self.addStretch()
 
 
 class TaxonInfoSection(HorizontalLayout):
@@ -270,40 +163,3 @@ class TaxonInfoCard(StylableWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.clicked.emit(self.taxon_id)
-
-
-class IconicTaxaFilters(GridLayout):
-    """Filters for iconic taxa"""
-
-    def __init__(self):
-        super().__init__(n_columns=6)
-        for id, name in SELECTABLE_ICONIC_TAXA.items():
-            button = IconicTaxonButton(id, name)
-            self.add_widget(button)
-
-    @property
-    def selected_iconic_taxa(self):
-        return [t.name for t in self.widgets if t.isChecked()]
-
-    def reset(self):
-        for widget in self.widgets:
-            widget.setChecked(False)
-
-
-class IconicTaxonButton(QPushButton):
-    """Button used as a filter for iconic taxa"""
-
-    def __init__(self, taxon_id: int, name: str):
-        super().__init__()
-        self.taxon_id = taxon_id
-        self.name = name
-
-        photo = IconPhoto.from_iconic_taxon(name)
-        img = PixmapLabel(url=photo.thumbnail_url)
-        self.setIcon(QIcon(img.pixmap()))
-        self.setIconSize(QSize(45, 45))
-
-        self.setCheckable(True)
-        self.setFixedSize(50, 50)
-        self.setContentsMargins(0, 0, 0, 0)
-        self.setToolTip(name)
