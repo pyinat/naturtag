@@ -5,25 +5,34 @@
 from logging import getLogger
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt
-from PySide6.QtWidgets import QLayout
+from PySide6.QtGui import QPainter
+from PySide6.QtWidgets import QHBoxLayout, QLayout, QStyle, QStyleOption, QVBoxLayout, QWidget
 
 logger = getLogger(__name__)
 
 
-class FlowLayout(QLayout):
+class ClearMixin:
+    """Layout/widget mixin with some extra convenience methods"""
+
+    def __del__(self):
+        try:
+            self.clear()
+        except RuntimeError:
+            pass
+
+    def clear(self):
+        for i in reversed(range(self.count())):
+            child = self.takeAt(i)
+            if child.widget():
+                child.widget().deleteLater()
+
+
+class FlowLayout(ClearMixin, QLayout):
     def __init__(self, parent=None):
         super().__init__(parent)
         if parent is not None:
             self.setContentsMargins(0, 0, 0, 0)
         self._items = []
-
-    def __del__(self):
-        self.clear()
-
-    def clear(self):
-        while item := self.takeAt(0):
-            if item.widget():
-                item.widget().setParent(None)
 
     def addItem(self, item):
         self._items.append(item)
@@ -123,3 +132,26 @@ class FlowLayout(QLayout):
             line_height = max(line_height, size.height())
 
         return y + line_height - rect.y()
+
+
+class HorizontalLayout(ClearMixin, QHBoxLayout):
+    pass
+
+
+class VerticalLayout(ClearMixin, QVBoxLayout):
+    pass
+
+
+class StyleMixin:
+    def paintEvent(self, event):
+        """Allow custom widgets to be styled with QSS"""
+        super().paintEvent(event)
+        opt = QStyleOption()
+        opt.initFrom(self)
+        painter = QPainter(self)
+        style = self.style()
+        style.drawPrimitive(QStyle.PE_Widget, opt, painter, self)
+
+
+class StylableWidget(StyleMixin, QWidget):
+    pass

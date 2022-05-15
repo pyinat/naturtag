@@ -1,20 +1,14 @@
 from logging import getLogger
-from typing import Callable
 
+from pyinaturalist import Taxon
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import (
-    QApplication,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QWidget
 
 from naturtag.app.image_gallery import ImageGallery
 from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
+from naturtag.widgets import HorizontalLayout, VerticalLayout
 
 logger = getLogger(__name__)
 
@@ -22,15 +16,16 @@ logger = getLogger(__name__)
 class ImageController(QWidget):
     """Controller for selecting and tagging local image files"""
 
-    def __init__(self, settings: Settings, info_callback: Callable):
+    message = Signal(str)
+
+    def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings
-        photo_layout = QVBoxLayout()
+        photo_layout = VerticalLayout()
         self.setLayout(photo_layout)
-        self.info = info_callback
 
         # Input group
-        input_layout = QHBoxLayout()
+        input_layout = HorizontalLayout()
         group_box = QGroupBox('Input')
         group_box.setFixedHeight(80)
         group_box.setLayout(input_layout)
@@ -105,3 +100,9 @@ class ImageController(QWidget):
             self.info(f'Taxon {taxon_id} selected')
         else:
             self.gallery.load_images(text.splitlines())
+
+    def select_taxon(self, taxon: Taxon):
+        self.input_taxon_id.setText(str(taxon.id))
+
+    def info(self, message: str):
+        self.message.emit(message)

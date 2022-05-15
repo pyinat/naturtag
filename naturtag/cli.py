@@ -1,9 +1,12 @@
+from collections import defaultdict
 from re import DOTALL, MULTILINE, compile
 from typing import Optional
 
 import click
+from click.shell_completion import CompletionItem
 from click_help_colors import HelpColorsCommand
 from pyinaturalist import ICONIC_EMOJI, enable_logging, get_taxa_autocomplete
+from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
@@ -16,12 +19,18 @@ CODE_INLINE = compile(r'`([^`]+?)`')
 HEADER = compile(r'^#+\s*(.*)$', MULTILINE)
 
 
-def colorize_help_text(text):
-    """An ugly hack to make help text prettier"""
-    text = HEADER.sub(click.style(r'\1:', 'blue'), text)
-    text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
-    text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
-    return text
+# TODO: Show all matched taxon names if more than one match per taxon ID
+class TaxonParam(click.ParamType):
+    """Custom parameter with taxon name autocompletion"""
+
+    def shell_complete(self, ctx, param, incomplete):
+        results = TaxonAutocompleter().search(incomplete)
+        grouped_results = defaultdict(list)
+        for taxon in results:
+            grouped_results[taxon.id].append(taxon.name)
+
+        # return [CompletionItem(taxon.id, help=taxon.name) for taxon in results]
+        return [CompletionItem(id, help=' | '.join(names)) for id, names in grouped_results.items()]
 
 
 def _strip_url(ctx, param, value):
@@ -41,7 +50,13 @@ def _strip_url_or_name(ctx, param, value):
 @click.option('-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format')
 @click.option('-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords')
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
-@click.option('-t', '--taxon', help='Taxon name, ID, or URL', callback=_strip_url_or_name)
+@click.option(
+    '-t',
+    '--taxon',
+    help='Taxon name, ID, or URL',
+    type=TaxonParam(),
+    callback=_strip_url_or_name,
+)
 @click.option(
     '-x', '--create-sidecar', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
 )
@@ -179,6 +194,7 @@ def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:
     """
     response = get_taxa_autocomplete(q=taxon)
     results = response.get('results', [])[:10]
+    # results = TaxonAutocompleter().search(taxon)
 
     # No results
     if not results:
@@ -221,6 +237,14 @@ def format_taxa(results, verbose: bool = False) -> Table:
         table.add_row(*row)
 
     return table
+
+
+def colorize_help_text(text):
+    """An ugly hack to make help text prettier"""
+    text = HEADER.sub(click.style(r'\1:', 'blue'), text)
+    text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
+    text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
+    return text
 
 
 # Main CLI entry point

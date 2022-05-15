@@ -177,7 +177,7 @@ def get_inaturalist_ids(metadata: dict) -> tuple[Optional[int], Optional[int]]:
     # Check all possible keys for valid taxon and observation IDs
     taxon_id = _first_match(metadata, TAXON_KEYS)
     observation_id = _first_match(metadata, OBSERVATION_KEYS)
-    logger.info(f'Taxon ID: {taxon_id} | Observation ID: {observation_id}')
+    logger.debug(f'Taxon ID: {taxon_id} | Observation ID: {observation_id}')
     return taxon_id, observation_id
 
 
@@ -185,7 +185,7 @@ def get_min_rank(metadata: dict[str, str]) -> StrTuple:
     """Get the lowest (most specific) taxonomic rank from tags, if any"""
     for rank in RANKS:
         if rank in metadata:
-            logger.info(f'Found minimum rank: {rank} = {metadata[rank]}')
+            logger.debug(f'Found minimum rank: {rank} = {metadata[rank]}')
             return rank, metadata[rank]
     return None, None
 

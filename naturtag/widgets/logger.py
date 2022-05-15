@@ -1,14 +1,15 @@
-from logging import Handler, basicConfig
+from logging import basicConfig, getLogger
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QTextEdit
 from rich.logging import RichHandler
 
 
-def init_handler() -> Handler:
+def init_handler() -> 'QtRichHandler':
     """Initialize logging handler and attach to root logger"""
     log_handler = QtRichHandler()
-    basicConfig(level='DEBUG', format='%(message)s', datefmt='[%X]', handlers=[log_handler])
+    basicConfig(level='INFO', format='%(message)s', datefmt='[%X]', handlers=[log_handler])
+    getLogger('naturtag').setLevel('DEBUG')
     return log_handler
 
 
@@ -21,7 +22,7 @@ class QtRichHandler(RichHandler):
         self.widget.setReadOnly(True)
         self.widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.widget.setAttribute(Qt.WA_StyledBackground, True)
-        self.widget.setStyleSheet('background-color: #ceddf0;')
+        self.widget.setObjectName('log_container')
 
         self.console.record = True
         self.console.width = 120

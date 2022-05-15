@@ -68,11 +68,11 @@ def get_inat_metadata(
 
     # Get observation and/or taxon records
     if observation_id:
-        observation = INAT_CLIENT.observations.from_id(observation_id).one()
+        observation = INAT_CLIENT.observations(observation_id)
         taxon_id = observation.taxon.id
 
     # Observation.taxon doesn't include ancestors, so we always need to fetch the full taxon record
-    taxon = INAT_CLIENT.taxa.from_id(taxon_id).one()
+    taxon = INAT_CLIENT.taxa(taxon_id)
     if not taxon:
         logger.warning(f'No taxon found: {taxon_id}')
         return None
@@ -119,10 +119,10 @@ def get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observat
     taxon, observation = None, None
 
     if metadata.has_observation:
-        observation = INAT_CLIENT.observations.from_id(metadata.observation_id).one()
+        observation = INAT_CLIENT.observations(metadata.observation_id)
         taxon = observation.taxon
     elif metadata.has_taxon:
-        taxon = INAT_CLIENT.taxa.from_id(metadata.taxon_id)
+        taxon = INAT_CLIENT.taxa(metadata.taxon_id)
 
     return taxon, observation
 

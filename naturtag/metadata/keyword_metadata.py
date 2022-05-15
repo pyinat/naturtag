@@ -50,14 +50,14 @@ class KeywordMetadata:
         keywords = [get_keyword_list(tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
         unique_keywords = set(chain.from_iterable(keywords))
 
-        logger.info(f'{len(unique_keywords)} unique keywords found')
+        logger.debug(f'{len(unique_keywords)} unique keywords found')
         return [k.replace('"', '') for k in unique_keywords]
 
     def _get_kv_keywords(self) -> dict[str, str]:
         """Get all keywords that contain key-value pairs"""
         kv_keywords = [kw for kw in self.keywords if kw.count('=') == 1 and kw.split('=')[1]]
         kv_keywords = sort_taxonomy_keywords(kv_keywords)
-        logger.info(f'{len(kv_keywords)} unique key-value pairs found in keywords')
+        logger.debug(f'{len(kv_keywords)} unique key-value pairs found in keywords')
         return dict([kw.split('=') for kw in kv_keywords])
 
     def _get_hierarchical_keywords(self) -> list[str]:

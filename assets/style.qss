@@ -1,0 +1,39 @@
+QGroupBox {
+    font: bold 18px;
+    border: 2px solid palette(midlight);
+    border-radius: 6px;
+    margin-top: 8px;
+    padding:5px;
+}
+QGroupBox::title {
+    subcontrol-origin:  margin;
+    subcontrol-position: top left;
+    left: 7px;
+    padding: 0px 5px 0px 5px;
+ }
+
+TaxonInfoCard {
+    background: palette(base);
+}
+TaxonInfoCard:hover {
+    background: palette(dark);
+}
+
+LocalThumbnail {
+    background: palette(window);
+}
+LocalThumbnail:hover {
+    background: palette(dark);
+}
+LocalThumbnail > QLabel {
+    background-color: rgba(0, 0, 0, 0.3);
+    font-size: 11pt;
+}
+LocalThumbnail > QLabel#metadata-icons {
+    background-color: rgba(0, 0, 0, 0.5);
+    font-size: 11pt;
+}
+
+QTextEdit#log_container {
+    background-color: #ceddf0;
+}

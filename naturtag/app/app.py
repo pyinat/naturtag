@@ -2,51 +2,59 @@ import sys
 from logging import getLogger
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget, QWidget
-from qtawesome import icon as fa_icon
-from qtmodern import styles
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
 from qtmodern.windows import ModernWindow
 
 from naturtag.app.image_controller import ImageController
-from naturtag.app.logger import init_handler
 from naturtag.app.settings_menu import SettingsMenu
+from naturtag.app.style import fa_icon, set_stylesheet, set_theme
+from naturtag.app.taxon_controller import TaxonController
 from naturtag.app.toolbar import Toolbar
-from naturtag.constants import ASSETS_DIR
+from naturtag.constants import ASSETS_DIR, INIT_WINDOW_SIZE
 from naturtag.settings import Settings
+from naturtag.widgets import init_handler
 
 logger = getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, settings: Settings):
         super().__init__()
-        self.resize(1024, 1024)
+        self.resize(*INIT_WINDOW_SIZE)
         self.setWindowTitle('Naturtag')
+        log_handler = init_handler()
 
         # Controllers & Settings
-        self.settings = Settings.read()
-        self.image_controller = ImageController(self.settings, self.info)
+        self.settings = settings
+        self.settings_menu = SettingsMenu(self.settings)
+        self.settings_menu.message.connect(self.info)
+        self.image_controller = ImageController(self.settings)
+        self.image_controller.message.connect(self.info)
+        self.image_controller.gallery.message.connect(self.info)
+        self.taxon_controller = TaxonController(self.settings)
+        self.taxon_controller.message.connect(self.info)
+        self.taxon_controller.selection.connect(self.image_controller.select_taxon)
 
         # Tabbed layout
         self.tabs = QTabWidget()
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
-        self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observation')
-        self.tabs.addTab(QWidget(), fa_icon('fa5s.spider'), 'Taxon')
-        self.log_tab_idx = self.tabs.addTab(init_handler().widget, fa_icon('fa.file-text-o'), 'Logs')
+        # self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observations')
+        self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
+        self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
         self.setCentralWidget(self.tabs)
 
         # Toolbar
-        self.toolbar = Toolbar(
-            self,
-            load_file_callback=self.image_controller.gallery.load_file_dialog,
-            run_callback=self.image_controller.run,
-            clear_callback=self.image_controller.clear,
-            paste_callback=self.image_controller.paste,
-            fullscreen_callback=self.toggle_fullscreen,
-            log_callback=self.toggle_log_tab,
-            settings_callback=self.show_settings,
-        )
+        self.toolbar = Toolbar(self)
+        self.toolbar.run_button.triggered.connect(self.image_controller.run)
+        self.toolbar.open_button.triggered.connect(self.image_controller.gallery.load_file_dialog)
+        self.toolbar.paste_button.triggered.connect(self.image_controller.paste)
+        self.toolbar.clear_button.triggered.connect(self.image_controller.clear)
+        self.toolbar.fullscreen_button.triggered.connect(self.toggle_fullscreen)
+        self.toolbar.settings_button.triggered.connect(self.show_settings)
+        self.toolbar.logs_button.triggered.connect(self.toggle_log_tab)
+        self.toolbar.exit_button.triggered.connect(QApplication.instance().quit)
 
         # Menu bar and status bar
         self.toolbar.populate_menu(self.menuBar(), self.settings)
@@ -54,8 +62,13 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
 
+        # Debug
+        shortcut = QShortcut(QKeySequence("F5"), self)
+        shortcut.activated.connect(self.reload_qss)
+
         # Load demo images
-        self.image_controller.gallery.load_images((ASSETS_DIR / 'demo_images').glob('*.jpg'))
+        demo_images = (ASSETS_DIR / 'demo_images').glob('*.jpg')
+        self.image_controller.gallery.load_images(demo_images)  # type: ignore
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""
@@ -70,7 +83,6 @@ class MainWindow(QMainWindow):
         super().mousePressEvent(event)
 
     def show_settings(self):
-        self.settings_menu = SettingsMenu(self.settings)
         self.settings_menu.show()
 
     def toggle_fullscreen(self) -> bool:
@@ -92,13 +104,16 @@ class MainWindow(QMainWindow):
         self.settings.show_logs = tab_visible
         self.settings.write()
 
+    def reload_qss(self):
+        set_stylesheet(self)
+
 
 def main():
     app = QApplication(sys.argv)
-    styles.dark(app)
-    # styles.light(app)
+    settings = Settings.read()
+    set_theme(dark_mode=settings.dark_mode)
 
-    window = ModernWindow(MainWindow())
+    window = ModernWindow(MainWindow(settings))
     window.show()
     sys.exit(app.exec())
 
