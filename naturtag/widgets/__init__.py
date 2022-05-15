@@ -1,8 +1,9 @@
 # flake8: noqa: F401
 # isort: skip_file
 from naturtag.widgets.layouts import (
-    ClearMixin,
+    LayoutMixin,
     FlowLayout,
+    GridLayout,
     HorizontalLayout,
     StylableWidget,
     StyleMixin,

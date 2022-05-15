@@ -3,16 +3,30 @@
 * Many hours of frustration
 """
 from logging import getLogger
+from typing import TYPE_CHECKING, Iterator, TypeAlias
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt
 from PySide6.QtGui import QPainter
-from PySide6.QtWidgets import QHBoxLayout, QLayout, QStyle, QStyleOption, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QGridLayout,
+    QHBoxLayout,
+    QLayout,
+    QStyle,
+    QStyleOption,
+    QVBoxLayout,
+    QWidget,
+)
 
 logger = getLogger(__name__)
 
+if TYPE_CHECKING:
+    MIXIN_BASE: TypeAlias = QLayout
+else:
+    MIXIN_BASE = object
 
-class ClearMixin:
-    """Layout/widget mixin with some extra convenience methods"""
+
+class LayoutMixin(MIXIN_BASE):
+    """Layout mixin with some extra convenience methods"""
 
     def __del__(self):
         try:
@@ -26,8 +40,15 @@ class ClearMixin:
             if child.widget():
                 child.widget().deleteLater()
 
+    @property
+    def widgets(self) -> Iterator[QWidget]:
+        for i in range(self.count()):
+            item = self.itemAt(i)
+            if item and (widget := item.widget()):
+                yield widget
 
-class FlowLayout(ClearMixin, QLayout):
+
+class FlowLayout(LayoutMixin, QLayout):
     def __init__(self, parent=None):
         super().__init__(parent)
         if parent is not None:
@@ -134,11 +155,26 @@ class FlowLayout(ClearMixin, QLayout):
         return y + line_height - rect.y()
 
 
-class HorizontalLayout(ClearMixin, QHBoxLayout):
+class GridLayout(LayoutMixin, QGridLayout):
+    def __init__(self, parent=None, n_columns: int = None):
+        super().__init__(parent)
+        self._n_columns = n_columns
+        self._col = 0
+        self._row = 0
+
+    def add_widget(self, item):
+        self.addWidget(item, self._row, self._col)
+        self._col += 1
+        if self._n_columns and self._col >= self._n_columns:
+            self._col = 0
+            self._row += 1
+
+
+class HorizontalLayout(LayoutMixin, QHBoxLayout):
     pass
 
 
-class VerticalLayout(ClearMixin, QVBoxLayout):
+class VerticalLayout(LayoutMixin, QVBoxLayout):
     pass
 
 

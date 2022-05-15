@@ -14,7 +14,7 @@ logger = getLogger(__name__)
 
 
 class IconLabel(QLabel):
-    """A QLabel for displaying an icon"""
+    """A QLabel for displaying a FontAwesome icon"""
 
     def __init__(self, icon_str: str, parent: QWidget = None, size: int = 20, active: bool = True):
         super().__init__(parent)
@@ -83,5 +83,5 @@ class PixmapLabel(QLabel):
 def _get_image(photo: Photo) -> QPixmap:
     data = INAT_CLIENT.session.get(photo.url, stream=True).content
     pixmap = QPixmap()
-    pixmap.loadFromData(data, format=photo.mimetype.replace('image/', ''))
+    pixmap.loadFromData(data, format=photo.ext)
     return pixmap

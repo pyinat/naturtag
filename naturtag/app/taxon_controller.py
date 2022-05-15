@@ -2,14 +2,16 @@ from logging import getLogger
 from time import time
 from typing import Iterable, Iterator
 
-from pyinaturalist import Taxon
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget
+from pyinaturalist import IconPhoto, Taxon
+from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtGui import QFont, QIcon, QKeySequence, QShortcut
+from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QScrollArea, QSizePolicy, QWidget
 
+from naturtag.constants import SELECTABLE_ICONIC_TAXA
 from naturtag.metadata import INAT_CLIENT
 from naturtag.settings import Settings
 from naturtag.widgets import (
+    GridLayout,
     HorizontalLayout,
     PixmapLabel,
     StylableWidget,
@@ -37,6 +39,14 @@ class TaxonController(QWidget):
         self.inputs = SearchInputs()
         root_layout.addLayout(self.inputs)
         self.inputs.autocomplete.selection.connect(self.select_taxon)
+
+        # Debug
+        shortcut = QShortcut(QKeySequence('F9'), self)
+        shortcut.activated.connect(
+            lambda: logger.info(self.inputs.category_filters.selected_iconic_taxa)
+        )
+        shortcut = QShortcut(QKeySequence('F10'), self)
+        shortcut.activated.connect(self.inputs.category_filters.reset)
 
         # Selected taxon info
         self.taxon_info = TaxonInfoSection()
@@ -90,14 +100,14 @@ class SearchInputs(VerticalLayout):
         self.addWidget(group_box)
 
         # Category inputs
-        categories_layout = VerticalLayout()
+        categories = VerticalLayout()
         group_box = QGroupBox('Categories')
         group_box.setFixedWidth(400)
-        group_box.setLayout(categories_layout)
+        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        group_box.setLayout(categories)
         self.addWidget(group_box)
-        categories_layout.addWidget(QLabel('1'))
-        categories_layout.addWidget(QLabel('2'))
-        categories_layout.addWidget(QLabel('3'))
+        self.category_filters = IconicTaxaFilters()
+        categories.addLayout(self.category_filters)
 
         # Rank inputs
         rank_layout = VerticalLayout()
@@ -105,9 +115,8 @@ class SearchInputs(VerticalLayout):
         group_box.setFixedWidth(400)
         group_box.setLayout(rank_layout)
         self.addWidget(group_box)
-        rank_layout.addWidget(QLabel('1'))
-        rank_layout.addWidget(QLabel('2'))
-        rank_layout.addWidget(QLabel('3'))
+
+        self.addStretch()
 
 
 class TaxonInfoSection(HorizontalLayout):
@@ -227,6 +236,8 @@ class TaxonList(VerticalLayout):
 
 
 class TaxonInfoCard(StylableWidget):
+    """Card containing a taxon icon, name, common name, and rank"""
+
     clicked = Signal(int)
 
     def __init__(self, taxon: Taxon):
@@ -259,3 +270,40 @@ class TaxonInfoCard(StylableWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.clicked.emit(self.taxon_id)
+
+
+class IconicTaxaFilters(GridLayout):
+    """Filters for iconic taxa"""
+
+    def __init__(self):
+        super().__init__(n_columns=6)
+        for id, name in SELECTABLE_ICONIC_TAXA.items():
+            button = IconicTaxonButton(id, name)
+            self.add_widget(button)
+
+    @property
+    def selected_iconic_taxa(self):
+        return [t.name for t in self.widgets if t.isChecked()]
+
+    def reset(self):
+        for widget in self.widgets:
+            widget.setChecked(False)
+
+
+class IconicTaxonButton(QPushButton):
+    """Button used as a filter for iconic taxa"""
+
+    def __init__(self, taxon_id: int, name: str):
+        super().__init__()
+        self.taxon_id = taxon_id
+        self.name = name
+
+        photo = IconPhoto.from_iconic_taxon(name)
+        img = PixmapLabel(url=photo.thumbnail_url)
+        self.setIcon(QIcon(img.pixmap()))
+        self.setIconSize(QSize(45, 45))
+
+        self.setCheckable(True)
+        self.setFixedSize(50, 50)
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setToolTip(name)

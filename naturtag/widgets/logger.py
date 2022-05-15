@@ -5,10 +5,10 @@ from PySide6.QtWidgets import QTextEdit
 from rich.logging import RichHandler
 
 
-def init_handler() -> 'QtRichHandler':
+def init_handler(root_level='INFO') -> 'QtRichHandler':
     """Initialize logging handler and attach to root logger"""
     log_handler = QtRichHandler()
-    basicConfig(level='INFO', format='%(message)s', datefmt='[%X]', handlers=[log_handler])
+    basicConfig(level=root_level, format='%(message)s', datefmt='[%X]', handlers=[log_handler])
     getLogger('naturtag').setLevel('DEBUG')
     return log_handler
 

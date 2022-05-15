@@ -15,7 +15,7 @@ from naturtag.image_glob import glob_paths
 from naturtag.metadata import MetaMetadata
 
 DWC_NAMESPACES = ['dcterms', 'dwc']
-INAT_CLIENT = iNatClient()
+INAT_CLIENT = iNatClient(cache_control=False)
 logger = getLogger().getChild(__name__)
 
 

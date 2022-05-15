@@ -1,3 +1,4 @@
+"""Main Qt app window and entry point"""
 import sys
 from logging import getLogger
 
@@ -23,7 +24,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.resize(*INIT_WINDOW_SIZE)
         self.setWindowTitle('Naturtag')
-        log_handler = init_handler()
+        log_handler = init_handler('DEBUG')  # TODO: Configurable log level
 
         # Controllers & Settings
         self.settings = settings
