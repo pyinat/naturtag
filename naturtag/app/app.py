@@ -30,12 +30,17 @@ class MainWindow(QMainWindow):
         self.settings = settings
         self.settings_menu = SettingsMenu(self.settings)
         self.settings_menu.message.connect(self.info)
+
         self.image_controller = ImageController(self.settings)
         self.image_controller.message.connect(self.info)
         self.image_controller.gallery.message.connect(self.info)
         self.taxon_controller = TaxonController(self.settings)
         self.taxon_controller.message.connect(self.info)
         self.taxon_controller.selection.connect(self.image_controller.select_taxon)
+
+        # Settings that take effect immediately
+        self.settings_menu.dark_mode.clicked.connect(lambda checked: set_theme(dark_mode=checked))
+        self.settings_menu.all_ranks.clicked.connect(self.taxon_controller.search.reset_ranks)
 
         # Tabbed layout
         self.tabs = QTabWidget()

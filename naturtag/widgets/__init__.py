@@ -7,6 +7,7 @@ from naturtag.widgets.layouts import (
     HorizontalLayout,
     StylableWidget,
     StyleMixin,
+    GroupMixin,
     VerticalLayout,
 )
 from naturtag.widgets.autocomplete import TaxonAutocomplete

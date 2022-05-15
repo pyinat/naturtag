@@ -3,25 +3,28 @@ from logging import getLogger
 from typing import Optional
 
 from pyinaturalist import RANKS, IconPhoto
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QComboBox, QGroupBox, QLabel, QPushButton, QSizePolicy
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
+from naturtag.controllers.taxon_view import TaxonList
 from naturtag.metadata import INAT_CLIENT
 from naturtag.settings import Settings
 from naturtag.widgets import GridLayout, HorizontalLayout, PixmapLabel, TaxonAutocomplete, VerticalLayout
 
 logger = getLogger(__name__)
 
-# TODO: Option to show all ranks
+
 ignore_terms = ['sub', 'super', 'infra', 'epi', 'hybrid']
 COMMON_RANKS = [r for r in RANKS if not any([k in r for k in ignore_terms])][::-1]
 
 
 class TaxonSearch(VerticalLayout):
     """Taxon search"""
+
+    new_results = Signal(TaxonList)
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -47,17 +50,12 @@ class TaxonSearch(VerticalLayout):
         categories.addLayout(self.category_filters)
 
         # Rank inputs
-        rank_layout = VerticalLayout()
+        self.ranks = VerticalLayout()
         group_box = QGroupBox('Rank')
         group_box.setFixedWidth(400)
-        group_box.setLayout(rank_layout)
+        group_box.setLayout(self.ranks)
         self.addWidget(group_box)
-        self.exact_rank = RankList('Exact')
-        self.min_rank = RankList('Minimum')
-        self.max_rank = RankList('Maximum')
-        rank_layout.addLayout(self.exact_rank)
-        rank_layout.addLayout(self.min_rank)
-        rank_layout.addLayout(self.max_rank)
+        self.reset_ranks()
 
         # Clear exact rank after selecting min or max, and vice versa
         self.min_rank.dropdown.activated.connect(self.exact_rank.reset)
@@ -78,7 +76,12 @@ class TaxonSearch(VerticalLayout):
         button_layout.addWidget(reset_button)
         self.addLayout(button_layout)
 
-        self.addStretch()
+        # Search results
+        self.results = TaxonList()
+        group_box = QGroupBox('Results')
+        group_box.setFixedWidth(400)
+        group_box.setLayout(self.results)
+        self.addWidget(group_box)
 
     def search(self):
         """Search for taxa with the currently selected filters"""
@@ -93,10 +96,25 @@ class TaxonSearch(VerticalLayout):
         ).limit(10)
         logger.info('\n'.join([str(t) for t in taxa]))
 
+        # self.results.setVisible(True)
+        self.results.set_taxa(taxa)
+        self.new_results.emit(self.results)
+
     def reset(self):
         """Reset all search filters"""
         self.autocomplete.search_input.setText('')
         self.category_filters.reset()
+        self.results.clear()
+        # self.results.setVisible(False)
+
+    def reset_ranks(self):
+        self.exact_rank = RankList('Exact', all_ranks=self.settings.all_ranks)
+        self.min_rank = RankList('Minimum', all_ranks=self.settings.all_ranks)
+        self.max_rank = RankList('Maximum', all_ranks=self.settings.all_ranks)
+        self.ranks.clear()
+        self.ranks.addLayout(self.exact_rank)
+        self.ranks.addLayout(self.min_rank)
+        self.ranks.addLayout(self.max_rank)
 
 
 class IconicTaxonFilters(GridLayout):
@@ -139,11 +157,12 @@ class IconicTaxonButton(QPushButton):
 class RankList(HorizontalLayout):
     """Taxonomic rank dropdown"""
 
-    def __init__(self, label: str):
+    def __init__(self, label: str, all_ranks: bool = False):
         super().__init__()
+        ranks = RANKS if all_ranks else COMMON_RANKS
         self.addWidget(QLabel(label))
         self.dropdown = QComboBox()
-        self.dropdown.addItems([''] + COMMON_RANKS[::-1])
+        self.dropdown.addItems([''] + ranks[::-1])
         self.addWidget(self.dropdown)
 
     def reset(self):

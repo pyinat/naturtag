@@ -1,13 +1,14 @@
 from logging import getLogger
 from time import time
+from typing import Union
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QWidget
 
 from naturtag.controllers.taxon_search import TaxonSearch
-from naturtag.controllers.taxon_view import TaxonInfoSection, TaxonomySection
+from naturtag.controllers.taxon_view import TaxonInfoSection, TaxonList, TaxonomySection
 from naturtag.metadata import INAT_CLIENT
 from naturtag.settings import Settings
 from naturtag.widgets import HorizontalLayout, VerticalLayout
@@ -25,12 +26,14 @@ class TaxonController(QWidget):
         super().__init__()
         self.settings = settings
         root_layout = HorizontalLayout()
+        root_layout.setAlignment(Qt.AlignLeft)
         self.setLayout(root_layout)
         self.selected_taxon: Taxon = None
 
         # Search inputs
         self.search = TaxonSearch(settings)
         self.search.autocomplete.selection.connect(self.select_taxon)
+        self.search.new_results.connect(self.bind_selection)
         root_layout.addLayout(self.search)
 
         # Debug
@@ -70,6 +73,10 @@ class TaxonController(QWidget):
 
         self.taxon_info.load(taxon)
         self.taxonomy.load(taxon)
-        for card in self.taxonomy.taxa:
-            card.clicked.connect(self.select_taxon)
+        self.bind_selection(self.taxonomy)
         logger.debug(f'Loaded taxon {taxon.id} in {time() - start:.2f}s')
+
+    def bind_selection(self, taxon_list: Union[TaxonomySection, TaxonList]):
+        """Connect click signal from each taxon in a list to select_taxon()"""
+        for taxon_card in taxon_list.taxa:
+            taxon_card.clicked.connect(self.select_taxon)

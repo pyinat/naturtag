@@ -68,6 +68,7 @@ class Settings(YamlMixin):
     # md_accent_palette: str = field(default='Cyan')
 
     # iNaturalist
+    all_ranks: bool = field(default=False)
     casual_observations: bool = field(default=True)
     locale: str = field(default='en_US')
     preferred_place_id: int = field(default=1, converter=int)

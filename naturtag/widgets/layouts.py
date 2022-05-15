@@ -9,6 +9,7 @@ from PySide6.QtCore import QPoint, QRect, QSize, Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (
     QGridLayout,
+    QGroupBox,
     QHBoxLayout,
     QLayout,
     QStyle,
@@ -46,6 +47,28 @@ class LayoutMixin(MIXIN_BASE):
             item = self.itemAt(i)
             if item and (widget := item.widget()):
                 yield widget
+
+
+class GroupMixin(MIXIN_BASE):
+    def add_group(self, name: str, parent_layout: QLayout = None) -> 'VerticalLayout':
+        """Add a new groupbox with a vertical layout"""
+        group_layout = VerticalLayout()
+        group_box = QGroupBox(name)
+        group_box.setLayout(group_layout)
+        if parent_layout:
+            parent_layout.addWidget(group_box)
+        return group_layout
+
+
+class StyleMixin:
+    def paintEvent(self, event):
+        """Allow custom widgets to be styled with QSS"""
+        super().paintEvent(event)
+        opt = QStyleOption()
+        opt.initFrom(self)
+        painter = QPainter(self)
+        style = self.style()
+        style.drawPrimitive(QStyle.PE_Widget, opt, painter, self)
 
 
 class FlowLayout(LayoutMixin, QLayout):
@@ -155,7 +178,7 @@ class FlowLayout(LayoutMixin, QLayout):
         return y + line_height - rect.y()
 
 
-class GridLayout(LayoutMixin, QGridLayout):
+class GridLayout(LayoutMixin, GroupMixin, QGridLayout):
     def __init__(self, parent=None, n_columns: int = None):
         super().__init__(parent)
         self._n_columns = n_columns
@@ -170,24 +193,13 @@ class GridLayout(LayoutMixin, QGridLayout):
             self._row += 1
 
 
-class HorizontalLayout(LayoutMixin, QHBoxLayout):
+class HorizontalLayout(LayoutMixin, GroupMixin, QHBoxLayout):
     pass
 
 
-class VerticalLayout(LayoutMixin, QVBoxLayout):
+class VerticalLayout(LayoutMixin, GroupMixin, QVBoxLayout):
     pass
 
 
-class StyleMixin:
-    def paintEvent(self, event):
-        """Allow custom widgets to be styled with QSS"""
-        super().paintEvent(event)
-        opt = QStyleOption()
-        opt.initFrom(self)
-        painter = QPainter(self)
-        style = self.style()
-        style.drawPrimitive(QStyle.PE_Widget, opt, painter, self)
-
-
-class StylableWidget(StyleMixin, QWidget):
+class StylableWidget(StyleMixin, GroupMixin, QWidget):
     pass
