@@ -56,6 +56,13 @@ class YamlMixin:
         return cls.read()
 
 
+def doc_field(doc: str = '', **kwargs):
+    """
+    Create a field for an attrs class that is documented in the class docstring.
+    """
+    return field(metadata={'doc': doc}, **kwargs)
+
+
 @define
 class Settings(YamlMixin):
     path = CONFIG_PATH
@@ -63,22 +70,29 @@ class Settings(YamlMixin):
     # Display
     dark_mode: bool = field(default=False)
     show_logs: bool = field(default=False)
-    # TODO:
-    # md_primary_palette: str = field(default='Teal')
-    # md_accent_palette: str = field(default='Cyan')
 
     # iNaturalist
-    all_ranks: bool = field(default=False)
-    casual_observations: bool = field(default=True)
-    locale: str = field(default='en_US')
-    preferred_place_id: int = field(default=1, converter=int)
-    username: str = field(default='')
+    all_ranks: bool = doc_field(
+        default=False, doc='Show all available taxonomic rank filters on taxon search page'
+    )
+    casual_observations: bool = doc_field(default=True, doc='Include casual observations in searches')
+    locale: str = doc_field(default='en_US', doc='Locale preference for species common names')
+    preferred_place_id: int = doc_field(
+        default=1, converter=int, doc='Place preference for regional species common names'
+    )
+    username: str = doc_field(default='', doc='Your iNaturalist username')
 
     # Metadata
-    common_names: bool = field(default=True)
-    create_sidecar: bool = field(default=True)
-    darwin_core: bool = field(default=True)
-    hierarchical_keywords: bool = field(default=False)
+    common_names: bool = doc_field(default=True, doc='Include common names in taxonomy keywords')
+    create_sidecar: bool = doc_field(
+        default=True, doc="Create XMP sidecar files if they don't already exist"
+    )
+    darwin_core: bool = doc_field(
+        default=True, doc='Convert species/observation metadata into XMP Darwin Core metadata'
+    )
+    hierarchical_keywords: bool = doc_field(
+        default=False, doc='Generate pipe-delimited hierarchical keyword tags'
+    )
 
     # Photos
     default_dir: Path = field(default=Path('~').expanduser(), converter=Path)
