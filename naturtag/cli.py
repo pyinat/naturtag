@@ -23,6 +23,8 @@ HEADER = compile(r'^\s*#+\s*(.*)$', MULTILINE)
 class TaxonParam(click.ParamType):
     """Custom parameter with taxon name autocompletion"""
 
+    name = 'taxon'
+
     def shell_complete(self, ctx, param, incomplete):
         results = TaxonAutocompleter().search(incomplete)
         grouped_results = defaultdict(list)

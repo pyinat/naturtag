@@ -8,6 +8,7 @@ from pyinaturalist.constants import ICONIC_TAXA
 # Resource directories
 PKG_DIR = Path(__file__).parent.parent
 ASSETS_DIR = PKG_DIR / 'assets'
+AUTOCOMPLETE_DIR = ASSETS_DIR / 'autocomplete'
 DATA_DIR = Path(user_data_dir()) / 'Naturtag'
 LOGFILE = DATA_DIR / 'naturtag.log'
 
