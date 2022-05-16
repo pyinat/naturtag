@@ -34,16 +34,23 @@ class MainWindow(QMainWindow):
         # Controllers & Settings
         self.settings = settings
         self.settings_menu = SettingsMenu(self.settings)
-        self.settings_menu.message.connect(self.info)
-
         self.image_controller = ImageController(self.settings)
+        self.taxon_controller = TaxonController(self.settings, self.threadpool)
+
+        # Connect controllers and their widgets to statusbar info
+        self.settings_menu.message.connect(self.info)
         self.image_controller.message.connect(self.info)
         self.image_controller.gallery.message.connect(self.info)
-
-        self.taxon_controller = TaxonController(self.settings, self.threadpool)
         self.taxon_controller.message.connect(self.info)
-        self.taxon_controller.selection.connect(self.image_controller.select_taxon)
+
+        # Select taxon from image context menu
         self.image_controller.gallery.selected_taxon.connect(self.taxon_controller.select_taxon)
+        # Select taxon from iconic taxa filters
+        self.taxon_controller.search.iconic_taxa_filters.selected_taxon.connect(
+            self.taxon_controller.select_taxon
+        )
+        # Update taxon ID on main page when a taxon is selected
+        self.taxon_controller.selection.connect(self.image_controller.select_taxon)
 
         # Settings that take effect immediately
         self.settings_menu.dark_mode.clicked.connect(lambda checked: set_theme(dark_mode=checked))

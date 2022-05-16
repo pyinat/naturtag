@@ -3,9 +3,17 @@ from logging import getLogger
 from typing import Optional
 
 from pyinaturalist import RANKS, IconPhoto
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QComboBox, QGroupBox, QLabel, QPushButton, QSizePolicy
+from PySide6.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QGroupBox,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QWidget,
+)
 
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
@@ -31,6 +39,7 @@ class TaxonSearch(VerticalLayout):
         super().__init__()
         self.settings = settings
         self.setAlignment(Qt.AlignTop)
+        self.batch_select = False
 
         # Taxon name autocomplete
         self.autocomplete = TaxonAutocomplete()
@@ -47,8 +56,8 @@ class TaxonSearch(VerticalLayout):
         group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         group_box.setLayout(categories)
         self.addWidget(group_box)
-        self.category_filters = IconicTaxonFilters()
-        categories.addLayout(self.category_filters)
+        self.iconic_taxa_filters = IconicTaxonFilters()
+        categories.addWidget(self.iconic_taxa_filters)
 
         # Rank inputs
         self.ranks = VerticalLayout()
@@ -90,7 +99,7 @@ class TaxonSearch(VerticalLayout):
         """Search for taxa with the currently selected filters"""
         taxa = INAT_CLIENT.taxa.search(
             q=self.autocomplete.search_input.text(),
-            taxon_id=self.category_filters.selected_iconic_taxa,
+            taxon_id=self.iconic_taxa_filters.selected_iconic_taxa,
             rank=self.exact_rank.text,
             min_rank=self.min_rank.text,
             max_rank=self.max_rank.text,
@@ -106,7 +115,7 @@ class TaxonSearch(VerticalLayout):
     def reset(self):
         """Reset all search filters"""
         self.autocomplete.search_input.setText('')
-        self.category_filters.reset()
+        self.iconic_taxa_filters.reset()
         self.results.clear()
         self.results_box.setVisible(False)
 
@@ -120,22 +129,41 @@ class TaxonSearch(VerticalLayout):
         self.ranks.addLayout(self.max_rank)
 
 
-class IconicTaxonFilters(GridLayout):
+class IconicTaxonFilters(QWidget):
     """Filters for iconic taxa"""
 
+    selected_taxon = Signal(int)
+
     def __init__(self):
-        super().__init__(n_columns=6)
+        super().__init__()
+        self.button_layout = GridLayout(n_columns=6)
+        self.setLayout(self.button_layout)
+        self.setFocusPolicy(Qt.StrongFocus)
+
         for id, name in SELECTABLE_ICONIC_TAXA.items():
             button = IconicTaxonButton(id, name)
-            self.add_widget(button)
+            button.clicked.connect(self.on_click)
+            self.button_layout.add_widget(button)
 
     @property
     def selected_iconic_taxa(self) -> list[int]:
         return [t.taxon_id for t in self.widgets if t.isChecked()]
 
-    def reset(self):
-        for widget in self.widgets:
-            widget.setChecked(False)
+    def reset(self, except_id: str = None):
+        """Reset all buttons, or all except one"""
+        for button in self.button_layout.widgets:
+            if button.taxon_id != except_id:
+                button.setChecked(False)
+
+    @Slot()
+    def on_click(self):
+        """Ctrl-click to select multiple buttons. Otherwise, when pressing a button, uncheck all
+        other buttons and display the corresponding taxon.
+        """
+        if QApplication.keyboardModifiers() != Qt.ControlModifier:
+            button_taxon_id = self.sender().taxon_id
+            self.reset(except_id=button_taxon_id)
+            self.selected_taxon.emit(button_taxon_id)
 
 
 class IconicTaxonButton(QPushButton):
