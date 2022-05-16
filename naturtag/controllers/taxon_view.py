@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QWidget
 
+from naturtag.app.threadpool import ThreadPool
 from naturtag.widgets import HorizontalLayout, PixmapLabel, StylableWidget, VerticalLayout
 
 logger = getLogger(__name__)
@@ -15,8 +16,9 @@ logger = getLogger(__name__)
 class TaxonInfoSection(HorizontalLayout):
     """Section to display selected taxon photo and basic info"""
 
-    def __init__(self):
+    def __init__(self, threadpool: ThreadPool):
         super().__init__()
+        self.threadpool = threadpool
 
         self.group = QGroupBox('Selected Taxon')
         inner_layout = HorizontalLayout(self.group)
@@ -41,14 +43,11 @@ class TaxonInfoSection(HorizontalLayout):
         inner_layout.addLayout(self.details)
 
     def load(self, taxon: Taxon):
-        # Label, photo ,and iconic taxon icon
+        # Label, photo, and iconic taxon icon
         common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
         self.group.setTitle(f'{taxon.name}{common_name}')
-        if taxon.default_photo:
-            self.image.setPixmap(url=taxon.default_photo.medium_url)
-        else:
-            self.image.clear()
-        self.icon.setPixmap(url=taxon.icon_url)
+        self.threadpool.schedule(self.image.setPixmap, url=taxon.default_photo.medium_url)
+        self.threadpool.schedule(self.icon.setPixmap, url=taxon.icon_url)
 
         # Other attributes
         self.details.clear()
@@ -61,17 +60,17 @@ class TaxonInfoSection(HorizontalLayout):
 class TaxonomySection(HorizontalLayout):
     """Section to display ancestors and children of selected taxon"""
 
-    def __init__(self):
+    def __init__(self, threadpool: ThreadPool):
         super().__init__()
 
         self.ancestors_group = QGroupBox('Ancestors')
         self.ancestors_group.setFixedWidth(400)
-        self.ancestors_layout = TaxonList(self.ancestors_group)
+        self.ancestors_layout = TaxonList(threadpool, self.ancestors_group)
         self.addWidget(self.ancestors_group)
 
         self.children_group = QGroupBox('Children')
         self.children_group.setFixedWidth(400)
-        self.children_layout = TaxonList(self.children_group)
+        self.children_layout = TaxonList(threadpool, self.children_group)
         self.addWidget(self.children_group)
 
     def load(self, taxon: Taxon):
@@ -95,8 +94,9 @@ class TaxonomySection(HorizontalLayout):
 class TaxonList(VerticalLayout):
     """A scrollable list of TaxonInfoCards"""
 
-    def __init__(self, parent: QWidget = None):
+    def __init__(self, threadpool: ThreadPool, parent: QWidget = None):
         super().__init__(parent)
+        self.threadpool = threadpool
 
         self.scroll_panel = QWidget()
         self.scroll_layout = VerticalLayout(self.scroll_panel)
@@ -117,7 +117,10 @@ class TaxonList(VerticalLayout):
                 yield item
 
     def add_taxon(self, taxon: Taxon):
-        self.scroll_layout.addWidget(TaxonInfoCard(taxon=taxon))
+        """Add a taxon card immediately, and load its thumbnail from a separate thread"""
+        card = TaxonInfoCard(taxon=taxon)
+        self.scroll_layout.addWidget(card)
+        self.threadpool.schedule(card.image.setPixmap, taxon=taxon)
 
     def clear(self):
         self.scroll_layout.clear()
@@ -137,12 +140,13 @@ class TaxonInfoCard(StylableWidget):
         super().__init__()
         card_layout = HorizontalLayout()
         self.setLayout(card_layout)
+        self.taxon = taxon
         self.taxon_id = taxon.id
 
         # Image
-        img = PixmapLabel(taxon=taxon)
-        img.setFixedWidth(75)
-        card_layout.addWidget(img)
+        self.image = PixmapLabel()
+        self.image.setFixedWidth(75)
+        card_layout.addWidget(self.image)
 
         # Details
         title = QLabel(taxon.name)

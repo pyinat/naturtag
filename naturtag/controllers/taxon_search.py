@@ -8,6 +8,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QComboBox, QGroupBox, QLabel, QPushButton, QSizePolicy
 
 from naturtag.app.style import fa_icon
+from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
 from naturtag.controllers.taxon_view import TaxonList
 from naturtag.metadata import INAT_CLIENT
@@ -26,17 +27,17 @@ class TaxonSearch(VerticalLayout):
 
     new_results = Signal(TaxonList)
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
         self.settings = settings
+        self.setAlignment(Qt.AlignTop)
 
         # Taxon name autocomplete
         self.autocomplete = TaxonAutocomplete()
-        self.autocomplete.setAlignment(Qt.AlignTop)
         group_box = QGroupBox('Search')
         group_box.setFixedWidth(400)
-        group_box.setLayout(self.autocomplete)
         group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        group_box.setLayout(self.autocomplete)
         self.addWidget(group_box)
 
         # Category inputs
@@ -53,6 +54,7 @@ class TaxonSearch(VerticalLayout):
         self.ranks = VerticalLayout()
         group_box = QGroupBox('Rank')
         group_box.setFixedWidth(400)
+        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         group_box.setLayout(self.ranks)
         self.addWidget(group_box)
         self.reset_ranks()
@@ -77,11 +79,12 @@ class TaxonSearch(VerticalLayout):
         self.addLayout(button_layout)
 
         # Search results
-        self.results = TaxonList()
-        group_box = QGroupBox('Results')
-        group_box.setFixedWidth(400)
-        group_box.setLayout(self.results)
-        self.addWidget(group_box)
+        self.results = TaxonList(threadpool)
+        self.results_box = QGroupBox('Results')
+        self.results_box.setFixedWidth(400)
+        self.results_box.setLayout(self.results)
+        self.results_box.setVisible(False)
+        self.addWidget(self.results_box)
 
     def search(self):
         """Search for taxa with the currently selected filters"""
@@ -96,7 +99,7 @@ class TaxonSearch(VerticalLayout):
         ).limit(10)
         logger.info('\n'.join([str(t) for t in taxa]))
 
-        # self.results.setVisible(True)
+        self.results_box.setVisible(True)
         self.results.set_taxa(taxa)
         self.new_results.emit(self.results)
 
@@ -105,7 +108,7 @@ class TaxonSearch(VerticalLayout):
         self.autocomplete.search_input.setText('')
         self.category_filters.reset()
         self.results.clear()
-        # self.results.setVisible(False)
+        self.results_box.setVisible(False)
 
     def reset_ranks(self):
         self.exact_rank = RankList('Exact', all_ranks=self.settings.all_ranks)

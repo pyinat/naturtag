@@ -9,6 +9,7 @@ from qtmodern.windows import ModernWindow
 
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
+from naturtag.app.threadpool import ThreadPool
 from naturtag.app.toolbar import Toolbar
 from naturtag.constants import ASSETS_DIR, INIT_WINDOW_SIZE
 from naturtag.controllers import ImageController, TaxonController
@@ -30,11 +31,12 @@ class MainWindow(QMainWindow):
         self.settings = settings
         self.settings_menu = SettingsMenu(self.settings)
         self.settings_menu.message.connect(self.info)
+        self.threadpool = ThreadPool()
 
         self.image_controller = ImageController(self.settings)
         self.image_controller.message.connect(self.info)
         self.image_controller.gallery.message.connect(self.info)
-        self.taxon_controller = TaxonController(self.settings)
+        self.taxon_controller = TaxonController(self.settings, self.threadpool)
         self.taxon_controller.message.connect(self.info)
         self.taxon_controller.selection.connect(self.image_controller.select_taxon)
 

@@ -51,9 +51,9 @@ class PixmapLabel(QLabel):
         if path:
             pixmap = QPixmap(str(path))
         elif taxon:
-            pixmap = _get_image(taxon.default_photo or Photo(url=taxon.icon_url))
+            pixmap = fetch_image(taxon.default_photo)
         elif url:
-            pixmap = _get_image(Photo(url=url))
+            pixmap = fetch_image(Photo(url=url))
         if pixmap is not None:
             self._pixmap = pixmap
             super().setPixmap(self.scaledPixmap())
@@ -79,8 +79,7 @@ class PixmapLabel(QLabel):
             super().setPixmap(self.scaledPixmap())
 
 
-# TODO: Simplify this with changes to Photo model
-def _get_image(photo: Photo) -> QPixmap:
+def fetch_image(photo: Photo) -> QPixmap:
     data = INAT_CLIENT.session.get(photo.url, stream=True).content
     pixmap = QPixmap()
     pixmap.loadFromData(data, format=photo.ext)
