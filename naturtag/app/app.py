@@ -43,12 +43,16 @@ class MainWindow(QMainWindow):
         self.image_controller.gallery.message.connect(self.info)
         self.taxon_controller.message.connect(self.info)
 
-        # Select taxon from image context menu
+        # Select taxon from image context menu, ID input fields, and iconic taxa filtes
         self.image_controller.gallery.selected_taxon.connect(self.taxon_controller.select_taxon)
-        # Select taxon from iconic taxa filters
+        self.image_controller.input_obs_id.selection.connect(
+            self.taxon_controller.select_observation_taxon
+        )
+        self.image_controller.input_taxon_id.selection.connect(self.taxon_controller.select_taxon)
         self.taxon_controller.search.iconic_taxa_filters.selected_taxon.connect(
             self.taxon_controller.select_taxon
         )
+
         # Update taxon ID on main page when a taxon is selected
         self.taxon_controller.selection.connect(self.image_controller.select_taxon)
 

@@ -39,7 +39,6 @@ class TaxonSearch(VerticalLayout):
         super().__init__()
         self.settings = settings
         self.setAlignment(Qt.AlignTop)
-        self.batch_select = False
 
         # Taxon name autocomplete
         self.autocomplete = TaxonAutocomplete()
@@ -105,7 +104,7 @@ class TaxonSearch(VerticalLayout):
             max_rank=self.max_rank.text,
             preferred_place_id=self.settings.preferred_place_id,
             locale=self.settings.locale,
-        ).limit(10)
+        ).limit(20)
         logger.info('\n'.join([str(t) for t in taxa]))
 
         self.results_box.setVisible(True)
@@ -147,7 +146,7 @@ class IconicTaxonFilters(QWidget):
 
     @property
     def selected_iconic_taxa(self) -> list[int]:
-        return [t.taxon_id for t in self.widgets if t.isChecked()]
+        return [t.taxon_id for t in self.button_layout.widgets if t.isChecked()]
 
     def reset(self, except_id: str = None):
         """Reset all buttons, or all except one"""

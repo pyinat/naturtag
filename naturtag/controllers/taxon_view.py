@@ -136,7 +136,7 @@ class TaxonInfoCard(StylableWidget):
 
     clicked = Signal(int)
 
-    def __init__(self, taxon: Taxon):
+    def __init__(self, taxon: Taxon, delayed_load: bool = True):
         super().__init__()
         card_layout = HorizontalLayout()
         self.setLayout(card_layout)
@@ -147,6 +147,8 @@ class TaxonInfoCard(StylableWidget):
         self.image = PixmapLabel()
         self.image.setFixedWidth(75)
         card_layout.addWidget(self.image)
+        if not delayed_load:
+            self.image.setPixmap(taxon=taxon)
 
         # Details
         title = QLabel(taxon.name)

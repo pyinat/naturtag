@@ -68,6 +68,13 @@ class TaxonController(QWidget):
         future = self.threadpool.schedule(lambda: INAT_CLIENT.taxa(taxon_id))
         future.result.connect(self.display_taxon)
 
+    def select_observation_taxon(self, observation_id: int):
+        """Load a taxon from an observation ID"""
+        logger.info(f'Selecting observation {observation_id}')
+        self.threadpool.cancel()
+        future = self.threadpool.schedule(lambda: INAT_CLIENT.observations(observation_id).taxon)
+        future.result.connect(self.display_taxon)
+
     @Slot(Taxon)
     def display_taxon(self, taxon: Taxon):
         self.selected_taxon = taxon
