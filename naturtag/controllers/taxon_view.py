@@ -28,7 +28,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.image = PixmapLabel()
         self.image.setMinimumWidth(200)
         self.image.setMaximumWidth(600)
-        self.image.setMaximumHeight(600)
+        self.image.setMaximumHeight(400)
         inner_layout.addWidget(self.image)
 
         self.icon = PixmapLabel()
