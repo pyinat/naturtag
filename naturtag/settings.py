@@ -9,7 +9,7 @@ from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
 
-from naturtag.constants import CONFIG_PATH, USER_TAXA_PATH
+from naturtag.constants import CONFIG_PATH, DEFAULT_WINDOW_SIZE, LOGFILE, USER_TAXA_PATH
 
 logger = getLogger().getChild(__name__)
 
@@ -67,9 +67,15 @@ def doc_field(doc: str = '', **kwargs):
 class Settings(YamlMixin):
     path = CONFIG_PATH
 
-    # Display
+    # Display settings
     dark_mode: bool = field(default=False)
     show_logs: bool = field(default=False)
+    window_size: tuple[int, int] = field(default=DEFAULT_WINDOW_SIZE)
+
+    # Logging settings
+    log_level: str = field(default='INFO')
+    log_level_external: str = field(default='INFO')
+    logfile: Path = field(default=LOGFILE, converter=Path)
 
     # iNaturalist
     all_ranks: bool = doc_field(
@@ -94,11 +100,10 @@ class Settings(YamlMixin):
         default=False, doc='Generate pipe-delimited hierarchical keyword tags'
     )
 
-    # Photos
-    default_dir: Path = field(default=Path('~').expanduser(), converter=Path)
     # TODO:
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
-    # favorite_dirs: list[Path] = field(factory=list)
+    # default_image_dir: Path = field(default=Path('~').expanduser(), converter=Path)
+    # starred_image_dirs: list[Path] = field(factory=list)
 
 
 @define

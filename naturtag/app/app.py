@@ -3,7 +3,7 @@ import sys
 from logging import getLogger
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
 from qtmodern.windows import ModernWindow
 
@@ -11,7 +11,7 @@ from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.app.toolbar import Toolbar
-from naturtag.constants import ASSETS_DIR, INIT_WINDOW_SIZE
+from naturtag.constants import ASSETS_DIR
 from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings
 from naturtag.widgets import init_handler
@@ -20,16 +20,16 @@ logger = getLogger(__name__)
 
 
 # TODO: Global access to Settings object instead of passing it around everywhere?
-# TODO: Configurable log level
-# TODO: Remember window size
 # TODO: Rember last selected taxon
 class MainWindow(QMainWindow):
     def __init__(self, settings: Settings):
         super().__init__()
-        self.resize(*INIT_WINDOW_SIZE)
         self.setWindowTitle('Naturtag')
+        self.resize(*settings.window_size)
         self.threadpool = ThreadPool()
-        log_handler = init_handler('DEBUG')
+        log_handler = init_handler(
+            settings.log_level, root_level=settings.log_level_external, logfile=settings.logfile
+        )
 
         # Controllers & Settings
         self.settings = settings
@@ -89,6 +89,10 @@ class MainWindow(QMainWindow):
         # Load demo images
         demo_images = (ASSETS_DIR / 'demo_images').glob('*.jpg')
         self.image_controller.gallery.load_images(demo_images)  # type: ignore
+
+    def closeEvent(self, event: QCloseEvent):
+        self.settings.window_size = self.size().toTuple()
+        self.settings.write()
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""
