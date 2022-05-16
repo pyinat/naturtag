@@ -19,26 +19,31 @@ from naturtag.widgets import init_handler
 logger = getLogger(__name__)
 
 
+# TODO: Global access to Settings object instead of passing it around everywhere?
+# TODO: Configurable log level
+# TODO: Remember window size
+# TODO: Rember last selected taxon
 class MainWindow(QMainWindow):
     def __init__(self, settings: Settings):
         super().__init__()
         self.resize(*INIT_WINDOW_SIZE)
         self.setWindowTitle('Naturtag')
-        log_handler = init_handler('DEBUG')  # TODO: Configurable log level
+        self.threadpool = ThreadPool()
+        log_handler = init_handler('DEBUG')
 
         # Controllers & Settings
-        # TODO: Global access to settings instead of passing it around?
         self.settings = settings
         self.settings_menu = SettingsMenu(self.settings)
         self.settings_menu.message.connect(self.info)
-        self.threadpool = ThreadPool()
 
         self.image_controller = ImageController(self.settings)
         self.image_controller.message.connect(self.info)
         self.image_controller.gallery.message.connect(self.info)
+
         self.taxon_controller = TaxonController(self.settings, self.threadpool)
         self.taxon_controller.message.connect(self.info)
         self.taxon_controller.selection.connect(self.image_controller.select_taxon)
+        self.image_controller.gallery.selected_taxon.connect(self.taxon_controller.select_taxon)
 
         # Settings that take effect immediately
         self.settings_menu.dark_mode.clicked.connect(lambda checked: set_theme(dark_mode=checked))
@@ -49,9 +54,16 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
         # self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observations')
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
+        self.setCentralWidget(self.tabs)
+
+        # Optionally show Logs tab
         self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
-        self.setCentralWidget(self.tabs)
+
+        # Switch to Taxon tab from image context menu -> View Taxon
+        self.image_controller.gallery.selected_taxon.connect(
+            lambda: self.tabs.setCurrentWidget(self.taxon_controller)
+        )
 
         # Toolbar
         self.toolbar = Toolbar(self)

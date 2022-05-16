@@ -31,6 +31,7 @@ class ImageGallery(QWidget):
     """Container for displaying local image thumbnails & info"""
 
     message = Signal(str)
+    selected_taxon: Signal = Signal(int)
 
     def __init__(self):
         super().__init__()
@@ -82,6 +83,7 @@ class ImageGallery(QWidget):
         thumbnail.removed.connect(self.remove_image)
         thumbnail.selected.connect(self.select_image)
         thumbnail.copied.connect(self.message.emit)
+        thumbnail.context_menu.selected_taxon.connect(self.selected_taxon.emit)
         self.flow_layout.addWidget(thumbnail)
         self.images[file_path] = thumbnail
 
@@ -165,9 +167,9 @@ class LocalThumbnail(StylableWidget):
     * Right click: Show context menu
     """
 
+    copied = Signal(str)
     removed = Signal(str)
     selected = Signal(str)
-    copied = Signal(str)
 
     def __init__(self, file_path: str):
         super().__init__()
@@ -180,6 +182,7 @@ class LocalThumbnail(StylableWidget):
 
         layout = VerticalLayout(self)
         layout.setSpacing(0)
+        self.context_menu = ThumbnailContextMenu(self)
 
         # Image
         self.image = QLabel(self)
@@ -203,8 +206,7 @@ class LocalThumbnail(StylableWidget):
         layout.addWidget(self.label)
 
     def contextMenuEvent(self, e):
-        context_menu = ThumbnailContextMenu(self)
-        context_menu.exec(e.globalPos())
+        self.context_menu.exec(e.globalPos())
 
     def mousePressEvent(self, _):
         """Placeholder to accept mouse press events"""
@@ -246,24 +248,33 @@ class LocalThumbnail(StylableWidget):
 class ThumbnailContextMenu(QMenu):
     """Context menu for local image thumbnails"""
 
+    selected_taxon: Signal = Signal(int)
+
     def __init__(self, thumbnail: LocalThumbnail):
         super().__init__()
         self.thumbnail = thumbnail
         meta = thumbnail.metadata
 
         self._add_action(
-            icon='fa.binoculars',
-            text='View Observation',
-            tooltip=f'View observation {meta.observation_id} on inaturalist.org',
-            enabled=meta.has_observation,
-            callback=lambda: webbrowser.open(meta.observation_url),
+            icon='fa5s.spider',
+            text='View Taxon',
+            tooltip=f'View taxon {meta.taxon_id} in naturtag',
+            enabled=meta.has_taxon,
+            callback=lambda: self.selected_taxon.emit(meta.taxon_id),
         )
         self._add_action(
             icon='fa5s.spider',
-            text='View Taxon',
+            text='View Taxon on iNat',
             tooltip=f'View taxon {meta.taxon_id} on inaturalist.org',
             enabled=meta.has_taxon,
             callback=lambda: webbrowser.open(meta.taxon_url),
+        )
+        self._add_action(
+            icon='fa.binoculars',
+            text='View Observation on iNat',
+            tooltip=f'View observation {meta.observation_id} on inaturalist.org',
+            enabled=meta.has_observation,
+            callback=lambda: webbrowser.open(meta.observation_url),
         )
         self._add_action(
             icon='fa5.copy',
