@@ -16,9 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.app.style import fa_icon
-from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
-from naturtag.controllers.taxon_view import TaxonList
 from naturtag.metadata import INAT_CLIENT
 from naturtag.settings import Settings
 from naturtag.widgets import GridLayout, HorizontalLayout, PixmapLabel, TaxonAutocomplete, VerticalLayout
@@ -33,9 +31,10 @@ COMMON_RANKS = [r for r in RANKS if not any([k in r for k in ignore_terms])][::-
 class TaxonSearch(VerticalLayout):
     """Taxon search"""
 
-    new_results = Signal(TaxonList)
+    new_results = Signal(list)
+    reset_results = Signal()
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
+    def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings
         self.setAlignment(Qt.AlignTop)
@@ -55,8 +54,8 @@ class TaxonSearch(VerticalLayout):
         group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         group_box.setLayout(categories)
         self.addWidget(group_box)
-        self.iconic_taxa_filters = IconicTaxonFilters()
-        categories.addWidget(self.iconic_taxa_filters)
+        self.iconic_taxon_filters = IconicTaxonFilters()
+        categories.addWidget(self.iconic_taxon_filters)
 
         # Rank inputs
         self.ranks = VerticalLayout()
@@ -86,37 +85,27 @@ class TaxonSearch(VerticalLayout):
         button_layout.addWidget(reset_button)
         self.addLayout(button_layout)
 
-        # Search results
-        self.results = TaxonList(threadpool)
-        self.results_box = QGroupBox('Results')
-        self.results_box.setFixedWidth(400)
-        self.results_box.setLayout(self.results)
-        self.results_box.setVisible(False)
-        self.addWidget(self.results_box)
-
     def search(self):
         """Search for taxa with the currently selected filters"""
         taxa = INAT_CLIENT.taxa.search(
             q=self.autocomplete.search_input.text(),
-            taxon_id=self.iconic_taxa_filters.selected_iconic_taxa,
+            taxon_id=self.iconic_taxon_filters.selected_iconic_taxa,
             rank=self.exact_rank.text,
             min_rank=self.min_rank.text,
             max_rank=self.max_rank.text,
             preferred_place_id=self.settings.preferred_place_id,
             locale=self.settings.locale,
         ).limit(20)
-        logger.info('\n'.join([str(t) for t in taxa]))
-
-        self.results_box.setVisible(True)
-        self.results.set_taxa(taxa)
-        self.new_results.emit(self.results)
+        logger.debug('\n'.join([str(t) for t in taxa]))
+        self.new_results.emit(taxa)
 
     def reset(self):
         """Reset all search filters"""
+        logger.warning('resetting search')
         self.autocomplete.search_input.setText('')
-        self.iconic_taxa_filters.reset()
-        self.results.clear()
-        self.results_box.setVisible(False)
+        self.iconic_taxon_filters.reset()
+        self.reset_ranks()
+        self.reset_results.emit()
 
     def reset_ranks(self):
         self.exact_rank = RankList('Exact', all_ranks=self.settings.all_ranks)
@@ -150,6 +139,7 @@ class IconicTaxonFilters(QWidget):
 
     def reset(self, except_id: str = None):
         """Reset all buttons, or all except one"""
+        logger.warning(f'resetting {self.button_layout.widgets}')
         for button in self.button_layout.widgets:
             if button.taxon_id != except_id:
                 button.setChecked(False)

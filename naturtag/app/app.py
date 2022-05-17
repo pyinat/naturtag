@@ -2,7 +2,7 @@
 import sys
 from logging import getLogger
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
 from qtmodern.windows import ModernWindow
@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
             self.taxon_controller.select_observation_taxon
         )
         self.image_controller.input_taxon_id.selection.connect(self.taxon_controller.select_taxon)
-        self.taxon_controller.search.iconic_taxa_filters.selected_taxon.connect(
+        self.taxon_controller.search.iconic_taxon_filters.selected_taxon.connect(
             self.taxon_controller.select_taxon
         )
 
@@ -62,8 +62,9 @@ class MainWindow(QMainWindow):
 
         # Tabbed layout
         self.tabs = QTabWidget()
+        self.tabs.setIconSize(QSize(32, 32))
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
-        # self.tabs.addTab(QWidget(), fa_icon('fa.binoculars'), 'Observations')
+        # self.tabs.addTab(QWidget(), fa_icon('fa5s.binoculars'), 'Observations')
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
         self.setCentralWidget(self.tabs)
 

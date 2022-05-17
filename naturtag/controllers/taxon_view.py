@@ -5,7 +5,7 @@ from typing import Iterable, Iterator
 from pyinaturalist import Taxon
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QWidget
+from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.threadpool import ThreadPool
 from naturtag.widgets import HorizontalLayout, PixmapLabel, StylableWidget, VerticalLayout
@@ -65,12 +65,12 @@ class TaxonomySection(HorizontalLayout):
 
         self.ancestors_group = QGroupBox('Ancestors')
         self.ancestors_group.setFixedWidth(400)
-        self.ancestors_layout = TaxonList(threadpool, self.ancestors_group)
+        self.ancestors_list = TaxonList(threadpool, self.ancestors_group)
         self.addWidget(self.ancestors_group)
 
         self.children_group = QGroupBox('Children')
         self.children_group.setFixedWidth(400)
-        self.children_layout = TaxonList(threadpool, self.children_group)
+        self.children_list = TaxonList(threadpool, self.children_group)
         self.addWidget(self.children_group)
 
     def load(self, taxon: Taxon):
@@ -81,14 +81,14 @@ class TaxonomySection(HorizontalLayout):
             return text + (f' ({len(items)})' if items else '')
 
         self.ancestors_group.setTitle(get_label('Ancestors', taxon.ancestors))
-        self.ancestors_layout.set_taxa(taxon.ancestors)
+        self.ancestors_list.set_taxa(taxon.ancestors)
         self.children_group.setTitle(get_label('Children', taxon.children))
-        self.children_layout.set_taxa(taxon.children)
+        self.children_list.set_taxa(taxon.children)
 
     @property
     def taxa(self) -> Iterator['TaxonInfoCard']:
-        yield from self.ancestors_layout.taxa
-        yield from self.children_layout.taxa
+        yield from self.ancestors_list.taxa
+        yield from self.children_list.taxa
 
 
 class TaxonList(VerticalLayout):
@@ -140,6 +140,8 @@ class TaxonInfoCard(StylableWidget):
         super().__init__()
         card_layout = HorizontalLayout()
         self.setLayout(card_layout)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setFixedHeight(90)
         self.taxon = taxon
         self.taxon_id = taxon.id
 

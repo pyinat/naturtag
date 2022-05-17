@@ -82,7 +82,7 @@ class Settings(YamlMixin):
         default=False, doc='Show all available taxonomic rank filters on taxon search page'
     )
     casual_observations: bool = doc_field(default=True, doc='Include casual observations in searches')
-    locale: str = doc_field(default='en_US', doc='Locale preference for species common names')
+    locale: str = doc_field(default='en', doc='Locale preference for species common names')
     preferred_place_id: int = doc_field(
         default=1, converter=int, doc='Place preference for regional species common names'
     )
