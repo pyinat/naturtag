@@ -14,7 +14,7 @@ logger = getLogger(__name__)
 
 
 class IconLabel(QLabel):
-    """A QLabel for displaying an icon"""
+    """A QLabel for displaying a FontAwesome icon"""
 
     def __init__(self, icon_str: str, parent: QWidget = None, size: int = 20, active: bool = True):
         super().__init__(parent)
@@ -51,9 +51,9 @@ class PixmapLabel(QLabel):
         if path:
             pixmap = QPixmap(str(path))
         elif taxon:
-            pixmap = _get_image(taxon.default_photo or Photo(url=taxon.icon_url))
+            pixmap = fetch_image(taxon.default_photo)
         elif url:
-            pixmap = _get_image(Photo(url=url))
+            pixmap = fetch_image(Photo(url=url))
         if pixmap is not None:
             self._pixmap = pixmap
             super().setPixmap(self.scaledPixmap())
@@ -79,9 +79,8 @@ class PixmapLabel(QLabel):
             super().setPixmap(self.scaledPixmap())
 
 
-# TODO: Simplify this with changes to Photo model
-def _get_image(photo: Photo) -> QPixmap:
+def fetch_image(photo: Photo) -> QPixmap:
     data = INAT_CLIENT.session.get(photo.url, stream=True).content
     pixmap = QPixmap()
-    pixmap.loadFromData(data, format=photo.mimetype.replace('image/', ''))
+    pixmap.loadFromData(data, format=photo.ext)
     return pixmap

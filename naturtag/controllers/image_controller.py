@@ -1,11 +1,13 @@
 from logging import getLogger
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QEvent, Signal
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QWidget
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QToolButton, QWidget
 
-from naturtag.app.image_gallery import ImageGallery
+from naturtag.app.style import fa_icon
+from naturtag.controllers.image_gallery import ImageGallery
+from naturtag.controllers.taxon_view import TaxonInfoCard
 from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
 from naturtag.widgets import HorizontalLayout, VerticalLayout
@@ -25,28 +27,31 @@ class ImageController(QWidget):
         self.setLayout(photo_layout)
 
         # Input group
-        input_layout = HorizontalLayout()
-        group_box = QGroupBox('Input')
-        group_box.setFixedHeight(80)
-        group_box.setLayout(input_layout)
+        data_source_layout = HorizontalLayout()
+        group_box = QGroupBox('Metadata source (observation and/or taxon)')
+        group_box.setFixedHeight(150)
+        group_box.setFixedWidth(600)
+        group_box.setLayout(data_source_layout)
         photo_layout.addWidget(group_box)
+
+        # Input fields
+        inputs_layout = VerticalLayout()
+        data_source_layout.addLayout(inputs_layout)
+        self.input_obs_id = IdInput()
+        inputs_layout.addWidget(QLabel('Observation ID:'))
+        inputs_layout.addWidget(self.input_obs_id)
+        self.input_taxon_id = IdInput()
+        inputs_layout.addWidget(QLabel('Taxon ID:'))
+        inputs_layout.addWidget(self.input_taxon_id)
+
+        # Selected taxon/observation info
+        data_source_layout.addStretch()
+        self.data_source_card = HorizontalLayout()
+        data_source_layout.addLayout(self.data_source_card)
 
         # Viewer
         self.gallery = ImageGallery()
         photo_layout.addWidget(self.gallery)
-
-        # Input fields
-        self.input_obs_id = QLineEdit()
-        self.input_obs_id.setClearButtonEnabled(True)
-        self.input_obs_id.setValidator(QIntValidator())
-        input_layout.addWidget(QLabel('Observation ID:'))
-        input_layout.addWidget(self.input_obs_id)
-
-        self.input_taxon_id = QLineEdit()
-        self.input_taxon_id.setClearButtonEnabled(True)
-        self.input_taxon_id.setValidator(QIntValidator())
-        input_layout.addWidget(QLabel('Taxon ID:'))
-        input_layout.addWidget(self.input_taxon_id)
 
     def run(self):
         """Run image tagging for selected images and input"""
@@ -103,6 +108,30 @@ class ImageController(QWidget):
 
     def select_taxon(self, taxon: Taxon):
         self.input_taxon_id.setText(str(taxon.id))
+        self.data_source_card.clear()
+        self.data_source_card.addWidget(TaxonInfoCard(taxon=taxon, delayed_load=False))
 
     def info(self, message: str):
         self.message.emit(message)
+
+
+class IdInput(QLineEdit):
+    """Pressing return or losing focus will send a 'selection' signal"""
+
+    selection = Signal(int)
+
+    def __init__(self):
+        super().__init__()
+        self.setClearButtonEnabled(True)
+        self.setValidator(QIntValidator())
+        self.setMaximumWidth(200)
+        self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
+        self.returnPressed.connect(self.select_taxon)
+
+    def focusOutEvent(self, event: QEvent = None):
+        self.select_taxon()
+        return super().focusOutEvent(event)
+
+    def select_taxon(self):
+        if self.text():
+            self.selection.emit(int(self.text()))

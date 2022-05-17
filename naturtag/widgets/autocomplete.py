@@ -2,8 +2,9 @@ from logging import getLogger
 
 from pyinaturalist_convert import DATA_DIR, TaxonAutocompleter
 from PySide6.QtCore import QStringListModel, Qt, Signal
-from PySide6.QtWidgets import QCompleter, QLineEdit
+from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
+from naturtag.app.style import fa_icon
 from naturtag.widgets import VerticalLayout
 
 logger = getLogger(__name__)
@@ -18,6 +19,7 @@ class TaxonAutocomplete(VerticalLayout):
 
         self.search_input = QLineEdit()
         self.search_input.setClearButtonEnabled(True)
+        self.search_input.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
         self.addWidget(self.search_input)
         self.taxa: dict[str, int] = {}
 

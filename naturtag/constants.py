@@ -9,6 +9,7 @@ from pyinaturalist.constants import ICONIC_TAXA
 PKG_DIR = Path(__file__).parent.parent
 ASSETS_DIR = PKG_DIR / 'assets'
 DATA_DIR = Path(user_data_dir()) / 'Naturtag'
+LOGFILE = DATA_DIR / 'naturtag.log'
 
 # Autocomplete settings
 TRIGGER_DELAY = 0.1
@@ -45,8 +46,8 @@ EXIF_HIDE_PREFIXES = [
 ]
 EXIF_ORIENTATION_ID = '0x0112'
 
-ICONIC_TAXA_DIR = ASSETS_DIR / 'iconic_taxa'
 APP_LOGO = str(ASSETS_DIR / 'logo.png')
+ICONIC_TAXA_DIR = ASSETS_DIR / 'iconic_taxa'
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
 
 # Config files
@@ -55,7 +56,7 @@ USER_TAXA_PATH = DATA_DIR / 'stored_taxa.yml'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 
 # Theme/window settings
-INIT_WINDOW_SIZE = (1500, 1024)
+DEFAULT_WINDOW_SIZE = (1500, 1024)
 MAX_LABEL_CHARS = 80
 QSS_PATH = ASSETS_DIR / 'style.qss'
 
