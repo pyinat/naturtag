@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event: QCloseEvent):
         self.settings.window_size = self.size().toTuple()
         self.settings.write()
+        self.taxon_controller.user_taxa.write()
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""

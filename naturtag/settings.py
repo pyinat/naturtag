@@ -125,7 +125,8 @@ class UserTaxa(YamlMixin):
 
     def append_history(self, taxon_id: int):
         self.history.append(taxon_id)
-        self._frequent = None
+        self.frequent.setdefault(taxon_id, 0)
+        self.frequent[taxon_id] += 1
 
     def __str__(self):
         sizes = [
@@ -135,3 +136,7 @@ class UserTaxa(YamlMixin):
             f'Observed: {len(self.observed)}',
         ]
         return '\n'.join(sizes)
+
+    @classmethod
+    def read(cls) -> 'UserTaxa':
+        return super(UserTaxa, cls).read()  # type: ignore
