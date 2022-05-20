@@ -1,5 +1,100 @@
+"""
+Get taxonomy tags from an iNaturalist observation or taxon, and write them
+either to the console or to local image metadata.
+
+\b
+### Species & Observation IDs
+Either a species or observation may be specified, either by ID or URL.
+For example, all of the following options will fetch the same taxonomy
+metadata:
+```
+naturtag -t 48978
+naturtag -t https://www.inaturalist.org/taxa/48978-Dirona-picta
+naturtag -o 45524803
+naturtag -o https://www.inaturalist.org/observations/45524803
+```
+
+\b
+The difference is that specifying a species (`-t, --taxon`) will fetch only
+taxonomy metadata, while specifying an observation (`-o, --observation`)
+will fetch taxonomy plus observation metadata.
+
+\b
+### Species Search
+You may also search for species by name. If there are multiple results, you
+will be prompted to choose from the top 10 search results:
+```
+naturtag -t 'indigo bunting'
+```
+
+\b
+### Images
+Multiple paths are supported, as well as glob patterns, for example:
+`0001.jpg IMG*.jpg ~/observations/**.jpg`
+
+If no images are specified, the generated keywords will be printed.
+
+\b
+### Keywords
+Keywords will be generated in the format:
+`taxonomy:{rank}={name}`
+
+\b
+### Darwin Core
+If an observation is specified, DwC metadata will also be generated, in the
+form of XMP tags. Among other things, this includes taxonomy tags in the
+format:
+`dwc:{rank}="{name}"`
+
+\b
+### Sidecar Files
+By default, XMP tags will be written to a sidecar file if it already exists.
+Use the `-x` option to create a new one if it doesn't exist.
+
+\b
+### Hierarchical Keywords
+If specified (`-h`), hierarchical keywords will be generated. These will be
+interpreted as a tree structure by image viewers that support them.
+
+\b
+For example, the following keywords:
+```
+Animalia
+Animalia|Arthropoda
+Animalia|Arthropoda|Chelicerata
+Animalia|Arthropoda|Hexapoda
+```
+
+\b
+Will translate into the following tree structure:
+```
+Animalia
+    ┗━Arthropoda
+        ┣━Chelicerata
+        ┗━Hexapoda
+```
+
+\b
+### Shell Completion
+Shell tab-completion is available for bash and fish shells. To install, run:
+```
+naturtag --install-completion [shell name]
+```
+
+\b
+This will provide tab-completion for options as well as taxon names, for example:
+```
+naturtag -t corm<TAB>
+```
+"""
+# TODO: Show all matched taxon names if more than one match per taxon ID
+# TODO: Bash doesn't support completion help text, so currently only shows IDs
+# TODO: Use table formatting from pyinaturalist if format_taxa
+import os
 from collections import defaultdict
+from pathlib import Path
 from re import DOTALL, MULTILINE, compile
+from shutil import copyfile
 from typing import Optional
 
 import click
@@ -11,17 +106,19 @@ from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
+from naturtag.constants import AUTOCOMPLETE_DIR
 from naturtag.metadata import tag_images
 from naturtag.metadata.inat_metadata import strip_url
 
-CODE_BLOCK = compile(r'```\n(.+?)```\s*\n', DOTALL)
+CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
-HEADER = compile(r'^#+\s*(.*)$', MULTILINE)
+HEADER = compile(r'^\s*#+\s*(.*)$', MULTILINE)
 
 
-# TODO: Show all matched taxon names if more than one match per taxon ID
 class TaxonParam(click.ParamType):
     """Custom parameter with taxon name autocompletion"""
+
+    name = 'taxon'
 
     def shell_complete(self, ctx, param, incomplete):
         results = TaxonAutocompleter().search(incomplete)
@@ -60,7 +157,12 @@ def _strip_url_or_name(ctx, param, value):
 @click.option(
     '-x', '--create-sidecar', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
 )
-@click.option('-v', '--verbose', is_flag=True, help='Show additional information')
+@click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
+@click.option(
+    '--install-completion',
+    type=click.Choice(['all', 'bash', 'fish']),
+    help='Install shell completion scripts',
+)
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
@@ -73,83 +175,11 @@ def tag(
     observation,
     taxon,
     verbose,
+    install_completion,
 ):
-    """
-    Get taxonomy tags from an iNaturalist observation or taxon, and write them
-    either to the console or to local image metadata.
-
-    \b
-    ### Species & Observation IDs
-    Either a species or observation may be specified, either by ID or URL.
-    For example, all of the following options will fetch the same taxonomy
-    metadata:
-    ```
-    naturtag -t 48978
-    naturtag -t https://www.inaturalist.org/taxa/48978-Dirona-picta
-    naturtag -o 45524803
-    naturtag -o https://www.inaturalist.org/observations/45524803
-    ```
-
-    \b
-    The difference is that specifying a species (`-t, --taxon`) will fetch only
-    taxonomy metadata, while specifying an observation (`-o, --observation`)
-    will fetch taxonomy plus observation metadata.
-
-    \b
-    ### Species Search
-    You may also search for species by name. If there are multiple results, you
-    will be prompted to choose from the top 10 search results:
-    ```
-    naturtag -t 'indigo bunting'
-    ```
-
-    \b
-    ### Images
-    Multiple paths are supported, as well as glob patterns, for example:
-    `0001.jpg IMG*.jpg ~/observations/**.jpg`
-    If no images are specified, the generated keywords will be printed.
-
-    \b
-    ### Keywords
-    Keywords will be generated in the format:
-    `taxonomy:{rank}={name}`
-
-    \b
-    ### DarwinCore
-    If an observation is specified, DwC metadata will also be generated, in the
-    form of XMP tags. Among other things, this includes taxonomy tags in the
-    format:
-    `dwc:{rank}="{name}"`
-
-    \b
-    ### Sidecar Files
-    By default, XMP tags will be written to a sidecar file if it already exists.
-    Use the `-x` option to create a new one if it doesn't exist.
-
-    \b
-    ### Hierarchical Keywords
-    If specified (`-h`), hierarchical keywords will be generated. These will be
-    interpreted as a tree structure by image viewers that support them.
-
-    \b
-    For example, the following keywords:
-    ```
-    Animalia
-    Animalia|Arthropoda
-    Animalia|Arthropoda|Chelicerata
-    Animalia|Arthropoda|Hexapoda
-    ```
-
-    \b
-    Will translate into the following tree structure:
-    ```
-    Animalia
-        ┗━Arthropoda
-            ┣━Chelicerata
-            ┗━Hexapoda
-    ```
-    \b
-    """
+    if install_completion:
+        install_shell_completion(install_completion)
+        ctx.exit()
     if not any([observation, taxon]):
         click.echo(ctx.get_help())
         ctx.exit()
@@ -214,7 +244,6 @@ def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:
     return results[int(taxon_index)]['id']
 
 
-# TODO: Use table formatting from pyinaturalist, add matched_term
 def format_taxa(results, verbose: bool = False) -> Table:
     """Format taxon autocomplete results into a table"""
     table = Table(
@@ -240,13 +269,45 @@ def format_taxa(results, verbose: bool = False) -> Table:
 
 
 def colorize_help_text(text):
-    """An ugly hack to make help text prettier"""
-    text = HEADER.sub(click.style(r'\1:', 'blue'), text)
+    """Colorize code blocks and headers in CLI help text"""
+    text = HEADER.sub(click.style(r'\1:', 'blue', bold=True), text)
     text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
     text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
     return text
 
 
+def install_shell_completion(shell: str):
+    """Copy packaged completion scripts for the specified shell(s)"""
+    if shell in ['all', 'bash']:
+        _install_bash_completion()
+    if shell in ['all', 'fish']:
+        _install_fish_completion()
+
+
+def _install_fish_completion():
+    """Copy packaged completion scripts for fish shell"""
+    config_dir = Path(os.environ.get('XDG_CONFIG_HOME', '~/.config')).expanduser()
+    completion_dir = config_dir / 'fish' / 'completions'
+    completion_dir.mkdir(exist_ok=True, parents=True)
+
+    for script in AUTOCOMPLETE_DIR.glob('*.fish'):
+        copyfile(script, completion_dir / script.name)
+    print(f'Installed fish completion scripts to {completion_dir}')
+
+
+def _install_bash_completion():
+    """Copy packaged completion scripts for bash"""
+    config_dir = Path(os.environ.get('XDG_CONFIG_HOME', '~/.config')).expanduser()
+    completion_dir = config_dir / 'bash' / 'completions'
+    completion_dir.mkdir(exist_ok=True, parents=True)
+
+    for script in AUTOCOMPLETE_DIR.glob('*.bash'):
+        copyfile(script, completion_dir / script.name)
+    print('Installed bash completion scripts.')
+    print('Add the following to your ~/.bashrc, and restart your shell:')
+    print(f'source {completion_dir}/*.bash\n')
+
+
 # Main CLI entry point
 main = tag
-tag.help = colorize_help_text(tag.help)
+tag.help = colorize_help_text(__doc__)

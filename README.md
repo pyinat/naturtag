@@ -95,6 +95,7 @@ pip install --pre naturtag
 ## CLI Usage
 This package provides the command `naturtag`, also aliased to `nt`.
 
+See `naturtag --help` for full usage information. Basic options:
 ```yaml
 Usage: naturtag [OPTIONS] [IMAGES]...
 
