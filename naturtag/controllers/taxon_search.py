@@ -16,8 +16,8 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.app.style import fa_icon
+from naturtag.client import INAT_CLIENT
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
-from naturtag.metadata import INAT_CLIENT
 from naturtag.settings import Settings
 from naturtag.widgets import GridLayout, HorizontalLayout, PixmapLabel, TaxonAutocomplete, VerticalLayout
 
@@ -101,7 +101,6 @@ class TaxonSearch(VerticalLayout):
 
     def reset(self):
         """Reset all search filters"""
-        logger.warning('resetting search')
         self.autocomplete.search_input.setText('')
         self.iconic_taxon_filters.reset()
         self.reset_ranks()
@@ -139,7 +138,6 @@ class IconicTaxonFilters(QWidget):
 
     def reset(self, except_id: str = None):
         """Reset all buttons, or all except one"""
-        logger.warning(f'resetting {self.button_layout.widgets}')
         for button in self.button_layout.widgets:
             if button.taxon_id != except_id:
                 button.setChecked(False)

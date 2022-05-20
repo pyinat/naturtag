@@ -8,7 +8,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.metadata.inat_metadata import INAT_CLIENT
+from naturtag.client import IMG_SESSION
 
 logger = getLogger(__name__)
 
@@ -80,7 +80,7 @@ class PixmapLabel(QLabel):
 
 
 def fetch_image(photo: Photo) -> QPixmap:
-    data = INAT_CLIENT.session.get(photo.url, stream=True).content
+    data = IMG_SESSION.get(photo.url, stream=True).content
     pixmap = QPixmap()
     pixmap.loadFromData(data, format=photo.ext)
     return pixmap

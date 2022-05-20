@@ -105,6 +105,8 @@ class Settings(YamlMixin):
     # default_image_dir: Path = field(default=Path('~').expanduser(), converter=Path)
     # starred_image_dirs: list[Path] = field(factory=list)
 
+    setup_complete: bool = field(default=False)
+
 
 @define
 class UserTaxa(YamlMixin):

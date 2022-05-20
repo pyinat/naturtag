@@ -2,6 +2,7 @@
 import sys
 from logging import getLogger
 
+from pyinaturalist_convert import create_tables
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
@@ -94,13 +95,17 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
 
+        self.setup()
+
         # Debug
         shortcut = QShortcut(QKeySequence('F5'), self)
         shortcut.activated.connect(self.reload_qss)
 
         # Load demo images
-        demo_images = (ASSETS_DIR / 'demo_images').glob('*.jpg')
-        self.image_controller.gallery.load_images(demo_images)  # type: ignore
+        demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
+        self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
+
+        self.taxon_controller.select_taxon(47792)
 
     def closeEvent(self, event: QCloseEvent):
         self.settings.window_size = self.size().toTuple()
@@ -118,6 +123,17 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
+
+    def setup(self):
+        """Run any first-time setup steps, if needed"""
+        # Create database tables if they don't exist
+        if not self.settings.setup_complete:
+            logger.info('Running first-time setup')
+            create_tables()
+            self.settings.setup_complete = True
+            self.settings.write()
+        else:
+            logger.info('First-time setup not needed')
 
     def show_settings(self):
         self.settings_menu.show()

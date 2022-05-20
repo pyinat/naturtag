@@ -7,15 +7,15 @@ from logging import getLogger
 from typing import Optional
 from urllib.parse import urlparse
 
-from pyinaturalist import Observation, Taxon, iNatClient
+from pyinaturalist import Observation, Taxon
 from pyinaturalist_convert import to_dwc
 
+from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple
 from naturtag.image_glob import glob_paths
 from naturtag.metadata import MetaMetadata
 
 DWC_NAMESPACES = ['dcterms', 'dwc']
-INAT_CLIENT = iNatClient(cache_control=False)
 logger = getLogger().getChild(__name__)
 
 

@@ -7,10 +7,10 @@ from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
+from naturtag.client import INAT_CLIENT
 from naturtag.constants import MAX_DISPLAY_HISTORY
 from naturtag.controllers.taxon_search import TaxonSearch
 from naturtag.controllers.taxon_view import TaxonInfoCard, TaxonInfoSection, TaxonList, TaxonomySection
-from naturtag.metadata import INAT_CLIENT
 from naturtag.settings import Settings, UserTaxa
 from naturtag.widgets import HorizontalLayout, VerticalLayout
 
@@ -55,9 +55,6 @@ class TaxonController(QWidget):
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
         self.root.addLayout(taxon_layout)
-
-        # Testing
-        self.select_taxon(47792)
 
     def info(self, message: str):
         self.message.emit(message)
