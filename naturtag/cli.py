@@ -14,9 +14,9 @@ from rich.table import Column, Table
 from naturtag.metadata import tag_images
 from naturtag.metadata.inat_metadata import strip_url
 
-CODE_BLOCK = compile(r'```\n(.+?)```\s*\n', DOTALL)
+CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
-HEADER = compile(r'^#+\s*(.*)$', MULTILINE)
+HEADER = compile(r'^\s*#+\s*(.*)$', MULTILINE)
 
 
 # TODO: Show all matched taxon names if more than one match per taxon ID
@@ -240,7 +240,7 @@ def format_taxa(results, verbose: bool = False) -> Table:
 
 
 def colorize_help_text(text):
-    """An ugly hack to make help text prettier"""
+    """Colorize code blocks and headers in CLI help text"""
     text = HEADER.sub(click.style(r'\1:', 'blue'), text)
     text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
     text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
