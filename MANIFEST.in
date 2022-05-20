@@ -1,4 +1,0 @@
-include *.kv
-include default-settings.yml
-recursive-include assets *
-recursive-exclude assets/iconic_taxa *
