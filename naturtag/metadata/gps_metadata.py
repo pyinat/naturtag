@@ -1,5 +1,4 @@
-"""Utilities for converting GPS coordinates to/from image metadata"""
-# TODO: This module could be moved to pyinaturalist-convert?
+"""Utilities for converting GPS coordinates to/from EXIF and XMP image metadata"""
 import re
 from typing import Optional
 

@@ -5,14 +5,17 @@ from typing import Any, Optional
 from pyinaturalist.constants import INAT_BASE_URL, RANKS, Coordinates
 
 from naturtag.constants import OBSERVATION_KEYS, TAXON_KEYS, IntTuple, StrTuple
-from naturtag.gps import (
+from naturtag.metadata import (
+    HIER_KEYWORD_TAGS,
+    KEYWORD_TAGS,
+    ImageMetadata,
+    KeywordMetadata,
     convert_dwc_coords,
     convert_exif_coords,
     convert_xmp_coords,
     to_exif_coords,
     to_xmp_coords,
 )
-from naturtag.metadata import HIER_KEYWORD_TAGS, KEYWORD_TAGS, ImageMetadata, KeywordMetadata
 
 NULL_COORDS = (0, 0)
 logger = getLogger().getChild(__name__)

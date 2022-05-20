@@ -1,4 +1,4 @@
-from naturtag.gps import (
+from naturtag.metadata.gps_metadata import (
     convert_dwc_coords,
     convert_exif_coords,
     convert_xmp_coords,
