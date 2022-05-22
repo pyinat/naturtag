@@ -126,6 +126,7 @@ class UserTaxa(YamlMixin):
         return self._frequent
 
     def append_history(self, taxon_id: int):
+        """Update history and frequent"""
         self.history.append(taxon_id)
         self.frequent.setdefault(taxon_id, 0)
         self.frequent[taxon_id] += 1

@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from logging import getLogger
 from typing import Iterable
 
@@ -47,6 +48,7 @@ class TaxonController(QWidget):
         self.tabs = TaxonTabs(threadpool, self.user_taxa)
         self.tabs.loaded.connect(self.bind_selection)
         self.root.addWidget(self.tabs)
+        self.selection.connect(self.tabs.update_history)
         self.search.reset_results.connect(self.tabs.results.clear)
 
         # Selected taxon info
@@ -74,7 +76,6 @@ class TaxonController(QWidget):
         # self.threadpool.cancel()
         future = self.threadpool.schedule(lambda: INAT_CLIENT.taxa(taxon_id))
         future.result.connect(self.display_taxon)
-        self.user_taxa.append_history(taxon_id)
 
     def select_observation_taxon(self, observation_id: int):
         """Load a taxon from an observation ID"""
@@ -105,7 +106,10 @@ class TaxonController(QWidget):
             taxon_card.clicked.connect(self.select_taxon)
 
 
+# TODO: Make MAX_DISPLAY_HISTORY configurable
 # TODO: Collapse tab titles to icons only if not all titles fit
+# TODO: Benchmark fetching in a single batch vs one at a time
+# TODO: Update history and frequent after TaxonController.select_taxon
 class TaxonTabs(QTabWidget):
     """Tabbed view for search results and user taxa"""
 
@@ -143,12 +147,10 @@ class TaxonTabs(QTabWidget):
         self.setTabToolTip(idx, tooltip)
         return tab
 
-    # TODO: Make MAX_DISPLAY_HISTORY configurable
-    # TODO: Benchmark fetching in a single batch vs one at a time
     def load_user_taxa(self):
-        self.unique_history_ids = list(set(self.user_taxa.history[::-1]))[:MAX_DISPLAY_HISTORY]
-        self.top_frequent_ids = list(self.user_taxa.frequent)[:MAX_DISPLAY_HISTORY]
-        self.top_observed_ids = list(self.user_taxa.observed)[:MAX_DISPLAY_HISTORY]
+        self.unique_history_ids = _top_unique_ids(self.user_taxa.history[::-1])
+        self.top_frequent_ids = _top_unique_ids(self.user_taxa.frequent)
+        self.top_observed_ids = _top_unique_ids(self.user_taxa.observed)
         self.starred_taxa_ids = self.user_taxa.starred
         all_ids = set(
             self.unique_history_ids
@@ -160,11 +162,12 @@ class TaxonTabs(QTabWidget):
         # def load_taxon(taxon_id):
         #     self.user_taxon_index[taxon_id] = INAT_CLIENT.taxa(taxon_id)
 
+        # self.threadpool.schedule_all([lambda: load_taxon(taxon_id) for taxon_id in all_ids])
+
         def load_all():
             logger.info(f'Loading {len(all_ids)} user taxa')
             return INAT_CLIENT.taxa.from_ids(*all_ids, accept_partial=True).all()
 
-        # self.threadpool.schedule_all([lambda: load_taxon(taxon_id) for taxon_id in all_ids])
         future = self.threadpool.schedule(load_all)
         future.result.connect(self.display_user_taxa)
 
@@ -176,3 +179,18 @@ class TaxonTabs(QTabWidget):
         self.frequent.set_taxa([taxa_by_id[taxon_id] for taxon_id in self.top_frequent_ids])
         self.loaded.emit(list(self.history.taxa))
         self.loaded.emit(list(self.frequent.taxa))
+
+    @Slot(Taxon)
+    def update_history(self, taxon: Taxon):
+        """Update history + frequency"""
+        # If item already exists in history, move it from its previous position to the top
+        self.history.add_or_update(taxon)
+        self.user_taxa.append_history(taxon.id)
+
+        # TODO: Update and re-sort frequent taxa
+        # self.frequent_taxa_list.sort()
+
+
+def _top_unique_ids(ids: list[int]) -> list[int]:
+    """Get the top unique IDs from a list, preserving order"""
+    return list(OrderedDict.fromkeys(ids))[:MAX_DISPLAY_HISTORY]
