@@ -1,9 +1,8 @@
 from itertools import chain
 from logging import getLogger
 from time import time
-from typing import Optional
 
-from pyinaturalist import ClientSession, Observation, Taxon, iNatClient
+from pyinaturalist import ClientSession, Observation, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 
@@ -20,15 +19,10 @@ class iNatDbClient(iNatClient):
 
 
 # TODO: Expiration?
-# TODO: Process one page at a time and return Paginator
 class ObservationDbController(ObservationController):
-    # TODO: Remove this after supporting Paginator
-    def __call__(self, observation_id, **kwargs) -> Optional[Observation]:
-        """Get a single observation by ID"""
-        result = self.from_ids(observation_id, **kwargs)[0]
-        return result[0] if result else None
-
-    def from_ids(self, *observation_ids, refresh: bool = False, **params) -> list[Observation]:
+    def from_ids(
+        self, *observation_ids, refresh: bool = False, **params
+    ) -> WrapperPaginator[Observation]:
         """Get observations by ID; first from the database, then from the API"""
         # Get any observations saved in the database (unless refreshing)
         db_results = list(get_db_observations(ids=observation_ids)) if not refresh else []
@@ -43,7 +37,7 @@ class ObservationDbController(ObservationController):
         else:
             results = []
 
-        return db_results + results
+        return WrapperPaginator(db_results + results)
 
     def search(self, **params) -> list[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
@@ -53,12 +47,6 @@ class ObservationDbController(ObservationController):
 
 
 class TaxonDbController(TaxonController):
-    # TODO: Remove this after supporting Paginator
-    def __call__(self, taxon_id, **kwargs) -> Optional[Taxon]:
-        """Get a single observation by ID"""
-        result = self.from_ids(taxon_id, **kwargs)
-        return result[0] if result else None
-
     def from_ids(
         self,
         *taxon_ids: int,
@@ -66,7 +54,7 @@ class TaxonDbController(TaxonController):
         fetch_taxonomy: bool = True,
         refresh: bool = False,
         **params,
-    ) -> list[Taxon]:
+    ) -> WrapperPaginator[Taxon]:
         """Get taxa by ID; first from the database, then from the API"""
         start = time()
         # Get any taxa saved in the database (unless refreshing)
@@ -86,7 +74,7 @@ class TaxonDbController(TaxonController):
             results = []
 
         logger.debug(f'Finished in {time()-start:.2f} seconds')
-        return db_results + results
+        return WrapperPaginator(db_results + results)
 
     def _get_db_taxa(
         self, taxon_ids: list[int], accept_partial: bool = False, fetch_taxonomy: bool = True
