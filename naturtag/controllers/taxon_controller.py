@@ -8,8 +8,10 @@ from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.client import INAT_CLIENT
+from naturtag.constants import MAX_DISPLAY_OBSERVED
 from naturtag.controllers.taxon_search import TaxonSearch
 from naturtag.controllers.taxon_view import TaxonInfoCard, TaxonInfoSection, TaxonList, TaxonomySection
+from naturtag.metadata.inat_metadata import get_observed_taxa
 from naturtag.settings import Settings, UserTaxa
 from naturtag.widgets import HorizontalLayout, VerticalLayout
 
@@ -43,7 +45,7 @@ class TaxonController(QWidget):
         self.root.addLayout(self.search)
 
         # Search results & User taxa
-        self.tabs = TaxonTabs(threadpool, self.user_taxa)
+        self.tabs = TaxonTabs(threadpool, self.settings, self.user_taxa)
         self.tabs.loaded.connect(self.bind_selection)
         self.root.addWidget(self.tabs)
         self.selection.connect(self.tabs.update_history)
@@ -104,20 +106,21 @@ class TaxonController(QWidget):
             taxon_card.clicked.connect(self.select_taxon)
 
 
-# TODO: Make MAX_DISPLAY_HISTORY configurable
 # TODO: Collapse tab titles to icons only if not all titles fit
 # TODO: Benchmark fetching in a single batch vs one at a time
-# TODO: Update history and frequent after TaxonController.select_taxon
 class TaxonTabs(QTabWidget):
     """Tabbed view for search results and user taxa"""
 
     loaded = Signal(list)
 
-    def __init__(self, threadpool: ThreadPool, user_taxa: UserTaxa, parent: QWidget = None):
+    def __init__(
+        self, threadpool: ThreadPool, settings: Settings, user_taxa: UserTaxa, parent: QWidget = None
+    ):
         super().__init__(parent)
         self.setMinimumWidth(200)
         self.setMaximumWidth(510)
         self.setIconSize(QSize(32, 32))
+        self.settings = settings
         self.threadpool = threadpool
         self.user_taxa = user_taxa
         # self.taxon_index: dict[int, Taxon] = {}
@@ -131,8 +134,8 @@ class TaxonTabs(QTabWidget):
         self.frequent = TaxonList(threadpool)
         self.add_tab(self.frequent, 'ri.bar-chart-fill', 'Frequent', 'Frequently viewed taxa')
 
-        # self.observed = TaxonList(threadpool)
-        # self.add_tab(self.observed, 'fa5s.binoculars', 'Observed', 'Taxa observed by you')
+        self.observed = TaxonList(threadpool)
+        self.add_tab(self.observed, 'fa5s.binoculars', 'Observed', 'Taxa observed by you')
 
         # self.starred = TaxonList(threadpool)
         # self.add_tab(self.starred, 'fa.star', 'Starred', 'Starred taxa')
@@ -146,22 +149,25 @@ class TaxonTabs(QTabWidget):
         return tab
 
     def load_user_taxa(self):
-        # def load_taxon(taxon_id):
-        #     self.user_taxon_index[taxon_id] = INAT_CLIENT.taxa(taxon_id)
-        # self.threadpool.schedule_all([lambda: load_taxon(taxon_id) for taxon_id in all_ids])
-
         display_ids = self.user_taxa.display_ids
 
-        def load_all():
+        def get_history_taxa():
             logger.info(f'Loading {len(display_ids)} user taxa')
             return INAT_CLIENT.taxa.from_ids(*display_ids, accept_partial=True).all()
 
-        future = self.threadpool.schedule(load_all)
-        future.result.connect(self.display_user_taxa)
+        future = self.threadpool.schedule(get_history_taxa)
+        future.result.connect(self.display_history)
+
+        future = self.threadpool.schedule(
+            lambda: get_observed_taxa(self.settings.username, self.settings.casual_observations)
+        )
+        future.result.connect(self.display_observed)
 
     @Slot(list)
-    def display_user_taxa(self, taxa: list[Taxon]):
-        """After loading all user taxa, add info cards for them in the appropriate tabs"""
+    def display_history(self, taxa: list[Taxon]):
+        """After fetching taxon records for history/frequent, add info cards for them in the
+        appropriate tabs
+        """
         taxa_by_id = {t.id: t for t in taxa}
         self.history.set_taxa([taxa_by_id.get(taxon_id) for taxon_id in self.user_taxa.top_history])
         self.loaded.emit(list(self.history.taxa))
@@ -175,13 +181,20 @@ class TaxonTabs(QTabWidget):
         self.frequent.set_taxa([get_taxon_count(taxon_id) for taxon_id in self.user_taxa.top_frequent])
         self.loaded.emit(list(self.frequent.taxa))
 
+    @Slot(list)
+    def display_observed(self, taxa: list[TaxonCount]):
+        """After fetching observation taxon counts for the user, add info cards for them"""
+        self.observed.set_taxa(taxa[:MAX_DISPLAY_OBSERVED])
+        self.user_taxa.update_observed(taxa)
+        self.loaded.emit(list(self.observed.taxa))
+
     @Slot(Taxon)
     def update_history(self, taxon: Taxon):
         """Update history and frequent lists with the selected taxon. If it was already in one or
         both lists, update its position in the list(s).
         """
         self.history.add_or_update(taxon)
-        self.user_taxa.append_history(taxon.id)
+        self.user_taxa.update_history(taxon.id)
 
         idx = self.user_taxa.frequent_idx(taxon.id)
         if idx is not None:

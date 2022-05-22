@@ -21,7 +21,6 @@ logger = getLogger(__name__)
 
 
 # TODO: Global access to Settings object instead of passing it around everywhere?
-# TODO: Rember last selected taxon
 class MainWindow(QMainWindow):
     def __init__(self, settings: Settings):
         super().__init__()
@@ -154,7 +153,6 @@ class MainWindow(QMainWindow):
         tab_visible = not self.tabs.isTabVisible(self.log_tab_idx)
         self.tabs.setTabVisible(self.log_tab_idx, tab_visible)
         self.settings.show_logs = tab_visible
-        self.settings.write()
 
     def reload_qss(self):
         set_stylesheet(self)

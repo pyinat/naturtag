@@ -55,6 +55,7 @@ SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Ani
 CONFIG_PATH = DATA_DIR / 'settings.yml'
 USER_TAXA_PATH = DATA_DIR / 'stored_taxa.yml'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
+MAX_DISPLAY_OBSERVED = 100  # Max number of observed taxa to display at a time
 
 # Theme/window settings
 DEFAULT_WINDOW_SIZE = (1500, 1024)

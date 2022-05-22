@@ -9,12 +9,14 @@ import yaml
 from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
+from pyinaturalist import TaxonCounts
 
 from naturtag.constants import (
     CONFIG_PATH,
     DEFAULT_WINDOW_SIZE,
     LOGFILE,
     MAX_DISPLAY_HISTORY,
+    MAX_DISPLAY_OBSERVED,
     USER_TAXA_PATH,
 )
 
@@ -107,7 +109,7 @@ class Settings(YamlMixin):
         default=False, doc='Generate pipe-delimited hierarchical keyword tags'
     )
 
-    # TODO:
+    # TODO: User-specified data directories
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
     # default_image_dir: Path = field(default=Path('~').expanduser(), converter=Path)
     # starred_image_dirs: list[Path] = field(factory=list)
@@ -148,17 +150,10 @@ class UserTaxa(YamlMixin):
         """Get the most frequently viewed taxa"""
         return [t[0] for t in self.frequent.most_common(MAX_DISPLAY_HISTORY)]
 
-    # TODO: Probalby use Counter, sort by observation count
     @property
     def top_observed(self) -> list[int]:
         """Get the most commonly observed taxa"""
-        return _top_unique_ids(self.observed.keys())
-
-    # TODO: Insert frequent by count... or just re-sort
-    def append_history(self, taxon_id: int):
-        """Update history and frequent"""
-        self.history.append(taxon_id)
-        self.frequent.update([taxon_id])
+        return _top_unique_ids(self.observed.keys(), MAX_DISPLAY_OBSERVED)
 
     def frequent_idx(self, taxon_id: int) -> Optional[int]:
         """Return the position of a taxon in the frequent list, if it's in the top
@@ -172,6 +167,15 @@ class UserTaxa(YamlMixin):
     def view_count(self, taxon_id: int) -> int:
         """Return the number of times this taxon has been viewed"""
         return self.frequent.get(taxon_id, 0)
+
+    def update_history(self, taxon_id: int):
+        """Update history and frequent with a new or existing taxon ID"""
+        self.history.append(taxon_id)
+        self.frequent.update([taxon_id])
+
+    def update_observed(self, taxon_counts: TaxonCounts):
+        self.observed = {t.id: t.count for t in taxon_counts}
+        self.write()
 
     def __str__(self):
         sizes = [
@@ -187,6 +191,6 @@ class UserTaxa(YamlMixin):
         return super(UserTaxa, cls).read()  # type: ignore
 
 
-def _top_unique_ids(ids: Iterable[int]) -> list[int]:
+def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
     """Get the top unique IDs from a list, preserving order"""
-    return list(OrderedDict.fromkeys(ids))[:MAX_DISPLAY_HISTORY]
+    return list(OrderedDict.fromkeys(ids))[:n]

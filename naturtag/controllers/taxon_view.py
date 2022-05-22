@@ -92,7 +92,6 @@ class TaxonomySection(HorizontalLayout):
 
 
 # TODO: Is the performance of widget iteration good enough, or should card be indexed by taxon ID?
-# TODO: Tooltip with taxon info (and count, if applicable)
 class TaxonList(VerticalLayout):
     """A scrollable list of TaxonInfoCards"""
 
