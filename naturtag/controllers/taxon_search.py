@@ -95,8 +95,9 @@ class TaxonSearch(VerticalLayout):
             max_rank=self.max_rank.text,
             preferred_place_id=self.settings.preferred_place_id,
             locale=self.settings.locale,
-        ).limit(20)
-        logger.debug('\n'.join([str(t) for t in taxa]))
+            limit=30,
+        ).all()
+        logger.debug('\n'.join([str(t) for t in taxa[:10]]))
         self.new_results.emit(taxa)
 
     def reset(self):

@@ -2,7 +2,7 @@
 from logging import getLogger
 from typing import Iterable, Iterator, Optional
 
-from pyinaturalist import Taxon
+from pyinaturalist import Taxon, TaxonCount
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget

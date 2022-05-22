@@ -39,11 +39,11 @@ class ObservationDbController(ObservationController):
 
         return WrapperPaginator(db_results + results)
 
-    def search(self, **params) -> list[Observation]:
+    def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
         save_observations(results)
-        return results
+        return WrapperPaginator(results)
 
 
 class TaxonDbController(TaxonController):
@@ -89,11 +89,12 @@ class TaxonDbController(TaxonController):
 
         return db_results
 
-    def search(self, **params) -> list[Taxon]:
+    # TODO: Don't use all
+    def search(self, **params) -> WrapperPaginator[Taxon]:
         """Search taxa, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
         save_taxa(results)
-        return results
+        return WrapperPaginator(results)
 
 
 INAT_CLIENT = iNatDbClient(cache_control=False)

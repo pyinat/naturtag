@@ -177,7 +177,9 @@ class TaxonTabs(QTabWidget):
 
     @Slot(Taxon)
     def update_history(self, taxon: Taxon):
-        """Update history + frequency. If the taxon was already in a list, update its position."""
+        """Update history and frequent lists with the selected taxon. If it was already in one or
+        both lists, update its position in the list(s).
+        """
         self.history.add_or_update(taxon)
         self.user_taxa.append_history(taxon.id)
 
