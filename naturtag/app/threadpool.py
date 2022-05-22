@@ -36,7 +36,7 @@ class ThreadPool(QThreadPool):
         return worker.signals
 
     def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
-        """Schedule a task to be run by the next available worker thread"""
+        """Schedule multiple tasks to be run by the next available worker thread"""
         self.progress.add(len(callbacks))
         for callback in callbacks:
             worker = Worker(callback, **kwargs)

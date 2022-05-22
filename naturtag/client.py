@@ -51,7 +51,6 @@ class TaxonDbController(TaxonController):
         self,
         *taxon_ids: int,
         accept_partial: bool = False,
-        fetch_taxonomy: bool = True,
         refresh: bool = False,
         **params,
     ) -> WrapperPaginator[Taxon]:
@@ -59,7 +58,7 @@ class TaxonDbController(TaxonController):
         start = time()
         # Get any taxa saved in the database (unless refreshing)
         if not refresh:
-            db_results = self._get_db_taxa(list(taxon_ids), accept_partial, fetch_taxonomy)
+            db_results = self._get_db_taxa(list(taxon_ids), accept_partial)
         else:
             db_results = []
         logger.debug(f'{len(db_results)} taxa found in database')
@@ -76,22 +75,14 @@ class TaxonDbController(TaxonController):
         logger.debug(f'Finished in {time()-start:.2f} seconds')
         return WrapperPaginator(db_results + results)
 
-    def _get_db_taxa(
-        self, taxon_ids: list[int], accept_partial: bool = False, fetch_taxonomy: bool = True
-    ):
+    def _get_db_taxa(self, taxon_ids: list[int], accept_partial: bool = False):
         db_results = list(get_db_taxa(ids=taxon_ids, accept_partial=accept_partial))
-        if len(db_results) == 1:
-            t = db_results[0]
-            logger.info(f'Ancestors of {t.full_name}: {[t2.full_name for t2 in t.ancestors]}')
-            # logger.info(f'Ancestors of {t.full_name}: {t.ancestors}')
+
         # DB records only contain ancestor/child IDs, so we need another query to fetch full records
         # This could be done in SQL, but a many-to-many relationship with ancestors would get messy
-        if fetch_taxonomy:
+        if not accept_partial:
             fetch_ids = chain.from_iterable([t.ancestor_ids + t.child_ids for t in db_results])
-            taxa = {
-                t.id: t
-                for t in self.from_ids(*set(fetch_ids), accept_partial=True, fetch_taxonomy=False)
-            }
+            taxa = {t.id: t for t in self.from_ids(*set(fetch_ids), accept_partial=True)}
             for taxon in db_results:
                 taxon.ancestors = [taxa[id] for id in taxon.ancestor_ids]
                 taxon.children = [taxa[id] for id in taxon.child_ids]

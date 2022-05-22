@@ -45,6 +45,7 @@ class TaxonController(QWidget):
 
         # Search results & User taxa
         self.tabs = TaxonTabs(threadpool, self.user_taxa)
+        self.tabs.loaded.connect(self.bind_selection)
         self.root.addWidget(self.tabs)
         self.search.reset_results.connect(self.tabs.results.clear)
 
@@ -70,7 +71,7 @@ class TaxonController(QWidget):
 
         # Fetch taxon record
         logger.info(f'Selecting taxon {taxon_id}')
-        self.threadpool.cancel()
+        # self.threadpool.cancel()
         future = self.threadpool.schedule(lambda: INAT_CLIENT.taxa(taxon_id))
         future.result.connect(self.display_taxon)
         self.user_taxa.append_history(taxon_id)
@@ -108,6 +109,8 @@ class TaxonController(QWidget):
 class TaxonTabs(QTabWidget):
     """Tabbed view for search results and user taxa"""
 
+    loaded = Signal(list)
+
     def __init__(self, threadpool: ThreadPool, user_taxa: UserTaxa, parent: QWidget = None):
         super().__init__(parent)
         self.setMinimumWidth(200)
@@ -115,6 +118,7 @@ class TaxonTabs(QTabWidget):
         self.setIconSize(QSize(32, 32))
         self.threadpool = threadpool
         self.user_taxa = user_taxa
+        self.taxon_index: dict[int, Taxon] = {}
 
         self.results = TaxonList(threadpool)
         self.results_tab = self.add_tab(self.results, 'mdi6.layers-search', 'Results', 'Search results')
@@ -130,19 +134,7 @@ class TaxonTabs(QTabWidget):
 
         # self.starred = TaxonList(threadpool)
         # self.add_tab(self.starred, 'fa.star', 'Starred', 'Starred taxa')
-        # self.load_user_taxa()
-        self.history.set_taxa(
-            [
-                Taxon(id=taxon_id, name=str(taxon_id))
-                for taxon_id in list(set(self.user_taxa.history[::-1]))[:MAX_DISPLAY_HISTORY]
-            ]
-        )
-        self.frequent.set_taxa(
-            [
-                Taxon(id=taxon_id, name=str(taxon_id))
-                for taxon_id in list(self.user_taxa.frequent)[:MAX_DISPLAY_HISTORY]
-            ]
-        )
+        self.load_user_taxa()
 
     def add_tab(self, tab_layout: QLayout, icon_str: str, label: str, tooltip: str) -> QWidget:
         tab = QWidget()
@@ -151,19 +143,36 @@ class TaxonTabs(QTabWidget):
         self.setTabToolTip(idx, tooltip)
         return tab
 
-    # WIP
     # TODO: Make MAX_DISPLAY_HISTORY configurable
+    # TODO: Benchmark fetching in a single batch vs one at a time
     def load_user_taxa(self):
-        unique_history_ids = list(set(self.user_taxa.history[::-1]))[:MAX_DISPLAY_HISTORY]
-        top_frequent_ids = list(self.user_taxa.frequent)[:MAX_DISPLAY_HISTORY]
-        top_observed_ids = list(self.user_taxa.observed)[:MAX_DISPLAY_HISTORY]
-        starred_taxa_ids = self.user_taxa.starred
-        all_ids = set(unique_history_ids + top_frequent_ids + top_observed_ids + starred_taxa_ids)
-        self.taxa: dict[int, Taxon] = {}
+        self.unique_history_ids = list(set(self.user_taxa.history[::-1]))[:MAX_DISPLAY_HISTORY]
+        self.top_frequent_ids = list(self.user_taxa.frequent)[:MAX_DISPLAY_HISTORY]
+        self.top_observed_ids = list(self.user_taxa.observed)[:MAX_DISPLAY_HISTORY]
+        self.starred_taxa_ids = self.user_taxa.starred
+        all_ids = set(
+            self.unique_history_ids
+            + self.top_frequent_ids
+            + self.top_observed_ids
+            + self.starred_taxa_ids
+        )
 
-        def load_taxon(taxon_id):
-            # taxa = INAT_CLIENT.taxa.from_ids(all_ids).all()
-            logger.info(f'Loading taxon {taxon_id}')
-            self.taxa[taxon_id] = INAT_CLIENT.taxa(taxon_id)
+        # def load_taxon(taxon_id):
+        #     self.user_taxon_index[taxon_id] = INAT_CLIENT.taxa(taxon_id)
 
-        self.threadpool.schedule_all([lambda: load_taxon(taxon_id) for taxon_id in all_ids])
+        def load_all():
+            logger.info(f'Loading {len(all_ids)} user taxa')
+            return INAT_CLIENT.taxa.from_ids(*all_ids, accept_partial=True).all()
+
+        # self.threadpool.schedule_all([lambda: load_taxon(taxon_id) for taxon_id in all_ids])
+        future = self.threadpool.schedule(load_all)
+        future.result.connect(self.display_user_taxa)
+
+    @Slot(list)
+    def display_user_taxa(self, taxa: list[Taxon]):
+        """After loading all user taxa, add info cards for them in the appropriate tabs"""
+        taxa_by_id = {t.id: t for t in taxa}
+        self.history.set_taxa([taxa_by_id[taxon_id] for taxon_id in self.unique_history_ids])
+        self.frequent.set_taxa([taxa_by_id[taxon_id] for taxon_id in self.top_frequent_ids])
+        self.loaded.emit(list(self.history.taxa))
+        self.loaded.emit(list(self.frequent.taxa))
