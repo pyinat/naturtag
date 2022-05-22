@@ -1,15 +1,13 @@
-from collections import OrderedDict
 from logging import getLogger
 from typing import Iterable
 
-from pyinaturalist import Taxon
+from pyinaturalist import Taxon, TaxonCount
 from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.client import INAT_CLIENT
-from naturtag.constants import MAX_DISPLAY_HISTORY
 from naturtag.controllers.taxon_search import TaxonSearch
 from naturtag.controllers.taxon_view import TaxonInfoCard, TaxonInfoSection, TaxonList, TaxonomySection
 from naturtag.settings import Settings, UserTaxa
@@ -122,7 +120,7 @@ class TaxonTabs(QTabWidget):
         self.setIconSize(QSize(32, 32))
         self.threadpool = threadpool
         self.user_taxa = user_taxa
-        self.taxon_index: dict[int, Taxon] = {}
+        # self.taxon_index: dict[int, Taxon] = {}
 
         self.results = TaxonList(threadpool)
         self.results_tab = self.add_tab(self.results, 'mdi6.layers-search', 'Results', 'Search results')
@@ -148,25 +146,15 @@ class TaxonTabs(QTabWidget):
         return tab
 
     def load_user_taxa(self):
-        self.unique_history_ids = _top_unique_ids(self.user_taxa.history[::-1])
-        self.top_frequent_ids = _top_unique_ids(self.user_taxa.frequent)
-        self.top_observed_ids = _top_unique_ids(self.user_taxa.observed)
-        self.starred_taxa_ids = self.user_taxa.starred
-        all_ids = set(
-            self.unique_history_ids
-            + self.top_frequent_ids
-            + self.top_observed_ids
-            + self.starred_taxa_ids
-        )
-
         # def load_taxon(taxon_id):
         #     self.user_taxon_index[taxon_id] = INAT_CLIENT.taxa(taxon_id)
-
         # self.threadpool.schedule_all([lambda: load_taxon(taxon_id) for taxon_id in all_ids])
 
+        display_ids = self.user_taxa.display_ids
+
         def load_all():
-            logger.info(f'Loading {len(all_ids)} user taxa')
-            return INAT_CLIENT.taxa.from_ids(*all_ids, accept_partial=True).all()
+            logger.info(f'Loading {len(display_ids)} user taxa')
+            return INAT_CLIENT.taxa.from_ids(*display_ids, accept_partial=True).all()
 
         future = self.threadpool.schedule(load_all)
         future.result.connect(self.display_user_taxa)
@@ -175,22 +163,24 @@ class TaxonTabs(QTabWidget):
     def display_user_taxa(self, taxa: list[Taxon]):
         """After loading all user taxa, add info cards for them in the appropriate tabs"""
         taxa_by_id = {t.id: t for t in taxa}
-        self.history.set_taxa([taxa_by_id[taxon_id] for taxon_id in self.unique_history_ids])
-        self.frequent.set_taxa([taxa_by_id[taxon_id] for taxon_id in self.top_frequent_ids])
+        self.history.set_taxa([taxa_by_id.get(taxon_id) for taxon_id in self.user_taxa.top_history])
         self.loaded.emit(list(self.history.taxa))
+
+        # Add counts to taxon cards in 'Frequent' tab, for sorting later
+        def get_taxon_count(taxon_id: int) -> TaxonCount:
+            taxon = TaxonCount.copy(taxa_by_id[taxon_id])
+            taxon.count = self.user_taxa.view_count(taxon_id)
+            return taxon
+
+        self.frequent.set_taxa([get_taxon_count(taxon_id) for taxon_id in self.user_taxa.top_frequent])
         self.loaded.emit(list(self.frequent.taxa))
 
     @Slot(Taxon)
     def update_history(self, taxon: Taxon):
-        """Update history + frequency"""
-        # If item already exists in history, move it from its previous position to the top
+        """Update history + frequency. If the taxon was already in a list, update its position."""
         self.history.add_or_update(taxon)
         self.user_taxa.append_history(taxon.id)
 
-        # TODO: Update and re-sort frequent taxa
-        # self.frequent_taxa_list.sort()
-
-
-def _top_unique_ids(ids: list[int]) -> list[int]:
-    """Get the top unique IDs from a list, preserving order"""
-    return list(OrderedDict.fromkeys(ids))[:MAX_DISPLAY_HISTORY]
+        idx = self.user_taxa.frequent_idx(taxon.id)
+        if idx is not None:
+            self.frequent.add_or_update(taxon, idx)

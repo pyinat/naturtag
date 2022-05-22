@@ -104,4 +104,4 @@ known_first_party = ['test']
 
 [tool.mypy]
 ignore_missing_imports = true
-exclude = "/docs|downloads|dist|build|test/"
+files = ['naturtag']

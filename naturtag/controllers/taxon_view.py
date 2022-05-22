@@ -91,6 +91,8 @@ class TaxonomySection(HorizontalLayout):
         yield from self.children_list.taxa
 
 
+# TODO: Is the performance of widget iteration good enough, or should card be indexed by taxon ID?
+# TODO: Tooltip with taxon info (and count, if applicable)
 class TaxonList(VerticalLayout):
     """A scrollable list of TaxonInfoCards"""
 
@@ -125,13 +127,16 @@ class TaxonList(VerticalLayout):
             self.scroll_layout.addWidget(card)
         self.threadpool.schedule(card.image.setPixmap, taxon=taxon)
 
-    def add_or_update(self, taxon: Taxon):
-        """Add a taxon card to the top of the list; if it's already in the list, move it to the top"""
-        if not self.move_to_top(taxon.id):
-            self.add_taxon(taxon, idx=0)
+    def add_or_update(self, taxon: Taxon, idx: int = 0):
+        """Move a taxon card to the specified position, and add a new one if it doesn't exist"""
+        if not self.move_card(taxon.id, idx):
+            self.add_taxon(taxon, idx)
 
     def clear(self):
         self.scroll_layout.clear()
+
+    def contains(self, taxon_id: int) -> bool:
+        return self.get_card_by_id(taxon_id) is not None
 
     def get_card_by_id(self, taxon_id: int) -> Optional['TaxonInfoCard']:
         for card in self.taxa:
@@ -139,19 +144,20 @@ class TaxonList(VerticalLayout):
                 return card
         return None
 
-    def move_to_top(self, taxon_id: int) -> bool:
-        """Move a card to the top of the list by taxon ID. Returns whether the card was found."""
+    def move_card(self, taxon_id: int, idx: int = 0) -> bool:
+        """Move a card to the specified position, if found; return False otherwise"""
         card = self.get_card_by_id(taxon_id)
         if card:
             self.scroll_layout.removeWidget(card)
-            self.scroll_layout.insertWidget(0, card)
+            self.scroll_layout.insertWidget(idx, card)
             return True
         return False
 
     def set_taxa(self, taxa: Iterable[Taxon]):
         self.clear()
         for taxon in taxa:
-            self.add_taxon(taxon)
+            if taxon is not None:
+                self.add_taxon(taxon)
 
 
 class TaxonInfoCard(StylableWidget):
@@ -164,6 +170,8 @@ class TaxonInfoCard(StylableWidget):
         card_layout = HorizontalLayout()
         self.setLayout(card_layout)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        if isinstance(taxon, TaxonCount):
+            self.setToolTip(f'Count: {taxon.count}')
         self.setFixedHeight(90)
         self.taxon = taxon
         self.taxon_id = taxon.id
