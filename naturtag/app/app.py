@@ -100,6 +100,11 @@ class MainWindow(QMainWindow):
         shortcut = QShortcut(QKeySequence('F5'), self)
         shortcut.activated.connect(self.reload_qss)
 
+        # Load any valid image paths provided on command line (or from drag & drop)
+        if __file__ in sys.argv:
+            sys.argv.remove(__file__)
+        self.image_controller.gallery.load_images(sys.argv)
+
         # Load demo images
         demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
         self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore

@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
-from naturtag.image_glob import get_images_from_paths
+from naturtag.image_glob import get_valid_image_paths
 from naturtag.metadata import MetaMetadata
 from naturtag.thumbnails import get_thumbnail
 from naturtag.widgets import (
@@ -58,8 +58,8 @@ class ImageGallery(QWidget):
 
     def load_images(self, paths: Iterable[str]):
         """Load multiple images, and ignore any duplicates"""
-        images = get_images_from_paths(paths, recursive=True)
-        new_images = list(set(images) - set(self.images.keys()))
+        images = get_valid_image_paths(paths, recursive=True)
+        new_images = [i for i in set(images) - set(self.images.keys()) if i]
         if not new_images:
             return
 

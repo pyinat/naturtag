@@ -47,7 +47,7 @@ def get_images_from_dir(dir: str, recursive: bool = False) -> list[str]:
     return paths
 
 
-def get_images_from_paths(
+def get_valid_image_paths(
     paths: Iterable[Union[str, bytes, Path]], recursive: bool = False
 ) -> list[str]:
     """
