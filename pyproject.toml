@@ -49,14 +49,15 @@ qtawesome = {version = "^1.1.1", optional = true}
 qtmodern = {version = "^0.2", optional = true}
 
 # Documentation dependencies needed for Readthedocs builds
-# sphinx-material = {version = "^0.0.32", optional = true}
-m2r2 = { version = ">=0.2.7", optional = true }
-sphinx = { version = "^4.0.2", optional = true }
-sphinx-autodoc-typehints = { version = "^1.11", optional = true }
-sphinx-copybutton = { version = ">=0.3,<0.5", optional = true }
-sphinx-rtd-theme = {version = ">=0.5.2,<1.1.0", optional = true}
-sphinxcontrib-apidoc = { version = "^0.3", optional = true }
-ujson = "^5.3.0"
+furo                        = {optional=true, version="^2022.2.14.1"}
+linkify-it-py               = {optional=true, version="^1.0.1"}
+myst-parser                 = {optional=true, version="^0.17.0"}
+sphinx                      = {optional=true, version="^4.5.0"}
+sphinx-autodoc-typehints    = {optional=true, version="^1.17"}
+sphinx-copybutton           = {optional=true, version=">=0.5"}
+sphinx-inline-tabs          = {optional=true, version="^2022.1.2b11"}
+sphinx-panels               = {optional=true, version="^0.6.0"}
+sphinxcontrib-apidoc        = {optional=true, version="^0.3"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
@@ -74,8 +75,8 @@ pytest-xdist = ">=2.2"
 [tool.poetry.extras]
 all = ["pyside6", "qtawesome", "qtmodern"]
 ui =  ["pyside6", "qtawesome", "qtmodern"]
-docs = ["m2r2", "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-rtd-theme",
-        "sphinxcontrib-apidoc"]
+docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-automodapi", "sphinx-autodoc-typehints",
+        "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-panels", "sphinxcontrib-apidoc"]
 
 [tool.poetry.scripts]
 nt = 'naturtag.cli:main'
