@@ -43,6 +43,7 @@ a = Analysis(
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
     datas=[
+        (str(ASSETS_DIR / '*.ico'), 'assets'),
         (str(ASSETS_DIR / '*.png'), 'assets'),
         (str(ASSETS_DIR / '*.qss'), 'assets'),
         (str(ASSETS_DIR / '*.tar.gz'), 'assets'),
@@ -62,6 +63,7 @@ exe = EXE(
     pyz,
     a.scripts,
     [],
+    icon=ASSETS_DIR/'logo.ico'
     exclude_binaries=True,
     name=PROJECT_NAME,
     debug=False,
