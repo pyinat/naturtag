@@ -7,15 +7,15 @@ from logging import getLogger
 from typing import Optional
 from urllib.parse import urlparse
 
-from pyinaturalist import Observation, Taxon, iNatClient
+from pyinaturalist import Observation, Taxon, TaxonCounts
 from pyinaturalist_convert import to_dwc
 
+from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple
 from naturtag.image_glob import glob_paths
 from naturtag.metadata import MetaMetadata
 
 DWC_NAMESPACES = ['dcterms', 'dwc']
-INAT_CLIENT = iNatClient(cache_control=False)
 logger = getLogger().getChild(__name__)
 
 
@@ -99,7 +99,7 @@ def get_inat_metadata(
     return inat_metadata
 
 
-def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> dict[int, int]:
+def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> TaxonCounts:
     """Get counts of taxa observed by the user, ordered by number of observations descending"""
     if not username:
         return {}
@@ -109,8 +109,7 @@ def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> 
         **kwargs,
     )
     logger.info(f'{len(taxon_counts)} user-observed taxa found')
-    taxon_counts = sorted(taxon_counts, key=lambda x: x.count, reverse=True)
-    return {t.id: t.count for t in taxon_counts}
+    return sorted(taxon_counts, key=lambda x: x.count, reverse=True)
 
 
 def get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observation]:

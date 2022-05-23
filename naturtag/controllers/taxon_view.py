@@ -1,8 +1,8 @@
 """Components for displaying taxon info"""
 from logging import getLogger
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, Optional
 
-from pyinaturalist import Taxon
+from pyinaturalist import Taxon, TaxonCount
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget
@@ -91,6 +91,7 @@ class TaxonomySection(HorizontalLayout):
         yield from self.children_list.taxa
 
 
+# TODO: Is the performance of widget iteration good enough, or should card be indexed by taxon ID?
 class TaxonList(VerticalLayout):
     """A scrollable list of TaxonInfoCards"""
 
@@ -116,19 +117,46 @@ class TaxonList(VerticalLayout):
             if isinstance(item, TaxonInfoCard):
                 yield item
 
-    def add_taxon(self, taxon: Taxon):
+    def add_taxon(self, taxon: Taxon, idx: int = None):
         """Add a taxon card immediately, and load its thumbnail from a separate thread"""
         card = TaxonInfoCard(taxon=taxon)
-        self.scroll_layout.addWidget(card)
+        if idx is not None:
+            self.scroll_layout.insertWidget(idx, card)
+        else:
+            self.scroll_layout.addWidget(card)
         self.threadpool.schedule(card.image.setPixmap, taxon=taxon)
+
+    def add_or_update(self, taxon: Taxon, idx: int = 0):
+        """Move a taxon card to the specified position, and add a new one if it doesn't exist"""
+        if not self.move_card(taxon.id, idx):
+            self.add_taxon(taxon, idx)
 
     def clear(self):
         self.scroll_layout.clear()
 
+    def contains(self, taxon_id: int) -> bool:
+        return self.get_card_by_id(taxon_id) is not None
+
+    def get_card_by_id(self, taxon_id: int) -> Optional['TaxonInfoCard']:
+        for card in self.taxa:
+            if card.taxon.id == taxon_id:
+                return card
+        return None
+
+    def move_card(self, taxon_id: int, idx: int = 0) -> bool:
+        """Move a card to the specified position, if found; return False otherwise"""
+        card = self.get_card_by_id(taxon_id)
+        if card:
+            self.scroll_layout.removeWidget(card)
+            self.scroll_layout.insertWidget(idx, card)
+            return True
+        return False
+
     def set_taxa(self, taxa: Iterable[Taxon]):
         self.clear()
         for taxon in taxa:
-            self.add_taxon(taxon)
+            if taxon is not None:
+                self.add_taxon(taxon)
 
 
 class TaxonInfoCard(StylableWidget):
@@ -141,6 +169,8 @@ class TaxonInfoCard(StylableWidget):
         card_layout = HorizontalLayout()
         self.setLayout(card_layout)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        if isinstance(taxon, TaxonCount):
+            self.setToolTip(f'Count: {taxon.count}')
         self.setFixedHeight(90)
         self.taxon = taxon
         self.taxon_id = taxon.id

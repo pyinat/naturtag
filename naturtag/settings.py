@@ -1,15 +1,24 @@
 """ Basic utilities for reading and writing settings from config files """
 from collections import Counter, OrderedDict
+from itertools import chain
 from logging import getLogger
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 import yaml
 from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
+from pyinaturalist import TaxonCounts
 
-from naturtag.constants import CONFIG_PATH, DEFAULT_WINDOW_SIZE, LOGFILE, USER_TAXA_PATH
+from naturtag.constants import (
+    CONFIG_PATH,
+    DEFAULT_WINDOW_SIZE,
+    LOGFILE,
+    MAX_DISPLAY_HISTORY,
+    MAX_DISPLAY_OBSERVED,
+    USER_TAXA_PATH,
+)
 
 logger = getLogger().getChild(__name__)
 
@@ -100,10 +109,12 @@ class Settings(YamlMixin):
         default=False, doc='Generate pipe-delimited hierarchical keyword tags'
     )
 
-    # TODO:
+    # TODO: User-specified data directories
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
     # default_image_dir: Path = field(default=Path('~').expanduser(), converter=Path)
     # starred_image_dirs: list[Path] = field(factory=list)
+
+    setup_complete: bool = field(default=False)
 
 
 @define
@@ -115,17 +126,56 @@ class UserTaxa(YamlMixin):
     history: list[int] = field(factory=list)
     starred: list[int] = field(factory=list)
     observed: dict[int, int] = field(factory=dict)
-    _frequent: Optional[dict[int, int]] = None
+    frequent: Counter[int] = None  # type: ignore
+
+    def __attrs_post_init__(self):
+        """Initialize frequent taxa counter"""
+        self.frequent = Counter(self.history)
 
     @property
-    def frequent(self) -> dict[int, int]:
-        if self._frequent is None:
-            self._frequent = OrderedDict(Counter(self.history).most_common())
-        return self._frequent
+    def display_ids(self) -> set[int]:
+        """Return top history, frequent, observed, and starred taxa combined.
+        Returns only unique IDs, since a given taxon may appear in more than one list.
+        """
+        top_ids = [self.top_history, self.top_frequent, self.top_observed, self.starred]
+        return set(chain.from_iterable(top_ids))
 
-    def append_history(self, taxon_id: int):
+    @property
+    def top_history(self) -> list[int]:
+        """Get the most recently viewed unique taxa"""
+        return _top_unique_ids(self.history[::-1])
+
+    @property
+    def top_frequent(self) -> list[int]:
+        """Get the most frequently viewed taxa"""
+        return [t[0] for t in self.frequent.most_common(MAX_DISPLAY_HISTORY)]
+
+    @property
+    def top_observed(self) -> list[int]:
+        """Get the most commonly observed taxa"""
+        return _top_unique_ids(self.observed.keys(), MAX_DISPLAY_OBSERVED)
+
+    def frequent_idx(self, taxon_id: int) -> Optional[int]:
+        """Return the position of a taxon in the frequent list, if it's in the top
+        ``MAX_DISPLAY_HISTORY`` taxa.
+        """
+        try:
+            return self.top_frequent.index(taxon_id)
+        except ValueError:
+            return None
+
+    def view_count(self, taxon_id: int) -> int:
+        """Return the number of times this taxon has been viewed"""
+        return self.frequent.get(taxon_id, 0)
+
+    def update_history(self, taxon_id: int):
+        """Update history and frequent with a new or existing taxon ID"""
         self.history.append(taxon_id)
-        self._frequent = None
+        self.frequent.update([taxon_id])
+
+    def update_observed(self, taxon_counts: TaxonCounts):
+        self.observed = {t.id: t.count for t in taxon_counts}
+        self.write()
 
     def __str__(self):
         sizes = [
@@ -135,3 +185,12 @@ class UserTaxa(YamlMixin):
             f'Observed: {len(self.observed)}',
         ]
         return '\n'.join(sizes)
+
+    @classmethod
+    def read(cls) -> 'UserTaxa':
+        return super(UserTaxa, cls).read()  # type: ignore
+
+
+def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
+    """Get the top unique IDs from a list, preserving order"""
+    return list(OrderedDict.fromkeys(ids))[:n]

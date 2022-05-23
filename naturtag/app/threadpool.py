@@ -23,16 +23,25 @@ class ThreadPool(QThreadPool):
     bar.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.progress = ProgressBar()
 
-    def schedule(self, callback: Callable, *args, **kwargs) -> 'WorkerSignals':
+    def schedule(self, callback: Callable, **kwargs) -> 'WorkerSignals':
         """Schedule a task to be run by the next available worker thread"""
         self.progress.add()
-        worker = Worker(callback, *args, **kwargs)
+        worker = Worker(callback, **kwargs)
         worker.signals.progress.connect(self.progress.advance)
         self.start(worker)
+        return worker.signals
+
+    def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
+        """Schedule multiple tasks to be run by the next available worker thread"""
+        self.progress.add(len(callbacks))
+        for callback in callbacks:
+            worker = Worker(callback, **kwargs)
+            worker.signals.progress.connect(self.progress.advance)
+            self.start(worker)
         return worker.signals
 
     def cancel(self):
@@ -50,16 +59,15 @@ class Worker(QRunnable):
     done.
     """
 
-    def __init__(self, callback: Callable, *args, **kwargs):
+    def __init__(self, callback: Callable, **kwargs):
         super().__init__()
         self.callback = callback
-        self.args = args
         self.kwargs = kwargs
         self.signals = WorkerSignals()
 
     def run(self):
         try:
-            result = self.callback(*self.args, **self.kwargs)
+            result = self.callback(**self.kwargs)
         except Exception as e:
             logger.warning('Worker error:', exc_info=True)
             self.signals.error.emit(e)
@@ -79,8 +87,8 @@ class WorkerSignals(QObject):
 class ProgressBar(QProgressBar):
     """Shared progress bar, updated by ThreadPool"""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.setMaximum(0)
         self.setValue(0)
         self.lock = RLock()

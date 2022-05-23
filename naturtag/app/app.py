@@ -2,6 +2,7 @@
 import sys
 from logging import getLogger
 
+from pyinaturalist_convert import create_tables
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
@@ -20,7 +21,6 @@ logger = getLogger(__name__)
 
 
 # TODO: Global access to Settings object instead of passing it around everywhere?
-# TODO: Rember last selected taxon
 class MainWindow(QMainWindow):
     def __init__(self, settings: Settings):
         super().__init__()
@@ -94,17 +94,21 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
 
+        self.setup()
+
         # Debug
         shortcut = QShortcut(QKeySequence('F5'), self)
         shortcut.activated.connect(self.reload_qss)
 
         # Load demo images
-        demo_images = (ASSETS_DIR / 'demo_images').glob('*.jpg')
-        self.image_controller.gallery.load_images(demo_images)  # type: ignore
+        demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
+        self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
+        self.taxon_controller.select_taxon(47792)
 
     def closeEvent(self, event: QCloseEvent):
         self.settings.window_size = self.size().toTuple()
         self.settings.write()
+        self.taxon_controller.user_taxa.write()
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""
@@ -117,6 +121,17 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
+
+    def setup(self):
+        """Run any first-time setup steps, if needed"""
+        # Create database tables if they don't exist
+        if not self.settings.setup_complete:
+            logger.info('Running first-time setup')
+            create_tables()
+            self.settings.setup_complete = True
+            self.settings.write()
+        else:
+            logger.info('First-time setup not needed')
 
     def show_settings(self):
         self.settings_menu.show()
@@ -138,7 +153,6 @@ class MainWindow(QMainWindow):
         tab_visible = not self.tabs.isTabVisible(self.log_tab_idx)
         self.tabs.setTabVisible(self.log_tab_idx, tab_visible)
         self.settings.show_logs = tab_visible
-        self.settings.write()
 
     def reload_qss(self):
         set_stylesheet(self)
