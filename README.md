@@ -1,9 +1,14 @@
 # Naturtag
+
 [![Build status](https://github.com/JWCook/naturtag/workflows/Build/badge.svg)](https://github.com/JWCook/naturtag/actions)
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io)
 [![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)](https://github.com/JWCook/naturtag/issues)
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
+
+<br />
+
+[![](assets/naturtag-banner.png)](https://naturtag.readthedocs.io)
 
 Naturtag is a tool for tagging local observation photos with iNaturalist taxonomy & observation metadata.
 This includes a basic **command-line interface**, an experimental **graphical interface**, and can
