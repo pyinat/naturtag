@@ -39,12 +39,13 @@ else:
     raise NotImplementedError
 
 a = Analysis(
-    [str(PACKAGE_DIR / 'qt_app' / 'app.py')],
+    [str(PACKAGE_DIR / 'app' / 'app.py')],
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
     datas=[
         (str(ASSETS_DIR / '*.png'), 'assets'),
         (str(ASSETS_DIR / '*.qss'), 'assets'),
+        (str(ASSETS_DIR / '*.tar.gz'), 'assets'),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -67,7 +68,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
