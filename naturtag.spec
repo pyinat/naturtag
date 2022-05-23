@@ -47,11 +47,11 @@ a = Analysis(
         (str(ASSETS_DIR / '*.qss'), 'assets'),
         (str(ASSETS_DIR / '*.tar.gz'), 'assets'),
     ],
-    hiddenimports=[],
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[PROJECT_DIR / 'coverage'],
+    excludes=[PROJECT_DIR / 'coverage', PROJECT_DIR / '__pycache__'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=None,
@@ -85,4 +85,10 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
+)
+app = BUNDLE(
+    coll,
+    name=PROJECT_NAME,
+    icon=None,
+    bundle_identifier=None,
 )
