@@ -117,6 +117,7 @@ class ImageGallery(StylableWidget):
         self.image_window.select_image(file_path, list(self.images.keys()))
 
 
+# TODO: Small overlay with photo info
 class ImageWindow(QWidget):
     """Display a single full-size image at a time as a separate window
 
@@ -143,11 +144,11 @@ class ImageWindow(QWidget):
         shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
         shortcut.activated.connect(self.select_prev_image)
 
-    def select_image(self, file_path: str, image_paths: list[str]):
+    def select_image(self, selected_path: str, image_paths: list[str]):
         """Open window to a selected image, and save other available image paths for navigation"""
-        self.selected_path = file_path
+        self.selected_path = selected_path
         self.image_paths = image_paths
-        self.image.setPixmap(QPixmap(file_path))
+        self.set_pixmap(self.selected_path)
         self.showFullScreen()
 
     def select_image_idx(self, idx: int):
@@ -159,13 +160,16 @@ class ImageWindow(QWidget):
 
         logger.debug(f'Selecting image {idx}: {self.selected_path}')
         self.selected_path = self.image_paths[idx]
-        self.image.setPixmap(QPixmap(self.selected_path))
+        self.set_pixmap(self.selected_path)
 
     def select_next_image(self):
         self.select_image_idx(self.image_paths.index(self.selected_path) + 1)
 
     def select_prev_image(self):
         self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
+
+    def set_pixmap(self, path: str):
+        self.image.setPixmap(QPixmap(path))
 
 
 class LocalThumbnail(StylableWidget):

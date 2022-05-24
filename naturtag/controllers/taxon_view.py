@@ -8,11 +8,14 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.threadpool import ThreadPool
+from naturtag.controllers import ImageWindow
 from naturtag.widgets import HorizontalLayout, PixmapLabel, StylableWidget, VerticalLayout
+from naturtag.widgets.images import fetch_image
 
 logger = getLogger(__name__)
 
 
+# thumbnail.selected.connect(self.select_image)
 class TaxonInfoSection(HorizontalLayout):
     """Section to display selected taxon photo and basic info"""
 
@@ -25,11 +28,15 @@ class TaxonInfoSection(HorizontalLayout):
         self.addWidget(self.group)
         self.setAlignment(Qt.AlignTop)
 
-        self.image = PixmapLabel()
+        # Medium taxon default photo
+        self.image = TaxonPixmapLabel()
         self.image.setMinimumWidth(200)
         self.image.setMaximumWidth(600)
         self.image.setMaximumHeight(400)
         inner_layout.addWidget(self.image)
+
+        self.image_window = TaxonImageWindow()
+        self.image.clicked.connect(self.image_window.display_taxon)
 
         self.icon = PixmapLabel()
         self.icon.setFixedSize(75, 75)
@@ -46,7 +53,7 @@ class TaxonInfoSection(HorizontalLayout):
         # Label, photo, and iconic taxon icon
         common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
         self.group.setTitle(f'{taxon.name}{common_name}')
-        self.threadpool.schedule(self.image.setPixmap, url=taxon.default_photo.medium_url)
+        self.threadpool.schedule(self.image.set_taxon, taxon=taxon)
         self.threadpool.schedule(self.icon.setPixmap, url=taxon.icon_url)
 
         # Other attributes
@@ -55,6 +62,28 @@ class TaxonInfoSection(HorizontalLayout):
         self.details.addWidget(QLabel(f'Rank: {taxon.rank}'))
         self.details.addWidget(QLabel(f'Observations: {taxon.observations_count}'))
         self.details.addWidget(QLabel(f'Child species: {taxon.complete_species_count}'))
+
+
+class TaxonPixmapLabel(PixmapLabel):
+    """A PixmapLabel for a taxon photo that adds a click event"""
+
+    clicked = Signal(Taxon)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.taxon = None
+
+    def set_taxon(self, taxon: Taxon, size: str = 'medium'):
+        self.taxon = taxon
+        self._pixmap = fetch_image(taxon.default_photo, size=size)
+        QLabel.setPixmap(self, self.scaledPixmap())
+
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit(self.taxon)
 
 
 class TaxonomySection(HorizontalLayout):
@@ -91,7 +120,6 @@ class TaxonomySection(HorizontalLayout):
         yield from self.children_list.taxa
 
 
-# TODO: Is the performance of widget iteration good enough, or should card be indexed by taxon ID?
 class TaxonList(VerticalLayout):
     """A scrollable list of TaxonInfoCards"""
 
@@ -124,7 +152,7 @@ class TaxonList(VerticalLayout):
             self.scroll_layout.insertWidget(idx, card)
         else:
             self.scroll_layout.addWidget(card)
-        self.threadpool.schedule(card.image.setPixmap, taxon=taxon)
+        self.threadpool.schedule(card.thumbnail.setPixmap, taxon=taxon)
 
     def add_or_update(self, taxon: Taxon, idx: int = 0):
         """Move a taxon card to the specified position, and add a new one if it doesn't exist"""
@@ -160,7 +188,7 @@ class TaxonList(VerticalLayout):
 
 
 class TaxonInfoCard(StylableWidget):
-    """Card containing a taxon icon, name, common name, and rank"""
+    """Card containing a taxon thumbnail, name, common name, and rank"""
 
     clicked = Signal(int)
 
@@ -176,11 +204,11 @@ class TaxonInfoCard(StylableWidget):
         self.taxon_id = taxon.id
 
         # Image
-        self.image = PixmapLabel()
-        self.image.setFixedWidth(75)
-        card_layout.addWidget(self.image)
+        self.thumbnail = TaxonPixmapLabel()
+        self.thumbnail.setFixedWidth(75)
+        card_layout.addWidget(self.thumbnail)
         if not delayed_load:
-            self.image.setPixmap(taxon=taxon)
+            self.thumbnail.set_taxon(taxon, size='thumbnail')
 
         # Details
         title = QLabel(taxon.name)
@@ -200,4 +228,19 @@ class TaxonInfoCard(StylableWidget):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.clicked.emit(self.taxon_id)
+            self.clicked.emit(self.taxon.id)
+
+
+class TaxonImageWindow(ImageWindow):
+    """Full-size image viewer that displays photos from URLs instead of local files"""
+
+    def display_taxon(self, taxon: Taxon):
+        """Open window to a selected taxon image, and save other taxon image URLs for navigation"""
+        self.selected_path = taxon.default_photo.original_url
+        self.image_paths = [p.original_url for p in taxon.taxon_photos]
+        self.image.setPixmap(url=self.selected_path)
+        self.showFullScreen()
+
+    def set_pixmap(self, url: str):
+        logger.info(f'Next taxon photo URL: {url}')
+        self.image.setPixmap(url=url)

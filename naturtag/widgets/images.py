@@ -39,6 +39,7 @@ class PixmapLabel(QLabel):
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
+        self.path = None
         self.setPixmap(pixmap, path, taxon, url)
 
     def setPixmap(
@@ -79,8 +80,9 @@ class PixmapLabel(QLabel):
             super().setPixmap(self.scaledPixmap())
 
 
-def fetch_image(photo: Photo) -> QPixmap:
-    data = IMG_SESSION.get(photo.url, stream=True).content
+def fetch_image(photo: Photo, size: str = None) -> QPixmap:
+    url = photo.url_size(size) if size else photo.url
+    data = IMG_SESSION.get(url, stream=True).content
     pixmap = QPixmap()
     pixmap.loadFromData(data, format=photo.ext)
     return pixmap
