@@ -89,6 +89,7 @@ class ImageController(QWidget):
         self.gallery.clear()
         self.input_obs_id.setText('')
         self.input_taxon_id.setText('')
+        self.data_source_card.clear()
         self.info('Images cleared')
 
     def paste(self):

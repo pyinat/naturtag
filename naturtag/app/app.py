@@ -115,7 +115,8 @@ class MainWindow(QMainWindow):
 
         # Load demo images
         demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
-        self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
+        # self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
+        self.image_controller.gallery.load_images(demo_images)  # type: ignore
         self.taxon_controller.select_taxon(47792)
 
     def closeEvent(self, event: QCloseEvent):

@@ -8,7 +8,7 @@ from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QKeySequence, QPixmap, QShortcut
-from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
+from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QScrollArea, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
@@ -27,7 +27,7 @@ from naturtag.widgets import (
 logger = getLogger(__name__)
 
 
-class ImageGallery(QWidget):
+class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
     message = Signal(str)
@@ -38,9 +38,19 @@ class ImageGallery(QWidget):
         self.setAcceptDrops(True)
         self.images: dict[str, LocalThumbnail] = {}
         self.image_window = ImageWindow()
-        self.flow_layout = FlowLayout()
+        root = VerticalLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+
+        self.scroll_panel = StylableWidget()
+        self.scroll_panel.setObjectName('gallery_scroll_panel')
+        self.flow_layout = FlowLayout(self.scroll_panel)
         self.flow_layout.setSpacing(0)
-        self.setLayout(self.flow_layout)
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setWidget(self.scroll_panel)
+        root.addLayout(self.flow_layout)
+        root.addWidget(scroll_area)
 
     def clear(self):
         """Clear all images from the viewer"""
