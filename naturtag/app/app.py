@@ -4,7 +4,7 @@ from logging import getLogger
 
 from pyinaturalist_convert import create_tables
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
+from PySide6.QtGui import QCloseEvent, QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget
 from qtmodern.windows import ModernWindow
 
@@ -16,6 +16,14 @@ from naturtag.constants import ASSETS_DIR
 from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings
 from naturtag.widgets import init_handler
+
+# Provide an application group so Windows doesn't use the default 'python' icon
+try:
+    from ctypes import windll  # type: ignore
+
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID('pyinat.naturtag.app.0.7')
+except ImportError:
+    pass
 
 logger = getLogger(__name__)
 
@@ -100,6 +108,11 @@ class MainWindow(QMainWindow):
         shortcut = QShortcut(QKeySequence('F5'), self)
         shortcut.activated.connect(self.reload_qss)
 
+        # Load any valid image paths provided on command line (or from drag & drop)
+        if __file__ in sys.argv:
+            sys.argv.remove(__file__)
+        self.image_controller.gallery.load_images(sys.argv)
+
         # Load demo images
         demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
         self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
@@ -160,6 +173,7 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(QPixmap(ASSETS_DIR / 'logo.ico')))
     settings = Settings.read()
     set_theme(dark_mode=settings.dark_mode)
 

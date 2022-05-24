@@ -1,4 +1,4 @@
-"""
+CLI_HELP = """
 Get taxonomy tags from an iNaturalist observation or taxon, and write them
 either to the console or to local image metadata.
 
@@ -310,4 +310,4 @@ def _install_bash_completion():
 
 # Main CLI entry point
 main = tag
-tag.help = colorize_help_text(__doc__)
+tag.help = colorize_help_text(CLI_HELP)
