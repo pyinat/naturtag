@@ -10,7 +10,7 @@ copyright = '2022, Jordan Cook'
 author = 'Jordan Cook'
 html_static_path = ['_static']
 templates_path = ['_templates']
-version = release = pkg_version('pyinaturalist-convert')
+version = release = pkg_version('naturtag')
 
 # Sphinx extension modules
 extensions = [
