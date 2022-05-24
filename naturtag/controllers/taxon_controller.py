@@ -9,10 +9,10 @@ from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import MAX_DISPLAY_OBSERVED
-from naturtag.controllers import TaxonInfoCard, TaxonInfoSection, TaxonList, TaxonomySection, TaxonSearch
+from naturtag.controllers import TaxonInfoSection, TaxonomySection, TaxonSearch
 from naturtag.metadata.inat_metadata import get_observed_taxa
 from naturtag.settings import Settings, UserTaxa
-from naturtag.widgets import HorizontalLayout, VerticalLayout
+from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
 
 logger = getLogger(__name__)
 

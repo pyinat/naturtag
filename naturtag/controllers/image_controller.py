@@ -6,10 +6,10 @@ from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QToolButton, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.controllers import ImageGallery, TaxonInfoCard
+from naturtag.controllers import ImageGallery
 from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
-from naturtag.widgets import HorizontalLayout, VerticalLayout
+from naturtag.widgets import HorizontalLayout, TaxonInfoCard, VerticalLayout
 
 logger = getLogger(__name__)
 
