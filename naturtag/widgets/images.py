@@ -5,7 +5,7 @@ from typing import Union
 
 from pyinaturalist import Photo, Taxon
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QKeySequence, QPixmap, QShortcut
+from PySide6.QtGui import QFont, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QLabel, QWidget
 
 from naturtag.app.style import fa_icon
@@ -36,12 +36,14 @@ class PixmapLabel(QLabel):
         path: Union[str, Path] = None,
         taxon: Taxon = None,
         url: str = None,
+        text: str = None,
     ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
         self.path = None
+        self.text = text
         self.setPixmap(pixmap, path, taxon, url)
 
     def setPixmap(
@@ -81,6 +83,26 @@ class PixmapLabel(QLabel):
         if self._pixmap:
             super().setPixmap(self.scaledPixmap())
 
+    def paintEvent(self, event):
+        """Draw a text overlay on the image"""
+        super().paintEvent(event)
+        if not self.text:
+            return
+
+        font = QFont()
+        font.setPixelSize(16)
+        painter = QPainter(self)
+        painter.setFont(font)
+
+        # Draw a semitransparent background for the text
+        metrics = painter.fontMetrics()
+        text_width = painter.fontMetrics().horizontalAdvance(self.text)
+        bg_color = self.palette().dark().color()
+        bg_color.setAlpha(128)
+        painter.fillRect(0, 0, text_width + 2, metrics.height() + 2, bg_color)
+
+        painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.text)
+
 
 # TODO: Small overlay with photo info
 class ImageWindow(QWidget):
@@ -104,10 +126,17 @@ class ImageWindow(QWidget):
         # Keyboard shortcuts
         shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         shortcut.activated.connect(self.close)
+        shortcut = QShortcut(QKeySequence('Q'), self)
+        shortcut.activated.connect(self.close)
         shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
         shortcut.activated.connect(self.select_next_image)
         shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
         shortcut.activated.connect(self.select_prev_image)
+
+    @property
+    def idx(self) -> int:
+        """The index of the currently selected image"""
+        return self.image_paths.index(self.selected_path)
 
     def select_image(self, selected_path: str, image_paths: list[str]):
         """Open window to a selected image, and save other available image paths for navigation"""
@@ -122,19 +151,18 @@ class ImageWindow(QWidget):
             idx = len(self.image_paths) - 1
         elif idx >= len(self.image_paths):
             idx = 0
-
-        logger.debug(f'Selecting image {idx}: {self.selected_path}')
         self.selected_path = self.image_paths[idx]
         self.set_pixmap(self.selected_path)
 
     def select_next_image(self):
-        self.select_image_idx(self.image_paths.index(self.selected_path) + 1)
+        self.select_image_idx(self.idx + 1)
 
     def select_prev_image(self):
-        self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
+        self.select_image_idx(self.idx - 1)
 
     def set_pixmap(self, path: str):
         self.image.setPixmap(QPixmap(path))
+        self.image.text = path
 
 
 def fetch_image(photo: Photo, size: str = None) -> QPixmap:

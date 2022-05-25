@@ -267,7 +267,7 @@ class ThumbnailContextMenu(QMenu):
 
 
 class ThumbnailMetaIcons(QLabel):
-    """Icons overlayed on top of a thumbnail to indicate what types of metadata are available"""
+    """Icons overlaid on top of a thumbnail to indicate what types of metadata are available"""
 
     def __init__(self, parent: LocalThumbnail):
         super().__init__(parent)
