@@ -114,7 +114,7 @@ class ImageGallery(StylableWidget):
 
     @Slot(str)
     def select_image(self, file_path: str):
-        self.image_window.select_image(file_path, list(self.images.keys()))
+        self.image_window.display_image(file_path, list(self.images.keys()))
 
 
 class LocalThumbnail(StylableWidget):

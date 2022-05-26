@@ -1,7 +1,9 @@
 """Image widgets specifically for taxon photos"""
+import re
+from logging import getLogger
 from typing import TYPE_CHECKING, Iterable, Iterator, Optional
 
-from pyinaturalist import Taxon, TaxonCount
+from pyinaturalist import Photo, Taxon, TaxonCount
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
@@ -11,6 +13,10 @@ from naturtag.widgets.layouts import HorizontalLayout, StylableWidget, VerticalL
 
 if TYPE_CHECKING:
     from naturtag.app.threadpool import ThreadPool
+
+ATTRIBUTION_STRIP_PATTERN = re.compile(r',?\s+uploaded by.*')
+
+logger = getLogger(__name__)
 
 
 class TaxonPixmapLabel(PixmapLabel):
@@ -67,7 +73,7 @@ class TaxonList(VerticalLayout):
             self.scroll_layout.insertWidget(idx, card)
         else:
             self.scroll_layout.addWidget(card)
-        self.threadpool.schedule(card.thumbnail.setPixmap, taxon=taxon)
+        self.threadpool.schedule(card.thumbnail.set_taxon, taxon=taxon, size='thumbnail')
 
     def add_or_update(self, taxon: Taxon, idx: int = 0):
         """Move a taxon card to the specified position, and add a new one if it doesn't exist"""
@@ -148,14 +154,34 @@ class TaxonInfoCard(StylableWidget):
 
 
 class TaxonImageWindow(ImageWindow):
-    """Full-size image viewer that displays photos from URLs instead of local files"""
+    """Display taxon images in fullscreen as a separate window. Uses URLs instead of local file paths."""
+
+    def __init__(self):
+        super().__init__()
+        self.taxon: Taxon = None
+        self.photos: list[Photo] = None
+        self.selected_photo: Photo = None
+
+    @property
+    def idx(self) -> int:
+        """The index of the currently selected image"""
+        return self.photos.index(self.selected_photo)
 
     def display_taxon(self, taxon: Taxon):
         """Open window to a selected taxon image, and save other taxon image URLs for navigation"""
-        self.selected_path = taxon.default_photo.original_url
-        self.image_paths = [p.original_url for p in taxon.taxon_photos]
-        self.image.setPixmap(url=self.selected_path)
+        self.taxon = taxon
+        self.selected_photo = taxon.default_photo
+        self.photos = taxon.taxon_photos
+        self.image_paths = [photo.original_url for photo in self.photos]
+        self.set_photo(self.selected_photo)
         self.showFullScreen()
 
-    def set_pixmap(self, url: str):
-        self.image.setPixmap(url=url)
+    def select_image_idx(self, idx: int):
+        """Select an image by index"""
+        self.selected_photo = self.photos[idx]
+        self.set_photo(self.selected_photo)
+
+    def set_photo(self, photo: Photo):
+        self.image.setPixmap(url=photo.original_url)
+        attribution = ATTRIBUTION_STRIP_PATTERN.sub('', photo.attribution or '')
+        self.image.overlay_text = f'{self.taxon.full_name}\n{attribution}'

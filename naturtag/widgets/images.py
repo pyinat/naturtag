@@ -3,10 +3,10 @@ from logging import getLogger
 from pathlib import Path
 from typing import Union
 
-from pyinaturalist import Photo, Taxon
+from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtWidgets import QApplication, QLabel, QWidget
+from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
@@ -27,36 +27,34 @@ class IconLabel(QLabel):
 
 
 class PixmapLabel(QLabel):
-    """A QLabel containing a pixmap that preserves its aspect ratio when resizing"""
+    """A QLabel containing a pixmap that preserves its aspect ratio when resizing, and an optional
+    text overlay.
+    """
 
     def __init__(
         self,
         parent: QWidget = None,
         pixmap: QPixmap = None,
         path: Union[str, Path] = None,
-        taxon: Taxon = None,
         url: str = None,
-        text: str = None,
+        overlay_text: str = None,
     ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
         self.path = None
-        self.text = text
-        self.setPixmap(pixmap, path, taxon, url)
+        self.overlay_text = overlay_text
+        self.setPixmap(pixmap, path, url)
 
     def setPixmap(
         self,
         pixmap: QPixmap = None,
         path: Union[str, Path] = None,
-        taxon: Taxon = None,
         url: str = None,
     ):
         if path:
             pixmap = QPixmap(str(path))
-        elif taxon:
-            pixmap = fetch_image(taxon.default_photo)
         elif url:
             pixmap = fetch_image(Photo(url=url))
         if pixmap is not None:
@@ -86,7 +84,7 @@ class PixmapLabel(QLabel):
     def paintEvent(self, event):
         """Draw a text overlay on the image"""
         super().paintEvent(event)
-        if not self.text:
+        if not self.overlay_text:
             return
 
         font = QFont()
@@ -94,19 +92,24 @@ class PixmapLabel(QLabel):
         painter = QPainter(self)
         painter.setFont(font)
 
-        # Draw a semitransparent background for the text
+        # Get text dimensions
+        lines = self.overlay_text.split('\n')
+        longest_line = max(lines, key=len)
         metrics = painter.fontMetrics()
-        text_width = painter.fontMetrics().horizontalAdvance(self.text)
+        text_width = painter.fontMetrics().horizontalAdvance(longest_line)
+        text_height = metrics.height() * len(lines)
+
+        # Draw a semitransparent background for the text
         bg_color = self.palette().dark().color()
         bg_color.setAlpha(128)
-        painter.fillRect(0, 0, text_width + 2, metrics.height() + 2, bg_color)
+        painter.fillRect(0, 0, text_width + 2, text_height + 2, bg_color)
 
-        painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.text)
+        painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.overlay_text)
 
 
-# TODO: Small overlay with photo info
+# TODO: Add other photo info to overlay
 class ImageWindow(QWidget):
-    """Display a single full-size image at a time as a separate window
+    """Display local images in fullscreen as a separate window
 
     Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
     """
@@ -117,7 +120,6 @@ class ImageWindow(QWidget):
         self.selected_path = None
 
         self.image = PixmapLabel()
-        self.image.setFixedSize(QApplication.primaryScreen().availableSize())
         self.image.setAlignment(Qt.AlignCenter)
         self.image_layout = VerticalLayout(self)
         self.image_layout.addWidget(self.image)
@@ -138,7 +140,7 @@ class ImageWindow(QWidget):
         """The index of the currently selected image"""
         return self.image_paths.index(self.selected_path)
 
-    def select_image(self, selected_path: str, image_paths: list[str]):
+    def display_image(self, selected_path: str, image_paths: list[str]):
         """Open window to a selected image, and save other available image paths for navigation"""
         self.selected_path = selected_path
         self.image_paths = image_paths
@@ -146,23 +148,28 @@ class ImageWindow(QWidget):
         self.showFullScreen()
 
     def select_image_idx(self, idx: int):
-        """Select an image by index, with wraparound"""
-        if idx < 0:
-            idx = len(self.image_paths) - 1
-        elif idx >= len(self.image_paths):
-            idx = 0
+        """Select an image by index"""
         self.selected_path = self.image_paths[idx]
         self.set_pixmap(self.selected_path)
 
     def select_next_image(self):
-        self.select_image_idx(self.idx + 1)
+        self.select_image_idx(self.wrap_idx(1))
 
     def select_prev_image(self):
-        self.select_image_idx(self.idx - 1)
+        self.select_image_idx(self.wrap_idx(-1))
 
     def set_pixmap(self, path: str):
         self.image.setPixmap(QPixmap(path))
-        self.image.text = path
+        self.image.overlay_text = path
+
+    def wrap_idx(self, increment: int):
+        """Increment and wrap the index around to the other side of the list"""
+        idx = self.idx + increment
+        if idx < 0:
+            idx = len(self.image_paths) - 1
+        elif idx >= len(self.image_paths):
+            idx = 0
+        return idx
 
 
 def fetch_image(photo: Photo, size: str = None) -> QPixmap:
