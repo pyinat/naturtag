@@ -2,7 +2,8 @@ from logging import getLogger
 from os.path import basename
 from typing import Any, Optional
 
-from pyinaturalist.constants import INAT_BASE_URL, RANKS, Coordinates
+from pyinaturalist import INAT_BASE_URL, RANKS, Coordinates, Observation
+from pyinaturalist_convert import dwc_record_to_observation
 
 from naturtag.constants import OBSERVATION_KEYS, TAXON_KEYS, IntTuple, StrTuple
 from naturtag.metadata import (
@@ -21,7 +22,7 @@ NULL_COORDS = (0, 0)
 logger = getLogger().getChild(__name__)
 
 
-# TODO: __str__
+# TODO: If there's no taxon ID but a `rank=name` tag, look up taxon based on that
 class MetaMetadata(ImageMetadata):
     """Class for parsing & organizing higher-level info derived from raw image metadata"""
 
@@ -79,7 +80,7 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def has_taxon(self) -> bool:
-        return bool(self.taxon_id or all(self.min_rank))
+        return bool(self.taxon_id or self.min_rank)
 
     @property
     def inaturalist_ids(self) -> IntTuple:
@@ -105,11 +106,19 @@ class MetaMetadata(ImageMetadata):
         return f'{INAT_BASE_URL}/taxa/{self.taxon_id or ""}'
 
     @property
-    def min_rank(self) -> StrTuple:
-        """Get the lowest (most specific) taxonomic rank from tags, if any"""
+    def min_rank(self) -> Optional[StrTuple]:
+        """Get the lowest (most specific) taxonomic rank and name from tags, if any
+
+        Returns:
+            ``(rank, name)``
+        """
         if self._min_rank is None:
-            self._min_rank = get_min_rank(self.simplified)
-        return self._min_rank
+            for rank in RANKS:
+                if name := self.simplified.get(rank):
+                    self._min_rank = (rank, name)
+                    break
+            self._min_rank = ()
+        return self._min_rank or None
 
     @property
     def simplified(self) -> dict[str, str]:
@@ -169,8 +178,17 @@ class MetaMetadata(ImageMetadata):
         """
         self.update(KeywordMetadata(keywords=keywords).tags)
 
+    def to_observation(self) -> Observation:
+        """Convert DwC metadata to an observation object, if possible"""
+        # Format Xmp.dwc.* and related tags as DwC terms
+        dwc = {k.replace('Xmp.', '').replace('.', ':'): v for k, v in self.xmp.items()}
+        return dwc_record_to_observation(dwc)
 
-def get_inaturalist_ids(metadata: dict) -> tuple[Optional[int], Optional[int]]:
+    def __str__(self) -> str:
+        return self.summary
+
+
+def get_inaturalist_ids(metadata: dict) -> IntTuple:
     """Look for taxon and/or observation IDs from metadata if available"""
     # Get first non-None value from specified keys, if any; otherwise return None
     def _first_match(d, keys):
@@ -182,15 +200,6 @@ def get_inaturalist_ids(metadata: dict) -> tuple[Optional[int], Optional[int]]:
     observation_id = _first_match(metadata, OBSERVATION_KEYS)
     logger.debug(f'Taxon ID: {taxon_id} | Observation ID: {observation_id}')
     return taxon_id, observation_id
-
-
-def get_min_rank(metadata: dict[str, str]) -> StrTuple:
-    """Get the lowest (most specific) taxonomic rank from tags, if any"""
-    for rank in RANKS:
-        if rank in metadata:
-            logger.debug(f'Found minimum rank: {rank} = {metadata[rank]}')
-            return rank, metadata[rank]
-    return None, None
 
 
 def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
