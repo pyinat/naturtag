@@ -4,9 +4,9 @@
   <rdf:Description rdf:about=""
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
    dwc:occurrenceID="https://www.inaturalist.org/observations/49454455"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -18,7 +18,7 @@
    dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2020-06-06T15:52:00-05:00"
-   dwc:eventTime="15:52-0600"
+   dwc:eventTime="15:52-0500"
    dwc:verbatimEventDate="2020-06-06 15:52:00-06:00"
    dwc:verbatimLocality=" Rolling Thunder Prairie, Warren County, Iowa "
    dwc:decimalLatitude="41.1989907799"
@@ -41,6 +41,9 @@
    dwc:inaturalistLogin="jkcook"
    dwc:occurrenceDetails="https://www.inaturalist.org/observations/49454455"
    dwc:establishmentMeans="wild"
+   dwc:vernacularName="Western Honey Bee"
+   dwc:subfamily="Apinae"
+   dwc:subgenus="Apis"
    dcterms:description="🐝💛🧡"
    exif:GPSLatitude="41,11.9394467N"
    exif:GPSLongitude="93,39.4367100E">
@@ -64,9 +67,32 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <lr:hierarchicalSubject>
+    <rdf:Seq>
+     <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini|taxonomy:genus=Apis</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini|taxonomy:genus=Apis|taxonomy:subgenus=Apis</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini|taxonomy:genus=Apis|taxonomy:subgenus=Apis|"taxonomy:species=Apis mellifera"</rdf:li>
+    </rdf:Seq>
+   </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
+     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -82,6 +108,8 @@
      <rdf:li>taxonomy:tribe=Apini</rdf:li>
      <rdf:li>taxonomy:genus=Apis</rdf:li>
      <rdf:li>taxonomy:subgenus=Apis</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
+     <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
      <rdf:li>"Western Honey Bee"</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
@@ -92,9 +120,10 @@
      <rdf:li>"Honey Bees"</rdf:li>
      <rdf:li>"Honey Bees"</rdf:li>
      <rdf:li>"Cavity-nesting Honey Bees"</rdf:li>
-     <rdf:li>inaturalist:taxon_id=47219</rdf:li>
+     <rdf:li>"Western Honey Bee"</rdf:li>
+     <rdf:li>inat:taxon_id=47219</rdf:li>
      <rdf:li>dwc:taxonID=47219</rdf:li>
-     <rdf:li>inaturalist:observation_id=49454455</rdf:li>
+     <rdf:li>inat:observation_id=49454455</rdf:li>
      <rdf:li>dwc:catalogNumber=49454455</rdf:li>
     </rdf:Seq>
    </dc:subject>
@@ -108,9 +137,6 @@
      <rdf:li xml:lang="x-default">Jordan Cook (CC-BY-NC) Free for non-commercial use</rdf:li>
     </rdf:Alt>
    </dc:rights>
-   <lr:hierarchicalSubject>
-    <rdf:Seq/>
-   </lr:hierarchicalSubject>
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>

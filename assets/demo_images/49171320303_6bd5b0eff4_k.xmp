@@ -4,9 +4,9 @@
   <rdf:Description rdf:about=""
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
    dwc:occurrenceID="https://www.inaturalist.org/observations/36370373"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -14,11 +14,11 @@
    dwc:datasetName="iNaturalist research-grade observations"
    dwc:catalogNumber="36370373"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jonathan Hoskins"
+   dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2019-11-28T15:15:00-06:00"
-   dwc:eventTime="21:15:00Z"
-   dwc:verbatimEventDate="2019/11/28 3:15 PM CST"
+   dwc:eventTime="15:15-0600"
+   dwc:verbatimEventDate="2019-11-28 15:15:00-06:00"
    dwc:verbatimLocality="Stone County, MO, USA"
    dwc:decimalLatitude="36.5578291939"
    dwc:decimalLongitude="-93.4679448499"
@@ -26,9 +26,8 @@
    dwc:geodeticDatum="EPSG:4326"
    dwc:countryCode="US"
    dwc:stateProvince="Missouri"
-   dwc:identificationID="79882425"
-   dwc:dateIdentified="2019-12-06T21:51:37Z"
-   dwc:identificationRemarks="Noting the extensive dark markings on the scutum (&quot;shield&quot; of the thorax&quot;) and around the ocelli. Photo #11 in particular shows an excellent view of the coarser ridging on the propodeum (rear slope of the thorax)."
+   dwc:identificationID="79731760"
+   dwc:dateIdentified="2019-12-04T23:37:38-06:00"
    dwc:taxonID="370906"
    dwc:scientificName="Polistes rubiginosus"
    dwc:taxonRank="species"
@@ -41,11 +40,16 @@
    dwc:inaturalistLogin="jkcook"
    dwc:sex="female"
    dwc:lifeStage="adult"
+   dwc:occurrenceDetails="https://www.inaturalist.org/observations/36370373"
+   dwc:establishmentMeans="wild"
+   dwc:vernacularName="Coarse-backed Red Paper Wasp"
+   dwc:subfamily="Polistinae"
+   dwc:subgenus="Fuscopolistes"
    exif:GPSLatitude="36,33.4697500N"
    exif:GPSLongitude="93,28.0766900E">
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2019-12-06T23:48:22Z</rdf:li>
+     <rdf:li>2019-12-06 17:48:22-06:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
@@ -55,7 +59,7 @@
    </dcterms:references>
    <dcterms:license>
     <rdf:Alt>
-     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0/</rdf:li>
+     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0</rdf:li>
     </rdf:Alt>
    </dcterms:license>
    <dcterms:rightsHolder>
@@ -63,9 +67,31 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <lr:hierarchicalSubject>
+    <rdf:Seq>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini|taxonomy:genus=Polistes</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini|taxonomy:genus=Polistes|taxonomy:subgenus=Fuscopolistes</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini|taxonomy:genus=Polistes|taxonomy:subgenus=Fuscopolistes|"taxonomy:species=Polistes rubiginosus"</rdf:li>
+    </rdf:Seq>
+   </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
+     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -80,6 +106,8 @@
      <rdf:li>taxonomy:tribe=Polistini</rdf:li>
      <rdf:li>taxonomy:genus=Polistes</rdf:li>
      <rdf:li>taxonomy:subgenus=Fuscopolistes</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
+     <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
      <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
@@ -89,9 +117,10 @@
      <rdf:li>"Paper Wasps"</rdf:li>
      <rdf:li>"Umbrella Paper Wasps"</rdf:li>
      <rdf:li>"fuscatus-group Paper Wasps"</rdf:li>
-     <rdf:li>inaturalist:taxon_id=370906</rdf:li>
+     <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
+     <rdf:li>inat:taxon_id=370906</rdf:li>
      <rdf:li>dwc:taxonID=370906</rdf:li>
-     <rdf:li>inaturalist:observation_id=36370373</rdf:li>
+     <rdf:li>inat:observation_id=36370373</rdf:li>
      <rdf:li>dwc:catalogNumber=36370373</rdf:li>
     </rdf:Seq>
    </dc:subject>
@@ -105,9 +134,6 @@
      <rdf:li xml:lang="x-default">Jordan Cook (CC-BY-NC) Free for non-commercial use</rdf:li>
     </rdf:Alt>
    </dc:rights>
-   <lr:hierarchicalSubject>
-    <rdf:Seq/>
-   </lr:hierarchicalSubject>
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>
