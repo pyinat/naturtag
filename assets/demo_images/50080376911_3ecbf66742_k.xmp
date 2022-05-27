@@ -4,56 +4,61 @@
   <rdf:Description rdf:about=""
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
-   dwc:occurrenceID="https://www.inaturalist.org/observations/32989972"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:occurrenceID="https://www.inaturalist.org/observations/52060342"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
    dwc:collectionCode="Observations"
    dwc:datasetName="iNaturalist research-grade observations"
-   dwc:informationWithheld="Coordinate uncertainty increased to 27754m at the request of the observer"
-   dwc:catalogNumber="32989972"
+   dwc:catalogNumber="52060342"
    dwc:recordedBy="Jordan Cook"
    dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
-   dwc:eventDate="2019-09-18T15:56:00-05:00"
-   dwc:eventTime="20:56:00Z"
-   dwc:verbatimEventDate="2019/09/18 3:56 PM CDT"
-   dwc:verbatimLocality="Jester Park, Granger, Iowa"
-   dwc:decimalLatitude="41.78763132"
-   dwc:decimalLongitude="-93.79020984"
-   dwc:coordinateUncertaintyInMeters="27754"
+   dwc:eventDate="2020-07-05T11:55:00-05:00"
+   dwc:eventTime="11:55-0500"
+   dwc:verbatimEventDate="2020-07-05 11:55:00-05:00"
+   dwc:verbatimLocality="Iowa, US"
+   dwc:decimalLatitude="41.6758759619"
+   dwc:decimalLongitude="-93.651100089"
    dwc:geodeticDatum="EPSG:4326"
    dwc:countryCode="US"
    dwc:stateProvince="Iowa"
-   dwc:identificationID="71443247"
-   dwc:dateIdentified="2019-09-19T02:33:54Z"
-   dwc:taxonID="120183"
-   dwc:scientificName="Araneus marmoreus"
+   dwc:identificationID="115097873"
+   dwc:dateIdentified="2020-07-05T15:36:43-04:00"
+   dwc:taxonID="81839"
+   dwc:scientificName="Platycryptus undatus"
    dwc:taxonRank="species"
    dwc:kingdom="Animalia"
    dwc:phylum="Arthropoda"
    dwc:class="Arachnida"
    dwc:order="Araneae"
-   dwc:family="Araneidae"
-   dwc:genus="Araneus"
+   dwc:family="Salticidae"
+   dwc:genus="Platycryptus"
    dwc:inaturalistLogin="jkcook"
-   exif:GPSLatitude="41,47.2578783N"
-   exif:GPSLongitude="93,47.4125900E">
+   dwc:occurrenceDetails="https://www.inaturalist.org/observations/52060342"
+   dwc:establishmentMeans="wild"
+   dwc:occurrenceRemarks=""
+   dwc:coordinateUncertaintyInMeters="100"
+   dwc:vernacularName="Tan Jumping Spider"
+   dwc:subfamily="Salticinae"
+   dwc:informationWithheld="Coordinate uncertainty increased to 100at the request of the observer"
+   exif:GPSLatitude="41,40.5525567N"
+   exif:GPSLongitude="93,39.0660050E">
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2019-09-24T00:36:34Z</rdf:li>
+     <rdf:li>2021-02-15 22:28:49-06:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
     <rdf:Bag>
-     <rdf:li>https://www.inaturalist.org/observations/32989972</rdf:li>
+     <rdf:li>https://www.inaturalist.org/observations/52060342</rdf:li>
     </rdf:Bag>
    </dcterms:references>
    <dcterms:license>
     <rdf:Alt>
-     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0/</rdf:li>
+     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0</rdf:li>
     </rdf:Alt>
    </dcterms:license>
    <dcterms:rightsHolder>
@@ -61,8 +66,30 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <lr:hierarchicalSubject>
+    <rdf:Seq>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini|taxonomy:subtribe=Marpissina</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini|taxonomy:subtribe=Marpissina|taxonomy:genus=Platycryptus</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini|taxonomy:subtribe=Marpissina|taxonomy:genus=Platycryptus|"taxonomy:species=Platycryptus undatus"</rdf:li>
+    </rdf:Seq>
+   </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
+     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Chelicerata</rdf:li>
@@ -70,11 +97,15 @@
      <rdf:li>taxonomy:order=Araneae</rdf:li>
      <rdf:li>taxonomy:suborder=Araneomorphae</rdf:li>
      <rdf:li>taxonomy:infraorder=Entelegynae</rdf:li>
-     <rdf:li>taxonomy:superfamily=Araneoidea</rdf:li>
-     <rdf:li>taxonomy:family=Araneidae</rdf:li>
-     <rdf:li>taxonomy:subfamily=Araneinae</rdf:li>
-     <rdf:li>taxonomy:genus=Araneus</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
+     <rdf:li>taxonomy:superfamily=Salticoidea</rdf:li>
+     <rdf:li>taxonomy:family=Salticidae</rdf:li>
+     <rdf:li>taxonomy:subfamily=Salticinae</rdf:li>
+     <rdf:li>taxonomy:tribe=Dendryphantini</rdf:li>
+     <rdf:li>taxonomy:subtribe=Marpissina</rdf:li>
+     <rdf:li>taxonomy:genus=Platycryptus</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
+     <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
+     <rdf:li>"Tan Jumping Spider"</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
      <rdf:li>Chelicerates</rdf:li>
@@ -82,14 +113,12 @@
      <rdf:li>Spiders</rdf:li>
      <rdf:li>"Typical Spiders"</rdf:li>
      <rdf:li>"Entelegyne Spiders"</rdf:li>
-     <rdf:li>"Araneoid Spiders"</rdf:li>
-     <rdf:li>Orbweavers</rdf:li>
-     <rdf:li>"Typical Orbweavers"</rdf:li>
-     <rdf:li>"Marbled Orbweaver"</rdf:li>
-     <rdf:li>inaturalist:taxon_id=120183</rdf:li>
-     <rdf:li>dwc:taxonID=120183</rdf:li>
-     <rdf:li>inaturalist:observation_id=32989972</rdf:li>
-     <rdf:li>dwc:catalogNumber=32989972</rdf:li>
+     <rdf:li>"Jumping Spiders"</rdf:li>
+     <rdf:li>"Tan Jumping Spider"</rdf:li>
+     <rdf:li>inat:taxon_id=81839</rdf:li>
+     <rdf:li>dwc:taxonID=81839</rdf:li>
+     <rdf:li>inat:observation_id=52060342</rdf:li>
+     <rdf:li>dwc:catalogNumber=52060342</rdf:li>
     </rdf:Seq>
    </dc:subject>
    <dc:creator>
@@ -102,9 +131,6 @@
      <rdf:li xml:lang="x-default">Jordan Cook (CC-BY-NC) Free for non-commercial use</rdf:li>
     </rdf:Alt>
    </dc:rights>
-   <lr:hierarchicalSubject>
-    <rdf:Seq/>
-   </lr:hierarchicalSubject>
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>

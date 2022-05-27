@@ -3,10 +3,10 @@
  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about=""
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
    dwc:occurrenceID="https://www.inaturalist.org/observations/32989972"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -17,8 +17,8 @@
    dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2019-09-18T15:56:00-05:00"
-   dwc:eventTime="20:56:00Z"
-   dwc:verbatimEventDate="2019/09/18 3:56 PM CDT"
+   dwc:eventTime="15:56-0500"
+   dwc:verbatimEventDate="2019-09-18 15:56:00-05:00"
    dwc:verbatimLocality="Jester Park, Granger, Iowa"
    dwc:decimalLatitude="41.78763132"
    dwc:decimalLongitude="-93.79020984"
@@ -26,7 +26,7 @@
    dwc:countryCode="US"
    dwc:stateProvince="Iowa"
    dwc:identificationID="71443247"
-   dwc:dateIdentified="2019-09-19T02:33:54Z"
+   dwc:dateIdentified="2019-09-19T02:33:54+00:00"
    dwc:taxonID="120183"
    dwc:scientificName="Araneus marmoreus"
    dwc:taxonRank="species"
@@ -37,11 +37,54 @@
    dwc:family="Araneidae"
    dwc:genus="Araneus"
    dwc:inaturalistLogin="jkcook"
+   dwc:occurrenceDetails="https://www.inaturalist.org/observations/32989972"
+   dwc:establishmentMeans="wild"
+   dwc:vernacularName="Marbled Orbweaver"
+   dwc:subfamily="Araneinae"
    exif:GPSLatitude="41,47.2578783N"
    exif:GPSLongitude="93,47.4125900E">
+   <lr:hierarchicalSubject>
+    <rdf:Seq>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae|taxonomy:subfamily=Araneinae</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae|taxonomy:subfamily=Araneinae|taxonomy:genus=Araneus</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae|taxonomy:subfamily=Araneinae|taxonomy:genus=Araneus|"taxonomy:species=Araneus marmoreus"</rdf:li>
+    </rdf:Seq>
+   </lr:hierarchicalSubject>
+   <dcterms:modified>
+    <rdf:Seq>
+     <rdf:li>2019-09-23 19:36:34-05:00</rdf:li>
+    </rdf:Seq>
+   </dcterms:modified>
+   <dcterms:references>
+    <rdf:Bag>
+     <rdf:li>https://www.inaturalist.org/observations/32989972</rdf:li>
+    </rdf:Bag>
+   </dcterms:references>
+   <dcterms:license>
+    <rdf:Alt>
+     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0</rdf:li>
+    </rdf:Alt>
+   </dcterms:license>
+   <dcterms:rightsHolder>
+    <rdf:Seq>
+     <rdf:li>Jordan Cook</rdf:li>
+    </rdf:Seq>
+   </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
+     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Chelicerata</rdf:li>
@@ -53,6 +96,8 @@
      <rdf:li>taxonomy:family=Araneidae</rdf:li>
      <rdf:li>taxonomy:subfamily=Araneinae</rdf:li>
      <rdf:li>taxonomy:genus=Araneus</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
+     <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
      <rdf:li>"Marbled Orbweaver"</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
@@ -64,9 +109,10 @@
      <rdf:li>"Araneoid Spiders"</rdf:li>
      <rdf:li>Orbweavers</rdf:li>
      <rdf:li>"Typical Orbweavers"</rdf:li>
-     <rdf:li>inaturalist:taxon_id=120183</rdf:li>
+     <rdf:li>"Marbled Orbweaver"</rdf:li>
+     <rdf:li>inat:taxon_id=120183</rdf:li>
      <rdf:li>dwc:taxonID=120183</rdf:li>
-     <rdf:li>inaturalist:observation_id=32989972</rdf:li>
+     <rdf:li>inat:observation_id=32989972</rdf:li>
      <rdf:li>dwc:catalogNumber=32989972</rdf:li>
     </rdf:Seq>
    </dc:subject>
@@ -80,29 +126,6 @@
      <rdf:li xml:lang="x-default">CC BY-NC</rdf:li>
     </rdf:Alt>
    </dc:rights>
-   <lr:hierarchicalSubject>
-    <rdf:Seq/>
-   </lr:hierarchicalSubject>
-   <dcterms:modified>
-    <rdf:Seq>
-     <rdf:li>2019-09-24T00:36:34Z</rdf:li>
-    </rdf:Seq>
-   </dcterms:modified>
-   <dcterms:references>
-    <rdf:Bag>
-     <rdf:li>https://www.inaturalist.org/observations/32989972</rdf:li>
-    </rdf:Bag>
-   </dcterms:references>
-   <dcterms:license>
-    <rdf:Alt>
-     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0/</rdf:li>
-    </rdf:Alt>
-   </dcterms:license>
-   <dcterms:rightsHolder>
-    <rdf:Seq>
-     <rdf:li>Jordan Cook</rdf:li>
-    </rdf:Seq>
-   </dcterms:rightsHolder>
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>

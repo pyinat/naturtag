@@ -75,4 +75,4 @@ COMMON_NAME_IGNORE_TERMS = [
 
 # Type aliases
 IntTuple = tuple[Optional[int], Optional[int]]
-StrTuple = tuple[Optional[str], Optional[str]]
+StrTuple = tuple[str, str]

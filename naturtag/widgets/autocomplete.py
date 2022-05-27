@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from pyinaturalist_convert import DATA_DIR, TaxonAutocompleter
-from PySide6.QtCore import QStringListModel, Qt, Signal
+from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.app.style import fa_icon
@@ -17,7 +17,7 @@ class TaxonAutocomplete(VerticalLayout):
     def __init__(self):
         super().__init__()
 
-        self.search_input = QLineEdit()
+        self.search_input = TabCompleteLineEdit()
         self.search_input.setClearButtonEnabled(True)
         self.search_input.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
         self.addWidget(self.search_input)
@@ -46,3 +46,27 @@ class TaxonAutocomplete(VerticalLayout):
         taxon_id = self.taxa.get(name)
         if taxon_id:
             self.selection.emit(taxon_id)
+
+
+class TabCompleteLineEdit(QLineEdit):
+    """LineEdit that allows cycling through autocomplete results with tab key.
+    Source: https://stackoverflow.com/a/28976373/15592055
+    """
+
+    tabPressed = Signal()
+
+    def __init__(self):
+        super().__init__()
+        self.tabPressed.connect(self.next_completion)
+
+    def next_completion(self):
+        completer = self.completer()
+        completer.popup().setCurrentIndex(completer.currentIndex())
+        if not completer.setCurrentRow(completer.currentRow() + 1):
+            completer.setCurrentRow(0)
+
+    def event(self, event):
+        if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Tab:
+            self.tabPressed.emit()
+            return True
+        return super().event(event)

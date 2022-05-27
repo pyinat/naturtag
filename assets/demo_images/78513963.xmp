@@ -4,9 +4,9 @@
   <rdf:Description rdf:about=""
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
    dwc:occurrenceID="https://www.inaturalist.org/observations/49459966"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -17,9 +17,9 @@
    dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2020-06-06T15:40:00-05:00"
-   dwc:eventTime="20:40:00Z"
-   dwc:verbatimEventDate="2020/06/06 3:40 PM CDT"
-   dwc:verbatimLocality="Rolling Thunder Prairie, Warren County, Iowa"
+   dwc:eventTime="15:40-0500"
+   dwc:verbatimEventDate="2020-06-06 15:40:00-05:00"
+   dwc:verbatimLocality=" Rolling Thunder Prairie, Warren County, Iowa "
    dwc:decimalLatitude="41.1990265685"
    dwc:decimalLongitude="-93.6572535501"
    dwc:coordinateUncertaintyInMeters="10"
@@ -27,7 +27,7 @@
    dwc:countryCode="US"
    dwc:stateProvince="Iowa"
    dwc:identificationID="109946898"
-   dwc:dateIdentified="2020-06-13T16:57:18Z"
+   dwc:dateIdentified="2020-06-13T16:57:18+00:00"
    dwc:taxonID="202860"
    dwc:scientificName="Chrysopilus ornatus"
    dwc:taxonRank="species"
@@ -40,11 +40,15 @@
    dwc:inaturalistLogin="jkcook"
    dwc:sex="female"
    dwc:lifeStage="adult"
+   dwc:occurrenceDetails="https://www.inaturalist.org/observations/49459966"
+   dwc:establishmentMeans="wild"
+   dwc:vernacularName="Ornate Snipe Fly"
+   dwc:subfamily="Chrysopilinae"
    exif:GPSLatitude="41,11.9415933N"
    exif:GPSLongitude="93,39.4352117E">
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2021-04-05T15:00:04Z</rdf:li>
+     <rdf:li>2021-04-05 10:00:04-05:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
@@ -54,7 +58,7 @@
    </dcterms:references>
    <dcterms:license>
     <rdf:Alt>
-     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0/</rdf:li>
+     <rdf:li xml:lang="x-default">http://creativecommons.org/licenses/by-nc/4.0</rdf:li>
     </rdf:Alt>
    </dcterms:license>
    <dcterms:rightsHolder>
@@ -62,8 +66,29 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <lr:hierarchicalSubject>
+    <rdf:Seq>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae|taxonomy:subfamily=Chrysopilinae</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae|taxonomy:subfamily=Chrysopilinae|taxonomy:genus=Chrysopilus</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae|taxonomy:subfamily=Chrysopilinae|taxonomy:genus=Chrysopilus|"taxonomy:species=Chrysopilus ornatus"</rdf:li>
+    </rdf:Seq>
+   </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
+     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -77,6 +102,8 @@
      <rdf:li>taxonomy:subfamily=Chrysopilinae</rdf:li>
      <rdf:li>taxonomy:genus=Chrysopilus</rdf:li>
      <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
+     <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
+     <rdf:li>"Ornate Snipe Fly"</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
      <rdf:li>Hexapods</rdf:li>
@@ -86,15 +113,12 @@
      <rdf:li>"Orthorrhaphan Flies"</rdf:li>
      <rdf:li>"Snipe Flies"</rdf:li>
      <rdf:li>"Ornate Snipe Fly"</rdf:li>
-     <rdf:li>inaturalist:taxon_id=202860</rdf:li>
+     <rdf:li>inat:taxon_id=202860</rdf:li>
      <rdf:li>dwc:taxonID=202860</rdf:li>
-     <rdf:li>inaturalist:observation_id=49459966</rdf:li>
+     <rdf:li>inat:observation_id=49459966</rdf:li>
      <rdf:li>dwc:catalogNumber=49459966</rdf:li>
     </rdf:Seq>
    </dc:subject>
-   <lr:hierarchicalSubject>
-    <rdf:Seq/>
-   </lr:hierarchicalSubject>
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>

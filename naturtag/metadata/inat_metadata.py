@@ -4,11 +4,11 @@
 # TODO: Handle observation with no taxon ID?
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
 from logging import getLogger
-from typing import Optional
+from typing import Iterable, Optional
 from urllib.parse import urlparse
 
 from pyinaturalist import Observation, Taxon, TaxonCounts
-from pyinaturalist_convert import to_dwc
+from pyinaturalist_convert import PathOrStr, to_dwc
 
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple
@@ -56,19 +56,20 @@ def tag_image(
 
 
 def get_inat_metadata(
-    observation_id: int,
-    taxon_id: int,
+    observation_id: int = None,
+    taxon_id: int = None,
     common_names: bool = False,
     darwin_core: bool = False,
     hierarchical: bool = False,
+    metadata: MetaMetadata = None,
 ) -> Optional[MetaMetadata]:
-    """Get image metadata based on an iNaturalist observation and/or taxon"""
-    inat_metadata = MetaMetadata()
+    """Create or update image metadata based on an iNaturalist observation and/or taxon"""
+    metadata = metadata or MetaMetadata()
     observation, taxon = None, None
 
     # Get observation and/or taxon records
     if observation_id:
-        observation = INAT_CLIENT.observations(observation_id)
+        observation = INAT_CLIENT.observations(observation_id, refresh=True)
         taxon_id = observation.taxon.id
 
     # Observation.taxon doesn't include ancestors, so we always need to fetch the full taxon record
@@ -86,17 +87,17 @@ def get_inat_metadata(
     keywords.extend(get_id_keywords(observation_id, taxon_id))
 
     logger.info(f'{len(keywords)} total keywords generated')
-    inat_metadata.update_keywords(keywords)
+    metadata.update_keywords(keywords)
 
     # Convert and add coordinates
     if observation:
-        inat_metadata.update_coordinates(observation.location)
+        metadata.update_coordinates(observation.location)
 
     # Convert and add DwC metadata, if specified
     if darwin_core:
-        inat_metadata.update(get_dwc_terms(observation, taxon))
+        metadata.update(get_dwc_terms(observation, taxon))
 
-    return inat_metadata
+    return metadata
 
 
 def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> TaxonCounts:
@@ -131,10 +132,13 @@ def get_taxonomy_keywords(taxon: Taxon) -> list[str]:
     return [_quote(f'taxonomy:{t.rank}={t.name}') for t in [taxon, *taxon.ancestors]]
 
 
-def get_id_keywords(observation_id: int, taxon_id: int) -> list[str]:
-    keywords = [f'inaturalist:taxon_id={taxon_id}', f'dwc:taxonID={taxon_id}']
+def get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[str]:
+    keywords = []
+    if taxon_id:
+        keywords.append(f'inat:taxon_id={taxon_id}')
+        keywords.append(f'dwc:taxonID={taxon_id}')
     if observation_id:
-        keywords.append(f'inaturalist:observation_id={observation_id}')
+        keywords.append(f'inat:observation_id={observation_id}')
         keywords.append(f'dwc:catalogNumber={observation_id}')
     return keywords
 
@@ -188,6 +192,44 @@ def get_ids_from_url(url: str) -> IntTuple:
         taxon_id = id
 
     return observation_id, taxon_id
+
+
+def refresh_all(
+    file_paths: Iterable[PathOrStr],
+    common_names: bool = False,
+    darwin_core: bool = False,
+    hierarchical: bool = False,
+    create_sidecar: bool = False,
+):
+    """Refresh metadata for all specified images"""
+    for file_path in file_paths:
+        refresh_metadata(
+            MetaMetadata(file_path), common_names, darwin_core, hierarchical, create_sidecar
+        )
+
+
+def refresh_metadata(
+    metadata: MetaMetadata,
+    common_names: bool = False,
+    darwin_core: bool = False,
+    hierarchical: bool = False,
+    create_sidecar: bool = False,
+) -> MetaMetadata:
+    """Refresh existing image metadata with latest observation and/or taxon data"""
+    if not metadata.has_observation and not metadata.has_taxon:
+        return metadata
+
+    logger.info(f'Refreshing metadata for {metadata.image_path}')
+    metadata = get_inat_metadata(  # type: ignore
+        observation_id=metadata.observation_id,
+        taxon_id=metadata.taxon_id,
+        common_names=common_names,
+        darwin_core=darwin_core,
+        hierarchical=hierarchical,
+        metadata=metadata,
+    )
+    metadata.write(create_sidecar=create_sidecar)
+    return metadata
 
 
 def strip_url(value: str) -> Optional[int]:

@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QToolB
 
 from naturtag.app.style import fa_icon
 from naturtag.controllers import ImageGallery
-from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
+from naturtag.metadata import get_ids_from_url, refresh_metadata, tag_images
 from naturtag.settings import Settings
 from naturtag.widgets import HorizontalLayout, TaxonInfoCard, VerticalLayout
 
@@ -54,12 +54,12 @@ class ImageController(QWidget):
 
     def run(self):
         """Run image tagging for selected images and input"""
-        obs_id, taxon_id = self.input_obs_id.text(), self.input_taxon_id.text()
         files = list(self.gallery.images.keys())
-
         if not files:
             self.info('Select images to tag')
             return
+
+        obs_id, taxon_id = self.input_obs_id.text(), self.input_taxon_id.text()
         if not (obs_id or taxon_id):
             self.info('Select either an observation or an organism to tag images with')
             return
@@ -82,6 +82,24 @@ class ImageController(QWidget):
         for metadata in all_metadata:
             image = self.gallery.images[metadata.image_path]
             image.update_metadata(metadata)
+
+    def refresh(self):
+        """Refresh metadata for any previously tagged images"""
+        images = list(self.gallery.images.values())
+        if not images:
+            self.info('Select images to tag')
+            return
+
+        for image in images:
+            metadata = refresh_metadata(
+                image.metadata,
+                common_names=self.settings.common_names,
+                darwin_core=self.settings.darwin_core,
+                hierarchical=self.settings.hierarchical_keywords,
+                create_sidecar=self.settings.create_sidecar,
+            )
+            image.update_metadata(metadata)
+        self.info(f'{len(images)} images updated')
 
     def clear(self):
         """Clear all images and input"""
