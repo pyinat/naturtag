@@ -199,6 +199,7 @@ class LocalThumbnail(StylableWidget):
         self.metadata = metadata
         self.icons.refresh_icons(metadata)
         self.setToolTip(f'{self.file_path}\n{self.metadata.summary}')
+        self.context_menu.refresh_actions(metadata)
 
     def open_directory(self):
         QDesktopServices.openUrl(QUrl(self.file_path.parent.as_uri()))
@@ -212,7 +213,11 @@ class ThumbnailContextMenu(QMenu):
     def __init__(self, thumbnail: LocalThumbnail):
         super().__init__()
         self.thumbnail = thumbnail
-        meta = thumbnail.metadata
+        self.refresh_actions(thumbnail.metadata)
+
+    def refresh_actions(self, meta: MetaMetadata):
+        """Update menu actions based on the available metadata"""
+        self.clear()
 
         self._add_action(
             icon='fa5s.spider',
@@ -240,19 +245,19 @@ class ThumbnailContextMenu(QMenu):
             text='Copy Flickr tags',
             tooltip='Copy Flickr-compatible taxon tags to clipboard',
             enabled=meta.has_taxon,
-            callback=thumbnail.copy_flickr_tags,
+            callback=self.thumbnail.copy_flickr_tags,
         )
         self._add_action(
             icon='fa5s.folder-open',
             text='Open containing folder',
-            tooltip=f'Open containing folder: {thumbnail.file_path.parent}',
-            callback=thumbnail.open_directory,
+            tooltip=f'Open containing folder: {self.thumbnail.file_path.parent}',
+            callback=self.thumbnail.open_directory,
         )
         self._add_action(
             icon='fa.remove',
             text='Remove image',
             tooltip='Remove this image from the selection',
-            callback=thumbnail.remove,
+            callback=self.thumbnail.remove,
         )
 
     def _add_action(
@@ -280,11 +285,11 @@ class ThumbnailMetaIcons(QLabel):
 
         self.refresh_icons(parent.metadata)
 
-    def refresh_icons(self, metadata: MetaMetadata):
-        """Update icons based on types of metadata available"""
+    def refresh_icons(self, meta: MetaMetadata):
+        """Update icons based on the available metadata"""
         self.icon_layout.clear()
-        self.icon_layout.addWidget(IconLabel('mdi.bird', active=metadata.has_taxon))
-        self.icon_layout.addWidget(IconLabel('fa.binoculars', active=metadata.has_observation))
-        self.icon_layout.addWidget(IconLabel('fa.map-marker', active=metadata.has_coordinates))
-        self.icon_layout.addWidget(IconLabel('fa.tags', active=metadata.has_any_tags))
-        self.icon_layout.addWidget(IconLabel('mdi.xml', active=metadata.has_sidecar))
+        self.icon_layout.addWidget(IconLabel('mdi.bird', active=meta.has_taxon))
+        self.icon_layout.addWidget(IconLabel('fa.binoculars', active=meta.has_observation))
+        self.icon_layout.addWidget(IconLabel('fa.map-marker', active=meta.has_coordinates))
+        self.icon_layout.addWidget(IconLabel('fa.tags', active=meta.has_any_tags))
+        self.icon_layout.addWidget(IconLabel('mdi.xml', active=meta.has_sidecar))
