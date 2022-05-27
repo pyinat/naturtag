@@ -1,18 +1,26 @@
 """Components for displaying taxon info"""
 from logging import getLogger
-from typing import Iterable, Iterator, Optional
+from typing import Iterator
 
-from pyinaturalist import Taxon, TaxonCount
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QGroupBox, QLabel, QScrollArea, QSizePolicy, QWidget
+from pyinaturalist import Taxon
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QGroupBox, QLabel
 
 from naturtag.app.threadpool import ThreadPool
-from naturtag.widgets import HorizontalLayout, PixmapLabel, StylableWidget, VerticalLayout
+from naturtag.widgets import (
+    HorizontalLayout,
+    PixmapLabel,
+    TaxonImageWindow,
+    TaxonInfoCard,
+    TaxonList,
+    TaxonPixmapLabel,
+    VerticalLayout,
+)
 
 logger = getLogger(__name__)
 
 
+# thumbnail.selected.connect(self.select_image)
 class TaxonInfoSection(HorizontalLayout):
     """Section to display selected taxon photo and basic info"""
 
@@ -25,11 +33,15 @@ class TaxonInfoSection(HorizontalLayout):
         self.addWidget(self.group)
         self.setAlignment(Qt.AlignTop)
 
-        self.image = PixmapLabel()
+        # Medium taxon default photo
+        self.image = TaxonPixmapLabel()
         self.image.setMinimumWidth(200)
         self.image.setMaximumWidth(600)
         self.image.setMaximumHeight(400)
         inner_layout.addWidget(self.image)
+
+        self.image_window = TaxonImageWindow()
+        self.image.clicked.connect(self.image_window.display_taxon)
 
         self.icon = PixmapLabel()
         self.icon.setFixedSize(75, 75)
@@ -46,7 +58,7 @@ class TaxonInfoSection(HorizontalLayout):
         # Label, photo, and iconic taxon icon
         common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
         self.group.setTitle(f'{taxon.name}{common_name}')
-        self.threadpool.schedule(self.image.setPixmap, url=taxon.default_photo.medium_url)
+        self.threadpool.schedule(self.image.set_taxon, taxon=taxon)
         self.threadpool.schedule(self.icon.setPixmap, url=taxon.icon_url)
 
         # Other attributes
@@ -89,115 +101,3 @@ class TaxonomySection(HorizontalLayout):
     def taxa(self) -> Iterator['TaxonInfoCard']:
         yield from self.ancestors_list.taxa
         yield from self.children_list.taxa
-
-
-# TODO: Is the performance of widget iteration good enough, or should card be indexed by taxon ID?
-class TaxonList(VerticalLayout):
-    """A scrollable list of TaxonInfoCards"""
-
-    def __init__(self, threadpool: ThreadPool, parent: QWidget = None):
-        super().__init__(parent)
-        self.threadpool = threadpool
-
-        self.scroll_panel = QWidget()
-        self.scroll_layout = VerticalLayout(self.scroll_panel)
-        self.scroll_layout.setAlignment(Qt.AlignTop)
-        self.scroll_layout.setContentsMargins(0, 0, 0, 0)
-        self.addLayout(self.scroll_layout)
-
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setWidget(self.scroll_panel)
-        self.addWidget(scroll_area)
-
-    @property
-    def taxa(self) -> Iterator['TaxonInfoCard']:
-        for item in self.scroll_panel.children():
-            if isinstance(item, TaxonInfoCard):
-                yield item
-
-    def add_taxon(self, taxon: Taxon, idx: int = None):
-        """Add a taxon card immediately, and load its thumbnail from a separate thread"""
-        card = TaxonInfoCard(taxon=taxon)
-        if idx is not None:
-            self.scroll_layout.insertWidget(idx, card)
-        else:
-            self.scroll_layout.addWidget(card)
-        self.threadpool.schedule(card.image.setPixmap, taxon=taxon)
-
-    def add_or_update(self, taxon: Taxon, idx: int = 0):
-        """Move a taxon card to the specified position, and add a new one if it doesn't exist"""
-        if not self.move_card(taxon.id, idx):
-            self.add_taxon(taxon, idx)
-
-    def clear(self):
-        self.scroll_layout.clear()
-
-    def contains(self, taxon_id: int) -> bool:
-        return self.get_card_by_id(taxon_id) is not None
-
-    def get_card_by_id(self, taxon_id: int) -> Optional['TaxonInfoCard']:
-        for card in self.taxa:
-            if card.taxon.id == taxon_id:
-                return card
-        return None
-
-    def move_card(self, taxon_id: int, idx: int = 0) -> bool:
-        """Move a card to the specified position, if found; return False otherwise"""
-        card = self.get_card_by_id(taxon_id)
-        if card:
-            self.scroll_layout.removeWidget(card)
-            self.scroll_layout.insertWidget(idx, card)
-            return True
-        return False
-
-    def set_taxa(self, taxa: Iterable[Taxon]):
-        self.clear()
-        for taxon in taxa:
-            if taxon is not None:
-                self.add_taxon(taxon)
-
-
-class TaxonInfoCard(StylableWidget):
-    """Card containing a taxon icon, name, common name, and rank"""
-
-    clicked = Signal(int)
-
-    def __init__(self, taxon: Taxon, delayed_load: bool = True):
-        super().__init__()
-        card_layout = HorizontalLayout()
-        self.setLayout(card_layout)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        if isinstance(taxon, TaxonCount):
-            self.setToolTip(f'Count: {taxon.count}')
-        self.setFixedHeight(90)
-        self.taxon = taxon
-        self.taxon_id = taxon.id
-
-        # Image
-        self.image = PixmapLabel()
-        self.image.setFixedWidth(75)
-        card_layout.addWidget(self.image)
-        if not delayed_load:
-            self.image.setPixmap(taxon=taxon)
-
-        # Details
-        title = QLabel(taxon.name)
-        font = QFont()
-        font.setPixelSize(16)
-        font.setBold(True)
-        font.setItalic(True)
-        title.setFont(font)
-        details_layout = VerticalLayout()
-        card_layout.addLayout(details_layout)
-        details_layout.addWidget(title)
-        details_layout.addWidget(QLabel(taxon.rank))
-        details_layout.addWidget(QLabel(taxon.preferred_common_name))
-
-    def mousePressEvent(self, _):
-        """Placeholder to accept mouse press events"""
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.clicked.emit(self.taxon_id)

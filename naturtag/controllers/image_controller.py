@@ -6,11 +6,10 @@ from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QToolButton, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.controllers.image_gallery import ImageGallery
-from naturtag.controllers.taxon_view import TaxonInfoCard
+from naturtag.controllers import ImageGallery
 from naturtag.metadata.inat_metadata import get_ids_from_url, tag_images
 from naturtag.settings import Settings
-from naturtag.widgets import HorizontalLayout, VerticalLayout
+from naturtag.widgets import HorizontalLayout, TaxonInfoCard, VerticalLayout
 
 logger = getLogger(__name__)
 
@@ -89,6 +88,7 @@ class ImageController(QWidget):
         self.gallery.clear()
         self.input_obs_id.setText('')
         self.input_taxon_id.setText('')
+        self.data_source_card.clear()
         self.info('Images cleared')
 
     def paste(self):

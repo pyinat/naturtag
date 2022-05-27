@@ -19,11 +19,15 @@ TaxonInfoCard:hover {
     background: palette(dark);
 }
 
+StylableWidget#gallery_scroll_panel {
+    background: palette(dark);
+}
+
 LocalThumbnail {
-    background: palette(window);
+    background: palette(dark);
 }
 LocalThumbnail:hover {
-    background: palette(dark);
+    background: palette(midlight);
 }
 LocalThumbnail > QLabel {
     background-color: rgba(0, 0, 0, 0.3);

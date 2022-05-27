@@ -7,8 +7,8 @@ from typing import Callable, Iterable
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, QUrl, Signal, Slot
-from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QKeySequence, QPixmap, QShortcut
-from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QWidget
+from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QPixmap
+from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QScrollArea
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
@@ -19,7 +19,7 @@ from naturtag.widgets import (
     FlowLayout,
     HorizontalLayout,
     IconLabel,
-    PixmapLabel,
+    ImageWindow,
     StylableWidget,
     VerticalLayout,
 )
@@ -27,7 +27,7 @@ from naturtag.widgets import (
 logger = getLogger(__name__)
 
 
-class ImageGallery(QWidget):
+class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
     message = Signal(str)
@@ -38,9 +38,19 @@ class ImageGallery(QWidget):
         self.setAcceptDrops(True)
         self.images: dict[str, LocalThumbnail] = {}
         self.image_window = ImageWindow()
-        self.flow_layout = FlowLayout()
+        root = VerticalLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+
+        self.scroll_panel = StylableWidget()
+        self.scroll_panel.setObjectName('gallery_scroll_panel')
+        self.flow_layout = FlowLayout(self.scroll_panel)
         self.flow_layout.setSpacing(0)
-        self.setLayout(self.flow_layout)
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setWidget(self.scroll_panel)
+        root.addLayout(self.flow_layout)
+        root.addWidget(scroll_area)
 
     def clear(self):
         """Clear all images from the viewer"""
@@ -104,58 +114,7 @@ class ImageGallery(QWidget):
 
     @Slot(str)
     def select_image(self, file_path: str):
-        self.image_window.select_image(file_path, list(self.images.keys()))
-
-
-class ImageWindow(QWidget):
-    """Display a single full-size image at a time as a separate window
-
-    Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.image_paths: list[str] = []
-        self.selected_path = None
-
-        self.image = PixmapLabel()
-        self.image.setFixedSize(QApplication.primaryScreen().availableSize())
-        self.image.setAlignment(Qt.AlignCenter)
-        self.image_layout = VerticalLayout(self)
-        self.image_layout.addWidget(self.image)
-        self.image_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Keyboard shortcuts
-        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
-        shortcut.activated.connect(self.close)
-        shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
-        shortcut.activated.connect(self.select_next_image)
-        shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
-        shortcut.activated.connect(self.select_prev_image)
-
-    def select_image(self, file_path: str, image_paths: list[str]):
-        """Open window to a selected image, and save other available image paths for navigation"""
-        self.selected_path = file_path
-        self.image_paths = image_paths
-        self.image.setPixmap(QPixmap(file_path))
-        self.showFullScreen()
-
-    def select_image_idx(self, idx: int):
-        """Select an image by index, with wraparound"""
-        if idx < 0:
-            idx = len(self.image_paths) - 1
-        elif idx >= len(self.image_paths):
-            idx = 0
-
-        logger.debug(f'Selecting image {idx}: {self.selected_path}')
-        self.selected_path = self.image_paths[idx]
-        self.image.setPixmap(QPixmap(self.selected_path))
-
-    def select_next_image(self):
-        self.select_image_idx(self.image_paths.index(self.selected_path) + 1)
-
-    def select_prev_image(self):
-        self.select_image_idx(self.image_paths.index(self.selected_path) - 1)
+        self.image_window.display_image(file_path, list(self.images.keys()))
 
 
 class LocalThumbnail(StylableWidget):
@@ -308,7 +267,7 @@ class ThumbnailContextMenu(QMenu):
 
 
 class ThumbnailMetaIcons(QLabel):
-    """Icons overlayed on top of a thumbnail to indicate what types of metadata are available"""
+    """Icons overlaid on top of a thumbnail to indicate what types of metadata are available"""
 
     def __init__(self, parent: LocalThumbnail):
         super().__init__(parent)
