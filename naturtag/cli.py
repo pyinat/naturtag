@@ -119,6 +119,7 @@ from rich.table import Column, Table
 from naturtag.constants import AUTOCOMPLETE_DIR
 from naturtag.metadata import refresh_all, strip_url, tag_images
 from naturtag.metadata.keyword_metadata import KeywordMetadata
+from naturtag.metadata.meta_metadata import MetaMetadata
 
 CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
@@ -156,6 +157,9 @@ def _strip_url_or_name(ctx, param, value):
 @click.option('-d', '--darwin-core', is_flag=True, help='Generate Darwin Core metadata')
 @click.option('-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format')
 @click.option('-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords')
+@click.option(
+    '-p', '--print', 'print_tags', is_flag=True, help='Print existing tags for previously tagged images'
+)
 @click.option('-r', '--refresh', is_flag=True, help='Refresh metadata for previously tagged images')
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
 @click.option(
@@ -183,6 +187,7 @@ def tag(
     flickr_format,
     hierarchical,
     image_paths,
+    print_tags,
     refresh,
     observation,
     taxon,
@@ -192,19 +197,24 @@ def tag(
     if install_completion:
         install_shell_completion(install_completion)
         ctx.exit()
-    n_action_args = sum([1 for arg in [observation, taxon, refresh] if arg is True])
-    if n_action_args != 1:
+    elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg is True]) != 1:
         click.secho('Specify either a taxon, observation, or refresh', fg='red')
         click.echo(ctx.get_help())
         ctx.exit()
-    if isinstance(taxon, str):
+    elif (print_tags or refresh) and not image_paths:
+        click.secho('Specify images', fg='red')
+        ctx.exit()
+    elif isinstance(taxon, str):
         taxon = search_taxa_by_name(taxon, verbose)
         if not taxon:
             ctx.exit()
-
     if verbose:
         enable_logging(level='DEBUG')
 
+    # Print or refresh images instead of tagging with new IDs
+    if print_tags:
+        print_all_metadata(image_paths, flickr_format, hierarchical)
+        ctx.exit()
     if refresh:
         refresh_all(
             image_paths,
@@ -229,19 +239,38 @@ def tag(
         return
 
     # Print keywords if specified
-    keyword_meta = metadata_list[0].keyword_meta
+    if not image_paths or verbose or flickr_format:
+        print_metadata(metadata_list[0].keyword_meta, flickr_format, hierarchical)
+
+
+def print_all_metadata(
+    image_paths: list[str],
+    flickr_format: bool = False,
+    hierarchical: bool = False,
+):
+    """Print keyword metadata for all specified files"""
+    for image_path in image_paths:
+        metadata = MetaMetadata(image_path)
+        click.secho(f'\n{image_path}', fg='white')
+        print_metadata(metadata.keyword_meta, flickr_format, hierarchical)
+
+
+def print_metadata(
+    keyword_meta: KeywordMetadata,
+    flickr_format: bool = False,
+    hierarchical: bool = False,
+):
+    """Print keyword metadata for a single observation/taxa"""
     if flickr_format:
-        print(' '.join(keyword_meta.flickr_tags))
-    elif not image_paths or verbose:
-        print_metadata(keyword_meta, hierarchical)
+        print(keyword_meta.flickr_tags)
+        return
 
-
-def print_metadata(keyword_meta: KeywordMetadata, hierarchical: bool = True):
     rprint('\n'.join(keyword_meta.normal_keywords))
     if hierarchical:
         rprint(keyword_meta.hier_keyword_tree_str)
     else:
-        rprint('\n'.join([kw.replace('"', '') for kw in keyword_meta.kv_keyword_list]))
+        for kw in keyword_meta.kv_keyword_list:
+            rprint(kw.replace('"', ''))
 
 
 def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:
