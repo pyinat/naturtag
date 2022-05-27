@@ -5,7 +5,7 @@ from typing import Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QFont, QKeySequence, QPainter, QPixmap, QShortcut
+from PySide6.QtGui import QBrush, QFont, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
@@ -18,11 +18,18 @@ logger = getLogger(__name__)
 class IconLabel(QLabel):
     """A QLabel for displaying a FontAwesome icon"""
 
-    def __init__(self, icon_str: str, parent: QWidget = None, size: int = 20, active: bool = True):
+    # TODO: Figure out how to manually set icon state
+    def __init__(
+        self,
+        icon_str: str,
+        parent: QWidget = None,
+        size: int = 20,
+        color: QBrush = None,
+        active: bool = True,
+    ):
         super().__init__(parent)
-
-        # TODO: Use palette, figure out setting icon state
-        icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
+        active_color = (color or self.palette().highlight()).color().rgb()
+        icon = fa_icon(icon_str, color=active_color if active else 'gray')
         self.setPixmap(icon.pixmap(size, size))
 
 

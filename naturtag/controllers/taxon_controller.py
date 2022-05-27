@@ -17,6 +17,9 @@ from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, Vertica
 logger = getLogger(__name__)
 
 
+# TODO: Add delay before loading user taxa on startup
+# TODO: Store Taxon.taxon_photos in DB; currently need to fetch this from API each time
+# TODO: Collapse tab titles to icons only if not all titles fit
 class TaxonController(QWidget):
     """Controller for searching and viewing taxa"""
 
@@ -73,8 +76,6 @@ class TaxonController(QWidget):
         # Fetch taxon record
         logger.info(f'Selecting taxon {taxon_id}')
         # self.threadpool.cancel()
-        # TODO: Remove refresh=True,  store Taxon.taxon_photos in DB. Currently need to fetch from
-        # API to get Taxon.taxon_photos.
         future = self.threadpool.schedule(lambda: INAT_CLIENT.taxa(taxon_id, refresh=True))
         future.result.connect(self.display_taxon)
 
@@ -107,8 +108,6 @@ class TaxonController(QWidget):
             taxon_card.clicked.connect(self.select_taxon)
 
 
-# TODO: Collapse tab titles to icons only if not all titles fit
-# TODO: Benchmark fetching in a single batch vs one at a time
 class TaxonTabs(QTabWidget):
     """Tabbed view for search results and user taxa"""
 
@@ -124,7 +123,6 @@ class TaxonTabs(QTabWidget):
         self.settings = settings
         self.threadpool = threadpool
         self.user_taxa = user_taxa
-        # self.taxon_index: dict[int, Taxon] = {}
 
         self.results = TaxonList(threadpool)
         self.results_tab = self.add_tab(self.results, 'mdi6.layers-search', 'Results', 'Search results')

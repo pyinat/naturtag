@@ -6,9 +6,25 @@ from pathlib import Path
 from typing import Callable, Iterable
 from urllib.parse import unquote, urlparse
 
-from PySide6.QtCore import Qt, QUrl, Signal, Slot
+from PySide6.QtCore import (
+    QEasingCurve,
+    QParallelAnimationGroup,
+    QPropertyAnimation,
+    Qt,
+    QUrl,
+    Signal,
+    Slot,
+)
 from PySide6.QtGui import QAction, QDesktopServices, QDropEvent
-from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QScrollArea
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QGraphicsColorizeEffect,
+    QGraphicsOpacityEffect,
+    QLabel,
+    QMenu,
+    QScrollArea,
+)
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
@@ -164,6 +180,15 @@ class LocalThumbnail(StylableWidget):
         self.label.setWordWrap(True)
         layout.addWidget(self.label)
 
+        # Icon shown when an image is tagged or updated
+        self.check = IconLabel(
+            'fa5s.check',
+            self.image,
+            color=self.palette().highlight(),
+            size=THUMBNAIL_SIZE_DEFAULT[0],
+        )
+        self.check.setVisible(False)
+
     def contextMenuEvent(self, e):
         self.context_menu.exec(e.globalPos())
 
@@ -183,7 +208,36 @@ class LocalThumbnail(StylableWidget):
             if self.metadata.has_observation
             else f'taxon {self.metadata.taxon_id}'
         )
+        self.pulse()
         self.copied.emit(f'Tags for {id_str} copied to clipboard')
+
+    def pulse(self):
+        """Show a highlight animation to indicate the image has been updated"""
+        # Color pulse
+        self.color_effect = QGraphicsColorizeEffect()
+        self.color_effect.setColor(self.palette().highlight().color())
+        self.label.setGraphicsEffect(self.color_effect)
+        color_anim = QPropertyAnimation(self.color_effect, b'strength')
+        color_anim.setStartValue(1)
+        color_anim.setEndValue(0)
+        color_anim.setDuration(1000)
+        color_anim.setEasingCurve(QEasingCurve.OutQuad)
+
+        # Check mark icon
+        self.op_effect = QGraphicsOpacityEffect()
+        self.check.setGraphicsEffect(self.op_effect)
+        self.check.setVisible(True)
+        op_anim = QPropertyAnimation(self.op_effect, b'opacity')
+        op_anim.setStartValue(1)
+        op_anim.setEndValue(0)
+        op_anim.setDuration(1000)
+        op_anim.setEasingCurve(QEasingCurve.InQuad)
+
+        # Group animations and start all
+        self.anim_group = QParallelAnimationGroup()
+        self.anim_group.addAnimation(color_anim)
+        self.anim_group.addAnimation(op_anim)
+        self.anim_group.start()
 
     def remove(self):
         logger.debug(f'Removing image {self.file_path}')
@@ -196,6 +250,7 @@ class LocalThumbnail(StylableWidget):
         self.selected.emit(str(self.file_path))
 
     def update_metadata(self, metadata: MetaMetadata):
+        self.pulse()
         self.metadata = metadata
         self.icons.refresh_icons(metadata)
         self.setToolTip(f'{self.file_path}\n{self.metadata.summary}')
@@ -271,6 +326,7 @@ class ThumbnailContextMenu(QMenu):
         self.addAction(action)
 
 
+# TODO: On refresh, update icon state in-place instead of removing and re-adding
 class ThumbnailMetaIcons(QLabel):
     """Icons overlaid on top of a thumbnail to indicate what types of metadata are available"""
 

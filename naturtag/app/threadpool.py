@@ -97,7 +97,7 @@ class ProgressBar(QProgressBar):
         self.reset_timer.timeout.connect(self.reset)
         self.op_effect = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.op_effect)
-        self.anim = QPropertyAnimation(self.op_effect, b"opacity")
+        self.anim = QPropertyAnimation(self.op_effect, b'opacity')
         self.anim.setEasingCurve(QEasingCurve.InOutCubic)
 
     def add(self, amount: int = 1):
