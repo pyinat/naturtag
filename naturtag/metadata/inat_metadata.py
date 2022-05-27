@@ -4,11 +4,11 @@
 # TODO: Handle observation with no taxon ID?
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
 from logging import getLogger
-from typing import Optional
+from typing import Iterable, Optional
 from urllib.parse import urlparse
 
 from pyinaturalist import Observation, Taxon, TaxonCounts
-from pyinaturalist_convert import to_dwc
+from pyinaturalist_convert import PathOrStr, to_dwc
 
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple
@@ -100,30 +100,6 @@ def get_inat_metadata(
     return metadata
 
 
-def refresh_metadata(
-    metadata: MetaMetadata,
-    common_names: bool = False,
-    darwin_core: bool = False,
-    hierarchical: bool = False,
-    create_sidecar: bool = False,
-) -> MetaMetadata:
-    """Refresh existing image metadata with latest observation and/or taxon data"""
-    if not metadata.has_observation and not metadata.has_taxon:
-        return metadata
-
-    logger.info(f'Refreshing metadata for {metadata.image_path}')
-    metadata = get_inat_metadata(  # type: ignore
-        observation_id=metadata.observation_id,
-        taxon_id=metadata.taxon_id,
-        common_names=common_names,
-        darwin_core=darwin_core,
-        hierarchical=hierarchical,
-        metadata=metadata,
-    )
-    metadata.write(create_sidecar=create_sidecar)
-    return metadata
-
-
 def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> TaxonCounts:
     """Get counts of taxa observed by the user, ordered by number of observations descending"""
     if not username:
@@ -197,9 +173,6 @@ def get_dwc_terms(observation: Observation = None, taxon: Taxon = None) -> dict[
         return f'Xmp.{namespace}.{term}' if namespace in DWC_NAMESPACES else None
 
     # Convert to DwC, then to XMP tags
-    logger.warning(observation)
-    logger.warning(observation.to_dict())
-    logger.warning(observation.license_code)
     dwc = to_dwc(observations=observation, taxa=taxon)[0]
     return {format_key(k): v for k, v in dwc.items() if format_key(k)}
 
@@ -219,6 +192,44 @@ def get_ids_from_url(url: str) -> IntTuple:
         taxon_id = id
 
     return observation_id, taxon_id
+
+
+def refresh_all(
+    file_paths: Iterable[PathOrStr],
+    common_names: bool = False,
+    darwin_core: bool = False,
+    hierarchical: bool = False,
+    create_sidecar: bool = False,
+):
+    """Refresh metadata for all specified images"""
+    for file_path in file_paths:
+        refresh_metadata(
+            MetaMetadata(file_path), common_names, darwin_core, hierarchical, create_sidecar
+        )
+
+
+def refresh_metadata(
+    metadata: MetaMetadata,
+    common_names: bool = False,
+    darwin_core: bool = False,
+    hierarchical: bool = False,
+    create_sidecar: bool = False,
+) -> MetaMetadata:
+    """Refresh existing image metadata with latest observation and/or taxon data"""
+    if not metadata.has_observation and not metadata.has_taxon:
+        return metadata
+
+    logger.info(f'Refreshing metadata for {metadata.image_path}')
+    metadata = get_inat_metadata(  # type: ignore
+        observation_id=metadata.observation_id,
+        taxon_id=metadata.taxon_id,
+        common_names=common_names,
+        darwin_core=darwin_core,
+        hierarchical=hierarchical,
+        metadata=metadata,
+    )
+    metadata.write(create_sidecar=create_sidecar)
+    return metadata
 
 
 def strip_url(value: str) -> Optional[int]:
