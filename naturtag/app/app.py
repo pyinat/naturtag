@@ -91,6 +91,7 @@ class MainWindow(QMainWindow):
         self.toolbar.open_button.triggered.connect(self.image_controller.gallery.load_file_dialog)
         self.toolbar.paste_button.triggered.connect(self.image_controller.paste)
         self.toolbar.clear_button.triggered.connect(self.image_controller.clear)
+        self.toolbar.refresh_button.triggered.connect(self.image_controller.refresh)
         self.toolbar.fullscreen_button.triggered.connect(self.toggle_fullscreen)
         self.toolbar.settings_button.triggered.connect(self.show_settings)
         self.toolbar.logs_button.triggered.connect(self.toggle_log_tab)
@@ -105,7 +106,7 @@ class MainWindow(QMainWindow):
         self.setup()
 
         # Debug
-        shortcut = QShortcut(QKeySequence('F5'), self)
+        shortcut = QShortcut(QKeySequence('F9'), self)
         shortcut.activated.connect(self.reload_qss)
 
         # Load any valid image paths provided on command line (or from drag & drop)

@@ -80,7 +80,7 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def has_taxon(self) -> bool:
-        return bool(self.taxon_id or self.min_rank)
+        return bool(self.taxon_id)
 
     @property
     def inaturalist_ids(self) -> IntTuple:

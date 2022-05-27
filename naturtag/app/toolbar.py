@@ -33,6 +33,12 @@ class Toolbar(QToolBar):
         self.clear_button = self.add_button(
             '&Clear', tooltip='Clear open images', icon='fa.remove', shortcut='Ctrl+Shift+X'
         )
+        self.refresh_button = self.add_button(
+            '&Refresh',
+            tooltip='Refresh previously tagged images with latest observation/taxon data',
+            icon='fa.refresh',
+            shortcut='F5',
+        )
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
@@ -80,6 +86,7 @@ class Toolbar(QToolBar):
         file_menu.addAction(self.open_button)
         file_menu.addAction(self.paste_button)
         file_menu.addAction(self.clear_button)
+        file_menu.addAction(self.refresh_button)
         file_menu.addAction(self.exit_button)
 
         view_menu = menu.addMenu('&View')
