@@ -1,11 +1,10 @@
 from logging import FileHandler, Handler, basicConfig, getLogger
 
-from pyinaturalist_convert import PathOrStr
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QTextEdit
 from rich.logging import RichHandler
 
-from naturtag.constants import LOGFILE
+from naturtag.constants import LOGFILE, PathOrStr
 
 
 def init_handler(

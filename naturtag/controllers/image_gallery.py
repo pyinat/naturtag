@@ -7,14 +7,14 @@ from typing import Callable, Iterable
 from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import Qt, QUrl, Signal, Slot
-from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QPixmap
+from PySide6.QtGui import QAction, QDesktopServices, QDropEvent
 from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMenu, QScrollArea
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT
 from naturtag.image_glob import get_valid_image_paths
 from naturtag.metadata import MetaMetadata
-from naturtag.thumbnails import get_thumbnail
+from naturtag.thumbnails import generate_thumbnail
 from naturtag.widgets import (
     FlowLayout,
     HorizontalLayout,
@@ -118,8 +118,8 @@ class ImageGallery(StylableWidget):
 
 
 class LocalThumbnail(StylableWidget):
-    """A tile that generates, caches, and displays a thumbnail for a local image file.
-    Contains icons representing its metadata types, and the following mouse actions:
+    """A tile that displays a thumbnail for a local image file. Contains icons representing its
+    metadata types, and the following mouse actions:
 
     * Left click: Show full image
     * Middle click: Remove image
@@ -145,7 +145,7 @@ class LocalThumbnail(StylableWidget):
 
         # Image
         self.image = QLabel(self)
-        self.image.setPixmap(QPixmap(get_thumbnail(file_path)))
+        self.image.setPixmap(generate_thumbnail(file_path))
         self.image.setAlignment(Qt.AlignCenter)
         self.image.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
         self.image.setMaximumHeight(THUMBNAIL_SIZE_DEFAULT[1])

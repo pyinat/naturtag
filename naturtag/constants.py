@@ -1,6 +1,6 @@
 # flake8: noqa: F401
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from platformdirs import user_data_dir
 from pyinaturalist.constants import ICONIC_TAXA
@@ -17,11 +17,11 @@ TRIGGER_DELAY = 0.1
 AUTOCOMPLETE_DELAY = 0.5
 AUTOCOMPLETE_MIN_CHARS = 3
 
-# Thumnbnail settings
+# Thumnbnail settind
+IMAGE_CACHE = DATA_DIR / 'images.db'
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 THUMBNAILS_DIR = DATA_DIR / 'thumbnails'
-THUMBNAIL_DEFAULT_FORMAT = 'png'
 THUMBNAIL_SIZE_SM = (75, 75)
 THUMBNAIL_SIZE_DEFAULT = (200, 200)
 THUMBNAIL_SIZE_LG = (500, 500)
@@ -76,3 +76,4 @@ COMMON_NAME_IGNORE_TERMS = [
 # Type aliases
 IntTuple = tuple[Optional[int], Optional[int]]
 StrTuple = tuple[str, str]
+PathOrStr = Union[Path, str]
