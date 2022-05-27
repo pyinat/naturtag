@@ -1,3 +1,4 @@
+import re
 from logging import getLogger
 from os.path import isfile, splitext
 from typing import Any, Union
@@ -13,6 +14,7 @@ NEW_XMP_CONTENTS = """
 </x:xmpmeta>
 <?xpacket?>
 """
+ARRAY_IDX_PATTERN = re.compile(r'\[\d+\]')
 
 logger = getLogger().getChild(__name__)
 
@@ -74,6 +76,11 @@ class ImageMetadata:
             if not any([k.startswith(prefix) for prefix in EXIF_HIDE_PREFIXES])
         }
 
+    @property
+    def simple_exif(self) -> dict[str, str]:
+        """Convert all EXIF tags with list values into strings"""
+        return {k: ','.join(v) if isinstance(v, list) else v for k, v in self.exif.items()}
+
     @staticmethod
     def read_exiv2_image(path) -> Image:
         """
@@ -120,13 +127,20 @@ class ImageMetadata:
         """Write current metadata to a single path"""
         logger.info(f'Writing tags to {path}')
         img = self.read_exiv2_image(path)
-        # TODO: Possible workaround to enable overwriting corrupted metadata?
         if img:
-            simple_exif = {}
-            for k, v in self.exif.items():
-                simple_exif[k] = ','.join(v) if isinstance(v, list) else v
-
-            img.modify_exif(simple_exif)
+            img.modify_exif(self.simple_exif)
             img.modify_iptc(self.iptc)
-            img.modify_xmp(self.xmp)
+            img.modify_xmp(self._fix_xmp())
             img.close()
+
+    def _fix_xmp(self):
+        """Fix some invalid XMP tags"""
+        for k, v in self.xmp.items():
+            # Flatten dict values, like {'lang="x-default"': value} -> value
+            if isinstance(v, dict):
+                self.xmp[k] = list(v.values())[0]
+            # XMP won't accept both a single value and an array with the same key
+            if k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
+                self.xmp[nonarray_key] = None
+        self.xmp = {k: v for k, v in self.xmp.items() if v is not None}
+        return self.xmp
