@@ -23,7 +23,6 @@ def tag_images(
     observation_id: int,
     taxon_id: int,
     common_names: bool = False,
-    darwin_core: bool = False,
     hierarchical: bool = False,
     create_sidecar: bool = False,
     images: list[str] = None,
@@ -36,7 +35,6 @@ def tag_images(
         observation_id=observation_id,
         taxon_id=taxon_id,
         common_names=common_names,
-        darwin_core=darwin_core,
         hierarchical=hierarchical,
     )
 
@@ -59,7 +57,6 @@ def get_inat_metadata(
     observation_id: int = None,
     taxon_id: int = None,
     common_names: bool = False,
-    darwin_core: bool = False,
     hierarchical: bool = False,
     metadata: MetaMetadata = None,
 ) -> Optional[MetaMetadata]:
@@ -93,10 +90,8 @@ def get_inat_metadata(
     if observation:
         metadata.update_coordinates(observation.location)
 
-    # Convert and add DwC metadata, if specified
-    if darwin_core:
-        metadata.update(get_dwc_terms(observation, taxon))
-
+    # Convert and add DwC metadata
+    metadata.update(get_dwc_terms(observation, taxon))
     return metadata
 
 
@@ -197,21 +192,17 @@ def get_ids_from_url(url: str) -> IntTuple:
 def refresh_all(
     file_paths: Iterable[PathOrStr],
     common_names: bool = False,
-    darwin_core: bool = False,
     hierarchical: bool = False,
     create_sidecar: bool = False,
 ):
     """Refresh metadata for all specified images"""
     for file_path in file_paths:
-        refresh_metadata(
-            MetaMetadata(file_path), common_names, darwin_core, hierarchical, create_sidecar
-        )
+        refresh_metadata(MetaMetadata(file_path), common_names, hierarchical, create_sidecar)
 
 
 def refresh_metadata(
     metadata: MetaMetadata,
     common_names: bool = False,
-    darwin_core: bool = False,
     hierarchical: bool = False,
     create_sidecar: bool = False,
 ) -> MetaMetadata:
@@ -224,7 +215,6 @@ def refresh_metadata(
         observation_id=metadata.observation_id,
         taxon_id=metadata.taxon_id,
         common_names=common_names,
-        darwin_core=darwin_core,
         hierarchical=hierarchical,
         metadata=metadata,
     )

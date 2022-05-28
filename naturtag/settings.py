@@ -102,9 +102,6 @@ class Settings(YamlMixin):
     create_sidecar: bool = doc_field(
         default=True, doc="Create XMP sidecar files if they don't already exist"
     )
-    darwin_core: bool = doc_field(
-        default=True, doc='Convert species/observation metadata into XMP Darwin Core metadata'
-    )
     hierarchical_keywords: bool = doc_field(
         default=False, doc='Generate pipe-delimited hierarchical keyword tags'
     )

@@ -35,7 +35,6 @@ class SettingsMenu(StylableWidget):
 
         metadata = self.add_group('Metadata', self.settings_layout)
         metadata.addLayout(ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names'))
-        metadata.addLayout(ToggleSetting(settings, icon_str='mdi.xml', setting_attr='darwin_core'))
         metadata.addLayout(
             ToggleSetting(settings, icon_str='ph.files-fill', setting_attr='create_sidecar')
         )

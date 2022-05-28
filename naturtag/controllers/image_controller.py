@@ -72,7 +72,6 @@ class ImageController(QWidget):
             obs_id,
             taxon_id,
             common_names=self.settings.common_names,
-            darwin_core=self.settings.darwin_core,
             hierarchical=self.settings.hierarchical_keywords,
             create_sidecar=self.settings.create_sidecar,
             images=files,
@@ -94,7 +93,6 @@ class ImageController(QWidget):
             metadata = refresh_metadata(
                 image.metadata,
                 common_names=self.settings.common_names,
-                darwin_core=self.settings.darwin_core,
                 hierarchical=self.settings.hierarchical_keywords,
                 create_sidecar=self.settings.create_sidecar,
             )

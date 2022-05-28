@@ -154,7 +154,6 @@ def _strip_url_or_name(ctx, param, value):
 @click.option(
     '-c', '--common-names', is_flag=True, help='Include common names for all ranks that have them'
 )
-@click.option('-d', '--darwin-core', is_flag=True, help='Generate Darwin Core metadata')
 @click.option('-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format')
 @click.option('-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords')
 @click.option(
@@ -183,7 +182,6 @@ def tag(
     ctx,
     common_names,
     create_sidecar,
-    darwin_core,
     flickr_format,
     hierarchical,
     image_paths,
@@ -219,7 +217,6 @@ def tag(
         refresh_all(
             image_paths,
             common_names=common_names,
-            darwin_core=darwin_core,
             hierarchical=hierarchical,
             create_sidecar=create_sidecar,
         )
@@ -230,7 +227,6 @@ def tag(
         observation,
         taxon,
         common_names=common_names,
-        darwin_core=darwin_core,
         hierarchical=hierarchical,
         create_sidecar=create_sidecar,
         images=image_paths,
