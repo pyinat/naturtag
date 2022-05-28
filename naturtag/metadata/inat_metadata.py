@@ -8,10 +8,10 @@ from typing import Iterable, Optional
 from urllib.parse import urlparse
 
 from pyinaturalist import Observation, Taxon, TaxonCounts
-from pyinaturalist_convert import PathOrStr, to_dwc
+from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
-from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple
+from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple, PathOrStr
 from naturtag.image_glob import glob_paths
 from naturtag.metadata import MetaMetadata
 

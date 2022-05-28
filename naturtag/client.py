@@ -1,10 +1,19 @@
+from hashlib import md5
 from itertools import chain
 from logging import getLogger
 from time import time
+from typing import TYPE_CHECKING
 
-from pyinaturalist import ClientSession, Observation, Taxon, WrapperPaginator, iNatClient
+from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
+from pyinaturalist.converters import format_file_size
 from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
+from requests_cache import SQLiteDict
+
+from naturtag.constants import IMAGE_CACHE
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QPixmap
 
 logger = getLogger(__name__)
 
@@ -97,8 +106,49 @@ class TaxonDbController(TaxonController):
         return WrapperPaginator(results)
 
 
-INAT_CLIENT = iNatDbClient(cache_control=False)
+# TODO: Set expiration on 'original' and 'large' size images using URL patterns
+# Requires changes in ClientSession
+class ImageSession(ClientSession):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.image_cache = SQLiteDict(IMAGE_CACHE, 'images')
 
-# A second session to use for fetching images, to set a higher rate limit
-# Changes could be made in requests-ratelimiter to more easily set different limits per host
-IMG_SESSION = ClientSession(expire_after=-1, per_second=5, per_minute=400)
+    def get_image(self, photo: Photo, size: str = None) -> bytes:
+        """Download an image, if it exists; otherwise, download and cache a new one"""
+        url = photo.url_size(size) if size else photo.url
+        image_hash = f'{get_url_hash(url)}.{photo.ext}'
+        try:
+            return self.image_cache.get(image_hash)
+        except KeyError:
+            pass
+
+        data = self.get(url).content
+        self.image_cache[image_hash] = data
+        return data
+
+    def get_pixmap(self, photo: Photo, size: str = None) -> 'QPixmap':
+        from PySide6.QtGui import QPixmap
+
+        pixmap = QPixmap()
+        pixmap.loadFromData(self.get_image(photo, size), format=photo.ext)
+        return pixmap
+
+    def cache_size(self) -> str:
+        """Get the total cache size in bytes, and the number of cached files"""
+        size = format_file_size(self.image_cache.size)
+        return f'{size} ({len(self.image_cache)} files)'
+
+
+def get_url_hash(url: str) -> str:
+    """Generate a hash to use as a cache key from an image URL, appended with the file extension
+
+    Args:
+        source: File path or URI for image source
+    """
+    thumbnail_hash = md5(url.encode()).hexdigest()
+    ext = Photo(url=url).ext
+    return f'{thumbnail_hash}.{ext}'
+
+
+INAT_CLIENT = iNatDbClient(cache_control=False)
+IMG_SESSION = ImageSession(expire_after=-1, per_second=5, per_minute=400)
