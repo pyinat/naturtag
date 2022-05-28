@@ -41,7 +41,7 @@ class TaxonInfoSection(HorizontalLayout):
         inner_layout.addWidget(self.image)
 
         self.image_window = TaxonImageWindow()
-        self.image.clicked.connect(self.image_window.display_taxon)
+        self.image.on_click.connect(self.image_window.display_taxon)
 
         self.icon = PixmapLabel()
         self.icon.setFixedSize(75, 75)

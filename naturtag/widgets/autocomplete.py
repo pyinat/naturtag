@@ -12,7 +12,7 @@ DB_FILE = DATA_DIR / 'taxa.db'
 
 
 class TaxonAutocomplete(VerticalLayout):
-    selection = Signal(int)
+    on_select = Signal(int)
 
     def __init__(self):
         super().__init__()
@@ -45,7 +45,7 @@ class TaxonAutocomplete(VerticalLayout):
         """Triggered by selecting a taxon name from the autocomplete list"""
         taxon_id = self.taxa.get(name)
         if taxon_id:
-            self.selection.emit(taxon_id)
+            self.on_select.emit(taxon_id)
 
 
 class TabCompleteLineEdit(QLineEdit):
@@ -53,11 +53,11 @@ class TabCompleteLineEdit(QLineEdit):
     Source: https://stackoverflow.com/a/28976373/15592055
     """
 
-    tabPressed = Signal()
+    on_tab = Signal()
 
     def __init__(self):
         super().__init__()
-        self.tabPressed.connect(self.next_completion)
+        self.on_tab.connect(self.next_completion)
 
     def next_completion(self):
         completer = self.completer()
@@ -67,6 +67,6 @@ class TabCompleteLineEdit(QLineEdit):
 
     def event(self, event):
         if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Tab:
-            self.tabPressed.emit()
+            self.on_tab.emit()
             return True
         return super().event(event)

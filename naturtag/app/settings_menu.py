@@ -14,7 +14,7 @@ logger = getLogger(__name__)
 class SettingsMenu(StylableWidget):
     """Application settings menu, with input widgets connected to values in settings file"""
 
-    message = Signal(str)
+    on_message = Signal(str)
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -57,7 +57,7 @@ class SettingsMenu(StylableWidget):
     def closeEvent(self, event):
         """Save settings when closing the window"""
         self.settings.write()
-        self.message.emit('Settings saved')
+        self.on_message.emit('Settings saved')
         event.accept()
 
 
@@ -120,7 +120,7 @@ class IntSetting(TextSetting):
 class ToggleSetting(SettingLayout):
     """Boolean setting with toggle switch"""
 
-    clicked = Signal(bool)
+    on_click = Signal(bool)
 
     def __init__(self, settings: Settings, icon_str: str, setting_attr: str):
         super().__init__(icon_str, setting_attr)
@@ -132,5 +132,5 @@ class ToggleSetting(SettingLayout):
         setting_value = getattr(settings, setting_attr)
         self.switch.setChecked(setting_value)
         self.switch.clicked.connect(set_state)
-        self.switch.clicked.connect(lambda checked: self.clicked.emit(checked))
+        self.switch.clicked.connect(lambda checked: self.on_click.emit(checked))
         self.addWidget(self.switch)

@@ -23,7 +23,7 @@ logger = getLogger(__name__)
 class TaxonPixmapLabel(PixmapLabel):
     """A PixmapLabel for a taxon photo that adds a click event"""
 
-    clicked = Signal(Taxon)
+    on_click = Signal(Taxon)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,7 +39,7 @@ class TaxonPixmapLabel(PixmapLabel):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.clicked.emit(self.taxon)
+            self.on_click.emit(self.taxon)
 
 
 class TaxonList(VerticalLayout):
@@ -112,7 +112,7 @@ class TaxonList(VerticalLayout):
 class TaxonInfoCard(StylableWidget):
     """Card containing a taxon thumbnail, name, common name, and rank"""
 
-    clicked = Signal(int)
+    on_click = Signal(int)
 
     def __init__(self, taxon: Taxon, delayed_load: bool = True):
         super().__init__()
@@ -151,7 +151,7 @@ class TaxonInfoCard(StylableWidget):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.clicked.emit(self.taxon.id)
+            self.on_click.emit(self.taxon.id)
 
 
 class TaxonImageWindow(ImageWindow):

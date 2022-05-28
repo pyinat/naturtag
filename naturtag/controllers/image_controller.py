@@ -17,7 +17,7 @@ logger = getLogger(__name__)
 class ImageController(QWidget):
     """Controller for selecting and tagging local image files"""
 
-    message = Signal(str)
+    on_message = Signal(str)
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -131,13 +131,13 @@ class ImageController(QWidget):
         self.data_source_card.addWidget(TaxonInfoCard(taxon=taxon, delayed_load=False))
 
     def info(self, message: str):
-        self.message.emit(message)
+        self.on_message.emit(message)
 
 
 class IdInput(QLineEdit):
     """Pressing return or losing focus will send a 'selection' signal"""
 
-    selection = Signal(int)
+    on_select = Signal(int)
 
     def __init__(self):
         super().__init__()
@@ -145,12 +145,12 @@ class IdInput(QLineEdit):
         self.setValidator(QIntValidator())
         self.setMaximumWidth(200)
         self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
-        self.returnPressed.connect(self.select_taxon)
+        self.returnPressed.connect(self.select)
 
     def focusOutEvent(self, event: QEvent = None):
-        self.select_taxon()
+        self.select()
         return super().focusOutEvent(event)
 
-    def select_taxon(self):
+    def select(self):
         if self.text():
-            self.selection.emit(int(self.text()))
+            self.on_select.emit(int(self.text()))

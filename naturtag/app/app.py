@@ -46,27 +46,27 @@ class MainWindow(QMainWindow):
         self.taxon_controller = TaxonController(self.settings, self.threadpool)
 
         # Connect controllers and their widgets to statusbar info
-        self.settings_menu.message.connect(self.info)
-        self.image_controller.message.connect(self.info)
-        self.image_controller.gallery.message.connect(self.info)
-        self.taxon_controller.message.connect(self.info)
+        self.settings_menu.on_message.connect(self.info)
+        self.image_controller.on_message.connect(self.info)
+        self.image_controller.gallery.on_message.connect(self.info)
+        self.taxon_controller.on_message.connect(self.info)
 
         # Select taxon from image context menu, ID input fields, and iconic taxa filtes
-        self.image_controller.gallery.selected_taxon.connect(self.taxon_controller.select_taxon)
-        self.image_controller.input_obs_id.selection.connect(
+        self.image_controller.gallery.on_select.connect(self.taxon_controller.select_taxon)
+        self.image_controller.input_obs_id.on_select.connect(
             self.taxon_controller.select_observation_taxon
         )
-        self.image_controller.input_taxon_id.selection.connect(self.taxon_controller.select_taxon)
-        self.taxon_controller.search.iconic_taxon_filters.selected_taxon.connect(
+        self.image_controller.input_taxon_id.on_select.connect(self.taxon_controller.select_taxon)
+        self.taxon_controller.search.iconic_taxon_filters.on_select.connect(
             self.taxon_controller.select_taxon
         )
 
         # Update taxon ID on main page when a taxon is selected
-        self.taxon_controller.selection.connect(self.image_controller.select_taxon)
+        self.taxon_controller.on_select.connect(self.image_controller.select_taxon)
 
         # Settings that take effect immediately
-        self.settings_menu.dark_mode.clicked.connect(lambda checked: set_theme(dark_mode=checked))
-        self.settings_menu.all_ranks.clicked.connect(self.taxon_controller.search.reset_ranks)
+        self.settings_menu.dark_mode.on_click.connect(lambda checked: set_theme(dark_mode=checked))
+        self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
 
         # Tabbed layout
         self.tabs = QTabWidget()
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
 
         # Switch to Taxon tab from image context menu -> View Taxon
-        self.image_controller.gallery.selected_taxon.connect(
+        self.image_controller.gallery.on_select.connect(
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )
 

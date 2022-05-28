@@ -46,8 +46,8 @@ logger = getLogger(__name__)
 class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
-    message = Signal(str)
-    selected_taxon: Signal = Signal(int)
+    on_message = Signal(str)
+    on_select = Signal(int)
 
     def __init__(self):
         super().__init__()
@@ -106,10 +106,10 @@ class ImageGallery(StylableWidget):
 
         logger.info(f'Loading {file_path}')
         thumbnail = LocalThumbnail(file_path)
-        thumbnail.removed.connect(self.remove_image)
-        thumbnail.selected.connect(self.select_image)
-        thumbnail.copied.connect(self.message.emit)
-        thumbnail.context_menu.selected_taxon.connect(self.selected_taxon.emit)
+        thumbnail.on_remove.connect(self.remove_image)
+        thumbnail.on_select.connect(self.select_image)
+        thumbnail.on_copy.connect(self.on_message.emit)
+        thumbnail.context_menu.on_select.connect(self.on_select.emit)
         self.flow_layout.addWidget(thumbnail)
         self.images[file_path] = thumbnail
 
@@ -142,9 +142,9 @@ class LocalThumbnail(StylableWidget):
     * Right click: Show context menu
     """
 
-    copied = Signal(str)
-    removed = Signal(str)
-    selected = Signal(str)
+    on_copy = Signal(str)
+    on_remove = Signal(str)
+    on_select = Signal(str)
 
     def __init__(self, file_path: str):
         super().__init__()
@@ -204,7 +204,7 @@ class LocalThumbnail(StylableWidget):
             else f'taxon {self.metadata.taxon_id}'
         )
         self.pulse()
-        self.copied.emit(f'Tags for {id_str} copied to clipboard')
+        self.on_copy.emit(f'Tags for {id_str} copied to clipboard')
 
     def pulse(self):
         """Show a highlight animation to indicate the image has been updated"""
@@ -236,13 +236,13 @@ class LocalThumbnail(StylableWidget):
 
     def remove(self):
         logger.debug(f'Removing image {self.file_path}')
-        self.removed.emit(str(self.file_path))
+        self.on_remove.emit(str(self.file_path))
         self.setParent(None)
         self.deleteLater()
 
     def select(self):
         logger.debug(f'Selecting image {self.file_path}')
-        self.selected.emit(str(self.file_path))
+        self.on_select.emit(str(self.file_path))
 
     def update_metadata(self, metadata: MetaMetadata):
         self.pulse()
@@ -258,7 +258,7 @@ class LocalThumbnail(StylableWidget):
 class ThumbnailContextMenu(QMenu):
     """Context menu for local image thumbnails"""
 
-    selected_taxon: Signal = Signal(int)
+    on_select = Signal(int)
 
     def __init__(self, thumbnail: LocalThumbnail):
         super().__init__()
@@ -274,7 +274,7 @@ class ThumbnailContextMenu(QMenu):
             text='View Taxon',
             tooltip=f'View taxon {meta.taxon_id} in naturtag',
             enabled=meta.has_taxon,
-            callback=lambda: self.selected_taxon.emit(meta.taxon_id),
+            callback=lambda: self.on_select.emit(meta.taxon_id),
         )
         self._add_action(
             icon='fa5s.spider',

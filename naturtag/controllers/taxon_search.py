@@ -31,8 +31,8 @@ COMMON_RANKS = [r for r in RANKS if not any([k in r for k in ignore_terms])][::-
 class TaxonSearch(VerticalLayout):
     """Taxon search"""
 
-    new_results = Signal(list)
-    reset_results = Signal()
+    on_results = Signal(list)
+    on_reset = Signal()
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -98,14 +98,14 @@ class TaxonSearch(VerticalLayout):
             limit=30,
         ).all()
         logger.debug('\n'.join([str(t) for t in taxa[:10]]))
-        self.new_results.emit(taxa)
+        self.on_results.emit(taxa)
 
     def reset(self):
         """Reset all search filters"""
         self.autocomplete.search_input.setText('')
         self.iconic_taxon_filters.reset()
         self.reset_ranks()
-        self.reset_results.emit()
+        self.on_reset.emit()
 
     def reset_ranks(self):
         self.exact_rank = RankList('Exact', all_ranks=self.settings.all_ranks)
@@ -120,7 +120,7 @@ class TaxonSearch(VerticalLayout):
 class IconicTaxonFilters(QWidget):
     """Filters for iconic taxa"""
 
-    selected_taxon = Signal(int)
+    on_select = Signal(int)
 
     def __init__(self):
         super().__init__()
@@ -151,7 +151,7 @@ class IconicTaxonFilters(QWidget):
         if QApplication.keyboardModifiers() != Qt.ControlModifier:
             button_taxon_id = self.sender().taxon_id
             self.reset(except_id=button_taxon_id)
-            self.selected_taxon.emit(button_taxon_id)
+            self.on_select.emit(button_taxon_id)
 
 
 class IconicTaxonButton(QPushButton):
