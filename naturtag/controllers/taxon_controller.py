@@ -138,7 +138,7 @@ class TaxonTabs(QTabWidget):
 
         # self.starred = TaxonList(threadpool)
         # self.add_tab(self.starred, 'fa.star', 'Starred', 'Starred taxa')
-        self.load_user_taxa()
+        # self.load_user_taxa()
 
     def add_tab(self, tab_layout: QLayout, icon_str: str, label: str, tooltip: str) -> QWidget:
         tab = QWidget()

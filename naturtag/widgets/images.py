@@ -5,7 +5,7 @@ from typing import Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QBrush, QFont, QKeySequence, QPainter, QPixmap, QShortcut
+from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
@@ -18,19 +18,25 @@ logger = getLogger(__name__)
 class IconLabel(QLabel):
     """A QLabel for displaying a FontAwesome icon"""
 
-    # TODO: Figure out how to manually set icon state
     def __init__(
         self,
         icon_str: str,
         parent: QWidget = None,
         size: int = 20,
-        color: QBrush = None,
-        active: bool = True,
+        color: QColor = None,
     ):
         super().__init__(parent)
-        active_color = (color or self.palette().highlight()).color().rgb()
-        icon = fa_icon(icon_str, color=active_color if active else 'gray')
-        self.setPixmap(icon.pixmap(size, size))
+        self.icon = fa_icon(icon_str, color=color)
+        self.icon_size = QSize(size, size)
+        self.setPixmap(self.icon.pixmap(size, size, mode=QIcon.Mode.Normal))
+
+    def set_enabled(self, enabled: bool = True):
+        self.setPixmap(
+            self.icon.pixmap(
+                self.icon_size,
+                mode=QIcon.Mode.Normal if enabled else QIcon.Mode.Disabled,
+            ),
+        )
 
 
 class PixmapLabel(QLabel):
@@ -106,11 +112,10 @@ class PixmapLabel(QLabel):
         text_width = painter.fontMetrics().horizontalAdvance(longest_line)
         text_height = metrics.height() * len(lines)
 
-        # Draw a semitransparent background for the text
+        # Draw text with a a semitransparent background
         bg_color = self.palette().dark().color()
         bg_color.setAlpha(128)
         painter.fillRect(0, 0, text_width + 2, text_height + 2, bg_color)
-
         painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.overlay_text)
 
 

@@ -107,6 +107,7 @@ class ImageController(QWidget):
         self.data_source_card.clear()
         self.info('Images cleared')
 
+    # TODO: Cleaner way to do this. move paste to MainWindow?
     def paste(self):
         """Paste either image paths or taxon/observation URLs"""
         text = QApplication.clipboard().text()
@@ -115,9 +116,11 @@ class ImageController(QWidget):
         observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
             self.input_obs_id.setText(str(observation_id))
+            # self.input_obs_id.select_taxon()
             self.info(f'Observation {observation_id} selected')
         elif taxon_id:
             self.input_taxon_id.setText(str(taxon_id))
+            # self.input_taxon_id.select_taxon()
             self.info(f'Taxon {taxon_id} selected')
         else:
             self.gallery.load_images(text.splitlines())

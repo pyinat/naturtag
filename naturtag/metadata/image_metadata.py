@@ -133,6 +133,7 @@ class ImageMetadata:
             img.modify_xmp(self._fix_xmp())
             img.close()
 
+    # TODO: Now modifying History results in "XMP Toolkit error 102: Indexing applied to non-array"
     def _fix_xmp(self):
         """Fix some invalid XMP tags"""
         for k, v in self.xmp.items():

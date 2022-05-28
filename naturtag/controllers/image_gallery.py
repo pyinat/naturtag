@@ -181,12 +181,7 @@ class LocalThumbnail(StylableWidget):
         layout.addWidget(self.label)
 
         # Icon shown when an image is tagged or updated
-        self.check = IconLabel(
-            'fa5s.check',
-            self.image,
-            color=self.palette().highlight(),
-            size=THUMBNAIL_SIZE_DEFAULT[0],
-        )
+        self.check = IconLabel('fa5s.check', self.image, size=THUMBNAIL_SIZE_DEFAULT[0])
         self.check.setVisible(False)
 
     def contextMenuEvent(self, e):
@@ -326,7 +321,6 @@ class ThumbnailContextMenu(QMenu):
         self.addAction(action)
 
 
-# TODO: On refresh, update icon state in-place instead of removing and re-adding
 class ThumbnailMetaIcons(QLabel):
     """Icons overlaid on top of a thumbnail to indicate what types of metadata are available"""
 
@@ -339,13 +333,24 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(11, img_size.height() - 9, 116, 20)
 
+        self.taxon_icon = IconLabel('mdi.bird')
+        self.observation_icon = IconLabel('fa.binoculars')
+        self.geo_icon = IconLabel('fa.map-marker')
+        self.tag_icon = IconLabel('fa.tags')
+        self.sidecar_icon = IconLabel('mdi.xml')
+        self.icon_layout.addWidget(self.taxon_icon)
+        self.icon_layout.addWidget(self.observation_icon)
+        self.icon_layout.addWidget(self.geo_icon)
+        self.icon_layout.addWidget(self.tag_icon)
+        self.icon_layout.addWidget(self.sidecar_icon)
+
         self.refresh_icons(parent.metadata)
 
     def refresh_icons(self, meta: MetaMetadata):
         """Update icons based on the available metadata"""
-        self.icon_layout.clear()
-        self.icon_layout.addWidget(IconLabel('mdi.bird', active=meta.has_taxon))
-        self.icon_layout.addWidget(IconLabel('fa.binoculars', active=meta.has_observation))
-        self.icon_layout.addWidget(IconLabel('fa.map-marker', active=meta.has_coordinates))
-        self.icon_layout.addWidget(IconLabel('fa.tags', active=meta.has_any_tags))
-        self.icon_layout.addWidget(IconLabel('mdi.xml', active=meta.has_sidecar))
+        logger.debug(f'Refreshing: {meta}')
+        self.taxon_icon.set_enabled(meta.has_taxon)
+        self.observation_icon.set_enabled(meta.has_observation)
+        self.geo_icon.set_enabled(meta.has_coordinates)
+        self.tag_icon.set_enabled(meta.has_any_tags)
+        self.sidecar_icon.set_enabled(meta.has_sidecar)
