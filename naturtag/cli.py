@@ -223,13 +223,15 @@ def tag(
         click.echo('Images refreshed')
         ctx.exit()
 
-    metadata_list = tag_images(
-        observation,
-        taxon,
-        common_names=common_names,
-        hierarchical=hierarchical,
-        create_sidecar=create_sidecar,
-        images=image_paths,
+    metadata_list = list(
+        tag_images(
+            observation,
+            taxon,
+            common_names=common_names,
+            hierarchical=hierarchical,
+            create_sidecar=create_sidecar,
+            images=image_paths,
+        )
     )
     if not metadata_list:
         return

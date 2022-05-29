@@ -32,12 +32,9 @@ class TaxonController(QWidget):
         self.threadpool = threadpool
         self.user_taxa = UserTaxa.read()
 
-        self.root_plus_progress = VerticalLayout()
         self.root = HorizontalLayout()
         self.root.setAlignment(Qt.AlignLeft)
-        self.root_plus_progress.addLayout(self.root)
-        self.root_plus_progress.addWidget(self.threadpool.progress)
-        self.setLayout(self.root_plus_progress)
+        self.setLayout(self.root)
         self.selected_taxon: Taxon = None
 
         # Search inputs

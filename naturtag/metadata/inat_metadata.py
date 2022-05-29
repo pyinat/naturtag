@@ -19,7 +19,6 @@ DWC_NAMESPACES = ['dcterms', 'dwc']
 logger = getLogger().getChild(__name__)
 
 
-# TODO: This should be a generator so ImageController can update thumbnails as they're tagged
 def tag_images(
     observation_id: int,
     taxon_id: int,
@@ -43,7 +42,10 @@ def tag_images(
         return []
     elif not images:
         return [inat_metadata]
-    return [tag_image(image_path, inat_metadata, create_sidecar) for image_path in glob_paths(images)]
+    else:
+        return [
+            tag_image(image_path, inat_metadata, create_sidecar) for image_path in glob_paths(images)
+        ]
 
 
 def tag_image(

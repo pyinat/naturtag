@@ -1,27 +1,32 @@
 from logging import getLogger
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import QEvent, Signal
+from PySide6.QtCore import QEvent, Signal, Slot
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QToolButton, QWidget
 
 from naturtag.app.style import fa_icon
+from naturtag.app.threadpool import ThreadPool
 from naturtag.controllers import ImageGallery
 from naturtag.metadata import get_ids_from_url, refresh_metadata, tag_images
+from naturtag.metadata.meta_metadata import MetaMetadata
 from naturtag.settings import Settings
 from naturtag.widgets import HorizontalLayout, TaxonInfoCard, VerticalLayout
 
 logger = getLogger(__name__)
 
 
+# TODO: Handle write errors (like file locked) and show dialog
 class ImageController(QWidget):
     """Controller for selecting and tagging local image files"""
 
     on_message = Signal(str)
+    on_new_metadata = Signal(MetaMetadata)
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
         self.settings = settings
+        self.threadpool = threadpool
         photo_layout = VerticalLayout()
         self.setLayout(photo_layout)
 
@@ -48,14 +53,16 @@ class ImageController(QWidget):
         self.data_source_card = HorizontalLayout()
         data_source_layout.addLayout(self.data_source_card)
 
+        self.on_new_metadata.connect(self.update_metadata)
+
         # Viewer
         self.gallery = ImageGallery()
         photo_layout.addWidget(self.gallery)
 
     def run(self):
         """Run image tagging for selected images and input"""
-        files = list(self.gallery.images.keys())
-        if not files:
+        image_paths = list(self.gallery.images.keys())
+        if not image_paths:
             self.info('Select images to tag')
             return
 
@@ -65,22 +72,27 @@ class ImageController(QWidget):
             return
 
         selected_id = f'Observation ID: {obs_id}' if obs_id else f'Taxon ID: {taxon_id}'
-        logger.info(f'Tagging {len(files)} images with metadata for {selected_id}')
+        logger.info(f'Tagging {len(image_paths)} images with metadata for {selected_id}')
 
-        # TODO: Handle write errors (like file locked) and show dialog
-        all_metadata = tag_images(
-            obs_id,
-            taxon_id,
-            common_names=self.settings.common_names,
-            hierarchical=self.settings.hierarchical_keywords,
-            create_sidecar=self.settings.create_sidecar,
-            images=files,
-        )
-        self.info(f'{len(files)} images tagged with metadata for {selected_id}')
+        def tag_image(image_path):
+            return tag_images(
+                obs_id,
+                taxon_id,
+                common_names=self.settings.common_names,
+                hierarchical=self.settings.hierarchical_keywords,
+                create_sidecar=self.settings.create_sidecar,
+                images=[image_path],
+            )[0]
 
-        for metadata in all_metadata:
-            image = self.gallery.images[metadata.image_path]
-            image.update_metadata(metadata)
+        for image_path in image_paths:
+            future = self.threadpool.schedule(tag_image, image_path=image_path)
+            future.on_result.connect(self.update_metadata)
+        self.info(f'{len(image_paths)} images tagged with metadata for {selected_id}')
+
+    @Slot(MetaMetadata)
+    def update_metadata(self, metadata: MetaMetadata):
+        image = self.gallery.images[metadata.image_path or '']
+        image.update_metadata(metadata)
 
     def refresh(self):
         """Refresh metadata for any previously tagged images"""
@@ -89,14 +101,17 @@ class ImageController(QWidget):
             self.info('Select images to tag')
             return
 
-        for image in images:
-            metadata = refresh_metadata(
+        def refresh_image(image):
+            return refresh_metadata(
                 image.metadata,
                 common_names=self.settings.common_names,
                 hierarchical=self.settings.hierarchical_keywords,
                 create_sidecar=self.settings.create_sidecar,
             )
-            image.update_metadata(metadata)
+
+        for image in images:
+            future = self.threadpool.schedule(refresh_image, image=image)
+            future.on_result.connect(self.update_metadata)
         self.info(f'{len(images)} images updated')
 
     def clear(self):
