@@ -111,14 +111,14 @@ class TaxonDbController(TaxonController):
 class ImageSession(ClientSession):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.image_cache = SQLiteDict(IMAGE_CACHE, 'images')
+        self.image_cache = SQLiteDict(IMAGE_CACHE, 'images', no_serializer=True)
 
     def get_image(self, photo: Photo, size: str = None) -> bytes:
         """Download an image, if it exists; otherwise, download and cache a new one"""
         url = photo.url_size(size) if size else photo.url
         image_hash = f'{get_url_hash(url)}.{photo.ext}'
         try:
-            return self.image_cache.get(image_hash)
+            return self.image_cache[image_hash]
         except KeyError:
             pass
 

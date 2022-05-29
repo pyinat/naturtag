@@ -8,7 +8,8 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
-from naturtag.widgets.images import ImageWindow, PixmapLabel, fetch_image
+from naturtag.client import IMG_SESSION
+from naturtag.widgets.images import ImageWindow, PixmapLabel
 from naturtag.widgets.layouts import HorizontalLayout, StylableWidget, VerticalLayout
 
 if TYPE_CHECKING:
@@ -30,7 +31,7 @@ class TaxonPixmapLabel(PixmapLabel):
 
     def set_taxon(self, taxon: Taxon, size: str = 'medium'):
         self.taxon = taxon
-        self._pixmap = fetch_image(taxon.default_photo, size=size)
+        self._pixmap = IMG_SESSION.get_pixmap(taxon.default_photo, size=size)
         QLabel.setPixmap(self, self.scaledPixmap())
 
     def mousePressEvent(self, _):

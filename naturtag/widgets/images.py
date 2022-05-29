@@ -56,7 +56,7 @@ class PixmapLabel(QLabel):
         if path:
             pixmap = QPixmap(str(path))
         elif url:
-            pixmap = fetch_image(Photo(url=url))
+            pixmap = IMG_SESSION.get_pixmap(Photo(url=url))
         if pixmap is not None:
             self._pixmap = pixmap
             super().setPixmap(self.scaledPixmap())
@@ -170,11 +170,3 @@ class ImageWindow(QWidget):
         elif idx >= len(self.image_paths):
             idx = 0
         return idx
-
-
-def fetch_image(photo: Photo, size: str = None) -> QPixmap:
-    url = photo.url_size(size) if size else photo.url
-    data = IMG_SESSION.get(url, stream=True).content
-    pixmap = QPixmap()
-    pixmap.loadFromData(data, format=photo.ext)
-    return pixmap
