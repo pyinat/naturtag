@@ -22,7 +22,7 @@ class IconLabel(QLabel):
         self,
         icon_str: str,
         parent: QWidget = None,
-        size: int = 20,
+        size: int = 32,
         color: QColor = None,
     ):
         super().__init__(parent)

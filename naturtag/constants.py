@@ -23,7 +23,7 @@ IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 THUMBNAILS_DIR = DATA_DIR / 'thumbnails'
 THUMBNAIL_SIZE_SM = (75, 75)
-THUMBNAIL_SIZE_DEFAULT = (200, 200)
+THUMBNAIL_SIZE_DEFAULT = (250, 250)
 THUMBNAIL_SIZE_LG = (500, 500)
 THUMBNAIL_SIZES = {
     'small': THUMBNAIL_SIZE_SM,
