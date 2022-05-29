@@ -2,11 +2,12 @@ from logging import getLogger
 
 from attr import fields
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont, QIntValidator, QKeySequence, QShortcut, QValidator
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QVBoxLayout
+from PySide6.QtGui import QIntValidator, QKeySequence, QShortcut, QValidator
+from PySide6.QtWidgets import QLabel, QLineEdit
 
 from naturtag.settings import Settings
 from naturtag.widgets import IconLabel, StylableWidget, ToggleSwitch
+from naturtag.widgets.layouts import HorizontalLayout, VerticalLayout
 
 logger = getLogger(__name__)
 
@@ -19,7 +20,7 @@ class SettingsMenu(StylableWidget):
     def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings
-        self.settings_layout = QVBoxLayout(self)
+        self.settings_layout = VerticalLayout(self)
 
         inat = self.add_group('iNaturalist', self.settings_layout)
         inat.addLayout(TextSetting(settings, icon_str='fa.user', setting_attr='username'))
@@ -67,7 +68,7 @@ class SettingsMenu(StylableWidget):
         event.accept()
 
 
-class SettingLayout(QHBoxLayout):
+class SettingContainer(HorizontalLayout):
     """Layout for an icon, description, and input widget for a single setting"""
 
     def __init__(self, icon_str: str, setting_attr: str):
@@ -75,24 +76,20 @@ class SettingLayout(QHBoxLayout):
         self.setAlignment(Qt.AlignLeft)
         self.addWidget(IconLabel(icon_str, size=32))
 
-        label_layout = QVBoxLayout()
-        label = QLabel(setting_attr.replace('_', ' ').title())
-        # TODO: Style with QSS
-        font = QFont()
-        font.setPixelSize(16)
-        font.setBold(True)
-        label.setFont(font)
-        label_layout.addWidget(label)
+        title = QLabel(setting_attr.replace('_', ' ').title())
+        title.setObjectName('title')
+        title_layout = VerticalLayout()
+        title_layout.addWidget(title)
 
         attr_meta = getattr(fields(Settings), setting_attr).metadata
         description = attr_meta.get('doc')
         if description:
-            label_layout.addWidget(QLabel(description))
-        self.addLayout(label_layout)
+            title_layout.addWidget(QLabel(description))
+        self.addLayout(title_layout)
         self.addStretch()
 
 
-class TextSetting(SettingLayout):
+class TextSetting(SettingContainer):
     """Text input setting"""
 
     def __init__(
@@ -123,7 +120,7 @@ class IntSetting(TextSetting):
         super().__init__(settings, icon_str, setting_attr, validator=QIntValidator())
 
 
-class ToggleSetting(SettingLayout):
+class ToggleSetting(SettingContainer):
     """Boolean setting with toggle switch"""
 
     on_click = Signal(bool)

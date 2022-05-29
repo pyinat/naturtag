@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Iterable, Iterator, Optional
 
 from pyinaturalist import Photo, Taxon, TaxonCount
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.client import IMG_SESSION
@@ -133,15 +132,10 @@ class TaxonInfoCard(StylableWidget):
             self.thumbnail.set_taxon(taxon, size='thumbnail')
 
         # Details
-        # TODO: Style with QSS
-        title = QLabel(taxon.name)
-        font = QFont()
-        font.setPixelSize(16)
-        font.setBold(True)
-        font.setItalic(True)
-        title.setFont(font)
         details_layout = VerticalLayout()
         card_layout.addLayout(details_layout)
+        title = QLabel(taxon.name)
+        title.setObjectName('title')
         details_layout.addWidget(title)
         details_layout.addWidget(QLabel(taxon.rank))
         details_layout.addWidget(QLabel(taxon.preferred_common_name))

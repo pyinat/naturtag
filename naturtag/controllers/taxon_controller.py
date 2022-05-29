@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Iterable
 
-from pyinaturalist import Taxon, TaxonCount
+from pyinaturalist import Taxon, TaxonCount, TaxonCounts
 from PySide6.QtCore import QSize, Qt, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
 
@@ -190,10 +190,10 @@ class TaxonTabs(QTabWidget):
         self.on_load.emit(list(self.frequent.taxa))
 
     @Slot(list)
-    def display_observed(self, taxa: list[TaxonCount]):
+    def display_observed(self, taxon_counts: TaxonCounts):
         """After fetching observation taxon counts for the user, add info cards for them"""
-        self.observed.set_taxa(taxa[:MAX_DISPLAY_OBSERVED])
-        self.user_taxa.update_observed(taxa)
+        self.observed.set_taxa(list(taxon_counts)[:MAX_DISPLAY_OBSERVED])
+        self.user_taxa.update_observed(taxon_counts)
         self.on_load.emit(list(self.observed.taxa))
 
     @Slot(Taxon)

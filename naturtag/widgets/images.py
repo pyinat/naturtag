@@ -119,7 +119,6 @@ class PixmapLabel(QLabel):
         painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.overlay_text)
 
 
-# TODO: Add other photo info to overlay
 class ImageWindow(QWidget):
     """Display local images in fullscreen as a separate window
 

@@ -18,9 +18,8 @@ TaxonInfoCard {
 TaxonInfoCard:hover {
     background: palette(dark);
 }
-
-StylableWidget#gallery_scroll_panel {
-    background: palette(dark);
+TaxonInfoCard > QLabel#title {
+    font: bold italic 16pt;
 }
 
 LocalThumbnail {
@@ -36,6 +35,14 @@ LocalThumbnail > QLabel {
 LocalThumbnail > QLabel#metadata-icons {
     background-color: rgba(0, 0, 0, 0.5);
     font-size: 11pt;
+}
+
+StylableWidget#gallery_scroll_panel {
+    background: palette(dark);
+}
+
+QLabel#title {
+    font: bold 16pt;
 }
 
 QTextEdit#log_container {
