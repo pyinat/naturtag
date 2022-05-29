@@ -20,7 +20,7 @@ logger = getLogger(__name__)
 
 
 class TaxonPixmapLabel(PixmapLabel):
-    """A PixmapLabel for a taxon photo that adds a click event"""
+    """A PixmapLabel for a taxon photo. Adds a Taxon reference and a click event"""
 
     on_click = Signal(Taxon)
 

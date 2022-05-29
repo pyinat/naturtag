@@ -3,12 +3,13 @@ from logging import getLogger
 from typing import Iterator
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, Qt
 from PySide6.QtWidgets import QGroupBox, QLabel
 
 from naturtag.app.threadpool import ThreadPool
 from naturtag.widgets import (
     HorizontalLayout,
+    IconLabel,
     PixmapLabel,
     TaxonImageWindow,
     TaxonInfoCard,
@@ -35,14 +36,26 @@ class TaxonInfoSection(HorizontalLayout):
 
         # Medium taxon default photo
         self.image = TaxonPixmapLabel()
+        self.image.setObjectName('selected_taxon')
         self.image.setMinimumWidth(200)
         self.image.setMaximumWidth(600)
         self.image.setMaximumHeight(400)
         inner_layout.addWidget(self.image)
 
+        # Show overlay on image hover
+        self.open_overlay = IconLabel('mdi.open-in-new', self.image, size=64)
+        self.open_overlay.setAlignment(Qt.AlignTop)
+        self.open_overlay.setGeometry(self.image.geometry())
+        self.open_overlay.setObjectName('open_overlay')
+        self.open_overlay.setVisible(False)
+        self.image.enterEvent = lambda *x: self.open_overlay.setVisible(True)
+        self.image.leaveEvent = lambda *x: self.open_overlay.setVisible(False)
+
+        # Fullscreen image viewer
         self.image_window = TaxonImageWindow()
         self.image.on_click.connect(self.image_window.display_taxon)
 
+        # Basic taxon info
         self.icon = PixmapLabel()
         self.icon.setFixedSize(75, 75)
         icon_layout = HorizontalLayout()
@@ -67,6 +80,16 @@ class TaxonInfoSection(HorizontalLayout):
         self.details.addWidget(QLabel(f'Rank: {taxon.rank}'))
         self.details.addWidget(QLabel(f'Observations: {taxon.observations_count}'))
         self.details.addWidget(QLabel(f'Child species: {taxon.complete_species_count}'))
+
+    def enterEvent(self, event: QEvent):
+        logger.warning('Enter')
+        self.open_overlay.setVisible(True)
+        return super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent) -> None:
+        logger.warning('Leave')
+        self.open_overlay.setVisible(False)
+        return super().leaveEvent(event)
 
 
 class TaxonomySection(HorizontalLayout):
