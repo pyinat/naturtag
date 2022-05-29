@@ -19,7 +19,13 @@ from naturtag.app.style import fa_icon
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
 from naturtag.settings import Settings
-from naturtag.widgets import GridLayout, HorizontalLayout, PixmapLabel, TaxonAutocomplete, VerticalLayout
+from naturtag.widgets import (
+    GridLayout,
+    HorizontalLayout,
+    PixmapLabel,
+    TaxonAutocomplete,
+    VerticalLayout,
+)
 
 logger = getLogger(__name__)
 

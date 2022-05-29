@@ -25,16 +25,22 @@ class SettingsMenu(StylableWidget):
         inat.addLayout(TextSetting(settings, icon_str='fa.user', setting_attr='username'))
         inat.addLayout(TextSetting(settings, icon_str='fa.globe', setting_attr='locale'))
         inat.addLayout(
-            IntSetting(settings, icon_str='mdi.home-city-outline', setting_attr='preferred_place_id')
+            IntSetting(
+                settings, icon_str='mdi.home-city-outline', setting_attr='preferred_place_id'
+            )
         )
-        inat.addLayout(ToggleSetting(settings, icon_str='mdi6.cat', setting_attr='casual_observations'))
+        inat.addLayout(
+            ToggleSetting(settings, icon_str='mdi6.cat', setting_attr='casual_observations')
+        )
         self.all_ranks = ToggleSetting(
             settings, icon_str='fa.chevron-circle-up', setting_attr='all_ranks'
         )
         inat.addLayout(self.all_ranks)
 
         metadata = self.add_group('Metadata', self.settings_layout)
-        metadata.addLayout(ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names'))
+        metadata.addLayout(
+            ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names')
+        )
         metadata.addLayout(
             ToggleSetting(settings, icon_str='ph.files-fill', setting_attr='create_sidecar')
         )

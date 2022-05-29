@@ -25,7 +25,8 @@ def glob_paths(path_patterns: list[str]) -> list[str]:
     """
     return list(
         chain.from_iterable(
-            [expanduser(path) for path in glob(pattern, recursive=True)] for pattern in path_patterns
+            [expanduser(path) for path in glob(pattern, recursive=True)]
+            for pattern in path_patterns
         )
     )
 

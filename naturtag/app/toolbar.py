@@ -28,7 +28,10 @@ class Toolbar(QToolBar):
             '&Open', tooltip='Open images', icon='ri.image-add-fill', shortcut='Ctrl+O'
         )
         self.paste_button = self.add_button(
-            '&Paste', tooltip='Paste photos or iNaturalist URLs', icon='fa5s.paste', shortcut='Ctrl+V'
+            '&Paste',
+            tooltip='Paste photos or iNaturalist URLs',
+            icon='fa5s.paste',
+            shortcut='Ctrl+V',
         )
         self.clear_button = self.add_button(
             '&Clear', tooltip='Clear open images', icon='fa.remove', shortcut='Ctrl+Shift+X'
@@ -44,7 +47,10 @@ class Toolbar(QToolBar):
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.addWidget(spacer)
         self.fullscreen_button = self.add_button(
-            '&Fullscreen', tooltip='Toggle fullscreen mode', icon='mdi.fullscreen', shortcut=Qt.Key_F11
+            '&Fullscreen',
+            tooltip='Toggle fullscreen mode',
+            icon='mdi.fullscreen',
+            shortcut=Qt.Key_F11,
         )
 
         # Extra actions not added to the toolbar, but used by the menu
@@ -55,7 +61,11 @@ class Toolbar(QToolBar):
             'Show &Logs', tooltip='Show tab with debug logs', icon='fa.file-text-o', visible=False
         )
         self.exit_button = self.add_button(
-            '&Exit', tooltip='Exit to desktop', icon='mdi.exit-run', shortcut='Ctrl+Q', visible=False
+            '&Exit',
+            tooltip='Exit to desktop',
+            icon='mdi.exit-run',
+            shortcut='Ctrl+Q',
+            visible=False,
         )
         self.logs_button.setCheckable(True)
 

@@ -44,7 +44,8 @@ def tag_images(
         return [inat_metadata]
     else:
         return [
-            tag_image(image_path, inat_metadata, create_sidecar) for image_path in glob_paths(images)
+            tag_image(image_path, inat_metadata, create_sidecar)
+            for image_path in glob_paths(images)
         ]
 
 

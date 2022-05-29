@@ -48,7 +48,9 @@ class KeywordMetadata:
 
         # Combine and re-sort all keywords, to account for invalid tags created by other apps
         keywords = [get_keyword_list(tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
-        unique_keywords = [k.replace('"', '') for k in set(chain.from_iterable(keywords)) if k != ',']
+        unique_keywords = [
+            k.replace('"', '') for k in set(chain.from_iterable(keywords)) if k != ','
+        ]
 
         logger.debug(f'{len(unique_keywords)} unique keywords found')
         return unique_keywords

@@ -7,7 +7,12 @@ from PIL.ImageOps import exif_transpose, flip
 from PIL.ImageQt import ImageQt
 from PySide6.QtGui import QPixmap
 
-from naturtag.constants import EXIF_ORIENTATION_ID, THUMBNAIL_SIZE_DEFAULT, THUMBNAIL_SIZES, PathOrStr
+from naturtag.constants import (
+    EXIF_ORIENTATION_ID,
+    THUMBNAIL_SIZE_DEFAULT,
+    THUMBNAIL_SIZES,
+    PathOrStr,
+)
 
 logger = getLogger().getChild(__name__)
 

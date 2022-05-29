@@ -111,7 +111,11 @@ class TaxonTabs(QTabWidget):
     on_load = Signal(list)
 
     def __init__(
-        self, threadpool: ThreadPool, settings: Settings, user_taxa: UserTaxa, parent: QWidget = None
+        self,
+        threadpool: ThreadPool,
+        settings: Settings,
+        user_taxa: UserTaxa,
+        parent: QWidget = None,
     ):
         super().__init__(parent)
         self.setMinimumWidth(200)
@@ -123,7 +127,9 @@ class TaxonTabs(QTabWidget):
         self._init_complete = False
 
         self.results = TaxonList(threadpool)
-        self.results_tab = self.add_tab(self.results, 'mdi6.layers-search', 'Results', 'Search results')
+        self.results_tab = self.add_tab(
+            self.results, 'mdi6.layers-search', 'Results', 'Search results'
+        )
 
         self.history = TaxonList(threadpool)
         self.add_tab(self.history, 'fa5s.history', 'History', 'Recently viewed taxa')
@@ -178,7 +184,9 @@ class TaxonTabs(QTabWidget):
             taxon.count = self.user_taxa.view_count(taxon_id)
             return taxon
 
-        self.frequent.set_taxa([get_taxon_count(taxon_id) for taxon_id in self.user_taxa.top_frequent])
+        self.frequent.set_taxa(
+            [get_taxon_count(taxon_id) for taxon_id in self.user_taxa.top_frequent]
+        )
         self.on_load.emit(list(self.frequent.taxa))
 
     @Slot(list)
