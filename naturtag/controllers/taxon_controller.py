@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Iterable
 
 from pyinaturalist import Taxon, TaxonCount
-from PySide6.QtCore import QSize, Qt, Signal, Slot
+from PySide6.QtCore import QSize, Qt, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
@@ -17,7 +17,6 @@ from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, Vertica
 logger = getLogger(__name__)
 
 
-# TODO: Add delay before loading user taxa on startup
 # TODO: Store Taxon.taxon_photos in DB; currently need to fetch this from API each time
 # TODO: Collapse tab titles to icons only if not all titles fit
 class TaxonController(QWidget):
@@ -72,7 +71,8 @@ class TaxonController(QWidget):
 
         # Fetch taxon record
         logger.info(f'Selecting taxon {taxon_id}')
-        # self.threadpool.cancel()
+        if self.tabs._init_complete:
+            self.threadpool.cancel()
         future = self.threadpool.schedule(lambda: INAT_CLIENT.taxa(taxon_id, refresh=True))
         future.on_result.connect(self.display_taxon)
 
@@ -120,6 +120,7 @@ class TaxonTabs(QTabWidget):
         self.settings = settings
         self.threadpool = threadpool
         self.user_taxa = user_taxa
+        self._init_complete = False
 
         self.results = TaxonList(threadpool)
         self.results_tab = self.add_tab(self.results, 'mdi6.layers-search', 'Results', 'Search results')
@@ -135,7 +136,9 @@ class TaxonTabs(QTabWidget):
 
         # self.starred = TaxonList(threadpool)
         # self.add_tab(self.starred, 'fa.star', 'Starred', 'Starred taxa')
-        # self.load_user_taxa()
+
+        # Add a delay before loading user taxa on startup
+        QTimer.singleShot(2, self.load_user_taxa)
 
     def add_tab(self, tab_layout: QLayout, icon_str: str, label: str, tooltip: str) -> QWidget:
         tab = QWidget()
@@ -158,6 +161,7 @@ class TaxonTabs(QTabWidget):
             lambda: get_observed_taxa(self.settings.username, self.settings.casual_observations)
         )
         future.on_result.connect(self.display_observed)
+        self._init_complete = True
 
     @Slot(list)
     def display_history(self, taxa: list[Taxon]):
