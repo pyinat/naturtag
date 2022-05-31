@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import TYPE_CHECKING
 
 from pyinaturalist import Taxon
 from PySide6.QtCore import QEvent, Signal, Slot
@@ -27,15 +28,14 @@ class ImageController(QWidget):
         super().__init__()
         self.settings = settings
         self.threadpool = threadpool
-        photo_layout = VerticalLayout()
-        self.setLayout(photo_layout)
+        photo_layout = VerticalLayout(self)
+        self.on_new_metadata.connect(self.update_metadata)
 
         # Input group
-        data_source_layout = HorizontalLayout()
         group_box = QGroupBox('Metadata source (observation and/or taxon)')
         group_box.setFixedHeight(150)
         group_box.setFixedWidth(600)
-        group_box.setLayout(data_source_layout)
+        data_source_layout = HorizontalLayout(group_box)
         photo_layout.addWidget(group_box)
 
         # Input fields
@@ -52,8 +52,6 @@ class ImageController(QWidget):
         data_source_layout.addStretch()
         self.data_source_card = HorizontalLayout()
         data_source_layout.addLayout(self.data_source_card)
-
-        self.on_new_metadata.connect(self.update_metadata)
 
         # Viewer
         self.gallery = ImageGallery()
@@ -91,7 +89,9 @@ class ImageController(QWidget):
 
     @Slot(MetaMetadata)
     def update_metadata(self, metadata: MetaMetadata):
-        image = self.gallery.images[metadata.image_path or '']
+        if TYPE_CHECKING:
+            assert metadata.image_path is not None
+        image = self.gallery.images[metadata.image_path]
         image.update_metadata(metadata)
 
     def refresh(self):

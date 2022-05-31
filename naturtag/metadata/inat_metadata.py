@@ -194,14 +194,14 @@ def get_ids_from_url(url: str) -> IntTuple:
 
 
 def refresh_all(
-    file_paths: Iterable[PathOrStr],
+    image_paths: Iterable[PathOrStr],
     common_names: bool = False,
     hierarchical: bool = False,
     create_sidecar: bool = False,
 ):
     """Refresh metadata for all specified images"""
-    for file_path in file_paths:
-        refresh_metadata(MetaMetadata(file_path), common_names, hierarchical, create_sidecar)
+    for image_path in image_paths:
+        refresh_metadata(MetaMetadata(image_path), common_names, hierarchical, create_sidecar)
 
 
 def refresh_metadata(

@@ -171,7 +171,7 @@ class ImageWindow(QWidget):
 
     def set_pixmap(self, path: str):
         self.image.setPixmap(QPixmap(path))
-        self.image.overlay_text = path
+        self.image.overlay_text = str(path)
 
     def wrap_idx(self, increment: int):
         """Increment and wrap the index around to the other side of the list"""
