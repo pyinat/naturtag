@@ -141,8 +141,11 @@ class ImageMetadata:
             # Flatten dict values, like {'lang="x-default"': value} -> value
             if isinstance(v, dict):
                 self.xmp[k] = list(v.values())[0]
+            # exiv2 can't modify XMP History
+            elif 'History' in k:
+                self.xmp[k] = None
             # XMP won't accept both a single value and an array with the same key
-            if k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
+            elif k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
                 self.xmp[nonarray_key] = None
         self.xmp = {k: v for k, v in self.xmp.items() if v is not None}
         return self.xmp
