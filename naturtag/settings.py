@@ -116,7 +116,7 @@ class Settings(YamlMixin):
     setup_complete: bool = field(default=False)
 
 
-@define
+@define(auto_attribs=False)
 class UserTaxa(YamlMixin):
     """Relevant taxon IDs stored for the current user"""
 
