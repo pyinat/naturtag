@@ -2,11 +2,12 @@ from logging import getLogger
 
 from attr import fields
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont, QIntValidator, QKeySequence, QShortcut, QValidator
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QVBoxLayout
+from PySide6.QtGui import QIntValidator, QKeySequence, QShortcut, QValidator
+from PySide6.QtWidgets import QLabel, QLineEdit
 
 from naturtag.settings import Settings
 from naturtag.widgets import IconLabel, StylableWidget, ToggleSwitch
+from naturtag.widgets.layouts import HorizontalLayout, VerticalLayout
 
 logger = getLogger(__name__)
 
@@ -14,28 +15,33 @@ logger = getLogger(__name__)
 class SettingsMenu(StylableWidget):
     """Application settings menu, with input widgets connected to values in settings file"""
 
-    message = Signal(str)
+    on_message = Signal(str)
 
     def __init__(self, settings: Settings):
         super().__init__()
         self.settings = settings
-        self.settings_layout = QVBoxLayout(self)
+        self.settings_layout = VerticalLayout(self)
 
         inat = self.add_group('iNaturalist', self.settings_layout)
         inat.addLayout(TextSetting(settings, icon_str='fa.user', setting_attr='username'))
         inat.addLayout(TextSetting(settings, icon_str='fa.globe', setting_attr='locale'))
         inat.addLayout(
-            IntSetting(settings, icon_str='mdi.home-city-outline', setting_attr='preferred_place_id')
+            IntSetting(
+                settings, icon_str='mdi.home-city-outline', setting_attr='preferred_place_id'
+            )
         )
-        inat.addLayout(ToggleSetting(settings, icon_str='mdi6.cat', setting_attr='casual_observations'))
+        inat.addLayout(
+            ToggleSetting(settings, icon_str='mdi6.cat', setting_attr='casual_observations')
+        )
         self.all_ranks = ToggleSetting(
             settings, icon_str='fa.chevron-circle-up', setting_attr='all_ranks'
         )
         inat.addLayout(self.all_ranks)
 
         metadata = self.add_group('Metadata', self.settings_layout)
-        metadata.addLayout(ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names'))
-        metadata.addLayout(ToggleSetting(settings, icon_str='mdi.xml', setting_attr='darwin_core'))
+        metadata.addLayout(
+            ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names')
+        )
         metadata.addLayout(
             ToggleSetting(settings, icon_str='ph.files-fill', setting_attr='create_sidecar')
         )
@@ -58,11 +64,11 @@ class SettingsMenu(StylableWidget):
     def closeEvent(self, event):
         """Save settings when closing the window"""
         self.settings.write()
-        self.message.emit('Settings saved')
+        self.on_message.emit('Settings saved')
         event.accept()
 
 
-class SettingLayout(QHBoxLayout):
+class SettingContainer(HorizontalLayout):
     """Layout for an icon, description, and input widget for a single setting"""
 
     def __init__(self, icon_str: str, setting_attr: str):
@@ -70,24 +76,20 @@ class SettingLayout(QHBoxLayout):
         self.setAlignment(Qt.AlignLeft)
         self.addWidget(IconLabel(icon_str, size=32))
 
-        label_layout = QVBoxLayout()
-        label = QLabel(setting_attr.replace('_', ' ').title())
-        # TODO: Style with QSS
-        font = QFont()
-        font.setPixelSize(16)
-        font.setBold(True)
-        label.setFont(font)
-        label_layout.addWidget(label)
+        title = QLabel(setting_attr.replace('_', ' ').title())
+        title.setObjectName('title')
+        title_layout = VerticalLayout()
+        title_layout.addWidget(title)
 
         attr_meta = getattr(fields(Settings), setting_attr).metadata
         description = attr_meta.get('doc')
         if description:
-            label_layout.addWidget(QLabel(description))
-        self.addLayout(label_layout)
+            title_layout.addWidget(QLabel(description))
+        self.addLayout(title_layout)
         self.addStretch()
 
 
-class TextSetting(SettingLayout):
+class TextSetting(SettingContainer):
     """Text input setting"""
 
     def __init__(
@@ -118,10 +120,10 @@ class IntSetting(TextSetting):
         super().__init__(settings, icon_str, setting_attr, validator=QIntValidator())
 
 
-class ToggleSetting(SettingLayout):
+class ToggleSetting(SettingContainer):
     """Boolean setting with toggle switch"""
 
-    clicked = Signal(bool)
+    on_click = Signal(bool)
 
     def __init__(self, settings: Settings, icon_str: str, setting_attr: str):
         super().__init__(icon_str, setting_attr)
@@ -133,5 +135,5 @@ class ToggleSetting(SettingLayout):
         setting_value = getattr(settings, setting_attr)
         self.switch.setChecked(setting_value)
         self.switch.clicked.connect(set_state)
-        self.switch.clicked.connect(lambda checked: self.clicked.emit(checked))
+        self.switch.clicked.connect(lambda checked: self.on_click.emit(checked))
         self.addWidget(self.switch)

@@ -1,11 +1,12 @@
 import re
 from logging import getLogger
-from os.path import isfile, splitext
-from typing import Any, Union
+from os.path import isfile
+from pathlib import Path
+from typing import Any
 
 from pyexiv2 import Image
 
-from naturtag.constants import EXIF_HIDE_PREFIXES
+from naturtag.constants import EXIF_HIDE_PREFIXES, PathOrStr
 
 # Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
 NEW_XMP_CONTENTS = """
@@ -22,9 +23,9 @@ logger = getLogger().getChild(__name__)
 class ImageMetadata:
     """Class for reading & writing basic image metadata"""
 
-    def __init__(self, image_path: Union[bytes, str] = None):
-        self.image_path = image_path.decode() if isinstance(image_path, bytes) else image_path
-        self.xmp_path = splitext(self.image_path)[0] + '.xmp' if self.image_path else None
+    def __init__(self, image_path: PathOrStr = None):
+        self.image_path = Path(image_path) if image_path else None
+        self.xmp_path = self.image_path.with_suffix('.xmp') if self.image_path else None
         self.exif, self.iptc, self.xmp = self.read_metadata()
 
     def read_metadata(self):
@@ -38,7 +39,7 @@ class ImageMetadata:
             iptc.update(s_iptc)
             xmp.update(s_xmp)
 
-        paths = self.image_path + (f' + {self.xmp_path}' if isfile(self.xmp_path) else '')
+        paths = str(self.image_path) + (f' + {self.xmp_path}' if isfile(self.xmp_path) else '')
         counts = ' | '.join([f'EXIF: {len(exif)}', f'IPTC: {len(iptc)}', f'XMP: {len(xmp)}'])
         logger.info(f'Total tags found in {paths}: {counts}')
 
@@ -82,13 +83,13 @@ class ImageMetadata:
         return {k: ','.join(v) if isinstance(v, list) else v for k, v in self.exif.items()}
 
     @staticmethod
-    def read_exiv2_image(path) -> Image:
+    def read_exiv2_image(path: PathOrStr) -> Image:
         """
         Read an image with basic error handling. Note: Exiv2 ``RuntimeError`` usually means
         corrupted metadata. See: https://dev.exiv2.org/issues/637#note-1
         """
         try:
-            return Image(path)
+            return Image(str(path))
         except RuntimeError:
             logger.exception(f'Failed to read corrupted metadata from {path}')
             return None
@@ -123,24 +124,28 @@ class ImageMetadata:
         else:
             logger.debug(f'No existing XMP sidecar file found for {self.image_path}; skipping')
 
-    def _write(self, path):
-        """Write current metadata to a single path"""
-        logger.info(f'Writing tags to {path}')
-        img = self.read_exiv2_image(path)
+    def _write(self, file_path: Path):
+        """Write current metadata to a single path either (image or sidecar)"""
+        logger.info(f'Writing tags to {file_path}')
+        img = self.read_exiv2_image(file_path)
         if img:
             img.modify_exif(self.simple_exif)
             img.modify_iptc(self.iptc)
             img.modify_xmp(self._fix_xmp())
             img.close()
 
+    # TODO: Now modifying History results in "XMP Toolkit error 102: Indexing applied to non-array"
     def _fix_xmp(self):
         """Fix some invalid XMP tags"""
         for k, v in self.xmp.items():
             # Flatten dict values, like {'lang="x-default"': value} -> value
             if isinstance(v, dict):
                 self.xmp[k] = list(v.values())[0]
+            # exiv2 can't modify XMP History
+            elif 'History' in k:
+                self.xmp[k] = None
             # XMP won't accept both a single value and an array with the same key
-            if k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
+            elif k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
                 self.xmp[nonarray_key] = None
         self.xmp = {k: v for k, v in self.xmp.items() if v is not None}
         return self.xmp

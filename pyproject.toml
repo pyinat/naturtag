@@ -36,8 +36,8 @@ numpy = "^1.22"
 pillow = ">=9.1"
 platformdirs = ">=2.5"
 pyexiv2 = ">=2.6.2"
-pyinaturalist = ">=0.17.2dev2"
-pyinaturalist-convert = ">=0.4.0dev5"
+pyinaturalist = ">=0.17.2dev3"
+pyinaturalist-convert = ">=0.4.0dev6"
 pyyaml = ">=6.0"
 requests = ">=2.22"
 rich = ">=10.0"
@@ -89,7 +89,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 skip-string-normalization = true
-line-length = 105
+line-length = 100
 
 [tool.coverage.html]
 directory = 'test-reports'
@@ -106,7 +106,7 @@ exclude_lines = [
 
 [tool.isort]
 profile = 'black'
-line_length = 105
+line_length = 100
 skip_gitignore = true
 known_first_party = ['test']
 

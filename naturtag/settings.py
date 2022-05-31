@@ -90,7 +90,9 @@ class Settings(YamlMixin):
     all_ranks: bool = doc_field(
         default=False, doc='Show all available taxonomic rank filters on taxon search page'
     )
-    casual_observations: bool = doc_field(default=True, doc='Include casual observations in searches')
+    casual_observations: bool = doc_field(
+        default=True, doc='Include casual observations in searches'
+    )
     locale: str = doc_field(default='en', doc='Locale preference for species common names')
     preferred_place_id: int = doc_field(
         default=1, converter=int, doc='Place preference for regional species common names'
@@ -101,9 +103,6 @@ class Settings(YamlMixin):
     common_names: bool = doc_field(default=True, doc='Include common names in taxonomy keywords')
     create_sidecar: bool = doc_field(
         default=True, doc="Create XMP sidecar files if they don't already exist"
-    )
-    darwin_core: bool = doc_field(
-        default=True, doc='Convert species/observation metadata into XMP Darwin Core metadata'
     )
     hierarchical_keywords: bool = doc_field(
         default=False, doc='Generate pipe-delimited hierarchical keyword tags'
@@ -117,7 +116,7 @@ class Settings(YamlMixin):
     setup_complete: bool = field(default=False)
 
 
-@define
+@define(auto_attribs=False)
 class UserTaxa(YamlMixin):
     """Relevant taxon IDs stored for the current user"""
 

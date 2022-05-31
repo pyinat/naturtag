@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Union
 
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
@@ -21,14 +22,14 @@ SILVER = (173, 168, 182)
 logger = getLogger(__name__)
 
 
-def fa_icon(icon_name, **kwargs):
+def fa_icon(icon_name, color: Union[str, QColor] = None, **kwargs):
     """Get a FontAwesome icon, with a default color from the current app's palette"""
-    kwargs.setdefault('color', get_palette().highlight().color())
-    return icon(icon_name, **kwargs)
-
-
-def get_palette() -> QPalette:
-    return QApplication.instance().palette()
+    return icon(
+        icon_name,
+        color=color or QApplication.instance().palette().highlight().color(),
+        color_disabled='gray',
+        **kwargs,
+    )
 
 
 def set_stylesheet(obj=None):

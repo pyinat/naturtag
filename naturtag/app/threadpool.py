@@ -31,7 +31,7 @@ class ThreadPool(QThreadPool):
         """Schedule a task to be run by the next available worker thread"""
         self.progress.add()
         worker = Worker(callback, **kwargs)
-        worker.signals.progress.connect(self.progress.advance)
+        worker.signals.on_progress.connect(self.progress.advance)
         self.start(worker)
         return worker.signals
 
@@ -40,7 +40,7 @@ class ThreadPool(QThreadPool):
         self.progress.add(len(callbacks))
         for callback in callbacks:
             worker = Worker(callback, **kwargs)
-            worker.signals.progress.connect(self.progress.advance)
+            worker.signals.on_progress.connect(self.progress.advance)
             self.start(worker)
         return worker.signals
 
@@ -70,18 +70,18 @@ class Worker(QRunnable):
             result = self.callback(**self.kwargs)
         except Exception as e:
             logger.warning('Worker error:', exc_info=True)
-            self.signals.error.emit(e)
+            self.signals.on_error.emit(e)
         else:
-            self.signals.result.emit(result)
-            self.signals.progress.emit()
+            self.signals.on_result.emit(result)
+            self.signals.on_progress.emit()
 
 
 class WorkerSignals(QObject):
     """Signals used by a worker thread (can't be set directly on a QRunnable)"""
 
-    error = Signal(Exception)
-    result = Signal(object)
-    progress = Signal()
+    on_error = Signal(Exception)
+    on_result = Signal(object)
+    on_progress = Signal()
 
 
 class ProgressBar(QProgressBar):
@@ -97,7 +97,7 @@ class ProgressBar(QProgressBar):
         self.reset_timer.timeout.connect(self.reset)
         self.op_effect = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.op_effect)
-        self.anim = QPropertyAnimation(self.op_effect, b"opacity")
+        self.anim = QPropertyAnimation(self.op_effect, b'opacity')
         self.anim.setEasingCurve(QEasingCurve.InOutCubic)
 
     def add(self, amount: int = 1):

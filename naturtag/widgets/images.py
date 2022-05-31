@@ -5,7 +5,7 @@ from typing import Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QFont, QKeySequence, QPainter, QPixmap, QShortcut
+from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
@@ -18,12 +18,25 @@ logger = getLogger(__name__)
 class IconLabel(QLabel):
     """A QLabel for displaying a FontAwesome icon"""
 
-    def __init__(self, icon_str: str, parent: QWidget = None, size: int = 20, active: bool = True):
+    def __init__(
+        self,
+        icon_str: str,
+        parent: QWidget = None,
+        size: int = 32,
+        color: QColor = None,
+    ):
         super().__init__(parent)
+        self.icon = fa_icon(icon_str, color=color)
+        self.icon_size = QSize(size, size)
+        self.setPixmap(self.icon.pixmap(size, size, mode=QIcon.Mode.Normal))
 
-        # TODO: Use palette, figure out setting icon state
-        icon = fa_icon(icon_str, color='yellowgreen' if active else 'gray')
-        self.setPixmap(icon.pixmap(size, size))
+    def set_enabled(self, enabled: bool = True):
+        self.setPixmap(
+            self.icon.pixmap(
+                self.icon_size,
+                mode=QIcon.Mode.Normal if enabled else QIcon.Mode.Disabled,
+            ),
+        )
 
 
 class PixmapLabel(QLabel):
@@ -56,7 +69,7 @@ class PixmapLabel(QLabel):
         if path:
             pixmap = QPixmap(str(path))
         elif url:
-            pixmap = fetch_image(Photo(url=url))
+            pixmap = IMG_SESSION.get_pixmap(Photo(url=url))
         if pixmap is not None:
             self._pixmap = pixmap
             super().setPixmap(self.scaledPixmap())
@@ -99,15 +112,13 @@ class PixmapLabel(QLabel):
         text_width = painter.fontMetrics().horizontalAdvance(longest_line)
         text_height = metrics.height() * len(lines)
 
-        # Draw a semitransparent background for the text
+        # Draw text with a a semitransparent background
         bg_color = self.palette().dark().color()
         bg_color.setAlpha(128)
         painter.fillRect(0, 0, text_width + 2, text_height + 2, bg_color)
-
         painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.overlay_text)
 
 
-# TODO: Add other photo info to overlay
 class ImageWindow(QWidget):
     """Display local images in fullscreen as a separate window
 
@@ -160,7 +171,7 @@ class ImageWindow(QWidget):
 
     def set_pixmap(self, path: str):
         self.image.setPixmap(QPixmap(path))
-        self.image.overlay_text = path
+        self.image.overlay_text = str(path)
 
     def wrap_idx(self, increment: int):
         """Increment and wrap the index around to the other side of the list"""
@@ -170,11 +181,3 @@ class ImageWindow(QWidget):
         elif idx >= len(self.image_paths):
             idx = 0
         return idx
-
-
-def fetch_image(photo: Photo, size: str = None) -> QPixmap:
-    url = photo.url_size(size) if size else photo.url
-    data = IMG_SESSION.get(url, stream=True).content
-    pixmap = QPixmap()
-    pixmap.loadFromData(data, format=photo.ext)
-    return pixmap

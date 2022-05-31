@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Iterable, Iterator, Optional
 
 from pyinaturalist import Photo, Taxon, TaxonCount
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
-from naturtag.widgets.images import ImageWindow, PixmapLabel, fetch_image
+from naturtag.client import IMG_SESSION
+from naturtag.widgets.images import ImageWindow, PixmapLabel
 from naturtag.widgets.layouts import HorizontalLayout, StylableWidget, VerticalLayout
 
 if TYPE_CHECKING:
@@ -20,9 +20,9 @@ logger = getLogger(__name__)
 
 
 class TaxonPixmapLabel(PixmapLabel):
-    """A PixmapLabel for a taxon photo that adds a click event"""
+    """A PixmapLabel for a taxon photo. Adds a Taxon reference and a click event"""
 
-    clicked = Signal(Taxon)
+    on_click = Signal(Taxon)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,7 +30,7 @@ class TaxonPixmapLabel(PixmapLabel):
 
     def set_taxon(self, taxon: Taxon, size: str = 'medium'):
         self.taxon = taxon
-        self._pixmap = fetch_image(taxon.default_photo, size=size)
+        self._pixmap = IMG_SESSION.get_pixmap(taxon.default_photo, size=size)
         QLabel.setPixmap(self, self.scaledPixmap())
 
     def mousePressEvent(self, _):
@@ -38,7 +38,7 @@ class TaxonPixmapLabel(PixmapLabel):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.clicked.emit(self.taxon)
+            self.on_click.emit(self.taxon)
 
 
 class TaxonList(VerticalLayout):
@@ -111,12 +111,11 @@ class TaxonList(VerticalLayout):
 class TaxonInfoCard(StylableWidget):
     """Card containing a taxon thumbnail, name, common name, and rank"""
 
-    clicked = Signal(int)
+    on_click = Signal(int)
 
     def __init__(self, taxon: Taxon, delayed_load: bool = True):
         super().__init__()
-        card_layout = HorizontalLayout()
-        self.setLayout(card_layout)
+        card_layout = HorizontalLayout(self)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         if isinstance(taxon, TaxonCount):
             self.setToolTip(f'Count: {taxon.count}')
@@ -132,15 +131,10 @@ class TaxonInfoCard(StylableWidget):
             self.thumbnail.set_taxon(taxon, size='thumbnail')
 
         # Details
-        # TODO: Style with QSS
-        title = QLabel(taxon.name)
-        font = QFont()
-        font.setPixelSize(16)
-        font.setBold(True)
-        font.setItalic(True)
-        title.setFont(font)
         details_layout = VerticalLayout()
         card_layout.addLayout(details_layout)
+        title = QLabel(taxon.name)
+        title.setObjectName('title')
         details_layout.addWidget(title)
         details_layout.addWidget(QLabel(taxon.rank))
         details_layout.addWidget(QLabel(taxon.preferred_common_name))
@@ -150,7 +144,7 @@ class TaxonInfoCard(StylableWidget):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.clicked.emit(self.taxon.id)
+            self.on_click.emit(self.taxon.id)
 
 
 class TaxonImageWindow(ImageWindow):

@@ -154,11 +154,18 @@ def _strip_url_or_name(ctx, param, value):
 @click.option(
     '-c', '--common-names', is_flag=True, help='Include common names for all ranks that have them'
 )
-@click.option('-d', '--darwin-core', is_flag=True, help='Generate Darwin Core metadata')
-@click.option('-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format')
-@click.option('-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords')
 @click.option(
-    '-p', '--print', 'print_tags', is_flag=True, help='Print existing tags for previously tagged images'
+    '-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format'
+)
+@click.option(
+    '-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords'
+)
+@click.option(
+    '-p',
+    '--print',
+    'print_tags',
+    is_flag=True,
+    help='Print existing tags for previously tagged images',
 )
 @click.option('-r', '--refresh', is_flag=True, help='Refresh metadata for previously tagged images')
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
@@ -170,7 +177,10 @@ def _strip_url_or_name(ctx, param, value):
     callback=_strip_url_or_name,
 )
 @click.option(
-    '-x', '--create-sidecar', is_flag=True, help="Create XMP sidecar file if it doesn't already exist"
+    '-x',
+    '--create-sidecar',
+    is_flag=True,
+    help="Create XMP sidecar file if it doesn't already exist",
 )
 @click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
 @click.option(
@@ -183,7 +193,6 @@ def tag(
     ctx,
     common_names,
     create_sidecar,
-    darwin_core,
     flickr_format,
     hierarchical,
     image_paths,
@@ -219,21 +228,21 @@ def tag(
         refresh_all(
             image_paths,
             common_names=common_names,
-            darwin_core=darwin_core,
             hierarchical=hierarchical,
             create_sidecar=create_sidecar,
         )
         click.echo('Images refreshed')
         ctx.exit()
 
-    metadata_list = tag_images(
-        observation,
-        taxon,
-        common_names=common_names,
-        darwin_core=darwin_core,
-        hierarchical=hierarchical,
-        create_sidecar=create_sidecar,
-        images=image_paths,
+    metadata_list = list(
+        tag_images(
+            observation,
+            taxon,
+            common_names=common_names,
+            hierarchical=hierarchical,
+            create_sidecar=create_sidecar,
+            images=image_paths,
+        )
     )
     if not metadata_list:
         return

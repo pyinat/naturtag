@@ -5,34 +5,31 @@ from typing import Optional
 from pyinaturalist import RANKS, IconPhoto
 from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import (
-    QApplication,
-    QComboBox,
-    QGroupBox,
-    QLabel,
-    QPushButton,
-    QSizePolicy,
-    QWidget,
-)
+from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import SELECTABLE_ICONIC_TAXA
 from naturtag.settings import Settings
-from naturtag.widgets import GridLayout, HorizontalLayout, PixmapLabel, TaxonAutocomplete, VerticalLayout
+from naturtag.widgets import (
+    GridLayout,
+    HorizontalLayout,
+    PixmapLabel,
+    TaxonAutocomplete,
+    VerticalLayout,
+)
+
+IGNORE_TERMS = ['sub', 'super', 'infra', 'epi', 'hybrid']
+COMMON_RANKS = [r for r in RANKS if not any([k in r for k in IGNORE_TERMS])][::-1]
 
 logger = getLogger(__name__)
-
-
-ignore_terms = ['sub', 'super', 'infra', 'epi', 'hybrid']
-COMMON_RANKS = [r for r in RANKS if not any([k in r for k in ignore_terms])][::-1]
 
 
 class TaxonSearch(VerticalLayout):
     """Taxon search"""
 
-    new_results = Signal(list)
-    reset_results = Signal()
+    on_results = Signal(list)
+    on_reset = Signal()
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -41,29 +38,16 @@ class TaxonSearch(VerticalLayout):
 
         # Taxon name autocomplete
         self.autocomplete = TaxonAutocomplete()
-        group_box = QGroupBox('Search')
-        group_box.setFixedWidth(400)
-        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        group_box.setLayout(self.autocomplete)
-        self.addWidget(group_box)
+        search_group = self.add_group('Search', self, width=400)
+        search_group.addWidget(self.autocomplete)
 
         # Category inputs
-        categories = VerticalLayout()
-        group_box = QGroupBox('Categories')
-        group_box.setFixedWidth(400)
-        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        group_box.setLayout(categories)
-        self.addWidget(group_box)
         self.iconic_taxon_filters = IconicTaxonFilters()
+        categories = self.add_group('Categories', self, width=400)
         categories.addWidget(self.iconic_taxon_filters)
 
         # Rank inputs
-        self.ranks = VerticalLayout()
-        group_box = QGroupBox('Rank')
-        group_box.setFixedWidth(400)
-        group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        group_box.setLayout(self.ranks)
-        self.addWidget(group_box)
+        self.ranks = self.add_group('Rank', self, width=400)
         self.reset_ranks()
 
         # Clear exact rank after selecting min or max, and vice versa
@@ -98,14 +82,14 @@ class TaxonSearch(VerticalLayout):
             limit=30,
         ).all()
         logger.debug('\n'.join([str(t) for t in taxa[:10]]))
-        self.new_results.emit(taxa)
+        self.on_results.emit(taxa)
 
     def reset(self):
         """Reset all search filters"""
         self.autocomplete.search_input.setText('')
         self.iconic_taxon_filters.reset()
         self.reset_ranks()
-        self.reset_results.emit()
+        self.on_reset.emit()
 
     def reset_ranks(self):
         self.exact_rank = RankList('Exact', all_ranks=self.settings.all_ranks)
@@ -120,12 +104,11 @@ class TaxonSearch(VerticalLayout):
 class IconicTaxonFilters(QWidget):
     """Filters for iconic taxa"""
 
-    selected_taxon = Signal(int)
+    on_select = Signal(int)
 
     def __init__(self):
         super().__init__()
-        self.button_layout = GridLayout(n_columns=6)
-        self.setLayout(self.button_layout)
+        self.button_layout = GridLayout(self, n_columns=6)
         self.setFocusPolicy(Qt.StrongFocus)
 
         for id, name in SELECTABLE_ICONIC_TAXA.items():
@@ -151,7 +134,7 @@ class IconicTaxonFilters(QWidget):
         if QApplication.keyboardModifiers() != Qt.ControlModifier:
             button_taxon_id = self.sender().taxon_id
             self.reset(except_id=button_taxon_id)
-            self.selected_taxon.emit(button_taxon_id)
+            self.on_select.emit(button_taxon_id)
 
 
 class IconicTaxonButton(QPushButton):
