@@ -228,6 +228,7 @@ class LocalThumbnail(StylableWidget):
         self.anim_group = QParallelAnimationGroup()
         self.anim_group.addAnimation(color_anim)
         self.anim_group.addAnimation(op_anim)
+        self.anim_group.finished.connect(lambda: self.label.setGraphicsEffect(None))
         self.anim_group.start()
 
     def remove(self):
