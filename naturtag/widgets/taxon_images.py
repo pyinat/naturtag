@@ -115,8 +115,7 @@ class TaxonInfoCard(StylableWidget):
 
     def __init__(self, taxon: Taxon, delayed_load: bool = True):
         super().__init__()
-        card_layout = HorizontalLayout()
-        self.setLayout(card_layout)
+        card_layout = HorizontalLayout(self)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         if isinstance(taxon, TaxonCount):
             self.setToolTip(f'Count: {taxon.count}')

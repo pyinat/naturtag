@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLayout,
+    QSizePolicy,
     QStyle,
     QStyleOption,
     QVBoxLayout,
@@ -50,13 +51,15 @@ class LayoutMixin(MIXIN_BASE):
 
 
 class GroupMixin(MIXIN_BASE):
-    def add_group(self, name: str, parent_layout: QLayout = None) -> 'VerticalLayout':
+    def add_group(self, name: str, parent: QLayout = None, width: int = None) -> 'VerticalLayout':
         """Add a new groupbox with a vertical layout"""
-        group_layout = VerticalLayout()
         group_box = QGroupBox(name)
-        group_box.setLayout(group_layout)
-        if parent_layout:
-            parent_layout.addWidget(group_box)
+        group_layout = VerticalLayout(group_box)
+        parent = parent or self
+        parent.addWidget(group_box)
+        if width:
+            group_box.setFixedWidth(width)
+            group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         return group_layout
 
 

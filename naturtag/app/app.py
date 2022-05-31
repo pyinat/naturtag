@@ -77,12 +77,11 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
 
         # Root layout: tabs + progress bar
-        self.root = VerticalLayout()
         self.root_widget = QWidget()
-        self.root_widget.setLayout(self.root)
-        self.setCentralWidget(self.root_widget)
+        self.root = VerticalLayout(self.root_widget)
         self.root.addWidget(self.tabs)
         self.root.addWidget(self.threadpool.progress)
+        self.setCentralWidget(self.root_widget)
 
         # Optionally show Logs tab
         self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')

@@ -5,35 +5,49 @@ from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.app.style import fa_icon
-from naturtag.widgets import VerticalLayout
 
 logger = getLogger(__name__)
 DB_FILE = DATA_DIR / 'taxa.db'
 
 
-class TaxonAutocomplete(VerticalLayout):
+class TaxonAutocomplete(QLineEdit):
+    """Autocomplete search that gets results from a local SQLite database. Allows cycling through
+    autocomplete results with tab key.
+    """
+
     on_select = Signal(int)
+    on_tab = Signal()
 
     def __init__(self):
         super().__init__()
-
-        self.search_input = TabCompleteLineEdit()
-        self.search_input.setClearButtonEnabled(True)
-        self.search_input.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
-        self.addWidget(self.search_input)
+        self.setClearButtonEnabled(True)
+        self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
         self.taxa: dict[str, int] = {}
 
         completer = QCompleter()
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         completer.setFilterMode(Qt.MatchContains)
-        self.search_input.setCompleter(completer)
+        self.setCompleter(completer)
+        self.on_tab.connect(self.next_result)
 
+        # Results are fetched from FTS5, and passed to the completer via an intermediate model
         self.taxon_completer = TaxonAutocompleter()
-        self.search_input.textChanged.connect(self.search)
-        completer.activated.connect(self.select_taxon)
-
+        self.textChanged.connect(self.search)
         self.model = QStringListModel()
+        completer.activated.connect(self.select_taxon)
         completer.setModel(self.model)
+
+    def event(self, event):
+        if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Tab:
+            self.on_tab.emit()
+            return True
+        return super().event(event)
+
+    def next_result(self):
+        completer = self.completer()
+        completer.popup().setCurrentIndex(completer.currentIndex())
+        if not completer.setCurrentRow(completer.currentRow() + 1):
+            completer.setCurrentRow(0)
 
     # TODO: Input delay
     def search(self, q: str):
@@ -46,27 +60,3 @@ class TaxonAutocomplete(VerticalLayout):
         taxon_id = self.taxa.get(name)
         if taxon_id:
             self.on_select.emit(taxon_id)
-
-
-class TabCompleteLineEdit(QLineEdit):
-    """LineEdit that allows cycling through autocomplete results with tab key.
-    Source: https://stackoverflow.com/a/28976373/15592055
-    """
-
-    on_tab = Signal()
-
-    def __init__(self):
-        super().__init__()
-        self.on_tab.connect(self.next_completion)
-
-    def next_completion(self):
-        completer = self.completer()
-        completer.popup().setCurrentIndex(completer.currentIndex())
-        if not completer.setCurrentRow(completer.currentRow() + 1):
-            completer.setCurrentRow(0)
-
-    def event(self, event):
-        if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Tab:
-            self.on_tab.emit()
-            return True
-        return super().event(event)

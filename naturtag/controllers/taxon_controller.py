@@ -31,9 +31,8 @@ class TaxonController(QWidget):
         self.threadpool = threadpool
         self.user_taxa = UserTaxa.read()
 
-        self.root = HorizontalLayout()
+        self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
-        self.setLayout(self.root)
         self.selected_taxon: Taxon = None
 
         # Search inputs
