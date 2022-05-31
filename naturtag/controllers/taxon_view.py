@@ -4,19 +4,19 @@ from typing import Iterator
 
 from pyinaturalist import Taxon
 from PySide6.QtCore import QEvent, Qt
-from PySide6.QtWidgets import QGroupBox, QLabel
+from PySide6.QtWidgets import QGroupBox
 
 from naturtag.app.threadpool import ThreadPool
 from naturtag.widgets import (
+    GridLayout,
     HorizontalLayout,
     IconLabel,
-    PixmapLabel,
     TaxonImageWindow,
     TaxonInfoCard,
     TaxonList,
-    TaxonPixmapLabel,
-    VerticalLayout,
+    TaxonPhoto,
 )
+from naturtag.widgets.taxon_images import HoverTaxonPhoto
 
 logger = getLogger(__name__)
 
@@ -28,58 +28,39 @@ class TaxonInfoSection(HorizontalLayout):
     def __init__(self, threadpool: ThreadPool):
         super().__init__()
         self.threadpool = threadpool
-
-        self.group = QGroupBox('Selected Taxon')
-        inner_layout = HorizontalLayout(self.group)
-        self.addWidget(self.group)
+        self.group_box = QGroupBox('Selected Taxon')
+        root = HorizontalLayout(self.group_box)
+        self.addWidget(self.group_box)
         self.setAlignment(Qt.AlignTop)
 
         # Medium taxon default photo
-        self.image = TaxonPixmapLabel()
+        self.image = HoverTaxonPhoto(hover_icon=True)
         self.image.setObjectName('selected_taxon')
-        self.image.setMinimumWidth(200)
-        self.image.setMaximumWidth(600)
-        self.image.setMaximumHeight(400)
-        inner_layout.addWidget(self.image)
+        self.image.setFixedHeight(395)  # Height of 5 thumbnails + spacing
+        self.image.setAlignment(Qt.AlignTop)
+        root.addWidget(self.image)
 
-        # Show overlay on image hover
-        self.open_overlay = IconLabel('mdi.open-in-new', self.image, size=64)
-        self.open_overlay.setAlignment(Qt.AlignTop)
-        self.open_overlay.setGeometry(self.image.geometry())
-        self.open_overlay.setObjectName('open_overlay')
-        self.open_overlay.setVisible(False)
-        self.image.enterEvent = lambda *x: self.open_overlay.setVisible(True)
-        self.image.leaveEvent = lambda *x: self.open_overlay.setVisible(False)
+        # Additional taxon photos
+        self.taxon_thumbnails = GridLayout(n_columns=2)
+        self.taxon_thumbnails.setSpacing(5)
+        root.addLayout(self.taxon_thumbnails)
 
         # Fullscreen image viewer
         self.image_window = TaxonImageWindow()
         self.image.on_click.connect(self.image_window.display_taxon)
 
-        # Basic taxon info
-        self.icon = PixmapLabel()
-        self.icon.setFixedSize(75, 75)
-        icon_layout = HorizontalLayout()
-        icon_layout.setAlignment(Qt.AlignTop)
-        icon_layout.addWidget(self.icon)
-        inner_layout.addLayout(icon_layout)
-
-        self.details = VerticalLayout()
-        self.details.setAlignment(Qt.AlignTop)
-        inner_layout.addLayout(self.details)
-
     def load(self, taxon: Taxon):
-        # Label, photo, and iconic taxon icon
-        common_name = f' ({taxon.preferred_common_name}) ' if taxon.preferred_common_name else ''
-        self.group.setTitle(f'{taxon.name}{common_name}')
+        """Load default photo + additional thumbnails"""
+        self.group_box.setTitle(taxon.full_name)
         self.threadpool.schedule(self.image.set_taxon, taxon=taxon)
-        self.threadpool.schedule(self.icon.setPixmap, url=taxon.icon_url)
 
-        # Other attributes
-        self.details.clear()
-        self.details.addWidget(QLabel(f'ID: {taxon.id}'))
-        self.details.addWidget(QLabel(f'Rank: {taxon.rank}'))
-        self.details.addWidget(QLabel(f'Observations: {taxon.observations_count}'))
-        self.details.addWidget(QLabel(f'Child species: {taxon.complete_species_count}'))
+        self.taxon_thumbnails.clear()
+        for i, photo in enumerate(taxon.taxon_photos[1:] if taxon.taxon_photos else []):
+            thumb = HoverTaxonPhoto(taxon=taxon, idx=i + 1)
+            thumb.setFixedSize(75, 75)
+            thumb.on_click.connect(self.image_window.display_taxon)
+            self.taxon_thumbnails.add_widget(thumb)
+            self.threadpool.schedule(thumb.set_pixmap, url=photo.thumbnail_url)
 
     def enterEvent(self, event: QEvent):
         logger.warning('Enter')

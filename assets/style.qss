@@ -41,7 +41,7 @@ StylableWidget#gallery_scroll_panel {
     background: palette(dark);
 }
 
-IconLabel:hover#open_overlay {
+QLabel#hover_overlay {
     background-color: rgba(0, 0, 0, 0.3);
 }
 QLabel#title {

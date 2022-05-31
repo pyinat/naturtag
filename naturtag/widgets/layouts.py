@@ -3,7 +3,7 @@
 * Many hours of frustration
 """
 from logging import getLogger
-from typing import TYPE_CHECKING, Iterator, TypeAlias
+from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt
 from PySide6.QtGui import QPainter
@@ -75,25 +75,26 @@ class StyleMixin:
 
 
 class FlowLayout(LayoutMixin, QLayout):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, spacing: float = None):
         super().__init__(parent)
         if parent is not None:
             self.setContentsMargins(0, 0, 0, 0)
-        self._items = []
+        self._items: list[QWidget] = []
+        self._spacing = spacing or 0
 
-    def addItem(self, item):
+    def addItem(self, item: QWidget):
         self._items.append(item)
         self.invalidate()
 
     def count(self):
         return len(self._items)
 
-    def itemAt(self, index):
+    def itemAt(self, index: int) -> Optional[QWidget]:
         if 0 <= index < len(self._items):
             return self._items[index]
         return None
 
-    def takeAt(self, index):
+    def takeAt(self, index: int) -> Optional[QWidget]:
         if 0 <= index < len(self._items):
             item = self._items.pop(index)
             return item
@@ -105,10 +106,10 @@ class FlowLayout(LayoutMixin, QLayout):
     def hasHeightForWidth(self):
         return True
 
-    def heightForWidth(self, width):
+    def heightForWidth(self, width: int):
         return self._do_layout(QRect(0, 0, width, 0), apply_geom=False)
 
-    def setGeometry(self, rect):
+    def setGeometry(self, rect: QRect):
         super().setGeometry(rect)
         self._do_layout(rect)
 
@@ -194,6 +195,11 @@ class GridLayout(LayoutMixin, GroupMixin, QGridLayout):
         if self._n_columns and self._col >= self._n_columns:
             self._col = 0
             self._row += 1
+
+    def clear(self):
+        super().clear()
+        self._col = 0
+        self._row = 0
 
 
 class HorizontalLayout(LayoutMixin, GroupMixin, QHBoxLayout):

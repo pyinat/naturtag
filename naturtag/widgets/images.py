@@ -40,8 +40,8 @@ class IconLabel(QLabel):
 
 
 class PixmapLabel(QLabel):
-    """A QLabel containing a pixmap that preserves its aspect ratio when resizing, and an optional
-    text overlay.
+    """A QLabel containing a pixmap that preserves its aspect ratio when resizing, with optional
+    description text
     """
 
     def __init__(
@@ -50,17 +50,17 @@ class PixmapLabel(QLabel):
         pixmap: QPixmap = None,
         path: Union[str, Path] = None,
         url: str = None,
-        overlay_text: str = None,
+        description: str = None,
     ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
         self.path = None
-        self.overlay_text = overlay_text
-        self.setPixmap(pixmap, path, url)
+        self.description = description
+        self.set_pixmap(pixmap, path, url)
 
-    def setPixmap(
+    def set_pixmap(
         self,
         pixmap: QPixmap = None,
         path: Union[str, Path] = None,
@@ -75,7 +75,7 @@ class PixmapLabel(QLabel):
             super().setPixmap(self.scaledPixmap())
 
     def clear(self):
-        self.setPixmap(QPixmap())
+        self.set_pixmap(QPixmap())
 
     def heightForWidth(self, width: int) -> int:
         if self._pixmap:
@@ -95,9 +95,9 @@ class PixmapLabel(QLabel):
             super().setPixmap(self.scaledPixmap())
 
     def paintEvent(self, event):
-        """Draw a text overlay on the image"""
+        """Draw description text in the upper left corner of the image"""
         super().paintEvent(event)
-        if not self.overlay_text:
+        if not self.description:
             return
 
         font = QFont()
@@ -106,7 +106,7 @@ class PixmapLabel(QLabel):
         painter.setFont(font)
 
         # Get text dimensions
-        lines = self.overlay_text.split('\n')
+        lines = self.description.split('\n')
         longest_line = max(lines, key=len)
         metrics = painter.fontMetrics()
         text_width = painter.fontMetrics().horizontalAdvance(longest_line)
@@ -116,7 +116,22 @@ class PixmapLabel(QLabel):
         bg_color = self.palette().dark().color()
         bg_color.setAlpha(128)
         painter.fillRect(0, 0, text_width + 2, text_height + 2, bg_color)
-        painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.overlay_text)
+        painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.description)
+
+
+class HoverMixin:
+    """Mixin that adds a transparent overlay to darken the image on hover"""
+
+    def __init__(self, *args, hover_icon: bool = False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.overlay = IconLabel('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
+        self.overlay.setAlignment(Qt.AlignTop)
+        self.overlay.setAutoFillBackground(True)
+        self.overlay.setGeometry(self.geometry())
+        self.overlay.setObjectName('hover_overlay')
+        self.overlay.setVisible(False)
+        self.enterEvent = lambda *x: self.overlay.setVisible(True)
+        self.leaveEvent = lambda *x: self.overlay.setVisible(False)
 
 
 class ImageWindow(QWidget):
@@ -125,12 +140,12 @@ class ImageWindow(QWidget):
     Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
     """
 
-    def __init__(self):
+    def __init__(self, image_class: type = PixmapLabel):
         super().__init__()
         self.image_paths: list[str] = []
         self.selected_path = None
 
-        self.image = PixmapLabel()
+        self.image = image_class()
         self.image.setAlignment(Qt.AlignCenter)
         self.image_layout = VerticalLayout(self)
         self.image_layout.addWidget(self.image)
@@ -170,8 +185,8 @@ class ImageWindow(QWidget):
         self.select_image_idx(self.wrap_idx(-1))
 
     def set_pixmap(self, path: str):
-        self.image.setPixmap(QPixmap(path))
-        self.image.overlay_text = str(path)
+        self.image.set_pixmap(QPixmap(path))
+        self.image.description = str(path)
 
     def wrap_idx(self, increment: int):
         """Increment and wrap the index around to the other side of the list"""

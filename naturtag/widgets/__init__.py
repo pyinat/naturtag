@@ -17,6 +17,6 @@ from naturtag.widgets.taxon_images import (
     TaxonImageWindow,
     TaxonInfoCard,
     TaxonList,
-    TaxonPixmapLabel,
+    TaxonPhoto,
 )
 from naturtag.widgets.toggle_switch import ToggleSwitch
