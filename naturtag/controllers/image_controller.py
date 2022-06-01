@@ -2,17 +2,15 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import QEvent, Signal, Slot
-from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QToolButton, QWidget
+from PySide6.QtCore import Signal, Slot
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QWidget
 
-from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.controllers import ImageGallery
 from naturtag.metadata import get_ids_from_url, refresh_image, tag_images
 from naturtag.metadata.meta_metadata import MetaMetadata
 from naturtag.settings import Settings
-from naturtag.widgets import HorizontalLayout, TaxonInfoCard, VerticalLayout
+from naturtag.widgets import HorizontalLayout, IdInput, TaxonInfoCard, VerticalLayout
 
 logger = getLogger(__name__)
 
@@ -147,25 +145,3 @@ class ImageController(QWidget):
 
     def info(self, message: str):
         self.on_message.emit(message)
-
-
-class IdInput(QLineEdit):
-    """Pressing return or losing focus will send a 'selection' signal"""
-
-    on_select = Signal(int)
-
-    def __init__(self):
-        super().__init__()
-        self.setClearButtonEnabled(True)
-        self.setValidator(QIntValidator())
-        self.setMaximumWidth(200)
-        self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
-        self.returnPressed.connect(self.select)
-
-    def focusOutEvent(self, event: QEvent = None):
-        self.select()
-        return super().focusOutEvent(event)
-
-    def select(self):
-        if self.text():
-            self.on_select.emit(int(self.text()))

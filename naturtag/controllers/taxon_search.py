@@ -43,6 +43,7 @@ class TaxonSearch(VerticalLayout):
         self.autocomplete = TaxonAutocomplete()
         search_group = self.add_group('Search', self, width=400)
         search_group.addWidget(self.autocomplete)
+        self.autocomplete.returnPressed.connect(self.search)
 
         # Category inputs
         self.iconic_taxon_filters = IconicTaxonFilters()

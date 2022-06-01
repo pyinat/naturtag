@@ -20,6 +20,7 @@ from naturtag.widgets.images import (
     NavButtonsMixin,
     PixmapLabel,
 )
+from naturtag.widgets.inputs import IdInput
 from naturtag.widgets.logger import QtRichHandler, init_handler
 from naturtag.widgets.taxon_images import (
     FullscreenTaxonPhoto,
