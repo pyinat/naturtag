@@ -6,7 +6,7 @@ from typing import Type, Union
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtWidgets import QApplication, QLabel, QWidget
+from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
@@ -66,13 +66,14 @@ class NavButtonsMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        screen = QApplication.primaryScreen().size()
-
         self.left_arrow = HoverIconLabel('ph.caret-left', self, size=128)
-        self.left_arrow.setGeometry(0, (screen.height() / 2) - 128, 128, 128)
-
         self.right_arrow = HoverIconLabel('ph.caret-right', self, size=128)
-        self.right_arrow.setGeometry(screen.width() - 128, (screen.height() / 2) - 128, 128, 128)
+
+    def resizeEvent(self, event):
+        """Position nav buttons on left/right center"""
+        self.left_arrow.setGeometry(0, (self.height() - 128) / 2, 128, 128)
+        self.right_arrow.setGeometry(self.width() - 128, (self.height() - 128) / 2, 128, 128)
+        super().resizeEvent(event)
 
 
 class HoverIconLabel(IconLabel):

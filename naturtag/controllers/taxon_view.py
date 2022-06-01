@@ -54,6 +54,7 @@ class TaxonInfoSection(HorizontalLayout):
         # Additional taxon thumbnails
         self.taxon_thumbnails = GridLayout(n_columns=2)
         self.taxon_thumbnails.setSpacing(5)
+        self.taxon_thumbnails.setAlignment(Qt.AlignTop)
         images.addLayout(self.taxon_thumbnails)
 
         # Back and Forward buttons: We already have the full Taxon object
