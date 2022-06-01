@@ -144,7 +144,6 @@ class PixmapLabel(QLabel):
         """Placeholder to accept mouse press events"""
 
     def mouseReleaseEvent(self, event):
-        logger.warning(event)
         if event.button() == Qt.LeftButton:
             self.on_click.emit(self)
 

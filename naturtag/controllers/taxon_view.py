@@ -61,12 +61,10 @@ class TaxonInfoSection(HorizontalLayout):
             self.threadpool.schedule(thumb.set_pixmap, url=photo.thumbnail_url)
 
     def enterEvent(self, event: QEvent):
-        logger.warning('Enter')
         self.open_overlay.setVisible(True)
         return super().enterEvent(event)
 
     def leaveEvent(self, event: QEvent) -> None:
-        logger.warning('Leave')
         self.open_overlay.setVisible(False)
         return super().leaveEvent(event)
 
