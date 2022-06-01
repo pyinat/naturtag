@@ -1,15 +1,16 @@
 """Generic image widgets"""
 from logging import getLogger
 from pathlib import Path
-from typing import Union
+from typing import Type, Union
 
 from pyinaturalist import Photo
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtWidgets import QLabel, QWidget
+from PySide6.QtWidgets import QApplication, QLabel, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
+from naturtag.constants import PathOrStr
 from naturtag.widgets import VerticalLayout
 
 logger = getLogger(__name__)
@@ -39,10 +40,66 @@ class IconLabel(QLabel):
         )
 
 
+class HoverMixin:
+    """Mixin that adds a transparent overlay to darken the image on hover"""
+
+    def __init__(self, *args, hover_icon: bool = False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.overlay = IconLabel('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
+        self.overlay.setAlignment(Qt.AlignTop)
+        self.overlay.setAutoFillBackground(True)
+        self.overlay.setGeometry(self.geometry())  # type: ignore
+        self.overlay.setObjectName('hover_overlay')
+        self.overlay.setVisible(False)
+
+    def enterEvent(self, event):
+        self.overlay.setVisible(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.overlay.setVisible(False)
+        super().leaveEvent(event)
+
+
+class NavButtonsMixin:
+    """Mixin for fullscreen images that adds left and right navigation buttons"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        screen = QApplication.primaryScreen().size()
+
+        self.left_arrow = HoverIconLabel('ph.caret-left', self, size=128)
+        self.left_arrow.setGeometry(0, (screen.height() / 2) - 128, 128, 128)
+
+        self.right_arrow = HoverIconLabel('ph.caret-right', self, size=128)
+        self.right_arrow.setGeometry(screen.width() - 128, (screen.height() / 2) - 128, 128, 128)
+
+
+class HoverIconLabel(IconLabel):
+    """IconLabel with a hover effect and click event"""
+
+    on_click = Signal(object)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_enabled(False)
+        self.enterEvent = lambda *x: self.set_enabled(True)
+        self.leaveEvent = lambda *x: self.set_enabled(False)
+
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.on_click.emit(self)
+
+
 class PixmapLabel(QLabel):
     """A QLabel containing a pixmap that preserves its aspect ratio when resizing, with optional
     description text
     """
+
+    on_click = Signal(QLabel)
 
     def __init__(
         self,
@@ -83,16 +140,13 @@ class PixmapLabel(QLabel):
         else:
             return self.height()
 
-    def sizeHint(self) -> QSize:
-        return QSize(self.width(), self.heightForWidth(self.width()))
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
 
-    def scaledPixmap(self) -> QPixmap:
-        assert self._pixmap is not None
-        return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-
-    def resizeEvent(self, _):
-        if self._pixmap:
-            super().setPixmap(self.scaledPixmap())
+    def mouseReleaseEvent(self, event):
+        logger.warning(event)
+        if event.button() == Qt.LeftButton:
+            self.on_click.emit(self)
 
     def paintEvent(self, event):
         """Draw description text in the upper left corner of the image"""
@@ -118,20 +172,20 @@ class PixmapLabel(QLabel):
         painter.fillRect(0, 0, text_width + 2, text_height + 2, bg_color)
         painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.description)
 
+    def resizeEvent(self, _):
+        if self._pixmap:
+            super().setPixmap(self.scaledPixmap())
 
-class HoverMixin:
-    """Mixin that adds a transparent overlay to darken the image on hover"""
+    def scaledPixmap(self) -> QPixmap:
+        assert self._pixmap is not None
+        return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
-    def __init__(self, *args, hover_icon: bool = False, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.overlay = IconLabel('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
-        self.overlay.setAlignment(Qt.AlignTop)
-        self.overlay.setAutoFillBackground(True)
-        self.overlay.setGeometry(self.geometry())
-        self.overlay.setObjectName('hover_overlay')
-        self.overlay.setVisible(False)
-        self.enterEvent = lambda *x: self.overlay.setVisible(True)
-        self.leaveEvent = lambda *x: self.overlay.setVisible(False)
+    def sizeHint(self) -> QSize:
+        return QSize(self.width(), self.heightForWidth(self.width()))
+
+
+class FullscreenPhoto(NavButtonsMixin, PixmapLabel):
+    """A fullscreen photo widget with nav buttons"""
 
 
 class ImageWindow(QWidget):
@@ -140,16 +194,20 @@ class ImageWindow(QWidget):
     Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
     """
 
-    def __init__(self, image_class: type = PixmapLabel):
+    def __init__(self, image_class: Type[FullscreenPhoto] = FullscreenPhoto):
         super().__init__()
-        self.image_paths: list[str] = []
-        self.selected_path = None
+        self.image_paths: list[Path] = []
+        self.selected_path: Path = Path('.')
 
         self.image = image_class()
         self.image.setAlignment(Qt.AlignCenter)
         self.image_layout = VerticalLayout(self)
         self.image_layout.addWidget(self.image)
         self.image_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Nav button actions
+        self.image.left_arrow.on_click.connect(self.select_prev_image)
+        self.image.right_arrow.on_click.connect(self.select_next_image)
 
         # Keyboard shortcuts
         shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
@@ -166,7 +224,7 @@ class ImageWindow(QWidget):
         """The index of the currently selected image"""
         return self.image_paths.index(self.selected_path)
 
-    def display_image(self, selected_path: str, image_paths: list[str]):
+    def display_image(self, selected_path: Path, image_paths: list[Path]):
         """Open window to a selected image, and save other available image paths for navigation"""
         self.selected_path = selected_path
         self.image_paths = image_paths
@@ -184,7 +242,7 @@ class ImageWindow(QWidget):
     def select_prev_image(self):
         self.select_image_idx(self.wrap_idx(-1))
 
-    def set_pixmap(self, path: str):
+    def set_pixmap(self, path: PathOrStr):
         self.image.set_pixmap(QPixmap(path))
         self.image.description = str(path)
 

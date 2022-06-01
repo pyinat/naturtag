@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.client import IMG_SESSION
-from naturtag.widgets.images import HoverMixin, IconLabel, ImageWindow, PixmapLabel
+from naturtag.widgets.images import HoverMixin, ImageWindow, NavButtonsMixin, PixmapLabel
 from naturtag.widgets.layouts import HorizontalLayout, StylableWidget, VerticalLayout
 
 if TYPE_CHECKING:
@@ -20,14 +20,12 @@ logger = getLogger(__name__)
 
 
 class TaxonPhoto(PixmapLabel):
-    """A taxon photo widget. Adds a Taxon reference and a click event
+    """A taxon photo widget with a Taxon reference and a click event
 
     Args:
         taxon: The taxon associated with this photo
         idx: The index of this photo within Taxon.taxon_photos
     """
-
-    on_click = Signal(object)
 
     def __init__(self, *args, taxon: Taxon = None, idx: int = 0, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,21 +37,13 @@ class TaxonPhoto(PixmapLabel):
         self._pixmap = IMG_SESSION.get_pixmap(taxon.default_photo, size=size)
         QLabel.setPixmap(self, self.scaledPixmap())
 
-    def mousePressEvent(self, _):
-        """Placeholder to accept mouse press events"""
 
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.on_click.emit(self)
-
-
-class FullscreenTaxonPhoto(TaxonPhoto):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class FullscreenTaxonPhoto(NavButtonsMixin, TaxonPhoto):
+    """A fullscreen taxon photo widget with nav buttons"""
 
 
 class HoverTaxonPhoto(HoverMixin, TaxonPhoto):
-    """A PixmapLabel for a taxon photo, with hover effect"""
+    """A taxon photo widget with hover effect"""
 
 
 class TaxonImageWindow(ImageWindow):

@@ -10,11 +10,9 @@ from naturtag.app.threadpool import ThreadPool
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
-    IconLabel,
     TaxonImageWindow,
     TaxonInfoCard,
     TaxonList,
-    TaxonPhoto,
 )
 from naturtag.widgets.taxon_images import HoverTaxonPhoto
 
