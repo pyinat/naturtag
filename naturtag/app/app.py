@@ -2,7 +2,6 @@
 import sys
 from logging import getLogger
 
-from pyinaturalist_convert import create_tables
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QCloseEvent, QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget, QWidget
@@ -14,7 +13,7 @@ from naturtag.app.threadpool import ThreadPool
 from naturtag.app.toolbar import Toolbar
 from naturtag.constants import ASSETS_DIR
 from naturtag.controllers import ImageController, TaxonController
-from naturtag.settings import Settings
+from naturtag.settings import Settings, setup
 from naturtag.widgets import init_handler
 from naturtag.widgets.layouts import VerticalLayout
 
@@ -110,7 +109,8 @@ class MainWindow(QMainWindow):
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
 
-        self.setup()
+        # Run any first-time setup steps, if needed
+        setup(self.settings)
 
         # Debug
         shortcut = QShortcut(QKeySequence('F9'), self)
@@ -141,17 +141,6 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
-
-    def setup(self):
-        """Run any first-time setup steps, if needed"""
-        # Create database tables if they don't exist
-        if not self.settings.setup_complete:
-            logger.info('Running first-time setup')
-            create_tables()
-            self.settings.setup_complete = True
-            self.settings.write()
-        else:
-            logger.info('First-time setup not needed')
 
     def show_settings(self):
         self.settings_menu.show()

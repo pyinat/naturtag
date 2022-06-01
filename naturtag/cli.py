@@ -116,10 +116,11 @@ from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
-from naturtag.constants import AUTOCOMPLETE_DIR
+from naturtag.constants import CLI_COMPLETE_DIR
 from naturtag.metadata import refresh_tags, strip_url, tag_images
 from naturtag.metadata.keyword_metadata import KeywordMetadata
 from naturtag.metadata.meta_metadata import MetaMetadata
+from naturtag.settings import Settings, setup
 
 CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
@@ -184,7 +185,7 @@ def _strip_url_or_name(ctx, param, value):
 )
 @click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
 @click.option(
-    '--install-completion',
+    '--install',
     type=click.Choice(['all', 'bash', 'fish']),
     help='Install shell completion scripts',
 )
@@ -205,6 +206,7 @@ def tag(
 ):
     if install_completion:
         install_shell_completion(install_completion)
+        setup(Settings.read())
         ctx.exit()
     elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
         click.secho('Specify either a taxon, observation, or refresh', fg='red')
@@ -354,7 +356,7 @@ def _install_fish_completion():
     completion_dir = config_dir / 'fish' / 'completions'
     completion_dir.mkdir(exist_ok=True, parents=True)
 
-    for script in AUTOCOMPLETE_DIR.glob('*.fish'):
+    for script in CLI_COMPLETE_DIR.glob('*.fish'):
         copyfile(script, completion_dir / script.name)
     print(f'Installed fish completion scripts to {completion_dir}')
 
@@ -365,7 +367,7 @@ def _install_bash_completion():
     completion_dir = config_dir / 'bash' / 'completions'
     completion_dir.mkdir(exist_ok=True, parents=True)
 
-    for script in AUTOCOMPLETE_DIR.glob('*.bash'):
+    for script in CLI_COMPLETE_DIR.glob('*.bash'):
         copyfile(script, completion_dir / script.name)
     print('Installed bash completion scripts.')
     print('Add the following to your ~/.bashrc, and restart your shell:')
