@@ -2,7 +2,7 @@
 from logging import getLogger
 from typing import Optional
 
-from pyinaturalist import RANKS, IconPhoto
+from pyinaturalist import RANKS, IconPhoto, Taxon
 from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QWidget
@@ -16,8 +16,10 @@ from naturtag.widgets import (
     HorizontalLayout,
     PixmapLabel,
     TaxonAutocomplete,
+    ToggleSwitch,
     VerticalLayout,
 )
+from naturtag.widgets.images import IconLabel
 
 IGNORE_TERMS = ['sub', 'super', 'infra', 'epi', 'hybrid']
 COMMON_RANKS = [r for r in RANKS if not any([k in r for k in IGNORE_TERMS])][::-1]
@@ -33,6 +35,7 @@ class TaxonSearch(VerticalLayout):
 
     def __init__(self, settings: Settings):
         super().__init__()
+        self.selected_taxon: Taxon = None
         self.settings = settings
         self.setAlignment(Qt.AlignTop)
 
@@ -56,6 +59,20 @@ class TaxonSearch(VerticalLayout):
         self.exact_rank.dropdown.activated.connect(self.min_rank.reset)
         self.exact_rank.dropdown.activated.connect(self.max_rank.reset)
 
+        # Button to search for children of selected taxon
+        # TODO: If more than one toggle filter is added, consolidate with settings_menu.ToggleSetting
+        group_box = self.add_group('Parent', self, width=400)
+        button_layout = HorizontalLayout()
+        button_layout.setAlignment(Qt.AlignLeft)
+        button_layout.addWidget(IconLabel('mdi.file-tree', size=20))
+        group_box.addLayout(button_layout)
+        self.search_children_desc = QLabel('Search within children of selected taxon')
+        self.search_children_desc.setTextFormat(Qt.RichText)
+        button_layout.addWidget(self.search_children_desc)
+        button_layout.addStretch()
+        self.search_children_switch = ToggleSwitch()
+        button_layout.addWidget(self.search_children_switch)
+
         # Search/reset buttons
         button_layout = HorizontalLayout()
         search_button = QPushButton('Search')
@@ -71,9 +88,13 @@ class TaxonSearch(VerticalLayout):
 
     def search(self):
         """Search for taxa with the currently selected filters"""
+        taxon_ids = self.iconic_taxon_filters.selected_iconic_taxa
+        if self.search_children_switch.isChecked():
+            taxon_ids.append(self.selected_taxon.id)
+
         taxa = INAT_CLIENT.taxa.search(
-            q=self.autocomplete.search_input.text(),
-            taxon_id=self.iconic_taxon_filters.selected_iconic_taxa,
+            q=self.autocomplete.text(),
+            taxon_id=taxon_ids,
             rank=self.exact_rank.text,
             min_rank=self.min_rank.text,
             max_rank=self.max_rank.text,
@@ -81,24 +102,35 @@ class TaxonSearch(VerticalLayout):
             locale=self.settings.locale,
             limit=30,
         ).all()
+
         logger.debug('\n'.join([str(t) for t in taxa[:10]]))
         self.on_results.emit(taxa)
 
     def reset(self):
         """Reset all search filters"""
-        self.autocomplete.search_input.setText('')
+        self.autocomplete.setText('')
         self.iconic_taxon_filters.reset()
         self.reset_ranks()
+        self.search_children_switch.setChecked(False)
         self.on_reset.emit()
 
     def reset_ranks(self):
-        self.exact_rank = RankList('Exact', all_ranks=self.settings.all_ranks)
-        self.min_rank = RankList('Minimum', all_ranks=self.settings.all_ranks)
-        self.max_rank = RankList('Maximum', all_ranks=self.settings.all_ranks)
+        self.exact_rank = RankList('Exact', 'fa5s.equals', all_ranks=self.settings.all_ranks)
+        self.min_rank = RankList(
+            'Minimum', 'fa5s.greater-than-equal', all_ranks=self.settings.all_ranks
+        )
+        self.max_rank = RankList(
+            'Maximum', 'fa5s.less-than-equal', all_ranks=self.settings.all_ranks
+        )
         self.ranks.clear()
         self.ranks.addLayout(self.exact_rank)
         self.ranks.addLayout(self.min_rank)
         self.ranks.addLayout(self.max_rank)
+
+    @Slot(Taxon)
+    def set_taxon(self, taxon: Taxon):
+        self.selected_taxon = taxon
+        self.search_children_desc.setText(f'Search within children of <b><i>{taxon.name}</i></b>')
 
 
 class IconicTaxonFilters(QWidget):
@@ -159,10 +191,14 @@ class IconicTaxonButton(QPushButton):
 class RankList(HorizontalLayout):
     """Taxonomic rank dropdown"""
 
-    def __init__(self, label: str, all_ranks: bool = False):
+    def __init__(self, label: str, icon_str: str, all_ranks: bool = False):
         super().__init__()
-        ranks = RANKS if all_ranks else COMMON_RANKS
+        self.setAlignment(Qt.AlignLeft)
+        self.addWidget(IconLabel(icon_str, size=20))
         self.addWidget(QLabel(label))
+        self.addStretch()
+
+        ranks = RANKS if all_ranks else COMMON_RANKS
         self.dropdown = QComboBox()
         self.dropdown.addItems([''] + ranks[::-1])
         self.addWidget(self.dropdown)

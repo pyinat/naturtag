@@ -39,6 +39,7 @@ class TaxonController(QWidget):
         self.search = TaxonSearch(settings)
         self.search.autocomplete.on_select.connect(self.select_taxon)
         self.search.on_results.connect(self.set_search_results)
+        self.on_select.connect(self.search.set_taxon)
         self.root.addLayout(self.search)
 
         # Search results & User taxa
@@ -55,9 +56,6 @@ class TaxonController(QWidget):
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
         self.root.addLayout(taxon_layout)
-
-    def info(self, message: str):
-        self.on_message.emit(message)
 
     def select_taxon(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a
@@ -94,6 +92,8 @@ class TaxonController(QWidget):
 
     def set_search_results(self, taxa: list[Taxon]):
         """Load search results into Results tab"""
+        if not taxa:
+            self.on_message.emit('No results found')
         self.tabs.results.set_taxa(taxa)
         self.tabs.setCurrentWidget(self.tabs.results_tab)
         self.bind_selection(self.tabs.results.taxa)

@@ -197,6 +197,7 @@ class ImageWindow(QWidget):
         super().__init__()
         self.image_paths: list[Path] = []
         self.selected_path: Path = Path('.')
+        self.setWindowTitle('Naturtag')
 
         self.image = image_class()
         self.image.setAlignment(Qt.AlignCenter)
