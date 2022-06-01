@@ -117,7 +117,7 @@ from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
 from naturtag.constants import AUTOCOMPLETE_DIR
-from naturtag.metadata import refresh_all, strip_url, tag_images
+from naturtag.metadata import refresh_tags, strip_url, tag_images
 from naturtag.metadata.keyword_metadata import KeywordMetadata
 from naturtag.metadata.meta_metadata import MetaMetadata
 
@@ -206,7 +206,7 @@ def tag(
     if install_completion:
         install_shell_completion(install_completion)
         ctx.exit()
-    elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg is True]) != 1:
+    elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
         click.secho('Specify either a taxon, observation, or refresh', fg='red')
         click.echo(ctx.get_help())
         ctx.exit()
@@ -225,7 +225,7 @@ def tag(
         print_all_metadata(image_paths, flickr_format, hierarchical)
         ctx.exit()
     if refresh:
-        refresh_all(
+        refresh_tags(
             image_paths,
             common_names=common_names,
             hierarchical=hierarchical,
@@ -236,12 +236,12 @@ def tag(
 
     metadata_list = list(
         tag_images(
+            image_paths,
             observation,
             taxon,
             common_names=common_names,
             hierarchical=hierarchical,
             create_sidecar=create_sidecar,
-            images=image_paths,
         )
     )
     if not metadata_list:

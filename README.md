@@ -14,16 +14,12 @@
 
 ## Contents
 - [Summary](#summary)
-- [Contents](#contents)
 - [Use Cases](#use-cases)
 - [Development Status](#development-status)
+- [Installation](#installation)
 - [Python Package](#python-package)
 - [CLI](#cli)
-  - [CLI Installation](#cli-installation)
-  - [CLI Usage](#cli-usage)
 - [GUI](#gui)
-  - [GUI Installation](#gui-installation)
-  - [GUI Usage](#gui-usage)
 - [See Also](#see-also)
 <!-- END-RTD-IGNORE -->
 
@@ -33,8 +29,8 @@ This includes a basic **command-line interface**, an experimental **graphical in
 also be used as a **python package**.
 
 ## Use Cases
-The purpose of this is to take some of the useful information from your own iNaturalist observations
-and embed it in your local photo collection.
+The purpose of naturtag is to take some of the useful information from your own iNaturalist
+observations and embed it in your local photo collection. This has a variety of uses, including:
 
 ### Metadata for local photo organization
 If you like the way you can search and filter your observations on iNaturalist.org and its mobile
@@ -56,38 +52,52 @@ another biodiversity observation platform with a more specific focus, such as
 [Simple Darwin Core](https://dwc.tdwg.org/simple).
 
 ## Development Status
-* This is currently just a small hobby project, and still fairly unpolished.
 * See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and current progress.
 * If you have any suggestions, questions, or requests, please
   [create an issue](https://github.com/JWCook/naturtag/issues/new/choose), or ping me (**@jcook**)
   on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
-* I am actively working on other libraries that naturtag will benefit from, including
+* When I'm not working on this, I'm usually working on other libraries that naturtag benefits from, including
   [requests-cache](https://requests-cache.readthedocs.io),
   [pyinaturalist](https://pyinaturalist.readthedocs.io), and
   [pyinaturalist-convert](https://github.com/JWCook/pyinaturalist-convert).
+
+## Installation
+First, [install python 3.10](https://www.python.org/downloads/) if you don't have it yet.
+Then, install with pip:
+```bash
+pip install naturtag
+```
 
 ## Python Package
 See [naturtag documentation on ReadTheDocs](https://naturtag.readthedocs.io) for details on the
 python package, which lets you use most of naturtag's features in your own scripts or applications.
 
-Generic iNaturalist data access features that aren't specific to naturtag are contributed upstream
-to [pyinaturalist](https://pyinaturalist.readthedocs.io/en/stable/).
+Basic examples:
+```python
+from naturtag import tag_images, refresh_tags
 
-## CLI
-The CLI takes an observation or species plus some image files, and generates EXIF and XMP metadata
-to write to those images. You can see it in action here:
-[![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
+# Tag images with full observation metadata
+tag_images(['img1.jpg', 'img2.jpg'], observation_id=1234)
 
-### CLI Installation
-Install with pip:
-```bash
-pip install naturtag
+# Tag images with taxonomy metadata only
+tag_images(['img1.jpg', 'img2.jpg'], taxon_id=1234)
+
+# Glob patterns are also supported
+tag_images(['~/observations/*.jpg'], taxon_id=1234)
+
+# Refresh previously tagged images with latest observation and taxonomy metadata
+refresh_tags(['~/observations/'], recursive=True)
 ```
 
-### CLI Usage
-This package provides the command `naturtag`, also aliased to `nt`.
+## CLI
+This package provides the command `naturtag`, also aliased to `nt`. It takes an observation or
+species plus some image files, and generates EXIF and XMP metadata to write to those images. You can
+see it in action here:
+[![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
 
-See `naturtag --help` for full usage information. Osptions:
+### CLI Options
+
+See `naturtag --help` for full usage information. Options:
 ```yaml
 Usage: naturtag [OPTIONS] [IMAGES]...
 
@@ -106,7 +116,7 @@ Options:
   --help                  Show this message and exit.
 ```
 
-#### Species & Observation IDs
+### Species & Observation IDs
 Either a species or observation may be specified, either by ID or URL.
 For example, all the following options will fetch the same taxonomy metadata:
 ```
@@ -120,32 +130,32 @@ The difference is that specifying a species (`-t, --taxon`) will fetch only
 taxonomy metadata, while specifying an observation (`-o, --observation`)
 will fetch taxonomy plus observation metadata.
 
-#### Species Search
+### Species Search
 You may also search for species by name, for example `naturtag -t cardinal`.
 If there are multiple results, you will be prompted to choose from the top 10 search results:
 
 ![Screenshot](assets/screenshots/cli-taxon-search.png)
 
-#### Images
+### Images
 Multiple paths are supported, as well as glob patterns, for example:
 `0001.jpg IMG*.jpg ~/observations/**.jpg`
 If no images are specified, the generated keywords will be printed.
 
-#### Keywords
+### Keywords
 Keywords will be generated in the format:
 `taxonomy:{rank}={name}`
 
-#### DarwinCore
-If an observation is specified, DwC metadata will also be generated, in the
+### Darwin Core
+If an observation is specified, Darwin Core metadata will also be generated, in the
 form of XMP tags. Among other things, this includes taxonomy tags in the
 format:
 `dwc:{rank}="{name}"`
 
-#### Sidecar Files
+### Sidecar Files
 By default, XMP tags will be written to a sidecar file if it already exists.
 Use the `-x` option to create a new one if it doesn't exist.
 
-#### Hierarchical Keywords
+### Hierarchical Keywords
 If specified (`-h`), hierarchical keywords will be generated. These will be
 interpreted as a tree structure by image viewers that support them.
 
@@ -165,7 +175,7 @@ Animalia
         ┗━Hexapoda
 ```
 
-#### Examples
+### Examples
 
 Just generate keywords from a taxon, without writing to a file:
 ```ini
@@ -216,24 +226,15 @@ No existing XMP sidecar file found for img00002.jpg; skipping
 
 ## GUI
 The main interface for this project will be a desktop application, although it's early in development.
-
-### GUI Installation
-My goal is to get this packaged into more convenient platform-specific builds, but for now it must
+Soon this will be packaged into more convenient platform-specific builds, but for now it must
 be installed and launched from the command line.
-
-To install:
-```
-pip install naturtag[ui]
-```
 
 To launch, run:
 ```
 python -m naturtag.app.app
 ```
 
-###  GUI Usage
-
-#### Image Selection and Tagging
+### Image Selection and Tagging
 The basic UI components are shown below:
 ![Screenshot](assets/screenshots/gui-image-selector.png)
 
@@ -247,7 +248,7 @@ Other things to do:
 * **Right-click** an image for a context menu with more actions
 * See [Metadata](#metadata) for more details
 
-#### Species Search
+### Species Search
 In the likely event that you don't already know the taxon ID, click the
 'Find a Species' button to go to the taxon search screen. You can start with searching by name,
 with autocompletion support:
@@ -259,7 +260,7 @@ and fungi with 'goose' in either the species or genus name:
 
 ![Screenshot](assets/screenshots/gui-taxon-search-results.png)
 
-#### Saved Species
+### Saved Species
 The additional tabs on the taxon screen contain:
 * History of recently viewed taxa
 * Most frequently viewed taxa
@@ -269,7 +270,7 @@ To save a particular taxon for future reference, click the ✩ icon in the top l
 and it will be saved in the ★ tab. These items can be re-ordered via **Right-click** -> **Move to top**.
 (Unfortunately, drag-and-drop functionality is not currently possible for list items).
 
-#### Metadata
+### Metadata
 **Right-click** an image and select **Copy Flickr tags** to copy keyword tags compatible with Flickr.
 ![Screenshot](assets/screenshots/gui-image-context-menu.png)
 
@@ -278,7 +279,7 @@ Also, a very simple metadata view is included. To open it, **Right-click** an im
 
 ![Screenshot](assets/screenshots/gui-metadata.png)
 
-#### Settings
+### Settings
 There are also some settings to customize the metadata that your images will be tagged with,
 as well as iNaturalist info used in search filters. And yes, there is a dark mode, because
 why not.
@@ -287,7 +288,7 @@ why not.
 
 See [CLI Usage](#cli-usage) for more details on these settings.
 
-#### Keyboard Shortcuts
+### Keyboard Shortcuts
 Some keyboard shortcuts are included for convenience:
 
 Key(s)          | Action                    | Screen

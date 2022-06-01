@@ -3,6 +3,7 @@ from typing import Iterable
 
 from pyinaturalist import Taxon, TaxonCount, TaxonCounts
 from PySide6.QtCore import QSize, Qt, QTimer, Signal, Slot
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
@@ -39,6 +40,7 @@ class TaxonController(QWidget):
         self.search = TaxonSearch(settings)
         self.search.autocomplete.on_select.connect(self.select_taxon)
         self.search.on_results.connect(self.set_search_results)
+        self.on_select.connect(self.search.set_taxon)
         self.root.addLayout(self.search)
 
         # Search results & User taxa
@@ -50,14 +52,21 @@ class TaxonController(QWidget):
 
         # Selected taxon info
         self.taxon_info = TaxonInfoSection(threadpool)
+        self.taxon_info.on_select.connect(self.select_taxon)
+        self.taxon_info.on_select_obj.connect(self.display_taxon)
         self.taxonomy = TaxonomySection(threadpool)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
         self.root.addLayout(taxon_layout)
 
-    def info(self, message: str):
-        self.on_message.emit(message)
+        # Navigation keyboard shortcuts
+        shortcut = QShortcut(QKeySequence('Alt+Left'), self)
+        shortcut.activated.connect(self.taxon_info.prev)
+        shortcut = QShortcut(QKeySequence('Alt+Right'), self)
+        shortcut.activated.connect(self.taxon_info.next)
+        shortcut = QShortcut(QKeySequence('Alt+Up'), self)
+        shortcut.activated.connect(self.taxon_info.select_parent)
 
     def select_taxon(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a
@@ -94,6 +103,8 @@ class TaxonController(QWidget):
 
     def set_search_results(self, taxa: list[Taxon]):
         """Load search results into Results tab"""
+        if not taxa:
+            self.on_message.emit('No results found')
         self.tabs.results.set_taxa(taxa)
         self.tabs.setCurrentWidget(self.tabs.results_tab)
         self.bind_selection(self.tabs.results.taxa)
@@ -131,7 +142,7 @@ class TaxonTabs(QTabWidget):
         )
 
         self.history = TaxonList(threadpool)
-        self.add_tab(self.history, 'fa5s.history', 'History', 'Recently viewed taxa')
+        self.add_tab(self.history, 'fa5s.history', 'Recent', 'Recently viewed taxa')
 
         self.frequent = TaxonList(threadpool)
         self.add_tab(self.frequent, 'ri.bar-chart-fill', 'Frequent', 'Frequently viewed taxa')
@@ -170,7 +181,7 @@ class TaxonTabs(QTabWidget):
 
     @Slot(list)
     def display_history(self, taxa: list[Taxon]):
-        """After fetching taxon records for history/frequent, add info cards for them in the
+        """After fetching taxon records for recent and frequent, add info cards for them in the
         appropriate tabs
         """
         taxa_by_id = {t.id: t for t in taxa}

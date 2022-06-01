@@ -2,18 +2,16 @@ from fnmatch import fnmatch
 from glob import glob
 from itertools import chain
 from logging import getLogger
-from os.path import expanduser, isdir, isfile, join
 from pathlib import Path
-from typing import Union
 
 from pyinaturalist import Iterable
 
-from naturtag.constants import IMAGE_FILETYPES
+from naturtag.constants import IMAGE_FILETYPES, PathOrStr
 
 logger = getLogger().getChild(__name__)
 
 
-def glob_paths(path_patterns: list[str]) -> list[str]:
+def glob_paths(path_patterns: Iterable[PathOrStr]) -> list[Path]:
     """
     Given one to many glob patterns, expand all into a list of matching files
 
@@ -23,15 +21,15 @@ def glob_paths(path_patterns: list[str]) -> list[str]:
     Returns:
         Expanded list of file paths
     """
-    return list(
-        chain.from_iterable(
-            [expanduser(path) for path in glob(pattern, recursive=True)]
-            for pattern in path_patterns
+    return [
+        Path(path).expanduser()
+        for path in chain.from_iterable(
+            glob(str(pattern), recursive=True) for pattern in path_patterns
         )
-    )
+    ]
 
 
-def get_images_from_dir(dir: str, recursive: bool = False) -> list[str]:
+def get_images_from_dir(path: Path, recursive: bool = False) -> list[Path]:
     """
     Get all images of supported filetypes from the selected directory.
 
@@ -43,14 +41,12 @@ def get_images_from_dir(dir: str, recursive: bool = False) -> list[str]:
         Paths of supported image files in the directory
     """
     patterns = {f'**/{ext}' for ext in IMAGE_FILETYPES} if recursive else IMAGE_FILETYPES
-    paths = glob_paths([join(dir, pattern) for pattern in patterns])
-    logger.info(f'{len(paths)} images found in directory: {dir}')
+    paths = glob_paths([path / pattern for pattern in patterns])
+    logger.info(f'{len(paths)} images found in directory: {path}')
     return paths
 
 
-def get_valid_image_paths(
-    paths: Iterable[Union[str, bytes, Path]], recursive: bool = False
-) -> list[str]:
+def get_valid_image_paths(paths: Iterable[PathOrStr], recursive: bool = False) -> list[Path]:
     """
     Get all images of supported filetypes from one or more dirs and/or image paths
 
@@ -62,11 +58,11 @@ def get_valid_image_paths(
          Combined list of image file paths
     """
     image_paths = []
-    check_paths = [path.decode() if isinstance(path, bytes) else str(path) for path in paths]
-    logger.info(f'Getting images from paths: {check_paths}')
+    logger.info(f'Getting images from paths: {paths}')
 
-    for path in check_paths:
-        if isdir(path):
+    for path in paths:
+        path = Path(path)
+        if path.is_dir():
             image_paths.extend(get_images_from_dir(path, recursive=recursive))
         elif is_image_path(path):
             image_paths.append(path)
@@ -77,6 +73,6 @@ def get_valid_image_paths(
     return image_paths
 
 
-def is_image_path(path: str) -> bool:
+def is_image_path(path: Path) -> bool:
     """Determine if a path points to a valid image of a supported type"""
-    return isfile(path) and any(fnmatch(path.lower(), pattern) for pattern in IMAGE_FILETYPES)
+    return path.is_file() and any(fnmatch(path.suffix.lower(), ext) for ext in IMAGE_FILETYPES)

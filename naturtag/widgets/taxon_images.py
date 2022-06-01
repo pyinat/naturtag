@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.client import IMG_SESSION
-from naturtag.widgets.images import ImageWindow, PixmapLabel
+from naturtag.widgets.images import HoverMixin, ImageWindow, NavButtonsMixin, PixmapLabel
 from naturtag.widgets.layouts import HorizontalLayout, StylableWidget, VerticalLayout
 
 if TYPE_CHECKING:
@@ -19,26 +19,74 @@ ATTRIBUTION_STRIP_PATTERN = re.compile(r',?\s+uploaded by.*')
 logger = getLogger(__name__)
 
 
-class TaxonPixmapLabel(PixmapLabel):
-    """A PixmapLabel for a taxon photo. Adds a Taxon reference and a click event"""
+class TaxonPhoto(PixmapLabel):
+    """A taxon photo widget with a Taxon reference and a click event
 
-    on_click = Signal(Taxon)
+    Args:
+        taxon: The taxon associated with this photo
+        idx: The index of this photo within Taxon.taxon_photos
+    """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, taxon: Taxon = None, idx: int = 0, **kwargs):
         super().__init__(*args, **kwargs)
-        self.taxon = None
+        self.idx = idx
+        self.taxon = taxon
 
     def set_taxon(self, taxon: Taxon, size: str = 'medium'):
         self.taxon = taxon
         self._pixmap = IMG_SESSION.get_pixmap(taxon.default_photo, size=size)
         QLabel.setPixmap(self, self.scaledPixmap())
 
-    def mousePressEvent(self, _):
-        """Placeholder to accept mouse press events"""
 
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.on_click.emit(self.taxon)
+class FullscreenTaxonPhoto(NavButtonsMixin, TaxonPhoto):
+    """A fullscreen taxon photo widget with nav buttons"""
+
+
+class HoverTaxonPhoto(HoverMixin, TaxonPhoto):
+    """A taxon photo widget with hover effect"""
+
+
+class TaxonImageWindow(ImageWindow):
+    """Display taxon images in fullscreen as a separate window. Uses URLs instead of local file paths."""
+
+    def __init__(self):
+        super().__init__(image_class=FullscreenTaxonPhoto)
+        self.taxon: Taxon = None
+        self.photos: list[Photo] = None
+        self.selected_photo: Photo = None
+
+    @property
+    def idx(self) -> int:
+        """The index of the currently selected image"""
+        return self.photos.index(self.selected_photo)
+
+    def display_taxon(self, taxon_image: FullscreenTaxonPhoto):
+        """Open window to a selected taxon image, and save other taxon image URLs for navigation"""
+        idx = taxon_image.idx
+        taxon = taxon_image.taxon
+        if TYPE_CHECKING:
+            assert taxon is not None
+
+        self.taxon = taxon_image.taxon
+        self.selected_photo = taxon.taxon_photos[idx] if taxon.taxon_photos else taxon.default_photo
+        self.photos = taxon.taxon_photos
+        self.image_paths = [photo.original_url for photo in self.photos]
+        self.set_photo(self.selected_photo)
+        self.showFullScreen()
+
+    def select_image_idx(self, idx: int):
+        """Select an image by index"""
+        self.selected_photo = self.photos[idx]
+        self.set_photo(self.selected_photo)
+
+    def set_photo(self, photo: Photo):
+        self.image.set_pixmap(url=photo.original_url)
+        attribution = (
+            ATTRIBUTION_STRIP_PATTERN.sub('', photo.attribution or '')
+            .replace('(c)', '©')
+            .replace('CC ', 'CC-')
+        )
+        self.image.description = f'{self.taxon.full_name}\n{attribution}'
 
 
 class TaxonList(VerticalLayout):
@@ -124,7 +172,7 @@ class TaxonInfoCard(StylableWidget):
         self.taxon_id = taxon.id
 
         # Image
-        self.thumbnail = TaxonPixmapLabel()
+        self.thumbnail = TaxonPhoto()
         self.thumbnail.setFixedWidth(75)
         card_layout.addWidget(self.thumbnail)
         if not delayed_load:
@@ -145,37 +193,3 @@ class TaxonInfoCard(StylableWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.on_click.emit(self.taxon.id)
-
-
-class TaxonImageWindow(ImageWindow):
-    """Display taxon images in fullscreen as a separate window. Uses URLs instead of local file paths."""
-
-    def __init__(self):
-        super().__init__()
-        self.taxon: Taxon = None
-        self.photos: list[Photo] = None
-        self.selected_photo: Photo = None
-
-    @property
-    def idx(self) -> int:
-        """The index of the currently selected image"""
-        return self.photos.index(self.selected_photo)
-
-    def display_taxon(self, taxon: Taxon):
-        """Open window to a selected taxon image, and save other taxon image URLs for navigation"""
-        self.taxon = taxon
-        self.selected_photo = taxon.default_photo
-        self.photos = taxon.taxon_photos
-        self.image_paths = [photo.original_url for photo in self.photos]
-        self.set_photo(self.selected_photo)
-        self.showFullScreen()
-
-    def select_image_idx(self, idx: int):
-        """Select an image by index"""
-        self.selected_photo = self.photos[idx]
-        self.set_photo(self.selected_photo)
-
-    def set_photo(self, photo: Photo):
-        self.image.setPixmap(url=photo.original_url)
-        attribution = ATTRIBUTION_STRIP_PATTERN.sub('', photo.attribution or '')
-        self.image.overlay_text = f'{self.taxon.full_name}\n{attribution}'

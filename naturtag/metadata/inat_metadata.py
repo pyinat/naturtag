@@ -12,7 +12,7 @@ from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple, PathOrStr
-from naturtag.image_glob import glob_paths
+from naturtag.image_glob import get_valid_image_paths
 from naturtag.metadata import MetaMetadata
 
 DWC_NAMESPACES = ['dcterms', 'dwc']
@@ -20,16 +20,29 @@ logger = getLogger().getChild(__name__)
 
 
 def tag_images(
-    observation_id: int,
-    taxon_id: int,
+    image_paths: Iterable[PathOrStr],
+    observation_id: int = None,
+    taxon_id: int = None,
     common_names: bool = False,
     hierarchical: bool = False,
     create_sidecar: bool = False,
-    images: list[str] = None,
+    recursive: bool = False,
 ) -> list[MetaMetadata]:
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
-    metadata. See :py:func:`~naturtag.cli.tag` for details.
+    metadata.
+
+    Args:
+        image_paths: Paths to images to tag
+        observation_id: ID of an iNaturalist observation
+        taxon_id: ID of an iNaturalist species or other taxon
+        common_names: Include common names in taxonomy keywords
+        hierarchical: Generate pipe-delimited hierarchical keyword tags
+        create_sidecar: Create XMP sidecar files if they don't already exist
+        recursive: Recursively search subdirectories for valid image files
+
+    Returns:
+        Updated image metadata for each image
     """
     inat_metadata = get_inat_metadata(
         observation_id=observation_id,
@@ -40,17 +53,17 @@ def tag_images(
 
     if not inat_metadata:
         return []
-    elif not images:
+    elif not image_paths:
         return [inat_metadata]
     else:
         return [
             tag_image(image_path, inat_metadata, create_sidecar)
-            for image_path in glob_paths(images)
+            for image_path in get_valid_image_paths(image_paths, recursive)
         ]
 
 
 def tag_image(
-    image_path: str, inat_metadata: MetaMetadata, create_sidecar: bool = False
+    image_path: PathOrStr, inat_metadata: MetaMetadata, create_sidecar: bool = False
 ) -> MetaMetadata:
     img_metadata = MetaMetadata(image_path).merge(inat_metadata)
     img_metadata.write(create_sidecar=create_sidecar)
@@ -193,18 +206,19 @@ def get_ids_from_url(url: str) -> IntTuple:
     return observation_id, taxon_id
 
 
-def refresh_all(
+def refresh_tags(
     image_paths: Iterable[PathOrStr],
     common_names: bool = False,
     hierarchical: bool = False,
     create_sidecar: bool = False,
+    recursive: bool = False,
 ):
-    """Refresh metadata for all specified images"""
-    for image_path in image_paths:
-        refresh_metadata(MetaMetadata(image_path), common_names, hierarchical, create_sidecar)
+    """Refresh metadata for previously tagged images"""
+    for image_path in get_valid_image_paths(image_paths, recursive):
+        refresh_image(MetaMetadata(image_path), common_names, hierarchical, create_sidecar)
 
 
-def refresh_metadata(
+def refresh_image(
     metadata: MetaMetadata,
     common_names: bool = False,
     hierarchical: bool = False,
@@ -214,7 +228,7 @@ def refresh_metadata(
     if not metadata.has_observation and not metadata.has_taxon:
         return metadata
 
-    logger.info(f'Refreshing metadata for {metadata.image_path}')
+    logger.info(f'Refreshing tags for {metadata.image_path}')
     metadata = get_inat_metadata(  # type: ignore
         observation_id=metadata.observation_id,
         taxon_id=metadata.taxon_id,

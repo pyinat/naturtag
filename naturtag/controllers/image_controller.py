@@ -2,17 +2,15 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import QEvent, Signal, Slot
-from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QLineEdit, QToolButton, QWidget
+from PySide6.QtCore import Signal, Slot
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QWidget
 
-from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.controllers import ImageGallery
-from naturtag.metadata import get_ids_from_url, refresh_metadata, tag_images
+from naturtag.metadata import get_ids_from_url, refresh_image, tag_images
 from naturtag.metadata.meta_metadata import MetaMetadata
 from naturtag.settings import Settings
-from naturtag.widgets import HorizontalLayout, TaxonInfoCard, VerticalLayout
+from naturtag.widgets import HorizontalLayout, IdInput, TaxonInfoCard, VerticalLayout
 
 logger = getLogger(__name__)
 
@@ -74,12 +72,12 @@ class ImageController(QWidget):
 
         def tag_image(image_path):
             return tag_images(
+                [image_path],
                 obs_id,
                 taxon_id,
                 common_names=self.settings.common_names,
                 hierarchical=self.settings.hierarchical_keywords,
                 create_sidecar=self.settings.create_sidecar,
-                images=[image_path],
             )[0]
 
         for image_path in image_paths:
@@ -101,8 +99,8 @@ class ImageController(QWidget):
             self.info('Select images to tag')
             return
 
-        def refresh_image(image):
-            return refresh_metadata(
+        def _refresh_image(image):
+            return refresh_image(
                 image.metadata,
                 common_names=self.settings.common_names,
                 hierarchical=self.settings.hierarchical_keywords,
@@ -110,7 +108,7 @@ class ImageController(QWidget):
             )
 
         for image in images:
-            future = self.threadpool.schedule(refresh_image, image=image)
+            future = self.threadpool.schedule(_refresh_image, image=image)
             future.on_result.connect(self.update_metadata)
         self.info(f'{len(images)} images updated')
 
@@ -147,25 +145,3 @@ class ImageController(QWidget):
 
     def info(self, message: str):
         self.on_message.emit(message)
-
-
-class IdInput(QLineEdit):
-    """Pressing return or losing focus will send a 'selection' signal"""
-
-    on_select = Signal(int)
-
-    def __init__(self):
-        super().__init__()
-        self.setClearButtonEnabled(True)
-        self.setValidator(QIntValidator())
-        self.setMaximumWidth(200)
-        self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
-        self.returnPressed.connect(self.select)
-
-    def focusOutEvent(self, event: QEvent = None):
-        self.select()
-        return super().focusOutEvent(event)
-
-    def select(self):
-        if self.text():
-            self.on_select.emit(int(self.text()))
