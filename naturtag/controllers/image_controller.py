@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QWidget
 
 from naturtag.app.threadpool import ThreadPool
 from naturtag.controllers import ImageGallery
-from naturtag.metadata import get_ids_from_url, refresh_image, tag_images
+from naturtag.metadata import _refresh_tags, get_ids_from_url, tag_images
 from naturtag.metadata.meta_metadata import MetaMetadata
 from naturtag.settings import Settings
 from naturtag.widgets import HorizontalLayout, IdInput, TaxonInfoCard, VerticalLayout
@@ -100,7 +100,7 @@ class ImageController(QWidget):
             return
 
         def _refresh_image(image):
-            return refresh_image(
+            return _refresh_tags(
                 image.metadata,
                 common_names=self.settings.common_names,
                 hierarchical=self.settings.hierarchical_keywords,

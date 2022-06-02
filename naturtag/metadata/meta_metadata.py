@@ -24,7 +24,15 @@ logger = getLogger().getChild(__name__)
 
 # TODO: If there's no taxon ID but a `rank=name` tag, look up taxon based on that
 class MetaMetadata(ImageMetadata):
-    """Class for parsing & organizing higher-level info derived from raw image metadata"""
+    """Parses observation info and other higher-level details derived from raw image metadata
+
+    Example:
+
+        >>> from naturtag import MetaMetadata
+        >>> meta = MetaMetadata('/path/to/image.jpg')
+        >>> print(meta.summary)
+        >>> print(meta.to_observation())
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

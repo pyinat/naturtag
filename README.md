@@ -79,7 +79,7 @@ And tools to search and browse species to tag your images with:
 
 ![Screenshot](assets/screenshots/taxon-search.png)
 
-See [GUI documentation](https://naturtag.readthedocs.io/en/latest/gui.html) for more details.
+See [Application Guide](https://naturtag.readthedocs.io/en/latest/gui.html) for more details.
 
 ### CLI
 Naturtag also includes a command-line interface. It takes an observation or species, plus some image
@@ -90,18 +90,12 @@ See [CLI documentation](https://naturtag.readthedocs.io/en/latest/cli.html) for 
 
 ### Library
 You can also import `naturtag` as a python library, and use its main features in your own scripts or
-applications. Basic examples:
+applications. Basic example:
 ```python
 from naturtag import tag_images, refresh_tags
 
 # Tag images with full observation metadata
 tag_images(['img1.jpg', 'img2.jpg'], observation_id=1234)
-
-# Tag images with taxonomy metadata only
-tag_images(['img1.jpg', 'img2.jpg'], taxon_id=1234)
-
-# Glob patterns are also supported
-tag_images(['~/observations/*.jpg'], taxon_id=1234)
 
 # Refresh previously tagged images with latest observation and taxonomy metadata
 refresh_tags(['~/observations/'], recursive=True)

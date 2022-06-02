@@ -1,4 +1,4 @@
-# GUI
+# Application Guide
 The main interface for this project will be a desktop application, although it's still a work in
 progress. Soon this will be packaged into more convenient platform-specific builds, but for now it
 must be installed and launched from the command line.

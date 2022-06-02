@@ -32,6 +32,18 @@ def tag_images(
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
     metadata.
 
+    Examples:
+
+        >>> # Tag images with full observation metadata:
+        >>> from naturtag import tag_images
+        >>> tag_images(['img1.jpg', 'img2.jpg'], observation_id=1234)
+
+        >>> # Tag images with taxonomy metadata only
+        >>> tag_images(['img1.jpg', 'img2.jpg'], taxon_id=1234)
+
+        >>> # Glob patterns are also supported
+        >>> tag_images(['~/observations/*.jpg'], taxon_id=1234)
+
     Args:
         image_paths: Paths to images to tag
         observation_id: ID of an iNaturalist observation
@@ -57,12 +69,12 @@ def tag_images(
         return [inat_metadata]
     else:
         return [
-            tag_image(image_path, inat_metadata, create_sidecar)
+            _tag_image(image_path, inat_metadata, create_sidecar)
             for image_path in get_valid_image_paths(image_paths, recursive)
         ]
 
 
-def tag_image(
+def _tag_image(
     image_path: PathOrStr, inat_metadata: MetaMetadata, create_sidecar: bool = False
 ) -> MetaMetadata:
     img_metadata = MetaMetadata(image_path).merge(inat_metadata)
@@ -93,12 +105,12 @@ def get_inat_metadata(
         return None
 
     # Get all specified keyword categories
-    keywords = get_taxonomy_keywords(taxon)
+    keywords = _get_taxonomy_keywords(taxon)
     if hierarchical:
-        keywords.extend(get_hierarchical_keywords(keywords))
+        keywords.extend(_get_hierarchical_keywords(keywords))
     if common_names:
-        keywords.extend(get_common_keywords(taxon))
-    keywords.extend(get_id_keywords(observation_id, taxon_id))
+        keywords.extend(_get_common_keywords(taxon))
+    keywords.extend(_get_id_keywords(observation_id, taxon_id))
 
     logger.info(f'{len(keywords)} total keywords generated')
     metadata.update_keywords(keywords)
@@ -108,7 +120,7 @@ def get_inat_metadata(
         metadata.update_coordinates(observation.location)
 
     # Convert and add DwC metadata
-    metadata.update(get_dwc_terms(observation, taxon))
+    metadata.update(_get_dwc_terms(observation, taxon))
     return metadata
 
 
@@ -125,7 +137,7 @@ def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> 
     return sorted(taxon_counts, key=lambda x: x.count, reverse=True)
 
 
-def get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observation]:
+def _get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observation]:
     """Get observation and/or taxon records based on image metadata"""
     logger.info(f'Searching for matching taxon and/or observation for {metadata.image_path}')
     taxon, observation = None, None
@@ -139,12 +151,12 @@ def get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observat
     return taxon, observation
 
 
-def get_taxonomy_keywords(taxon: Taxon) -> list[str]:
+def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into rank keywords"""
     return [_quote(f'taxonomy:{t.rank}={t.name}') for t in [taxon, *taxon.ancestors]]
 
 
-def get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[str]:
+def _get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[str]:
     keywords = []
     if taxon_id:
         keywords.append(f'inat:taxon_id={taxon_id}')
@@ -155,7 +167,7 @@ def get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[st
     return keywords
 
 
-def get_common_keywords(taxon: Taxon) -> list[str]:
+def _get_common_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into common name keywords.
     Filters out terms that aren't useful to keep as tags
     """
@@ -167,7 +179,7 @@ def get_common_keywords(taxon: Taxon) -> list[str]:
     return [_quote(kw) for kw in keywords if kw and not is_ignored(kw)]
 
 
-def get_hierarchical_keywords(keywords: list) -> list[str]:
+def _get_hierarchical_keywords(keywords: list) -> list[str]:
     """Translate sorted taxonomy keywords into pipe-delimited hierarchical keywords"""
     hier_keywords = [keywords[0]]
     for rank_name in keywords[1:]:
@@ -175,7 +187,7 @@ def get_hierarchical_keywords(keywords: list) -> list[str]:
     return hier_keywords
 
 
-def get_dwc_terms(observation: Observation = None, taxon: Taxon = None) -> dict[str, str]:
+def _get_dwc_terms(observation: Observation = None, taxon: Taxon = None) -> dict[str, str]:
     """Convert either an observation or taxon into XMP-formatted Darwin Core terms"""
 
     # Get terms only for specific namespaces
@@ -213,18 +225,32 @@ def refresh_tags(
     create_sidecar: bool = False,
     recursive: bool = False,
 ):
-    """Refresh metadata for previously tagged images"""
+    """Refresh metadata for previously tagged images
+
+    Example:
+
+        >>> # Refresh previously tagged images with latest observation and taxonomy metadata
+        >>> from naturtag import refresh_tags
+        >>> refresh_tags(['~/observations/'], recursive=True)
+
+    Args:
+        image_paths: Paths to images to tag
+        common_names: Include common names in taxonomy keywords
+        hierarchical: Generate pipe-delimited hierarchical keyword tags
+        create_sidecar: Create XMP sidecar files if they don't already exist
+        recursive: Recursively search subdirectories for valid image files
+    """
     for image_path in get_valid_image_paths(image_paths, recursive):
-        refresh_image(MetaMetadata(image_path), common_names, hierarchical, create_sidecar)
+        _refresh_tags(MetaMetadata(image_path), common_names, hierarchical, create_sidecar)
 
 
-def refresh_image(
+def _refresh_tags(
     metadata: MetaMetadata,
     common_names: bool = False,
     hierarchical: bool = False,
     create_sidecar: bool = False,
 ) -> MetaMetadata:
-    """Refresh existing image metadata with latest observation and/or taxon data"""
+    """Refresh existing metadata for a single image with latest observation and/or taxon data"""
     if not metadata.has_observation and not metadata.has_taxon:
         return metadata
 
