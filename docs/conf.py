@@ -52,6 +52,13 @@ napoleon_include_private_with_doc = False
 napoleon_include_special_with_doc = False
 napoleon_use_param = True
 
+# Strip prompt text when copying code blocks with copy button
+copybutton_prompt_text = r'>>> |\.\.\. |\$ '
+copybutton_prompt_is_regexp = True
+
+# Generate labels in the format <page>:<section>
+autosectionlabel_prefix_document = True
+
 # HTML general settings
 html_static_path = [str(ASSETS_DIR)]
 html_favicon = str(ASSETS_DIR / 'favicon.ico')

@@ -17,5 +17,7 @@
 ```{toctree}
 :maxdepth: 2
 
+cli
+gui
 reference
 ```
