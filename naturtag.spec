@@ -63,7 +63,7 @@ exe = EXE(
     pyz,
     a.scripts,
     [],
-    icon=ASSETS_DIR/'logo.ico'
+    icon=str(ASSETS_DIR / 'logo.ico'),
     exclude_binaries=True,
     name=PROJECT_NAME,
     debug=False,

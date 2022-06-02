@@ -45,7 +45,7 @@ jobs:
           poetry build
           poetry publish -u  __token__ -p ${{ secrets.PYPI_TOKEN }}
 
-  release-installer:
+  build-installer:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -79,22 +79,58 @@ jobs:
       - name: Build PyInstaller package
         run: poetry run pyinstaller -y naturtag.spec
 
-      - name: Include taxon FTS db and compress (Windows)
+      # Include taxon FTS db, compress, and set platform name
+      - name: Finish artifact (Linux)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          tar -xvzf dist/naturtag/assets/taxon-fts-en.tar.gz --directory dist/naturtag/assets/
+          rm dist/naturtag/assets/taxon-fts-en.tar.gz
+          tar -C dist/naturtag/ -czvf naturtag.tar.gz .
+          echo "DIST_NAME=linux" >> $GITHUB_ENV
+
+      - name: Finish artifact (MacOS)
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          ASSETS=dist/naturtag/Contents/Resources/assets
+          tar -xvzf $ASSETS/taxon-fts-en.tar.gz --directory $ASSETS/
+          rm $ASSETS/taxon-fts-en.tar.gz
+          tar -C dist/naturtag/ -czvf naturtag.tar.gz .
+          echo "DIST_NAME=macos" >> $GITHUB_ENV
+
+      - name: Finish artifact (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           tar -xvzf dist\naturtag\assets\taxon-fts-en.tar.gz --directory dist\naturtag\assets\
           Remove-Item dist\naturtag\assets\taxon-fts-en.tar.gz
           tar -C dist\naturtag\ -czvf naturtag.tar.gz .
+          echo "DIST_NAME=windows" >> $env:GITHUB_ENV
 
-      - name: Include taxon FTS db and compress (Non-Windows)
-        if: ${{ matrix.os != 'windows-latest' }}
-        run: |
-          tar -xvzf dist/naturtag/assets/taxon-fts-en.tar.gz --directory dist/naturtag/assets/
-          rm dist/naturtag/assets/taxon-fts-en.tar.gz
-          tar -C dist/naturtag/ -czvf naturtag.tar.gz .
-
-      - name: Upload artifact
+      - name: Upload workflow artifact
         uses: actions/upload-artifact@v3
         with:
-          name: naturtag_${{ matrix.os }}.tar.gz
+          name: naturtag-${{ env.DIST_NAME }}.tar.gz
           path: naturtag.tar.gz
+
+  release-installer:
+    runs-on: ubuntu-latest
+    needs: build-installer
+    steps:
+      # Explicitly download each artifact to retain filenames
+      - uses: actions/download-artifact@v3
+        with:
+          name: naturtag-linux.tar.gz
+          path: naturtag-linux.tar.gz
+      - uses: actions/download-artifact@v3
+        with:
+          name: naturtag-macos.tar.gz
+          path: naturtag-macos.tar.gz
+      - uses: actions/download-artifact@v3
+        with:
+          name: naturtag-windows.tar.gz
+          path: naturtag-windows.tar.gz
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: '*tar.gz'

@@ -3,6 +3,7 @@ from collections import Counter, OrderedDict
 from itertools import chain
 from logging import getLogger
 from pathlib import Path
+from tarfile import TarFile
 from typing import Iterable, Optional
 
 import yaml
@@ -10,10 +11,13 @@ from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
 from pyinaturalist import TaxonCounts
+from pyinaturalist_convert import create_tables
 
 from naturtag.constants import (
     CONFIG_PATH,
+    DB_PATH,
     DEFAULT_WINDOW_SIZE,
+    FTS_DB,
     LOGFILE,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
@@ -188,6 +192,24 @@ class UserTaxa(YamlMixin):
     @classmethod
     def read(cls) -> 'UserTaxa':
         return super(UserTaxa, cls).read()  # type: ignore
+
+
+def setup(settings: Settings):
+    """Run any first-time setup steps, if needed:
+    * Extract packaged full text search database to user data directory
+    * Create database tables
+    """
+    if settings.setup_complete:
+        logger.debug('First-time setup not needed')
+        return
+
+    logger.info('Running first-time setup')
+    with TarFile.open(FTS_DB) as tar:
+        tar.extractall(path=DB_PATH.parent)
+    create_tables()
+
+    settings.setup_complete = True
+    settings.write()
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
