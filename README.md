@@ -228,72 +228,91 @@ python -m naturtag.app.app
 ```
 
 ### Image Selection and Tagging
-The basic UI components are shown below:
-![Screenshot](assets/screenshots/gui-image-selector.png)
+The **Photos** tab is the main interface for selecting and tagging images:
 
-1. Drag & drop images or folders into the window.
-2. Or, select files via the file browser on the right
-3. Enter an iNaturalist observation ID or taxon ID (iNaturalist URLs also work here)
-4. Click the 'Run' button in the lower-left to tag the selected images
+![Screenshot](assets/screenshots/image-selector.png)
 
-Other things to do:
+1. Select images:
+    * Drag & drop images or folders into the window
+    * Or, select files via the file browser (from the toolbar, or `Ctrl+O`)
+2. Select iNaturalist metadata:
+    * Enter an iNaturalist observation ID or taxon ID
+    * Or paste an iNaturalist URLs with `Ctrl+V`
+    * Or search for a species from the **Species** tab (see details below)
+    * Coming soon: search for observations from the **Observations** tab
+3. Click the **Run** (▶️) button in the top right (or `Ctrl+R`) to tag the selected images
+
+Mouse actions:
+* **Left-click** an image to view fullscreen
 * **Middle-click** an image to remove it
-* **Right-click** an image for a context menu with more actions
-* See [Metadata](#metadata) for more details
+* **Right-click** an image for a context menu with more actions:
+
+![Screenshot](assets/screenshots/image-context-menu.png)
 
 ### Species Search
-In the likely event that you don't already know the taxon ID, click the
-'Find a Species' button to go to the taxon search screen. You can start with searching by name,
-with autocompletion support:
+The **Species** tab contains tools to search and browse species to tag your images with:
 
-![Screenshot](assets/screenshots/gui-taxon-search.png)
+![Screenshot](assets/screenshots/taxon-search.png)
 
-You can also run a full search using the additional filters. For example, to search for plants
-and fungi with 'goose' in either the species or genus name:
+#### Basic Search
+You can start by searching by name, with autocompletion:
 
-![Screenshot](assets/screenshots/gui-taxon-search-results.png)
+![Screenshot](assets/screenshots/taxon-autocomplete.png)
 
-### Saved Species
-The additional tabs on the taxon screen contain:
-* History of recently viewed taxa
-* Most frequently viewed taxa
-* Starred taxa
+#### Full Search
+Or you can also run a full search using additional filters:
+* **Categories** filters by iconic taxa (Birds, Amphibians, etc.). `Ctrl-click` to select multiple.
+* **Rank** filters by taxonomic rank (Family, Genus, Species, etc.).
+  * Select an exact rank, for example to search only for species
+  * Or select a minimum and/or maximum rank, for example to search for anything between a species
+    and a family.
+* **Parent** uses the selected taxon as a filter, and searches within children of that taxon. For
+  example, to search for flies (_Diptera_) with 'ornate' in the name:
 
-To save a particular taxon for future reference, click the ✩ icon in the top left of its info panel,
-and it will be saved in the ★ tab. These items can be re-ordered via **Right-click** -> **Move to top**.
-(Unfortunately, drag-and-drop functionality is not currently possible for list items).
+![Screenshot](assets/screenshots/taxon-search-children.png)
 
-### Metadata
-**Right-click** an image and select **Copy Flickr tags** to copy keyword tags compatible with Flickr.
-![Screenshot](assets/screenshots/gui-image-context-menu.png)
 
-Also, a very simple metadata view is included. To open it, **Right-click** an image and select
-**View metadata**.
+#### Navigation
+* After selecting a taxon, you will see a list of its **Ancestors** and **Children**
+* The **Back** and **Forward** buttons (or `Alt-Left`/`Right`) navigate through recently viewed taxa
+* The **Parent** button (or `Alt-Up`) selects the immediate parent
+* **View on iNaturalist** will show more details about the taxon on inaturalist.org, in a new browser tab
+* Click on a taxon photo or the thumbnails to the right to view fullscreen
 
-![Screenshot](assets/screenshots/gui-metadata.png)
+#### Species Lists
+The additional tabs next to search results contain:
+* **Recent:** Recently viewed taxa
+* **Frequent:** Most frequently viewed taxa
+* **Observed:** Taxa observed by you, sorted by observation count
+
+![Screenshot](assets/screenshots/taxon-tabs.png)
 
 ### Settings
-There are also some settings to customize the metadata that your images will be tagged with,
-as well as iNaturalist info used in search filters. And yes, there is a dark mode, because
-why not.
+See the **Settings** menu for some settings to customize the metadata that your images will be
+tagged with, iNaturalist info used in search filters, and other behavior:
 
-![Screenshot](assets/screenshots/gui-settings.png)
-
-See [CLI Usage](#cli-usage) for more details on these settings.
+![Screenshot](assets/screenshots/settings.png)
 
 ### Keyboard Shortcuts
 Some keyboard shortcuts are included for convenience:
 
-Key(s)          | Action                    | Screen
-----            |----                       |----------
-Ctrl+O          | Open file chooser         | Image selection
-Ctrl+V          | Paste photos or iNat URLs | Image selection
-Ctrl+Enter      | Run image tagger          | Image selection
-Shift+Ctrl+X    | Clear selected images     | Image selection
-Ctrl+Enter      | Run taxon search          | Taxon search
-Shift+Ctrl+X    | Clear search filters      | Taxon search
-F11             | Toggle fullscreen         | All
-Ctrl+Q          | Quit                      | All
+Key(s)         | Action                    | Tab/Screen
+----           |----                       |----------
+`Ctrl+O`       | Open file browser         | Photos
+`Ctrl+V`       | Paste photos or iNat URLs | Photos
+`Ctrl+R`       | Run image tagger          | Photos
+`Shift+Ctrl+X` | Clear selected images     | Photos
+`F5`           | Refresh photo metadata    | Photos
+`Ctrl+Enter`   | Run search                | Species
+`Alt+Left`     | View previous taxon       | Species
+`Alt+Right`    | View next taxon           | Species
+`Alt+Up`       | View parent taxon         | Species
+`Left`         | View previous image       | Fullscreen image (local photo or taxon)
+`Right`        | View next image           | Fullscreen image (local photo or taxon)
+`Escape`       | Exit fullscreen view      | Fullscreen image (local photo or taxon)
+`Ctrl+Tab`     | Cycle through tabs        | All
+`F11`          | Toggle fullscreen         | All
+`Ctrl+Q`       | Quit                      | All
 
 ## Development Status
 * See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and current progress.
