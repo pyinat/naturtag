@@ -9,9 +9,9 @@ from naturtag.metadata.meta_metadata import MetaMetadata
 from naturtag.metadata.inat_metadata import (
     get_ids_from_url,
     get_inat_metadata,
-    refresh_image,
+    _refresh_tags,
     refresh_tags,
     strip_url,
-    tag_image,
+    _tag_image,
     tag_images,
 )

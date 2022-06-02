@@ -31,12 +31,15 @@ extensions = [
 # MyST extensions
 myst_enable_extensions = ['colon_fence', 'html_image', 'linkify']
 
+# Ignore a subset of auto-generated pages
+exclude_patterns = ['modules/modules.rst']
+
+# Enable automatic links to other projects' Sphinx docs
 intersphinx_mapping = {
     'click': ('https://click.palletsprojects.com/en/latest/', None),
-    'kivy': ('https://kivy.org/doc/stable', None),
-    'kivymd': ('https://kivymd.readthedocs.io/en/latest', None),
     'pillow': ('https://pillow.readthedocs.io/en/stable', None),
-    'pyinaturalist': ('https://pyinaturalist.readthedocs.io/en/latest/', None),
+    'pyinaturalist': ('https://pyinaturalist.readthedocs.io/en/stable/', None),
+    'pyinaturalist_convert': ('https://pyinaturalist-convert.readthedocs.io/en/latest/', None),
 }
 intersphinx_timeout = 30
 
@@ -51,6 +54,13 @@ napoleon_google_docstring = True
 napoleon_include_private_with_doc = False
 napoleon_include_special_with_doc = False
 napoleon_use_param = True
+
+# Strip prompt text when copying code blocks with copy button
+copybutton_prompt_text = r'>>> |\.\.\. |\$ '
+copybutton_prompt_is_regexp = True
+
+# Generate labels in the format <page>:<section>
+autosectionlabel_prefix_document = True
 
 # HTML general settings
 html_static_path = [str(ASSETS_DIR)]

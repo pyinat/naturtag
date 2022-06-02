@@ -202,10 +202,10 @@ def tag(
     observation,
     taxon,
     verbose,
-    install_completion,
+    install,
 ):
-    if install_completion:
-        install_shell_completion(install_completion)
+    if install:
+        install_shell_completion(install)
         setup(Settings.read())
         ctx.exit()
     elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
