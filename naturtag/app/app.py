@@ -112,18 +112,17 @@ class MainWindow(QMainWindow):
         # Run any first-time setup steps, if needed
         setup(self.settings)
 
-        # Debug
-        shortcut = QShortcut(QKeySequence('F9'), self)
-        shortcut.activated.connect(self.reload_qss)
-
         # Load any valid image paths provided on command line (or from drag & drop)
         self.image_controller.gallery.load_images([a for a in sys.argv if a != __file__])
 
-        # Load demo images
-        demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
-        # self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
-        self.image_controller.gallery.load_images(demo_images)  # type: ignore
-        self.taxon_controller.select_taxon(47792)
+        # Debug
+        if settings.debug:
+            shortcut = QShortcut(QKeySequence('F9'), self)
+            shortcut.activated.connect(self.reload_qss)
+            demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
+            # self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
+            self.image_controller.gallery.load_images(demo_images)  # type: ignore
+            self.taxon_controller.select_taxon(47792)
 
     def closeEvent(self, event: QCloseEvent):
         self.settings.window_size = self.size().toTuple()
