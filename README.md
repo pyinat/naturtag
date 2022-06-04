@@ -79,7 +79,7 @@ And tools to search and browse species to tag your images with:
 
 ![Screenshot](assets/screenshots/taxon-search.png)
 
-See [Application Guide](https://naturtag.readthedocs.io/en/latest/gui.html) for more details.
+See [Application Guide](https://naturtag.readthedocs.io/en/latest/app.html) for more details.
 
 ### CLI
 Naturtag also includes a command-line interface. It takes an observation or species, plus some image
