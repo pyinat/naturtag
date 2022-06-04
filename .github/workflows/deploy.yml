@@ -77,7 +77,7 @@ jobs:
           poetry install -v --without dev --extras ui
           poetry run pip install -U pyinstaller setuptools
       - name: Build PyInstaller package
-        run: poetry run pyinstaller -y naturtag.spec
+        run: poetry run pyinstaller -y packaging/naturtag.spec
 
       # Include taxon FTS db, compress, and set platform name
       - name: Finish artifact (Linux)
@@ -111,7 +111,8 @@ jobs:
         if : ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           gem install fpm --user-install
-          .github/build_fpm.sh -dsr
+          cd packaging
+          ./build_fpm.sh
 
       # Upload workflow artifacts
       - name: Upload PyInstaller workflow artifact
