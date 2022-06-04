@@ -2,6 +2,7 @@
 # Build Linux packages with FPM
 SRC_DIR=dist/naturtag
 PKG_DIR=dist/fpm
+export PATH=$PATH:~/.gem/ruby/2.7.0/bin:~/.gem/ruby/3.0.0/bin
 
 # Options for package format(s) to build
 while getopts "dsr" option; do
@@ -31,12 +32,15 @@ find $PKG_DIR/usr/share -type f -exec chmod 644 -- {} +
 chmod +x $PKG_DIR/opt/naturtag/naturtag
 
 # Get app version from poetry config
-app_version=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['tool']['poetry']['version'])")
+poetry run pip install tomlkit  #  Shouldn't this already be installed?
+app_version=$(poetry run python .github/get_version.py)
+echo "Version: $app_version"
 
 # DEB
 if [[ ! -z "${PGK_DEB}" ]]; then
     fpm -f -C $PKG_DIR \
-        --input-type dir \
+        -s dir \
+        --verbose \
         --name "naturtag" \
         --version $app_version \
         --description "Tagger for iNaturalist observation photos" \
@@ -50,7 +54,8 @@ fi
 # Snap
 if [[ ! -z "${PGK_SNAP}" ]]; then
     fpm -f -C $PKG_DIR \
-        --input-type dir \
+        -s dir \
+        --verbose \
         --name "naturtag" \
         --version $app_version \
         --description "Tagger for iNaturalist observation photos" \
@@ -63,8 +68,9 @@ fi
 
 # RPM
 if [[ ! -z "${PGK_RPM}" ]]; then
-    fpm -f -C package \
-        --input-type dir \
+    fpm -f -C $PKG_DIR \
+        -s dir \
+        --verbose \
         --name "naturtag" \
         --version $app_version \
         --description "Tagger for iNaturalist observation photos" \
@@ -72,5 +78,5 @@ if [[ ! -z "${PGK_RPM}" ]]; then
         --maintainer "jordan.cook@pioneer.com" \
         --url "https://naturtag.readthedocs.io" \
         --output-type rpm \
-        --package naturtag.rpm
+        --package dist/naturtag.rpm
 fi
