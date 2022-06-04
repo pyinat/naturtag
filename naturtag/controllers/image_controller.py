@@ -21,6 +21,8 @@ class ImageController(QWidget):
 
     on_message = Signal(str)
     on_new_metadata = Signal(MetaMetadata)
+    on_select_observation_id = Signal(int)
+    on_select_taxon_id = Signal(int)
 
     def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
@@ -39,10 +41,14 @@ class ImageController(QWidget):
         # Input fields
         inputs_layout = VerticalLayout()
         data_source_layout.addLayout(inputs_layout)
+
         self.input_obs_id = IdInput()
+        self.input_obs_id.on_select.connect(self.select_observation_id)
         inputs_layout.addWidget(QLabel('Observation ID:'))
         inputs_layout.addWidget(self.input_obs_id)
+
         self.input_taxon_id = IdInput()
+        self.input_taxon_id.on_select.connect(self.select_taxon_id)
         inputs_layout.addWidget(QLabel('Taxon ID:'))
         inputs_layout.addWidget(self.input_taxon_id)
 
@@ -115,33 +121,54 @@ class ImageController(QWidget):
     def clear(self):
         """Clear all images and input"""
         self.gallery.clear()
-        self.input_obs_id.setText('')
-        self.input_taxon_id.setText('')
+        self.input_obs_id.clear()
+        self.input_taxon_id.clear()
         self.data_source_card.clear()
         self.info('Images cleared')
 
-    # TODO: Cleaner way to do this. move paste to MainWindow?
     def paste(self):
         """Paste either image paths or taxon/observation URLs"""
         text = QApplication.clipboard().text()
         logger.debug(f'Pasted: {text}')
 
+        # Check for IDs if an iNat URL was pasted
         observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
-            self.input_obs_id.setText(str(observation_id))
-            # self.input_obs_id.select_taxon()
-            self.info(f'Observation {observation_id} selected')
+            self.input_obs_id.set_id(observation_id)
+            self.select_observation_id(observation_id)
         elif taxon_id:
-            self.input_taxon_id.setText(str(taxon_id))
-            # self.input_taxon_id.select_taxon()
-            self.info(f'Taxon {taxon_id} selected')
+            self.input_taxon_id.set_id(taxon_id)
+            self.select_taxon_id(taxon_id)
+        # If not an iNat URL, check for valid image paths
         else:
             self.gallery.load_images(text.splitlines())
 
+    @Slot(Taxon)
     def select_taxon(self, taxon: Taxon):
-        self.input_taxon_id.setText(str(taxon.id))
+        """Update input info from a taxon object (loaded from Species tab)"""
+        self.input_taxon_id.set_id(taxon.id)
         self.data_source_card.clear()
         self.data_source_card.addWidget(TaxonInfoCard(taxon=taxon, delayed_load=False))
+
+    # @Slot(Observation)
+    # def select_observation(self, observation: Observation):
+    #     """Update input info from an observation object (loaded from Observations tab)"""
+    #     self.input_taxon_id.set_id(observation.id)
+    #     self.data_source_card.clear()
+    #     self.data_source_card.addWidget(
+    #         ObservationInfoCard(observation=observation, delayed_load=False)
+    #     )
+
+    def select_observation_id(self, observation_id: int):
+        self.on_select_observation_id.emit(observation_id)
+        self.info(f'Observation {observation_id} selected')
+
+    def select_taxon_id(self, taxon_id: int):
+        """Select a taxon ID from text input; will be loaded by TaxonController and finished with
+        self.select_taxon()
+        """
+        self.on_select_taxon_id.emit(taxon_id)
+        self.info(f'Taxon {taxon_id} selected')
 
     def info(self, message: str):
         self.on_message.emit(message)

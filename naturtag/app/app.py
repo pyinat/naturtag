@@ -64,10 +64,10 @@ class MainWindow(QMainWindow):
 
         # Select taxon from image context menu, ID input fields, and iconic taxa filtes
         self.image_controller.gallery.on_select.connect(self.taxon_controller.select_taxon)
-        self.image_controller.input_obs_id.on_select.connect(
+        self.image_controller.on_select_observation_id.connect(
             self.taxon_controller.select_observation_taxon
         )
-        self.image_controller.input_taxon_id.on_select.connect(self.taxon_controller.select_taxon)
+        self.image_controller.on_select_taxon_id.connect(self.taxon_controller.select_taxon)
         self.taxon_controller.search.iconic_taxon_filters.on_select.connect(
             self.taxon_controller.select_taxon
         )
