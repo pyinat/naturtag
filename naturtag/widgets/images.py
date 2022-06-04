@@ -194,10 +194,12 @@ class ImageWindow(QWidget):
     Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
     """
 
+    on_remove = Signal(Path)
+
     def __init__(self, image_class: Type[FullscreenPhoto] = FullscreenPhoto):
         super().__init__()
         self.image_paths: list[Path] = []
-        self.selected_path: Path = Path('.')
+        self.selected_path = Path('.')
         self.setWindowTitle('Naturtag')
 
         self.image = image_class()
@@ -211,14 +213,11 @@ class ImageWindow(QWidget):
         self.image.right_arrow.on_click.connect(self.select_next_image)
 
         # Keyboard shortcuts
-        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
-        shortcut.activated.connect(self.close)
-        shortcut = QShortcut(QKeySequence('Q'), self)
-        shortcut.activated.connect(self.close)
-        shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
-        shortcut.activated.connect(self.select_next_image)
-        shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
-        shortcut.activated.connect(self.select_prev_image)
+        QShortcut(QKeySequence(Qt.Key_Escape), self).activated.connect(self.close)
+        QShortcut(QKeySequence('Q'), self).activated.connect(self.close)
+        QShortcut(QKeySequence(Qt.Key_Right), self).activated.connect(self.select_next_image)
+        QShortcut(QKeySequence(Qt.Key_Left), self).activated.connect(self.select_prev_image)
+        QShortcut(QKeySequence(Qt.Key_Delete), self).activated.connect(self.remove_image)
 
     @property
     def idx(self) -> int:
@@ -246,6 +245,17 @@ class ImageWindow(QWidget):
     def set_pixmap(self, path: PathOrStr):
         self.image.set_pixmap(QPixmap(path))
         self.image.description = str(path)
+
+    def remove_image(self):
+        """Remove the current image from the list"""
+        remove_path = self.selected_path
+        if len(self.image_paths) > 1:
+            self.select_next_image()
+            self.image_paths.remove(remove_path)
+        # If the last image was removed, close the window
+        else:
+            self.close()
+        self.on_remove.emit(remove_path)
 
     def wrap_idx(self, increment: int):
         """Increment and wrap the index around to the other side of the list"""

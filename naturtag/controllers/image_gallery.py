@@ -53,6 +53,7 @@ class ImageGallery(StylableWidget):
         self.setAcceptDrops(True)
         self.images: dict[Path, LocalThumbnail] = {}
         self.image_window = ImageWindow()
+        self.image_window.on_remove.connect(self.remove_image)
         root = VerticalLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 
@@ -125,7 +126,10 @@ class ImageGallery(StylableWidget):
 
     @Slot(str)
     def remove_image(self, image_path: Path):
-        del self.images[image_path]
+        logger.debug(f'Removing image {image_path}')
+        thumbnail = self.images.pop(image_path)
+        thumbnail.setParent(None)
+        thumbnail.deleteLater()
 
     @Slot(str)
     def select_image(self, image_path: Path):
@@ -232,10 +236,7 @@ class LocalThumbnail(StylableWidget):
         self.anim_group.start()
 
     def remove(self):
-        logger.debug(f'Removing image {self.image_path}')
         self.on_remove.emit(self.image_path)
-        self.setParent(None)
-        self.deleteLater()
 
     def select(self):
         logger.debug(f'Selecting image {self.image_path}')
