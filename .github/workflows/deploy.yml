@@ -13,13 +13,12 @@ on:
         description: 'Version number for pre-releases; defaults to build number'
         required: false
         default: ''
-
 env:
   LATEST_PY_VERSION: '3.10'
 
 
 jobs:
-  release-package:
+  release-pypi-package:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -45,7 +44,8 @@ jobs:
           poetry build
           poetry publish -u  __token__ -p ${{ secrets.PYPI_TOKEN }}
 
-  build-installer:
+
+  build-app-packages:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -63,7 +63,7 @@ jobs:
 
       - name: Install system packages
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt-get install -y libegl-dev libxcb1-dev libxcb-image0 libxcb-render0 libwebp-dev libpng16-16
+        run: sudo apt-get install -y libegl-dev libxcb1-dev libxcb-image0 libxcb-render0 libwebp-dev libpng16-16 rpm
 
       - name: Cache python packages
         id: cache
@@ -77,15 +77,16 @@ jobs:
           poetry install -v --without dev --extras ui
           poetry run pip install -U pyinstaller setuptools
       - name: Build PyInstaller package
-        run: poetry run pyinstaller -y naturtag.spec
+        run: poetry run pyinstaller -y packaging/naturtag.spec
 
       # Include taxon FTS db, compress, and set platform name
       - name: Finish artifact (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          tar -xvzf dist/naturtag/assets/taxon-fts-en.tar.gz --directory dist/naturtag/assets/
-          rm dist/naturtag/assets/taxon-fts-en.tar.gz
-          tar -C dist/naturtag/ -czvf naturtag.tar.gz .
+          ASSETS=dist/naturtag/assets
+          tar -xvzf $ASSETS/taxon-fts-en.tar.gz --directory $ASSETS/
+          rm $ASSETS/taxon-fts-en.tar.gz
+          tar -C dist/naturtag/ -czvf naturtag-linux.tar.gz .
           echo "DIST_NAME=linux" >> $GITHUB_ENV
 
       - name: Finish artifact (MacOS)
@@ -94,7 +95,7 @@ jobs:
           ASSETS=dist/naturtag/Contents/Resources/assets
           tar -xvzf $ASSETS/taxon-fts-en.tar.gz --directory $ASSETS/
           rm $ASSETS/taxon-fts-en.tar.gz
-          tar -C dist/naturtag/ -czvf naturtag.tar.gz .
+          tar -C dist/naturtag/ -czvf naturtag-macos.tar.gz .
           echo "DIST_NAME=macos" >> $GITHUB_ENV
 
       - name: Finish artifact (Windows)
@@ -102,35 +103,48 @@ jobs:
         run: |
           tar -xvzf dist\naturtag\assets\taxon-fts-en.tar.gz --directory dist\naturtag\assets\
           Remove-Item dist\naturtag\assets\taxon-fts-en.tar.gz
-          tar -C dist\naturtag\ -czvf naturtag.tar.gz .
+          tar -C dist\naturtag\ -czvf naturtag-windows.tar.gz .
           echo "DIST_NAME=windows" >> $env:GITHUB_ENV
 
-      - name: Upload workflow artifact
+      # Build deb, snap, and rpm packages
+      - name: Build Linux packages with FPM
+        if : ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          gem install fpm --user-install
+          cd packaging
+          ./build_fpm.sh
+
+      # Upload workflow artifacts
+      - name: Upload PyInstaller workflow artifact
         uses: actions/upload-artifact@v3
         with:
           name: naturtag-${{ env.DIST_NAME }}.tar.gz
-          path: naturtag.tar.gz
+          path: naturtag-${{ env.DIST_NAME }}.tar.gz
+          retention-days: 7
+      - name: Upload FPM workflow artifacts
+        if : ${{ matrix.os == 'ubuntu-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: naturtag-fpm
+          path: dist/naturtag.*
+          retention-days: 7
 
-  release-installer:
+
+  # Create a release with all workflow artifacts attached
+  release-app-packages:
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-    needs: build-installer
+    needs: build-app-packages
     steps:
-      # Explicitly download each artifact to retain filenames
       - uses: actions/download-artifact@v3
-        with:
-          name: naturtag-linux.tar.gz
-          path: naturtag-linux.tar.gz
-      - uses: actions/download-artifact@v3
-        with:
-          name: naturtag-macos.tar.gz
-          path: naturtag-macos.tar.gz
-      - uses: actions/download-artifact@v3
-        with:
-          name: naturtag-windows.tar.gz
-          path: naturtag-windows.tar.gz
+      - name: Collect artifacts from workflow subdirs
+        run: |
+          find . -type d -depth -name 'naturtag*' -exec mv {} {}_dir \;
+          find . -type f -mindepth 2 -exec mv -- {} . \;
+          rmdir *_dir
+          ls -ARl
 
       - name: Create release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: '*tar.gz'
+          files: 'naturtag*'

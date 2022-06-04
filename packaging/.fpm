@@ -1,0 +1,8 @@
+-f
+-s dir
+--verbose
+--name "naturtag"
+--description "Tagger for iNaturalist observation photos"
+--license "MIT"
+--maintainer "Jordan Cook <jordan.cook@pioneer.com>"
+--url "https://naturtag.readthedocs.io"

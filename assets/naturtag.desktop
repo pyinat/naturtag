@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Naturtag
+Comment=Tagger for iNaturalist observation photos
+Path=/opt/naturtag
+Exec=/opt/naturtag/naturtag
+Icon=naturtag
