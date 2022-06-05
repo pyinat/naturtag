@@ -12,8 +12,8 @@ from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple, PathOrStr
-from naturtag.image_glob import get_valid_image_paths
 from naturtag.metadata import MetaMetadata
+from naturtag.utils.image_glob import get_valid_image_paths
 
 DWC_NAMESPACES = ['dcterms', 'dwc']
 logger = getLogger().getChild(__name__)

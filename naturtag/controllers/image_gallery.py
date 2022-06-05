@@ -3,7 +3,6 @@ import webbrowser
 from logging import getLogger
 from pathlib import Path
 from typing import Callable, Iterable
-from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import (
     QEasingCurve,
@@ -27,9 +26,8 @@ from PySide6.QtWidgets import (
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT, PathOrStr
-from naturtag.image_glob import get_valid_image_paths
 from naturtag.metadata import MetaMetadata
-from naturtag.thumbnails import generate_thumbnail
+from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FlowLayout,
     HorizontalLayout,
@@ -86,7 +84,7 @@ class ImageGallery(StylableWidget):
     def load_images(self, image_paths: Iterable[PathOrStr]):
         """Load multiple images, and ignore any duplicates"""
         images = get_valid_image_paths(image_paths, recursive=True)
-        new_images = {Path(i) for i in images if i} - set(self.images.keys())
+        new_images = images - set(self.images.keys())
         if not new_images:
             return
 
@@ -94,10 +92,8 @@ class ImageGallery(StylableWidget):
         for image_path in sorted(list(new_images)):
             self.load_image(image_path)
 
-    def load_image(self, image_path: PathOrStr):
-        """Load an image from a file path or URI"""
-        # TODO: Support Windows file URIs from clipboard
-        image_path = Path(unquote(urlparse(str(image_path)).path))
+    def load_image(self, image_path: Path):
+        """Load an image"""
         if not image_path.is_file():
             logger.info(f'File does not exist: {image_path}')
             return
@@ -122,8 +118,7 @@ class ImageGallery(StylableWidget):
 
     def dropEvent(self, event: QDropEvent):
         event.acceptProposedAction()
-        for image_path in event.mimeData().text().splitlines():
-            self.load_image(image_path)
+        self.load_images(event.mimeData().text().splitlines())
 
     @Slot(str)
     def remove_image(self, image_path: Path):
@@ -156,6 +151,7 @@ class LocalThumbnail(StylableWidget):
         self.metadata = MetaMetadata(self.image_path)
         self.setToolTip(self.metadata.summary)
         layout = VerticalLayout(self)
+
         # Image
         self.image = HoverLabel(self)
         self.image.setPixmap(generate_thumbnail(self.image_path))
