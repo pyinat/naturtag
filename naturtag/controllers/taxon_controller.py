@@ -3,7 +3,7 @@ from typing import Iterable
 
 from pyinaturalist import Taxon, TaxonCount, TaxonCounts
 from PySide6.QtCore import QSize, Qt, QTimer, Signal, Slot
-from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
+from PySide6.QtWidgets import QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
@@ -69,6 +69,7 @@ class TaxonController(StylableWidget):
         self.add_shortcut('Alt+Right', self.taxon_info.next)
         self.add_shortcut('Alt+Up', self.taxon_info.select_parent)
         self.add_shortcut('Ctrl+Shift+R', self.search.reset)
+        self.add_shortcut('Ctrl+Shift+Enter', self.search.search)
 
     def select_taxon(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a
@@ -108,7 +109,7 @@ class TaxonController(StylableWidget):
         if not taxa:
             self.on_message.emit('No results found')
         self.tabs.results.set_taxa(taxa)
-        self.tabs.setCurrentWidget(self.tabs.results_tab)
+        self.tabs.setCurrentWidget(self.tabs.results)
         self.bind_selection(self.tabs.results.taxa)
 
     def bind_selection(self, taxon_cards: Iterable[TaxonInfoCard]):
@@ -130,50 +131,45 @@ class TaxonTabs(QTabWidget):
         parent: QWidget = None,
     ):
         super().__init__(parent)
-        self.setMinimumWidth(200)
-        self.setMaximumWidth(510)
+        self.setElideMode(Qt.ElideRight)
         self.setIconSize(QSize(32, 32))
+        self.setMinimumWidth(240)
+        self.setMaximumWidth(510)
         self.settings = settings
         self.threadpool = threadpool
         self.user_taxa = user_taxa
         self._init_complete = False
 
-        self.results = TaxonList(threadpool)
-        self.results_tab = self.add_tab(
-            self.results, 'mdi6.layers-search', 'Results', 'Search results'
+        self.results = self.add_tab(
+            TaxonList(threadpool), 'mdi6.layers-search', 'Results', 'Search results'
         )
-
-        self.history = TaxonList(threadpool)
-        self.add_tab(self.history, 'fa5s.history', 'Recent', 'Recently viewed taxa')
-
-        self.frequent = TaxonList(threadpool)
-        self.add_tab(self.frequent, 'ri.bar-chart-fill', 'Frequent', 'Frequently viewed taxa')
-
-        self.observed = TaxonList(threadpool)
-        self.add_tab(self.observed, 'fa5s.binoculars', 'Observed', 'Taxa observed by you')
-
-        # self.starred = TaxonList(threadpool)
-        # self.add_tab(self.starred, 'fa.star', 'Starred', 'Starred taxa')
+        self.recent = self.add_tab(
+            TaxonList(threadpool), 'fa5s.history', 'Recent', 'Recently viewed taxa'
+        )
+        self.frequent = self.add_tab(
+            TaxonList(threadpool), 'ri.bar-chart-fill', 'Frequent', 'Frequently viewed taxa'
+        )
+        self.observed = self.add_tab(
+            TaxonList(threadpool), 'fa5s.binoculars', 'Observed', 'Taxa observed by you'
+        )
 
         # Add a delay before loading user taxa on startup
         QTimer.singleShot(2, self.load_user_taxa)
 
-    def add_tab(self, tab_layout: QLayout, icon_str: str, label: str, tooltip: str) -> QWidget:
-        tab = QWidget()
-        tab.setLayout(tab_layout)
-        idx = super().addTab(tab, fa_icon(icon_str), label)
+    def add_tab(self, taxon_list: TaxonList, icon_str: str, label: str, tooltip: str) -> QWidget:
+        idx = super().addTab(taxon_list.scroller, fa_icon(icon_str), label)
         self.setTabToolTip(idx, tooltip)
-        return tab
+        return taxon_list
 
     def load_user_taxa(self):
         display_ids = self.user_taxa.display_ids
 
-        def get_history_taxa():
+        def get_recent_taxa():
             logger.info(f'Loading {len(display_ids)} user taxa')
             return INAT_CLIENT.taxa.from_ids(*display_ids, accept_partial=True).all()
 
-        future = self.threadpool.schedule(get_history_taxa)
-        future.on_result.connect(self.display_history)
+        future = self.threadpool.schedule(get_recent_taxa)
+        future.on_result.connect(self.display_recent)
 
         future = self.threadpool.schedule(
             lambda: get_observed_taxa(self.settings.username, self.settings.casual_observations)
@@ -182,13 +178,13 @@ class TaxonTabs(QTabWidget):
         self._init_complete = True
 
     @Slot(list)
-    def display_history(self, taxa: list[Taxon]):
+    def display_recent(self, taxa: list[Taxon]):
         """After fetching taxon records for recent and frequent, add info cards for them in the
         appropriate tabs
         """
         taxa_by_id = {t.id: t for t in taxa}
-        self.history.set_taxa([taxa_by_id.get(taxon_id) for taxon_id in self.user_taxa.top_history])
-        self.on_load.emit(list(self.history.taxa))
+        self.recent.set_taxa([taxa_by_id.get(taxon_id) for taxon_id in self.user_taxa.top_history])
+        self.on_load.emit(list(self.recent.taxa))
 
         # Add counts to taxon cards in 'Frequent' tab, for sorting later
         def get_taxon_count(taxon_id: int) -> TaxonCount:
@@ -213,9 +209,23 @@ class TaxonTabs(QTabWidget):
         """Update history and frequent lists with the selected taxon. If it was already in one or
         both lists, update its position in the list(s).
         """
-        self.history.add_or_update(taxon)
+        self.recent.add_or_update(taxon)
         self.user_taxa.update_history(taxon.id)
 
         idx = self.user_taxa.frequent_idx(taxon.id)
         if idx is not None:
             self.frequent.add_or_update(taxon, idx)
+
+    def resizeEvent(self, event):
+        """On resize, show tab labels if there is enough room for at least a couple characters each
+        (plus '...'), otherwise collapse to icons only
+        """
+        super().resizeEvent(event)
+        if self.width() > (90 * self.count()):
+            self.setTabText(self.indexOf(self.results.scroller), 'Results')
+            self.setTabText(self.indexOf(self.recent.scroller), 'Recent')
+            self.setTabText(self.indexOf(self.frequent.scroller), 'Frequent')
+            self.setTabText(self.indexOf(self.observed.scroller), 'Observed')
+        else:
+            for tab_idx in range(self.count()):
+                self.setTabText(tab_idx, '')

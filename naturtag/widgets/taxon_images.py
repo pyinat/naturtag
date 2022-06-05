@@ -92,28 +92,24 @@ class TaxonImageWindow(ImageWindow):
         pass
 
 
-class TaxonList(VerticalLayout):
+class TaxonList(StylableWidget):
     """A scrollable list of TaxonInfoCards"""
 
     def __init__(self, threadpool: 'ThreadPool', parent: QWidget = None):
         super().__init__(parent)
         self.threadpool = threadpool
+        self.root = VerticalLayout(self)
+        self.root.setAlignment(Qt.AlignTop)
+        self.root.setContentsMargins(0, 0, 0, 0)
 
-        self.scroll_panel = QWidget()
-        self.scroll_layout = VerticalLayout(self.scroll_panel)
-        self.scroll_layout.setAlignment(Qt.AlignTop)
-        self.scroll_layout.setContentsMargins(0, 0, 0, 0)
-        self.addLayout(self.scroll_layout)
-
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setWidget(self.scroll_panel)
-        self.addWidget(scroll_area)
+        self.scroller = QScrollArea()
+        self.scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroller.setWidgetResizable(True)
+        self.scroller.setWidget(self)
 
     @property
     def taxa(self) -> Iterator['TaxonInfoCard']:
-        for item in self.scroll_panel.children():
+        for item in self.children():
             if isinstance(item, TaxonInfoCard):
                 yield item
 
@@ -121,9 +117,9 @@ class TaxonList(VerticalLayout):
         """Add a taxon card immediately, and load its thumbnail from a separate thread"""
         card = TaxonInfoCard(taxon=taxon)
         if idx is not None:
-            self.scroll_layout.insertWidget(idx, card)
+            self.root.insertWidget(idx, card)
         else:
-            self.scroll_layout.addWidget(card)
+            self.root.addWidget(card)
         self.threadpool.schedule(card.thumbnail.set_taxon, taxon=taxon, size='thumbnail')
 
     def add_or_update(self, taxon: Taxon, idx: int = 0):
@@ -132,7 +128,7 @@ class TaxonList(VerticalLayout):
             self.add_taxon(taxon, idx)
 
     def clear(self):
-        self.scroll_layout.clear()
+        self.root.clear()
 
     def contains(self, taxon_id: int) -> bool:
         return self.get_card_by_id(taxon_id) is not None
@@ -147,8 +143,8 @@ class TaxonList(VerticalLayout):
         """Move a card to the specified position, if found; return False otherwise"""
         card = self.get_card_by_id(taxon_id)
         if card:
-            self.scroll_layout.removeWidget(card)
-            self.scroll_layout.insertWidget(idx, card)
+            self.root.removeWidget(card)
+            self.root.insertWidget(idx, card)
             return True
         return False
 

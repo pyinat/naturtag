@@ -163,15 +163,13 @@ class TaxonomySection(HorizontalLayout):
     def __init__(self, threadpool: ThreadPool):
         super().__init__()
 
-        self.ancestors_group = QGroupBox('Ancestors')
-        self.ancestors_group.setFixedWidth(400)
-        self.ancestors_list = TaxonList(threadpool, self.ancestors_group)
-        self.addWidget(self.ancestors_group)
+        self.ancestors_group = self.add_group('Ancestors', width=400, min_height=False)
+        self.ancestors_list = TaxonList(threadpool)
+        self.ancestors_group.addWidget(self.ancestors_list.scroller)
 
-        self.children_group = QGroupBox('Children')
-        self.children_group.setFixedWidth(400)
-        self.children_list = TaxonList(threadpool, self.children_group)
-        self.addWidget(self.children_group)
+        self.children_group = self.add_group('Children', width=400, min_height=False)
+        self.children_list = TaxonList(threadpool)
+        self.children_group.addWidget(self.children_list.scroller)
 
     def load(self, taxon: Taxon):
         """Populate taxon ancestors and children"""
@@ -180,9 +178,9 @@ class TaxonomySection(HorizontalLayout):
         def get_label(text: str, items: list) -> str:
             return text + (f' ({len(items)})' if items else '')
 
-        self.ancestors_group.setTitle(get_label('Ancestors', taxon.ancestors))
+        self.ancestors_group.set_title(get_label('Ancestors', taxon.ancestors))
         self.ancestors_list.set_taxa(taxon.ancestors)
-        self.children_group.setTitle(get_label('Children', taxon.children))
+        self.children_group.set_title(get_label('Children', taxon.children))
         self.children_list.set_taxa(taxon.children)
 
     @property
