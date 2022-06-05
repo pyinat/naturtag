@@ -13,7 +13,8 @@ from naturtag.widgets.layouts import (
 from naturtag.widgets.autocomplete import TaxonAutocomplete
 from naturtag.widgets.images import (
     FullscreenPhoto,
-    HoverIconLabel,
+    HoverIcon,
+    HoverLabel,
     HoverMixin,
     IconLabel,
     ImageWindow,

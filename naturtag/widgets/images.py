@@ -1,7 +1,7 @@
 """Generic image widgets"""
 from logging import getLogger
 from pathlib import Path
-from typing import Type, Union
+from typing import TYPE_CHECKING, Type, TypeAlias, Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, Signal
@@ -12,6 +12,11 @@ from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
 from naturtag.constants import PathOrStr
 from naturtag.widgets import VerticalLayout
+
+if TYPE_CHECKING:
+    MIXIN_BASE: TypeAlias = QWidget
+else:
+    MIXIN_BASE = object
 
 logger = getLogger(__name__)
 
@@ -38,61 +43,6 @@ class IconLabel(QLabel):
                 mode=QIcon.Mode.Normal if enabled else QIcon.Mode.Disabled,
             ),
         )
-
-
-class HoverMixin:
-    """Mixin that adds a transparent overlay to darken the image on hover"""
-
-    def __init__(self, *args, hover_icon: bool = False, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.overlay = IconLabel('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
-        self.overlay.setAlignment(Qt.AlignTop)
-        self.overlay.setAutoFillBackground(True)
-        self.overlay.setGeometry(self.geometry())  # type: ignore
-        self.overlay.setObjectName('hover_overlay')
-        self.overlay.setVisible(False)
-
-    def enterEvent(self, event):
-        self.overlay.setVisible(True)
-        super().enterEvent(event)
-
-    def leaveEvent(self, event):
-        self.overlay.setVisible(False)
-        super().leaveEvent(event)
-
-
-class NavButtonsMixin:
-    """Mixin for fullscreen images that adds left and right navigation buttons"""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.left_arrow = HoverIconLabel('ph.caret-left', self, size=128)
-        self.right_arrow = HoverIconLabel('ph.caret-right', self, size=128)
-
-    def resizeEvent(self, event):
-        """Position nav buttons on left/right center"""
-        self.left_arrow.setGeometry(0, (self.height() - 128) / 2, 128, 128)
-        self.right_arrow.setGeometry(self.width() - 128, (self.height() - 128) / 2, 128, 128)
-        super().resizeEvent(event)
-
-
-class HoverIconLabel(IconLabel):
-    """IconLabel with a hover effect and click event"""
-
-    on_click = Signal(object)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.set_enabled(False)
-        self.enterEvent = lambda *x: self.set_enabled(True)
-        self.leaveEvent = lambda *x: self.set_enabled(False)
-
-    def mousePressEvent(self, _):
-        """Placeholder to accept mouse press events"""
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.on_click.emit(self)
 
 
 class PixmapLabel(QLabel):
@@ -149,7 +99,7 @@ class PixmapLabel(QLabel):
             self.on_click.emit(self)
 
     def paintEvent(self, event):
-        """Draw description text in the upper left corner of the image"""
+        """Draw optional description text in the upper left corner of the image"""
         super().paintEvent(event)
         if not self.description:
             return
@@ -182,6 +132,69 @@ class PixmapLabel(QLabel):
 
     def sizeHint(self) -> QSize:
         return QSize(self.width(), self.heightForWidth(self.width()))
+
+
+class HoverMixin(MIXIN_BASE):
+    """Mixin that adds a transparent overlay to darken the image on hover"""
+
+    def __init__(self, *args, hover_icon: bool = False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.overlay = IconLabel('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
+        self.overlay.setAlignment(Qt.AlignTop)
+        self.overlay.setAutoFillBackground(True)
+        self.overlay.setGeometry(self.geometry())
+        self.overlay.setObjectName('hover_overlay')
+        self.overlay.setVisible(False)
+
+    def enterEvent(self, event):
+        self.overlay.setVisible(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.overlay.setVisible(False)
+        super().leaveEvent(event)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.overlay.setFixedSize(self.size())
+
+
+class HoverIcon(IconLabel):
+    """IconLabel with a hover effect and click event"""
+
+    on_click = Signal(object)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_enabled(False)
+        self.enterEvent = lambda *x: self.set_enabled(True)
+        self.leaveEvent = lambda *x: self.set_enabled(False)
+
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.on_click.emit(self)
+
+
+class HoverLabel(HoverMixin, QLabel):
+    """QLabel with a hover effect"""
+
+
+class NavButtonsMixin(MIXIN_BASE):
+    """Mixin for fullscreen images that adds left and right navigation buttons"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.left_arrow = HoverIcon('ph.caret-left', self, size=128)
+        self.right_arrow = HoverIcon('ph.caret-right', self, size=128)
+
+    def resizeEvent(self, event):
+        """Position nav buttons on left/right center"""
+        self.left_arrow.setGeometry(0, (self.height() - 128) / 2, 128, 128)
+        self.right_arrow.setGeometry(self.width() - 128, (self.height() - 128) / 2, 128, 128)
+        super().resizeEvent(event)
 
 
 class FullscreenPhoto(NavButtonsMixin, PixmapLabel):

@@ -75,12 +75,12 @@ class StyleMixin:
 
 
 class FlowLayout(LayoutMixin, QLayout):
-    def __init__(self, parent=None, spacing: float = None):
+    def __init__(self, parent=None, spacing: float = 0):
         super().__init__(parent)
         if parent is not None:
             self.setContentsMargins(0, 0, 0, 0)
         self._items: list[QWidget] = []
-        self._spacing = spacing or 0
+        self._spacing = spacing
 
     def addItem(self, item: QWidget):
         self._items.append(item)

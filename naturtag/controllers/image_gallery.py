@@ -33,6 +33,7 @@ from naturtag.thumbnails import generate_thumbnail
 from naturtag.widgets import (
     FlowLayout,
     HorizontalLayout,
+    HoverLabel,
     IconLabel,
     ImageWindow,
     StylableWidget,
@@ -95,7 +96,7 @@ class ImageGallery(StylableWidget):
 
     def load_image(self, image_path: PathOrStr):
         """Load an image from a file path or URI"""
-        # TODO: Support Windows file URIs
+        # TODO: Support Windows file URIs from clipboard
         image_path = Path(unquote(urlparse(str(image_path)).path))
         if not image_path.is_file():
             logger.info(f'File does not exist: {image_path}')
@@ -146,7 +147,7 @@ class LocalThumbnail(StylableWidget):
     """
 
     on_copy = Signal(str)  #: Tags were copied to the clipboard
-    on_remove = Signal(Path)  #: The image was removed from the gallery
+    on_remove = Signal(Path)  #: Request for the image to be removed from the gallery
     on_select = Signal(Path)  #: The image was clicked
 
     def __init__(self, image_path: Path):
@@ -154,16 +155,10 @@ class LocalThumbnail(StylableWidget):
         self.image_path = image_path
         self.metadata = MetaMetadata(self.image_path)
         self.setToolTip(self.metadata.summary)
-        self.setContentsMargins(2, 2, 2, 2)
         layout = VerticalLayout(self)
-        layout.setSpacing(0)
-
         # Image
-        self.image = QLabel(self)
+        self.image = HoverLabel(self)
         self.image.setPixmap(generate_thumbnail(self.image_path))
-        self.image.setAlignment(Qt.AlignCenter)
-        self.image.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
-        self.image.setMaximumHeight(THUMBNAIL_SIZE_DEFAULT[1])
         layout.addWidget(self.image)
 
         # Context menu and metadata icons
