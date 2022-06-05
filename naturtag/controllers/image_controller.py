@@ -41,21 +41,26 @@ class ImageController(QWidget):
         # Input fields
         inputs_layout = VerticalLayout()
         data_source_layout.addLayout(inputs_layout)
-
         self.input_obs_id = IdInput()
-        self.input_obs_id.on_select.connect(self.select_observation_id)
         inputs_layout.addWidget(QLabel('Observation ID:'))
         inputs_layout.addWidget(self.input_obs_id)
-
         self.input_taxon_id = IdInput()
-        self.input_taxon_id.on_select.connect(self.select_taxon_id)
         inputs_layout.addWidget(QLabel('Taxon ID:'))
         inputs_layout.addWidget(self.input_taxon_id)
+
+        # Notify other controllers when an ID is selected
+        self.input_obs_id.on_select.connect(self.select_observation_id)
+        self.input_taxon_id.on_select.connect(self.select_taxon_id)
 
         # Selected taxon/observation info
         data_source_layout.addStretch()
         self.data_source_card = HorizontalLayout()
         data_source_layout.addLayout(self.data_source_card)
+
+        # Clear info when clearing an input field
+        self.input_obs_id.on_clear.connect(self.data_source_card.clear)
+        self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
+        self.input_obs_id.on_clear.connect(self.input_taxon_id.clear)
 
         # Viewer
         self.gallery = ImageGallery()
