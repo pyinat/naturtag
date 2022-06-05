@@ -1,17 +1,28 @@
 """Main Qt app window and entry point"""
 import sys
+import webbrowser
+from datetime import datetime
+from importlib.metadata import version as pkg_version
 from logging import getLogger
 
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QCloseEvent, QIcon, QKeySequence, QPixmap, QShortcut
-from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QStatusBar, QTabWidget, QWidget
+from PySide6.QtGui import QIcon, QKeySequence, QPixmap, QShortcut
+from PySide6.QtWidgets import (
+    QApplication,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QStatusBar,
+    QTabWidget,
+    QWidget,
+)
 from qtmodern.windows import ModernWindow
 
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.app.toolbar import Toolbar
-from naturtag.constants import ASSETS_DIR
+from naturtag.constants import ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings, setup
 from naturtag.widgets import init_handler
@@ -21,7 +32,7 @@ from naturtag.widgets.layouts import VerticalLayout
 try:
     from ctypes import windll  # type: ignore
 
-    windll.shell32.SetCurrentProcessExplicitAppUserModelID('pyinat.naturtag.app.0.7')
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID('pyinat.naturtag.app.1.0')
 except ImportError:
     pass
 
@@ -102,6 +113,8 @@ class MainWindow(QMainWindow):
         self.toolbar.settings_button.triggered.connect(self.show_settings)
         self.toolbar.logs_button.triggered.connect(self.toggle_log_tab)
         self.toolbar.exit_button.triggered.connect(QApplication.instance().quit)
+        self.toolbar.docs_button.triggered.connect(self.open_docs)
+        self.toolbar.about_button.triggered.connect(self.open_about)
 
         # Menu bar and status bar
         self.toolbar.populate_menu(self.menuBar(), self.settings)
@@ -124,7 +137,8 @@ class MainWindow(QMainWindow):
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.taxon_controller.select_taxon(47792)
 
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, _):
+        """Save settings before closing the app"""
         self.settings.window_size = self.size().toTuple()
         self.settings.write()
         self.taxon_controller.user_taxa.write()
@@ -141,7 +155,25 @@ class MainWindow(QMainWindow):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
 
+    def open_docs(self):
+        """Open the documentation in a web browser"""
+        webbrowser.open(DOCS_URL)
+
+    def open_about(self):
+        """Show an About dialog with basic app information"""
+        about = QMessageBox()
+        about.setIconPixmap(QPixmap(ASSETS_DIR / 'logo.ico'))
+        about.setTextFormat(Qt.RichText)
+
+        version = pkg_version('naturtag')
+        repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
+        license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
+        attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
+        about.setText(f'<b>Naturtag v{version}</b> <br/>Source: {repo_link} <br/>{attribution}')
+        about.exec()
+
     def show_settings(self):
+        """Show the settings menu"""
         self.settings_menu.show()
 
     def toggle_fullscreen(self) -> bool:

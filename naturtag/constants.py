@@ -20,6 +20,10 @@ LOGFILE = DATA_DIR / 'naturtag.log'
 CONFIG_PATH = DATA_DIR / 'settings.yml'
 USER_TAXA_PATH = DATA_DIR / 'stored_taxa.yml'
 
+# Project info
+DOCS_URL = 'https://naturtag.readthedocs.io/en/latest/app.html'
+REPO_URL = 'https://github.com/pyinat/naturtag'
+
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
