@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMainWindow,
     QMessageBox,
+    QSplashScreen,
     QStatusBar,
     QTabWidget,
     QWidget,
@@ -132,8 +133,8 @@ class MainWindow(QMainWindow):
         if settings.debug:
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
-            # self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
-            self.image_controller.gallery.load_images(demo_images)  # type: ignore
+            self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
+            # self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.taxon_controller.select_taxon(47792)
 
     def closeEvent(self, _):
@@ -199,12 +200,15 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(QPixmap(ASSETS_DIR / 'logo.ico')))
+    splash = QSplashScreen(QPixmap(ASSETS_DIR / 'logo.png').scaledToHeight(512))
+    splash.show()
     settings = Settings.read()
-    set_theme(dark_mode=settings.dark_mode)
 
+    app.setWindowIcon(QIcon(QPixmap(ASSETS_DIR / 'logo.ico')))
+    set_theme(dark_mode=settings.dark_mode)
     window = ModernWindow(MainWindow(settings))
     window.show()
+    splash.finish(window)
     sys.exit(app.exec())
 
 

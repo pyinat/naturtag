@@ -24,7 +24,6 @@ logger = getLogger(__name__)
 
 
 # TODO: Store Taxon.taxon_photos in DB; currently need to fetch this from API each time
-# TODO: Collapse tab titles to icons only if not all titles fit
 class TaxonController(StylableWidget):
     """Controller for searching and viewing taxa"""
 
