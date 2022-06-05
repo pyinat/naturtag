@@ -61,12 +61,10 @@ class TaxonController(QWidget):
         self.root.addLayout(taxon_layout)
 
         # Navigation keyboard shortcuts
-        shortcut = QShortcut(QKeySequence('Alt+Left'), self)
-        shortcut.activated.connect(self.taxon_info.prev)
-        shortcut = QShortcut(QKeySequence('Alt+Right'), self)
-        shortcut.activated.connect(self.taxon_info.next)
-        shortcut = QShortcut(QKeySequence('Alt+Up'), self)
-        shortcut.activated.connect(self.taxon_info.select_parent)
+        QShortcut(QKeySequence('Alt+Left'), self).activated.connect(self.taxon_info.prev)
+        QShortcut(QKeySequence('Alt+Right'), self).activated.connect(self.taxon_info.next)
+        QShortcut(QKeySequence('Alt+Up'), self).activated.connect(self.taxon_info.select_parent)
+        QShortcut(QKeySequence('Ctrl+Shift+R'), self).activated.connect(self.search.reset)
 
     def select_taxon(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a

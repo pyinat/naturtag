@@ -11,6 +11,7 @@ from naturtag.settings import Settings
 logger = getLogger(__name__)
 
 
+# TODO: Different actions for Run, Refresh, and Clear depending on active tab
 class Toolbar(QToolBar):
     def __init__(self, parent: QWidget):
         super(Toolbar, self).__init__(parent)

@@ -130,8 +130,7 @@ class MainWindow(QMainWindow):
 
         # Debug
         if settings.debug:
-            shortcut = QShortcut(QKeySequence('F9'), self)
-            shortcut.activated.connect(self.reload_qss)
+            QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
             # self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
