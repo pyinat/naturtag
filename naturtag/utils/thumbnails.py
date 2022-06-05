@@ -4,7 +4,6 @@ from logging import getLogger
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
-from PIL.ImageQt import ImageQt
 from PySide6.QtGui import QPixmap
 
 from naturtag.constants import (
@@ -13,6 +12,13 @@ from naturtag.constants import (
     THUMBNAIL_SIZES,
     PathOrStr,
 )
+
+# Allow utils to be used without Qt installed
+try:
+    from PIL.ImageQt import ImageQt
+except ImportError:
+    from PIL import Image as ImageQt
+
 
 logger = getLogger().getChild(__name__)
 

@@ -29,25 +29,21 @@ include = [
 
 # Can update to 3.11 once PySide6 supports it
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
-attrs = ">=21.2"
-click = ">=8.0"
-click-help-colors = ">=0.9"
-numpy = "^1.22"
-pillow = ">=9.1"
-platformdirs = ">=2.5"
-pyexiv2 = ">=2.6.2"
-pyinaturalist = ">=0.17.2dev3"
-pyinaturalist-convert = ">=0.4.0dev6"
-pyyaml = ">=6.0"
-requests = ">=2.22"
-rich = ">=10.0"
-sqlalchemy = "^1.4.36"
-
-# UI dependencies
-pyside6 = {version = "^6.3.0", optional = true}
-qtawesome = {version = "^1.1.1", optional = true}
-qtmodern = {version = "^0.2", optional = true}
+python                      = ">=3.10,<3.11"
+attrs                       = ">=21.2"
+click                       = ">=8.0"
+click-help-colors           = ">=0.9"
+numpy                       = "^1.22"  # TODO: Make optional
+pillow                      = ">=9.1"
+platformdirs                = ">=2.5"
+pyexiv2                     = ">=2.6.2"
+pyinaturalist               = ">=0.17.2dev3"
+pyinaturalist-convert       = ">=0.4.0dev6"
+pyside6                     = "^6.3.0"
+pyyaml                      = ">=6.0"
+qtawesome                   = "^1.1.1"
+qtmodern                    = "^0.2"
+sqlalchemy                  = "^1.4.36"
 
 # Documentation dependencies needed for Readthedocs builds
 furo                        = {optional=true, version="^2022.2.14.1"}
@@ -74,8 +70,7 @@ pytest-cov = ">=3.0"
 pytest-xdist = ">=2.2"
 
 [tool.poetry.extras]
-all = ["pyside6", "qtawesome", "qtmodern"]
-ui =  ["pyside6", "qtawesome", "qtmodern"]
+all = []
 docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-automodapi", "sphinx-autodoc-typehints",
         "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-panels", "sphinxcontrib-apidoc"]
 
