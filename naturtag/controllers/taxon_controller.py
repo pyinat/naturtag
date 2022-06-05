@@ -3,7 +3,6 @@ from typing import Iterable
 
 from pyinaturalist import Taxon, TaxonCount, TaxonCounts
 from PySide6.QtCore import QSize, Qt, QTimer, Signal, Slot
-from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QLayout, QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
@@ -13,14 +12,20 @@ from naturtag.constants import MAX_DISPLAY_OBSERVED
 from naturtag.controllers import TaxonInfoSection, TaxonomySection, TaxonSearch
 from naturtag.metadata.inat_metadata import get_observed_taxa
 from naturtag.settings import Settings, UserTaxa
-from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
+from naturtag.widgets import (
+    HorizontalLayout,
+    StylableWidget,
+    TaxonInfoCard,
+    TaxonList,
+    VerticalLayout,
+)
 
 logger = getLogger(__name__)
 
 
 # TODO: Store Taxon.taxon_photos in DB; currently need to fetch this from API each time
 # TODO: Collapse tab titles to icons only if not all titles fit
-class TaxonController(QWidget):
+class TaxonController(StylableWidget):
     """Controller for searching and viewing taxa"""
 
     on_message = Signal(str)  #: Forward a message to status bar
@@ -61,10 +66,10 @@ class TaxonController(QWidget):
         self.root.addLayout(taxon_layout)
 
         # Navigation keyboard shortcuts
-        QShortcut(QKeySequence('Alt+Left'), self).activated.connect(self.taxon_info.prev)
-        QShortcut(QKeySequence('Alt+Right'), self).activated.connect(self.taxon_info.next)
-        QShortcut(QKeySequence('Alt+Up'), self).activated.connect(self.taxon_info.select_parent)
-        QShortcut(QKeySequence('Ctrl+Shift+R'), self).activated.connect(self.search.reset)
+        self.add_shortcut('Alt+Left', self.taxon_info.prev)
+        self.add_shortcut('Alt+Right', self.taxon_info.next)
+        self.add_shortcut('Alt+Up', self.taxon_info.select_parent)
+        self.add_shortcut('Ctrl+Shift+R', self.search.reset)
 
     def select_taxon(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a

@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Type, TypeAlias, Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
 from naturtag.constants import PathOrStr
-from naturtag.widgets import VerticalLayout
+from naturtag.widgets import StylableWidget, VerticalLayout
 
 if TYPE_CHECKING:
     MIXIN_BASE: TypeAlias = QWidget
@@ -201,7 +201,7 @@ class FullscreenPhoto(NavButtonsMixin, PixmapLabel):
     """A fullscreen photo widget with nav buttons"""
 
 
-class ImageWindow(QWidget):
+class ImageWindow(StylableWidget):
     """Display local images in fullscreen as a separate window
 
     Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
@@ -226,11 +226,11 @@ class ImageWindow(QWidget):
         self.image.right_arrow.on_click.connect(self.select_next_image)
 
         # Keyboard shortcuts
-        QShortcut(QKeySequence(Qt.Key_Escape), self).activated.connect(self.close)
-        QShortcut(QKeySequence('Q'), self).activated.connect(self.close)
-        QShortcut(QKeySequence(Qt.Key_Right), self).activated.connect(self.select_next_image)
-        QShortcut(QKeySequence(Qt.Key_Left), self).activated.connect(self.select_prev_image)
-        QShortcut(QKeySequence(Qt.Key_Delete), self).activated.connect(self.remove_image)
+        self.add_shortcut(Qt.Key_Escape, self.close)
+        self.add_shortcut('Q', self.close)
+        self.add_shortcut(Qt.Key_Right, self.select_next_image)
+        self.add_shortcut(Qt.Key_Left, self.select_prev_image)
+        self.add_shortcut(Qt.Key_Delete, self.remove_image)
 
     @property
     def idx(self) -> int:
