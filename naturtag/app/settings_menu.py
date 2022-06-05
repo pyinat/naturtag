@@ -2,7 +2,7 @@ from logging import getLogger
 
 from attr import fields
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIntValidator, QKeySequence, QShortcut, QValidator
+from PySide6.QtGui import QIntValidator, QValidator
 from PySide6.QtWidgets import QLabel, QLineEdit
 
 from naturtag.settings import Settings
@@ -15,7 +15,7 @@ logger = getLogger(__name__)
 class SettingsMenu(StylableWidget):
     """Application settings menu, with input widgets connected to values in settings file"""
 
-    on_message = Signal(str)
+    on_message = Signal(str)  #: Forward a message to status bar
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -58,8 +58,7 @@ class SettingsMenu(StylableWidget):
         display.addLayout(self.dark_mode)
 
         # Press escape to save and close window
-        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
-        shortcut.activated.connect(self.close)
+        self.add_shortcut(Qt.Key_Escape, self.close)
 
     def closeEvent(self, event):
         """Save settings when closing the window"""

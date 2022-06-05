@@ -1,23 +1,19 @@
 # flake8: noqa: F401
 # isort: skip_file
 from naturtag.widgets.layouts import (
-    LayoutMixin,
     FlowLayout,
     GridLayout,
     HorizontalLayout,
     StylableWidget,
-    StyleMixin,
-    GroupMixin,
     VerticalLayout,
 )
 from naturtag.widgets.autocomplete import TaxonAutocomplete
 from naturtag.widgets.images import (
     FullscreenPhoto,
-    HoverIconLabel,
-    HoverMixin,
+    HoverIcon,
+    HoverLabel,
     IconLabel,
     ImageWindow,
-    NavButtonsMixin,
     PixmapLabel,
 )
 from naturtag.widgets.inputs import IdInput

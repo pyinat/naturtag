@@ -3,10 +3,10 @@
 * Many hours of frustration
 """
 from logging import getLogger
-from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias
+from typing import TYPE_CHECKING, Callable, Iterator, Optional, TypeAlias
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QKeySequence, QPainter, QShortcut
 from PySide6.QtWidgets import (
     QGridLayout,
     QGroupBox,
@@ -27,7 +27,39 @@ else:
     MIXIN_BASE = object
 
 
-class LayoutMixin(MIXIN_BASE):
+class GroupMixin(MIXIN_BASE):
+    def add_group(self, name: str, parent: QLayout = None, width: int = None) -> 'VerticalLayout':
+        """Add a new groupbox to the widget or layout"""
+        group_box = QGroupBox(name)
+        group_layout = VerticalLayout(group_box)
+        parent = parent or self
+        parent.addWidget(group_box)
+        if width:
+            group_box.setFixedWidth(width)
+            group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        return group_layout
+
+
+class ShortcutMixin:
+    def add_shortcut(self, key_sequence, callback: Callable) -> QShortcut:
+        """Add a keyboard shortcut to the widget or layout"""
+        shortcut = QShortcut(QKeySequence(key_sequence), self)
+        shortcut.activated.connect(callback)
+        return shortcut
+
+
+class StyleMixin:
+    def paintEvent(self, event):
+        """Allow custom widgets to be styled with QSS"""
+        super().paintEvent(event)
+        opt = QStyleOption()
+        opt.initFrom(self)
+        painter = QPainter(self)
+        style = self.style()
+        style.drawPrimitive(QStyle.PE_Widget, opt, painter, self)
+
+
+class LayoutMixin(GroupMixin, ShortcutMixin, MIXIN_BASE):
     """Layout mixin with some extra convenience methods"""
 
     def __del__(self):
@@ -50,37 +82,17 @@ class LayoutMixin(MIXIN_BASE):
                 yield widget
 
 
-class GroupMixin(MIXIN_BASE):
-    def add_group(self, name: str, parent: QLayout = None, width: int = None) -> 'VerticalLayout':
-        """Add a new groupbox with a vertical layout"""
-        group_box = QGroupBox(name)
-        group_layout = VerticalLayout(group_box)
-        parent = parent or self
-        parent.addWidget(group_box)
-        if width:
-            group_box.setFixedWidth(width)
-            group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        return group_layout
-
-
-class StyleMixin:
-    def paintEvent(self, event):
-        """Allow custom widgets to be styled with QSS"""
-        super().paintEvent(event)
-        opt = QStyleOption()
-        opt.initFrom(self)
-        painter = QPainter(self)
-        style = self.style()
-        style.drawPrimitive(QStyle.PE_Widget, opt, painter, self)
+class WidgetMixin(GroupMixin, StyleMixin, ShortcutMixin):
+    """Layout mixin with some extra convenience methods"""
 
 
 class FlowLayout(LayoutMixin, QLayout):
-    def __init__(self, parent=None, spacing: float = None):
+    def __init__(self, parent=None, spacing: float = 0):
         super().__init__(parent)
         if parent is not None:
             self.setContentsMargins(0, 0, 0, 0)
         self._items: list[QWidget] = []
-        self._spacing = spacing or 0
+        self._spacing = spacing
 
     def addItem(self, item: QWidget):
         self._items.append(item)
@@ -182,7 +194,7 @@ class FlowLayout(LayoutMixin, QLayout):
         return y + line_height - rect.y()
 
 
-class GridLayout(LayoutMixin, GroupMixin, QGridLayout):
+class GridLayout(LayoutMixin, QGridLayout):
     def __init__(self, parent=None, n_columns: int = None):
         super().__init__(parent)
         self._n_columns = n_columns
@@ -202,13 +214,13 @@ class GridLayout(LayoutMixin, GroupMixin, QGridLayout):
         self._row = 0
 
 
-class HorizontalLayout(LayoutMixin, GroupMixin, QHBoxLayout):
+class HorizontalLayout(LayoutMixin, QHBoxLayout):
     pass
 
 
-class VerticalLayout(LayoutMixin, GroupMixin, QVBoxLayout):
+class VerticalLayout(LayoutMixin, QVBoxLayout):
     pass
 
 
-class StylableWidget(StyleMixin, GroupMixin, QWidget):
+class StylableWidget(WidgetMixin, QWidget):
     pass

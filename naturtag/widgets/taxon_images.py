@@ -88,6 +88,9 @@ class TaxonImageWindow(ImageWindow):
         )
         self.image.description = f'{self.taxon.full_name}\n{attribution}'
 
+    def remove_image(self):
+        pass
+
 
 class TaxonList(VerticalLayout):
     """A scrollable list of TaxonInfoCards"""

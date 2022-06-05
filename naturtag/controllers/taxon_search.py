@@ -30,8 +30,8 @@ logger = getLogger(__name__)
 class TaxonSearch(VerticalLayout):
     """Taxon search"""
 
-    on_results = Signal(list)
-    on_reset = Signal()
+    on_results = Signal(list)  #: New search results were loaded
+    on_reset = Signal()  #: Input fields were reset
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -137,7 +137,7 @@ class TaxonSearch(VerticalLayout):
 class IconicTaxonFilters(QWidget):
     """Filters for iconic taxa"""
 
-    on_select = Signal(int)
+    on_select = Signal(int)  # A filter was selected
 
     def __init__(self):
         super().__init__()

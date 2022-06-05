@@ -1,3 +1,4 @@
+"""Configuration for toolbar, menu bar, and main keyboard shortcuts"""
 from logging import getLogger
 
 from PySide6.QtCore import QSize, Qt
@@ -10,9 +11,8 @@ from naturtag.settings import Settings
 logger = getLogger(__name__)
 
 
+# TODO: Different actions for Run, Refresh, and Clear depending on active tab
 class Toolbar(QToolBar):
-    """Main toolbar and keyboard shortcut definitions. Actions are reused by app menu."""
-
     def __init__(self, parent: QWidget):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
@@ -60,6 +60,7 @@ class Toolbar(QToolBar):
         self.logs_button = self.add_button(
             'Show &Logs', tooltip='Show tab with debug logs', icon='fa.file-text-o', visible=False
         )
+        self.logs_button.setCheckable(True)
         self.exit_button = self.add_button(
             '&Exit',
             tooltip='Exit to desktop',
@@ -67,7 +68,20 @@ class Toolbar(QToolBar):
             shortcut='Ctrl+Q',
             visible=False,
         )
-        self.logs_button.setCheckable(True)
+        self.docs_button = self.add_button(
+            '&Docs',
+            tooltip='Open documentation',
+            icon='fa.question-circle',
+            shortcut='F1',
+            visible=False,
+        )
+        self.about_button = self.add_button(
+            '&About',
+            tooltip='Application information',
+            icon='fa.info-circle',
+            shortcut='Ctrl+F1',
+            visible=False,
+        )
 
     def add_button(
         self,
@@ -106,3 +120,7 @@ class Toolbar(QToolBar):
 
         settings_menu = menu.addMenu('&Settings')
         settings_menu.addAction(self.settings_button)
+
+        help_menu = menu.addMenu('&Help')
+        help_menu.addAction(self.docs_button)
+        help_menu.addAction(self.about_button)

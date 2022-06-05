@@ -15,8 +15,8 @@ class TaxonAutocomplete(QLineEdit):
     autocomplete results with tab key.
     """
 
-    on_select = Signal(int)
-    on_tab = Signal()
+    on_select = Signal(int)  #: An autocomplete result was selected
+    on_tab = Signal()  #: Tab key was pressed
 
     def __init__(self):
         super().__init__()

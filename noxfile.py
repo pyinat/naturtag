@@ -40,7 +40,7 @@ def clean(session):
 @session(python=False, name='cov')
 def coverage(session):
     """Run tests and generate coverage report"""
-    cmd = ['pytest', '-n', 'auto', '--cov']
+    cmd = ['pytest', '--cov']
 
     # Add coverage formats
     cov_formats = session.posargs or DEFAULT_COVERAGE_FORMATS

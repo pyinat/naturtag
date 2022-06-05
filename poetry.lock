@@ -840,7 +840,7 @@ name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
 category = "dev"
-optional = true
+optional = false
 python-versions = ">=3.6.8"
 
 [package.extras]
@@ -863,7 +863,7 @@ name = "pyside6"
 version = "6.3.0"
 description = "Python bindings for the Qt cross-platform application and UI framework"
 category = "dev"
-optional = true
+optional = false
 python-versions = "<3.11,>=3.6"
 
 [package.dependencies]
@@ -876,7 +876,7 @@ name = "pyside6-addons"
 version = "6.3.0"
 description = "Python bindings for the Qt cross-platform application and UI framework (Addons)"
 category = "dev"
-optional = true
+optional = false
 python-versions = "<3.11,>=3.6"
 
 [package.dependencies]
@@ -888,7 +888,7 @@ name = "pyside6-essentials"
 version = "6.3.0"
 description = "Python bindings for the Qt cross-platform application and UI framework (Essentials)"
 category = "dev"
-optional = true
+optional = false
 python-versions = "<3.11,>=3.6"
 
 [package.dependencies]
@@ -1013,7 +1013,7 @@ name = "qtawesome"
 version = "1.1.1"
 description = "FontAwesome icons in PyQt and PySide applications"
 category = "dev"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -1024,7 +1024,7 @@ name = "qtmodern"
 version = "0.2.0"
 description = "Qt Widgets Modern User Interface"
 category = "dev"
-optional = true
+optional = false
 python-versions = "*"
 
 [package.dependencies]
@@ -1035,7 +1035,7 @@ name = "qtpy"
 version = "2.1.0"
 description = "Provides an abstraction layer on top of the various Qt bindings (PyQt5/6 and PySide2/6)."
 category = "dev"
-optional = true
+optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
@@ -1150,7 +1150,7 @@ name = "shiboken6"
 version = "6.3.0"
 description = "Python/C++ bindings helper module"
 category = "dev"
-optional = true
+optional = false
 python-versions = "<3.11,>=3.6"
 
 [[package]]
@@ -1516,14 +1516,13 @@ docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "jaraco-itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-all = ["pyside6", "qtawesome", "qtmodern"]
+all = []
 docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-panels", "sphinxcontrib-apidoc"]
-ui = ["pyside6", "qtawesome", "qtmodern"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "85f468aed394e496ecf942b5698b3bae3546b50e2631c7686ccbbb9ae923a13f"
+content-hash = "8eab4273bacc9ea239c80b317b6f06a8bbdb6eb06164427339dc1332eb3d1805"
 
 [metadata.files]
 alabaster = [

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from platformdirs import user_data_dir
-from pyinaturalist.constants import ICONIC_TAXA
+from pyinaturalist.constants import ICONIC_TAXA, RANKS
 from pyinaturalist_convert.constants import DB_PATH
 
 # Packaged assets
@@ -20,6 +20,10 @@ LOGFILE = DATA_DIR / 'naturtag.log'
 CONFIG_PATH = DATA_DIR / 'settings.yml'
 USER_TAXA_PATH = DATA_DIR / 'stored_taxa.yml'
 
+# Project info
+DOCS_URL = 'https://naturtag.readthedocs.io/en/latest/app.html'
+REPO_URL = 'https://github.com/pyinat/naturtag'
+
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
@@ -32,7 +36,7 @@ THUMBNAIL_SIZES = {
     'large': THUMBNAIL_SIZE_LG,
 }
 
-# Image metadata settings
+# Relevant groups of image metadata tags
 EXIF_HIDE_PREFIXES = [
     'Exif.Image.PrintImageMatching',
     'Exif.MakerNote',
@@ -47,6 +51,24 @@ EXIF_HIDE_PREFIXES = [
     'Exif.Photo.MakerNote',
 ]
 EXIF_ORIENTATION_ID = '0x0112'
+
+DATE_TAGS = [
+    'Exif.Photo.DateTimeOriginal',
+    'Xmp.exif.DateTimeOriginal',
+    'Exif.Photo.DateTimeDigitized',
+    'Xmp.exif.DateTimeDigitized',
+    'Xmp.dwc.eventDate',
+]
+KEYWORD_TAGS = [
+    'Exif.Image.XPSubject',
+    'Iptc.Application2.Subject',
+    'Xmp.dc.subject',
+]
+HIER_KEYWORD_TAGS = [
+    'Exif.Image.XPKeywords',
+    'Iptc.Application2.Keywords',
+    'Xmp.lr.hierarchicalSubject',
+]
 
 # Theme/window/display settings
 DEFAULT_WINDOW_SIZE = (1500, 1024)

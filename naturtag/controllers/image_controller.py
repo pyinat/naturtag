@@ -19,8 +19,11 @@ logger = getLogger(__name__)
 class ImageController(QWidget):
     """Controller for selecting and tagging local image files"""
 
-    on_message = Signal(str)
-    on_new_metadata = Signal(MetaMetadata)
+    on_message = Signal(str)  #: Forward a message to status bar
+    on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
+    on_select_observation_id = Signal(int)  #: An observation ID was entered
+    on_select_taxon_id = Signal(int)  #: A taxon ID was entered
+    on_select_taxon_tab = Signal()  #: Request to switch to taxon tab
 
     def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
@@ -46,13 +49,23 @@ class ImageController(QWidget):
         inputs_layout.addWidget(QLabel('Taxon ID:'))
         inputs_layout.addWidget(self.input_taxon_id)
 
+        # Notify other controllers when an ID is selected
+        self.input_obs_id.on_select.connect(self.select_observation_id)
+        self.input_taxon_id.on_select.connect(self.select_taxon_id)
+
         # Selected taxon/observation info
         data_source_layout.addStretch()
         self.data_source_card = HorizontalLayout()
         data_source_layout.addLayout(self.data_source_card)
 
-        # Viewer
+        # Clear info when clearing an input field
+        self.input_obs_id.on_clear.connect(self.data_source_card.clear)
+        self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
+        self.input_obs_id.on_clear.connect(self.input_taxon_id.clear)
+
+        # Image gallery
         self.gallery = ImageGallery()
+        self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
 
     def run(self):
@@ -115,33 +128,56 @@ class ImageController(QWidget):
     def clear(self):
         """Clear all images and input"""
         self.gallery.clear()
-        self.input_obs_id.setText('')
-        self.input_taxon_id.setText('')
+        self.input_obs_id.clear()
+        self.input_taxon_id.clear()
         self.data_source_card.clear()
         self.info('Images cleared')
 
-    # TODO: Cleaner way to do this. move paste to MainWindow?
     def paste(self):
         """Paste either image paths or taxon/observation URLs"""
         text = QApplication.clipboard().text()
         logger.debug(f'Pasted: {text}')
 
+        # Check for IDs if an iNat URL was pasted
         observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
-            self.input_obs_id.setText(str(observation_id))
-            # self.input_obs_id.select_taxon()
-            self.info(f'Observation {observation_id} selected')
+            self.input_obs_id.set_id(observation_id)
+            self.select_observation_id(observation_id)
         elif taxon_id:
-            self.input_taxon_id.setText(str(taxon_id))
-            # self.input_taxon_id.select_taxon()
-            self.info(f'Taxon {taxon_id} selected')
+            self.input_taxon_id.set_id(taxon_id)
+            self.select_taxon_id(taxon_id)
+        # If not an iNat URL, check for valid image paths
         else:
             self.gallery.load_images(text.splitlines())
 
+    @Slot(Taxon)
     def select_taxon(self, taxon: Taxon):
-        self.input_taxon_id.setText(str(taxon.id))
+        """Update input info from a taxon object (loaded from Species tab)"""
+        self.input_taxon_id.set_id(taxon.id)
         self.data_source_card.clear()
-        self.data_source_card.addWidget(TaxonInfoCard(taxon=taxon, delayed_load=False))
+        card = TaxonInfoCard(taxon=taxon, delayed_load=False)
+        card.on_click.connect(self.on_select_taxon_tab)
+        self.data_source_card.addWidget(card)
+
+    # @Slot(Observation)
+    # def select_observation(self, observation: Observation):
+    #     """Update input info from an observation object (loaded from Observations tab)"""
+    #     self.input_taxon_id.set_id(observation.id)
+    #     self.data_source_card.clear()
+    #     self.data_source_card.addWidget(
+    #         ObservationInfoCard(observation=observation, delayed_load=False)
+    #     )
+
+    def select_observation_id(self, observation_id: int):
+        self.on_select_observation_id.emit(observation_id)
+        self.info(f'Observation {observation_id} selected')
+
+    def select_taxon_id(self, taxon_id: int):
+        """Select a taxon ID from text input; will be loaded by TaxonController and finished with
+        self.select_taxon()
+        """
+        self.on_select_taxon_id.emit(taxon_id)
+        self.info(f'Taxon {taxon_id} selected')
 
     def info(self, message: str):
         self.on_message.emit(message)

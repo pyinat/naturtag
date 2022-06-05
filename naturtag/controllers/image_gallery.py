@@ -3,7 +3,6 @@ import webbrowser
 from logging import getLogger
 from pathlib import Path
 from typing import Callable, Iterable
-from urllib.parse import unquote, urlparse
 
 from PySide6.QtCore import (
     QEasingCurve,
@@ -27,12 +26,12 @@ from PySide6.QtWidgets import (
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT, PathOrStr
-from naturtag.image_glob import get_valid_image_paths
 from naturtag.metadata import MetaMetadata
-from naturtag.thumbnails import generate_thumbnail
+from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FlowLayout,
     HorizontalLayout,
+    HoverLabel,
     IconLabel,
     ImageWindow,
     StylableWidget,
@@ -45,14 +44,15 @@ logger = getLogger(__name__)
 class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
-    on_message = Signal(str)
-    on_select = Signal(int)
+    on_message = Signal(str)  #: Forward a message to status bar
+    on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
     def __init__(self):
         super().__init__()
         self.setAcceptDrops(True)
         self.images: dict[Path, LocalThumbnail] = {}
         self.image_window = ImageWindow()
+        self.image_window.on_remove.connect(self.remove_image)
         root = VerticalLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 
@@ -84,7 +84,7 @@ class ImageGallery(StylableWidget):
     def load_images(self, image_paths: Iterable[PathOrStr]):
         """Load multiple images, and ignore any duplicates"""
         images = get_valid_image_paths(image_paths, recursive=True)
-        new_images = {Path(i) for i in images if i} - set(self.images.keys())
+        new_images = images - set(self.images.keys())
         if not new_images:
             return
 
@@ -92,10 +92,8 @@ class ImageGallery(StylableWidget):
         for image_path in sorted(list(new_images)):
             self.load_image(image_path)
 
-    def load_image(self, image_path: PathOrStr):
-        """Load an image from a file path or URI"""
-        # TODO: Support Windows file URIs
-        image_path = Path(unquote(urlparse(str(image_path)).path))
+    def load_image(self, image_path: Path):
+        """Load an image"""
         if not image_path.is_file():
             logger.info(f'File does not exist: {image_path}')
             return
@@ -107,8 +105,8 @@ class ImageGallery(StylableWidget):
         thumbnail = LocalThumbnail(image_path)
         thumbnail.on_remove.connect(self.remove_image)
         thumbnail.on_select.connect(self.select_image)
-        thumbnail.on_copy.connect(self.on_message.emit)
-        thumbnail.context_menu.on_select.connect(self.on_select.emit)
+        thumbnail.on_copy.connect(self.on_message)
+        thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon)
         self.flow_layout.addWidget(thumbnail)
         self.images[thumbnail.image_path] = thumbnail
 
@@ -120,12 +118,14 @@ class ImageGallery(StylableWidget):
 
     def dropEvent(self, event: QDropEvent):
         event.acceptProposedAction()
-        for image_path in event.mimeData().text().splitlines():
-            self.load_image(image_path)
+        self.load_images(event.mimeData().text().splitlines())
 
     @Slot(str)
     def remove_image(self, image_path: Path):
-        del self.images[image_path]
+        logger.debug(f'Removing image {image_path}')
+        thumbnail = self.images.pop(image_path)
+        thumbnail.setParent(None)
+        thumbnail.deleteLater()
 
     @Slot(str)
     def select_image(self, image_path: Path):
@@ -141,25 +141,20 @@ class LocalThumbnail(StylableWidget):
     * Right click: Show context menu
     """
 
-    on_copy = Signal(str)
-    on_remove = Signal(Path)
-    on_select = Signal(Path)
+    on_copy = Signal(str)  #: Tags were copied to the clipboard
+    on_remove = Signal(Path)  #: Request for the image to be removed from the gallery
+    on_select = Signal(Path)  #: The image was clicked
 
     def __init__(self, image_path: Path):
         super().__init__()
         self.image_path = image_path
         self.metadata = MetaMetadata(self.image_path)
-        self.setToolTip(f'{self.image_path}\n{self.metadata.summary}')
-        self.setContentsMargins(2, 2, 2, 2)
+        self.setToolTip(self.metadata.summary)
         layout = VerticalLayout(self)
-        layout.setSpacing(0)
 
         # Image
-        self.image = QLabel(self)
+        self.image = HoverLabel(self)
         self.image.setPixmap(generate_thumbnail(self.image_path))
-        self.image.setAlignment(Qt.AlignCenter)
-        self.image.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
-        self.image.setMaximumHeight(THUMBNAIL_SIZE_DEFAULT[1])
         layout.addWidget(self.image)
 
         # Context menu and metadata icons
@@ -232,10 +227,7 @@ class LocalThumbnail(StylableWidget):
         self.anim_group.start()
 
     def remove(self):
-        logger.debug(f'Removing image {self.image_path}')
         self.on_remove.emit(self.image_path)
-        self.setParent(None)
-        self.deleteLater()
 
     def select(self):
         logger.debug(f'Selecting image {self.image_path}')
@@ -255,7 +247,7 @@ class LocalThumbnail(StylableWidget):
 class ThumbnailContextMenu(QMenu):
     """Context menu for local image thumbnails"""
 
-    on_select = Signal(int)
+    on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
     def __init__(self, thumbnail: LocalThumbnail):
         super().__init__()
@@ -271,7 +263,7 @@ class ThumbnailContextMenu(QMenu):
             text='View Taxon',
             tooltip=f'View taxon {meta.taxon_id} in naturtag',
             enabled=meta.has_taxon,
-            callback=lambda: self.on_select.emit(meta.taxon_id),
+            callback=lambda: self.on_select_taxon.emit(meta.taxon_id),
         )
         self._add_action(
             icon='fa5s.spider',

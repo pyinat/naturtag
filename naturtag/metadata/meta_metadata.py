@@ -1,14 +1,19 @@
 from logging import getLogger
-from os.path import basename
 from typing import Any, Optional
 
 from pyinaturalist import INAT_BASE_URL, RANKS, Coordinates, Observation
 from pyinaturalist_convert import dwc_record_to_observation
 
-from naturtag.constants import OBSERVATION_KEYS, TAXON_KEYS, IntTuple, StrTuple
-from naturtag.metadata import (
+from naturtag.constants import (
+    DATE_TAGS,
     HIER_KEYWORD_TAGS,
     KEYWORD_TAGS,
+    OBSERVATION_KEYS,
+    TAXON_KEYS,
+    IntTuple,
+    StrTuple,
+)
+from naturtag.metadata import (
     ImageMetadata,
     KeywordMetadata,
     convert_dwc_coords,
@@ -42,6 +47,7 @@ class MetaMetadata(ImageMetadata):
         self._min_rank = None
         self._simplified = None
         self._summary = None
+        self._observation: Observation = None
         self.keyword_meta = None
         self._update_derived_properties()
 
@@ -52,6 +58,7 @@ class MetaMetadata(ImageMetadata):
         self._min_rank = None
         self._simplified = None
         self._summary = None
+        self._observation = None
         self.keyword_meta = KeywordMetadata(self.combined)
 
     @property
@@ -73,6 +80,11 @@ class MetaMetadata(ImageMetadata):
                 or NULL_COORDS
             )
         return self._coordinates
+
+    @property
+    def date(self) -> Optional[str]:
+        """Date taken or created, as a string"""
+        return _first_match(self.combined, DATE_TAGS)
 
     @property
     def has_any_tags(self) -> bool:
@@ -143,18 +155,21 @@ class MetaMetadata(ImageMetadata):
     def summary(self) -> str:
         """Get a condensed summary of available metadata"""
         if self._summary is None:
+            obs = self.to_observation()
             meta_types = {
-                'TAX': self.has_taxon,
-                'OBS': self.has_observation,
-                'GPS': self.has_coordinates,
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
                 'XMP': bool(self.xmp),
-                'SIDECAR': self.has_sidecar,
+                'Sidecar': self.has_sidecar,
             }
-            self._summary = f'{basename(self.image_path)}\n' if self.image_path else ''
-            self._summary += ' | '.join([k for k, v in meta_types.items() if v])
-            logger.debug(f'Metadata summary: {self._summary}')
+            summary_info = {
+                'Path': self.image_path,
+                'Date': self.date,
+                'Taxon': obs.taxon.full_name,
+                'Location': f'{obs.place_guess} {obs.location}',
+                'Metadata types': ', '.join([k for k, v in meta_types.items() if v]),
+            }
+            self._summary = '\n'.join([f'{k}: {v}' for k, v in summary_info.items()])
         return self._summary
 
     def merge(self, other: 'MetaMetadata') -> 'MetaMetadata':
@@ -188,9 +203,11 @@ class MetaMetadata(ImageMetadata):
 
     def to_observation(self) -> Observation:
         """Convert DwC metadata to an observation object, if possible"""
-        # Format Xmp.dwc.* and related tags as DwC terms
-        dwc = {k.replace('Xmp.', '').replace('.', ':'): v for k, v in self.xmp.items()}
-        return dwc_record_to_observation(dwc)
+        if not self._observation:
+            # Format Xmp.dwc.* and related tags as DwC terms
+            dwc = {k.replace('Xmp.', '').replace('.', ':'): v for k, v in self.xmp.items()}
+            self._observation = dwc_record_to_observation(dwc)
+        return self._observation
 
     def __str__(self) -> str:
         return self.summary
@@ -198,14 +215,9 @@ class MetaMetadata(ImageMetadata):
 
 def get_inaturalist_ids(metadata: dict) -> IntTuple:
     """Look for taxon and/or observation IDs from metadata if available"""
-    # Get first non-None value from specified keys, if any; otherwise return None
-    def _first_match(d, keys):
-        id = next(filter(None, map(d.get, keys)), None)
-        return int(id) if id else None
-
     # Check all possible keys for valid taxon and observation IDs
-    taxon_id = _first_match(metadata, TAXON_KEYS)
-    observation_id = _first_match(metadata, OBSERVATION_KEYS)
+    taxon_id = _first_match_int(metadata, TAXON_KEYS)
+    observation_id = _first_match_int(metadata, OBSERVATION_KEYS)
     logger.debug(f'Taxon ID: {taxon_id} | Observation ID: {observation_id}')
     return taxon_id, observation_id
 
@@ -222,3 +234,13 @@ def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
         dict with simplified/deduplicated keys
     """
     return {k.lower().replace('_', '').split(':')[-1]: v for k, v in mapping.items()}
+
+
+def _first_match(d: dict, tags: list[str]) -> Optional[str]:
+    """Get first non-None value from specified keys, if any; otherwise return None"""
+    return next(filter(None, map(d.get, tags)), None)
+
+
+def _first_match_int(d: dict, tags: list[str]) -> Optional[int]:
+    match = _first_match(d, tags)
+    return int(match) if match else None

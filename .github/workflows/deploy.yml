@@ -27,7 +27,7 @@ jobs:
           python-version: ${{ env.LATEST_PY_VERSION }}
       - uses: snok/install-poetry@v1.3.1
         with:
-          version: 1.2.0a2
+          version: 1.2.0b1
           virtualenvs-in-project: true
 
       - name: Set pre-release version
@@ -58,7 +58,7 @@ jobs:
           python-version: ${{ env.LATEST_PY_VERSION }}
       - uses: snok/install-poetry@v1.3.1
         with:
-          version: 1.2.0a2
+          version: 1.2.0b1
           virtualenvs-in-project: true
 
       - name: Install system packages

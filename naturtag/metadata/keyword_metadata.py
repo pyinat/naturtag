@@ -2,19 +2,9 @@ from itertools import chain
 from logging import getLogger
 from typing import Any
 
-from pyinaturalist.constants import RANKS
+from naturtag.constants import HIER_KEYWORD_TAGS, KEYWORD_TAGS, RANKS
 
 # All tags that support regular and hierarchical keyword lists
-KEYWORD_TAGS = [
-    'Exif.Image.XPSubject',
-    'Iptc.Application2.Subject',
-    'Xmp.dc.subject',
-]
-HIER_KEYWORD_TAGS = [
-    'Exif.Image.XPKeywords',
-    'Iptc.Application2.Keywords',
-    'Xmp.lr.hierarchicalSubject',
-]
 
 logger = getLogger().getChild(__name__)
 

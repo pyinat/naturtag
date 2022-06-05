@@ -25,9 +25,6 @@ TaxonInfoCard > QLabel#title {
 LocalThumbnail {
     background: palette(dark);
 }
-LocalThumbnail:hover {
-    background: palette(midlight);
-}
 LocalThumbnail > QLabel {
     background-color: rgba(0, 0, 0, 0.3);
     font-size: 11pt;
