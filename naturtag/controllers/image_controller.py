@@ -23,6 +23,7 @@ class ImageController(QWidget):
     on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
     on_select_observation_id = Signal(int)  #: An observation ID was entered
     on_select_taxon_id = Signal(int)  #: A taxon ID was entered
+    on_select_taxon_tab = Signal()  #: Request to switch to taxon tab
 
     def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
@@ -62,8 +63,9 @@ class ImageController(QWidget):
         self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
         self.input_obs_id.on_clear.connect(self.input_taxon_id.clear)
 
-        # Viewer
+        # Image gallery
         self.gallery = ImageGallery()
+        self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
 
     def run(self):
@@ -153,7 +155,9 @@ class ImageController(QWidget):
         """Update input info from a taxon object (loaded from Species tab)"""
         self.input_taxon_id.set_id(taxon.id)
         self.data_source_card.clear()
-        self.data_source_card.addWidget(TaxonInfoCard(taxon=taxon, delayed_load=False))
+        card = TaxonInfoCard(taxon=taxon, delayed_load=False)
+        card.on_click.connect(self.on_select_taxon_tab)
+        self.data_source_card.addWidget(card)
 
     # @Slot(Observation)
     # def select_observation(self, observation: Observation):

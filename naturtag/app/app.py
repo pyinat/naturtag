@@ -97,8 +97,8 @@ class MainWindow(QMainWindow):
         self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
 
-        # Switch to Taxon tab from image context menu -> View Taxon
-        self.image_controller.gallery.on_select_taxon.connect(
+        # Switch to Taxon tab if requested from Photos tab
+        self.image_controller.on_select_taxon_tab.connect(
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )
 

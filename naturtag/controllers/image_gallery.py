@@ -108,8 +108,8 @@ class ImageGallery(StylableWidget):
         thumbnail = LocalThumbnail(image_path)
         thumbnail.on_remove.connect(self.remove_image)
         thumbnail.on_select.connect(self.select_image)
-        thumbnail.on_copy.connect(self.on_message.emit)
-        thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon.emit)
+        thumbnail.on_copy.connect(self.on_message)
+        thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon)
         self.flow_layout.addWidget(thumbnail)
         self.images[thumbnail.image_path] = thumbnail
 

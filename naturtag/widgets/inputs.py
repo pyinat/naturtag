@@ -21,7 +21,7 @@ class IdInput(QLineEdit):
         self.setMaximumWidth(200)
         self.setClearButtonEnabled(True)
         self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
-        self.findChild(QAction).triggered.connect(self.on_clear.emit)
+        self.findChild(QAction).triggered.connect(self.on_clear)
         self.returnPressed.connect(self.select)
 
     def focusOutEvent(self, event: QEvent = None):
