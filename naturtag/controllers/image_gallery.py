@@ -153,7 +153,7 @@ class LocalThumbnail(StylableWidget):
         super().__init__()
         self.image_path = image_path
         self.metadata = MetaMetadata(self.image_path)
-        self.setToolTip(f'{self.image_path}\n{self.metadata.summary}')
+        self.setToolTip(self.metadata.summary)
         self.setContentsMargins(2, 2, 2, 2)
         layout = VerticalLayout(self)
         layout.setSpacing(0)
