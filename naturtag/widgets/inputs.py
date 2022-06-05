@@ -12,21 +12,17 @@ logger = getLogger(__name__)
 class IdInput(QLineEdit):
     """Pressing return or losing focus will send an 'on_select' signal"""
 
-    on_clear = Signal()
-    on_select = Signal(int)
+    on_clear = Signal()  #: Wrapper for 'clear' button signal
+    on_select = Signal(int)  #: An ID was selected
 
     def __init__(self):
         super().__init__()
         self.setValidator(QIntValidator())
         self.setMaximumWidth(200)
-        self.returnPressed.connect(self.select)
-
-        # Enable clear button and set its icon
         self.setClearButtonEnabled(True)
         self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
-
-        # Make 'clear' signal easier to access
         self.findChild(QAction).triggered.connect(self.on_clear.emit)
+        self.returnPressed.connect(self.select)
 
     def focusOutEvent(self, event: QEvent = None):
         self.select()

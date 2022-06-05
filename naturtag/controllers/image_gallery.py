@@ -45,8 +45,8 @@ logger = getLogger(__name__)
 class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
-    on_message = Signal(str)
-    on_select = Signal(int)
+    on_message = Signal(str)  #: Forward a message to status bar
+    on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
     def __init__(self):
         super().__init__()
@@ -109,7 +109,7 @@ class ImageGallery(StylableWidget):
         thumbnail.on_remove.connect(self.remove_image)
         thumbnail.on_select.connect(self.select_image)
         thumbnail.on_copy.connect(self.on_message.emit)
-        thumbnail.context_menu.on_select.connect(self.on_select.emit)
+        thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon.emit)
         self.flow_layout.addWidget(thumbnail)
         self.images[thumbnail.image_path] = thumbnail
 
@@ -145,9 +145,9 @@ class LocalThumbnail(StylableWidget):
     * Right click: Show context menu
     """
 
-    on_copy = Signal(str)
-    on_remove = Signal(Path)
-    on_select = Signal(Path)
+    on_copy = Signal(str)  #: Tags were copied to the clipboard
+    on_remove = Signal(Path)  #: The image was removed from the gallery
+    on_select = Signal(Path)  #: The image was clicked
 
     def __init__(self, image_path: Path):
         super().__init__()
@@ -256,7 +256,7 @@ class LocalThumbnail(StylableWidget):
 class ThumbnailContextMenu(QMenu):
     """Context menu for local image thumbnails"""
 
-    on_select = Signal(int)
+    on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
     def __init__(self, thumbnail: LocalThumbnail):
         super().__init__()
@@ -272,7 +272,7 @@ class ThumbnailContextMenu(QMenu):
             text='View Taxon',
             tooltip=f'View taxon {meta.taxon_id} in naturtag',
             enabled=meta.has_taxon,
-            callback=lambda: self.on_select.emit(meta.taxon_id),
+            callback=lambda: self.on_select_taxon.emit(meta.taxon_id),
         )
         self._add_action(
             icon='fa5s.spider',

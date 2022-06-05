@@ -23,8 +23,8 @@ logger = getLogger(__name__)
 class TaxonController(QWidget):
     """Controller for searching and viewing taxa"""
 
-    on_message = Signal(str)
-    on_select = Signal(Taxon)
+    on_message = Signal(str)  #: Forward a message to status bar
+    on_select = Signal(Taxon)  #: A taxon was selected
 
     def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
@@ -118,7 +118,7 @@ class TaxonController(QWidget):
 class TaxonTabs(QTabWidget):
     """Tabbed view for search results and user taxa"""
 
-    on_load = Signal(list)
+    on_load = Signal(list)  #: New taxon cards were loaded
 
     def __init__(
         self,

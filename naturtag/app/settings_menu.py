@@ -15,7 +15,7 @@ logger = getLogger(__name__)
 class SettingsMenu(StylableWidget):
     """Application settings menu, with input widgets connected to values in settings file"""
 
-    on_message = Signal(str)
+    on_message = Signal(str)  #: Forward a message to status bar
 
     def __init__(self, settings: Settings):
         super().__init__()

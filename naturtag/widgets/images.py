@@ -194,7 +194,7 @@ class ImageWindow(QWidget):
     Keyboard shortcuts: Escape to close window, Left and Right to cycle through images
     """
 
-    on_remove = Signal(Path)
+    on_remove = Signal(Path)  #: Request for image to be removed from list
 
     def __init__(self, image_class: Type[FullscreenPhoto] = FullscreenPhoto):
         super().__init__()

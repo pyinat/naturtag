@@ -26,8 +26,8 @@ logger = getLogger(__name__)
 class TaxonInfoSection(HorizontalLayout):
     """Section to display selected taxon photo and basic info"""
 
-    on_select = Signal(int)
-    on_select_obj = Signal(Taxon)
+    on_select = Signal(int)  #: A taxon was selected from 'parent' button
+    on_select_obj = Signal(Taxon)  # :A taxon was selected from nav buttons or another screen
 
     def __init__(self, threadpool: ThreadPool):
         super().__init__()

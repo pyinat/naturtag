@@ -79,9 +79,9 @@ class Worker(QRunnable):
 class WorkerSignals(QObject):
     """Signals used by a worker thread (can't be set directly on a QRunnable)"""
 
-    on_error = Signal(Exception)
-    on_result = Signal(object)
-    on_progress = Signal()
+    on_error = Signal(Exception)  #: Return exception info on error
+    on_result = Signal(object)  #: Return result on completion
+    on_progress = Signal()  #: Increment progress bar
 
 
 class ProgressBar(QProgressBar):

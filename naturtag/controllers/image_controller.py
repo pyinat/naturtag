@@ -19,10 +19,10 @@ logger = getLogger(__name__)
 class ImageController(QWidget):
     """Controller for selecting and tagging local image files"""
 
-    on_message = Signal(str)
-    on_new_metadata = Signal(MetaMetadata)
-    on_select_observation_id = Signal(int)
-    on_select_taxon_id = Signal(int)
+    on_message = Signal(str)  #: Forward a message to status bar
+    on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
+    on_select_observation_id = Signal(int)  #: An observation ID was entered
+    on_select_taxon_id = Signal(int)  #: A taxon ID was entered
 
     def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()

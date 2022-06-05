@@ -63,7 +63,7 @@ class MainWindow(QMainWindow):
         self.taxon_controller.on_message.connect(self.info)
 
         # Select taxon from image context menu, ID input fields, and iconic taxa filtes
-        self.image_controller.gallery.on_select.connect(self.taxon_controller.select_taxon)
+        self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
         self.image_controller.on_select_observation_id.connect(
             self.taxon_controller.select_observation_taxon
         )
@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
 
         # Switch to Taxon tab from image context menu -> View Taxon
-        self.image_controller.gallery.on_select.connect(
+        self.image_controller.gallery.on_select_taxon.connect(
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )
 
