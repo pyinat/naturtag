@@ -28,10 +28,8 @@ jobs:
         with:
           version: 1.2.0b1
           virtualenvs-in-project: true
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: 6.3.0
+      - name: Install Qt dependencies
+        run: sudo apt-get install -y libegl1
 
       # Cache packages per python version, and reuse until lockfile changes
       - name: Cache python packages
