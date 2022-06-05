@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Type, TypeAlias, Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
@@ -28,11 +28,11 @@ class IconLabel(QLabel):
         self,
         icon_str: str,
         parent: QWidget = None,
+        primary: bool = False,
         size: int = 32,
-        color: QColor = None,
     ):
         super().__init__(parent)
-        self.icon = fa_icon(icon_str, color=color)
+        self.icon = fa_icon(icon_str, primary=primary)
         self.icon_size = QSize(size, size)
         self.setPixmap(self.icon.pixmap(size, size, mode=QIcon.Mode.Normal))
 

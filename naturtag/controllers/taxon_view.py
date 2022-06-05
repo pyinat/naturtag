@@ -61,26 +61,26 @@ class TaxonInfoSection(HorizontalLayout):
         button_layout = HorizontalLayout()
         root.addLayout(button_layout)
         self.prev_button = QPushButton('Back')
-        self.prev_button.setIcon(fa_icon('ph.caret-left'))
+        self.prev_button.setIcon(fa_icon('ei.chevron-left'))
         self.prev_button.clicked.connect(self.prev)
         self.prev_button.setEnabled(False)
         button_layout.addWidget(self.prev_button)
 
         self.next_button = QPushButton('Forward')
-        self.next_button.setIcon(fa_icon('ph.caret-right'))
+        self.next_button.setIcon(fa_icon('ei.chevron-right'))
         self.next_button.clicked.connect(self.next)
         self.next_button.setEnabled(False)
         button_layout.addWidget(self.next_button)
 
         # Parent button: We need to fetch the full Taxon object, so just pass the ID
         self.parent_button = QPushButton('Parent')
-        self.parent_button.setIcon(fa_icon('ph.caret-up'))
+        self.parent_button.setIcon(fa_icon('ei.chevron-up'))
         self.parent_button.clicked.connect(self.select_parent)
         button_layout.addWidget(self.parent_button)
 
         # Link button: Open web browser to taxon info page
         self.link_button = QPushButton('View on iNaturalist')
-        self.link_button.setIcon(fa_icon('mdi.web'))
+        self.link_button.setIcon(fa_icon('mdi.web', primary=True))
         self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_taxon.url))
         button_layout.addWidget(self.link_button)
 

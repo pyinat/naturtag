@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Union
 
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
@@ -8,8 +7,10 @@ from qtmodern.styles import _STYLESHEET as BASE_STYLESHEET
 
 from naturtag.constants import QSS_PATH
 
-YELLOWGREEN_LIGHT = (154, 205, 50)
+YELLOWGREEN = (154, 205, 50)
 YELLOWGREEN_DARK = (135, 181, 44)
+PALEBLUE = (94, 184, 255)
+PALEBLUE_DARK = (94, 184, 255)
 SILVER = (173, 168, 182)
 
 # LIGHT_GREEN_INAT = (116, 172, 0)
@@ -22,11 +23,12 @@ SILVER = (173, 168, 182)
 logger = getLogger(__name__)
 
 
-def fa_icon(icon_name, color: Union[str, QColor] = None, **kwargs):
-    """Get a FontAwesome icon, with a default color from the current app's palette"""
+def fa_icon(icon_name, primary: bool = False, **kwargs):
+    """Get a FontAwesome icon, using either a primary or secondary color from the palette"""
+    palette = QApplication.instance().palette()
     return icon(
         icon_name,
-        color=color or QApplication.instance().palette().highlight().color(),
+        color=palette.highlight().color() if primary else palette.link().color(),
         color_disabled='gray',
         **kwargs,
     )
@@ -61,10 +63,10 @@ def dark_palette() -> QPalette:
         QPalette.ButtonText: (180, 180, 180),
         QPalette.Dark: (35, 35, 35),
         # QPalette.Highlight: (42, 130, 218),
-        QPalette.Highlight: YELLOWGREEN_LIGHT,
+        QPalette.Highlight: YELLOWGREEN,
         QPalette.HighlightedText: (180, 180, 180),
         QPalette.Light: (180, 180, 180),
-        QPalette.Link: (56, 252, 196),
+        QPalette.Link: PALEBLUE,
         QPalette.LinkVisited: (80, 80, 80),
         QPalette.Midlight: (90, 90, 90),
         # QPalette.Midlight: CERULEAN,
@@ -109,7 +111,7 @@ def light_palette() -> QPalette:
         # QPalette.Highlight: (76, 163, 224),
         QPalette.Highlight: YELLOWGREEN_DARK,
         QPalette.HighlightedText: (0, 0, 0),
-        QPalette.Link: (0, 162, 232),
+        QPalette.Link: PALEBLUE_DARK,
         QPalette.AlternateBase: (225, 225, 225),
         QPalette.ToolTipBase: (240, 240, 240),
         QPalette.ToolTipText: (0, 0, 0),
