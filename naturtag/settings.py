@@ -82,13 +82,13 @@ class Settings(YamlMixin):
 
     # Display settings
     dark_mode: bool = field(default=False)
-    show_logs: bool = field(default=False)
     window_size: tuple[int, int] = field(default=DEFAULT_WINDOW_SIZE)
 
     # Logging settings
-    log_level: str = field(default='INFO')
+    log_level: str = doc_field(default='INFO', doc='Logging level')
     log_level_external: str = field(default='INFO')
     logfile: Path = field(default=LOGFILE, converter=Path)
+    show_logs: bool = doc_field(default=False, doc='Show a tab with application logs')
 
     # iNaturalist
     all_ranks: bool = doc_field(

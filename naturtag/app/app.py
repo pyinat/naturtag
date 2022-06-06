@@ -77,8 +77,9 @@ class MainWindow(QMainWindow):
         self.taxon_controller.on_select.connect(self.image_controller.select_taxon)
 
         # Settings that take effect immediately
-        self.settings_menu.dark_mode.on_click.connect(lambda checked: set_theme(dark_mode=checked))
         self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
+        self.settings_menu.dark_mode.on_click.connect(set_theme)
+        self.settings_menu.show_logs.on_click.connect(self.toggle_log_tab)
 
         # Tabs
         self.tabs = QTabWidget()
@@ -114,7 +115,6 @@ class MainWindow(QMainWindow):
         self.toolbar.refresh_button.triggered.connect(self.image_controller.refresh)
         self.toolbar.fullscreen_button.triggered.connect(self.toggle_fullscreen)
         self.toolbar.settings_button.triggered.connect(self.show_settings)
-        self.toolbar.logs_button.triggered.connect(self.toggle_log_tab)
         self.toolbar.exit_button.triggered.connect(QApplication.instance().quit)
         self.toolbar.docs_button.triggered.connect(self.open_docs)
         self.toolbar.about_button.triggered.connect(self.open_about)
@@ -191,10 +191,8 @@ class MainWindow(QMainWindow):
             self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen', primary=True))
         return self.isFullScreen()
 
-    def toggle_log_tab(self):
-        tab_visible = not self.tabs.isTabVisible(self.log_tab_idx)
-        self.tabs.setTabVisible(self.log_tab_idx, tab_visible)
-        self.settings.show_logs = tab_visible
+    def toggle_log_tab(self, checked: bool = True):
+        self.tabs.setTabVisible(self.log_tab_idx, checked)
 
     def reload_qss(self):
         set_stylesheet(self)
