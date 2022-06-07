@@ -27,15 +27,18 @@ class ToggleSwitch(QAbstractButton):
         palette = self.palette()
         self._thumb_color = {
             True: palette.highlightedText(),
-            False: palette.light(),
+            False: palette.midlight(),
+            None: palette.mid(),
         }
         self._track_color = {
-            True: palette.highlight(),
+            True: palette.link(),
             False: palette.dark(),
+            None: palette.shadow(),
         }
         self._text_color = {
-            True: palette.highlight().color(),
+            True: palette.link().color(),
             False: palette.dark().color(),
+            None: palette.shadow().color(),
         }
         self._thumb_text = {True: '✔', False: '✕'}
 
@@ -66,18 +69,16 @@ class ToggleSwitch(QAbstractButton):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing, True)
         p.setPen(Qt.NoPen)
-        track_opacity = self._track_opacity
         thumb_opacity = 1.0
         text_opacity = 1.0
-        if self.isEnabled():
-            track_brush = self._track_color[self.isChecked()]
-            thumb_brush = self._thumb_color[self.isChecked()]
-            text_color = self._text_color[self.isChecked()]
-        else:
+        track_opacity = self._track_opacity
+        if not self.isEnabled():
             track_opacity *= 0.8
-            track_brush = self.palette().shadow()
-            thumb_brush = self.palette().mid()
-            text_color = self.palette().shadow().color()
+
+        state = self.isChecked() if self.isEnabled() else None
+        track_brush = self._track_color[state]
+        thumb_brush = self._thumb_color[state]
+        text_color = self._text_color[state]
 
         p.setBrush(track_brush)
         p.setOpacity(track_opacity)

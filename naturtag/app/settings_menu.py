@@ -93,7 +93,7 @@ class SettingContainer(HorizontalLayout):
         self.addWidget(IconLabel(icon_str, size=32))
 
         title = QLabel(setting_attr.replace('_', ' ').title())
-        title.setObjectName('title')
+        title.setObjectName('h3')
         title_layout = VerticalLayout()
         title_layout.addWidget(title)
 

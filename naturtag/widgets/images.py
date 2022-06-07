@@ -134,8 +134,8 @@ class PixmapLabel(QLabel):
         return QSize(self.width(), self.heightForWidth(self.width()))
 
 
-class HoverMixin(MIXIN_BASE):
-    """Mixin that adds a transparent overlay to darken the image on hover"""
+class HoverMixinBase(MIXIN_BASE):
+    """Base class for HoverMixin, to allow activating overlay on parent hover"""
 
     def __init__(self, *args, hover_icon: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
@@ -146,6 +146,14 @@ class HoverMixin(MIXIN_BASE):
         self.overlay.setObjectName('hover_overlay')
         self.overlay.setVisible(False)
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.overlay.setFixedSize(self.size())
+
+
+class HoverMixin(HoverMixinBase):
+    """Mixin that adds a transparent overlay to darken the image on hover (handled in QSS)"""
+
     def enterEvent(self, event):
         self.overlay.setVisible(True)
         super().enterEvent(event)
@@ -153,10 +161,6 @@ class HoverMixin(MIXIN_BASE):
     def leaveEvent(self, event):
         self.overlay.setVisible(False)
         super().leaveEvent(event)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self.overlay.setFixedSize(self.size())
 
 
 class HoverIcon(IconLabel):

@@ -55,7 +55,11 @@ class Toolbar(QToolBar):
 
         # Extra actions not added to the toolbar, but used by the menu
         self.settings_button = self.add_button(
-            '&Settings', tooltip='Settings', icon='fa.gear', visible=False
+            '&Settings',
+            tooltip='Settings',
+            icon='fa.gear',
+            shortcut='Ctrl+Shift+S',
+            visible=False,
         )
         self.exit_button = self.add_button(
             '&Exit',
