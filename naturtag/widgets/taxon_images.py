@@ -106,7 +106,7 @@ class TaxonList(StylableWidget):
         self.threadpool = threadpool
         self.root = VerticalLayout(self)
         self.root.setAlignment(Qt.AlignTop)
-        self.root.setContentsMargins(0, 5, 5, 0)
+        self.root.setContentsMargins(0, 1, 1, 0)
 
         self.scroller = QScrollArea()
         self.scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -139,6 +139,18 @@ class TaxonList(StylableWidget):
     def contains(self, taxon_id: int) -> bool:
         return self.get_card_by_id(taxon_id) is not None
 
+    def collapse(self):
+        """Collapse all taxon cards"""
+        self.root.setContentsMargins(0, 1, 1, 0)
+        for card in self.taxa:
+            card.collapse()
+
+    def expand(self):
+        """Expand all taxon cards"""
+        self.root.setContentsMargins(0, 5, 5, 0)
+        for card in self.taxa:
+            card.expand()
+
     def get_card_by_id(self, taxon_id: int) -> Optional['TaxonInfoCard']:
         for card in self.taxa:
             if card.taxon.id == taxon_id:
@@ -170,7 +182,6 @@ class TaxonInfoCard(StylableWidget):
         super().__init__()
         card_layout = HorizontalLayout(self)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.setFixedHeight(90)
 
         self.taxon = taxon
         if isinstance(taxon, TaxonCount):
@@ -180,20 +191,54 @@ class TaxonInfoCard(StylableWidget):
         self.thumbnail = TaxonPhoto()
         self.thumbnail.setFixedSize(75, 75)
         card_layout.addWidget(self.thumbnail)
+        self.condensed_thumbnail = PixmapLabel()
+        self.condensed_thumbnail.setFixedSize(20, 20)
+        card_layout.addWidget(self.condensed_thumbnail)
         if not delayed_load:
             self.load()
 
         # Details
         self.title = QLabel(taxon.name)
         self.title.setObjectName('h1_italic')
+        self.condensed_title = QLabel(taxon.full_name)
+        self.condensed_title.setObjectName('h3')
         self.line_1 = QLabel(taxon.rank)
         self.line_2 = QLabel(taxon.preferred_common_name)
 
+        self.collapse()
+        # if collapsed:
+        #     self.collapse()
+        # else:
+        #     self.expand()
+
         details_layout = VerticalLayout()
         details_layout.addWidget(self.title)
+        details_layout.addWidget(self.condensed_title)
         details_layout.addWidget(self.line_1)
         details_layout.addWidget(self.line_2)
         card_layout.addLayout(details_layout)
+
+    def collapse(self):
+        """Collapse the card to show only icon and taxon rank/name"""
+        self.setFixedHeight(32)
+        self.condensed_title.setVisible(True)
+        self.condensed_thumbnail.setVisible(True)
+
+        self.thumbnail.setVisible(False)
+        self.title.setVisible(False)
+        self.line_1.setVisible(False)
+        self.line_2.setVisible(False)
+
+    def expand(self):
+        """Expand the card to show all details"""
+        self.setFixedHeight(90)
+        self.condensed_thumbnail.setVisible(False)
+        self.condensed_title.setVisible(False)
+
+        self.thumbnail.setVisible(True)
+        self.title.setVisible(True)
+        self.line_1.setVisible(True)
+        self.line_2.setVisible(True)
 
     # Darken thumbnail when hovering over card. Background hover is handled in QSS.
     def enterEvent(self, event):
@@ -206,6 +251,7 @@ class TaxonInfoCard(StylableWidget):
 
     def load(self):
         self.thumbnail.set_taxon(self.taxon, size='thumbnail')
+        self.condensed_thumbnail.set_pixmap(url=self.taxon.icon_url)
 
     def mousePressEvent(self, _):
         """Placeholder to accept mouse press events"""
