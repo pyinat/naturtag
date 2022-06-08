@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from pyinaturalist_convert import DATA_DIR, TaxonAutocompleter
-from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal
+from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal, Slot
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.app.style import fa_icon
@@ -55,6 +55,7 @@ class TaxonAutocomplete(QLineEdit):
             self.taxa = {t.name: t.id for t in self.taxon_completer.search(q)}
             self.model.setStringList(self.taxa.keys())
 
+    @Slot(str)
     def select_taxon(self, name: str):
         """Triggered by selecting a taxon name from the autocomplete list"""
         taxon_id = self.taxa.get(name)
