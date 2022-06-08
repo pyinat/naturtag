@@ -23,7 +23,6 @@ from naturtag.widgets import (
 logger = getLogger(__name__)
 
 
-# TODO: Store Taxon.taxon_photos in DB; currently need to fetch this from API each time
 class TaxonController(StylableWidget):
     """Controller for searching and viewing taxa"""
 
@@ -85,7 +84,7 @@ class TaxonController(StylableWidget):
         if self.tabs._init_complete:
             self.threadpool.cancel()
         future = self.threadpool.schedule(
-            lambda: INAT_CLIENT.taxa(taxon_id), priority=QThread.HighPriority, refresh=True
+            lambda: INAT_CLIENT.taxa(taxon_id), priority=QThread.HighPriority
         )
         future.on_result.connect(self.display_taxon)
 
