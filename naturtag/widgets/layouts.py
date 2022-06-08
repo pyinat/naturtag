@@ -27,17 +27,40 @@ else:
     MIXIN_BASE = object
 
 
+class GroupBoxLayout(QVBoxLayout):
+    """GroupBox with a default layout"""
+
+    def __init__(self, name: str = None):
+        self.box = QGroupBox(name)
+        super().__init__(self.box)
+
+    def set_title(self, title: str):
+        self.box.setTitle(title)
+
+    def clear(self):
+        for i in reversed(range(self.count())):
+            child = self.takeAt(i)
+            if child.widget():
+                child.widget().deleteLater()
+
+
 class GroupMixin(MIXIN_BASE):
-    def add_group(self, name: str, parent: QLayout = None, width: int = None) -> 'VerticalLayout':
+    def add_group(
+        self,
+        name: str,
+        parent: QLayout = None,
+        width: int = None,
+        min_height: bool = True,
+    ) -> GroupBoxLayout:
         """Add a new groupbox to the widget or layout"""
-        group_box = QGroupBox(name)
-        group_layout = VerticalLayout(group_box)
+        group_box_layout = GroupBoxLayout(name)
         parent = parent or self
-        parent.addWidget(group_box)
+        parent.addWidget(group_box_layout.box)
         if width:
-            group_box.setFixedWidth(width)
-            group_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        return group_layout
+            group_box_layout.box.setFixedWidth(width)
+        if min_height:
+            group_box_layout.box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
+        return group_box_layout
 
 
 class ShortcutMixin:

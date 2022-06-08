@@ -55,12 +55,12 @@ class Toolbar(QToolBar):
 
         # Extra actions not added to the toolbar, but used by the menu
         self.settings_button = self.add_button(
-            '&Settings', tooltip='Settings', icon='fa.gear', visible=False
+            '&Settings',
+            tooltip='Settings',
+            icon='fa.gear',
+            shortcut='Ctrl+Shift+S',
+            visible=False,
         )
-        self.logs_button = self.add_button(
-            'Show &Logs', tooltip='Show tab with debug logs', icon='fa.file-text-o', visible=False
-        )
-        self.logs_button.setCheckable(True)
         self.exit_button = self.add_button(
             '&Exit',
             tooltip='Exit to desktop',
@@ -91,7 +91,7 @@ class Toolbar(QToolBar):
         shortcut: str = None,
         visible: bool = True,
     ) -> QAction:
-        action = QAction(fa_icon(icon), name, self)
+        action = QAction(fa_icon(icon, primary=True), name, self)
         if tooltip:
             action.setStatusTip(tooltip)
         if shortcut:
@@ -115,8 +115,6 @@ class Toolbar(QToolBar):
 
         view_menu = menu.addMenu('&View')
         view_menu.addAction(self.fullscreen_button)
-        view_menu.addAction(self.logs_button)
-        self.logs_button.setChecked(settings.show_logs)
 
         settings_menu = menu.addMenu('&Settings')
         settings_menu.addAction(self.settings_button)

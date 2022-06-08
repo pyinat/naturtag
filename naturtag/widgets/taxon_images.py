@@ -8,7 +8,13 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.client import IMG_SESSION
-from naturtag.widgets.images import HoverMixin, ImageWindow, NavButtonsMixin, PixmapLabel
+from naturtag.widgets.images import (
+    HoverMixin,
+    HoverMixinBase,
+    ImageWindow,
+    NavButtonsMixin,
+    PixmapLabel,
+)
 from naturtag.widgets.layouts import HorizontalLayout, StylableWidget, VerticalLayout
 
 if TYPE_CHECKING:
@@ -19,7 +25,7 @@ ATTRIBUTION_STRIP_PATTERN = re.compile(r',?\s+uploaded by.*')
 logger = getLogger(__name__)
 
 
-class TaxonPhoto(PixmapLabel):
+class TaxonPhoto(HoverMixinBase, PixmapLabel):
     """A taxon photo widget with a Taxon reference and a click event
 
     Args:
@@ -92,28 +98,24 @@ class TaxonImageWindow(ImageWindow):
         pass
 
 
-class TaxonList(VerticalLayout):
+class TaxonList(StylableWidget):
     """A scrollable list of TaxonInfoCards"""
 
     def __init__(self, threadpool: 'ThreadPool', parent: QWidget = None):
         super().__init__(parent)
         self.threadpool = threadpool
+        self.root = VerticalLayout(self)
+        self.root.setAlignment(Qt.AlignTop)
+        self.root.setContentsMargins(0, 5, 5, 0)
 
-        self.scroll_panel = QWidget()
-        self.scroll_layout = VerticalLayout(self.scroll_panel)
-        self.scroll_layout.setAlignment(Qt.AlignTop)
-        self.scroll_layout.setContentsMargins(0, 0, 0, 0)
-        self.addLayout(self.scroll_layout)
-
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setWidget(self.scroll_panel)
-        self.addWidget(scroll_area)
+        self.scroller = QScrollArea()
+        self.scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroller.setWidgetResizable(True)
+        self.scroller.setWidget(self)
 
     @property
     def taxa(self) -> Iterator['TaxonInfoCard']:
-        for item in self.scroll_panel.children():
+        for item in self.children():
             if isinstance(item, TaxonInfoCard):
                 yield item
 
@@ -121,10 +123,10 @@ class TaxonList(VerticalLayout):
         """Add a taxon card immediately, and load its thumbnail from a separate thread"""
         card = TaxonInfoCard(taxon=taxon)
         if idx is not None:
-            self.scroll_layout.insertWidget(idx, card)
+            self.root.insertWidget(idx, card)
         else:
-            self.scroll_layout.addWidget(card)
-        self.threadpool.schedule(card.thumbnail.set_taxon, taxon=taxon, size='thumbnail')
+            self.root.addWidget(card)
+        self.threadpool.schedule(card.load)
 
     def add_or_update(self, taxon: Taxon, idx: int = 0):
         """Move a taxon card to the specified position, and add a new one if it doesn't exist"""
@@ -132,7 +134,7 @@ class TaxonList(VerticalLayout):
             self.add_taxon(taxon, idx)
 
     def clear(self):
-        self.scroll_layout.clear()
+        self.root.clear()
 
     def contains(self, taxon_id: int) -> bool:
         return self.get_card_by_id(taxon_id) is not None
@@ -147,8 +149,8 @@ class TaxonList(VerticalLayout):
         """Move a card to the specified position, if found; return False otherwise"""
         card = self.get_card_by_id(taxon_id)
         if card:
-            self.scroll_layout.removeWidget(card)
-            self.scroll_layout.insertWidget(idx, card)
+            self.root.removeWidget(card)
+            self.root.insertWidget(idx, card)
             return True
         return False
 
@@ -164,31 +166,46 @@ class TaxonInfoCard(StylableWidget):
 
     on_click = Signal(int)
 
-    def __init__(self, taxon: Taxon, delayed_load: bool = True):
+    def __init__(self, taxon: Taxon, collapsed: bool = False, delayed_load: bool = True):
         super().__init__()
         card_layout = HorizontalLayout(self)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setFixedHeight(90)
+
+        self.taxon = taxon
         if isinstance(taxon, TaxonCount):
             self.setToolTip(f'Count: {taxon.count}')
-        self.setFixedHeight(90)
-        self.taxon = taxon
-        self.taxon_id = taxon.id
 
         # Image
         self.thumbnail = TaxonPhoto()
-        self.thumbnail.setFixedWidth(75)
+        self.thumbnail.setFixedSize(75, 75)
         card_layout.addWidget(self.thumbnail)
         if not delayed_load:
-            self.thumbnail.set_taxon(taxon, size='thumbnail')
+            self.load()
 
         # Details
+        self.title = QLabel(taxon.name)
+        self.title.setObjectName('h1_italic')
+        self.line_1 = QLabel(taxon.rank)
+        self.line_2 = QLabel(taxon.preferred_common_name)
+
         details_layout = VerticalLayout()
+        details_layout.addWidget(self.title)
+        details_layout.addWidget(self.line_1)
+        details_layout.addWidget(self.line_2)
         card_layout.addLayout(details_layout)
-        title = QLabel(taxon.name)
-        title.setObjectName('title')
-        details_layout.addWidget(title)
-        details_layout.addWidget(QLabel(taxon.rank))
-        details_layout.addWidget(QLabel(taxon.preferred_common_name))
+
+    # Darken thumbnail when hovering over card. Background hover is handled in QSS.
+    def enterEvent(self, event):
+        self.thumbnail.overlay.setVisible(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.thumbnail.overlay.setVisible(False)
+        super().leaveEvent(event)
+
+    def load(self):
+        self.thumbnail.set_taxon(self.taxon, size='thumbnail')
 
     def mousePressEvent(self, _):
         """Placeholder to accept mouse press events"""

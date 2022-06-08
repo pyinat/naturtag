@@ -172,7 +172,9 @@ class LocalThumbnail(StylableWidget):
         layout.addWidget(self.label)
 
         # Icon shown when an image is tagged or updated
-        self.check = IconLabel('fa5s.check', self.image, size=THUMBNAIL_SIZE_DEFAULT[0])
+        self.check = IconLabel(
+            'fa5s.check', self.image, primary=True, size=THUMBNAIL_SIZE_DEFAULT[0]
+        )
         self.check.setVisible(False)
 
     def contextMenuEvent(self, e):
@@ -320,13 +322,13 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout = HorizontalLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
-        self.setGeometry(11, img_size.height() - 9, 116, 20)
+        self.setGeometry(9, img_size.height() - 11, 116, 20)
 
-        self.taxon_icon = IconLabel('mdi.bird', size=20)
-        self.observation_icon = IconLabel('fa.binoculars', size=20)
-        self.geo_icon = IconLabel('fa.map-marker', size=20)
-        self.tag_icon = IconLabel('fa.tags', size=20)
-        self.sidecar_icon = IconLabel('mdi.xml', size=20)
+        self.taxon_icon = IconLabel('mdi.bird', primary=True, size=20)
+        self.observation_icon = IconLabel('fa.binoculars', primary=True, size=20)
+        self.geo_icon = IconLabel('fa.map-marker', primary=True, size=20)
+        self.tag_icon = IconLabel('fa.tags', primary=True, size=20)
+        self.sidecar_icon = IconLabel('mdi.xml', primary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)
         self.icon_layout.addWidget(self.observation_icon)
         self.icon_layout.addWidget(self.geo_icon)

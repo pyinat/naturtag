@@ -1,8 +1,8 @@
 QGroupBox {
-    font: bold 18px;
+    font: bold 16pt;
     border: 2px solid palette(midlight);
     border-radius: 6px;
-    margin-top: 8px;
+    margin-top: 10px;
     padding:5px;
 }
 QGroupBox::title {
@@ -10,20 +10,24 @@ QGroupBox::title {
     subcontrol-position: top left;
     left: 7px;
     padding: 0px 5px 0px 5px;
- }
+}
+QScrollArea {
+    background: palette(midlight);
+}
 
+TaxonList {
+    background: palette(alternate-base);
+}
 TaxonInfoCard {
     background: palette(base);
+    border-radius: 6px;
 }
 TaxonInfoCard:hover {
     background: palette(dark);
 }
-TaxonInfoCard > QLabel#title {
-    font: bold italic 16pt;
-}
 
 LocalThumbnail {
-    background: palette(dark);
+    background: palette(base);
 }
 LocalThumbnail > QLabel {
     background-color: rgba(0, 0, 0, 0.3);
@@ -35,16 +39,25 @@ LocalThumbnail > QLabel#metadata-icons {
 }
 
 StylableWidget#gallery_scroll_panel {
-    background: palette(dark);
+    background: palette(base);
 }
 
 QLabel#hover_overlay {
     background-color: rgba(0, 0, 0, 0.3);
 }
-QLabel#title {
+QLabel#h1 {
     font: bold 16pt;
+}
+QLabel#h1_italic {
+    font: bold italic 16pt;
+}
+QLabel#h2 {
+    font: bold 14pt;
+}
+QLabel#h3 {
+    font: bold 12pt;
 }
 
 QTextEdit#log_container {
-    background-color: #ceddf0;
+    background-color: palette(base);
 }

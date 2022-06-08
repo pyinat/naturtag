@@ -61,26 +61,26 @@ class TaxonInfoSection(HorizontalLayout):
         button_layout = HorizontalLayout()
         root.addLayout(button_layout)
         self.prev_button = QPushButton('Back')
-        self.prev_button.setIcon(fa_icon('ph.caret-left'))
+        self.prev_button.setIcon(fa_icon('ei.chevron-left'))
         self.prev_button.clicked.connect(self.prev)
         self.prev_button.setEnabled(False)
         button_layout.addWidget(self.prev_button)
 
         self.next_button = QPushButton('Forward')
-        self.next_button.setIcon(fa_icon('ph.caret-right'))
+        self.next_button.setIcon(fa_icon('ei.chevron-right'))
         self.next_button.clicked.connect(self.next)
         self.next_button.setEnabled(False)
         button_layout.addWidget(self.next_button)
 
         # Parent button: We need to fetch the full Taxon object, so just pass the ID
         self.parent_button = QPushButton('Parent')
-        self.parent_button.setIcon(fa_icon('ph.caret-up'))
+        self.parent_button.setIcon(fa_icon('ei.chevron-up'))
         self.parent_button.clicked.connect(self.select_parent)
         button_layout.addWidget(self.parent_button)
 
         # Link button: Open web browser to taxon info page
         self.link_button = QPushButton('View on iNaturalist')
-        self.link_button.setIcon(fa_icon('mdi.web'))
+        self.link_button.setIcon(fa_icon('mdi.web', primary=True))
         self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_taxon.url))
         button_layout.addWidget(self.link_button)
 
@@ -163,15 +163,13 @@ class TaxonomySection(HorizontalLayout):
     def __init__(self, threadpool: ThreadPool):
         super().__init__()
 
-        self.ancestors_group = QGroupBox('Ancestors')
-        self.ancestors_group.setFixedWidth(400)
-        self.ancestors_list = TaxonList(threadpool, self.ancestors_group)
-        self.addWidget(self.ancestors_group)
+        self.ancestors_group = self.add_group('Ancestors', width=400, min_height=False)
+        self.ancestors_list = TaxonList(threadpool)
+        self.ancestors_group.addWidget(self.ancestors_list.scroller)
 
-        self.children_group = QGroupBox('Children')
-        self.children_group.setFixedWidth(400)
-        self.children_list = TaxonList(threadpool, self.children_group)
-        self.addWidget(self.children_group)
+        self.children_group = self.add_group('Children', width=400, min_height=False)
+        self.children_list = TaxonList(threadpool)
+        self.children_group.addWidget(self.children_list.scroller)
 
     def load(self, taxon: Taxon):
         """Populate taxon ancestors and children"""
@@ -180,9 +178,9 @@ class TaxonomySection(HorizontalLayout):
         def get_label(text: str, items: list) -> str:
             return text + (f' ({len(items)})' if items else '')
 
-        self.ancestors_group.setTitle(get_label('Ancestors', taxon.ancestors))
+        self.ancestors_group.set_title(get_label('Ancestors', taxon.ancestors))
         self.ancestors_list.set_taxa(taxon.ancestors)
-        self.children_group.setTitle(get_label('Children', taxon.children))
+        self.children_group.set_title(get_label('Children', taxon.children))
         self.children_list.set_taxa(taxon.children)
 
     @property

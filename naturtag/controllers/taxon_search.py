@@ -77,11 +77,13 @@ class TaxonSearch(VerticalLayout):
         # Search/reset buttons
         button_layout = HorizontalLayout()
         search_button = QPushButton('Search')
+        search_button.setMaximumWidth(200)
         search_button.setIcon(fa_icon('fa.search'))
         search_button.clicked.connect(self.search)
         button_layout.addWidget(search_button)
 
         reset_button = QPushButton('Reset')
+        reset_button.setMaximumWidth(200)
         reset_button.setIcon(fa_icon('mdi.backspace'))
         reset_button.clicked.connect(self.reset)
         button_layout.addWidget(reset_button)

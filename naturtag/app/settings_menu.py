@@ -3,7 +3,7 @@ from logging import getLogger
 from attr import fields
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator, QValidator
-from PySide6.QtWidgets import QLabel, QLineEdit
+from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QSizePolicy
 
 from naturtag.settings import Settings
 from naturtag.widgets import IconLabel, StylableWidget, ToggleSwitch
@@ -57,8 +57,25 @@ class SettingsMenu(StylableWidget):
         )
         display.addLayout(self.dark_mode)
 
+        debug = self.add_group('Debug', self.settings_layout)
+        self.show_logs = ToggleSetting(
+            settings,
+            icon_str='fa.file-text-o',
+            setting_attr='show_logs',
+        )
+        debug.addLayout(self.show_logs)
+        self.log_level = ChoiceSetting(
+            settings, icon_str='fa.thermometer-2', setting_attr='log_level'
+        )
+        debug.addLayout(self.log_level)
+
         # Press escape to save and close window
         self.add_shortcut(Qt.Key_Escape, self.close)
+
+    def add_group(self, *args, **kwargs):
+        group = super().add_group(*args, **kwargs)
+        group.box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        return group
 
     def closeEvent(self, event):
         """Save settings when closing the window"""
@@ -76,7 +93,7 @@ class SettingContainer(HorizontalLayout):
         self.addWidget(IconLabel(icon_str, size=32))
 
         title = QLabel(setting_attr.replace('_', ' ').title())
-        title.setObjectName('title')
+        title.setObjectName('h3')
         title_layout = VerticalLayout()
         title_layout.addWidget(title)
 
@@ -86,6 +103,25 @@ class SettingContainer(HorizontalLayout):
             title_layout.addWidget(QLabel(description))
         self.addLayout(title_layout)
         self.addStretch()
+
+
+class ChoiceSetting(SettingContainer):
+    def __init__(
+        self,
+        settings: Settings,
+        icon_str: str,
+        setting_attr: str,
+    ):
+        super().__init__(icon_str, setting_attr)
+
+        def set_text(text):
+            setattr(settings, setting_attr, text)
+
+        widget = QComboBox()
+        widget.addItems(['DEBUG', 'INFO', 'WARNING', 'ERROR'])
+        widget.setCurrentText(str(getattr(settings, setting_attr)))
+        widget.currentTextChanged.connect(set_text)
+        self.addWidget(widget)
 
 
 class TextSetting(SettingContainer):
