@@ -5,7 +5,7 @@ from logging import getLogger
 from typing import Iterator
 
 from pyinaturalist import Taxon
-from PySide6.QtCore import QEvent, Qt, Signal
+from PySide6.QtCore import QEvent, Qt, QThread, Signal
 from PySide6.QtWidgets import QGroupBox, QPushButton
 
 from naturtag.app.style import fa_icon
@@ -103,7 +103,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.history_taxon = None
         self.selected_taxon = taxon
         self.group_box.setTitle(taxon.full_name)
-        self.threadpool.schedule(self.image.set_taxon, taxon=taxon)
+        self.threadpool.schedule(self.image.set_taxon, priority=QThread.HighPriority, taxon=taxon)
         self._update_nav_buttons()
 
         # Load additional thumbnails
