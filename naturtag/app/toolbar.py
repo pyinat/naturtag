@@ -16,9 +16,6 @@ class Toolbar(QToolBar):
     def __init__(self, parent: QWidget):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
-        self.setMovable(False)
-        self.setFloatable(False)
-        self.setAllowedAreas(Qt.TopToolBarArea)
 
         self.run_button = self.add_button(
             '&Run', tooltip='Apply tags to images', icon='fa.play', shortcut='Ctrl+R'
