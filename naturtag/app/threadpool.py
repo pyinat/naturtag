@@ -8,6 +8,7 @@ from PySide6.QtCore import (
     QObject,
     QPropertyAnimation,
     QRunnable,
+    QThread,
     QThreadPool,
     QTimer,
     Signal,
@@ -27,12 +28,14 @@ class ThreadPool(QThreadPool):
         super().__init__(**kwargs)
         self.progress = ProgressBar()
 
-    def schedule(self, callback: Callable, **kwargs) -> 'WorkerSignals':
+    def schedule(
+        self, callback: Callable, priority: QThread.Priority = QThread.NormalPriority, **kwargs
+    ) -> 'WorkerSignals':
         """Schedule a task to be run by the next available worker thread"""
         self.progress.add()
         worker = Worker(callback, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
-        self.start(worker)
+        self.start(worker, priority)
         return worker.signals
 
     def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:

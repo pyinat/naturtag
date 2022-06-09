@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Iterable
 
 from pyinaturalist import Taxon, TaxonCount, TaxonCounts
-from PySide6.QtCore import QSize, Qt, QTimer, Signal, Slot
+from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
@@ -83,14 +83,18 @@ class TaxonController(StylableWidget):
         logger.info(f'Selecting taxon {taxon_id}')
         if self.tabs._init_complete:
             self.threadpool.cancel()
-        future = self.threadpool.schedule(lambda: INAT_CLIENT.taxa(taxon_id))
+        future = self.threadpool.schedule(
+            lambda: INAT_CLIENT.taxa(taxon_id), priority=QThread.HighPriority
+        )
         future.on_result.connect(self.display_taxon)
 
     def select_observation_taxon(self, observation_id: int):
         """Load a taxon from an observation ID"""
         logger.info(f'Selecting observation {observation_id}')
         self.threadpool.cancel()
-        future = self.threadpool.schedule(lambda: INAT_CLIENT.observations(observation_id).taxon)
+        future = self.threadpool.schedule(
+            lambda: INAT_CLIENT.observations(observation_id).taxon, priority=QThread.HighPriority
+        )
         future.on_result.connect(self.display_taxon)
 
     @Slot(Taxon)
@@ -167,11 +171,12 @@ class TaxonTabs(QTabWidget):
             logger.info(f'Loading {len(display_ids)} user taxa')
             return INAT_CLIENT.taxa.from_ids(*display_ids, accept_partial=True).all()
 
-        future = self.threadpool.schedule(get_recent_taxa)
+        future = self.threadpool.schedule(get_recent_taxa, priority=QThread.LowPriority)
         future.on_result.connect(self.display_recent)
 
         future = self.threadpool.schedule(
-            lambda: get_observed_taxa(self.settings.username, self.settings.casual_observations)
+            lambda: get_observed_taxa(self.settings.username, self.settings.casual_observations),
+            priority=QThread.LowPriority,
         )
         future.on_result.connect(self.display_observed)
         self._init_complete = True
