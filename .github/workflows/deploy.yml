@@ -74,7 +74,7 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          poetry install -v --without dev --extras ui
+          poetry install -v --without dev
           poetry run pip install -U pyinstaller setuptools
       - name: Build PyInstaller package
         run: poetry run pyinstaller -y packaging/naturtag.spec
@@ -127,7 +127,7 @@ jobs:
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
-          retention-days: 7
+          retention-days: 30
 
 
   # Create a release with all workflow artifacts attached
