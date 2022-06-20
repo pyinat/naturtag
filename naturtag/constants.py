@@ -9,9 +9,11 @@ from pyinaturalist_convert.constants import DB_PATH
 # Packaged assets
 PKG_DIR = Path(__file__).parent.parent
 ASSETS_DIR = PKG_DIR / 'assets'
+ICONS_DIR = ASSETS_DIR / 'icons'
 CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
 FTS_DB = ASSETS_DIR / 'taxon-fts-en.tar.gz'
-APP_LOGO = str(ASSETS_DIR / 'logo.png')
+APP_ICON = ICONS_DIR / 'logo.ico'
+APP_LOGO = ICONS_DIR / 'logo.png'
 
 # Local settings & data paths
 DATA_DIR = Path(user_data_dir()) / 'Naturtag'

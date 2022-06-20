@@ -741,7 +741,7 @@ docs = ["furo (>=2022.2.14.1,<2023.0.0.0)", "ipython (>=7.25.0,<8.0.0)", "linkif
 
 [[package]]
 name = "pyinaturalist-convert"
-version = "0.4.0.dev8"
+version = "0.4.0"
 description = "Convert iNaturalist observation data to and from multiple formats"
 category = "main"
 optional = false
@@ -749,7 +749,7 @@ python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
 flatten-dict = ">=0.4.0,<0.5.0"
-pyinaturalist = ">=0.17.2dev3"
+pyinaturalist = ">=0.17.2"
 tablib = ">=3.0,<4.0"
 
 [package.extras]
@@ -1092,7 +1092,7 @@ jeepney = ">=0.6"
 
 [[package]]
 name = "setuptools"
-version = "62.5.0"
+version = "62.6.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "dev"
 optional = false
@@ -1468,7 +1468,7 @@ docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-autodoc-typehi
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "565b86e885be4019a0632b568da7659cd3df39135c4b302dea1d211a87d7d818"
+content-hash = "a4d2ea08cd91400a4907a714d79addad054c1a2d5030e9a351e1bd19b31ffe1f"
 
 [metadata.files]
 alabaster = [
@@ -1993,8 +1993,8 @@ pyinaturalist = [
     {file = "pyinaturalist-0.17.2.tar.gz", hash = "sha256:a6a34f4b26f6fa09e466e21f9de9d3d3894aa8ec856ebd67a6236d9462c11920"},
 ]
 pyinaturalist-convert = [
-    {file = "pyinaturalist-convert-0.4.0.dev8.tar.gz", hash = "sha256:fc2cab184ba3d58ab2664af74697da7ce3f3b66ca30eb861fba62b867db8c664"},
-    {file = "pyinaturalist_convert-0.4.0.dev8-py3-none-any.whl", hash = "sha256:676dc514cb0e147a813d5d20002c4c06325e8d2cc1a953eaa05f7773abb4704f"},
+    {file = "pyinaturalist-convert-0.4.0.tar.gz", hash = "sha256:f8d3af5bc7f65cf68aca2161eff79b682351f1c13116a4ac83c03bb30280436f"},
+    {file = "pyinaturalist_convert-0.4.0-py3-none-any.whl", hash = "sha256:9ee908944477ae5fcc6a33a018dec6f9dbcc04658b6bcfee770c8820cfd58701"},
 ]
 pyinstaller = [
     {file = "pyinstaller-5.1-py3-none-macosx_10_13_universal2.whl", hash = "sha256:3c9bc373b4a4bf6d81b306b9918e290a3de582d7b50a0f6f4e837970a4db0c54"},
@@ -2134,8 +2134,8 @@ secretstorage = [
     {file = "SecretStorage-3.3.2.tar.gz", hash = "sha256:0a8eb9645b320881c222e827c26f4cfcf55363e8b374a021981ef886657a912f"},
 ]
 setuptools = [
-    {file = "setuptools-62.5.0-py3-none-any.whl", hash = "sha256:2a5de5d1ed1fd6dfbe4f1a1079af816032e2d8dfc0975265b57a61429511d10c"},
-    {file = "setuptools-62.5.0.tar.gz", hash = "sha256:a4c782ac58fcc9e3a86e5e1a4c74cf9d24bf21e4f1562043309022e1bb76951c"},
+    {file = "setuptools-62.6.0-py3-none-any.whl", hash = "sha256:c1848f654aea2e3526d17fc3ce6aeaa5e7e24e66e645b5be2171f3f6b4e5a178"},
+    {file = "setuptools-62.6.0.tar.gz", hash = "sha256:990a4f7861b31532871ab72331e755b5f14efbe52d336ea7f6118144dd478741"},
 ]
 shiboken6 = [
     {file = "shiboken6-6.3.1-cp36-abi3-macosx_10_9_universal2.whl", hash = "sha256:6393aa330101b098631a88dfb99b6b46794046c7f63b5c1ac93ae2fcef4773ff"},

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from naturtag.constants import ASSETS_DIR
+from naturtag.constants import APP_LOGO, ASSETS_DIR, ICONS_DIR
 from naturtag.utils.image_glob import get_valid_image_paths, uri_to_path
 
 
@@ -40,21 +40,19 @@ def test_uri_to_path__windows(input, expected):
 
 
 def test_get_valid_image_paths__dir():
-    assert len(get_valid_image_paths([ASSETS_DIR])) == 2
+    assert len(get_valid_image_paths([ICONS_DIR])) == 6
 
 
 def test_get_valid_image_paths__recursive():
-    assert len(get_valid_image_paths([ASSETS_DIR], recursive=True)) == 22
+    assert len(get_valid_image_paths([ASSETS_DIR], recursive=True)) == 26
 
 
 def test_get_valid_image_paths__uri():
-    logo = ASSETS_DIR / 'logo.png'
-    assert get_valid_image_paths([f'file://{logo.absolute()}']) == {logo}
+    assert get_valid_image_paths([f'file://{APP_LOGO.absolute()}']) == {APP_LOGO}
 
 
 def test_get_valid_image_paths__removes_duplicates():
-    logo = ASSETS_DIR / 'logo.png'
-    assert len(get_valid_image_paths([ASSETS_DIR, logo, f'file://{logo.absolute()}'])) == 2
+    assert len(get_valid_image_paths([APP_LOGO, f'file://{APP_LOGO.absolute()}'])) == 1
 
 
 def test_get_valid_image_paths__nonexistent():

@@ -6,6 +6,7 @@ BUILD_PY_VERSION = '3.10'
 PROJECT_NAME = 'naturtag'
 PROJECT_DIR = Path('.').absolute()
 ASSETS_DIR = PROJECT_DIR / 'assets'
+ICONS_DIR = ASSETS_DIR / 'icons'
 PACKAGE_DIR = PROJECT_DIR / 'naturtag'
 # LIB_DIR = PROJECT_DIR / 'lib'
 
@@ -43,8 +44,8 @@ a = Analysis(
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
     datas=[
-        (str(ASSETS_DIR / '*.ico'), 'assets'),
-        (str(ASSETS_DIR / '*.png'), 'assets'),
+        (str(ICONS_DIR / '*.ico'), 'assets/icons'),
+        (str(ICONS_DIR / '*.png'), 'assets/icons'),
         (str(ASSETS_DIR / '*.qss'), 'assets'),
         (str(ASSETS_DIR / '*.tar.gz'), 'assets'),
     ],
@@ -63,7 +64,7 @@ exe = EXE(
     pyz,
     a.scripts,
     [],
-    icon=str(ASSETS_DIR / 'logo.ico'),
+    icon=str(ICONS_DIR / 'logo.ico'),
     exclude_binaries=True,
     name=PROJECT_NAME,
     debug=False,

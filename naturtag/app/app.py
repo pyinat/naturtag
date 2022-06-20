@@ -23,7 +23,7 @@ from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.app.toolbar import Toolbar
-from naturtag.constants import ASSETS_DIR, DOCS_URL, REPO_URL
+from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings, setup
 from naturtag.widgets import init_handler
@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
     def open_about(self):
         """Show an About dialog with basic app information"""
         about = QMessageBox()
-        about.setIconPixmap(QPixmap(ASSETS_DIR / 'logo.ico'))
+        about.setIconPixmap(QPixmap(str(APP_ICON)))
         about.setTextFormat(Qt.RichText)
 
         version = pkg_version('naturtag')
@@ -200,11 +200,11 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    splash = QSplashScreen(QPixmap(ASSETS_DIR / 'logo.png').scaledToHeight(512))
+    splash = QSplashScreen(QPixmap(str(APP_LOGO)).scaledToHeight(512))
     splash.show()
     settings = Settings.read()
 
-    app.setWindowIcon(QIcon(QPixmap(ASSETS_DIR / 'logo.ico')))
+    app.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
     set_theme(dark_mode=settings.dark_mode)
     window = ModernWindow(MainWindow(settings))
     window.show()
