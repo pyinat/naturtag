@@ -91,7 +91,7 @@ coll = COLLECT(
 )
 app = BUNDLE(
     coll,
-    name=PROJECT_NAME,
-    icon=None,
+    name=f'{PROJECT_NAME}.app',
+    icon=str(ICONS_DIR / 'logo.icns'),
     bundle_identifier=None,
 )

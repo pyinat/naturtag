@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       pre-release-suffix:
-        description: 'Version suffix for pre-releases ("a", "b", "rc", etc.)'
+        description: 'Version suffix for pre-release package ("a", "b", "rc", etc.)'
         required: false
-        default: 'dev'
+        default: ''
       pre-release-version:
-        description: 'Version number for pre-releases; defaults to build number'
+        description: 'Version number for pre-release package (defaults to build number)'
         required: false
         default: ''
 env:
@@ -18,33 +18,6 @@ env:
 
 
 jobs:
-  release-pypi-package:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.LATEST_PY_VERSION }}
-      - uses: snok/install-poetry@v1.3.1
-        with:
-          version: 1.2.0b1
-          virtualenvs-in-project: true
-
-      - name: Set pre-release version
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-        env:
-          pre-release-suffix: ${{ github.event.inputs.pre-release-suffix || 'dev' }}
-          pre-release-version: ${{ github.event.inputs.pre-release-version || github.run_number }}
-        run: |
-          poetry version $(poetry version -s).${{ env.pre-release-suffix }}${{ env.pre-release-version }}
-          poetry version
-
-      - name: Build and publish to pypi
-        run: |
-          poetry build
-          poetry publish -u  __token__ -p ${{ secrets.PYPI_TOKEN }}
-
-
   build-app-packages:
     strategy:
       matrix:
@@ -80,7 +53,7 @@ jobs:
         run: poetry run pyinstaller -y packaging/naturtag.spec
 
       # Include taxon FTS db, compress, and set platform name
-      - name: Finish artifact (Linux)
+      - name: Finish pyinstaller package (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           ASSETS=dist/naturtag/assets
@@ -89,16 +62,16 @@ jobs:
           tar -C dist/naturtag/ -czvf naturtag-linux.tar.gz .
           echo "DIST_NAME=linux" >> $GITHUB_ENV
 
-      - name: Finish artifact (MacOS)
+      - name: Finish pyinstaller package (macOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          ASSETS=dist/naturtag/Contents/Resources/assets
+          ASSETS=dist/naturtag.app/Contents/Resources/assets
           tar -xvzf $ASSETS/taxon-fts-en.tar.gz --directory $ASSETS/
           rm $ASSETS/taxon-fts-en.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-macos.tar.gz .
           echo "DIST_NAME=macos" >> $GITHUB_ENV
 
-      - name: Finish artifact (Windows)
+      - name: Finish pyinstaller package (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           tar -xvzf dist\naturtag\assets\taxon-fts-en.tar.gz --directory dist\naturtag\assets\
@@ -114,21 +87,34 @@ jobs:
           cd packaging
           ./build_fpm.sh
 
+      # Build dmg package
+      - name: Build disk image (macOS)
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          brew install create-dmg
+          cd packaging
+          ./build_dmg.sh
+
       # Upload workflow artifacts
-      - name: Upload PyInstaller workflow artifact
+      - name: Upload pyinstaller package
         uses: actions/upload-artifact@v3
         with:
           name: naturtag-${{ env.DIST_NAME }}.tar.gz
           path: naturtag-${{ env.DIST_NAME }}.tar.gz
-          retention-days: 7
-      - name: Upload FPM workflow artifacts
+
+      - name: Upload disk image (macOS)
+        if: ${{ matrix.os == 'macos-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: naturtag.dmg
+          path: dist/naturtag.dmg
+
+      - name: Upload FPM workflow artifacts (Linux)
         if : ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v3
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
-          retention-days: 30
-
 
   # Create a release with all workflow artifacts attached
   release-app-packages:
@@ -148,3 +134,31 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: 'naturtag*'
+
+  # Publish python package to PyPI
+  release-pypi-package:
+    if: github.event.inputs.pre-release-suffix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.LATEST_PY_VERSION }}
+      - uses: snok/install-poetry@v1.3.1
+        with:
+          version: 1.2.0b1
+          virtualenvs-in-project: true
+
+      - name: Set pre-release version
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          pre-release-suffix: ${{ github.event.inputs.pre-release-suffix }}
+          pre-release-version: ${{ github.event.inputs.pre-release-version || github.run_number }}
+        run: |
+          poetry version $(poetry version -s).${{ env.pre-release-suffix }}${{ env.pre-release-version }}
+          poetry version
+
+      - name: Build and publish to pypi
+        run: |
+          poetry build
+          poetry publish -u  __token__ -p ${{ secrets.PYPI_TOKEN }}
