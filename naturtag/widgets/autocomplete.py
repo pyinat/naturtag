@@ -1,13 +1,12 @@
 from logging import getLogger
 
-from pyinaturalist_convert import DATA_DIR, TaxonAutocompleter
+from pyinaturalist_convert import TaxonAutocompleter
 from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal, Slot
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.app.style import fa_icon
 
 logger = getLogger(__name__)
-DB_FILE = DATA_DIR / 'taxa.db'
 
 
 class TaxonAutocomplete(QLineEdit):
