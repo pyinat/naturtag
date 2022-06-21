@@ -8,7 +8,6 @@ PROJECT_DIR = Path('.').absolute()
 ASSETS_DIR = PROJECT_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
 PACKAGE_DIR = PROJECT_DIR / 'naturtag'
-# LIB_DIR = PROJECT_DIR / 'lib'
 
 LOCAL_VENV_DIR = Path('~/.virtualenvs/naturtag').expanduser().absolute()
 CI_VENV_DIR = PROJECT_DIR / '.venv'
@@ -53,7 +52,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[PROJECT_DIR / 'coverage', PROJECT_DIR / '__pycache__'],
+    excludes=['**/__pycache__', PROJECT_DIR / 'coverage', PACKAGE_DIR / 'py.typed'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=None,
