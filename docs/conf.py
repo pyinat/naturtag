@@ -2,7 +2,7 @@
 from importlib.metadata import version as pkg_version
 from pathlib import Path
 
-ASSETS_DIR = Path('_static')
+STATIC_DIR = Path('_static')
 
 # Basic config
 project = 'Naturtag'
@@ -22,17 +22,24 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
-    'sphinx_inline_tabs',
-    'sphinx_panels',
+    'sphinx_design',
     'sphinxcontrib.apidoc',
     'myst_parser',
 ]
 
 # MyST extensions
-myst_enable_extensions = ['colon_fence', 'html_image', 'linkify']
+myst_enable_extensions = ['colon_fence', 'html_image', 'linkify', 'substitution']
 
 # Ignore a subset of auto-generated pages
-exclude_patterns = ['modules/modules.rst']
+exclude_patterns = [
+    'modules/modules.rst',
+    'modules/naturtag.rst',
+    'modules/naturtag.constants.rst',
+    'modules/naturtag.utils.rst',
+]
+
+# Replace '{{version}}' in md files with current version
+myst_substitutions = {'version': f'v{version}'}
 
 # Enable automatic links to other projects' Sphinx docs
 intersphinx_mapping = {
@@ -63,13 +70,10 @@ copybutton_prompt_is_regexp = True
 autosectionlabel_prefix_document = True
 
 # HTML general settings
-html_static_path = [str(ASSETS_DIR)]
-html_favicon = str(ASSETS_DIR / 'favicon.ico')
-html_logo = str(ASSETS_DIR / 'logo.png')
-html_css_files = [
-    'https://use.fontawesome.com/releases/v5.15.3/css/all.css',
-    'https://use.fontawesome.com/releases/v5.15.3/css/v4-shims.css',
-]
+html_static_path = [str(STATIC_DIR)]
+html_favicon = str(STATIC_DIR / 'favicon.ico')
+html_logo = str(STATIC_DIR / 'logo.png')
+html_css_files = ['https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css']
 html_show_sphinx = False
 pygments_style = 'friendly'
 pygments_dark_style = 'material'
