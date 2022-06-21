@@ -11,12 +11,38 @@ Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if y
 
 ::::{tab-set}
 
-:::{tab-item} Windows
-A windows installer is coming soon. Meanwhile, you can download
+:::{tab-item} Debian
+A DEB package is available for Debian, Ubuntu, and derivatives. Download
 {{
-    '[naturtag-windows.tar.gz](https://github.com/pyinat/naturtag/releases/download/{}/naturtag-windows.tar.gz),'.format(version)
+    '[naturtag.deb](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.deb)'.format(version)
 }}
-extract it, and run `naturtag.exe`.
+and run:
+```
+sudo dpkg -i naturtag.deb
+```
+:::
+
+:::{tab-item} Fedora
+An RPM package is available for Fedora, RHEL, and derivatives. Download
+{{
+    '[naturtag.rpm](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.rpm)'.format(version)
+}}
+and run:
+```
+sudo rpm -i naturtag.rpm
+```
+:::
+
+:::{tab-item} Linux (Other)
+For other Linux distributions, a [Snap](https://snapcraft.io/docs/installing-snapd)
+package is available. Download
+{{
+    '[naturtag.snap](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.snap)'.format(version)
+}}
+and run:
+```
+sudo snap install naturtag.snap
+```
 :::
 
 :::{tab-item} macOS
@@ -27,44 +53,11 @@ Download
 double-click the file, and drag to Applications to install.
 :::
 
-::::
-
-
-## Linux
-::::{tab-set}
-
-:::{tab-item} DEB (Debian/Ubuntu and derivatives)
-Download
+:::{tab-item} Windows
+A Windows installer is available here:
 {{
-    '[naturtag.deb](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.deb)'.format(version)
+    '[naturtag-installer.exe](https://github.com/pyinat/naturtag/releases/download/{}/naturtag-installer.exe)'.format(version)
 }}
-and run:
-```
-sudo dpkg -i naturtag.deb
-```
-:::
-
-:::{tab-item} RPM (Fedora and derivatives)
-Download
-{{
-    '[naturtag.rpm](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.rpm)'.format(version)
-}}
-and run:
-```
-sudo rpm -i naturtag.rpm
-```
-:::
-
-:::{tab-item} Other linux distros
-For other Linux distributions, you can install with [Snap](https://snapcraft.io/docs/installing-snapd).
-Download
-{{
-    '[naturtag.snap](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.snap)'.format(version)
-}}
-and run:
-```
-sudo snap install naturtag.snap
-```
 :::
 
 ::::
