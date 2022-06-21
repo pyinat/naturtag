@@ -52,7 +52,7 @@ modules/naturtag.widgets
 
 modules/naturtag.cli
 modules/naturtag.client
-modules/naturtag.image_glob
 modules/naturtag.settings
-modules/naturtag.thumbnails
+modules/naturtag.utils.image_glob
+modules/naturtag.utils.thumbnails
 ```

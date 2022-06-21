@@ -17,6 +17,7 @@
 ```{toctree}
 :maxdepth: 2
 
+installation
 app
 cli
 reference

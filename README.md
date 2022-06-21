@@ -52,9 +52,11 @@ platform with a more specific focus, such as **eBird**, **BugGuide**, or **Mushr
 For that use case, this tool supports [Simple Darwin Core](https://dwc.tdwg.org/simple).
 
 ## Installation
-* First, [install python 3.10](https://www.python.org/downloads/) if you don't have it yet.
-* It's recommended to install into a [virtual environment](https://docs.python.org/3/library/venv.html).
-* Then, install with pip:
+See [GitHub Releases](https://github.com/pyinat/naturtag/releases) for downloads and
+[Installation](https://naturtag.readthedocs.io/en/latest/installation.html)
+for platform-specific instructions.
+
+To just install naturtag as a python package, run:
 ```bash
 pip install naturtag
 ```
@@ -62,14 +64,7 @@ pip install naturtag
 ## Usage
 
 ### GUI
-The main interface for this project is still a work in progress. Soon this will be packaged into
-more convenient platform-specific builds, but for now it must be installed and launched from the
-command line.
-
-To launch, run:
-```
-python -m naturtag.app.app
-```
+The main interface for this project is still a work in progress.
 
 It includes an interface for selecting and tagging images:
 
