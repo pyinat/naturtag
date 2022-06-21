@@ -205,8 +205,9 @@ def setup(settings: Settings):
         return
 
     logger.info('Running first-time setup')
-    with TarFile.open(FTS_DB) as tar:
-        tar.extractall(path=DB_PATH.parent)
+    if not DB_PATH.is_file():
+        with TarFile.open(FTS_DB) as tar:
+            tar.extractall(path=DB_PATH.parent)
     create_tables()
 
     settings.setup_complete = True
