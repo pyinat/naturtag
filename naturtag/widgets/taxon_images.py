@@ -205,6 +205,7 @@ class TaxonInfoCard(StylableWidget):
         super().leaveEvent(event)
 
     def load(self):
+        """Load taxon thumbnail either from cache or remote"""
         self.thumbnail.set_taxon(self.taxon, size='thumbnail')
 
     def mousePressEvent(self, _):
