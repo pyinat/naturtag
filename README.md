@@ -10,7 +10,7 @@
 <!-- RTD-IGNORE -->
 <br />
 
-[![](assets/naturtag-banner.png)](https://naturtag.readthedocs.io)
+[![](assets/icons/naturtag-gh-preview.png)](https://naturtag.readthedocs.io)
 
 ## Contents
 - [Summary](#summary)
