@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-
 # Build a disk image for macOS using create-dmg
+
 DIST_DIR=../dist
 ICONS_DIR=../assets/icons
 PKG_DIR=$DIST_DIR/dmg
