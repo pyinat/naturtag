@@ -36,7 +36,7 @@ click-help-colors           = '>=0.9'
 pillow                      = '>=9.1'
 pyexiv2                     = '>=2.6.2'
 pyinaturalist               = '>=0.17.2'
-pyinaturalist-convert       = '>=0.4.0'
+pyinaturalist-convert       = '>=0.4.1dev1'
 pyside6                     = '^6.3.0'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
@@ -70,8 +70,8 @@ pytest-xdist = '>=2.2'
 [tool.poetry.extras]
 all = []
 docs = [
-    'furo', 'linkify-it-py', 'myst-parser', 'sphinx', 'sphinx-automodapi',
-    'sphinx-autodoc-typehints', 'sphinx-copybutton', 'sphinx-design','sphinxcontrib-apidoc',
+    'furo', 'linkify-it-py', 'myst-parser', 'sphinx', 'sphinx-autodoc-typehints',
+    'sphinx-copybutton', 'sphinx-design','sphinxcontrib-apidoc',
 ]
 
 [tool.poetry.scripts]

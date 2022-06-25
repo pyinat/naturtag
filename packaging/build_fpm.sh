@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-
 # Build Linux packages with FPM
+
 export PATH=$PATH:~/.gem/ruby/2.7.0/bin:~/.gem/ruby/3.0.0/bin
 ASSETS_DIR=../assets
 DIST_DIR=../dist

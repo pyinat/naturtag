@@ -114,7 +114,7 @@ class ImageSession(ClientSession):
         self.image_cache = SQLiteDict(IMAGE_CACHE, 'images', no_serializer=True)
 
     def get_image(self, photo: Photo, size: str = None) -> bytes:
-        """Download an image, if it exists; otherwise, download and cache a new one"""
+        """Get an image from the cache, if it exists; otherwise, download and cache a new one"""
         url = photo.url_size(size) if size else photo.url
         image_hash = f'{get_url_hash(url)}.{photo.ext}'
         try:
