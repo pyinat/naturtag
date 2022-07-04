@@ -120,8 +120,6 @@
    Iptc4xmpCore:CountryCode="USA">
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
      <rdf:li>taxonomy:kingdom=Fungi</rdf:li>
      <rdf:li>taxonomy:phylum=Basidiomycota</rdf:li>
      <rdf:li>taxonomy:subphylum=Agaricomycotina</rdf:li>
@@ -133,11 +131,8 @@
      <rdf:li>taxonomy:genus=Pleurotus</rdf:li>
      <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"</rdf:li>
      <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi</rdf:li>
      <rdf:li>"Golden Oyster Mushroom"</rdf:li>
-     <rdf:li>"Fungi Including Lichens"</rdf:li>
-     <rdf:li>"Basidiomycete Fungi"</rdf:li>
-     <rdf:li>"Higher Basidiomycetes"</rdf:li>
-     <rdf:li>"Oyster Mushrooms"</rdf:li>
      <rdf:li>"Golden Oyster Mushroom"</rdf:li>
      <rdf:li>inat:taxon_id=504060</rdf:li>
      <rdf:li>dwc:taxonID=504060</rdf:li>
@@ -201,18 +196,17 @@
    </exif:ISOSpeedRatings>
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae|taxonomy:family=Pleurotaceae</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae|taxonomy:family=Pleurotaceae|taxonomy:genus=Pleurotus</rdf:li>
-     <rdf:li>"taxonomy:species=Pleurotus citrinopileatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae|taxonomy:family=Pleurotaceae|taxonomy:genus=Pleurotus|"taxonomy:species=Pleurotus citrinopileatus"</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae|taxonomy:family=Pleurotaceae</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae|taxonomy:family=Pleurotaceae|taxonomy:genus=Pleurotus</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae|taxonomy:family=Pleurotaceae|taxonomy:genus=Pleurotus|"taxonomy:species=Pleurotus citrinopileatus"</rdf:li>
+     <rdf:li>taxonomy:kingdom=Fungi|taxonomy:phylum=Basidiomycota|taxonomy:subphylum=Agaricomycotina|taxonomy:class=Agaricomycetes|taxonomy:subclass=Agaricomycetidae|taxonomy:order=Agaricales|taxonomy:suborder=Pleurotineae|taxonomy:family=Pleurotaceae|taxonomy:genus=Pleurotus|"taxonomy:species=Pleurotus citrinopileatus"|"taxonomy:species=Pleurotus citrinopileatus"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
   </rdf:Description>

@@ -42,22 +42,21 @@
    exif:GPSLongitude="93,43.8220367E">
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae|taxonomy:tribe=Cnodalonini</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae|taxonomy:tribe=Cnodalonini|taxonomy:genus=Alobates</rdf:li>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae|taxonomy:tribe=Cnodalonini|taxonomy:genus=Alobates|"taxonomy:species=Alobates pensylvanicus"</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae|taxonomy:tribe=Cnodalonini</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae|taxonomy:tribe=Cnodalonini|taxonomy:genus=Alobates</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae|taxonomy:tribe=Cnodalonini|taxonomy:genus=Alobates|"taxonomy:species=Alobates pensylvanicus"</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Tenebrionoidea|taxonomy:family=Tenebrionidae|taxonomy:subfamily=Stenochiinae|taxonomy:tribe=Cnodalonini|taxonomy:genus=Alobates|"taxonomy:species=Alobates pensylvanicus"|"taxonomy:species=Alobates pensylvanicus"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -82,8 +81,6 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Alobates pensylvanicus"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -99,14 +96,8 @@
      <rdf:li>taxonomy:genus=Alobates</rdf:li>
      <rdf:li>"taxonomy:species=Alobates pensylvanicus"</rdf:li>
      <rdf:li>"taxonomy:species=Alobates pensylvanicus"</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>"false mealworm beetle"</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
-     <rdf:li>Insects</rdf:li>
-     <rdf:li>Beetles</rdf:li>
-     <rdf:li>"Cucujiform Beetles"</rdf:li>
-     <rdf:li>"Darkling Beetles"</rdf:li>
      <rdf:li>"false mealworm beetle"</rdf:li>
      <rdf:li>inat:taxon_id=458100</rdf:li>
      <rdf:li>dwc:taxonID=458100</rdf:li>

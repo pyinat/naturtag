@@ -11,7 +11,7 @@ from pyinaturalist import Observation, Taxon, TaxonCounts
 from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
-from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple, PathOrStr
+from naturtag.constants import COMMON_NAME_IGNORE_TERMS, ROOT_TAXON_ID, IntTuple, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.utils.image_glob import get_valid_image_paths
 
@@ -153,7 +153,11 @@ def _get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observa
 
 def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into rank keywords"""
-    return [_quote(f'taxonomy:{t.rank}={t.name}') for t in [taxon, *taxon.ancestors]]
+    return [
+        _quote(f'taxonomy:{t.rank}={t.name}')
+        for t in [*taxon.ancestors, taxon]
+        if t.id != ROOT_TAXON_ID
+    ]
 
 
 def _get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[str]:
