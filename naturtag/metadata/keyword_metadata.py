@@ -57,20 +57,14 @@ class KeywordMetadata:
         Also account for root node (single value without '|')
         """
         hier_keywords = [kw for kw in self.keywords if '|' in kw]
-        if hier_keywords:
+        if len(hier_keywords) > 1:
             root = hier_keywords[0].split('|')[0]
             hier_keywords.insert(0, root)
         return hier_keywords
 
     def _get_normal_keywords(self) -> list[str]:
         """Get all single-value keywords that are neither a key-value pair nor hierarchical"""
-        return sorted([k for k in self.keywords if '=' not in k and '|' not in k])
-
-    # TODO: Is this still needed?
-    @property
-    def flat_keywords(self) -> list[str]:
-        """Get all non-hierarchical keywords"""
-        return [kw for kw in self.keywords if '|' not in kw]
+        return sorted({k for k in self.keywords if '=' not in k and '|' not in k})
 
     @property
     def flickr_tags(self):
@@ -120,7 +114,8 @@ class KeywordMetadata:
         Returns:
             dict: Mapping from qualified tag name to tag value(s)
         """
-        metadata = {tag: self.flat_keywords for tag in KEYWORD_TAGS}
+        flat_keywords = self.normal_keywords + self.kv_keyword_list
+        metadata = {tag: flat_keywords for tag in KEYWORD_TAGS}
         metadata.update({tag: self.hier_keywords for tag in HIER_KEYWORD_TAGS})
         return metadata
 

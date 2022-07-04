@@ -43,22 +43,27 @@
    exif:GPSLongitude="93,43.8436000E">
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea|taxonomy:family=Mantidae</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea|taxonomy:family=Mantidae|taxonomy:subfamily=Tenoderinae</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea|taxonomy:family=Mantidae|taxonomy:subfamily=Tenoderinae|taxonomy:tribe=Tenoderini</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea|taxonomy:family=Mantidae|taxonomy:subfamily=Tenoderinae|taxonomy:tribe=Tenoderini|taxonomy:subtribe=Tenoderina</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea|taxonomy:family=Mantidae|taxonomy:subfamily=Tenoderinae|taxonomy:tribe=Tenoderini|taxonomy:subtribe=Tenoderina|taxonomy:genus=Tenodera</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea|taxonomy:family=Mantidae|taxonomy:subfamily=Tenoderinae|taxonomy:tribe=Tenoderini|taxonomy:subtribe=Tenoderina|taxonomy:genus=Tenodera|"taxonomy:species=Tenodera sinensis"</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Mantodea|taxonomy:suborder=Eumantodea|taxonomy:infraorder=Schizomantodea|taxonomy:superfamily=Mantoidea|taxonomy:family=Mantidae|taxonomy:subfamily=Tenoderinae|taxonomy:tribe=Tenoderini|taxonomy:subtribe=Tenoderina|taxonomy:genus=Tenodera|"taxonomy:species=Tenodera sinensis"|"taxonomy:species=Tenodera sinensis"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini|Tenoderina</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini|Tenoderina|Tenodera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini|Tenoderina|Tenodera|Tenodera sinensis"</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods|Insects|Mantises</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods|Insects|Mantises|Mantids</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods|Insects|Mantises|Mantids|"Chinese Mantis"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -83,6 +88,14 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
+     <rdf:li>"Chinese Mantis"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Hexapods</rdf:li>
+     <rdf:li>Insects</rdf:li>
+     <rdf:li>Mantids</rdf:li>
+     <rdf:li>Mantises</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -98,10 +111,6 @@
      <rdf:li>taxonomy:subtribe=Tenoderina</rdf:li>
      <rdf:li>taxonomy:genus=Tenodera</rdf:li>
      <rdf:li>"taxonomy:species=Tenodera sinensis"</rdf:li>
-     <rdf:li>"taxonomy:species=Tenodera sinensis"</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"Chinese Mantis"</rdf:li>
-     <rdf:li>"Chinese Mantis"</rdf:li>
      <rdf:li>inat:taxon_id=71034</rdf:li>
      <rdf:li>dwc:taxonID=71034</rdf:li>
      <rdf:li>inat:observation_id=63913621</rdf:li>

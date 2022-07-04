@@ -11,7 +11,7 @@ from pyinaturalist import Observation, Taxon, TaxonCounts
 from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
-from naturtag.constants import COMMON_NAME_IGNORE_TERMS, ROOT_TAXON_ID, IntTuple, PathOrStr
+from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.utils.image_glob import get_valid_image_paths
 
@@ -99,7 +99,7 @@ def get_inat_metadata(
         taxon_id = observation.taxon.id
 
     # Observation.taxon doesn't include ancestors, so we always need to fetch the full taxon record
-    taxon = INAT_CLIENT.taxa(taxon_id)
+    taxon = INAT_CLIENT.taxa(taxon_id, refresh=True)
     if not taxon:
         logger.warning(f'No taxon found: {taxon_id}')
         return None
@@ -109,7 +109,10 @@ def get_inat_metadata(
     if hierarchical:
         keywords.extend(_get_hierarchical_keywords(keywords))
     if common_names:
-        keywords.extend(_get_common_keywords(taxon))
+        common_keywords = _get_common_keywords(taxon)
+        keywords.extend(common_keywords)
+        if hierarchical:
+            keywords.extend(_get_hierarchical_keywords(common_keywords))
     keywords.extend(_get_id_keywords(observation_id, taxon_id))
 
     logger.info(f'{len(keywords)} total keywords generated')
@@ -153,11 +156,7 @@ def _get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observa
 
 def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into rank keywords"""
-    return [
-        _quote(f'taxonomy:{t.rank}={t.name}')
-        for t in [*taxon.ancestors, taxon]
-        if t.id != ROOT_TAXON_ID
-    ]
+    return [_quote(f'taxonomy:{t.rank}={t.name}') for t in taxon.ancestors + [taxon]]
 
 
 def _get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[str]:
@@ -175,7 +174,7 @@ def _get_common_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into common name keywords.
     Filters out terms that aren't useful to keep as tags
     """
-    keywords = [t.preferred_common_name for t in [taxon, *taxon.ancestors]]
+    keywords = [t.preferred_common_name for t in taxon.ancestors + [taxon]]
 
     def is_ignored(kw):
         return any([ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS])
@@ -185,9 +184,13 @@ def _get_common_keywords(taxon: Taxon) -> list[str]:
 
 def _get_hierarchical_keywords(keywords: list) -> list[str]:
     """Translate sorted taxonomy keywords into pipe-delimited hierarchical keywords"""
-    hier_keywords = [keywords[0]]
-    for rank_name in keywords[1:]:
-        hier_keywords.append(f'{hier_keywords[-1]}|{rank_name}')
+
+    def _name_only(k):
+        return k.split('=')[-1] if '=' in k else k
+
+    hier_keywords = [_name_only(keywords[0])]
+    for k in keywords[1:]:
+        hier_keywords.append(f'{hier_keywords[-1]}|{_name_only(k)}')
     return hier_keywords
 
 

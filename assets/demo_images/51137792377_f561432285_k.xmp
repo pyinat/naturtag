@@ -44,21 +44,25 @@
    exif:GPSLongitude="93,43.9188967E">
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Nomadinae</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Nomadinae|taxonomy:tribe=Nomadini</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Nomadinae|taxonomy:tribe=Nomadini|taxonomy:genus=Nomada</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Nomadinae|taxonomy:tribe=Nomadini|taxonomy:genus=Nomada|taxonomy:genus=Nomada</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Nomadinae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Nomadinae|Nomadini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Nomadinae|Nomadini|Nomada</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees</rdf:li>
+     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees|"Nomad Bees"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -83,6 +87,13 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
+     <rdf:li>"Nomad Bees"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Bees</rdf:li>
+     <rdf:li>Hexapods</rdf:li>
+     <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -97,10 +108,6 @@
      <rdf:li>taxonomy:subfamily=Nomadinae</rdf:li>
      <rdf:li>taxonomy:tribe=Nomadini</rdf:li>
      <rdf:li>taxonomy:genus=Nomada</rdf:li>
-     <rdf:li>taxonomy:genus=Nomada</rdf:li>
-     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"Nomad Bees"</rdf:li>
-     <rdf:li>"Nomad Bees"</rdf:li>
      <rdf:li>inat:taxon_id=53648</rdf:li>
      <rdf:li>dwc:taxonID=53648</rdf:li>
      <rdf:li>inat:observation_id=75237015</rdf:li>
