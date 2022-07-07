@@ -114,15 +114,13 @@ class ImageMetadata:
         self.iptc.update(_filter_tags('Iptc.'))
         self.xmp.update(_filter_tags('Xmp.'))
 
-    def write(self, create_sidecar=True):
+    def write(self, embedded=True, sidecar=True):
         """Write current metadata to image and sidecar"""
-        self._write(self.image_path)
-        if create_sidecar:
+        if embedded:
+            self._write(self.image_path)
+        if sidecar:
             self.create_xmp_sidecar()
-        if isfile(self.xmp_path):
             self._write(self.xmp_path)
-        else:
-            logger.debug(f'No existing XMP sidecar file found for {self.image_path}; skipping')
 
     def _write(self, file_path: Path):
         """Write current metadata to a single path either (image or sidecar)"""

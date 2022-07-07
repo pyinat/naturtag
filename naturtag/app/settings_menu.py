@@ -43,10 +43,10 @@ class SettingsMenu(StylableWidget):
             ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names')
         )
         metadata.addLayout(
-            ToggleSetting(settings, icon_str='ph.files-fill', setting_attr='create_sidecar')
+            ToggleSetting(settings, icon_str='ph.files-fill', setting_attr='sidecar')
         )
         metadata.addLayout(
-            ToggleSetting(settings, icon_str='mdi.file-tree', setting_attr='hierarchical_keywords')
+            ToggleSetting(settings, icon_str='mdi.file-tree', setting_attr='hierarchical')
         )
 
         display = self.add_group('Display', self.settings_layout)

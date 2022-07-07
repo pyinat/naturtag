@@ -12,6 +12,5 @@ from naturtag.metadata.inat_metadata import (
     _refresh_tags,
     refresh_tags,
     strip_url,
-    _tag_image,
     tag_images,
 )

@@ -89,8 +89,8 @@ class ImageController(QWidget):
                 obs_id,
                 taxon_id,
                 common_names=self.settings.common_names,
-                hierarchical=self.settings.hierarchical_keywords,
-                create_sidecar=self.settings.create_sidecar,
+                hierarchical=self.settings.hierarchical,
+                create_sidecar=self.settings.sidecar,
             )[0]
 
         for image_path in image_paths:
@@ -112,16 +112,11 @@ class ImageController(QWidget):
             self.info('Select images to tag')
             return
 
-        def _refresh_image(image):
-            return _refresh_tags(
-                image.metadata,
-                common_names=self.settings.common_names,
-                hierarchical=self.settings.hierarchical_keywords,
-                create_sidecar=self.settings.create_sidecar,
-            )
-
         for image in images:
-            future = self.threadpool.schedule(_refresh_image, image=image)
+            future = self.threadpool.schedule(
+                lambda: _refresh_tags(image.metadata, self.settings),
+                image=image,
+            )
             future.on_result.connect(self.update_metadata)
         self.info(f'{len(images)} images updated')
 

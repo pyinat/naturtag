@@ -105,10 +105,9 @@ class Settings(YamlMixin):
 
     # Metadata
     common_names: bool = doc_field(default=True, doc='Include common names in taxonomy keywords')
-    create_sidecar: bool = doc_field(
-        default=True, doc="Create XMP sidecar files if they don't already exist"
-    )
-    hierarchical_keywords: bool = doc_field(
+    embedded: bool = doc_field(default=False, doc="Write to embedded image metadata")
+    sidecar: bool = doc_field(default=True, doc="Write metadata to XMP sidecar files")
+    hierarchical: bool = doc_field(
         default=False, doc='Generate pipe-delimited hierarchical keyword tags'
     )
 
@@ -119,6 +118,10 @@ class Settings(YamlMixin):
 
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
+
+    @classmethod
+    def read(cls) -> 'Settings':
+        return super(Settings, cls).read()  # type: ignore
 
 
 @define(auto_attribs=False)
