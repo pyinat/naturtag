@@ -40,10 +40,22 @@ It can tag your photos with **hierarchical keywords**, which can then be used in
 DAM such as [**Lightroom**](https://millennialdiyer.com/articles/photography/lightroom-keyword-hierarchy/), [**FastPictureViewer**](https://www.fastpictureviewer.com), or
 [**XnViewMP**](https://www.xnview.com/en/xnviewmp).
 
+This essentially gives you a phylogenetic tree for browsing and filtering your photos.
+Example in XnView:
+
+![screenshot](assets/screenshots/xnview.png)
+
 ### Photo hosting
 Naturtag can also simplify tagging photos for photo hosting sites like Flickr. For that use case, this
-tool generates keywords in the same format as
+tool generates structured keywords in the same format as
 [iNaturalist's Flickr Tagger](https://www.inaturalist.org/taxa/flickr_tagger).
+
+Example search using these tags: https://www.flickr.com/photos/tags/taxonomy:class=arachnida
+
+Example of taxonomy tags on a Flickr photo page:
+
+![screenshot](assets/screenshots/flickr.png)
+
 
 ### Other biodiversity tools
 Finally, naturtag can improve interoperability with other tools and systems that interact with biodiversity
