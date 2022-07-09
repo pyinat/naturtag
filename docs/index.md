@@ -20,5 +20,6 @@
 installation
 app
 cli
+metadata
 reference
 ```

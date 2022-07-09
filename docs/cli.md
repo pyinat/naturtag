@@ -1,3 +1,4 @@
+(cli)=
 # CLI
 This package provides the command `naturtag`, also aliased to `nt`. It takes an observation or
 species, plus some image files, and generates EXIF and XMP metadata to write to those images.
