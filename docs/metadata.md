@@ -1,3 +1,6 @@
+<!-- TODO: This is kind of a rough draft. Needs more editing. -->
+
+(metadata)=
 # Metadata
 This page describes the formats and types of metadata that naturtag generates.
 
