@@ -71,42 +71,26 @@
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Apinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Apinae|Apini</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Apinae|Apini|Apis</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Apinae|Apini|Apis|Apis</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Apoidea|Anthophila|Apidae|Apinae|Apini|Apis|Apis|Apis mellifera"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini|Apis</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini|Apis|Apis mellifera</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees|"Apine Bees"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees|"Apine Bees"|"Honey Bees"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees|"Apine Bees"|"Honey Bees"|"Honey Bees"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees|"Apine Bees"|"Honey Bees"|"Honey Bees"|"Cavity-nesting Honey Bees"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Bees|"Apine Bees"|"Honey Bees"|"Honey Bees"|"Cavity-nesting Honey Bees"|"Western Honey Bee"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"|"Honey Bees"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"|"Honey Bees"|"Western Honey Bee"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"Apine Bees"</rdf:li>
-     <rdf:li>"Cavity-nesting Honey Bees"</rdf:li>
      <rdf:li>"Honey Bees"</rdf:li>
      <rdf:li>"Western Honey Bee"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Bees</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>

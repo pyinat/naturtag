@@ -11,7 +11,7 @@ from pyinaturalist import Observation, Taxon, TaxonCounts
 from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
-from naturtag.constants import COMMON_NAME_IGNORE_TERMS, IntTuple, PathOrStr
+from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, IntTuple, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.settings import Settings
 from naturtag.utils.image_glob import get_valid_image_paths
@@ -101,7 +101,7 @@ def get_inat_metadata(
     # Get all specified keyword categories
     keywords = _get_taxonomy_keywords(taxon)
     if hierarchical:
-        keywords.extend(_get_hierarchical_keywords(keywords))
+        keywords.extend(_get_taxon_hierarchical_keywords(taxon))
     if common_names:
         common_keywords = _get_common_keywords(taxon)
         keywords.extend(common_keywords)
@@ -166,9 +166,11 @@ def _get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[s
 
 def _get_common_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into common name keywords.
-    Filters out terms that aren't useful to keep as tags
+    Filters out terms that aren't useful to keep as tags.
     """
-    keywords = [t.preferred_common_name for t in taxon.ancestors + [taxon]]
+    keywords = [
+        t.preferred_common_name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS
+    ]
 
     def is_ignored(kw):
         return any([ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS])
@@ -176,15 +178,17 @@ def _get_common_keywords(taxon: Taxon) -> list[str]:
     return [_quote(kw) for kw in keywords if kw and not is_ignored(kw)]
 
 
-def _get_hierarchical_keywords(keywords: list) -> list[str]:
-    """Translate sorted taxonomy keywords into pipe-delimited hierarchical keywords"""
+def _get_taxon_hierarchical_keywords(taxon: Taxon) -> list[str]:
+    """Get hierarchical keywords for a taxon"""
+    keywords = [t.name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS]
+    return _get_hierarchical_keywords(keywords)
 
-    def _name_only(k):
-        return k.split('=')[-1] if '=' in k else k
 
-    hier_keywords = [_name_only(keywords[0])]
+def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
+    """Translate a sorted list of flat keywords into pipe-delimited hierarchical keywords"""
+    hier_keywords = [keywords[0]]
     for k in keywords[1:]:
-        hier_keywords.append(f'{hier_keywords[-1]}|{_name_only(k)}')
+        hier_keywords.append(f'{hier_keywords[-1]}|{k}')
     return hier_keywords
 
 

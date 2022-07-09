@@ -70,38 +70,26 @@
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera|Brachycera</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera|Brachycera|Orthorrhapha</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera|Brachycera|Orthorrhapha|Rhagionidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera|Brachycera|Orthorrhapha|Rhagionidae|Chrysopilinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera|Brachycera|Orthorrhapha|Rhagionidae|Chrysopilinae|Chrysopilus</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera|Brachycera|Orthorrhapha|Rhagionidae|Chrysopilinae|Chrysopilus|Tabanomorpha</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Diptera|Brachycera|Orthorrhapha|Rhagionidae|Chrysopilinae|Chrysopilus|Tabanomorpha|Chrysopilus ornatus"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae|Chrysopilus</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae|Chrysopilus|Chrysopilus ornatus</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Flies</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Flies|"Brachyceran Flies"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Flies|"Brachyceran Flies"|"Orthorrhaphan Flies"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Flies|"Brachyceran Flies"|"Orthorrhaphan Flies"|"Snipe Flies"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Flies|"Brachyceran Flies"|"Orthorrhaphan Flies"|"Snipe Flies"|"Ornate Snipe Fly"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Flies</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Flies|"Snipe Flies"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Flies|"Snipe Flies"|"Ornate Snipe Fly"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"Brachyceran Flies"</rdf:li>
      <rdf:li>"Ornate Snipe Fly"</rdf:li>
-     <rdf:li>"Orthorrhaphan Flies"</rdf:li>
      <rdf:li>"Snipe Flies"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
      <rdf:li>Flies</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>

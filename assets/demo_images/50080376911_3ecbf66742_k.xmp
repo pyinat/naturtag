@@ -70,39 +70,27 @@
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Salticoidea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Salticoidea|Salticidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Salticoidea|Salticidae|Salticinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Salticoidea|Salticidae|Salticinae|Dendryphantini</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Salticoidea|Salticidae|Salticinae|Dendryphantini|Marpissina</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Salticoidea|Salticidae|Salticinae|Dendryphantini|Marpissina|Platycryptus</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Salticoidea|Salticidae|Salticinae|Dendryphantini|Marpissina|Platycryptus|Platycryptus undatus"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini|Platycryptus</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini|Platycryptus|Platycryptus undatus</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Jumping Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Jumping Spiders"|"Tan Jumping Spider"</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|"Jumping Spiders"</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|"Jumping Spiders"|"Tan Jumping Spider"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"Entelegyne Spiders"</rdf:li>
      <rdf:li>"Jumping Spiders"</rdf:li>
      <rdf:li>"Tan Jumping Spider"</rdf:li>
-     <rdf:li>"Typical Spiders"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arachnids</rdf:li>
      <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Chelicerates</rdf:li>
      <rdf:li>Spiders</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>

@@ -44,25 +44,17 @@
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga|Cucujiformia</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga|Cucujiformia|Tenebrionoidea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga|Cucujiformia|Tenebrionoidea|Tenebrionidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga|Cucujiformia|Tenebrionoidea|Tenebrionidae|Stenochiinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga|Cucujiformia|Tenebrionoidea|Tenebrionidae|Stenochiinae|Cnodalonini</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga|Cucujiformia|Tenebrionoidea|Tenebrionidae|Stenochiinae|Cnodalonini|Alobates</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Coleoptera|Polyphaga|Cucujiformia|Tenebrionoidea|Tenebrionidae|Stenochiinae|Cnodalonini|Alobates|Alobates pensylvanicus"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Tenebrionidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Tenebrionidae|Cnodalonini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Tenebrionidae|Cnodalonini|Alobates</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Tenebrionidae|Cnodalonini|Alobates|Alobates pensylvanicus</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Beetles</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Beetles|"Cucujiform Beetles"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Beetles|"Cucujiform Beetles"|"Darkling Beetles"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Beetles|"Cucujiform Beetles"|"Darkling Beetles"|"false mealworm beetle"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Beetles</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Beetles|"Darkling Beetles"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Beetles|"Darkling Beetles"|"false mealworm beetle"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -87,14 +79,12 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"Cucujiform Beetles"</rdf:li>
      <rdf:li>"Darkling Beetles"</rdf:li>
      <rdf:li>"false mealworm beetle"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
      <rdf:li>Beetles</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>

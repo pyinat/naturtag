@@ -2,14 +2,14 @@
 from logging import getLogger
 from typing import Optional
 
-from pyinaturalist import RANKS, IconPhoto, Taxon
+from pyinaturalist import IconPhoto, Taxon
 from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import INAT_CLIENT
-from naturtag.constants import SELECTABLE_ICONIC_TAXA
+from naturtag.constants import COMMON_RANKS, RANKS, SELECTABLE_ICONIC_TAXA
 from naturtag.settings import Settings
 from naturtag.widgets import (
     GridLayout,
@@ -20,9 +20,6 @@ from naturtag.widgets import (
     VerticalLayout,
 )
 from naturtag.widgets.images import IconLabel
-
-IGNORE_TERMS = ['sub', 'super', 'infra', 'epi', 'hybrid']
-COMMON_RANKS = [r for r in RANKS if not any([k in r for k in IGNORE_TERMS])][::-1]
 
 logger = getLogger(__name__)
 

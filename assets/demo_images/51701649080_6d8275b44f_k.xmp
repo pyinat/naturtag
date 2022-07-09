@@ -45,27 +45,17 @@
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae|Neoscona</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae|Neoscona|Neoscona arabesca"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae|Neoscona</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae|Neoscona|Neoscona arabesca</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers|"Typical Orbweavers"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers|"Typical Orbweavers"|"Spotted Orbweavers"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers|"Typical Orbweavers"|"Spotted Orbweavers"|"Arabesque Orbweaver"</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|Orbweavers</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|Orbweavers|"Spotted Orbweavers"</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|Orbweavers|"Spotted Orbweavers"|"Arabesque Orbweaver"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -91,16 +81,11 @@
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Arabesque Orbweaver"</rdf:li>
-     <rdf:li>"Araneoid Spiders"</rdf:li>
-     <rdf:li>"Entelegyne Spiders"</rdf:li>
      <rdf:li>"Spotted Orbweavers"</rdf:li>
-     <rdf:li>"Typical Orbweavers"</rdf:li>
-     <rdf:li>"Typical Spiders"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arachnids</rdf:li>
      <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Chelicerates</rdf:li>
      <rdf:li>Orbweavers</rdf:li>
      <rdf:li>Spiders</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>

@@ -123,7 +123,6 @@
      <rdf:li>"Basidiomycete Fungi"</rdf:li>
      <rdf:li>"Fungi Including Lichens"</rdf:li>
      <rdf:li>"Golden Oyster Mushroom"</rdf:li>
-     <rdf:li>"Higher Basidiomycetes"</rdf:li>
      <rdf:li>"Oyster Mushrooms"</rdf:li>
      <rdf:li>Fungi</rdf:li>
      <rdf:li>taxonomy:kingdom=Fungi</rdf:li>
@@ -200,18 +199,14 @@
     <rdf:Seq>
      <rdf:li>Fungi</rdf:li>
      <rdf:li>Fungi|Basidiomycota</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina|Agaricomycetes</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina|Agaricomycetes|Agaricomycetidae</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina|Agaricomycetes|Agaricomycetidae|Agaricales</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina|Agaricomycetes|Agaricomycetidae|Agaricales|Pleurotineae</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina|Agaricomycetes|Agaricomycetidae|Agaricales|Pleurotineae|Pleurotaceae</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina|Agaricomycetes|Agaricomycetidae|Agaricales|Pleurotineae|Pleurotaceae|Pleurotus</rdf:li>
-     <rdf:li>Fungi|Basidiomycota|Agaricomycotina|Agaricomycetes|Agaricomycetidae|Agaricales|Pleurotineae|Pleurotaceae|Pleurotus|Pleurotus citrinopileatus"</rdf:li>
+     <rdf:li>Fungi|Basidiomycota|Agaricomycetes</rdf:li>
+     <rdf:li>Fungi|Basidiomycota|Agaricomycetes|Agaricales</rdf:li>
+     <rdf:li>Fungi|Basidiomycota|Agaricomycetes|Agaricales|Pleurotaceae</rdf:li>
+     <rdf:li>Fungi|Basidiomycota|Agaricomycetes|Agaricales|Pleurotaceae|Pleurotus</rdf:li>
+     <rdf:li>Fungi|Basidiomycota|Agaricomycetes|Agaricales|Pleurotaceae|Pleurotus|Pleurotus citrinopileatus</rdf:li>
      <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"</rdf:li>
-     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"|"Higher Basidiomycetes"</rdf:li>
-     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"|"Higher Basidiomycetes"|"Oyster Mushrooms"</rdf:li>
-     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"|"Higher Basidiomycetes"|"Oyster Mushrooms"|"Golden Oyster Mushroom"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"|"Oyster Mushrooms"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"|"Oyster Mushrooms"|"Golden Oyster Mushroom"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
   </rdf:Description>

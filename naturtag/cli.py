@@ -227,25 +227,11 @@ def tag(
         print_all_metadata(image_paths, flickr_format, hierarchical)
         ctx.exit()
     if refresh:
-        refresh_tags(
-            image_paths,
-            common_names=common_names,
-            hierarchical=hierarchical,
-            create_sidecar=create_sidecar,
-        )
+        refresh_tags(image_paths, recursive=True)
         click.echo('Images refreshed')
         ctx.exit()
 
-    metadata_list = list(
-        tag_images(
-            image_paths,
-            observation,
-            taxon,
-            common_names=common_names,
-            hierarchical=hierarchical,
-            create_sidecar=create_sidecar,
-        )
-    )
+    metadata_list = list(tag_images(image_paths, observation, taxon))
     if not metadata_list:
         return
 

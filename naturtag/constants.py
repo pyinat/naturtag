@@ -86,9 +86,22 @@ MAX_DISPLAY_OBSERVED = 100  # Max number of observed taxa to display at a time
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
 
-COMMON_NAME_IGNORE_TERMS = [',', ' and ', 'allies', 'relatives']
+COMMON_NAME_IGNORE_TERMS = [',', ' and ', 'allies', 'relatives', 'typical']
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
 
+# Simplified subset of ranks that are useful for display
+COMMON_RANKS = [
+    'form',
+    'variety',
+    'species',
+    'genus',
+    'tribe',
+    'family',
+    'order',
+    'class',
+    'phylum',
+    'kingdom',
+]
 ROOT_TAXON_ID = 48460
 
 # Type aliases

@@ -84,14 +84,7 @@ class ImageController(QWidget):
         logger.info(f'Tagging {len(image_paths)} images with metadata for {selected_id}')
 
         def tag_image(image_path):
-            return tag_images(
-                [image_path],
-                obs_id,
-                taxon_id,
-                common_names=self.settings.common_names,
-                hierarchical=self.settings.hierarchical,
-                create_sidecar=self.settings.sidecar,
-            )[0]
+            return tag_images([image_path], obs_id, taxon_id, settings=self.settings)[0]
 
         for image_path in image_paths:
             future = self.threadpool.schedule(tag_image, image_path=image_path)
@@ -115,7 +108,6 @@ class ImageController(QWidget):
         for image in images:
             future = self.threadpool.schedule(
                 lambda: _refresh_tags(image.metadata, self.settings),
-                image=image,
             )
             future.on_result.connect(self.update_metadata)
         self.info(f'{len(images)} images updated')

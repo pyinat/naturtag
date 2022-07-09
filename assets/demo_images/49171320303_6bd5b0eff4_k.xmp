@@ -71,40 +71,25 @@
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Vespoidea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Vespoidea|Vespidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Vespoidea|Vespidae|Polistinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Vespoidea|Vespidae|Polistinae|Polistini</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Vespoidea|Vespidae|Polistinae|Polistini|Polistes</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Vespoidea|Vespidae|Polistinae|Polistini|Polistes|Fuscopolistes</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Hymenoptera|Apocrita|Aculeata|Vespoidea|Vespidae|Polistinae|Polistini|Polistes|Fuscopolistes|Polistes rubiginosus"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini|Polistes</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini|Polistes|Polistes rubiginosus</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|"Vespoid Wasps"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|"Vespoid Wasps"|"Paper Wasps"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|"Vespoid Wasps"|"Paper Wasps"|"Umbrella Paper Wasps"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|"Vespoid Wasps"|"Paper Wasps"|"Umbrella Paper Wasps"|"fuscatus-group Paper Wasps"</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|"Vespoid Wasps"|"Paper Wasps"|"Umbrella Paper Wasps"|"fuscatus-group Paper Wasps"|"Coarse-backed Red Paper Wasp"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Umbrella Paper Wasps"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Umbrella Paper Wasps"|"Coarse-backed Red Paper Wasp"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
-     <rdf:li>"Paper Wasps"</rdf:li>
      <rdf:li>"Umbrella Paper Wasps"</rdf:li>
-     <rdf:li>"Vespoid Wasps"</rdf:li>
-     <rdf:li>"fuscatus-group Paper Wasps"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>

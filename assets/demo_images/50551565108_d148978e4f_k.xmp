@@ -45,25 +45,17 @@
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini|Tenoderina</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini|Tenoderina|Tenodera</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Hexapoda|Insecta|Pterygota|Mantodea|Eumantodea|Schizomantodea|Mantoidea|Mantidae|Tenoderinae|Tenoderini|Tenoderina|Tenodera|Tenodera sinensis"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Mantodea</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Mantodea|Mantidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Mantodea|Mantidae|Tenoderini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Mantodea|Mantidae|Tenoderini|Tenodera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Mantodea|Mantidae|Tenoderini|Tenodera|Tenodera sinensis</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Mantises</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Mantises|Mantids</rdf:li>
-     <rdf:li>Animals|Arthropods|Hexapods|Insects|Mantises|Mantids|"Chinese Mantis"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Mantises</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Mantises|Mantids</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Mantises|Mantids|"Chinese Mantis"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -92,7 +84,6 @@
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>Mantids</rdf:li>
      <rdf:li>Mantises</rdf:li>
