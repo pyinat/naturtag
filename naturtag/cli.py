@@ -45,46 +45,6 @@ Multiple paths are supported, as well as glob patterns, for example:
 If no images are specified, the generated keywords will be printed.
 
 \b
-### Keywords
-Keywords will be generated in the format:
-`taxonomy:{rank}={name}`
-
-\b
-### Darwin Core
-If an observation is specified, DwC metadata will also be generated, in the
-form of XMP tags. Among other things, this includes taxonomy tags in the
-format:
-`dwc:{rank}="{name}"`
-
-\b
-### Sidecar Files
-By default, XMP tags will be written to a sidecar file if it already exists.
-Use the `-x` option to create a new one if it doesn't exist.
-
-\b
-### Hierarchical Keywords
-If specified (`-h`), hierarchical keywords will be generated. These will be
-interpreted as a tree structure by image viewers that support them.
-
-\b
-For example, the following keywords:
-```
-Animalia
-Animalia|Arthropoda
-Animalia|Arthropoda|Chelicerata
-Animalia|Arthropoda|Hexapoda
-```
-
-\b
-Will translate into the following tree structure:
-```
-Animalia
-    ┗━Arthropoda
-        ┣━Chelicerata
-        ┗━Hexapoda
-```
-
-\b
 ### Shell Completion
 Shell tab-completion is available for bash and fish shells. To install, run:
 ```
@@ -153,13 +113,7 @@ def _strip_url_or_name(ctx, param, value):
 @click.command(cls=HelpColorsCommand, help_headers_color='blue', help_options_color='cyan')
 @click.pass_context
 @click.option(
-    '-c', '--common-names', is_flag=True, help='Include common names for all ranks that have them'
-)
-@click.option(
     '-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format'
-)
-@click.option(
-    '-h', '--hierarchical', is_flag=True, help='Generate pipe-delimited hierarchical keywords'
 )
 @click.option(
     '-p',
@@ -177,12 +131,6 @@ def _strip_url_or_name(ctx, param, value):
     type=TaxonParam(),
     callback=_strip_url_or_name,
 )
-@click.option(
-    '-x',
-    '--create-sidecar',
-    is_flag=True,
-    help="Create XMP sidecar file if it doesn't already exist",
-)
 @click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
 @click.option(
     '--install',
@@ -192,10 +140,7 @@ def _strip_url_or_name(ctx, param, value):
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
-    common_names,
-    create_sidecar,
     flickr_format,
-    hierarchical,
     image_paths,
     print_tags,
     refresh,
@@ -224,34 +169,20 @@ def tag(
 
     # Print or refresh images instead of tagging with new IDs
     if print_tags:
-        print_all_metadata(image_paths, flickr_format, hierarchical)
+        print_all_metadata(image_paths, flickr_format)
         ctx.exit()
     if refresh:
-        refresh_tags(
-            image_paths,
-            common_names=common_names,
-            hierarchical=hierarchical,
-            create_sidecar=create_sidecar,
-        )
+        refresh_tags(image_paths, recursive=True)
         click.echo('Images refreshed')
         ctx.exit()
 
-    metadata_list = list(
-        tag_images(
-            image_paths,
-            observation,
-            taxon,
-            common_names=common_names,
-            hierarchical=hierarchical,
-            create_sidecar=create_sidecar,
-        )
-    )
+    metadata_list = list(tag_images(image_paths, observation, taxon))
     if not metadata_list:
         return
 
     # Print keywords if specified
     if not image_paths or verbose or flickr_format:
-        print_metadata(metadata_list[0].keyword_meta, flickr_format, hierarchical)
+        print_metadata(metadata_list[0].keyword_meta, flickr_format)
 
 
 def print_all_metadata(

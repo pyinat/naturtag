@@ -43,22 +43,19 @@
    exif:GPSLongitude="93,43.7966533E">
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Saperda tridentata"</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Cerambycoidea</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Cerambycoidea|taxonomy:family=Cerambycidae</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Cerambycoidea|taxonomy:family=Cerambycidae|taxonomy:subfamily=Lamiinae</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Cerambycoidea|taxonomy:family=Cerambycidae|taxonomy:subfamily=Lamiinae|taxonomy:tribe=Saperdini</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Cerambycoidea|taxonomy:family=Cerambycidae|taxonomy:subfamily=Lamiinae|taxonomy:tribe=Saperdini|taxonomy:genus=Saperda</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Coleoptera|taxonomy:suborder=Polyphaga|taxonomy:infraorder=Cucujiformia|taxonomy:superfamily=Cerambycoidea|taxonomy:family=Cerambycidae|taxonomy:subfamily=Lamiinae|taxonomy:tribe=Saperdini|taxonomy:genus=Saperda|"taxonomy:species=Saperda tridentata"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Cerambycidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Cerambycidae|Saperdini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Cerambycidae|Saperdini|Saperda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Cerambycidae|Saperdini|Saperda|Saperda tridentata</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Beetles</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Beetles|"Longhorn Beetles"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Beetles|"Longhorn Beetles"|"Elm Borer"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -83,8 +80,13 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Saperda tridentata"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"Elm Borer"</rdf:li>
+     <rdf:li>"Longhorn Beetles"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Beetles</rdf:li>
+     <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -99,17 +101,6 @@
      <rdf:li>taxonomy:tribe=Saperdini</rdf:li>
      <rdf:li>taxonomy:genus=Saperda</rdf:li>
      <rdf:li>"taxonomy:species=Saperda tridentata"</rdf:li>
-     <rdf:li>"taxonomy:species=Saperda tridentata"</rdf:li>
-     <rdf:li>"Elm Borer"</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
-     <rdf:li>Insects</rdf:li>
-     <rdf:li>Beetles</rdf:li>
-     <rdf:li>"Cucujiform Beetles"</rdf:li>
-     <rdf:li>"Longhorn Beetles"</rdf:li>
-     <rdf:li>"Flat-faced Longhorn Beetles"</rdf:li>
-     <rdf:li>"Elm Borer"</rdf:li>
      <rdf:li>inat:taxon_id=144007</rdf:li>
      <rdf:li>dwc:taxonID=144007</rdf:li>
      <rdf:li>inat:observation_id=49664891</rdf:li>

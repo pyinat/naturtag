@@ -6,8 +6,11 @@ from platformdirs import user_data_dir
 from pyinaturalist.constants import ICONIC_TAXA, RANKS
 from pyinaturalist_convert.constants import DB_PATH
 
-# Packaged assets
+# In an sdist/wheel, package files will be
+# In a pyinstaller package, source files will be in the root dir
 PKG_DIR = Path(__file__).parent.parent
+
+# Packaged assets
 ASSETS_DIR = PKG_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
 CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
@@ -83,8 +86,23 @@ MAX_DISPLAY_OBSERVED = 100  # Max number of observed taxa to display at a time
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']
 OBSERVATION_KEYS = ['observationid', 'catalognumber', 'dwc:catalognumber']
 
-COMMON_NAME_IGNORE_TERMS = [',', ' and ', 'allies', 'relatives']
+COMMON_NAME_IGNORE_TERMS = [',', ' and ', 'allies', 'relatives', 'typical']
 SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Animalia', 'Unknown']}
+
+# Simplified subset of ranks that are useful for display
+COMMON_RANKS = [
+    'form',
+    'variety',
+    'species',
+    'genus',
+    'tribe',
+    'family',
+    'order',
+    'class',
+    'phylum',
+    'kingdom',
+]
+ROOT_TAXON_ID = 48460
 
 # Type aliases
 IntTuple = tuple[Optional[int], Optional[int]]

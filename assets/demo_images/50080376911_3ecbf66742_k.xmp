@@ -68,28 +68,30 @@
    </dcterms:rightsHolder>
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini|taxonomy:subtribe=Marpissina</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini|taxonomy:subtribe=Marpissina|taxonomy:genus=Platycryptus</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Salticoidea|taxonomy:family=Salticidae|taxonomy:subfamily=Salticinae|taxonomy:tribe=Dendryphantini|taxonomy:subtribe=Marpissina|taxonomy:genus=Platycryptus|"taxonomy:species=Platycryptus undatus"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini|Platycryptus</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini|Platycryptus|Platycryptus undatus</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|"Jumping Spiders"</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|"Jumping Spiders"|"Tan Jumping Spider"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"Jumping Spiders"</rdf:li>
+     <rdf:li>"Tan Jumping Spider"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arachnids</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Spiders</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Chelicerata</rdf:li>
@@ -104,17 +106,6 @@
      <rdf:li>taxonomy:subtribe=Marpissina</rdf:li>
      <rdf:li>taxonomy:genus=Platycryptus</rdf:li>
      <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
-     <rdf:li>"taxonomy:species=Platycryptus undatus"</rdf:li>
-     <rdf:li>"Tan Jumping Spider"</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Chelicerates</rdf:li>
-     <rdf:li>Arachnids</rdf:li>
-     <rdf:li>Spiders</rdf:li>
-     <rdf:li>"Typical Spiders"</rdf:li>
-     <rdf:li>"Entelegyne Spiders"</rdf:li>
-     <rdf:li>"Jumping Spiders"</rdf:li>
-     <rdf:li>"Tan Jumping Spider"</rdf:li>
      <rdf:li>inat:taxon_id=81839</rdf:li>
      <rdf:li>dwc:taxonID=81839</rdf:li>
      <rdf:li>inat:observation_id=52060342</rdf:li>

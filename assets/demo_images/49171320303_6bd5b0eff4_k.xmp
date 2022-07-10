@@ -69,29 +69,28 @@
    </dcterms:rightsHolder>
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini|taxonomy:genus=Polistes</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini|taxonomy:genus=Polistes|taxonomy:subgenus=Fuscopolistes</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Vespoidea|taxonomy:family=Vespidae|taxonomy:subfamily=Polistinae|taxonomy:tribe=Polistini|taxonomy:genus=Polistes|taxonomy:subgenus=Fuscopolistes|"taxonomy:species=Polistes rubiginosus"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini|Polistes</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini|Polistes|Polistes rubiginosus</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Umbrella Paper Wasps"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Umbrella Paper Wasps"|"Coarse-backed Red Paper Wasp"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
+     <rdf:li>"Umbrella Paper Wasps"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -107,17 +106,6 @@
      <rdf:li>taxonomy:genus=Polistes</rdf:li>
      <rdf:li>taxonomy:subgenus=Fuscopolistes</rdf:li>
      <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
-     <rdf:li>"taxonomy:species=Polistes rubiginosus"</rdf:li>
-     <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
-     <rdf:li>Insects</rdf:li>
-     <rdf:li>"Vespoid Wasps"</rdf:li>
-     <rdf:li>"Paper Wasps"</rdf:li>
-     <rdf:li>"Umbrella Paper Wasps"</rdf:li>
-     <rdf:li>"fuscatus-group Paper Wasps"</rdf:li>
-     <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
      <rdf:li>inat:taxon_id=370906</rdf:li>
      <rdf:li>dwc:taxonID=370906</rdf:li>
      <rdf:li>inat:observation_id=36370373</rdf:li>

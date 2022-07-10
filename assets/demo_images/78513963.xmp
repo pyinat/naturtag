@@ -68,27 +68,29 @@
    </dcterms:rightsHolder>
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae|taxonomy:subfamily=Chrysopilinae</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae|taxonomy:subfamily=Chrysopilinae|taxonomy:genus=Chrysopilus</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Diptera|taxonomy:suborder=Brachycera|taxonomy:infraorder=Orthorrhapha|taxonomy:parvorder=Tabanomorpha|taxonomy:family=Rhagionidae|taxonomy:subfamily=Chrysopilinae|taxonomy:genus=Chrysopilus|"taxonomy:species=Chrysopilus ornatus"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae|Chrysopilus</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae|Chrysopilus|Chrysopilus ornatus</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Flies</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Flies|"Snipe Flies"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Flies|"Snipe Flies"|"Ornate Snipe Fly"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"Ornate Snipe Fly"</rdf:li>
+     <rdf:li>"Snipe Flies"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Flies</rdf:li>
+     <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -97,22 +99,11 @@
      <rdf:li>taxonomy:order=Diptera</rdf:li>
      <rdf:li>taxonomy:suborder=Brachycera</rdf:li>
      <rdf:li>taxonomy:infraorder=Orthorrhapha</rdf:li>
-     <rdf:li>taxonomy:parvorder=Tabanomorpha</rdf:li>
      <rdf:li>taxonomy:family=Rhagionidae</rdf:li>
      <rdf:li>taxonomy:subfamily=Chrysopilinae</rdf:li>
      <rdf:li>taxonomy:genus=Chrysopilus</rdf:li>
      <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
-     <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
-     <rdf:li>"Ornate Snipe Fly"</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
-     <rdf:li>Insects</rdf:li>
-     <rdf:li>Flies</rdf:li>
-     <rdf:li>"Brachyceran Flies"</rdf:li>
-     <rdf:li>"Orthorrhaphan Flies"</rdf:li>
-     <rdf:li>"Snipe Flies"</rdf:li>
-     <rdf:li>"Ornate Snipe Fly"</rdf:li>
+     <rdf:li>taxonomy:parvorder=Tabanomorpha</rdf:li>
      <rdf:li>inat:taxon_id=202860</rdf:li>
      <rdf:li>dwc:taxonID=202860</rdf:li>
      <rdf:li>inat:observation_id=49459966</rdf:li>

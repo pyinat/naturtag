@@ -10,7 +10,7 @@ from pyinaturalist.converters import format_file_size
 from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
-from naturtag.constants import IMAGE_CACHE
+from naturtag.constants import IMAGE_CACHE, ROOT_TAXON_ID
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -93,7 +93,11 @@ class TaxonDbController(TaxonController):
             fetch_ids = chain.from_iterable([t.ancestor_ids + t.child_ids for t in db_results])
             taxa = {t.id: t for t in self.from_ids(*set(fetch_ids), accept_partial=True)}
             for taxon in db_results:
-                taxon.ancestors = [taxa[id] for id in taxon.ancestor_ids]
+                # Depending on data source, the taxon itself may have already been added to ancestry
+                # TODO: Fix in pyinaturalist.Taxon and/or pyinaturalist_convert.db
+                taxon.ancestors = [
+                    taxa[id] for id in taxon.ancestor_ids if id not in [ROOT_TAXON_ID, taxon.id]
+                ]
                 taxon.children = [taxa[id] for id in taxon.child_ids]
 
         return db_results

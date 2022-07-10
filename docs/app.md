@@ -68,11 +68,16 @@ The additional tabs next to search results contain:
 
 ![Screenshot](../assets/screenshots/taxon-tabs.png)
 
+(app-settings)=
 ### Settings
 See the **Settings** menu for some settings to customize the metadata that your images will be
 tagged with, iNaturalist info used in search filters, and other behavior:
 
 ![Screenshot](../assets/screenshots/settings.png)
+
+```{note}
+The settings in the **Metadata** section also apply to the {ref}`cli`.
+```
 
 ## Keyboard Shortcuts
 Some keyboard shortcuts are included for convenience:

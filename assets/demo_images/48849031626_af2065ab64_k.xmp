@@ -45,20 +45,28 @@
    exif:GPSLongitude="93,47.4125900E">
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae|taxonomy:subfamily=Araneinae</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae|taxonomy:subfamily=Araneinae|taxonomy:genus=Araneus</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Chelicerata|taxonomy:class=Arachnida|taxonomy:order=Araneae|taxonomy:suborder=Araneomorphae|taxonomy:infraorder=Entelegynae|taxonomy:superfamily=Araneoidea|taxonomy:family=Araneidae|taxonomy:subfamily=Araneinae|taxonomy:genus=Araneus|"taxonomy:species=Araneus marmoreus"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae|Araneus</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae|Araneus|Araneus marmoreus"</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers|"Typical Orbweavers"</rdf:li>
+     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers|"Typical Orbweavers"|"Marbled Orbweaver"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:modified>
@@ -83,8 +91,18 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"Araneoid Spiders"</rdf:li>
+     <rdf:li>"Entelegyne Spiders"</rdf:li>
+     <rdf:li>"Marbled Orbweaver"</rdf:li>
+     <rdf:li>"Typical Orbweavers"</rdf:li>
+     <rdf:li>"Typical Spiders"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arachnids</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Chelicerates</rdf:li>
+     <rdf:li>Orbweavers</rdf:li>
+     <rdf:li>Spiders</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Chelicerata</rdf:li>
@@ -97,19 +115,6 @@
      <rdf:li>taxonomy:subfamily=Araneinae</rdf:li>
      <rdf:li>taxonomy:genus=Araneus</rdf:li>
      <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
-     <rdf:li>"taxonomy:species=Araneus marmoreus"</rdf:li>
-     <rdf:li>"Marbled Orbweaver"</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Chelicerates</rdf:li>
-     <rdf:li>Arachnids</rdf:li>
-     <rdf:li>Spiders</rdf:li>
-     <rdf:li>"Typical Spiders"</rdf:li>
-     <rdf:li>"Entelegyne Spiders"</rdf:li>
-     <rdf:li>"Araneoid Spiders"</rdf:li>
-     <rdf:li>Orbweavers</rdf:li>
-     <rdf:li>"Typical Orbweavers"</rdf:li>
-     <rdf:li>"Marbled Orbweaver"</rdf:li>
      <rdf:li>inat:taxon_id=120183</rdf:li>
      <rdf:li>dwc:taxonID=120183</rdf:li>
      <rdf:li>inat:observation_id=32989972</rdf:li>

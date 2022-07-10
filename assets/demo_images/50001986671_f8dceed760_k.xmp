@@ -69,30 +69,29 @@
    </dcterms:rightsHolder>
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini|taxonomy:genus=Apis</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini|taxonomy:genus=Apis|taxonomy:subgenus=Apis</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Hymenoptera|taxonomy:suborder=Apocrita|taxonomy:infraorder=Aculeata|taxonomy:superfamily=Apoidea|taxonomy:epifamily=Anthophila|taxonomy:family=Apidae|taxonomy:subfamily=Apinae|taxonomy:tribe=Apini|taxonomy:genus=Apis|taxonomy:subgenus=Apis|"taxonomy:species=Apis mellifera"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini|Apis</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini|Apis|Apis mellifera</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"|"Honey Bees"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"|"Honey Bees"|"Western Honey Bee"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"Honey Bees"</rdf:li>
+     <rdf:li>"Western Honey Bee"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -109,18 +108,6 @@
      <rdf:li>taxonomy:genus=Apis</rdf:li>
      <rdf:li>taxonomy:subgenus=Apis</rdf:li>
      <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
-     <rdf:li>"taxonomy:species=Apis mellifera"</rdf:li>
-     <rdf:li>"Western Honey Bee"</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
-     <rdf:li>Insects</rdf:li>
-     <rdf:li>Bees</rdf:li>
-     <rdf:li>"Apine Bees"</rdf:li>
-     <rdf:li>"Honey Bees"</rdf:li>
-     <rdf:li>"Honey Bees"</rdf:li>
-     <rdf:li>"Cavity-nesting Honey Bees"</rdf:li>
-     <rdf:li>"Western Honey Bee"</rdf:li>
      <rdf:li>inat:taxon_id=47219</rdf:li>
      <rdf:li>dwc:taxonID=47219</rdf:li>
      <rdf:li>inat:observation_id=49454455</rdf:li>

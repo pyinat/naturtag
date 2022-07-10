@@ -42,18 +42,16 @@
    exif:GPSLongitude="93,44.0741533E">
    <lr:hierarchicalSubject>
     <rdf:Seq>
-     <rdf:li>taxonomy:genus=Argia</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Odonata</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Odonata|taxonomy:suborder=Zygoptera</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Odonata|taxonomy:suborder=Zygoptera|taxonomy:superfamily=Coenagrionoidea</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Odonata|taxonomy:suborder=Zygoptera|taxonomy:superfamily=Coenagrionoidea|taxonomy:family=Coenagrionidae</rdf:li>
-     <rdf:li>taxonomy:genus=Argia|taxonomy:stateofmatter=Life|taxonomy:kingdom=Animalia|taxonomy:phylum=Arthropoda|taxonomy:subphylum=Hexapoda|taxonomy:class=Insecta|taxonomy:subclass=Pterygota|taxonomy:order=Odonata|taxonomy:suborder=Zygoptera|taxonomy:superfamily=Coenagrionoidea|taxonomy:family=Coenagrionidae|taxonomy:genus=Argia</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Arthropoda</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Odonata</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Odonata|Coenagrionidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Insecta|Odonata|Coenagrionidae|Argia</rdf:li>
+     <rdf:li>Animals|Arthropods</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Narrow-winged Damselflies"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|"Narrow-winged Damselflies"|Dancers</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -78,8 +76,12 @@
    </dcterms:rightsHolder>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>taxonomy:genus=Argia</rdf:li>
-     <rdf:li>taxonomy:stateofmatter=Life</rdf:li>
+     <rdf:li>"Narrow-winged Damselflies"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Dancers</rdf:li>
+     <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
      <rdf:li>taxonomy:subphylum=Hexapoda</rdf:li>
@@ -90,16 +92,6 @@
      <rdf:li>taxonomy:superfamily=Coenagrionoidea</rdf:li>
      <rdf:li>taxonomy:family=Coenagrionidae</rdf:li>
      <rdf:li>taxonomy:genus=Argia</rdf:li>
-     <rdf:li>taxonomy:genus=Argia</rdf:li>
-     <rdf:li>Dancers</rdf:li>
-     <rdf:li>Animals</rdf:li>
-     <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Hexapods</rdf:li>
-     <rdf:li>Insects</rdf:li>
-     <rdf:li>Damselflies</rdf:li>
-     <rdf:li>"Coenagrionoid Damselflies"</rdf:li>
-     <rdf:li>"Narrow-winged Damselflies"</rdf:li>
-     <rdf:li>Dancers</rdf:li>
      <rdf:li>inat:taxon_id=47977</rdf:li>
      <rdf:li>dwc:taxonID=47977</rdf:li>
      <rdf:li>inat:observation_id=85007060</rdf:li>

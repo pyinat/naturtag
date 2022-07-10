@@ -43,10 +43,25 @@ class SettingsMenu(StylableWidget):
             ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names')
         )
         metadata.addLayout(
-            ToggleSetting(settings, icon_str='ph.files-fill', setting_attr='create_sidecar')
+            ToggleSetting(settings, icon_str='mdi.file-tree', setting_attr='hierarchical')
         )
         metadata.addLayout(
-            ToggleSetting(settings, icon_str='mdi.file-tree', setting_attr='hierarchical_keywords')
+            ToggleSetting(settings, icon_str='fa5s.file-code', setting_attr='sidecar')
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                settings, icon_str='fa5s.file-alt', setting_attr='exif', setting_title='EXIF'
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                settings, icon_str='fa5s.file-alt', setting_attr='iptc', setting_title='IPTC'
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                settings, icon_str='fa5s.file-alt', setting_attr='xmp', setting_title='XMP'
+            )
         )
 
         display = self.add_group('Display', self.settings_layout)
@@ -87,12 +102,13 @@ class SettingsMenu(StylableWidget):
 class SettingContainer(HorizontalLayout):
     """Layout for an icon, description, and input widget for a single setting"""
 
-    def __init__(self, icon_str: str, setting_attr: str):
+    def __init__(self, icon_str: str, setting_attr: str, setting_title: str = None):
         super().__init__()
         self.setAlignment(Qt.AlignLeft)
         self.addWidget(IconLabel(icon_str, size=32))
 
-        title = QLabel(setting_attr.replace('_', ' ').title())
+        title_str = setting_title or setting_attr.replace('_', ' ').title()
+        title = QLabel(title_str)
         title.setObjectName('h3')
         title_layout = VerticalLayout()
         title_layout.addWidget(title)
@@ -111,8 +127,9 @@ class ChoiceSetting(SettingContainer):
         settings: Settings,
         icon_str: str,
         setting_attr: str,
+        setting_title: str = None,
     ):
-        super().__init__(icon_str, setting_attr)
+        super().__init__(icon_str, setting_attr, setting_title)
 
         def set_text(text):
             setattr(settings, setting_attr, text)
@@ -132,9 +149,10 @@ class TextSetting(SettingContainer):
         settings: Settings,
         icon_str: str,
         setting_attr: str,
+        setting_title: str = None,
         validator: QValidator = None,
     ):
-        super().__init__(icon_str, setting_attr)
+        super().__init__(icon_str, setting_attr, setting_title)
 
         def set_text(text):
             setattr(settings, setting_attr, text)
@@ -160,8 +178,14 @@ class ToggleSetting(SettingContainer):
 
     on_click = Signal(bool)
 
-    def __init__(self, settings: Settings, icon_str: str, setting_attr: str):
-        super().__init__(icon_str, setting_attr)
+    def __init__(
+        self,
+        settings: Settings,
+        icon_str: str,
+        setting_attr: str,
+        setting_title: str = None,
+    ):
+        super().__init__(icon_str, setting_attr, setting_title)
 
         def set_state(checked: bool):
             setattr(settings, setting_attr, checked)
