@@ -105,11 +105,11 @@ class Settings(YamlMixin):
 
     # Metadata
     common_names: bool = doc_field(default=True, doc='Include common names in taxonomy keywords')
-    embedded: bool = doc_field(default=False, doc="Write to embedded image metadata")
-    sidecar: bool = doc_field(default=True, doc="Write metadata to XMP sidecar files")
-    hierarchical: bool = doc_field(
-        default=False, doc='Generate pipe-delimited hierarchical keyword tags'
-    )
+    hierarchical: bool = doc_field(default=True, doc='Generate hierarchical keywords')
+    sidecar: bool = doc_field(default=True, doc='Write XMP metadata to sidecar (separate file)')
+    exif: bool = doc_field(default=True, doc='Write EXIF metadata to image (embedded)')
+    iptc: bool = doc_field(default=True, doc='Write IPTC metadata to image (embedded)')
+    xmp: bool = doc_field(default=True, doc='Write XMP metadata to image (embedded)')
 
     # TODO: User-specified data directories
     # data_dir: Path = field(default=DATA_DIR, converter=Path)

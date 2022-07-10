@@ -70,7 +70,12 @@ def tag_images(
         image_path,
     ):
         img_metadata = MetaMetadata(image_path).merge(inat_metadata)
-        img_metadata.write(embedded=settings.embedded, sidecar=settings.sidecar)
+        img_metadata.write(
+            exif=settings.exif,
+            iptc=settings.iptc,
+            xmp=settings.xmp,
+            sidecar=settings.sidecar,
+        )
         return img_metadata
 
     return [_tag_image(image_path) for image_path in get_valid_image_paths(image_paths, recursive)]
@@ -251,15 +256,20 @@ def _refresh_tags(metadata: MetaMetadata, settings: Settings = None) -> MetaMeta
         return metadata
 
     logger.info(f'Refreshing tags for {metadata.image_path}')
-    _settings = settings or Settings.read()
+    settings = settings or Settings.read()
     metadata = get_inat_metadata(  # type: ignore
         observation_id=metadata.observation_id,
         taxon_id=metadata.taxon_id,
-        common_names=_settings.common_names,
-        hierarchical=_settings.hierarchical,
+        common_names=settings.common_names,
+        hierarchical=settings.hierarchical,
         metadata=metadata,
     )
-    metadata.write(embedded=_settings.embedded, sidecar=_settings.sidecar)
+    metadata.write(
+        exif=settings.exif,
+        iptc=settings.iptc,
+        xmp=settings.xmp,
+        sidecar=settings.sidecar,
+    )
     return metadata
 
 
