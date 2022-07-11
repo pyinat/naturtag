@@ -51,8 +51,8 @@ UninstallCloseMainExe=1
 UninstallCloseApp=0
 UninstallCloseAppFile=File.exe
 UninstallCloseAppText=App
-Updater=0
-UpdateURL=http://www.website.com/update.txt
+Updater=1
+UpdateURL=https://raw.githubusercontent.com/pyinat/naturtag/main/packaging/latest.txt
 CheckUpdateBefore=0
 CheckUpdaterTitle=0
 CheckUseDownloader=0
@@ -139,7 +139,7 @@ CustomActionName=Visit Web Site
 CustomActionCommand=<WebSite>
 CustomActionChecked=0
 CustomActionAdmin=0
-TotalFiles=1
+TotalFiles=2
 SourceDirFiles=209
 SourceDirSize=134393029
 
@@ -154,6 +154,7 @@ LogoTransparent=0
 
 [Files]
 0=<AIDir>\Uninstall.exe?<InstallDir>\Uninstall.exe?1?1
+1=<AIDir>\Updater.exe?<InstallDir>\Updater.exe?1?1
 
 [Shortcuts]
 0=<ProgramsMenu>*?<AppName>*?<InstallDir>\naturtag.exe*?A tool for tagging image files with iNaturalist taxonomy & observation metadata*?*?<InstallDir>*?<InstallDir>\assets\icons\logo.ico*?0*?Normal*?No
