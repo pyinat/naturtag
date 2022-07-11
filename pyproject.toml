@@ -1,7 +1,7 @@
 [tool.poetry]
 name = 'naturtag'
 version = '0.7.0'
-description = 'A CLI tool to add iNaturalist taxonomy metadata to local observation photos'
+description = 'A tool for tagging your iNaturalist photo collection with observation metadata'
 authors = ['Jordan Cook']
 license = 'MIT'
 readme = 'README.md'

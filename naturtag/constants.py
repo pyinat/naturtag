@@ -6,15 +6,12 @@ from platformdirs import user_data_dir
 from pyinaturalist.constants import ICONIC_TAXA, RANKS
 from pyinaturalist_convert.constants import DB_PATH
 
-# In an sdist/wheel, package files will be
-# In a pyinstaller package, source files will be in the root dir
-PKG_DIR = Path(__file__).parent.parent
-
 # Packaged assets
+PKG_DIR = Path(__file__).parent.parent
 ASSETS_DIR = PKG_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
 CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
-FTS_DB = ASSETS_DIR / 'taxon-fts-en.tar.gz'
+PACKAGED_FTS_DB = ASSETS_DIR / 'taxon-fts-en.tar.gz'
 APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
 

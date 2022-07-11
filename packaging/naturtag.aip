@@ -31,7 +31,7 @@ CloseAppFile=File.exe
 CloseAppText=App Name
 PackageType=0
 SetupFolder=D:\Workspace\naturtag\dist
-SetupFileName=naturtag-setup
+SetupFileName=naturtag-installer
 IconFile=Default
 SourceDir=D:\Workspace\naturtag\dist\naturtag
 InstallDir=<ProgramFiles>\<AppName>
@@ -140,8 +140,8 @@ CustomActionCommand=<WebSite>
 CustomActionChecked=0
 CustomActionAdmin=0
 TotalFiles=1
-SourceDirFiles=212
-SourceDirSize=190559427
+SourceDirFiles=209
+SourceDirSize=134393029
 
 [GUI]
 FontName=Verdana
