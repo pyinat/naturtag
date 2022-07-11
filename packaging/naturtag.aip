@@ -4,7 +4,7 @@ AIEdition=1
 GUID={01329D81-576C-42FE-9850-9C4C03F161FB}
 AppName=Naturtag
 AppVersion=v0.7.0
-AppDescription=A tool for tagging image files with iNaturalist taxonomy & observation metadata
+AppDescription=
 CompanyName=
 WebSite=https://naturtag.readthedocs.io
 SupportLink=https://naturtag.readthedocs.io
@@ -78,7 +78,7 @@ SetupParameters=
 Theme=2
 WizardBitmap=<AIDir>\Bitmaps\Wizard\01.bmp
 HeaderBitmap=<AIDir>\Bitmaps\Header\01.bmp
-LogoBitmap=<AIDir>\Bitmaps\Logo\01.bmp
+LogoBitmap=D:\Workspace\naturtag\assets\icons\logo_installer.bmp
 DialogWelcome=1
 DialogLicense=0
 DialogReadme=0
@@ -150,7 +150,7 @@ LogoAlignClient=0
 LogoAutoSize=1
 LogoStretch=0
 LogoProportional=0
-LogoTransparent=0
+LogoTransparent=1
 
 [Files]
 0=<AIDir>\Uninstall.exe?<InstallDir>\Uninstall.exe?1?1
