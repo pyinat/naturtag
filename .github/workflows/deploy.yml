@@ -16,6 +16,9 @@ on:
 env:
   LATEST_PY_VERSION: '3.10'
 
+# Required for creating a new release
+permissions:
+  contents: write
 
 jobs:
   build-app-packages:
@@ -137,7 +140,7 @@ jobs:
 
   # Publish python package to PyPI
   release-pypi-package:
-    if: github.event.inputs.pre-release-suffix
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.pre-release-suffix
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -150,7 +153,7 @@ jobs:
           virtualenvs-in-project: true
 
       - name: Set pre-release version
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        if: github.event.inputs.pre-release-suffix
         env:
           pre-release-suffix: ${{ github.event.inputs.pre-release-suffix }}
           pre-release-version: ${{ github.event.inputs.pre-release-version || github.run_number }}
