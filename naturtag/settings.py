@@ -17,10 +17,10 @@ from naturtag.constants import (
     CONFIG_PATH,
     DB_PATH,
     DEFAULT_WINDOW_SIZE,
-    FTS_DB,
     LOGFILE,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
+    PACKAGED_FTS_DB,
     USER_TAXA_PATH,
 )
 
@@ -209,8 +209,11 @@ def setup(settings: Settings):
 
     logger.info('Running first-time setup')
     if not DB_PATH.is_file():
-        with TarFile.open(FTS_DB) as tar:
+        logger.debug('Initializing text search database')
+        with TarFile.open(PACKAGED_FTS_DB) as tar:
             tar.extractall(path=DB_PATH.parent)
+
+    logger.debug('Creating remaining tables')
     create_tables()
 
     settings.setup_complete = True

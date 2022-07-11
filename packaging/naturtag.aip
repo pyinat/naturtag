@@ -4,7 +4,7 @@ AIEdition=1
 GUID={01329D81-576C-42FE-9850-9C4C03F161FB}
 AppName=Naturtag
 AppVersion=v0.7.0
-AppDescription=A tool for tagging image files with iNaturalist taxonomy & observation metadata
+AppDescription=
 CompanyName=
 WebSite=https://naturtag.readthedocs.io
 SupportLink=https://naturtag.readthedocs.io
@@ -31,7 +31,7 @@ CloseAppFile=File.exe
 CloseAppText=App Name
 PackageType=0
 SetupFolder=D:\Workspace\naturtag\dist
-SetupFileName=naturtag-setup
+SetupFileName=naturtag-installer
 IconFile=Default
 SourceDir=D:\Workspace\naturtag\dist\naturtag
 InstallDir=<ProgramFiles>\<AppName>
@@ -51,8 +51,8 @@ UninstallCloseMainExe=1
 UninstallCloseApp=0
 UninstallCloseAppFile=File.exe
 UninstallCloseAppText=App
-Updater=0
-UpdateURL=http://www.website.com/update.txt
+Updater=1
+UpdateURL=https://raw.githubusercontent.com/pyinat/naturtag/main/packaging/latest.txt
 CheckUpdateBefore=0
 CheckUpdaterTitle=0
 CheckUseDownloader=0
@@ -78,7 +78,7 @@ SetupParameters=
 Theme=2
 WizardBitmap=<AIDir>\Bitmaps\Wizard\01.bmp
 HeaderBitmap=<AIDir>\Bitmaps\Header\01.bmp
-LogoBitmap=<AIDir>\Bitmaps\Logo\01.bmp
+LogoBitmap=D:\Workspace\naturtag\assets\icons\logo_installer.bmp
 DialogWelcome=1
 DialogLicense=0
 DialogReadme=0
@@ -139,9 +139,9 @@ CustomActionName=Visit Web Site
 CustomActionCommand=<WebSite>
 CustomActionChecked=0
 CustomActionAdmin=0
-TotalFiles=1
-SourceDirFiles=212
-SourceDirSize=190559427
+TotalFiles=2
+SourceDirFiles=209
+SourceDirSize=134393029
 
 [GUI]
 FontName=Verdana
@@ -150,10 +150,11 @@ LogoAlignClient=0
 LogoAutoSize=1
 LogoStretch=0
 LogoProportional=0
-LogoTransparent=0
+LogoTransparent=1
 
 [Files]
 0=<AIDir>\Uninstall.exe?<InstallDir>\Uninstall.exe?1?1
+1=<AIDir>\Updater.exe?<InstallDir>\Updater.exe?1?1
 
 [Shortcuts]
 0=<ProgramsMenu>*?<AppName>*?<InstallDir>\naturtag.exe*?A tool for tagging image files with iNaturalist taxonomy & observation metadata*?*?<InstallDir>*?<InstallDir>\assets\icons\logo.ico*?0*?Normal*?No

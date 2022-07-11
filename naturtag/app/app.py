@@ -51,8 +51,11 @@ class MainWindow(QMainWindow):
             settings.log_level, root_level=settings.log_level_external, logfile=settings.logfile
         )
 
-        # Controllers & Settings
+        # Run any first-time setup steps, if needed
         self.settings = settings
+        setup(settings)
+
+        # Controllers
         self.settings_menu = SettingsMenu(self.settings)
         self.image_controller = ImageController(self.settings, self.threadpool)
         self.taxon_controller = TaxonController(self.settings, self.threadpool)
@@ -124,9 +127,6 @@ class MainWindow(QMainWindow):
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
-
-        # Run any first-time setup steps, if needed
-        setup(self.settings)
 
         # Load any valid image paths provided on command line (or from drag & drop)
         self.image_controller.gallery.load_images([a for a in sys.argv if a != __file__])
