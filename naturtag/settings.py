@@ -113,7 +113,9 @@ class Settings(YamlMixin):
 
     # TODO: User-specified data directories
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
-    # default_image_dir: Path = field(default=Path('~').expanduser(), converter=Path)
+    default_image_dir: Path = doc_field(
+        default=Path('~').expanduser(), converter=Path, doc='Starting directory for image selection'
+    )
     # recent_image_dirs: Path = field(default=Path('~').expanduser(), converter=Path)
     # starred_image_dirs: list[Path] = field(factory=list)
 

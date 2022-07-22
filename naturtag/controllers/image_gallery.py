@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT, PathOrStr
 from naturtag.metadata import MetaMetadata
+from naturtag.settings import Settings
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FlowLayout,
@@ -47,12 +48,13 @@ class ImageGallery(StylableWidget):
     on_message = Signal(str)  #: Forward a message to status bar
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
-    def __init__(self):
+    def __init__(self, settings: Settings):
         super().__init__()
         self.setAcceptDrops(True)
         self.images: dict[Path, LocalThumbnail] = {}
         self.image_window = ImageWindow()
         self.image_window.on_remove.connect(self.remove_image)
+        self.settings = settings
         root = VerticalLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 
@@ -76,7 +78,8 @@ class ImageGallery(StylableWidget):
         """Show a file chooser dialog"""
         image_paths, _ = QFileDialog.getOpenFileNames(
             self,
-            'Open image files:',
+            caption='Open image files:',
+            dir=str(self.settings.default_image_dir),
             filter=f'Image files ({" ".join(IMAGE_FILETYPES)})',
         )
         self.load_images(image_paths)

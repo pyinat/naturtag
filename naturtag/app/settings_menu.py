@@ -3,7 +3,15 @@ from logging import getLogger
 from attr import fields
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator, QValidator
-from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QSizePolicy
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFileDialog,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QWidget,
+)
 
 from naturtag.settings import Settings
 from naturtag.widgets import IconLabel, StylableWidget, ToggleSwitch
@@ -64,6 +72,17 @@ class SettingsMenu(StylableWidget):
             )
         )
 
+        user_data = self.add_group('User Data', self.settings_layout)
+        user_data.addLayout(
+            PathSetting(
+                settings,
+                icon_str='fa5.images',
+                setting_attr='default_image_dir',
+                setting_title='Default image directory',
+                dialog_parent=self,
+            )
+        )
+
         display = self.add_group('Display', self.settings_layout)
         self.dark_mode = ToggleSetting(
             settings,
@@ -80,7 +99,10 @@ class SettingsMenu(StylableWidget):
         )
         debug.addLayout(self.show_logs)
         self.log_level = ChoiceSetting(
-            settings, icon_str='fa.thermometer-2', setting_attr='log_level'
+            settings,
+            icon_str='fa.thermometer-2',
+            setting_attr='log_level',
+            choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
         )
         debug.addLayout(self.log_level)
 
@@ -110,14 +132,14 @@ class SettingContainer(HorizontalLayout):
         title_str = setting_title or setting_attr.replace('_', ' ').title()
         title = QLabel(title_str)
         title.setObjectName('h3')
-        title_layout = VerticalLayout()
-        title_layout.addWidget(title)
+        self.title_layout = VerticalLayout()
+        self.title_layout.addWidget(title)
 
         attr_meta = getattr(fields(Settings), setting_attr).metadata
         description = attr_meta.get('doc')
         if description:
-            title_layout.addWidget(QLabel(description))
-        self.addLayout(title_layout)
+            self.title_layout.addWidget(QLabel(description))
+        self.addLayout(self.title_layout)
         self.addStretch()
 
 
@@ -128,6 +150,7 @@ class ChoiceSetting(SettingContainer):
         icon_str: str,
         setting_attr: str,
         setting_title: str = None,
+        choices: list = None,
     ):
         super().__init__(icon_str, setting_attr, setting_title)
 
@@ -135,7 +158,7 @@ class ChoiceSetting(SettingContainer):
             setattr(settings, setting_attr, text)
 
         widget = QComboBox()
-        widget.addItems(['DEBUG', 'INFO', 'WARNING', 'ERROR'])
+        widget.addItems(choices or [])
         widget.setCurrentText(str(getattr(settings, setting_attr)))
         widget.currentTextChanged.connect(set_text)
         self.addWidget(widget)
@@ -157,13 +180,53 @@ class TextSetting(SettingContainer):
         def set_text(text):
             setattr(settings, setting_attr, text)
 
-        widget = QLineEdit()
-        widget.setFixedWidth(150)
-        widget.setText(str(getattr(settings, setting_attr)))
-        widget.textChanged.connect(set_text)
+        text_box = QLineEdit()
+        text_box.setFixedWidth(150)
+        text_box.setText(str(getattr(settings, setting_attr)))
+        text_box.textChanged.connect(set_text)
         if validator:
-            widget.setValidator(validator)
-        self.addWidget(widget)
+            text_box.setValidator(validator)
+        self.addWidget(text_box)
+
+
+class PathSetting(SettingContainer):
+    def __init__(
+        self,
+        settings: Settings,
+        icon_str: str,
+        setting_attr: str,
+        setting_title: str = None,
+        dialog_parent: QWidget = None,
+    ):
+        super().__init__(icon_str, setting_attr, setting_title)
+        self.settings = settings
+        self.setting_attr = setting_attr
+        self.dialog_parent = dialog_parent
+        path_layout = HorizontalLayout()
+        self.title_layout.addLayout(path_layout)
+
+        self.text_box = QLineEdit()
+        self.text_box.setFixedWidth(450)
+        self.text_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.text_box.setText(str(getattr(settings, setting_attr)))
+        self.text_box.textChanged.connect(self.set_text)
+        path_layout.addWidget(self.text_box)
+
+        button = QPushButton('Browse...')
+        button.clicked.connect(self.browse)
+        path_layout.addWidget(button)
+
+    def set_text(self, text):
+        setattr(self.settings, self.setting_attr, str(text))
+
+    def browse(self):
+        """Browse for a directory"""
+        if path := QFileDialog.getExistingDirectory(
+            self.dialog_parent,
+            'Select directory',
+            str(getattr(self.settings, self.setting_attr)),
+        ):
+            self.text_box.setText(path)
 
 
 class IntSetting(TextSetting):

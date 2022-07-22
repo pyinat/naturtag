@@ -64,7 +64,7 @@ class ImageController(QWidget):
         self.input_obs_id.on_clear.connect(self.input_taxon_id.clear)
 
         # Image gallery
-        self.gallery = ImageGallery()
+        self.gallery = ImageGallery(settings)
         self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
 
