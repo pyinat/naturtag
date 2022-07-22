@@ -4,7 +4,6 @@ from typing import Optional, Union
 
 from platformdirs import user_data_dir
 from pyinaturalist.constants import ICONIC_TAXA, RANKS
-from pyinaturalist_convert.constants import DB_PATH
 
 # Packaged assets
 PKG_DIR = Path(__file__).parent.parent
@@ -17,6 +16,7 @@ APP_LOGO = ICONS_DIR / 'logo.png'
 
 # Local settings & data paths
 APP_DIR = Path(user_data_dir()) / 'Naturtag'
+DB_PATH = APP_DIR / 'observations.db'
 IMAGE_CACHE = APP_DIR / 'images.db'
 LOGFILE = APP_DIR / 'naturtag.log'
 CONFIG_PATH = APP_DIR / 'settings.yml'

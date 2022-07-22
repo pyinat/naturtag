@@ -10,7 +10,7 @@ from pyinaturalist.converters import format_file_size
 from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
-from naturtag.constants import IMAGE_CACHE, ROOT_TAXON_ID
+from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -34,7 +34,7 @@ class ObservationDbController(ObservationController):
     ) -> WrapperPaginator[Observation]:
         """Get observations by ID; first from the database, then from the API"""
         # Get any observations saved in the database (unless refreshing)
-        db_results = list(get_db_observations(ids=observation_ids)) if not refresh else []
+        db_results = list(get_db_observations(DB_PATH, ids=observation_ids)) if not refresh else []
         logger.debug(f'{len(db_results)} observations found in database')
 
         # Get remaining observations from the API and save to the database
@@ -42,7 +42,7 @@ class ObservationDbController(ObservationController):
         if remaining_ids:
             logger.debug(f'Fetching remaining {len(remaining_ids)} observations from API')
             results = super().from_ids(*remaining_ids, **params).all()
-            save_observations(results)
+            save_observations(results, DB_PATH)
         else:
             results = []
 
@@ -51,7 +51,7 @@ class ObservationDbController(ObservationController):
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        save_observations(results)
+        save_observations(results, DB_PATH)
         return WrapperPaginator(results)
 
 
@@ -77,7 +77,7 @@ class TaxonDbController(TaxonController):
         if remaining_ids:
             logger.debug(f'Fetching remaining {len(remaining_ids)} taxa from API')
             results = super().from_ids(*remaining_ids, **params).all() if remaining_ids else []
-            save_taxa(results)
+            save_taxa(results, DB_PATH)
         else:
             results = []
 
@@ -85,7 +85,7 @@ class TaxonDbController(TaxonController):
         return WrapperPaginator(db_results + results)
 
     def _get_db_taxa(self, taxon_ids: list[int], accept_partial: bool = False):
-        db_results = list(get_db_taxa(ids=taxon_ids, accept_partial=accept_partial))
+        db_results = list(get_db_taxa(DB_PATH, ids=taxon_ids, accept_partial=accept_partial))
 
         # DB records only contain ancestor/child IDs, so we need another query to fetch full records
         # This could be done in SQL, but a many-to-many relationship with ancestors would get messy

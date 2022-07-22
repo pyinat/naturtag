@@ -114,6 +114,7 @@ class Settings(YamlMixin):
     # TODO: User-specified data directories
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
     # default_image_dir: Path = field(default=Path('~').expanduser(), converter=Path)
+    # recent_image_dirs: Path = field(default=Path('~').expanduser(), converter=Path)
     # starred_image_dirs: list[Path] = field(factory=list)
 
     debug: bool = field(default=False)
@@ -214,7 +215,7 @@ def setup(settings: Settings):
             tar.extractall(path=DB_PATH.parent)
 
     logger.debug('Creating remaining tables')
-    create_tables()
+    create_tables(DB_PATH)
 
     settings.setup_complete = True
     settings.write()
