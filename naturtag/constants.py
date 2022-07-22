@@ -16,11 +16,11 @@ APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
 
 # Local settings & data paths
-DATA_DIR = Path(user_data_dir()) / 'Naturtag'
-IMAGE_CACHE = DATA_DIR / 'images.db'
-LOGFILE = DATA_DIR / 'naturtag.log'
-CONFIG_PATH = DATA_DIR / 'settings.yml'
-USER_TAXA_PATH = DATA_DIR / 'stored_taxa.yml'
+APP_DIR = Path(user_data_dir()) / 'Naturtag'
+IMAGE_CACHE = APP_DIR / 'images.db'
+LOGFILE = APP_DIR / 'naturtag.log'
+CONFIG_PATH = APP_DIR / 'settings.yml'
+USER_TAXA_PATH = APP_DIR / 'stored_taxa.yml'
 
 # Project info
 DOCS_URL = 'https://naturtag.readthedocs.io/en/latest/app.html'
