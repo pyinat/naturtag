@@ -23,7 +23,7 @@ from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.app.toolbar import Toolbar
-from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
+from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings, setup
 from naturtag.widgets import init_handler
@@ -169,7 +169,14 @@ class MainWindow(QMainWindow):
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
-        about.setText(f'<b>Naturtag v{version}</b> <br/>Source: {repo_link} <br/>{attribution}')
+        app_dir_link = f"<a href='{APP_DIR}'>{APP_DIR}</a>"
+
+        about.setText(
+            f'<b>Naturtag v{version}</b><br/>'
+            f'{attribution}'
+            f'<br/>Source: {repo_link}'
+            f'<br/>User data directory: {app_dir_link}'
+        )
         about.exec()
 
     def show_settings(self):
