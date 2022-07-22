@@ -45,6 +45,7 @@ logger = getLogger(__name__)
 class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
+    on_load_images = Signal(list)
     on_message = Signal(str)  #: Forward a message to status bar
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
@@ -74,12 +75,12 @@ class ImageGallery(StylableWidget):
         self.images = {}
         self.flow_layout.clear()
 
-    def load_file_dialog(self):
+    def load_file_dialog(self, start_dir: PathOrStr = None):
         """Show a file chooser dialog"""
         image_paths, _ = QFileDialog.getOpenFileNames(
             self,
             caption='Open image files:',
-            dir=str(self.settings.default_image_dir),
+            dir=str(start_dir or self.settings.default_image_dir),
             filter=f'Image files ({" ".join(IMAGE_FILETYPES)})',
         )
         self.load_images(image_paths)
@@ -87,13 +88,14 @@ class ImageGallery(StylableWidget):
     def load_images(self, image_paths: Iterable[PathOrStr]):
         """Load multiple images, and ignore any duplicates"""
         images = get_valid_image_paths(image_paths, recursive=True)
-        new_images = images - set(self.images.keys())
+        new_images = sorted(images - set(self.images.keys()))
         if not new_images:
             return
 
         logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
-        for image_path in sorted(list(new_images)):
+        for image_path in new_images:
             self.load_image(image_path)
+        self.on_load_images.emit(new_images)
 
     def load_image(self, image_path: Path):
         """Load an image"""

@@ -78,6 +78,7 @@ MAX_LABEL_CHARS = 80
 QSS_PATH = ASSETS_DIR / 'style.qss'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 MAX_DISPLAY_OBSERVED = 100  # Max number of observed taxa to display at a time
+MAX_DIR_HISTORY = 10
 
 # Simplified tags without formatting variations
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']

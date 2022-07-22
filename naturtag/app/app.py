@@ -2,10 +2,13 @@
 import sys
 import webbrowser
 from datetime import datetime
+from functools import partial
 from importlib.metadata import version as pkg_version
 from logging import getLogger
+from pathlib import Path
+from typing import Iterable
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Slot
 from PySide6.QtGui import QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -66,6 +69,9 @@ class MainWindow(QMainWindow):
         self.image_controller.gallery.on_message.connect(self.info)
         self.taxon_controller.on_message.connect(self.info)
 
+        # Update history and menu when new images are loaded
+        self.image_controller.gallery.on_load_images.connect(self.update_recent_dirs)
+
         # Select taxon from image context menu, ID input fields, and iconic taxa filtes
         self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
         self.image_controller.on_select_observation_id.connect(
@@ -121,21 +127,25 @@ class MainWindow(QMainWindow):
         self.toolbar.about_button.triggered.connect(self.open_about)
 
         # Menu bar and status bar
-        self.toolbar.populate_menu(self.menuBar(), self.settings)
+        self.toolbar.populate_menu(self.menuBar())
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
+        # self._update_recent_dirs_menu(self.settings.recent_image_dirs)
 
         # Load any valid image paths provided on command line (or from drag & drop)
-        self.image_controller.gallery.load_images([a for a in sys.argv if a != __file__])
+        self.image_controller.gallery.load_images(
+            [a for a in sys.argv if not (a == __file__ or a.endswith('.exe'))]
+        )
 
         # Debug
         if settings.debug:
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
-            self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
-            # self.image_controller.gallery.load_images(demo_images)  # type: ignore
+            self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.taxon_controller.select_taxon(47792)
+
+        self._update_recent_dirs_menu(self.settings.recent_image_dirs)
 
     def closeEvent(self, _):
         """Save settings before closing the app"""
@@ -179,9 +189,32 @@ class MainWindow(QMainWindow):
         )
         about.exec()
 
+    def reload_qss(self):
+        """Reload Qt stylesheet"""
+        set_stylesheet(self)
+
     def show_settings(self):
         """Show the settings menu"""
         self.settings_menu.show()
+
+    @Slot(list)
+    def update_recent_dirs(self, image_paths: list[Path]):
+        """Update recently used image directories in both settings (history) and the menu"""
+        logger.info(f'{len(image_paths)} new paths')
+        unique_image_dirs = {image_path.parent for image_path in image_paths}
+        for image_dir in unique_image_dirs:
+            self.settings.add_recent_image_dir(image_dir)
+        self.settings.write()
+        self._update_recent_dirs_menu(unique_image_dirs)
+
+    def _update_recent_dirs_menu(self, image_dirs: Iterable[Path]):
+        """Update recently used image directories menu"""
+        for image_dir in image_dirs:
+            if action := self.toolbar.add_recent_image_dir(image_dir):
+                # Using partial here due to strange bug when using lambda
+                action.triggered.connect(
+                    partial(self.image_controller.gallery.load_file_dialog, image_dir)
+                )
 
     def toggle_fullscreen(self) -> bool:
         """Toggle fullscreen, and change icon for toolbar fullscreen button"""
@@ -198,9 +231,6 @@ class MainWindow(QMainWindow):
 
     def toggle_log_tab(self, checked: bool = True):
         self.tabs.setTabVisible(self.log_tab_idx, checked)
-
-    def reload_qss(self):
-        set_stylesheet(self)
 
 
 def main():

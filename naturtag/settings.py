@@ -18,10 +18,12 @@ from naturtag.constants import (
     DB_PATH,
     DEFAULT_WINDOW_SIZE,
     LOGFILE,
+    MAX_DIR_HISTORY,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
     PACKAGED_FTS_DB,
     USER_TAXA_PATH,
+    PathOrStr,
 )
 
 logger = getLogger().getChild(__name__)
@@ -76,6 +78,11 @@ def doc_field(doc: str = '', **kwargs):
     return field(metadata={'doc': doc}, **kwargs)
 
 
+def _convert_paths(paths: Iterable[str]) -> list[Path]:
+    """Convert a list of paths to a list of Path objects"""
+    return [Path(p) for p in paths]
+
+
 @define
 class Settings(YamlMixin):
     path = CONFIG_PATH
@@ -111,13 +118,13 @@ class Settings(YamlMixin):
     iptc: bool = doc_field(default=True, doc='Write IPTC metadata to image (embedded)')
     xmp: bool = doc_field(default=True, doc='Write XMP metadata to image (embedded)')
 
-    # TODO: User-specified data directories
-    # data_dir: Path = field(default=DATA_DIR, converter=Path)
+    # User data directories
     default_image_dir: Path = doc_field(
-        default=Path('~').expanduser(), converter=Path, doc='Starting directory for image selection'
+        default=Path('~').expanduser(), doc='Starting directory for image selection'
     )
-    # recent_image_dirs: Path = field(default=Path('~').expanduser(), converter=Path)
+    recent_image_dirs: list[Path] = field(factory=list)
     # starred_image_dirs: list[Path] = field(factory=list)
+    # data_dir: Path = field(default=DATA_DIR, converter=Path)
 
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
@@ -125,6 +132,13 @@ class Settings(YamlMixin):
     @classmethod
     def read(cls) -> 'Settings':
         return super(Settings, cls).read()  # type: ignore
+
+    def add_recent_image_dir(self, path: PathOrStr):
+        """Add a directory to the list of recent image directories"""
+        path = Path(path)
+        if path in self.recent_image_dirs:
+            self.recent_image_dirs.remove(path)
+        self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
 
 
 @define(auto_attribs=False)

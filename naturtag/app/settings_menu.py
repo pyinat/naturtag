@@ -30,6 +30,7 @@ class SettingsMenu(StylableWidget):
         self.settings = settings
         self.settings_layout = VerticalLayout(self)
 
+        # iNaturalist settings
         inat = self.add_group('iNaturalist', self.settings_layout)
         inat.addLayout(TextSetting(settings, icon_str='fa.user', setting_attr='username'))
         inat.addLayout(TextSetting(settings, icon_str='fa.globe', setting_attr='locale'))
@@ -46,6 +47,7 @@ class SettingsMenu(StylableWidget):
         )
         inat.addLayout(self.all_ranks)
 
+        # Metadata settings
         metadata = self.add_group('Metadata', self.settings_layout)
         metadata.addLayout(
             ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names')
@@ -72,6 +74,7 @@ class SettingsMenu(StylableWidget):
             )
         )
 
+        # User data settings
         user_data = self.add_group('User Data', self.settings_layout)
         user_data.addLayout(
             PathSetting(
@@ -83,6 +86,7 @@ class SettingsMenu(StylableWidget):
             )
         )
 
+        # Display settings
         display = self.add_group('Display', self.settings_layout)
         self.dark_mode = ToggleSetting(
             settings,
@@ -91,6 +95,7 @@ class SettingsMenu(StylableWidget):
         )
         display.addLayout(self.dark_mode)
 
+        # Debug settings
         debug = self.add_group('Debug', self.settings_layout)
         self.show_logs = ToggleSetting(
             settings,

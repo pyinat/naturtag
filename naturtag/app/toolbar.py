@@ -1,21 +1,24 @@
 """Configuration for toolbar, menu bar, and main keyboard shortcuts"""
 from logging import getLogger
+from pathlib import Path
+from typing import Optional
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import QMenu, QSizePolicy, QToolBar, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.settings import Settings
 
+HOME_DIR = str(Path.home())
 logger = getLogger(__name__)
 
 
-# TODO: Different actions for Run, Refresh, and Clear depending on active tab
 class Toolbar(QToolBar):
     def __init__(self, parent: QWidget):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
+        self.recent_dirs: list[Path] = []
+        self.recent_dirs_submenu = QMenu('Open Recent')
 
         self.run_button = self.add_button(
             '&Run', tooltip='Apply tags to images', icon='fa.play', shortcut='Ctrl+R'
@@ -100,11 +103,15 @@ class Toolbar(QToolBar):
     def _placeholder(self, s):
         logger.info(f'Click; checked: {s}')
 
-    def populate_menu(self, menu: QMenu, settings: Settings):
+    def populate_menu(self, menu: QMenu):
         """Populate the application menu using actions defined on the toolbar"""
         file_menu = menu.addMenu('&File')
         file_menu.addAction(self.run_button)
         file_menu.addAction(self.open_button)
+
+        self.recent_dirs_submenu.setIcon(fa_icon('fa.history'))
+        file_menu.addMenu(self.recent_dirs_submenu)
+
         file_menu.addAction(self.paste_button)
         file_menu.addAction(self.clear_button)
         file_menu.addAction(self.refresh_button)
@@ -119,3 +126,16 @@ class Toolbar(QToolBar):
         help_menu = menu.addMenu('&Help')
         help_menu.addAction(self.docs_button)
         help_menu.addAction(self.about_button)
+
+    def add_recent_image_dir(self, image_dir: Path) -> Optional[QAction]:
+        """Populate the recent image directories menu"""
+        if image_dir in self.recent_dirs:
+            return None
+
+        self.recent_dirs.append(image_dir)
+        action = self.recent_dirs_submenu.addAction(
+            fa_icon('fa5s.folder-open'),
+            str(image_dir).replace(HOME_DIR, '~'),
+        )
+        action.setStatusTip(f'Open images from {image_dir}')
+        return action
