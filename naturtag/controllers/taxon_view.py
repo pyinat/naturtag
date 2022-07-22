@@ -80,7 +80,7 @@ class TaxonInfoSection(HorizontalLayout):
 
         # Link button: Open web browser to taxon info page
         self.link_button = QPushButton('View on iNaturalist')
-        self.link_button.setIcon(fa_icon('mdi.web', primary=True))
+        self.link_button.setIcon(fa_icon('mdi.web', secondary=True))
         self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_taxon.url))
         button_layout.addWidget(self.link_button)
 

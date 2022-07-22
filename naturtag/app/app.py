@@ -87,9 +87,9 @@ class MainWindow(QMainWindow):
         # Tabs
         self.tabs = QTabWidget()
         self.tabs.setIconSize(QSize(32, 32))
-        self.tabs.addTab(self.image_controller, fa_icon('fa.camera', primary=True), 'Photos')
+        self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
         # self.tabs.addTab(QWidget(), fa_icon('fa5s.binoculars'), 'Observations')
-        self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider', primary=True), 'Species')
+        self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
 
         # Root layout: tabs + progress bar
         self.root_widget = QWidget()
@@ -99,9 +99,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.root_widget)
 
         # Optionally show Logs tab
-        self.log_tab_idx = self.tabs.addTab(
-            log_handler.widget, fa_icon('fa.file-text-o', primary=True), 'Logs'
-        )
+        self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
 
         # Switch to Taxon tab if requested from Photos tab
@@ -184,11 +182,11 @@ class MainWindow(QMainWindow):
             self._flags = self.windowFlags()
             self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowType_Mask)
             self.showFullScreen()
-            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen-exit', primary=True))
+            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen-exit'))
         else:
             self.setWindowFlags(self._flags)
             self.showNormal()
-            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen', primary=True))
+            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen'))
         return self.isFullScreen()
 
     def toggle_log_tab(self, checked: bool = True):

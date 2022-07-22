@@ -88,7 +88,7 @@ class Toolbar(QToolBar):
         shortcut: str = None,
         visible: bool = True,
     ) -> QAction:
-        action = QAction(fa_icon(icon, primary=True), name, self)
+        action = QAction(fa_icon(icon), name, self)
         if tooltip:
             action.setStatusTip(tooltip)
         if shortcut:
