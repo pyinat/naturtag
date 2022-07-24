@@ -1,4 +1,9 @@
-"""Configuration for toolbar, menu bar, and main keyboard shortcuts"""
+"""This module contains utilities for the main UI controls:
+
+* Toolbar
+* Menu bar
+* Global keyboard shortcuts
+"""
 from functools import partial
 from logging import getLogger
 from pathlib import Path
