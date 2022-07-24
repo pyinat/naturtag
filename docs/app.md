@@ -79,6 +79,16 @@ tagged with, iNaturalist info used in search filters, and other behavior:
 The settings in the **Metadata** section also apply to the {ref}`cli`.
 ```
 
+### Image Directories
+Under the **File** menu, there are submenus with shortcuts to commonly used image directories:
+* **Open Recent** Will show the most recently used directories
+* **Open Favorites** Will show the directories you have marked as favorites
+
+#### Adding and removing favorites
+To add a directory to favorites select **Add a favorite** from the favorites submenu. You can also Ctrl-click a directory from the recent submenu.
+
+To remove a directory from favorites, Ctrl-click the directory from the favorites submenu.
+
 ## Keyboard Shortcuts
 Some keyboard shortcuts are included for convenience:
 
@@ -101,5 +111,7 @@ Key(s)         | Action                      | Tab/Screen
 `Del`          | Remove image from selection | Fullscreen image (local photo)
 ⠀              |                             |
 `Ctrl+Tab`     | Cycle through tabs          | All
+`Ctrl+Shift+F` | Add a directory to favorites| All
+`Ctrl+Shift+T` | Toggle toolbar visibility   | All
 `F11`          | Toggle fullscreen           | All
 `Ctrl+Q`       | Quit                        | All
