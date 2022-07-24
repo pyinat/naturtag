@@ -11,7 +11,7 @@ from typing import Optional
 
 from PySide6.QtCore import QObject, QSize, Qt, Signal, Slot
 from PySide6.QtGui import QAction, QKeySequence
-from PySide6.QtWidgets import QApplication, QMenu, QSizePolicy, QToolBar, QWidget
+from PySide6.QtWidgets import QApplication, QFileDialog, QMenu, QSizePolicy, QToolBar, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.settings import Settings
@@ -157,9 +157,15 @@ class UserDirs(QObject):
         # insertAction() requires a reference to another action to insert before
         self.last_opened_action = QAction()
 
+        # Add action to top of favorites submenu to add a new favorite
+        action = self.favorite_dirs_submenu.addAction(fa_icon('fa.star'), 'Add a favorite')
+        action.triggered.connect(self.choose_favorite_dir)
+        action.setStatusTip('Add a new image directory to Favorites')
+        action.setShortcut(QKeySequence('Ctrl+Shift+F'))
+        self.favorite_dirs_submenu.addSeparator()
+
         # Populate directory submenus from settings
         self.settings = settings
-        # self.add_favorite_dirs(settings.favorite_image_dirs, save=False)
         for image_dir in settings.favorite_image_dirs:
             self.add_favorite_dir(image_dir, save=False)
         for image_dir in settings.recent_image_dirs[::-1]:
@@ -216,6 +222,14 @@ class UserDirs(QObject):
         self.recent_dirs[image_dir] = action
         self.last_opened_action = action
         return action
+
+    def choose_favorite_dir(self):
+        """Open a file chooser to select a new favorite directory"""
+        path = QFileDialog.getExistingDirectory(
+            caption='Choose a directory to add:', dir=str(self.settings.start_image_dir)
+        )
+        if path:
+            self.add_favorite_dir(Path(path))
 
     def _move_to_top(self, image_dir: Path):
         """Move an existing directory in history to the top of the submenu"""
