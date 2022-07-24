@@ -93,6 +93,12 @@ class Toolbar(QToolBar):
             visible=False,
         )
 
+        # Add action to toggle toolbar visibility
+        self.show_toolbar_button = self.toggleViewAction()
+        self.show_toolbar_button.setText('Show &toolbar')
+        self.show_toolbar_button.setShortcut('Ctrl+Shift+T')
+        self.show_toolbar_button.setStatusTip('Show or hide the toolbar')
+
     def add_button(
         self,
         name: str,
@@ -109,9 +115,6 @@ class Toolbar(QToolBar):
         if visible:
             self.addAction(action)
         return action
-
-    def _placeholder(self, s):
-        logger.info(f'Click; checked: {s}')
 
     # TODO: Merge into init?
     def populate_menu(self, menu: QMenu):
@@ -130,6 +133,7 @@ class Toolbar(QToolBar):
 
         view_menu = menu.addMenu('&View')
         view_menu.addAction(self.fullscreen_button)
+        view_menu.addAction(self.show_toolbar_button)
 
         settings_menu = menu.addMenu('&Settings')
         settings_menu.addAction(self.settings_button)
