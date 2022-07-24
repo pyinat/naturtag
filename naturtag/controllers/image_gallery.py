@@ -77,7 +77,6 @@ class ImageGallery(StylableWidget):
 
     def load_file_dialog(self, start_dir: PathOrStr = None):
         """Show a file chooser dialog"""
-        d = str(start_dir or self.settings.start_image_dir)
         image_paths, _ = QFileDialog.getOpenFileNames(
             self,
             caption='Open image files:',

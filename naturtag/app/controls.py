@@ -154,12 +154,16 @@ class UserDirs(QObject):
         self.recent_dirs_submenu = QMenu('Open Recent')
         self.recent_dirs_submenu.setIcon(fa_icon('mdi6.history'))
 
+        # insertAction() requires a reference to another action to insert before
+        self.last_opened_action = QAction()
+
         # Populate directory submenus from settings
         self.settings = settings
         # self.add_favorite_dirs(settings.favorite_image_dirs, save=False)
         for image_dir in settings.favorite_image_dirs:
             self.add_favorite_dir(image_dir, save=False)
-        self.add_recent_dirs(settings.recent_image_dirs, save=False)
+        for image_dir in settings.recent_image_dirs[::-1]:
+            self.add_recent_dir(image_dir, save=False)
 
     def add_favorite_dir(self, image_dir: Path, save: bool = True) -> Optional[QAction]:
         """Add an image directory to Favorites (if not already added)"""
@@ -192,23 +196,33 @@ class UserDirs(QObject):
         if save:
             self.settings.write()
 
-    # TODO: Move history item to top if it already exists
     def add_recent_dir(self, image_dir: Path, save: bool = True) -> Optional[QAction]:
         """Add an image directory to Recent (if not already added)"""
         if save:
             self.settings.add_recent_dir(image_dir)
         if image_dir in self.recent_dirs:
+            self._move_to_top(image_dir)
             return None
 
-        action = self.recent_dirs_submenu.addAction(
+        # Add to top of recent submenu
+        action = QAction(
             fa_icon('mdi6.folder-clock'),
             str(image_dir).replace(HOME_DIR, '~'),
         )
+        self.recent_dirs_submenu.insertAction(self.last_opened_action, action)
         action.setStatusTip(f'Open images from {image_dir} (Ctrl-click to add to favorites)')
         action.triggered.connect(partial(self.open_or_add_favorite_dir, image_dir))
 
         self.recent_dirs[image_dir] = action
+        self.last_opened_action = action
         return action
+
+    def _move_to_top(self, image_dir: Path):
+        """Move an existing directory in history to the top of the submenu"""
+        action = self.recent_dirs[image_dir]
+        self.recent_dirs_submenu.removeAction(action)
+        self.recent_dirs_submenu.insertAction(self.last_opened_action, action)
+        self.last_opened_action = action
 
     def remove_favorite_dir(self, image_dir: Path):
         """Remove an image directory from Favorites menu"""
