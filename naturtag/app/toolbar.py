@@ -17,7 +17,9 @@ class Toolbar(QToolBar):
     def __init__(self, parent: QWidget):
         super(Toolbar, self).__init__(parent)
         self.setIconSize(QSize(24, 24))
-        self.recent_dirs: list[Path] = []
+        self.favorite_dirs: dict[Path, QAction] = {}
+        self.favorite_dirs_submenu = QMenu('Open Favorites')
+        self.recent_dirs: dict[Path, QAction] = {}
         self.recent_dirs_submenu = QMenu('Open Recent')
 
         self.run_button = self.add_button(
@@ -109,7 +111,9 @@ class Toolbar(QToolBar):
         file_menu.addAction(self.run_button)
         file_menu.addAction(self.open_button)
 
-        self.recent_dirs_submenu.setIcon(fa_icon('fa.history'))
+        self.favorite_dirs_submenu.setIcon(fa_icon('fa.star'))
+        file_menu.addMenu(self.favorite_dirs_submenu)
+        self.recent_dirs_submenu.setIcon(fa_icon('mdi6.history'))
         file_menu.addMenu(self.recent_dirs_submenu)
 
         file_menu.addAction(self.paste_button)
@@ -127,15 +131,41 @@ class Toolbar(QToolBar):
         help_menu.addAction(self.docs_button)
         help_menu.addAction(self.about_button)
 
-    def add_recent_image_dir(self, image_dir: Path) -> Optional[QAction]:
-        """Populate the recent image directories menu"""
-        if image_dir in self.recent_dirs:
+    def add_favorite_dir(self, image_dir: Path) -> Optional[QAction]:
+        """Add an image directory to Favorites menu"""
+        if image_dir in self.favorite_dirs:
             return None
 
-        self.recent_dirs.append(image_dir)
-        action = self.recent_dirs_submenu.addAction(
-            fa_icon('fa5s.folder-open'),
+        self.remove_recent_dir(image_dir)
+        action = self.favorite_dirs_submenu.addAction(
+            fa_icon('mdi.folder-star'),
             str(image_dir).replace(HOME_DIR, '~'),
         )
-        action.setStatusTip(f'Open images from {image_dir}')
+        self.favorite_dirs[image_dir] = action
+        action.setStatusTip(f'Open images from {image_dir} (Ctrl-click to remove from favorites)')
         return action
+
+    # TODO: Move history item to top if it already exists
+    def add_recent_dir(self, image_dir: Path) -> Optional[QAction]:
+        """Add an image directory to Recent menu (if not already in Recent or Favorites)"""
+        if image_dir in self.recent_dirs or image_dir in self.favorite_dirs:
+            return None
+
+        action = self.recent_dirs_submenu.addAction(
+            fa_icon('mdi6.folder-clock'),
+            str(image_dir).replace(HOME_DIR, '~'),
+        )
+        self.recent_dirs[image_dir] = action
+        action.setStatusTip(f'Open images from {image_dir} (Ctrl-click to add to favorites)')
+        return action
+
+    def remove_favorite_dir(self, image_dir: Path):
+        """Remove an image directory from Favorites menu"""
+        if action := self.favorite_dirs.pop(image_dir, None):
+            self.favorite_dirs_submenu.removeAction(action)
+            self.add_recent_dir(image_dir)
+
+    def remove_recent_dir(self, image_dir: Path) -> Optional[QAction]:
+        """Remove an image directory from Recent menu"""
+        if action := self.recent_dirs.pop(image_dir, None):
+            self.recent_dirs_submenu.removeAction(action)
