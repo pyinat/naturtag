@@ -19,11 +19,11 @@ from PySide6.QtWidgets import (
 )
 from qtmodern.windows import ModernWindow
 
+from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
-from naturtag.app.toolbar import Toolbar
-from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
+from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings, setup
 from naturtag.widgets import init_handler
@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
 
         # Run any first-time setup steps, if needed
         self.settings = settings
+        self.user_dirs = UserDirs(settings)
         setup(settings)
 
         # Controllers
@@ -87,9 +88,9 @@ class MainWindow(QMainWindow):
         # Tabs
         self.tabs = QTabWidget()
         self.tabs.setIconSize(QSize(32, 32))
-        self.tabs.addTab(self.image_controller, fa_icon('fa.camera', primary=True), 'Photos')
+        self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
         # self.tabs.addTab(QWidget(), fa_icon('fa5s.binoculars'), 'Observations')
-        self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider', primary=True), 'Species')
+        self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
 
         # Root layout: tabs + progress bar
         self.root_widget = QWidget()
@@ -99,9 +100,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.root_widget)
 
         # Optionally show Logs tab
-        self.log_tab_idx = self.tabs.addTab(
-            log_handler.widget, fa_icon('fa.file-text-o', primary=True), 'Logs'
-        )
+        self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
 
         # Switch to Taxon tab if requested from Photos tab
@@ -109,8 +108,12 @@ class MainWindow(QMainWindow):
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )
 
-        # Toolbar
-        self.toolbar = Toolbar(self)
+        # Connect file picker <--> recent/favorite dirs
+        self.image_controller.gallery.on_load_images.connect(self.user_dirs.add_recent_dirs)
+        self.user_dirs.on_dir_open.connect(self.image_controller.gallery.load_file_dialog)
+
+        # Toolbar actions
+        self.toolbar = Toolbar(self, self.user_dirs)
         self.toolbar.run_button.triggered.connect(self.image_controller.run)
         self.toolbar.open_button.triggered.connect(self.image_controller.gallery.load_file_dialog)
         self.toolbar.paste_button.triggered.connect(self.image_controller.paste)
@@ -123,20 +126,21 @@ class MainWindow(QMainWindow):
         self.toolbar.about_button.triggered.connect(self.open_about)
 
         # Menu bar and status bar
-        self.toolbar.populate_menu(self.menuBar(), self.settings)
+        self.toolbar.populate_menu(self.menuBar())
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
 
         # Load any valid image paths provided on command line (or from drag & drop)
-        self.image_controller.gallery.load_images([a for a in sys.argv if a != __file__])
+        self.image_controller.gallery.load_images(
+            [a for a in sys.argv if not (a == __file__ or a.endswith('.exe'))]
+        )
 
         # Debug
         if settings.debug:
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
-            self.image_controller.gallery.load_images(demo_images[:2])  # type: ignore
-            # self.image_controller.gallery.load_images(demo_images)  # type: ignore
+            self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.taxon_controller.select_taxon(47792)
 
     def closeEvent(self, _):
@@ -171,8 +175,19 @@ class MainWindow(QMainWindow):
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
-        about.setText(f'<b>Naturtag v{version}</b> <br/>Source: {repo_link} <br/>{attribution}')
+        app_dir_link = f"<a href='{APP_DIR}'>{APP_DIR}</a>"
+
+        about.setText(
+            f'<b>Naturtag v{version}</b><br/>'
+            f'{attribution}'
+            f'<br/>Source: {repo_link}'
+            f'<br/>User data directory: {app_dir_link}'
+        )
         about.exec()
+
+    def reload_qss(self):
+        """Reload Qt stylesheet"""
+        set_stylesheet(self)
 
     def show_settings(self):
         """Show the settings menu"""
@@ -184,18 +199,15 @@ class MainWindow(QMainWindow):
             self._flags = self.windowFlags()
             self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowType_Mask)
             self.showFullScreen()
-            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen-exit', primary=True))
+            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen-exit'))
         else:
             self.setWindowFlags(self._flags)
             self.showNormal()
-            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen', primary=True))
+            self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen'))
         return self.isFullScreen()
 
     def toggle_log_tab(self, checked: bool = True):
         self.tabs.setTabVisible(self.log_tab_idx, checked)
-
-    def reload_qss(self):
-        set_stylesheet(self)
 
 
 def main():

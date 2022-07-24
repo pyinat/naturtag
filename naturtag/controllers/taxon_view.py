@@ -108,7 +108,7 @@ class TaxonInfoSection(HorizontalLayout):
 
         # Load additional thumbnails
         self.taxon_thumbnails.clear()
-        for i, photo in enumerate(taxon.taxon_photos[1:] if taxon.taxon_photos else []):
+        for i, photo in enumerate(taxon.taxon_photos[1:11] if taxon.taxon_photos else []):
             thumb = HoverTaxonPhoto(taxon=taxon, idx=i + 1)
             thumb.setFixedSize(75, 75)
             thumb.on_click.connect(self.image_window.display_taxon)

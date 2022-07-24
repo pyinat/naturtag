@@ -28,11 +28,11 @@ class IconLabel(QLabel):
         self,
         icon_str: str,
         parent: QWidget = None,
-        primary: bool = False,
+        secondary: bool = False,
         size: int = 32,
     ):
         super().__init__(parent)
-        self.icon = fa_icon(icon_str, primary=primary)
+        self.icon = fa_icon(icon_str, secondary=secondary)
         self.icon_size = QSize(size, size)
         self.setPixmap(self.icon.pixmap(size, size, mode=QIcon.Mode.Normal))
 

@@ -5,6 +5,7 @@ from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal, Slot
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.app.style import fa_icon
+from naturtag.constants import DB_PATH
 
 logger = getLogger(__name__)
 
@@ -30,7 +31,7 @@ class TaxonAutocomplete(QLineEdit):
         self.on_tab.connect(self.next_result)
 
         # Results are fetched from FTS5, and passed to the completer via an intermediate model
-        self.taxon_completer = TaxonAutocompleter()
+        self.taxon_completer = TaxonAutocompleter(DB_PATH)
         self.textChanged.connect(self.search)
         self.model = QStringListModel()
         completer.activated.connect(self.select_taxon)

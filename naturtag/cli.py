@@ -62,6 +62,7 @@ naturtag -t corm<TAB>
 # TODO: Use table formatting from pyinaturalist if format_taxa
 import os
 from collections import defaultdict
+from importlib.metadata import version as pkg_version
 from pathlib import Path
 from re import DOTALL, MULTILINE, compile
 from shutil import copyfile
@@ -76,7 +77,7 @@ from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
-from naturtag.constants import CLI_COMPLETE_DIR
+from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR
 from naturtag.metadata import refresh_tags, strip_url, tag_images
 from naturtag.metadata.keyword_metadata import KeywordMetadata
 from naturtag.metadata.meta_metadata import MetaMetadata
@@ -131,12 +132,13 @@ def _strip_url_or_name(ctx, param, value):
     type=TaxonParam(),
     callback=_strip_url_or_name,
 )
-@click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
 @click.option(
     '--install',
     type=click.Choice(['all', 'bash', 'fish']),
     help='Install shell completion scripts',
 )
+@click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
+@click.option('--version', is_flag=True, help='Show version')
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
@@ -146,12 +148,18 @@ def tag(
     refresh,
     observation,
     taxon,
-    verbose,
     install,
+    verbose,
+    version,
 ):
     if install:
         install_shell_completion(install)
         setup(Settings.read())
+        ctx.exit()
+    elif version:
+        v = pkg_version('naturtag')
+        click.echo(f'naturtag v{v}')
+        click.echo(f'User data directory: {APP_DIR}')
         ctx.exit()
     elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
         click.secho('Specify either a taxon, observation, or refresh', fg='red')

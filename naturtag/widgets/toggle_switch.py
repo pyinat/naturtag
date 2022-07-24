@@ -31,12 +31,12 @@ class ToggleSwitch(QAbstractButton):
             None: palette.mid(),
         }
         self._track_color = {
-            True: palette.link(),
+            True: palette.highlight(),
             False: palette.dark(),
             None: palette.shadow(),
         }
         self._text_color = {
-            True: palette.link().color(),
+            True: palette.highlight().color(),
             False: palette.dark().color(),
             None: palette.shadow().color(),
         }
