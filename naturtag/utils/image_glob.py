@@ -24,6 +24,9 @@ def get_valid_image_paths(paths_or_uris: Iterable[PathOrStr], recursive: bool = 
     Returns:
          Combined list of image file paths
     """
+    if not paths_or_uris:
+        return set()
+
     image_paths = []
     logger.info(f'Getting images from paths: {paths_or_uris}')
 

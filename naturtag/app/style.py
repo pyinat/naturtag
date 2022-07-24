@@ -8,9 +8,10 @@ from qtmodern.styles import _STYLESHEET as BASE_STYLESHEET
 from naturtag.constants import QSS_PATH
 
 YELLOWGREEN = (154, 205, 50)
-YELLOWGREEN_DARK = (135, 181, 44)
-PALEBLUE = (94, 184, 255)
-PALEBLUE_DARK = (94, 184, 255)
+YELLOWGREEN_DARK = (130, 195, 45)
+PALEBLUE = (128, 207, 238)
+PALEBLUE_DARK = (98, 190, 227)
+GRAYBLUE = (63, 113, 172)
 SILVER = (173, 168, 182)
 
 # LIGHT_GREEN_INAT = (116, 172, 0)
@@ -23,12 +24,12 @@ SILVER = (173, 168, 182)
 logger = getLogger(__name__)
 
 
-def fa_icon(icon_name, primary: bool = False, **kwargs):
+def fa_icon(icon_name, secondary: bool = False, **kwargs):
     """Get a FontAwesome icon, using either a primary or secondary color from the palette"""
     palette = QApplication.instance().palette()
     return icon(
         icon_name,
-        color=palette.highlight().color() if primary else palette.link().color(),
+        color=palette.link().color() if secondary else palette.highlight().color(),
         color_disabled='gray',
         **kwargs,
     )
@@ -63,10 +64,10 @@ def dark_palette() -> QPalette:
         QPalette.ButtonText: (180, 180, 180),
         QPalette.Dark: (35, 35, 35),
         # QPalette.Highlight: (42, 130, 218),
-        QPalette.Highlight: YELLOWGREEN,
+        QPalette.Highlight: PALEBLUE,
         QPalette.HighlightedText: (180, 180, 180),
         QPalette.Light: (180, 180, 180),
-        QPalette.Link: PALEBLUE,
+        QPalette.Link: YELLOWGREEN,  # Secondary highlight
         QPalette.LinkVisited: (80, 80, 80),
         QPalette.Midlight: (90, 90, 90),
         # QPalette.Midlight: CERULEAN,
@@ -104,10 +105,10 @@ def light_palette() -> QPalette:
         QPalette.ButtonText: (0, 0, 0),
         QPalette.Dark: (225, 225, 225),
         # QPalette.Highlight: (76, 163, 224),
-        QPalette.Highlight: YELLOWGREEN_DARK,
+        QPalette.Highlight: PALEBLUE_DARK,
         QPalette.HighlightedText: (0, 0, 0),
         QPalette.Light: (180, 180, 180),
-        QPalette.Link: PALEBLUE_DARK,
+        QPalette.Link: YELLOWGREEN,
         QPalette.LinkVisited: (222, 222, 222),
         QPalette.Midlight: (200, 200, 200),
         QPalette.Shadow: (20, 20, 20),

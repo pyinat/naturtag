@@ -27,16 +27,16 @@ include = [
     { path = 'test', format = 'sdist' }
 ]
 
-# Can update to 3.11 once PySide6 supports it
 [tool.poetry.dependencies]
+# Can update to python 3.11 once PySide6 supports it
 python                      = '>=3.10,<3.11'
 attrs                       = '>=21.2'
 click                       = '>=8.0'
 click-help-colors           = '>=0.9'
 pillow                      = '>=9.1'
 pyexiv2                     = '>=2.6.2'
-pyinaturalist               = '>=0.17.2'
-pyinaturalist-convert       = '>=0.4.1.dev1'
+pyinaturalist               = '>=0.17.4'
+pyinaturalist-convert       = '>=0.5.0'
 pyside6                     = '^6.3.0'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
@@ -52,7 +52,6 @@ sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
 sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
 sphinxcontrib-apidoc        = {optional=true, version='^0.3'}
-
 
 [tool.poetry.dev-dependencies]
 black = '^22.3.0'

@@ -18,10 +18,12 @@ from naturtag.constants import (
     DB_PATH,
     DEFAULT_WINDOW_SIZE,
     LOGFILE,
+    MAX_DIR_HISTORY,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
     PACKAGED_FTS_DB,
     USER_TAXA_PATH,
+    PathOrStr,
 )
 
 logger = getLogger().getChild(__name__)
@@ -111,10 +113,16 @@ class Settings(YamlMixin):
     iptc: bool = doc_field(default=True, doc='Write IPTC metadata to image (embedded)')
     xmp: bool = doc_field(default=True, doc='Write XMP metadata to image (embedded)')
 
-    # TODO: User-specified data directories
+    # User data directories
+    default_image_dir: Path = doc_field(
+        default=Path('~').expanduser(), doc='Open file chooser in a specific directory'
+    )
+    use_last_dir: bool = doc_field(
+        default=True, doc='Open file chooser in the previously used directory'
+    )
+    recent_image_dirs: list[Path] = field(factory=list)
+    favorite_image_dirs: list[Path] = field(factory=list)
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
-    # default_image_dir: Path = field(default=Path('~').expanduser(), converter=Path)
-    # starred_image_dirs: list[Path] = field(factory=list)
 
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
@@ -122,6 +130,33 @@ class Settings(YamlMixin):
     @classmethod
     def read(cls) -> 'Settings':
         return super(Settings, cls).read()  # type: ignore
+
+    @property
+    def start_image_dir(self) -> Path:
+        """Get the starting directory for image selection, depeding on settings"""
+        if self.use_last_dir and self.recent_image_dirs:
+            return self.recent_image_dirs[0]
+        else:
+            return self.default_image_dir
+
+    def add_favorite_dir(self, image_dir: Path):
+        if image_dir not in self.favorite_image_dirs:
+            self.favorite_image_dirs.append(image_dir)
+
+    def add_recent_dir(self, path: PathOrStr):
+        """Add a directory to the list of recent image directories"""
+        path = Path(path)
+        if path in self.recent_image_dirs:
+            self.recent_image_dirs.remove(path)
+        self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
+
+    def remove_favorite_dir(self, image_dir: Path):
+        if image_dir in self.favorite_image_dirs:
+            self.favorite_image_dirs.remove(image_dir)
+
+    def remove_recent_dir(self, image_dir: Path):
+        if image_dir in self.recent_image_dirs:
+            self.recent_image_dirs.remove(image_dir)
 
 
 @define(auto_attribs=False)
@@ -214,7 +249,7 @@ def setup(settings: Settings):
             tar.extractall(path=DB_PATH.parent)
 
     logger.debug('Creating remaining tables')
-    create_tables()
+    create_tables(DB_PATH)
 
     settings.setup_complete = True
     settings.write()

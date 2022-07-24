@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
 from naturtag.app.style import fa_icon
 from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT, PathOrStr
 from naturtag.metadata import MetaMetadata
+from naturtag.settings import Settings
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FlowLayout,
@@ -44,15 +45,17 @@ logger = getLogger(__name__)
 class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
+    on_load_images = Signal(list)
     on_message = Signal(str)  #: Forward a message to status bar
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
-    def __init__(self):
+    def __init__(self, settings: Settings):
         super().__init__()
         self.setAcceptDrops(True)
         self.images: dict[Path, LocalThumbnail] = {}
         self.image_window = ImageWindow()
         self.image_window.on_remove.connect(self.remove_image)
+        self.settings = settings
         root = VerticalLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 
@@ -72,11 +75,12 @@ class ImageGallery(StylableWidget):
         self.images = {}
         self.flow_layout.clear()
 
-    def load_file_dialog(self):
+    def load_file_dialog(self, start_dir: PathOrStr = None):
         """Show a file chooser dialog"""
         image_paths, _ = QFileDialog.getOpenFileNames(
             self,
-            'Open image files:',
+            caption='Open image files:',
+            dir=str(start_dir or self.settings.start_image_dir),
             filter=f'Image files ({" ".join(IMAGE_FILETYPES)})',
         )
         self.load_images(image_paths)
@@ -84,13 +88,14 @@ class ImageGallery(StylableWidget):
     def load_images(self, image_paths: Iterable[PathOrStr]):
         """Load multiple images, and ignore any duplicates"""
         images = get_valid_image_paths(image_paths, recursive=True)
-        new_images = images - set(self.images.keys())
+        new_images = sorted(images - set(self.images.keys()))
         if not new_images:
             return
 
         logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
-        for image_path in sorted(list(new_images)):
+        for image_path in new_images:
             self.load_image(image_path)
+        self.on_load_images.emit(new_images)
 
     def load_image(self, image_path: Path):
         """Load an image"""
@@ -173,7 +178,7 @@ class LocalThumbnail(StylableWidget):
 
         # Icon shown when an image is tagged or updated
         self.check = IconLabel(
-            'fa5s.check', self.image, primary=True, size=THUMBNAIL_SIZE_DEFAULT[0]
+            'fa5s.check', self.image, secondary=True, size=THUMBNAIL_SIZE_DEFAULT[0]
         )
         self.check.setVisible(False)
 
@@ -324,11 +329,11 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(9, img_size.height() - 11, 116, 20)
 
-        self.taxon_icon = IconLabel('mdi.bird', primary=True, size=20)
-        self.observation_icon = IconLabel('fa.binoculars', primary=True, size=20)
-        self.geo_icon = IconLabel('fa.map-marker', primary=True, size=20)
-        self.tag_icon = IconLabel('fa.tags', primary=True, size=20)
-        self.sidecar_icon = IconLabel('mdi.xml', primary=True, size=20)
+        self.taxon_icon = IconLabel('mdi.bird', secondary=True, size=20)
+        self.observation_icon = IconLabel('fa.binoculars', secondary=True, size=20)
+        self.geo_icon = IconLabel('fa.map-marker', secondary=True, size=20)
+        self.tag_icon = IconLabel('fa.tags', secondary=True, size=20)
+        self.sidecar_icon = IconLabel('mdi.xml', secondary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)
         self.icon_layout.addWidget(self.observation_icon)
         self.icon_layout.addWidget(self.geo_icon)

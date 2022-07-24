@@ -4,7 +4,6 @@ from typing import Optional, Union
 
 from platformdirs import user_data_dir
 from pyinaturalist.constants import ICONIC_TAXA, RANKS
-from pyinaturalist_convert.constants import DB_PATH
 
 # Packaged assets
 PKG_DIR = Path(__file__).parent.parent
@@ -16,11 +15,12 @@ APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
 
 # Local settings & data paths
-DATA_DIR = Path(user_data_dir()) / 'Naturtag'
-IMAGE_CACHE = DATA_DIR / 'images.db'
-LOGFILE = DATA_DIR / 'naturtag.log'
-CONFIG_PATH = DATA_DIR / 'settings.yml'
-USER_TAXA_PATH = DATA_DIR / 'stored_taxa.yml'
+APP_DIR = Path(user_data_dir()) / 'Naturtag'
+DB_PATH = APP_DIR / 'observations.db'
+IMAGE_CACHE = APP_DIR / 'images.db'
+LOGFILE = APP_DIR / 'naturtag.log'
+CONFIG_PATH = APP_DIR / 'settings.yml'
+USER_TAXA_PATH = APP_DIR / 'stored_taxa.yml'
 
 # Project info
 DOCS_URL = 'https://naturtag.readthedocs.io/en/latest/app.html'
@@ -78,6 +78,7 @@ MAX_LABEL_CHARS = 80
 QSS_PATH = ASSETS_DIR / 'style.qss'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 MAX_DISPLAY_OBSERVED = 100  # Max number of observed taxa to display at a time
+MAX_DIR_HISTORY = 10
 
 # Simplified tags without formatting variations
 TAXON_KEYS = ['taxonid', 'dwc:taxonid']

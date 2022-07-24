@@ -33,7 +33,7 @@ class ImageController(QWidget):
         self.on_new_metadata.connect(self.update_metadata)
 
         # Input group
-        group_box = QGroupBox('Metadata source (observation and/or taxon)')
+        group_box = QGroupBox('Selected metadata source')
         group_box.setFixedHeight(150)
         group_box.setFixedWidth(600)
         data_source_layout = HorizontalLayout(group_box)
@@ -64,7 +64,7 @@ class ImageController(QWidget):
         self.input_obs_id.on_clear.connect(self.input_taxon_id.clear)
 
         # Image gallery
-        self.gallery = ImageGallery()
+        self.gallery = ImageGallery(settings)
         self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
 
