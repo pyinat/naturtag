@@ -194,11 +194,11 @@ class UserDirs(QObject):
 
     # TODO: Move history item to top if it already exists
     def add_recent_dir(self, image_dir: Path, save: bool = True) -> Optional[QAction]:
-        """Add an image directory to Recent (if not already in Recent or Favorites)"""
-        if image_dir in self.recent_dirs or image_dir in self.favorite_dirs:
-            return None
+        """Add an image directory to Recent (if not already added)"""
         if save:
             self.settings.add_recent_dir(image_dir)
+        if image_dir in self.recent_dirs:
+            return None
 
         action = self.recent_dirs_submenu.addAction(
             fa_icon('mdi6.folder-clock'),
