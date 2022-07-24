@@ -122,10 +122,11 @@ class Settings(YamlMixin):
     default_image_dir: Path = doc_field(
         default=Path('~').expanduser(), doc='Open file chooser in a specific directory'
     )
-    recent_image_dirs: list[Path] = field(factory=list)
     use_last_dir: bool = doc_field(
         default=True, doc='Open file chooser in the previously used directory'
     )
+    recent_image_dirs: list[Path] = field(factory=list)
+    favorite_image_dirs: list[Path] = field(factory=list)
     # data_dir: Path = field(default=DATA_DIR, converter=Path)
 
     debug: bool = field(default=False)
@@ -140,7 +141,8 @@ class Settings(YamlMixin):
         path = Path(path)
         if path in self.recent_image_dirs:
             self.recent_image_dirs.remove(path)
-        self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
+        if path not in self.favorite_image_dirs:
+            self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
 
     @property
     def start_image_dir(self) -> Path:
@@ -149,6 +151,14 @@ class Settings(YamlMixin):
             return self.recent_image_dirs[0]
         else:
             return self.default_image_dir
+
+    def add_favorite_dir(self, image_dir: Path):
+        if image_dir not in self.favorite_image_dirs:
+            self.favorite_image_dirs.append(image_dir)
+
+    def remove_favorite_dir(self, image_dir: Path):
+        if image_dir in self.favorite_image_dirs:
+            self.favorite_image_dirs.remove(image_dir)
 
 
 @define(auto_attribs=False)

@@ -138,14 +138,16 @@ class MainWindow(QMainWindow):
             [a for a in sys.argv if not (a == __file__ or a.endswith('.exe'))]
         )
 
+        # Populate directory submenus from settings
+        self._update_favorite_dirs_menu(self.settings.favorite_image_dirs)
+        self._update_recent_dirs_menu(self.settings.recent_image_dirs)
+
         # Debug
         if settings.debug:
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.taxon_controller.select_taxon(47792)
-
-        self._update_recent_dirs_menu(self.settings.recent_image_dirs)
 
     def closeEvent(self, _):
         """Save settings before closing the app"""
@@ -164,6 +166,23 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
+
+    def open_or_add_favorite_dir(self, image_dir: Path):
+        """Open a directory from the 'Open Recent' submenu, or Ctrl-click to add it as a favorite"""
+        if QApplication.keyboardModifiers() == Qt.ControlModifier:
+            self.settings.add_favorite_dir(image_dir)
+            self.toolbar.add_favorite_dir(image_dir)
+        else:
+            self.image_controller.gallery.load_file_dialog(image_dir)
+
+    def open_or_remove_favorite_dir(self, image_dir: Path):
+        """Open a directory from the 'Open Favorites' submenu, or Ctrl-click to add it as a
+        favorite"""
+        if QApplication.keyboardModifiers() == Qt.ControlModifier:
+            self.settings.remove_favorite_dir(image_dir)
+            self.toolbar.remove_favorite_dir(image_dir)
+        else:
+            self.image_controller.gallery.load_file_dialog(image_dir)
 
     def open_docs(self):
         """Open the documentation in a web browser"""
@@ -200,7 +219,6 @@ class MainWindow(QMainWindow):
     @Slot(list)
     def update_recent_dirs(self, image_paths: list[Path]):
         """Update recently used image directories in both settings (history) and the menu"""
-        logger.info(f'{len(image_paths)} new paths')
         unique_image_dirs = {image_path.parent for image_path in image_paths}
         for image_dir in unique_image_dirs:
             self.settings.add_recent_image_dir(image_dir)
@@ -210,11 +228,15 @@ class MainWindow(QMainWindow):
     def _update_recent_dirs_menu(self, image_dirs: Iterable[Path]):
         """Update recently used image directories menu"""
         for image_dir in image_dirs:
-            if action := self.toolbar.add_recent_image_dir(image_dir):
-                # Using partial here due to strange bug when using lambda
-                action.triggered.connect(
-                    partial(self.image_controller.gallery.load_file_dialog, image_dir)
-                )
+            if action := self.toolbar.add_recent_dir(image_dir):
+                action.triggered.connect(partial(self.open_or_add_favorite_dir, image_dir))
+
+    def _update_favorite_dirs_menu(self, image_dirs: list[Path]):
+        """Update favorite image directories menu"""
+        logger.warning(f'Updating faves: {image_dirs}')
+        for image_dir in image_dirs:
+            if action := self.toolbar.add_favorite_dir(image_dir):
+                action.triggered.connect(partial(self.open_or_remove_favorite_dir, image_dir))
 
     def toggle_fullscreen(self) -> bool:
         """Toggle fullscreen, and change icon for toolbar fullscreen button"""
