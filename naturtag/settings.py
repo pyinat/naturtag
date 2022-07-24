@@ -148,8 +148,7 @@ class Settings(YamlMixin):
         path = Path(path)
         if path in self.recent_image_dirs:
             self.recent_image_dirs.remove(path)
-        if path not in self.favorite_image_dirs:
-            self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
+        self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
 
     def remove_favorite_dir(self, image_dir: Path):
         if image_dir in self.favorite_image_dirs:
