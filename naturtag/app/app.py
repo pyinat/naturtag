@@ -2,13 +2,10 @@
 import sys
 import webbrowser
 from datetime import datetime
-from functools import partial
 from importlib.metadata import version as pkg_version
 from logging import getLogger
-from pathlib import Path
-from typing import Iterable
 
-from PySide6.QtCore import QSize, Qt, Slot
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -25,7 +22,7 @@ from qtmodern.windows import ModernWindow
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
-from naturtag.app.toolbar import Toolbar
+from naturtag.app.toolbar import Toolbar, UserDirs
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, TaxonController
 from naturtag.settings import Settings, setup
@@ -56,6 +53,7 @@ class MainWindow(QMainWindow):
 
         # Run any first-time setup steps, if needed
         self.settings = settings
+        self.user_dirs = UserDirs(settings)
         setup(settings)
 
         # Controllers
@@ -68,9 +66,6 @@ class MainWindow(QMainWindow):
         self.image_controller.on_message.connect(self.info)
         self.image_controller.gallery.on_message.connect(self.info)
         self.taxon_controller.on_message.connect(self.info)
-
-        # Update history and menu when new images are loaded
-        self.image_controller.gallery.on_load_images.connect(self.update_recent_dirs)
 
         # Select taxon from image context menu, ID input fields, and iconic taxa filtes
         self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
@@ -113,8 +108,12 @@ class MainWindow(QMainWindow):
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )
 
-        # Toolbar
-        self.toolbar = Toolbar(self)
+        # Connect file picker <--> recent/favorite dirs
+        self.image_controller.gallery.on_load_images.connect(self.user_dirs.add_recent_dirs)
+        self.user_dirs.on_dir_open.connect(self.image_controller.gallery.load_file_dialog)
+
+        # Toolbar actions
+        self.toolbar = Toolbar(self, self.user_dirs)
         self.toolbar.run_button.triggered.connect(self.image_controller.run)
         self.toolbar.open_button.triggered.connect(self.image_controller.gallery.load_file_dialog)
         self.toolbar.paste_button.triggered.connect(self.image_controller.paste)
@@ -131,16 +130,11 @@ class MainWindow(QMainWindow):
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
-        # self._update_recent_dirs_menu(self.settings.recent_image_dirs)
 
         # Load any valid image paths provided on command line (or from drag & drop)
         self.image_controller.gallery.load_images(
             [a for a in sys.argv if not (a == __file__ or a.endswith('.exe'))]
         )
-
-        # Populate directory submenus from settings
-        self._update_favorite_dirs_menu(self.settings.favorite_image_dirs)
-        self._update_recent_dirs_menu(self.settings.recent_image_dirs)
 
         # Debug
         if settings.debug:
@@ -166,23 +160,6 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
-
-    def open_or_add_favorite_dir(self, image_dir: Path):
-        """Open a directory from the 'Open Recent' submenu, or Ctrl-click to add it as a favorite"""
-        if QApplication.keyboardModifiers() == Qt.ControlModifier:
-            self.settings.add_favorite_dir(image_dir)
-            self.toolbar.add_favorite_dir(image_dir)
-        else:
-            self.image_controller.gallery.load_file_dialog(image_dir)
-
-    def open_or_remove_favorite_dir(self, image_dir: Path):
-        """Open a directory from the 'Open Favorites' submenu, or Ctrl-click to add it as a
-        favorite"""
-        if QApplication.keyboardModifiers() == Qt.ControlModifier:
-            self.settings.remove_favorite_dir(image_dir)
-            self.toolbar.remove_favorite_dir(image_dir)
-        else:
-            self.image_controller.gallery.load_file_dialog(image_dir)
 
     def open_docs(self):
         """Open the documentation in a web browser"""
@@ -215,28 +192,6 @@ class MainWindow(QMainWindow):
     def show_settings(self):
         """Show the settings menu"""
         self.settings_menu.show()
-
-    @Slot(list)
-    def update_recent_dirs(self, image_paths: list[Path]):
-        """Update recently used image directories in both settings (history) and the menu"""
-        unique_image_dirs = {image_path.parent for image_path in image_paths}
-        for image_dir in unique_image_dirs:
-            self.settings.add_recent_image_dir(image_dir)
-        self.settings.write()
-        self._update_recent_dirs_menu(unique_image_dirs)
-
-    def _update_recent_dirs_menu(self, image_dirs: Iterable[Path]):
-        """Update recently used image directories menu"""
-        for image_dir in image_dirs:
-            if action := self.toolbar.add_recent_dir(image_dir):
-                action.triggered.connect(partial(self.open_or_add_favorite_dir, image_dir))
-
-    def _update_favorite_dirs_menu(self, image_dirs: list[Path]):
-        """Update favorite image directories menu"""
-        logger.warning(f'Updating faves: {image_dirs}')
-        for image_dir in image_dirs:
-            if action := self.toolbar.add_favorite_dir(image_dir):
-                action.triggered.connect(partial(self.open_or_remove_favorite_dir, image_dir))
 
     def toggle_fullscreen(self) -> bool:
         """Toggle fullscreen, and change icon for toolbar fullscreen button"""
