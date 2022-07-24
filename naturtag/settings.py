@@ -78,11 +78,6 @@ def doc_field(doc: str = '', **kwargs):
     return field(metadata={'doc': doc}, **kwargs)
 
 
-def _convert_paths(paths: Iterable[str]) -> list[Path]:
-    """Convert a list of paths to a list of Path objects"""
-    return [Path(p) for p in paths]
-
-
 @define
 class Settings(YamlMixin):
     path = CONFIG_PATH
@@ -136,14 +131,6 @@ class Settings(YamlMixin):
     def read(cls) -> 'Settings':
         return super(Settings, cls).read()  # type: ignore
 
-    def add_recent_image_dir(self, path: PathOrStr):
-        """Add a directory to the list of recent image directories"""
-        path = Path(path)
-        if path in self.recent_image_dirs:
-            self.recent_image_dirs.remove(path)
-        if path not in self.favorite_image_dirs:
-            self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
-
     @property
     def start_image_dir(self) -> Path:
         """Get the starting directory for image selection, depeding on settings"""
@@ -156,9 +143,21 @@ class Settings(YamlMixin):
         if image_dir not in self.favorite_image_dirs:
             self.favorite_image_dirs.append(image_dir)
 
+    def add_recent_dir(self, path: PathOrStr):
+        """Add a directory to the list of recent image directories"""
+        path = Path(path)
+        if path in self.recent_image_dirs:
+            self.recent_image_dirs.remove(path)
+        if path not in self.favorite_image_dirs:
+            self.recent_image_dirs = [path] + self.recent_image_dirs[:MAX_DIR_HISTORY]
+
     def remove_favorite_dir(self, image_dir: Path):
         if image_dir in self.favorite_image_dirs:
             self.favorite_image_dirs.remove(image_dir)
+
+    def remove_recent_dir(self, image_dir: Path):
+        if image_dir in self.recent_image_dirs:
+            self.recent_image_dirs.remove(image_dir)
 
 
 @define(auto_attribs=False)
