@@ -80,7 +80,7 @@ class ImageGallery(StylableWidget):
         image_paths, _ = QFileDialog.getOpenFileNames(
             self,
             caption='Open image files:',
-            dir=str(start_dir or self.settings.default_image_dir),
+            dir=str(start_dir or self.settings.start_image_dir),
             filter=f'Image files ({" ".join(IMAGE_FILETYPES)})',
         )
         self.load_images(image_paths)

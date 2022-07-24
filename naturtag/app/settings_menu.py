@@ -76,14 +76,26 @@ class SettingsMenu(StylableWidget):
 
         # User data settings
         user_data = self.add_group('User Data', self.settings_layout)
-        user_data.addLayout(
-            PathSetting(
-                settings,
-                icon_str='fa5.images',
-                setting_attr='default_image_dir',
-                setting_title='Default image directory',
-                dialog_parent=self,
-            )
+        use_last_dir = ToggleSetting(
+            settings,
+            icon_str='mdi.folder-clock-outline',
+            setting_attr='use_last_dir',
+            setting_title='Use last directory',
+        )
+        user_data.addLayout(use_last_dir)
+        self.default_image_dir = PathSetting(
+            settings,
+            icon_str='fa5.images',
+            setting_attr='default_image_dir',
+            setting_title='Default image directory',
+            dialog_parent=self,
+        )
+        user_data.addLayout(self.default_image_dir)
+
+        # Disable default_image_dir option when use_last_dir is enabled
+        self.default_image_dir.setEnabled(not settings.use_last_dir)
+        use_last_dir.on_click.connect(
+            lambda checked: self.default_image_dir.setEnabled(not checked)
         )
 
         # Display settings
@@ -217,12 +229,17 @@ class PathSetting(SettingContainer):
         self.text_box.textChanged.connect(self.set_text)
         path_layout.addWidget(self.text_box)
 
-        button = QPushButton('Browse...')
-        button.clicked.connect(self.browse)
-        path_layout.addWidget(button)
+        self.browse_button = QPushButton('Browse...')
+        self.browse_button.clicked.connect(self.browse)
+        path_layout.addWidget(self.browse_button)
 
     def set_text(self, text):
         setattr(self.settings, self.setting_attr, str(text))
+
+    def setEnabled(self, enabled: bool):
+        self.text_box.setEnabled(enabled)
+        self.browse_button.setEnabled(enabled)
+        super().setEnabled(enabled)
 
     def browse(self):
         """Browse for a directory"""
