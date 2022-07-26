@@ -7,7 +7,6 @@ from pyinaturalist import Photo, Taxon, TaxonCount
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
-from naturtag.client import IMG_SESSION
 from naturtag.widgets.images import (
     HoverMixin,
     HoverMixinBase,
@@ -25,6 +24,7 @@ ATTRIBUTION_STRIP_PATTERN = re.compile(r',?\s+uploaded by.*')
 logger = getLogger(__name__)
 
 
+# Note: This doesn't inherit from HoverMixin because overlay is shown when TaxonInfoCard is hovered
 class TaxonPhoto(HoverMixinBase, PixmapLabel):
     """A taxon photo widget with a Taxon reference and a click event
 
@@ -37,11 +37,6 @@ class TaxonPhoto(HoverMixinBase, PixmapLabel):
         super().__init__(*args, **kwargs)
         self.idx = idx
         self.taxon = taxon
-
-    def set_taxon(self, taxon: Taxon, size: str = 'medium'):
-        self.taxon = taxon
-        self._pixmap = IMG_SESSION.get_pixmap(taxon.default_photo, size=size)
-        QLabel.setPixmap(self, self.scaledPixmap())
 
 
 class FullscreenTaxonPhoto(NavButtonsMixin, TaxonPhoto):
@@ -126,7 +121,9 @@ class TaxonList(StylableWidget):
             self.root.insertWidget(idx, card)
         else:
             self.root.addWidget(card)
-        self.threadpool.schedule(card.load)
+        card.thumbnail.set_pixmap_async(
+            self.threadpool, photo=taxon.default_photo, size='thumbnail'
+        )
 
     def add_or_update(self, taxon: Taxon, idx: int = 0):
         """Move a taxon card to the specified position, and add a new one if it doesn't exist"""
@@ -166,7 +163,7 @@ class TaxonInfoCard(StylableWidget):
 
     on_click = Signal(int)
 
-    def __init__(self, taxon: Taxon, collapsed: bool = False, delayed_load: bool = True):
+    def __init__(self, taxon: Taxon, delayed_load: bool = True):
         super().__init__()
         card_layout = HorizontalLayout(self)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -177,11 +174,11 @@ class TaxonInfoCard(StylableWidget):
             self.setToolTip(f'Count: {taxon.count}')
 
         # Image
-        self.thumbnail = TaxonPhoto()
+        self.thumbnail = TaxonPhoto(taxon=self.taxon)
         self.thumbnail.setFixedSize(75, 75)
         card_layout.addWidget(self.thumbnail)
         if not delayed_load:
-            self.load()
+            self.thumbnail.set_pixmap(url=taxon.default_photo.thumbnail_url)
 
         # Details
         self.title = QLabel(taxon.name)
@@ -203,10 +200,6 @@ class TaxonInfoCard(StylableWidget):
     def leaveEvent(self, event):
         self.thumbnail.overlay.setVisible(False)
         super().leaveEvent(event)
-
-    def load(self):
-        """Load taxon thumbnail either from cache or remote"""
-        self.thumbnail.set_taxon(self.taxon, size='thumbnail')
 
     def mousePressEvent(self, _):
         """Placeholder to accept mouse press events"""

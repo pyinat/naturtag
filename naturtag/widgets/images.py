@@ -4,11 +4,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Type, TypeAlias, Union
 
 from pyinaturalist import Photo
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
+from naturtag.app.threadpool import ThreadPool
 from naturtag.client import IMG_SESSION
 from naturtag.constants import PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
@@ -81,6 +82,20 @@ class PixmapLabel(QLabel):
         if pixmap is not None:
             self._pixmap = pixmap
             super().setPixmap(self.scaledPixmap())
+
+    def set_pixmap_async(
+        self,
+        threadpool: ThreadPool,
+        photo: Photo = None,
+        url: str = None,
+        size: str = 'medium',
+        priority: QThread.Priority = QThread.NormalPriority,
+    ):
+        """Fetch a photo from a separate thread, and draw in the main thread when complete"""
+        future = threadpool.schedule(
+            IMG_SESSION.get_pixmap, priority=priority, photo=photo, url=url, size=size
+        )
+        future.on_result.connect(self.set_pixmap)
 
     def clear(self):
         self.set_pixmap(QPixmap())
@@ -245,13 +260,13 @@ class ImageWindow(StylableWidget):
         """Open window to a selected image, and save other available image paths for navigation"""
         self.selected_path = selected_path
         self.image_paths = image_paths
-        self.set_pixmap(self.selected_path)
+        self.set_pixmap_path(self.selected_path)
         self.showFullScreen()
 
     def select_image_idx(self, idx: int):
         """Select an image by index"""
         self.selected_path = self.image_paths[idx]
-        self.set_pixmap(self.selected_path)
+        self.set_pixmap_path(self.selected_path)
 
     def select_next_image(self):
         self.select_image_idx(self.wrap_idx(1))
@@ -259,7 +274,7 @@ class ImageWindow(StylableWidget):
     def select_prev_image(self):
         self.select_image_idx(self.wrap_idx(-1))
 
-    def set_pixmap(self, path: PathOrStr):
+    def set_pixmap_path(self, path: PathOrStr):
         self.image.set_pixmap(QPixmap(path))
         self.image.description = str(path)
 

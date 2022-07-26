@@ -111,7 +111,7 @@ class TaxonDbController(TaxonController):
 
 
 # TODO: Set expiration on 'original' and 'large' size images using URL patterns
-# Requires changes in ClientSession
+#   Requires changes in ClientSession to update urls_expire_after param for requests-cache
 class ImageSession(ClientSession):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -130,9 +130,11 @@ class ImageSession(ClientSession):
         self.image_cache[image_hash] = data
         return data
 
-    def get_pixmap(self, photo: Photo, size: str = None) -> 'QPixmap':
+    def get_pixmap(self, photo: Photo = None, url: str = None, size: str = None) -> 'QPixmap':
         from PySide6.QtGui import QPixmap
 
+        # Wrap a plain URL in a Photo object to modify URL for different photo sizes
+        photo = photo or Photo(url=url)
         pixmap = QPixmap()
         pixmap.loadFromData(self.get_image(photo, size), format=photo.ext)
         return pixmap

@@ -103,7 +103,11 @@ class TaxonInfoSection(HorizontalLayout):
         self.history_taxon = None
         self.selected_taxon = taxon
         self.group_box.setTitle(taxon.full_name)
-        self.threadpool.schedule(self.image.set_taxon, priority=QThread.HighPriority, taxon=taxon)
+        self.image.set_pixmap_async(
+            self.threadpool,
+            photo=taxon.default_photo,
+            priority=QThread.HighPriority,
+        )
         self._update_nav_buttons()
 
         # Load additional thumbnails
@@ -112,8 +116,8 @@ class TaxonInfoSection(HorizontalLayout):
             thumb = HoverTaxonPhoto(taxon=taxon, idx=i + 1)
             thumb.setFixedSize(75, 75)
             thumb.on_click.connect(self.image_window.display_taxon)
+            thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
             self.taxon_thumbnails.add_widget(thumb)
-            self.threadpool.schedule(thumb.set_pixmap, url=photo.thumbnail_url)
 
     def prev(self):
         if not self.hist_prev:
