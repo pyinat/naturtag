@@ -210,16 +210,21 @@ class UserDirs(QObject):
         """Add an image directory to Recent (if not already added)"""
         if save:
             self.settings.add_recent_dir(image_dir)
+
+        # Move existing item to top of Recent submenu
         if image_dir in self.recent_dirs:
             self._move_to_top(image_dir)
             return None
 
-        # Add to top of recent submenu
+        # Add new item to top of Recent submenu
         action = QAction(
             fa_icon('mdi6.folder-clock'),
             str(image_dir).replace(HOME_DIR, '~'),
         )
-        self.recent_dirs_submenu.insertAction(self.last_opened_action, action)
+        if self.last_opened_action:
+            self.recent_dirs_submenu.insertAction(self.last_opened_action, action)
+        else:
+            self.recent_dirs_submenu.addAction(action)
         action.setStatusTip(f'Open images from {image_dir} (Ctrl-click to add to favorites)')
         action.triggered.connect(partial(self.open_or_add_favorite_dir, image_dir))
 
