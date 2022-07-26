@@ -22,4 +22,5 @@ app
 cli
 metadata
 reference
+history
 ```
