@@ -1,3 +1,4 @@
+# TODO: Placeholder "spinner" for loading images
 import re
 import webbrowser
 from logging import getLogger

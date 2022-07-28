@@ -13,6 +13,7 @@ CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
 PACKAGED_FTS_DB = ASSETS_DIR / 'taxon-fts-en.tar.gz'
 APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
+SPINNER = ICONS_DIR / 'spinner_250px.svg'
 
 # Local settings & data paths
 APP_DIR = Path(user_data_dir()) / 'Naturtag'
