@@ -7,6 +7,7 @@ from pyinaturalist import Photo, Taxon, TaxonCount
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
+from naturtag.constants import SIZE_SM
 from naturtag.widgets.images import (
     HoverMixin,
     HoverMixinBase,
@@ -81,7 +82,7 @@ class TaxonImageWindow(ImageWindow):
         self.set_photo(self.selected_photo)
 
     def set_photo(self, photo: Photo):
-        self.image.set_pixmap(url=photo.original_url)
+        self.image.setPixmap(self.image.get_pixmap(url=photo.original_url))
         attribution = (
             ATTRIBUTION_STRIP_PATTERN.sub('', photo.attribution or '')
             .replace('(c)', '©')
@@ -175,10 +176,11 @@ class TaxonInfoCard(StylableWidget):
 
         # Image
         self.thumbnail = TaxonPhoto(taxon=self.taxon)
-        self.thumbnail.setFixedSize(75, 75)
+        self.thumbnail.setFixedSize(*SIZE_SM)
         card_layout.addWidget(self.thumbnail)
         if not delayed_load:
-            self.thumbnail.set_pixmap(url=taxon.default_photo.thumbnail_url)
+            pixmap = self.thubmnail.get_pixmap(url=taxon.default_photo.thumbnail_url)
+            self.thumbnail.setPixmap(pixmap)
 
         # Details
         self.title = QLabel(taxon.name)

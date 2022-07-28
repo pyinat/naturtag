@@ -11,7 +11,6 @@ from naturtag.widgets.autocomplete import TaxonAutocomplete
 from naturtag.widgets.images import (
     FullscreenPhoto,
     HoverIcon,
-    HoverLabel,
     IconLabel,
     ImageWindow,
     PixmapLabel,
