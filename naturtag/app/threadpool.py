@@ -76,7 +76,7 @@ class Worker(QRunnable):
             self.signals.on_error.emit(e)
         else:
             self.signals.on_result.emit(result)
-            self.signals.on_progress.emit()
+        self.signals.on_progress.emit()
 
 
 class WorkerSignals(QObject):
