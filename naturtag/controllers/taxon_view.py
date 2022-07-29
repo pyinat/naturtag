@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QGroupBox, QPushButton
 
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
+from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
@@ -103,17 +104,21 @@ class TaxonInfoSection(HorizontalLayout):
         self.history_taxon = None
         self.selected_taxon = taxon
         self.group_box.setTitle(taxon.full_name)
-        self.threadpool.schedule(self.image.set_taxon, priority=QThread.HighPriority, taxon=taxon)
+        self.image.set_pixmap_async(
+            self.threadpool,
+            photo=taxon.default_photo,
+            priority=QThread.HighPriority,
+        )
         self._update_nav_buttons()
 
         # Load additional thumbnails
         self.taxon_thumbnails.clear()
         for i, photo in enumerate(taxon.taxon_photos[1:11] if taxon.taxon_photos else []):
             thumb = HoverTaxonPhoto(taxon=taxon, idx=i + 1)
-            thumb.setFixedSize(75, 75)
+            thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_taxon)
+            thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
             self.taxon_thumbnails.add_widget(thumb)
-            self.threadpool.schedule(thumb.set_pixmap, url=photo.thumbnail_url)
 
     def prev(self):
         if not self.hist_prev:

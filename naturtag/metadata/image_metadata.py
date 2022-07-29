@@ -41,7 +41,7 @@ class ImageMetadata:
 
         paths = str(self.image_path) + (f' + {self.xmp_path}' if isfile(self.xmp_path) else '')
         counts = ' | '.join([f'EXIF: {len(exif)}', f'IPTC: {len(iptc)}', f'XMP: {len(xmp)}'])
-        logger.info(f'Total tags found in {paths}: {counts}')
+        logger.debug(f'Total tags found in {paths}: {counts}')
 
         return exif, iptc, xmp
 

@@ -1,16 +1,17 @@
 """Generic image widgets"""
 from logging import getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, Type, TypeAlias, Union
+from typing import TYPE_CHECKING, Type, TypeAlias
 
 from pyinaturalist import Photo
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QWidget
 
 from naturtag.app.style import fa_icon
+from naturtag.app.threadpool import ThreadPool
 from naturtag.client import IMG_SESSION
-from naturtag.constants import PathOrStr
+from naturtag.constants import SIZE_ICON, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ class IconLabel(QLabel):
         icon_str: str,
         parent: QWidget = None,
         secondary: bool = False,
-        size: int = 32,
+        size: int = SIZE_ICON[0],
     ):
         super().__init__(parent)
         self.icon = fa_icon(icon_str, secondary=secondary)
@@ -56,9 +57,11 @@ class PixmapLabel(QLabel):
         self,
         parent: QWidget = None,
         pixmap: QPixmap = None,
-        path: Union[str, Path] = None,
+        path: PathOrStr = None,
         url: str = None,
         description: str = None,
+        resample: bool = True,
+        scale: bool = True,
     ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
@@ -66,24 +69,54 @@ class PixmapLabel(QLabel):
         self._pixmap = None
         self.path = None
         self.description = description
-        self.set_pixmap(pixmap, path, url)
+        self.scale = scale
+        self.xform = Qt.SmoothTransformation if resample else Qt.FastTransformation
+        if path or url:
+            pixmap = self.get_pixmap(path=path, url=url)
+        self.setPixmap(pixmap)
 
-    def set_pixmap(
+    def get_pixmap(
         self,
-        pixmap: QPixmap = None,
-        path: Union[str, Path] = None,
+        path: PathOrStr = None,
+        photo: Photo = None,
+        size: str = None,
+        url: str = None,
+    ) -> QPixmap:
+        """Fetch a pixmap from either a local path or remote URL.
+        This does not render the image, so it is safe to run from any thread.
+        """
+        if path:
+            self._pixmap = QPixmap(str(path))
+        elif photo or url:
+            self._pixmap = IMG_SESSION.get_pixmap(photo, url, size)
+        return self._pixmap
+
+    def setPixmap(self, pixmap: QPixmap):
+        self._pixmap = pixmap
+        super().setPixmap(self.scaledPixmap())
+
+    def set_pixmap_async(
+        self,
+        threadpool: ThreadPool,
+        priority: QThread.Priority = QThread.NormalPriority,
+        path: PathOrStr = None,
+        photo: Photo = None,
+        size: str = 'medium',
         url: str = None,
     ):
-        if path:
-            pixmap = QPixmap(str(path))
-        elif url:
-            pixmap = IMG_SESSION.get_pixmap(Photo(url=url))
-        if pixmap is not None:
-            self._pixmap = pixmap
-            super().setPixmap(self.scaledPixmap())
+        """Fetch a photo from a separate thread, and render it in the main thread when complete"""
+        future = threadpool.schedule(
+            self.get_pixmap,
+            priority=priority,
+            path=path,
+            photo=photo,
+            url=url,
+            size=size,
+        )
+        future.on_result.connect(self.setPixmap)
 
     def clear(self):
-        self.set_pixmap(QPixmap())
+        self.setPixmap(QPixmap())
 
     def heightForWidth(self, width: int) -> int:
         if self._pixmap:
@@ -127,8 +160,13 @@ class PixmapLabel(QLabel):
             super().setPixmap(self.scaledPixmap())
 
     def scaledPixmap(self) -> QPixmap:
-        assert self._pixmap is not None
-        return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        if self._pixmap is None:
+            self._pixmap = QPixmap()
+        if not self.scale:
+            return self._pixmap
+        if TYPE_CHECKING:
+            assert self._pixmap is not None
+        return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, self.xform)
 
     def sizeHint(self) -> QSize:
         return QSize(self.width(), self.heightForWidth(self.width()))
@@ -180,10 +218,6 @@ class HoverIcon(IconLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.on_click.emit(self)
-
-
-class HoverLabel(HoverMixin, QLabel):
-    """QLabel with a hover effect"""
 
 
 class NavButtonsMixin(MIXIN_BASE):
@@ -245,13 +279,13 @@ class ImageWindow(StylableWidget):
         """Open window to a selected image, and save other available image paths for navigation"""
         self.selected_path = selected_path
         self.image_paths = image_paths
-        self.set_pixmap(self.selected_path)
+        self.set_pixmap_path(self.selected_path)
         self.showFullScreen()
 
     def select_image_idx(self, idx: int):
         """Select an image by index"""
         self.selected_path = self.image_paths[idx]
-        self.set_pixmap(self.selected_path)
+        self.set_pixmap_path(self.selected_path)
 
     def select_next_image(self):
         self.select_image_idx(self.wrap_idx(1))
@@ -259,8 +293,8 @@ class ImageWindow(StylableWidget):
     def select_prev_image(self):
         self.select_image_idx(self.wrap_idx(-1))
 
-    def set_pixmap(self, path: PathOrStr):
-        self.image.set_pixmap(QPixmap(path))
+    def set_pixmap_path(self, path: PathOrStr):
+        self.image.setPixmap(QPixmap(str(path)))
         self.image.description = str(path)
 
     def remove_image(self):

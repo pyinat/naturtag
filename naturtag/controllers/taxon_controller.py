@@ -91,7 +91,8 @@ class TaxonController(StylableWidget):
     def select_observation_taxon(self, observation_id: int):
         """Load a taxon from an observation ID"""
         logger.info(f'Selecting observation {observation_id}')
-        self.threadpool.cancel()
+        if self.tabs._init_complete:
+            self.threadpool.cancel()
         future = self.threadpool.schedule(
             lambda: INAT_CLIENT.observations(observation_id).taxon, priority=QThread.HighPriority
         )

@@ -1,4 +1,4 @@
-""" Utilities for generating and retrieving image thumbnails """
+"""Utilities for generating and retrieving image thumbnails"""
 from io import IOBase
 from logging import getLogger
 
@@ -7,33 +7,25 @@ from PIL.ImageOps import exif_transpose, flip
 from PIL.ImageQt import ImageQt
 from PySide6.QtGui import QPixmap
 
-from naturtag.constants import (
-    EXIF_ORIENTATION_ID,
-    THUMBNAIL_SIZE_DEFAULT,
-    THUMBNAIL_SIZES,
-    PathOrStr,
-)
+from naturtag.constants import EXIF_ORIENTATION_ID, SIZE_DEFAULT, Dimensions, PathOrStr
 
 logger = getLogger().getChild(__name__)
 
 
 def generate_thumbnail(
     path: PathOrStr,
-    size: str = 'medium',
+    target_size: Dimensions = SIZE_DEFAULT,
     default_flip: bool = True,
 ) -> QPixmap:
-    """
-    Generate and store a thumbnail from the source image
+    """Generate a thumbnail from the source image
 
     Args:
         path: Image file path
-        thumbnail_path: Destination path for thumbnail
-        size: One of: 'small', 'medium', 'large'
+        target_size: Max dimensions for thumbnail
 
     Returns:
-        str: The path of the new thumbnail
+        Thumbnail data as a pixmap
     """
-    target_size = THUMBNAIL_SIZES.get(size, THUMBNAIL_SIZE_DEFAULT)
     logger.debug(f'Thumbnails: Generating {target_size} thumbnail for {path}')
 
     # Resize if necessary, or just copy the image to the cache if it's already thumbnail size

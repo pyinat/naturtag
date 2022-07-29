@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from platformdirs import user_data_dir
-from pyinaturalist.constants import ICONIC_TAXA, RANKS
+from pyinaturalist.constants import ICONIC_TAXA, RANKS, Dimensions
 
 # Packaged assets
 PKG_DIR = Path(__file__).parent.parent
@@ -13,6 +13,7 @@ CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
 PACKAGED_FTS_DB = ASSETS_DIR / 'taxon-fts-en.tar.gz'
 APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
+SPINNER = ICONS_DIR / 'spinner_250px.svg'
 
 # Local settings & data paths
 APP_DIR = Path(user_data_dir()) / 'Naturtag'
@@ -29,14 +30,10 @@ REPO_URL = 'https://github.com/pyinat/naturtag'
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
-THUMBNAIL_SIZE_SM = (75, 75)
-THUMBNAIL_SIZE_DEFAULT = (250, 250)
-THUMBNAIL_SIZE_LG = (500, 500)
-THUMBNAIL_SIZES = {
-    'small': THUMBNAIL_SIZE_SM,
-    'medium': THUMBNAIL_SIZE_DEFAULT,
-    'large': THUMBNAIL_SIZE_LG,
-}
+SIZE_ICON = (32, 32)
+SIZE_SM = (75, 75)
+SIZE_DEFAULT = (250, 250)
+SIZE_LG = (500, 500)
 
 # Relevant groups of image metadata tags
 EXIF_HIDE_PREFIXES = [

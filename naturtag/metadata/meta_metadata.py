@@ -27,6 +27,7 @@ NULL_COORDS = (0, 0)
 logger = getLogger().getChild(__name__)
 
 
+# TODO: Refactor derived properties; many of these don't need to be lazy-loaded
 # TODO: If there's no taxon ID but a `rank=name` tag, look up taxon based on that
 class MetaMetadata(ImageMetadata):
     """Parses observation info and other higher-level details derived from raw image metadata
@@ -60,6 +61,7 @@ class MetaMetadata(ImageMetadata):
         self._summary = None
         self._observation = None
         self.keyword_meta = KeywordMetadata(self.combined)
+        self.inaturalist_ids  # for side effect
 
     @property
     def combined(self) -> dict[str, Any]:

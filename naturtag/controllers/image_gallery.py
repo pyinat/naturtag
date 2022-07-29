@@ -1,8 +1,9 @@
+# TODO: Placeholder "spinner" for loading images
 import re
 import webbrowser
 from logging import getLogger
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Optional
 
 from PySide6.QtCore import (
     QEasingCurve,
@@ -13,7 +14,7 @@ from PySide6.QtCore import (
     Signal,
     Slot,
 )
-from PySide6.QtGui import QAction, QDesktopServices, QDropEvent
+from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -22,22 +23,24 @@ from PySide6.QtWidgets import (
     QLabel,
     QMenu,
     QScrollArea,
+    QWidget,
 )
 
 from naturtag.app.style import fa_icon
-from naturtag.constants import IMAGE_FILETYPES, THUMBNAIL_SIZE_DEFAULT, PathOrStr
+from naturtag.app.threadpool import ThreadPool
+from naturtag.constants import IMAGE_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.settings import Settings
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FlowLayout,
     HorizontalLayout,
-    HoverLabel,
     IconLabel,
     ImageWindow,
     StylableWidget,
     VerticalLayout,
 )
+from naturtag.widgets.images import HoverMixin, PixmapLabel
 
 logger = getLogger(__name__)
 
@@ -45,17 +48,18 @@ logger = getLogger(__name__)
 class ImageGallery(StylableWidget):
     """Container for displaying local image thumbnails & info"""
 
-    on_load_images = Signal(list)
+    on_load_images = Signal(list)  #: New images have been loaded
     on_message = Signal(str)  #: Forward a message to status bar
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
         self.setAcceptDrops(True)
-        self.images: dict[Path, LocalThumbnail] = {}
+        self.images: dict[Path, ThumbnailCard] = {}
         self.image_window = ImageWindow()
         self.image_window.on_remove.connect(self.remove_image)
         self.settings = settings
+        self.threadpool = threadpool
         root = VerticalLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 
@@ -92,28 +96,41 @@ class ImageGallery(StylableWidget):
         if not new_images:
             return
 
+        # Load blank placeholder cards first
         logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
-        for image_path in new_images:
-            self.load_image(image_path)
+        cards = [self.load_image(image_path, delayed_load=True) for image_path in new_images]
+
+        # Then load actual images
+        for thumbnail_card in filter(None, cards):
+            thumbnail_card.load_image_async(self.threadpool)
+
         self.on_load_images.emit(new_images)
 
-    def load_image(self, image_path: Path):
+    def load_image(self, image_path: Path, delayed_load: bool = False) -> Optional['ThumbnailCard']:
         """Load an image"""
         if not image_path.is_file():
             logger.info(f'File does not exist: {image_path}')
-            return
+            return None
         elif image_path in self.images:
             logger.info(f'Image already loaded: {image_path}')
-            return
+            return None
 
         logger.info(f'Loading {image_path}')
-        thumbnail = LocalThumbnail(image_path)
+        thumbnail_card = ThumbnailCard(image_path)
+        thumbnail_card.on_loaded.connect(self._bind_image_actions)
+        self.flow_layout.addWidget(thumbnail_card)
+        self.images[thumbnail_card.image_path] = thumbnail_card
+
+        if not delayed_load:
+            thumbnail_card.load_image()
+        return thumbnail_card
+
+    def _bind_image_actions(self, thumbnail: 'ThumbnailCard'):
+        """Bind actions to an image"""
         thumbnail.on_remove.connect(self.remove_image)
         thumbnail.on_select.connect(self.select_image)
         thumbnail.on_copy.connect(self.on_message)
         thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon)
-        self.flow_layout.addWidget(thumbnail)
-        self.images[thumbnail.image_path] = thumbnail
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -137,32 +154,30 @@ class ImageGallery(StylableWidget):
         self.image_window.display_image(image_path, list(self.images.keys()))
 
 
-class LocalThumbnail(StylableWidget):
-    """A tile that displays a thumbnail for a local image file. Contains icons representing its
-    metadata types, and the following mouse actions:
+class ThumbnailCard(StylableWidget):
+    """A card that displays a thumbnail for a local image file, along with a title and icons
+    representing its metadata contents. Also adds the following mouse actions:
 
     * Left click: Show full image
     * Middle click: Remove image
     * Right click: Show context menu
     """
 
+    on_loaded = Signal(object)  #: Image and metadata have been loaded
     on_copy = Signal(str)  #: Tags were copied to the clipboard
     on_remove = Signal(Path)  #: Request for the image to be removed from the gallery
     on_select = Signal(Path)  #: The image was clicked
 
-    def __init__(self, image_path: Path):
+    def __init__(self, image_path: Path, size: Dimensions = SIZE_DEFAULT):
         super().__init__()
         self.image_path = image_path
-        self.metadata = MetaMetadata(self.image_path)
-        self.setToolTip(self.metadata.summary)
+        self.metadata: MetaMetadata = None  # type: ignore
         layout = VerticalLayout(self)
 
         # Image
-        self.image = HoverLabel(self)
-        self.image.setPixmap(generate_thumbnail(self.image_path))
+        self.image = MetaThumbnail(self, size=size)
         layout.addWidget(self.image)
 
-        # Context menu and metadata icons
         self.context_menu = ThumbnailContextMenu(self)
         self.icons = ThumbnailMetaIcons(self)
         self.icons.setObjectName('metadata-icons')
@@ -170,17 +185,34 @@ class LocalThumbnail(StylableWidget):
         # Filename label
         text = re.sub('([_-])', '\\1\u200b', self.image_path.name)  # To allow word wrapping
         self.label = QLabel(text)
-        self.label.setMaximumWidth(THUMBNAIL_SIZE_DEFAULT[0])
+        self.label.setMaximumWidth(SIZE_DEFAULT[0])
         self.label.setMinimumHeight(40)
         self.label.setAlignment(Qt.AlignLeft)
         self.label.setWordWrap(True)
         layout.addWidget(self.label)
 
         # Icon shown when an image is tagged or updated
-        self.check = IconLabel(
-            'fa5s.check', self.image, secondary=True, size=THUMBNAIL_SIZE_DEFAULT[0]
-        )
+        self.check = IconLabel('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT[0])
         self.check.setVisible(False)
+
+    def load_image(self):
+        """Load thumbnail + metadata in the main thread"""
+        pixmap, metadata = self.image.get_pixmap_meta()
+        self.image.setPixmap(pixmap)
+        self.set_metadata(metadata)
+
+    def load_image_async(self, threadpool: ThreadPool):
+        """Load thumbnail + metadata in a separate thread"""
+        self.image.set_pixmap_meta_async(threadpool, self.image_path)
+        self.image.on_load_metadata.connect(self.set_metadata)
+
+    def set_metadata(self, metadata: MetaMetadata):
+        """Update UI based on new metadata"""
+        self.metadata = metadata
+        self.context_menu.refresh_actions(self)
+        self.icons.refresh_icons(metadata)
+        self.setToolTip(metadata.summary)
+        self.on_loaded.emit(self)
 
     def contextMenuEvent(self, e):
         self.context_menu.exec(e.globalPos())
@@ -203,6 +235,9 @@ class LocalThumbnail(StylableWidget):
         )
         self.pulse()
         self.on_copy.emit(f'Tags for {id_str} copied to clipboard')
+
+    def open_directory(self):
+        QDesktopServices.openUrl(QUrl(self.image_path.parent.as_uri()))
 
     def pulse(self):
         """Show a highlight animation to indicate the image has been updated"""
@@ -241,14 +276,39 @@ class LocalThumbnail(StylableWidget):
         self.on_select.emit(self.image_path)
 
     def update_metadata(self, metadata: MetaMetadata):
+        """Update UI based on new metadata, and show a highlight animation"""
         self.pulse()
-        self.metadata = metadata
-        self.icons.refresh_icons(metadata)
-        self.setToolTip(f'{self.image_path}\n{self.metadata.summary}')
-        self.context_menu.refresh_actions(metadata)
+        self.set_metadata(metadata)
 
-    def open_directory(self):
-        QDesktopServices.openUrl(QUrl(self.image_path.parent.as_uri()))
+
+class MetaThumbnail(HoverMixin, PixmapLabel):
+    """Thumbnail for a local image plus metadata"""
+
+    on_load_metadata = Signal(MetaMetadata)  #: Finished reading image metadata
+
+    def __init__(self, parent: QWidget, size: Dimensions = SIZE_DEFAULT):
+        # We will generate a thumbnail of final size; no scaling needed
+        super().__init__(parent, scale=False)
+        self.thumbnail_size = size
+        self.setFixedSize(*size)
+
+    def get_pixmap_meta(self, path: PathOrStr) -> tuple[QPixmap, MetaMetadata]:
+        """All I/O for loading an image preview (reading metadata, generating thumbnail),
+        to be run from a separate thread
+        """
+        return generate_thumbnail(path, self.thumbnail_size), MetaMetadata(path)
+
+    def set_pixmap_meta_async(self, threadpool: ThreadPool, path: PathOrStr = None):
+        """Generate a photo thumbnail and read its metadata from a separate thread, and render it
+        in the main thread when complete
+        """
+        future = threadpool.schedule(self.get_pixmap_meta, path=path)
+        future.on_result.connect(self.set_pixmap_meta)
+
+    def set_pixmap_meta(self, pixmap_meta: tuple[QPixmap, MetaMetadata]):
+        pixmap, metadata = pixmap_meta
+        self.setPixmap(pixmap)
+        self.on_load_metadata.emit(metadata)
 
 
 class ThumbnailContextMenu(QMenu):
@@ -256,16 +316,13 @@ class ThumbnailContextMenu(QMenu):
 
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
 
-    def __init__(self, thumbnail: LocalThumbnail):
-        super().__init__()
-        self.thumbnail = thumbnail
-        self.refresh_actions(thumbnail.metadata)
-
-    def refresh_actions(self, meta: MetaMetadata):
+    def refresh_actions(self, thumbnail_card: ThumbnailCard):
         """Update menu actions based on the available metadata"""
         self.clear()
+        meta = thumbnail_card.metadata
 
         self._add_action(
+            parent=thumbnail_card,
             icon='fa5s.spider',
             text='View Taxon',
             tooltip=f'View taxon {meta.taxon_id} in naturtag',
@@ -273,6 +330,7 @@ class ThumbnailContextMenu(QMenu):
             callback=lambda: self.on_select_taxon.emit(meta.taxon_id),
         )
         self._add_action(
+            parent=thumbnail_card,
             icon='fa5s.spider',
             text='View Taxon on iNat',
             tooltip=f'View taxon {meta.taxon_id} on inaturalist.org',
@@ -280,6 +338,7 @@ class ThumbnailContextMenu(QMenu):
             callback=lambda: webbrowser.open(meta.taxon_url),
         )
         self._add_action(
+            parent=thumbnail_card,
             icon='fa.binoculars',
             text='View Observation on iNat',
             tooltip=f'View observation {meta.observation_id} on inaturalist.org',
@@ -287,29 +346,38 @@ class ThumbnailContextMenu(QMenu):
             callback=lambda: webbrowser.open(meta.observation_url),
         )
         self._add_action(
+            parent=thumbnail_card,
             icon='fa5.copy',
             text='Copy Flickr tags',
             tooltip='Copy Flickr-compatible taxon tags to clipboard',
             enabled=meta.has_taxon,
-            callback=self.thumbnail.copy_flickr_tags,
+            callback=thumbnail_card.copy_flickr_tags,
         )
         self._add_action(
+            parent=thumbnail_card,
             icon='fa5s.folder-open',
             text='Open containing folder',
-            tooltip=f'Open containing folder: {self.thumbnail.image_path.parent}',
-            callback=self.thumbnail.open_directory,
+            tooltip=f'Open containing folder: {thumbnail_card.image_path.parent}',
+            callback=thumbnail_card.open_directory,
         )
         self._add_action(
+            parent=thumbnail_card,
             icon='fa.remove',
             text='Remove image',
             tooltip='Remove this image from the selection',
-            callback=self.thumbnail.remove,
+            callback=thumbnail_card.remove,
         )
 
     def _add_action(
-        self, icon: str, text: str, tooltip: str, enabled: bool = True, callback: Callable = None
+        self,
+        parent: QWidget,
+        icon: str,
+        text: str,
+        tooltip: str,
+        enabled: bool = True,
+        callback: Callable = None,
     ):
-        action = QAction(fa_icon(icon), text, self.thumbnail)
+        action = QAction(fa_icon(icon), text, parent)
         action.setStatusTip(tooltip)
         action.setEnabled(enabled)
         if callback:
@@ -320,14 +388,14 @@ class ThumbnailContextMenu(QMenu):
 class ThumbnailMetaIcons(QLabel):
     """Icons overlaid on top of a thumbnail to indicate what types of metadata are available"""
 
-    def __init__(self, parent: LocalThumbnail):
+    def __init__(self, parent: ThumbnailCard):
         super().__init__(parent)
-        img_size = parent.image.sizeHint()
+        img_size = SIZE_DEFAULT
 
         self.icon_layout = HorizontalLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
-        self.setGeometry(9, img_size.height() - 11, 116, 20)
+        self.setGeometry(9, img_size[0] - 11, 116, 20)
 
         self.taxon_icon = IconLabel('mdi.bird', secondary=True, size=20)
         self.observation_icon = IconLabel('fa.binoculars', secondary=True, size=20)
@@ -340,13 +408,11 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.addWidget(self.tag_icon)
         self.icon_layout.addWidget(self.sidecar_icon)
 
-        self.refresh_icons(parent.metadata)
-
-    def refresh_icons(self, meta: MetaMetadata):
+    def refresh_icons(self, metadata: MetaMetadata):
         """Update icons based on the available metadata"""
-        logger.debug(f'Refreshing: {meta}')
-        self.taxon_icon.set_enabled(meta.has_taxon)
-        self.observation_icon.set_enabled(meta.has_observation)
-        self.geo_icon.set_enabled(meta.has_coordinates)
-        self.tag_icon.set_enabled(meta.has_any_tags)
-        self.sidecar_icon.set_enabled(meta.has_sidecar)
+        logger.debug(f'Refreshing: {metadata}')
+        self.taxon_icon.set_enabled(metadata.has_taxon)
+        self.observation_icon.set_enabled(metadata.has_observation)
+        self.geo_icon.set_enabled(metadata.has_coordinates)
+        self.tag_icon.set_enabled(metadata.has_any_tags)
+        self.sidecar_icon.set_enabled(metadata.has_sidecar)
