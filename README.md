@@ -24,37 +24,47 @@
 <!-- END-RTD-IGNORE -->
 
 ## Summary
-Naturtag is a tool for tagging image files with iNaturalist taxonomy & observation metadata.
-This includes a basic **command-line interface**, a work-in-progress **desktop application**,
-and can also be used as a **python library**.
+Naturtag is a tool for nature photographers that adds useful metadata to describe the organisms in
+your photos. It includes a **desktop application**, a **command-line interface**, and can also be
+used as a **python library**.
+
+It is mainly intended for use with [iNaturalist](https://www.inaturalist.org); it can tag your
+photos with either complete observation metadata, or just taxonomy metadata.
+
 
 ## Use Cases
-Naturtag takes useful information from your own iNaturalist observations and embeds it in your local
-photo collection, mainly using [XMP](https://en.wikipedia.org/wiki/Extensible_Metadata_Platform) and
+Naturtag embeds this information in your local photo collection using
+[XMP](https://en.wikipedia.org/wiki/Extensible_Metadata_Platform) and
 [EXIF](https://en.wikipedia.org/wiki/Exif) metadata. This has a variety of uses, including:
 
 ### Local photo organization
-If you like the way you can search and filter your observations on iNaturalist.org and its mobile
-apps, and you wish you could do that with your local photos, naturtag can help.
-It can tag your photos with **hierarchical keywords**, which can then be used in a photo viewer or
-DAM such as [**Lightroom**](https://millennialdiyer.com/articles/photography/lightroom-keyword-hierarchy/), [**FastPictureViewer**](https://www.fastpictureviewer.com), or
-[**XnViewMP**](https://www.xnview.com/en/xnviewmp).
+Naturtag can tag your photos with **hierarchical keywords** (aka structured keywords), which
+are supported by some photo viewers/editors like
+[**Lightroom**](https://millennialdiyer.com/articles/photography/lightroom-keyword-hierarchy/),
+[**FastPictureViewer**](https://www.fastpictureviewer.com),
+[**Photo Mechanic**](https://www.photometadata.org/META-Tutorials-Photo-Mechanic-Applying-Keywords),
+and [**XnViewMP**](https://www.xnview.com/en/xnviewmp).
 
 This essentially gives you a phylogenetic tree for browsing and filtering your photos.
-Example in XnView:
+
+<details>
+<summary><b>Example in XnView</b></summary>
 
 ![screenshot](assets/screenshots/xnview.png)
+</details>
 
 ### Photo hosting
 Naturtag can also simplify tagging photos for photo hosting sites like Flickr. For that use case, this
-tool generates structured keywords in the same format as
+tool generates semi-structured keywords in the same format as
 [iNaturalist's Flickr Tagger](https://www.inaturalist.org/taxa/flickr_tagger).
 
 Example search using these tags: https://www.flickr.com/photos/tags/taxonomy:class=arachnida
 
-Example of taxonomy tags on a Flickr photo page:
+<details>
+<summary><b>Example of taxonomy tags on Flickr</b></summary>
 
 ![screenshot](assets/screenshots/flickr.png)
+</details>
 
 
 ### Other biodiversity tools

@@ -1,39 +1,77 @@
-# Application Guide
-The main interface for this project will be a desktop application, although it's still a work in
-progress. Soon this will be packaged into more convenient platform-specific builds, but for now it
-must be installed and launched from the command line.
+# {fa}`book` Application Guide
+This page describes how to use the main features of the Naturtag desktop application.
 
-To launch, run:
-```
-python -m naturtag.app.app
+Typically there will be three steps:
+1. {ref}`Select photos <selecting-images>`
+2. {ref}`Select an observation or species <selecting-metadata-source>`
+3. {ref}`Tag images <tagging-images>`
+
+```{note}
+Currently, the UI is meant for tagging one set of related photos at a time, but batch tagging
+features are planned for future updates.
 ```
 
-## Image Selection and Tagging
+(selecting-images)=
+## Selecting Images
 The **Photos** tab is the main interface for selecting and tagging images:
 
 ![Screenshot](../assets/screenshots/image-selector.png)
 
-1. Select images:
-    * Drag & drop images or folders into the window
-    * Or, select files via the file browser (from the toolbar, or `Ctrl+O`)
-2. Select iNaturalist metadata:
-    * Enter an iNaturalist observation ID or taxon ID
-    * Or paste an iNaturalist URLs with `Ctrl+V`
-    * Or search for a species from the **Species** tab (see details below)
-    * Coming soon: search for observations from the **Observations** tab
-3. Click the **Run** (▶️) button in the top right (or `Ctrl+R`) to tag the selected images
+To select images:
+* Drag & drop images or folders into the window
+* Select files with the {material-outlined}`add_photo_alternate` **Open** button in the toolbar (or `Ctrl+O`)
 
 Mouse actions:
 * **Left-click** an image for a fullscreen view
 * **Middle-click** an image to remove it
 * **Right-click** an image for a context menu with more actions:
 
+Use the {fa}`remove` button  in the toolbar (or `Ctrl+Shift+X`) to clear all selected images.
+
 ![Screenshot](../assets/screenshots/image-context-menu.png)
 
+(selecting-metadata-source)=
+## Selecting a Metadata Source
+Next, you will specify an observation or species to use as a metadata source
+There are a few ways to do this:
+* Paste an iNaturalist URL anywhere (with `Ctrl+V` or the {fas}`paste` **Paste** button from the toolbar)
+* Enter an iNaturalist observation ID or taxon ID
+* Use the {ref}`species-search` page
+
+(tagging-images)=
+## Tagging Images
+Once you have selected images and a metadata source, click the {fa}`play` **Run** button in the toolbar
+(or `Ctrl+R`) to generate and save image metadata.
+
+## Refreshing Metadata
+In many cases, you might upload an observation with only a rough identification (order, family,
+etc.), and later get a more specific (or corrected) ID on iNaturalist. In these cases, you can use
+the {fa}`refresh` **Refresh** button in the toolbar (or `F5`) to quickly update all of your selected images
+that have been previously tagged. When using Refresh, you can select images for multiple
+observations and taxa.
+
+Refresh has the following behavior depending on the metadata source:
+* For observations, this will update your image metadata with the latest observation details from
+iNaturalist, and fill in any additional missing information.
+* For taxa, this will update your image metadata with any missing taxonomy information (for example
+  if an image has been tagged with only a taxon ID)
+
+:::{note}
+If you would like to use a different tool to add taxon IDs to your photos, and then use Naturtag to
+fill in the rest of the details, you can add it as an EXIF or XMP keyword in the format:
+```
+taxon_id:12345
+```
+:::
+
+(species-search)=
 ## Species Search
 The **Species** tab contains tools to search and browse species to tag your images with:
 
 ![Screenshot](../assets/screenshots/taxon-search.png)
+
+This can be used to search for any taxonomic rank (genus, family, etc.), not just species.
+Elsewhere in the docs these will be referred to as **taxa** (singular: **taxon**).
 
 ### Basic Search
 You can start by searching by name, with autocompletion:
@@ -60,7 +98,7 @@ For example, a search for flies (_Diptera_) with 'ornate' in the name will look 
 * **View on iNaturalist** will show more details about the taxon on inaturalist.org
 * Click on a taxon photo (or the thumbnails to the right) for a fullscreen view
 
-### Species Lists
+### Taxon Lists
 The additional tabs next to search results contain:
 * **Recent:** Recently viewed taxa
 * **Frequent:** Most frequently viewed taxa

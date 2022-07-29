@@ -1,7 +1,7 @@
-<!-- TODO: This is kind of a rough draft. Needs more editing. -->
+<!-- TODO: This is just a rough draft. Needs more details and editing. -->
 
 (metadata)=
-# Metadata
+# {fa}`code` Metadata
 This page describes the formats and types of metadata that naturtag generates.
 
 ## Metadata formats
@@ -22,15 +22,16 @@ may want to enable some of these formats but not others.
 
 ```{warning}
 After using naturtag, you can manually edit your image metadata using any other tool, but it's not
-recommended to use multiple tools to edit metadata for the same file.
+recommended to use multiple tools to edit metadata for the same file, if it contains multiple
+metadata formats.
 
 For example, some tools may use EXIF only, while others may use a combination of EXIF and XMP.
 ```
 
 ### Sidecar files
 A sidecar file can be saved alongside a photo that contains all XMP metadata.
-This has the advantage of not needing to modify the original image file, and
-also lets you associate the metadata with a RAW image file.
+This has the advantage of non-desctructive edits (not needing to modify the original image file),
+and also lets you associate the metadata with a RAW image file.
 
 The sidecar will have the same filename as the image, but with a `.xmp` extension. For example:
 ```bash

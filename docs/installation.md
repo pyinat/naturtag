@@ -1,4 +1,4 @@
-# Installation
+# {fa}`download` Installation
 Package downloads can be found on [GitHub Releases](https://github.com/pyinat/naturtag/releases).
 Platform-specific installation instructions are below:
 
@@ -6,7 +6,7 @@ Platform-specific installation instructions are below:
 
 ```{warning}
 These packages and installers are brand new, and not yet throughly tested on all platforms.
-Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if you find any issues.
+Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if you find any issues!
 ```
 
 ::::{tab-set}

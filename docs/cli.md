@@ -1,8 +1,10 @@
 (cli)=
-# CLI
-This package provides the command `naturtag`, also aliased to `nt`. It takes an observation or
-species, plus some image files, and generates EXIF and XMP metadata to write to those images.
-You can see it in action here:
+# {fa}`terminal` CLI
+This page describes how to use the Naturtag CLI.
+
+The basic tagging features of naturtag can be used via the command `naturtag`, also aliased to `nt`.
+It takes an observation or species, plus some image files, and generates EXIF and XMP metadata to
+write to those images. You can see it in action here:
 [![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
 
 ## CLI Options
@@ -24,6 +26,13 @@ Options:
   -v, --verbose           Show additional information
   --help                  Show this message and exit.
 ```
+
+## Metadata Options
+Some additional options are available to change which metadata formats to use.
+The CLI will use the same {ref}`app-settings` as the app, if available.
+
+You can also directly edit the config file at `settings.yml` in the naturtag data directory. The
+location varies by platform, and you can get this info from `naturtag --version`.
 
 ## Species & Observation IDs
 Either a species or observation may be specified, either by ID or URL.

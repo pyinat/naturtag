@@ -1,4 +1,4 @@
-# API Reference
+# {fa}`list` API Reference
 This section documents all the modules included in naturtag. Many of these are internal modules,
 and likely only relevant if you are interested in contributing to naturtag.
 
