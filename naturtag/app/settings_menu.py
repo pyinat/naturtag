@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.settings import Settings
-from naturtag.widgets import IconLabel, StylableWidget, ToggleSwitch
+from naturtag.widgets import FAIcon, StylableWidget, ToggleSwitch
 from naturtag.widgets.layouts import HorizontalLayout, VerticalLayout
 
 logger = getLogger(__name__)
@@ -144,7 +144,7 @@ class SettingContainer(HorizontalLayout):
     def __init__(self, icon_str: str, setting_attr: str, setting_title: str = None):
         super().__init__()
         self.setAlignment(Qt.AlignLeft)
-        self.addWidget(IconLabel(icon_str, size=32))
+        self.addWidget(FAIcon(icon_str, size=32))
 
         title_str = setting_title or setting_attr.replace('_', ' ').title()
         title = QLabel(title_str)

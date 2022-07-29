@@ -117,9 +117,12 @@ class ImageSession(ClientSession):
         super().__init__(*args, **kwargs)
         self.image_cache = SQLiteDict(IMAGE_CACHE, 'images', no_serializer=True)
 
-    def get_image(self, photo: Photo, size: str = None) -> bytes:
+    def get_image(self, photo: Photo, url: str = None, size: str = None) -> bytes:
         """Get an image from the cache, if it exists; otherwise, download and cache a new one"""
-        url = photo.url_size(size) if size else photo.url
+        if not url:
+            url = photo.url_size(size) if size else photo.url
+        if not url:
+            raise ValueError('No URL or photo object specified')
         image_hash = f'{get_url_hash(url)}.{photo.ext}'
         try:
             return self.image_cache[image_hash]
@@ -133,10 +136,10 @@ class ImageSession(ClientSession):
     def get_pixmap(self, photo: Photo = None, url: str = None, size: str = None) -> 'QPixmap':
         from PySide6.QtGui import QPixmap
 
-        # Wrap a plain URL in a Photo object to modify URL for different photo sizes
-        photo = photo or Photo(url=url)
+        if url and not photo:
+            photo = Photo(url=url)
         pixmap = QPixmap()
-        pixmap.loadFromData(self.get_image(photo, size), format=photo.ext)
+        pixmap.loadFromData(self.get_image(photo, url, size), format=photo.ext)  # type: ignore
         return pixmap
 
     def cache_size(self) -> str:
