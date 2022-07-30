@@ -33,9 +33,9 @@ from naturtag.metadata import MetaMetadata
 from naturtag.settings import Settings
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
+    FAIcon,
     FlowLayout,
     HorizontalLayout,
-    FAIcon,
     ImageWindow,
     StylableWidget,
     VerticalLayout,

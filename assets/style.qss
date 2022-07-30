@@ -15,15 +15,15 @@ QScrollArea {
     background: palette(midlight);
 }
 
-TaxonList {
-    background: palette(alternate-base);
-}
-TaxonInfoCard {
+InfoCard {
     background: palette(base);
     border-radius: 6px;
 }
-TaxonInfoCard:hover {
+InfoCard:hover {
     background: palette(dark);
+}
+InfoCardList {
+    background: palette(alternate-base);
 }
 
 ThumbnailCard {

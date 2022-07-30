@@ -30,6 +30,7 @@ REPO_URL = 'https://github.com/pyinat/naturtag'
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
+SIZE_ICON_SM = (20, 20)
 SIZE_ICON = (32, 32)
 SIZE_SM = (75, 75)
 SIZE_DEFAULT = (250, 250)

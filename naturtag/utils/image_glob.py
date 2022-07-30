@@ -31,6 +31,8 @@ def get_valid_image_paths(paths_or_uris: Iterable[PathOrStr], recursive: bool = 
     logger.info(f'Getting images from paths: {paths_or_uris}')
 
     for path in paths_or_uris:
+        if not path:
+            continue
         path = uri_to_path(path)
         if path.is_dir():
             image_paths.extend(get_images_from_dir(path, recursive=recursive))

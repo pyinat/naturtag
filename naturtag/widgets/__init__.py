@@ -20,10 +20,11 @@ from naturtag.widgets.images import (
 )
 from naturtag.widgets.inputs import IdInput
 from naturtag.widgets.logger import QtRichHandler, init_handler
+from naturtag.widgets.observation_images import ObservationInfoCard, ObservationPhoto
 from naturtag.widgets.taxon_images import (
-    TaxonPhoto,
     TaxonImageWindow,
     TaxonInfoCard,
     TaxonList,
+    TaxonPhoto,
 )
 from naturtag.widgets.toggle_switch import ToggleSwitch

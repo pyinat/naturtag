@@ -50,6 +50,22 @@ class FAIcon(QLabel):
         )
 
 
+class IconLabel(QWidget):
+    def __init__(
+        self, icon_str: str, text: str, size: int = SIZE_ICON[0], parent: QWidget = None, **kwargs
+    ):
+        super().__init__(parent)
+        self.setFixedHeight(size * 2)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+
+        self.icon = FAIcon(icon_str, size=size, **kwargs)
+        self.label = QLabel(text)
+        root = HorizontalLayout(self)
+        root.addWidget(self.icon)
+        root.addWidget(self.label)
+        root.setAlignment(Qt.AlignLeft)
+
+
 class PixmapLabel(QLabel):
     """A QLabel containing a pixmap that preserves its aspect ratio when resizing, with optional
     description text
@@ -270,23 +286,25 @@ class InfoCard(StylableWidget):
         self.card_id = card_id
 
         # Image
-        self.thumbnail = HoverPhoto()
+        self.thumbnail = HoverPhoto(disable_hover_event=True)  # Use card hover event instead
         self.thumbnail.setFixedSize(*SIZE_SM)
         card_layout.addWidget(self.thumbnail)
 
         # Details
         self.title = QLabel()
-        self.line_1 = QLabel()
-        self.line_2 = QLabel()
-
         self.details_layout = VerticalLayout()
         self.details_layout.addWidget(self.title)
-        self.details_layout.addWidget(self.line_1)
-        self.details_layout.addWidget(self.line_2)
         card_layout.addLayout(self.details_layout)
 
-    # Darken thumbnail when hovering over card. Background hover is handled in QSS.
+    def add_line(self, widget: QWidget):
+        """Add a widget as a line of info to the card"""
+        self.details_layout.addWidget(widget)
+
     def enterEvent(self, event):
+        """Note on hover effect:
+        * Thumbnail: this method triggers overlay
+        * Card background: Handled in QSS
+        """
         self.thumbnail.overlay.setVisible(True)
         super().enterEvent(event)
 
