@@ -4,6 +4,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING, Iterable
 
 from pyinaturalist import Photo, Taxon, TaxonCount
+from PySide6.QtWidgets import QLabel
 
 from naturtag.widgets.images import HoverPhoto, ImageWindow, InfoCard, InfoCardList
 
@@ -38,8 +39,8 @@ class TaxonInfoCard(InfoCard):
         # Details
         self.title.setText(taxon.name)
         self.title.setObjectName('h1_italic')
-        self.line_1.setText(taxon.rank)
-        self.line_2.setText(taxon.preferred_common_name)
+        self.add_line(QLabel(taxon.rank))
+        self.add_line(QLabel(taxon.preferred_common_name))
 
 
 class TaxonList(InfoCardList):

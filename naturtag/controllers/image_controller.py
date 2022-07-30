@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from pyinaturalist import Taxon
+from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QWidget
 
@@ -10,7 +10,13 @@ from naturtag.controllers import ImageGallery
 from naturtag.metadata import _refresh_tags, get_ids_from_url, tag_images
 from naturtag.metadata.meta_metadata import MetaMetadata
 from naturtag.settings import Settings
-from naturtag.widgets import HorizontalLayout, IdInput, TaxonInfoCard, VerticalLayout
+from naturtag.widgets import (
+    HorizontalLayout,
+    IdInput,
+    ObservationInfoCard,
+    TaxonInfoCard,
+    VerticalLayout,
+)
 
 logger = getLogger(__name__)
 
@@ -24,6 +30,8 @@ class ImageController(QWidget):
     on_select_observation_id = Signal(int)  #: An observation ID was entered
     on_select_taxon_id = Signal(int)  #: A taxon ID was entered
     on_select_taxon_tab = Signal()  #: Request to switch to taxon tab
+    on_select_observation_id = Signal(int)  #: An observation ID was entered
+    on_select_observation_tab = Signal()  #: Request to switch to observation tab
 
     def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
@@ -35,7 +43,7 @@ class ImageController(QWidget):
         # Input group
         group_box = QGroupBox('Selected metadata source')
         group_box.setFixedHeight(150)
-        group_box.setFixedWidth(600)
+        group_box.setFixedWidth(800)
         data_source_layout = HorizontalLayout(group_box)
         photo_layout.addWidget(group_box)
 
@@ -61,7 +69,6 @@ class ImageController(QWidget):
         # Clear info when clearing an input field
         self.input_obs_id.on_clear.connect(self.data_source_card.clear)
         self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
-        self.input_obs_id.on_clear.connect(self.input_taxon_id.clear)
 
         # Image gallery
         self.gallery = ImageGallery(settings, threadpool)
@@ -128,10 +135,8 @@ class ImageController(QWidget):
         # Check for IDs if an iNat URL was pasted
         observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
-            self.input_obs_id.set_id(observation_id)
             self.select_observation_id(observation_id)
         elif taxon_id:
-            self.input_taxon_id.set_id(taxon_id)
             self.select_taxon_id(taxon_id)
         # If not an iNat URL, check for valid image paths
         else:
@@ -146,22 +151,26 @@ class ImageController(QWidget):
         card.on_click.connect(self.on_select_taxon_tab)
         self.data_source_card.addWidget(card)
 
-    # @Slot(Observation)
-    # def select_observation(self, observation: Observation):
-    #     """Update input info from an observation object (loaded from Observations tab)"""
-    #     self.input_taxon_id.set_id(observation.id)
-    #     self.data_source_card.clear()
-    #     self.data_source_card.addWidget(
-    #         ObservationInfoCard(observation=observation, delayed_load=False)
-    #     )
+    @Slot(Observation)
+    def select_observation(self, observation: Observation):
+        """Update input info from an observation object (loaded from Observations tab)"""
+        # TODO: Infinite loop
+        # self.input_obs_id.set_id(observation.id)
+        self.data_source_card.clear()
+        card = ObservationInfoCard(observation=observation, delayed_load=False)
+        card.on_click.connect(self.on_select_observation_tab)
+        self.data_source_card.addWidget(card)
 
     def select_observation_id(self, observation_id: int):
+        """Select an observation ID from text input or clipboard; will be loaded by
+        ObservationController and finished with self.select_observation()
+        """
         self.on_select_observation_id.emit(observation_id)
         self.info(f'Observation {observation_id} selected')
 
     def select_taxon_id(self, taxon_id: int):
-        """Select a taxon ID from text input; will be loaded by TaxonController and finished with
-        self.select_taxon()
+        """Select a taxon ID from text input or clipboard; will be loaded by
+        TaxonController and finished with self.select_taxon()
         """
         self.on_select_taxon_id.emit(taxon_id)
         self.info(f'Taxon {taxon_id} selected')
