@@ -35,7 +35,7 @@ from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FlowLayout,
     HorizontalLayout,
-    IconLabel,
+    FAIcon,
     ImageWindow,
     StylableWidget,
     VerticalLayout,
@@ -151,7 +151,7 @@ class ImageGallery(StylableWidget):
 
     @Slot(str)
     def select_image(self, image_path: Path):
-        self.image_window.display_image(image_path, list(self.images.keys()))
+        self.image_window.display_image_fullscreen(image_path, list(self.images.keys()))
 
 
 class ThumbnailCard(StylableWidget):
@@ -192,7 +192,7 @@ class ThumbnailCard(StylableWidget):
         layout.addWidget(self.label)
 
         # Icon shown when an image is tagged or updated
-        self.check = IconLabel('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT[0])
+        self.check = FAIcon('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT[0])
         self.check.setVisible(False)
 
     def load_image(self):
@@ -397,11 +397,11 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(9, img_size[0] - 11, 116, 20)
 
-        self.taxon_icon = IconLabel('mdi.bird', secondary=True, size=20)
-        self.observation_icon = IconLabel('fa.binoculars', secondary=True, size=20)
-        self.geo_icon = IconLabel('fa.map-marker', secondary=True, size=20)
-        self.tag_icon = IconLabel('fa.tags', secondary=True, size=20)
-        self.sidecar_icon = IconLabel('mdi.xml', secondary=True, size=20)
+        self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
+        self.observation_icon = FAIcon('fa.binoculars', secondary=True, size=20)
+        self.geo_icon = FAIcon('fa.map-marker', secondary=True, size=20)
+        self.tag_icon = FAIcon('fa.tags', secondary=True, size=20)
+        self.sidecar_icon = FAIcon('mdi.xml', secondary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)
         self.icon_layout.addWidget(self.observation_icon)
         self.icon_layout.addWidget(self.geo_icon)

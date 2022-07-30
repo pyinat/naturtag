@@ -19,7 +19,7 @@ from naturtag.widgets import (
     TaxonList,
 )
 from naturtag.widgets.layouts import VerticalLayout
-from naturtag.widgets.taxon_images import HoverTaxonPhoto
+from naturtag.widgets.taxon_images import TaxonPhoto
 
 logger = getLogger(__name__)
 
@@ -46,7 +46,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.setAlignment(Qt.AlignTop)
 
         # Medium taxon default photo
-        self.image = HoverTaxonPhoto(hover_icon=True)
+        self.image = TaxonPhoto(hover_icon=True)
         self.image.setObjectName('selected_taxon')
         self.image.setFixedHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
@@ -87,7 +87,7 @@ class TaxonInfoSection(HorizontalLayout):
 
         # Fullscreen image viewer
         self.image_window = TaxonImageWindow()
-        self.image.on_click.connect(self.image_window.display_taxon)
+        self.image.on_click.connect(self.image_window.display_taxon_fullscreen)
 
     def load(self, taxon: Taxon):
         """Load default photo + additional thumbnails"""
@@ -104,6 +104,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.history_taxon = None
         self.selected_taxon = taxon
         self.group_box.setTitle(taxon.full_name)
+        self.image.taxon = taxon
         self.image.set_pixmap_async(
             self.threadpool,
             photo=taxon.default_photo,
@@ -114,9 +115,9 @@ class TaxonInfoSection(HorizontalLayout):
         # Load additional thumbnails
         self.taxon_thumbnails.clear()
         for i, photo in enumerate(taxon.taxon_photos[1:11] if taxon.taxon_photos else []):
-            thumb = HoverTaxonPhoto(taxon=taxon, idx=i + 1)
+            thumb = TaxonPhoto(taxon=taxon, idx=i + 1)
             thumb.setFixedSize(*SIZE_SM)
-            thumb.on_click.connect(self.image_window.display_taxon)
+            thumb.on_click.connect(self.image_window.display_taxon_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
             self.taxon_thumbnails.add_widget(thumb)
 
@@ -190,5 +191,5 @@ class TaxonomySection(HorizontalLayout):
 
     @property
     def taxa(self) -> Iterator['TaxonInfoCard']:
-        yield from self.ancestors_list.taxa
-        yield from self.children_list.taxa
+        yield from self.ancestors_list.cards
+        yield from self.children_list.cards
