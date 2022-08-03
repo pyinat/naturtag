@@ -150,7 +150,7 @@ class SettingContainer(HorizontalLayout):
         self.title_layout = VerticalLayout()
         self.title_layout.addWidget(title)
 
-        attr_meta = getattr(fields(Settings), setting_attr).metadata
+        attr_meta = getattr(fields(Settings), setting_attr).metadata  # type: ignore  # false positive
         description = attr_meta.get('doc')
         if description:
             self.title_layout.addWidget(QLabel(description))

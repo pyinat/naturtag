@@ -28,17 +28,22 @@ class ObservationInfoCard(InfoCard):
 
     def __init__(self, observation: Observation, delayed_load: bool = True):
         super().__init__(card_id=observation.id)
-        self.setFixedHeight(120)
+        self.setFixedHeight(130)
         self.observation = observation
 
-        # Image
         if not delayed_load:
             pixmap = self.thumbnail.get_pixmap(url=observation.thumbnail_url)
             self.thumbnail.setPixmap(pixmap)
 
-        # Details: taxon name quality grade, place guess, age, number of ids, number of photos
-        self.title.setText(observation.taxon.full_name if observation.taxon else 'unknown taxon')
-        self.title.setObjectName('h1_italic')
+        # Title: Taxon name
+        if observation.taxon:
+            t = observation.taxon
+            common_name = f' ({t.preferred_common_name.title()})' if t.preferred_common_name else ''
+            self.title.setText(f'{t.rank.title()}: <i>{t.name}</i>{common_name}')
+        else:
+            self.title.setText('Unknown Taxon')
+
+        # Details: Date, place guess, quality grade, number of ids, number of photos
         date = (
             observation.observed_on.strftime('%Y-%m-%d')
             if observation.observed_on
