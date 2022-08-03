@@ -70,9 +70,6 @@ class MainWindow(QMainWindow):
 
         # Select observation/taxon from image context menu, ID input fields, and iconic taxa filters
         self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
-        # self.image_controller.on_select_observation_id.connect(
-        #     self.taxon_controller.select_observation_taxon
-        # )
         self.image_controller.on_select_observation_id.connect(
             self.observation_controller.select_observation
         )
@@ -87,7 +84,7 @@ class MainWindow(QMainWindow):
         # Update photo and taxon tabs when an observation is selected
         self.observation_controller.on_select.connect(self.image_controller.select_observation)
         self.observation_controller.on_select.connect(
-            lambda obs: self.taxon_controller.select_taxon(obs.taxon.id, notify=False)
+            lambda obs: self.taxon_controller.display_taxon(obs.taxon, notify=False)
         )
 
         # Settings that take effect immediately

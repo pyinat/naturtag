@@ -23,30 +23,40 @@ class iNatDbClient(iNatClient):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.observations = ObservationDbController(self)
         self.taxa = TaxonDbController(self)
+        self.observations = ObservationDbController(self, taxon_controller=self.taxa)
 
 
 # TODO: Expiration?
 class ObservationDbController(ObservationController):
+    def __init__(self, *args, taxon_controller: 'TaxonDbController', **kwargs):
+        """Need a reference to taxon controller to get full taxon ancestry"""
+        super().__init__(*args, **kwargs)
+        self.taxon_controller = taxon_controller
+
     def from_ids(
-        self, *observation_ids, refresh: bool = False, **params
+        self, *observation_ids, refresh: bool = False, taxonomy: bool = False, **params
     ) -> WrapperPaginator[Observation]:
         """Get observations by ID; first from the database, then from the API"""
         # Get any observations saved in the database (unless refreshing)
-        db_results = list(get_db_observations(DB_PATH, ids=observation_ids)) if not refresh else []
-        logger.debug(f'{len(db_results)} observations found in database')
+        start = time()
+        observations = [] if refresh else list(get_db_observations(DB_PATH, ids=observation_ids))
+        logger.debug(f'{len(observations)} observations found in database')
 
         # Get remaining observations from the API and save to the database
-        remaining_ids = set(observation_ids) - {obs.id for obs in db_results}
+        remaining_ids = set(observation_ids) - {obs.id for obs in observations}
         if remaining_ids:
             logger.debug(f'Fetching remaining {len(remaining_ids)} observations from API')
-            results = super().from_ids(*remaining_ids, **params).all()
-            save_observations(results, DB_PATH)
-        else:
-            results = []
+            api_results = super().from_ids(*remaining_ids, **params).all()
+            observations.extend(api_results)
+            save_observations(api_results, DB_PATH)
 
-        return WrapperPaginator(db_results + results)
+        # Add full taxonomy to observations, if specified
+        if taxonomy:
+            self.taxon_controller._get_taxonomy([obs.taxon for obs in observations])
+
+        logger.debug(f'Finished in {time()-start:.2f} seconds')
+        return WrapperPaginator(observations)
 
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
@@ -64,43 +74,48 @@ class TaxonDbController(TaxonController):
         **params,
     ) -> WrapperPaginator[Taxon]:
         """Get taxa by ID; first from the database, then from the API"""
-        start = time()
         # Get any taxa saved in the database (unless refreshing)
-        if not refresh:
-            db_results = self._get_db_taxa(list(taxon_ids), accept_partial)
-        else:
-            db_results = []
-        logger.debug(f'{len(db_results)} taxa found in database')
+        start = time()
+        taxa = [] if refresh else self._get_db_taxa(list(taxon_ids), accept_partial)
+        logger.debug(f'{len(taxa)} taxa found in database')
 
         # Get remaining taxa from the API and save to the database
-        remaining_ids = set(taxon_ids) - {taxon.id for taxon in db_results}
+        remaining_ids = set(taxon_ids) - {taxon.id for taxon in taxa}
         if remaining_ids:
             logger.debug(f'Fetching remaining {len(remaining_ids)} taxa from API')
-            results = super().from_ids(*remaining_ids, **params).all() if remaining_ids else []
-            save_taxa(results, DB_PATH)
-        else:
-            results = []
+            api_results = super().from_ids(*remaining_ids, **params).all() if remaining_ids else []
+            taxa.extend(api_results)
+            save_taxa(api_results, DB_PATH)
 
         logger.debug(f'Finished in {time()-start:.2f} seconds')
-        return WrapperPaginator(db_results + results)
+        return WrapperPaginator(taxa)
 
     def _get_db_taxa(self, taxon_ids: list[int], accept_partial: bool = False):
         db_results = list(get_db_taxa(DB_PATH, ids=taxon_ids, accept_partial=accept_partial))
-
-        # DB records only contain ancestor/child IDs, so we need another query to fetch full records
-        # This could be done in SQL, but a many-to-many relationship with ancestors would get messy
         if not accept_partial:
-            fetch_ids = chain.from_iterable([t.ancestor_ids + t.child_ids for t in db_results])
-            taxa = {t.id: t for t in self.from_ids(*set(fetch_ids), accept_partial=True)}
-            for taxon in db_results:
-                # Depending on data source, the taxon itself may have already been added to ancestry
-                # TODO: Fix in pyinaturalist.Taxon and/or pyinaturalist_convert.db
-                taxon.ancestors = [
-                    taxa[id] for id in taxon.ancestor_ids if id not in [ROOT_TAXON_ID, taxon.id]
-                ]
-                taxon.children = [taxa[id] for id in taxon.child_ids]
-
+            db_results = self._get_taxonomy(db_results)
         return db_results
+
+    def _get_taxonomy(self, taxa: list[Taxon]) -> list[Taxon]:
+        """Add ancestor and descendant records to all the specified taxa.
+
+        DB records only contain ancestor/child IDs, so we need another query to fetch full records
+        This could be done in SQL, but a many-to-many relationship with ancestors would get messy.
+        Besides, some may be missing and need to be fetched from the API.
+        """
+        fetch_ids = chain.from_iterable([t.ancestor_ids + t.child_ids for t in taxa])
+        extended_taxa = {t.id: t for t in self.from_ids(*set(fetch_ids), accept_partial=True)}
+
+        for taxon in taxa:
+            # Depending on data source, the taxon itself may have already been added to ancestry
+            # TODO: Fix in pyinaturalist.Taxon and/or pyinaturalist_convert.db
+            taxon.ancestors = [
+                extended_taxa[id]
+                for id in taxon.ancestor_ids
+                if id not in [ROOT_TAXON_ID, taxon.id]
+            ]
+            taxon.children = [extended_taxa[id] for id in taxon.child_ids]
+        return taxa
 
     # TODO: Don't use all
     def search(self, **params) -> WrapperPaginator[Taxon]:

@@ -70,7 +70,7 @@ class TaxonController(StylableWidget):
         self.add_shortcut('Ctrl+Shift+R', self.search.reset)
         self.add_shortcut('Ctrl+Shift+Enter', self.search.search)
 
-    def select_taxon(self, taxon_id: int, notify: bool = False):
+    def select_taxon(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a
         separate thread, return to main thread, and then display info will be loaded from a separate
         thread.
@@ -86,16 +86,7 @@ class TaxonController(StylableWidget):
         future = self.threadpool.schedule(
             lambda: INAT_CLIENT.taxa(taxon_id), priority=QThread.HighPriority
         )
-        future.on_result.connect(lambda taxon: self.display_taxon(taxon, notify=notify))
-
-    def select_observation_taxon(self, observation_id: int):
-        """Load a taxon from an observation ID"""
-        if self.tabs._init_complete:
-            self.threadpool.cancel()
-        future = self.threadpool.schedule(
-            lambda: INAT_CLIENT.observations(observation_id), priority=QThread.HighPriority
-        )
-        future.on_result.connect(self.display_taxon)
+        future.on_result.connect(lambda taxon: self.display_taxon(taxon))
 
     @Slot(Taxon)
     def display_taxon(self, taxon: Taxon, notify: bool = True):
