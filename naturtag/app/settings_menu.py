@@ -13,20 +13,18 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from naturtag.controllers import BaseController
 from naturtag.settings import Settings
-from naturtag.widgets import IconLabel, StylableWidget, ToggleSwitch
-from naturtag.widgets.layouts import HorizontalLayout, VerticalLayout
+from naturtag.widgets import FAIcon, HorizontalLayout, ToggleSwitch, VerticalLayout
 
 logger = getLogger(__name__)
 
 
-class SettingsMenu(StylableWidget):
+class SettingsMenu(BaseController):
     """Application settings menu, with input widgets connected to values in settings file"""
 
-    on_message = Signal(str)  #: Forward a message to status bar
-
     def __init__(self, settings: Settings):
-        super().__init__()
+        super().__init__(settings)
         self.settings = settings
         self.settings_layout = VerticalLayout(self)
 
@@ -144,7 +142,7 @@ class SettingContainer(HorizontalLayout):
     def __init__(self, icon_str: str, setting_attr: str, setting_title: str = None):
         super().__init__()
         self.setAlignment(Qt.AlignLeft)
-        self.addWidget(IconLabel(icon_str, size=32))
+        self.addWidget(FAIcon(icon_str, size=32))
 
         title_str = setting_title or setting_attr.replace('_', ' ').title()
         title = QLabel(title_str)

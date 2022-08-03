@@ -29,13 +29,13 @@ from PySide6.QtWidgets import (
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import IMAGE_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
+from naturtag.controllers import BaseController
 from naturtag.metadata import MetaMetadata
-from naturtag.settings import Settings
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
+    FAIcon,
     FlowLayout,
     HorizontalLayout,
-    IconLabel,
     ImageWindow,
     StylableWidget,
     VerticalLayout,
@@ -45,21 +45,19 @@ from naturtag.widgets.images import HoverMixin, PixmapLabel
 logger = getLogger(__name__)
 
 
-class ImageGallery(StylableWidget):
+class ImageGallery(BaseController):
     """Container for displaying local image thumbnails & info"""
 
     on_load_images = Signal(list)  #: New images have been loaded
-    on_message = Signal(str)  #: Forward a message to status bar
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
+    on_select_observation = Signal(int)  #: An observation was selected from context menu
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.setAcceptDrops(True)
         self.images: dict[Path, ThumbnailCard] = {}
         self.image_window = ImageWindow()
         self.image_window.on_remove.connect(self.remove_image)
-        self.settings = settings
-        self.threadpool = threadpool
         root = VerticalLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 
@@ -131,6 +129,7 @@ class ImageGallery(StylableWidget):
         thumbnail.on_select.connect(self.select_image)
         thumbnail.on_copy.connect(self.on_message)
         thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon)
+        thumbnail.context_menu.on_select_observation.connect(self.on_select_observation)
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -151,7 +150,7 @@ class ImageGallery(StylableWidget):
 
     @Slot(str)
     def select_image(self, image_path: Path):
-        self.image_window.display_image(image_path, list(self.images.keys()))
+        self.image_window.display_image_fullscreen(image_path, list(self.images.keys()))
 
 
 class ThumbnailCard(StylableWidget):
@@ -192,7 +191,7 @@ class ThumbnailCard(StylableWidget):
         layout.addWidget(self.label)
 
         # Icon shown when an image is tagged or updated
-        self.check = IconLabel('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT[0])
+        self.check = FAIcon('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT[0])
         self.check.setVisible(False)
 
     def load_image(self):
@@ -315,6 +314,7 @@ class ThumbnailContextMenu(QMenu):
     """Context menu for local image thumbnails"""
 
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
+    on_select_observation = Signal(int)  #: An observation was selected from context menu
 
     def refresh_actions(self, thumbnail_card: ThumbnailCard):
         """Update menu actions based on the available metadata"""
@@ -336,6 +336,14 @@ class ThumbnailContextMenu(QMenu):
             tooltip=f'View taxon {meta.taxon_id} on inaturalist.org',
             enabled=meta.has_taxon,
             callback=lambda: webbrowser.open(meta.taxon_url),
+        )
+        self._add_action(
+            parent=thumbnail_card,
+            icon='fa.binoculars',
+            text='View Observation',
+            tooltip=f'View observation {meta.observation_id} in naturtag',
+            enabled=meta.has_observation,
+            callback=lambda: self.on_select_observation.emit(meta.observation_id),
         )
         self._add_action(
             parent=thumbnail_card,
@@ -397,11 +405,11 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(9, img_size[0] - 11, 116, 20)
 
-        self.taxon_icon = IconLabel('mdi.bird', secondary=True, size=20)
-        self.observation_icon = IconLabel('fa.binoculars', secondary=True, size=20)
-        self.geo_icon = IconLabel('fa.map-marker', secondary=True, size=20)
-        self.tag_icon = IconLabel('fa.tags', secondary=True, size=20)
-        self.sidecar_icon = IconLabel('mdi.xml', secondary=True, size=20)
+        self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
+        self.observation_icon = FAIcon('fa.binoculars', secondary=True, size=20)
+        self.geo_icon = FAIcon('fa.map-marker', secondary=True, size=20)
+        self.tag_icon = FAIcon('fa.tags', secondary=True, size=20)
+        self.sidecar_icon = FAIcon('mdi.xml', secondary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)
         self.icon_layout.addWidget(self.observation_icon)
         self.icon_layout.addWidget(self.geo_icon)

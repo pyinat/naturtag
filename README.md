@@ -1,7 +1,7 @@
 # Naturtag
 
 [![Build status](https://github.com/JWCook/naturtag/workflows/Build/badge.svg)](https://github.com/JWCook/naturtag/actions)
-[![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io)
+[![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=latest)](https://naturtag.readthedocs.io/en/stable/)
 [![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)](https://github.com/JWCook/naturtag/issues)
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
@@ -43,9 +43,10 @@ are supported by some photo viewers/editors like
 [**Lightroom**](https://millennialdiyer.com/articles/photography/lightroom-keyword-hierarchy/),
 [**FastPictureViewer**](https://www.fastpictureviewer.com),
 [**Photo Mechanic**](https://www.photometadata.org/META-Tutorials-Photo-Mechanic-Applying-Keywords),
-and [**XnViewMP**](https://www.xnview.com/en/xnviewmp).
+[**digiKam**](https://www.digikam.org), and
+[**XnViewMP**](https://www.xnview.com/en/xnviewmp).
 
-This essentially gives you a phylogenetic tree for browsing and filtering your photos.
+This basically gives you a taxonomic tree for browsing and filtering your photos.
 
 <details>
 <summary><b>Example in XnView</b></summary>
@@ -65,7 +66,6 @@ Example search using these tags: https://www.flickr.com/photos/tags/taxonomy:cla
 
 ![screenshot](assets/screenshots/flickr.png)
 </details>
-
 
 ### Other biodiversity tools
 Finally, naturtag can improve interoperability with other tools and systems that interact with biodiversity

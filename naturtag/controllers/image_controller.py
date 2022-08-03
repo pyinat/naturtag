@@ -1,41 +1,42 @@
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from pyinaturalist import Taxon
+from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QWidget
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel
 
-from naturtag.app.threadpool import ThreadPool
-from naturtag.controllers import ImageGallery
-from naturtag.metadata import _refresh_tags, get_ids_from_url, tag_images
-from naturtag.metadata.meta_metadata import MetaMetadata
-from naturtag.settings import Settings
-from naturtag.widgets import HorizontalLayout, IdInput, TaxonInfoCard, VerticalLayout
+from naturtag.controllers import BaseController, ImageGallery
+from naturtag.metadata import MetaMetadata, _refresh_tags, get_ids_from_url, tag_images
+from naturtag.widgets import (
+    HorizontalLayout,
+    IdInput,
+    ObservationInfoCard,
+    TaxonInfoCard,
+    VerticalLayout,
+)
 
 logger = getLogger(__name__)
 
 
 # TODO: Handle write errors (like file locked) and show dialog
-class ImageController(QWidget):
+class ImageController(BaseController):
     """Controller for selecting and tagging local image files"""
 
-    on_message = Signal(str)  #: Forward a message to status bar
     on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
-    on_select_observation_id = Signal(int)  #: An observation ID was entered
     on_select_taxon_id = Signal(int)  #: A taxon ID was entered
     on_select_taxon_tab = Signal()  #: Request to switch to taxon tab
+    on_select_observation_id = Signal(int)  #: An observation ID was entered
+    on_select_observation_tab = Signal()  #: Request to switch to observation tab
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
-        super().__init__()
-        self.settings = settings
-        self.threadpool = threadpool
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         photo_layout = VerticalLayout(self)
         self.on_new_metadata.connect(self.update_metadata)
 
         # Input group
         group_box = QGroupBox('Selected metadata source')
         group_box.setFixedHeight(150)
-        group_box.setFixedWidth(600)
+        group_box.setFixedWidth(800)
         data_source_layout = HorizontalLayout(group_box)
         photo_layout.addWidget(group_box)
 
@@ -49,9 +50,9 @@ class ImageController(QWidget):
         inputs_layout.addWidget(QLabel('Taxon ID:'))
         inputs_layout.addWidget(self.input_taxon_id)
 
-        # Notify other controllers when an ID is selected
-        self.input_obs_id.on_select.connect(self.select_observation_id)
-        self.input_taxon_id.on_select.connect(self.select_taxon_id)
+        # Notify other controllers when an ID is selected from input text
+        self.input_obs_id.on_select.connect(self.on_select_observation_id)
+        self.input_taxon_id.on_select.connect(self.on_select_taxon_id)
 
         # Selected taxon/observation info
         data_source_layout.addStretch()
@@ -61,10 +62,10 @@ class ImageController(QWidget):
         # Clear info when clearing an input field
         self.input_obs_id.on_clear.connect(self.data_source_card.clear)
         self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
-        self.input_obs_id.on_clear.connect(self.input_taxon_id.clear)
 
         # Image gallery
-        self.gallery = ImageGallery(settings, threadpool)
+        self.gallery = ImageGallery(self.settings, self.threadpool)
+        self.gallery.on_select_observation.connect(self.on_select_observation_tab)
         self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
 
@@ -128,11 +129,9 @@ class ImageController(QWidget):
         # Check for IDs if an iNat URL was pasted
         observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
-            self.input_obs_id.set_id(observation_id)
-            self.select_observation_id(observation_id)
+            self.on_select_observation_id.emit(observation_id)
         elif taxon_id:
-            self.input_taxon_id.set_id(taxon_id)
-            self.select_taxon_id(taxon_id)
+            self.on_select_taxon_id.emit(taxon_id)
         # If not an iNat URL, check for valid image paths
         else:
             self.gallery.load_images(text.splitlines())
@@ -140,31 +139,27 @@ class ImageController(QWidget):
     @Slot(Taxon)
     def select_taxon(self, taxon: Taxon):
         """Update input info from a taxon object (loaded from Species tab)"""
+        if self.input_taxon_id.text() == str(taxon.id):
+            return
+
         self.input_taxon_id.set_id(taxon.id)
         self.data_source_card.clear()
         card = TaxonInfoCard(taxon=taxon, delayed_load=False)
         card.on_click.connect(self.on_select_taxon_tab)
         self.data_source_card.addWidget(card)
 
-    # @Slot(Observation)
-    # def select_observation(self, observation: Observation):
-    #     """Update input info from an observation object (loaded from Observations tab)"""
-    #     self.input_taxon_id.set_id(observation.id)
-    #     self.data_source_card.clear()
-    #     self.data_source_card.addWidget(
-    #         ObservationInfoCard(observation=observation, delayed_load=False)
-    #     )
+    @Slot(Observation)
+    def select_observation(self, observation: Observation):
+        """Update input info from an observation object (loaded from Observations tab)"""
+        if self.input_obs_id.text() == str(observation.id):
+            return
 
-    def select_observation_id(self, observation_id: int):
-        self.on_select_observation_id.emit(observation_id)
-        self.info(f'Observation {observation_id} selected')
-
-    def select_taxon_id(self, taxon_id: int):
-        """Select a taxon ID from text input; will be loaded by TaxonController and finished with
-        self.select_taxon()
-        """
-        self.on_select_taxon_id.emit(taxon_id)
-        self.info(f'Taxon {taxon_id} selected')
+        self.input_obs_id.set_id(observation.id)
+        self.input_taxon_id.set_id(observation.taxon.id)
+        self.data_source_card.clear()
+        card = ObservationInfoCard(observation=observation, delayed_load=False)
+        card.on_click.connect(self.on_select_observation_tab)
+        self.data_source_card.addWidget(card)
 
     def info(self, message: str):
         self.on_message.emit(message)

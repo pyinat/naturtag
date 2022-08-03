@@ -25,9 +25,9 @@ from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, TaxonController
+from naturtag.controllers.observation_controller import ObservationController
 from naturtag.settings import Settings, setup
-from naturtag.widgets import init_handler
-from naturtag.widgets.layouts import VerticalLayout
+from naturtag.widgets import VerticalLayout, init_handler
 
 # Provide an application group so Windows doesn't use the default 'python' icon
 try:
@@ -60,25 +60,36 @@ class MainWindow(QMainWindow):
         self.settings_menu = SettingsMenu(self.settings)
         self.image_controller = ImageController(self.settings, self.threadpool)
         self.taxon_controller = TaxonController(self.settings, self.threadpool)
+        self.observation_controller = ObservationController(self.settings, self.threadpool)
 
         # Connect controllers and their widgets to statusbar info
         self.settings_menu.on_message.connect(self.info)
         self.image_controller.on_message.connect(self.info)
         self.image_controller.gallery.on_message.connect(self.info)
         self.taxon_controller.on_message.connect(self.info)
+        self.observation_controller.on_message.connect(self.info)
 
-        # Select taxon from image context menu, ID input fields, and iconic taxa filtes
+        # Select observation/taxon from image context menu, ID input fields, and iconic taxa filters
         self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
+        self.image_controller.gallery.on_select_observation.connect(
+            self.observation_controller.select_observation
+        )
         self.image_controller.on_select_observation_id.connect(
-            self.taxon_controller.select_observation_taxon
+            self.observation_controller.select_observation
         )
         self.image_controller.on_select_taxon_id.connect(self.taxon_controller.select_taxon)
         self.taxon_controller.search.iconic_taxon_filters.on_select.connect(
             self.taxon_controller.select_taxon
         )
 
-        # Update taxon ID on main page when a taxon is selected
+        # Update photo tab when a taxon is selected
         self.taxon_controller.on_select.connect(self.image_controller.select_taxon)
+
+        # Update photo and taxon tabs when an observation is selected
+        self.observation_controller.on_select.connect(self.image_controller.select_observation)
+        self.observation_controller.on_select.connect(
+            lambda obs: self.taxon_controller.display_taxon(obs.taxon, notify=False)
+        )
 
         # Settings that take effect immediately
         self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
@@ -89,7 +100,7 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.setIconSize(QSize(32, 32))
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
-        # self.tabs.addTab(QWidget(), fa_icon('fa5s.binoculars'), 'Observations')
+        self.tabs.addTab(self.observation_controller, fa_icon('fa5s.binoculars'), 'Observations')
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
 
         # Root layout: tabs + progress bar
@@ -103,9 +114,12 @@ class MainWindow(QMainWindow):
         self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
         self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
 
-        # Switch to Taxon tab if requested from Photos tab
+        # Switch to differet tab if requested from Photos tab
         self.image_controller.on_select_taxon_tab.connect(
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
+        )
+        self.image_controller.on_select_observation_tab.connect(
+            lambda: self.tabs.setCurrentWidget(self.observation_controller)
         )
 
         # Connect file picker <--> recent/favorite dirs
@@ -141,7 +155,7 @@ class MainWindow(QMainWindow):
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
-            self.taxon_controller.select_taxon(47792)
+            self.observation_controller.select_observation(56830941)
 
     def closeEvent(self, _):
         """Save settings before closing the app"""

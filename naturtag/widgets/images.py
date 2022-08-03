@@ -1,20 +1,24 @@
-"""Generic image widgets"""
+"""Generic image widgets and base classes for other page-specific widgets.
+Includes plain images, cards, scrollable lists, and fullscreen image views.
+"""
 from logging import getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, Type, TypeAlias
+from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
-from PySide6.QtWidgets import QLabel, QWidget
+from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.app.threadpool import ThreadPool
 from naturtag.client import IMG_SESSION
-from naturtag.constants import SIZE_ICON, PathOrStr
+from naturtag.constants import SIZE_ICON, SIZE_SM, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
+from naturtag.widgets.layouts import HorizontalLayout
 
 if TYPE_CHECKING:
+    from naturtag.app.threadpool import ThreadPool
+
     MIXIN_BASE: TypeAlias = QWidget
 else:
     MIXIN_BASE = object
@@ -22,7 +26,7 @@ else:
 logger = getLogger(__name__)
 
 
-class IconLabel(QLabel):
+class FAIcon(QLabel):
     """A QLabel for displaying a FontAwesome icon"""
 
     def __init__(
@@ -46,6 +50,22 @@ class IconLabel(QLabel):
         )
 
 
+class IconLabel(QWidget):
+    def __init__(
+        self, icon_str: str, text: str, size: int = SIZE_ICON[0], parent: QWidget = None, **kwargs
+    ):
+        super().__init__(parent)
+        self.setFixedHeight(size * 2)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+
+        self.icon = FAIcon(icon_str, size=size, **kwargs)
+        self.label = QLabel(text)
+        root = HorizontalLayout(self)
+        root.addWidget(self.icon)
+        root.addWidget(self.label)
+        root.setAlignment(Qt.AlignLeft)
+
+
 class PixmapLabel(QLabel):
     """A QLabel containing a pixmap that preserves its aspect ratio when resizing, with optional
     description text
@@ -62,11 +82,13 @@ class PixmapLabel(QLabel):
         description: str = None,
         resample: bool = True,
         scale: bool = True,
+        idx: int = 0,
     ):
         super().__init__(parent)
         self.setMinimumSize(1, 1)
         self.setScaledContents(False)
         self._pixmap = None
+        self.idx = idx
         self.path = None
         self.description = description
         self.scale = scale
@@ -97,7 +119,7 @@ class PixmapLabel(QLabel):
 
     def set_pixmap_async(
         self,
-        threadpool: ThreadPool,
+        threadpool: 'ThreadPool',
         priority: QThread.Priority = QThread.NormalPriority,
         path: PathOrStr = None,
         photo: Photo = None,
@@ -130,6 +152,7 @@ class PixmapLabel(QLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.on_click.emit(self)
+        super().mouseReleaseEvent(event)
 
     def paintEvent(self, event):
         """Draw optional description text in the upper left corner of the image"""
@@ -172,36 +195,47 @@ class PixmapLabel(QLabel):
         return QSize(self.width(), self.heightForWidth(self.width()))
 
 
-class HoverMixinBase(MIXIN_BASE):
-    """Base class for HoverMixin, to allow activating overlay on parent hover"""
+class HoverMixin(MIXIN_BASE):
+    """Mixin that adds a transparent overlay to darken the image on hover (handled in QSS)
 
-    def __init__(self, *args, hover_icon: bool = False, **kwargs):
+    Args:
+        hover_icon: Add an 'open' icon on hover
+        disable_hover_event: Don't automatically show overlay on hover
+            (e.g., to use parent widget hover event instead)
+    """
+
+    def __init__(
+        self, *args, hover_icon: bool = False, disable_hover_event: bool = False, **kwargs
+    ):
         super().__init__(*args, **kwargs)
-        self.overlay = IconLabel('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
+        self.overlay = FAIcon('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
         self.overlay.setAlignment(Qt.AlignTop)
         self.overlay.setAutoFillBackground(True)
         self.overlay.setGeometry(self.geometry())
         self.overlay.setObjectName('hover_overlay')
         self.overlay.setVisible(False)
+        self.disable_hover_event = disable_hover_event
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.overlay.setFixedSize(self.size())
 
-
-class HoverMixin(HoverMixinBase):
-    """Mixin that adds a transparent overlay to darken the image on hover (handled in QSS)"""
-
     def enterEvent(self, event):
-        self.overlay.setVisible(True)
+        if not self.disable_hover_event:
+            self.overlay.setVisible(True)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self.overlay.setVisible(False)
+        if not self.disable_hover_event:
+            self.overlay.setVisible(False)
         super().leaveEvent(event)
 
 
-class HoverIcon(IconLabel):
+class HoverPhoto(HoverMixin, PixmapLabel):
+    """PixmapLabel with a hover effect"""
+
+
+class HoverIcon(FAIcon):
     """IconLabel with a hover effect and click event"""
 
     on_click = Signal(object)
@@ -218,6 +252,7 @@ class HoverIcon(IconLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.on_click.emit(self)
+        super().mouseReleaseEvent(event)
 
 
 class NavButtonsMixin(MIXIN_BASE):
@@ -239,6 +274,103 @@ class FullscreenPhoto(NavButtonsMixin, PixmapLabel):
     """A fullscreen photo widget with nav buttons"""
 
 
+class InfoCard(StylableWidget):
+    """Card containing a thumbnail and additional details"""
+
+    on_click = Signal(int)
+
+    def __init__(self, card_id: int = None):
+        super().__init__()
+        card_layout = HorizontalLayout(self)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.card_id = card_id
+
+        # Image
+        self.thumbnail = HoverPhoto(disable_hover_event=True)  # Use card hover event instead
+        self.thumbnail.setFixedSize(*SIZE_SM)
+        card_layout.addWidget(self.thumbnail)
+
+        # Details
+        self.title = QLabel()
+        self.details_layout = VerticalLayout()
+        self.details_layout.addWidget(self.title)
+        card_layout.addLayout(self.details_layout)
+
+    def add_line(self, widget: QWidget):
+        """Add a widget as a line of info to the card"""
+        self.details_layout.addWidget(widget)
+
+    def enterEvent(self, event):
+        """Note on hover effect:
+        * Thumbnail: this method triggers overlay
+        * Card background: Handled in QSS
+        """
+        self.thumbnail.overlay.setVisible(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.thumbnail.overlay.setVisible(False)
+        super().leaveEvent(event)
+
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.on_click.emit(self.card_id)
+
+
+class InfoCardList(StylableWidget):
+    """A scrollable list of InfoCards"""
+
+    def __init__(self, threadpool: 'ThreadPool', parent: QWidget = None):
+        super().__init__(parent)
+        self.threadpool = threadpool
+        self.root = VerticalLayout(self)
+        self.root.setAlignment(Qt.AlignTop)
+        self.root.setContentsMargins(0, 5, 5, 0)
+
+        self.scroller = QScrollArea()
+        self.scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroller.setWidgetResizable(True)
+        self.scroller.setWidget(self)
+
+    @property
+    def cards(self) -> Iterator[InfoCard]:
+        for item in self.children():
+            if isinstance(item, InfoCard):
+                yield item
+
+    def add_card(self, card: InfoCard, thumbnail_url: str, idx: int = None):
+        """Add a card immediately, and load its thumbnail from a separate thread"""
+        if idx is not None:
+            self.root.insertWidget(idx, card)
+        else:
+            self.root.addWidget(card)
+        card.thumbnail.set_pixmap_async(self.threadpool, url=thumbnail_url)
+
+    def clear(self):
+        self.root.clear()
+
+    def contains(self, card_id: int) -> bool:
+        return self.get_card_by_id(card_id) is not None
+
+    def get_card_by_id(self, card_id: int) -> Optional[InfoCard]:
+        for card in self.cards:
+            if card.card_id == card_id:
+                return card
+        return None
+
+    def move_card(self, card_id: int, idx: int = 0) -> bool:
+        """Move a card to the specified position, if found; return ``False`` otherwise"""
+        card = self.get_card_by_id(card_id)
+        if card:
+            self.root.removeWidget(card)
+            self.root.insertWidget(idx, card)
+            return True
+        return False
+
+
 class ImageWindow(StylableWidget):
     """Display local images in fullscreen as a separate window
 
@@ -247,13 +379,13 @@ class ImageWindow(StylableWidget):
 
     on_remove = Signal(Path)  #: Request for image to be removed from list
 
-    def __init__(self, image_class: Type[FullscreenPhoto] = FullscreenPhoto):
+    def __init__(self):
         super().__init__()
         self.image_paths: list[Path] = []
         self.selected_path = Path('.')
         self.setWindowTitle('Naturtag')
 
-        self.image = image_class()
+        self.image = FullscreenPhoto()
         self.image.setAlignment(Qt.AlignCenter)
         self.image_layout = VerticalLayout(self)
         self.image_layout.addWidget(self.image)
@@ -275,7 +407,7 @@ class ImageWindow(StylableWidget):
         """The index of the currently selected image"""
         return self.image_paths.index(self.selected_path)
 
-    def display_image(self, selected_path: Path, image_paths: list[Path]):
+    def display_image_fullscreen(self, selected_path: Path, image_paths: list[Path]):
         """Open window to a selected image, and save other available image paths for navigation"""
         self.selected_path = selected_path
         self.image_paths = image_paths

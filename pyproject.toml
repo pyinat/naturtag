@@ -1,6 +1,6 @@
 [tool.poetry]
 name = 'naturtag'
-version = '0.7.0'
+version = '0.8.0'
 description = 'A tool for tagging your iNaturalist photo collection with observation metadata'
 authors = ['Jordan Cook']
 license = 'MIT'

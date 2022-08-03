@@ -11,15 +11,17 @@ from naturtag.widgets.autocomplete import TaxonAutocomplete
 from naturtag.widgets.images import (
     FullscreenPhoto,
     HoverIcon,
-    IconLabel,
+    HoverPhoto,
+    FAIcon,
+    InfoCard,
+    InfoCardList,
     ImageWindow,
     PixmapLabel,
 )
 from naturtag.widgets.inputs import IdInput
 from naturtag.widgets.logger import QtRichHandler, init_handler
+from naturtag.widgets.observation_images import ObservationInfoCard, ObservationPhoto
 from naturtag.widgets.taxon_images import (
-    FullscreenTaxonPhoto,
-    HoverTaxonPhoto,
     TaxonImageWindow,
     TaxonInfoCard,
     TaxonList,

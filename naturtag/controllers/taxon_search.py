@@ -19,7 +19,7 @@ from naturtag.widgets import (
     ToggleSwitch,
     VerticalLayout,
 )
-from naturtag.widgets.images import IconLabel
+from naturtag.widgets.images import FAIcon
 
 logger = getLogger(__name__)
 
@@ -62,7 +62,7 @@ class TaxonSearch(VerticalLayout):
         group_box = self.add_group('Parent', self, width=400)
         button_layout = HorizontalLayout()
         button_layout.setAlignment(Qt.AlignLeft)
-        button_layout.addWidget(IconLabel('mdi.file-tree', size=20))
+        button_layout.addWidget(FAIcon('mdi.file-tree', size=20))
         group_box.addLayout(button_layout)
         self.search_children_desc = QLabel('Search within children of selected taxon')
         self.search_children_desc.setTextFormat(Qt.RichText)
@@ -194,7 +194,7 @@ class RankList(HorizontalLayout):
     def __init__(self, label: str, icon_str: str, all_ranks: bool = False):
         super().__init__()
         self.setAlignment(Qt.AlignLeft)
-        self.addWidget(IconLabel(icon_str, size=20))
+        self.addWidget(FAIcon(icon_str, size=20))
         self.addWidget(QLabel(label))
         self.addStretch()
 

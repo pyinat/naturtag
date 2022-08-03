@@ -9,30 +9,21 @@ from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import MAX_DISPLAY_OBSERVED
-from naturtag.controllers import TaxonInfoSection, TaxonomySection, TaxonSearch
+from naturtag.controllers import BaseController, TaxonInfoSection, TaxonomySection, TaxonSearch
 from naturtag.metadata.inat_metadata import get_observed_taxa
 from naturtag.settings import Settings, UserTaxa
-from naturtag.widgets import (
-    HorizontalLayout,
-    StylableWidget,
-    TaxonInfoCard,
-    TaxonList,
-    VerticalLayout,
-)
+from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
 
 logger = getLogger(__name__)
 
 
-class TaxonController(StylableWidget):
+class TaxonController(BaseController):
     """Controller for searching and viewing taxa"""
 
-    on_message = Signal(str)  #: Forward a message to status bar
     on_select = Signal(Taxon)  #: A taxon was selected
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
-        super().__init__()
-        self.settings = settings
-        self.threadpool = threadpool
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.user_taxa = UserTaxa.read()
 
         self.root = HorizontalLayout(self)
@@ -40,24 +31,24 @@ class TaxonController(StylableWidget):
         self.selected_taxon: Taxon = None
 
         # Search inputs
-        self.search = TaxonSearch(settings)
+        self.search = TaxonSearch(self.settings)
         self.search.autocomplete.on_select.connect(self.select_taxon)
         self.search.on_results.connect(self.set_search_results)
         self.on_select.connect(self.search.set_taxon)
         self.root.addLayout(self.search)
 
-        # Search results & User taxa
-        self.tabs = TaxonTabs(threadpool, self.settings, self.user_taxa)
+        # Search results & user taxa
+        self.tabs = TaxonTabs(self.settings, self.threadpool, self.user_taxa)
         self.tabs.on_load.connect(self.bind_selection)
         self.root.addWidget(self.tabs)
         self.on_select.connect(self.tabs.update_history)
         self.search.on_reset.connect(self.tabs.results.clear)
 
         # Selected taxon info
-        self.taxon_info = TaxonInfoSection(threadpool)
+        self.taxon_info = TaxonInfoSection(self.threadpool)
         self.taxon_info.on_select.connect(self.select_taxon)
         self.taxon_info.on_select_obj.connect(self.display_taxon)
-        self.taxonomy = TaxonomySection(threadpool)
+        self.taxonomy = TaxonomySection(self.threadpool)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
@@ -86,26 +77,17 @@ class TaxonController(StylableWidget):
         future = self.threadpool.schedule(
             lambda: INAT_CLIENT.taxa(taxon_id), priority=QThread.HighPriority
         )
-        future.on_result.connect(self.display_taxon)
-
-    def select_observation_taxon(self, observation_id: int):
-        """Load a taxon from an observation ID"""
-        logger.info(f'Selecting observation {observation_id}')
-        if self.tabs._init_complete:
-            self.threadpool.cancel()
-        future = self.threadpool.schedule(
-            lambda: INAT_CLIENT.observations(observation_id).taxon, priority=QThread.HighPriority
-        )
-        future.on_result.connect(self.display_taxon)
+        future.on_result.connect(lambda taxon: self.display_taxon(taxon))
 
     @Slot(Taxon)
-    def display_taxon(self, taxon: Taxon):
+    def display_taxon(self, taxon: Taxon, notify: bool = True):
         self.selected_taxon = taxon
-        self.on_select.emit(taxon)
+        if notify:
+            self.on_select.emit(taxon)
         self.taxon_info.load(self.selected_taxon)
         self.taxonomy.load(self.selected_taxon)
-        self.bind_selection(self.taxonomy.ancestors_list.taxa)
-        self.bind_selection(self.taxonomy.children_list.taxa)
+        self.bind_selection(self.taxonomy.ancestors_list.cards)
+        self.bind_selection(self.taxonomy.children_list.cards)
         logger.debug(f'Loaded taxon {self.selected_taxon.id}')
 
     def set_search_results(self, taxa: list[Taxon]):
@@ -114,7 +96,7 @@ class TaxonController(StylableWidget):
             self.on_message.emit('No results found')
         self.tabs.results.set_taxa(taxa)
         self.tabs.setCurrentWidget(self.tabs.results)
-        self.bind_selection(self.tabs.results.taxa)
+        self.bind_selection(self.tabs.results.cards)
 
     def bind_selection(self, taxon_cards: Iterable[TaxonInfoCard]):
         """Connect click signal from each taxon card to select_taxon()"""
@@ -129,8 +111,8 @@ class TaxonTabs(QTabWidget):
 
     def __init__(
         self,
-        threadpool: ThreadPool,
         settings: Settings,
+        threadpool: ThreadPool,
         user_taxa: UserTaxa,
         parent: QWidget = None,
     ):
@@ -160,7 +142,7 @@ class TaxonTabs(QTabWidget):
         # Add a delay before loading user taxa on startup
         QTimer.singleShot(2, self.load_user_taxa)
 
-    def add_tab(self, taxon_list: TaxonList, icon_str: str, label: str, tooltip: str) -> QWidget:
+    def add_tab(self, taxon_list: TaxonList, icon_str: str, label: str, tooltip: str) -> TaxonList:
         idx = super().addTab(taxon_list.scroller, fa_icon(icon_str), label)
         self.setTabToolTip(idx, tooltip)
         return taxon_list
@@ -189,7 +171,7 @@ class TaxonTabs(QTabWidget):
         """
         taxa_by_id = {t.id: t for t in taxa}
         self.recent.set_taxa([taxa_by_id.get(taxon_id) for taxon_id in self.user_taxa.top_history])
-        self.on_load.emit(list(self.recent.taxa))
+        self.on_load.emit(list(self.recent.cards))
 
         # Add counts to taxon cards in 'Frequent' tab, for sorting later
         def get_taxon_count(taxon_id: int) -> TaxonCount:
@@ -200,26 +182,26 @@ class TaxonTabs(QTabWidget):
         self.frequent.set_taxa(
             [get_taxon_count(taxon_id) for taxon_id in self.user_taxa.top_frequent]
         )
-        self.on_load.emit(list(self.frequent.taxa))
+        self.on_load.emit(list(self.frequent.cards))
 
     @Slot(list)
     def display_observed(self, taxon_counts: TaxonCounts):
         """After fetching observation taxon counts for the user, add info cards for them"""
         self.observed.set_taxa(list(taxon_counts)[:MAX_DISPLAY_OBSERVED])
         self.user_taxa.update_observed(taxon_counts)
-        self.on_load.emit(list(self.observed.taxa))
+        self.on_load.emit(list(self.observed.cards))
 
     @Slot(Taxon)
     def update_history(self, taxon: Taxon):
         """Update history and frequent lists with the selected taxon. If it was already in one or
         both lists, update its position in the list(s).
         """
-        self.recent.add_or_update(taxon)
+        self.recent.add_or_update_taxon(taxon)
         self.user_taxa.update_history(taxon.id)
 
         idx = self.user_taxa.frequent_idx(taxon.id)
         if idx is not None:
-            self.frequent.add_or_update(taxon, idx)
+            self.frequent.add_or_update_taxon(taxon, idx)
 
     def resizeEvent(self, event):
         """On resize, show tab labels if there is enough room for at least a couple characters each
