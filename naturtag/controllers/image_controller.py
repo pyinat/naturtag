@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QApplication, QGroupBox, QLabel
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QSizePolicy
 
 from naturtag.controllers import BaseController, ImageGallery
 from naturtag.metadata import MetaMetadata, _refresh_tags, get_ids_from_url, tag_images
@@ -35,8 +35,9 @@ class ImageController(BaseController):
 
         # Input group
         group_box = QGroupBox('Selected metadata source')
-        group_box.setFixedHeight(150)
-        group_box.setFixedWidth(800)
+        group_box.setFixedHeight(170)
+        # group_box.setFixedWidth(800)
+        group_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
         data_source_layout = HorizontalLayout(group_box)
         photo_layout.addWidget(group_box)
 
