@@ -29,8 +29,8 @@ from PySide6.QtWidgets import (
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import IMAGE_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
+from naturtag.controllers import BaseController
 from naturtag.metadata import MetaMetadata
-from naturtag.settings import Settings
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FAIcon,
@@ -45,22 +45,19 @@ from naturtag.widgets.images import HoverMixin, PixmapLabel
 logger = getLogger(__name__)
 
 
-class ImageGallery(StylableWidget):
+class ImageGallery(BaseController):
     """Container for displaying local image thumbnails & info"""
 
     on_load_images = Signal(list)  #: New images have been loaded
-    on_message = Signal(str)  #: Forward a message to status bar
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
     on_select_observation = Signal(int)  #: An observation was selected from context menu
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.setAcceptDrops(True)
         self.images: dict[Path, ThumbnailCard] = {}
         self.image_window = ImageWindow()
         self.image_window.on_remove.connect(self.remove_image)
-        self.settings = settings
-        self.threadpool = threadpool
         root = VerticalLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 

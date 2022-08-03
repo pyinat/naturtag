@@ -9,30 +9,21 @@ from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import MAX_DISPLAY_OBSERVED
-from naturtag.controllers import TaxonInfoSection, TaxonomySection, TaxonSearch
+from naturtag.controllers import BaseController, TaxonInfoSection, TaxonomySection, TaxonSearch
 from naturtag.metadata.inat_metadata import get_observed_taxa
 from naturtag.settings import Settings, UserTaxa
-from naturtag.widgets import (
-    HorizontalLayout,
-    StylableWidget,
-    TaxonInfoCard,
-    TaxonList,
-    VerticalLayout,
-)
+from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
 
 logger = getLogger(__name__)
 
 
-class TaxonController(StylableWidget):
+class TaxonController(BaseController):
     """Controller for searching and viewing taxa"""
 
-    on_message = Signal(str)  #: Forward a message to status bar
     on_select = Signal(Taxon)  #: A taxon was selected
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
-        super().__init__()
-        self.settings = settings
-        self.threadpool = threadpool
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.user_taxa = UserTaxa.read()
 
         self.root = HorizontalLayout(self)
@@ -40,24 +31,24 @@ class TaxonController(StylableWidget):
         self.selected_taxon: Taxon = None
 
         # Search inputs
-        self.search = TaxonSearch(settings)
+        self.search = TaxonSearch(self.settings)
         self.search.autocomplete.on_select.connect(self.select_taxon)
         self.search.on_results.connect(self.set_search_results)
         self.on_select.connect(self.search.set_taxon)
         self.root.addLayout(self.search)
 
-        # Search results & User taxa
-        self.tabs = TaxonTabs(threadpool, self.settings, self.user_taxa)
+        # Search results & user taxa
+        self.tabs = TaxonTabs(self.settings, self.threadpool, self.user_taxa)
         self.tabs.on_load.connect(self.bind_selection)
         self.root.addWidget(self.tabs)
         self.on_select.connect(self.tabs.update_history)
         self.search.on_reset.connect(self.tabs.results.clear)
 
         # Selected taxon info
-        self.taxon_info = TaxonInfoSection(threadpool)
+        self.taxon_info = TaxonInfoSection(self.threadpool)
         self.taxon_info.on_select.connect(self.select_taxon)
         self.taxon_info.on_select_obj.connect(self.display_taxon)
-        self.taxonomy = TaxonomySection(threadpool)
+        self.taxonomy = TaxonomySection(self.threadpool)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
@@ -120,8 +111,8 @@ class TaxonTabs(QTabWidget):
 
     def __init__(
         self,
-        threadpool: ThreadPool,
         settings: Settings,
+        threadpool: ThreadPool,
         user_taxa: UserTaxa,
         parent: QWidget = None,
     ):
