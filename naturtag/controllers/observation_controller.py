@@ -29,6 +29,10 @@ class ObservationController(StylableWidget):
         self.root.addWidget(QLabel("Observation"))
 
     def select_observation(self, observation_id: int):
+        # Don't need to do anything if this observation is already selected
+        if self.selected_observation and self.selected_observation.id == observation_id:
+            return
+
         logger.info(f'Selecting observation {observation_id}')
         future = self.threadpool.schedule(
             lambda: INAT_CLIENT.observations(observation_id, taxonomy=True),

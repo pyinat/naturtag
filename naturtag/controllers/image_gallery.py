@@ -51,6 +51,7 @@ class ImageGallery(StylableWidget):
     on_load_images = Signal(list)  #: New images have been loaded
     on_message = Signal(str)  #: Forward a message to status bar
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
+    on_select_observation = Signal(int)  #: An observation was selected from context menu
 
     def __init__(self, settings: Settings, threadpool: ThreadPool):
         super().__init__()
@@ -131,6 +132,7 @@ class ImageGallery(StylableWidget):
         thumbnail.on_select.connect(self.select_image)
         thumbnail.on_copy.connect(self.on_message)
         thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon)
+        thumbnail.context_menu.on_select_observation.connect(self.on_select_observation)
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -315,6 +317,7 @@ class ThumbnailContextMenu(QMenu):
     """Context menu for local image thumbnails"""
 
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
+    on_select_observation = Signal(int)  #: An observation was selected from context menu
 
     def refresh_actions(self, thumbnail_card: ThumbnailCard):
         """Update menu actions based on the available metadata"""
@@ -336,6 +339,14 @@ class ThumbnailContextMenu(QMenu):
             tooltip=f'View taxon {meta.taxon_id} on inaturalist.org',
             enabled=meta.has_taxon,
             callback=lambda: webbrowser.open(meta.taxon_url),
+        )
+        self._add_action(
+            parent=thumbnail_card,
+            icon='fa.binoculars',
+            text='View Observation',
+            tooltip=f'View observation {meta.observation_id} in naturtag',
+            enabled=meta.has_observation,
+            callback=lambda: self.on_select_observation.emit(meta.observation_id),
         )
         self._add_action(
             parent=thumbnail_card,
