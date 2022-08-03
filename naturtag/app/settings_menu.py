@@ -13,20 +13,18 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from naturtag.controllers import BaseController
 from naturtag.settings import Settings
-from naturtag.widgets import FAIcon, StylableWidget, ToggleSwitch
-from naturtag.widgets.layouts import HorizontalLayout, VerticalLayout
+from naturtag.widgets import FAIcon, HorizontalLayout, ToggleSwitch, VerticalLayout
 
 logger = getLogger(__name__)
 
 
-class SettingsMenu(StylableWidget):
+class SettingsMenu(BaseController):
     """Application settings menu, with input widgets connected to values in settings file"""
 
-    on_message = Signal(str)  #: Forward a message to status bar
-
     def __init__(self, settings: Settings):
-        super().__init__()
+        super().__init__(settings)
         self.settings = settings
         self.settings_layout = VerticalLayout(self)
 

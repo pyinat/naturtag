@@ -2,31 +2,26 @@ from logging import getLogger
 
 from pyinaturalist import Observation
 from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtWidgets import QLabel
 
-from naturtag.app.threadpool import ThreadPool
 from naturtag.client import INAT_CLIENT
-from naturtag.settings import Settings
-from naturtag.widgets import HorizontalLayout, StylableWidget
+from naturtag.controllers import BaseController
+from naturtag.widgets import HorizontalLayout
 
 logger = getLogger(__name__)
 
 
-class ObservationController(StylableWidget):
+class ObservationController(BaseController):
 
-    on_message = Signal(str)  #: Forward a message to status bar
     on_select = Signal(Observation)  #: An observation was selected
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
-        super().__init__()
-        self.settings = settings
-        self.threadpool = threadpool
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
         self.selected_observation: Observation = None
 
-        self.root.addWidget(QLabel("Observation"))
+        # TODO: basically everything
+        # self.root.addWidget(QLabel("Observation"))
 
     def select_observation(self, observation_id: int):
         # Don't need to do anything if this observation is already selected

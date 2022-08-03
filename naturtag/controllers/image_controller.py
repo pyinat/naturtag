@@ -3,13 +3,10 @@ from typing import TYPE_CHECKING
 
 from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QWidget
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel
 
-from naturtag.app.threadpool import ThreadPool
-from naturtag.controllers import ImageGallery
-from naturtag.metadata import _refresh_tags, get_ids_from_url, tag_images
-from naturtag.metadata.meta_metadata import MetaMetadata
-from naturtag.settings import Settings
+from naturtag.controllers import BaseController, ImageGallery
+from naturtag.metadata import MetaMetadata, _refresh_tags, get_ids_from_url, tag_images
 from naturtag.widgets import (
     HorizontalLayout,
     IdInput,
@@ -22,20 +19,17 @@ logger = getLogger(__name__)
 
 
 # TODO: Handle write errors (like file locked) and show dialog
-class ImageController(QWidget):
+class ImageController(BaseController):
     """Controller for selecting and tagging local image files"""
 
-    on_message = Signal(str)  #: Forward a message to status bar
     on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
     on_select_taxon_id = Signal(int)  #: A taxon ID was entered
     on_select_taxon_tab = Signal()  #: Request to switch to taxon tab
     on_select_observation_id = Signal(int)  #: An observation ID was entered
     on_select_observation_tab = Signal()  #: Request to switch to observation tab
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool):
-        super().__init__()
-        self.settings = settings
-        self.threadpool = threadpool
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         photo_layout = VerticalLayout(self)
         self.on_new_metadata.connect(self.update_metadata)
 
@@ -70,7 +64,7 @@ class ImageController(QWidget):
         self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
 
         # Image gallery
-        self.gallery = ImageGallery(settings, threadpool)
+        self.gallery = ImageGallery(self.settings, self.threadpool)
         self.gallery.on_select_observation.connect(self.on_select_observation_tab)
         self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
