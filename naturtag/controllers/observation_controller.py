@@ -31,7 +31,8 @@ class ObservationController(StylableWidget):
     def select_observation(self, observation_id: int):
         logger.info(f'Selecting observation {observation_id}')
         future = self.threadpool.schedule(
-            lambda: INAT_CLIENT.observations(observation_id), priority=QThread.HighPriority
+            lambda: INAT_CLIENT.observations(observation_id, taxonomy=True),
+            priority=QThread.HighPriority,
         )
         future.on_result.connect(self.display_observation)
 
