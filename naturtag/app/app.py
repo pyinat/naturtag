@@ -67,9 +67,13 @@ class MainWindow(QMainWindow):
         self.image_controller.on_message.connect(self.info)
         self.image_controller.gallery.on_message.connect(self.info)
         self.taxon_controller.on_message.connect(self.info)
+        self.observation_controller.on_message.connect(self.info)
 
         # Select observation/taxon from image context menu, ID input fields, and iconic taxa filters
         self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
+        self.image_controller.gallery.on_select_observation.connect(
+            self.observation_controller.select_observation
+        )
         self.image_controller.on_select_observation_id.connect(
             self.observation_controller.select_observation
         )
