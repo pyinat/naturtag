@@ -52,10 +52,15 @@ class FAIcon(QLabel):
 
 class IconLabel(QWidget):
     def __init__(
-        self, icon_str: str, text: str, size: int = SIZE_ICON[0], parent: QWidget = None, **kwargs
+        self,
+        icon_str: str,
+        text: str,
+        size: int = SIZE_ICON[0],
+        parent: QWidget = None,
+        **kwargs,
     ):
         super().__init__(parent)
-        self.setFixedHeight(size * 2)
+        self.setFixedHeight(size + 15)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.icon = FAIcon(icon_str, size=size, **kwargs)
@@ -185,10 +190,9 @@ class PixmapLabel(QLabel):
     def scaledPixmap(self) -> QPixmap:
         if self._pixmap is None:
             self._pixmap = QPixmap()
-        if not self.scale:
             return self._pixmap
-        if TYPE_CHECKING:
-            assert self._pixmap is not None
+        elif self._pixmap.isNull() or not self.scale:
+            return self._pixmap
         return self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, self.xform)
 
     def sizeHint(self) -> QSize:
@@ -292,6 +296,8 @@ class InfoCard(StylableWidget):
 
         # Details
         self.title = QLabel()
+        self.title.setTextFormat(Qt.RichText)
+        self.title.setObjectName('h1')
         self.details_layout = VerticalLayout()
         self.details_layout.addWidget(self.title)
         card_layout.addLayout(self.details_layout)

@@ -31,16 +31,14 @@ class TaxonInfoCard(InfoCard):
         if isinstance(taxon, TaxonCount):
             self.setToolTip(f'Count: {taxon.count}')
 
-        # Image
         if not delayed_load:
             pixmap = self.thumbnail.get_pixmap(url=taxon.default_photo.thumbnail_url)
             self.thumbnail.setPixmap(pixmap)
 
         # Details
-        self.title.setText(taxon.name)
-        self.title.setObjectName('h1_italic')
-        self.add_line(QLabel(taxon.rank))
-        self.add_line(QLabel(taxon.preferred_common_name))
+        self.title.setText(f'<i>{taxon.name}</i>')
+        self.add_line(QLabel(taxon.rank.title()))
+        self.add_line(QLabel((taxon.preferred_common_name or '').title()))
 
 
 class TaxonList(InfoCardList):
