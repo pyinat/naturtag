@@ -103,6 +103,14 @@ def get_inat_metadata(
         logger.warning(f'No taxon found: {taxon_id}')
         return None
 
+    # If there's a taxon only (no observation), check for any taxonomy changes
+    if (
+        not observation_id
+        and not taxon.is_active
+        and len(taxon.current_synonymous_taxon_ids or []) == 1
+    ):
+        taxon = INAT_CLIENT.taxa(taxon.current_synonymous_taxon_ids[0], refresh=True)
+
     # Get all specified keyword categories
     keywords = _get_taxonomy_keywords(taxon)
     if hierarchical:

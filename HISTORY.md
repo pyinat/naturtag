@@ -1,5 +1,9 @@
 # History
 
+## 0.8.0 (Unreleased)
+* If an observation is selected, show a summary of basic observation details on main screen
+* In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
+
 ## 0.7.0 (2022-07-29)
 * Rebuilt UI from scratch using Qt
 * Build local taxon and observation database for partial online access and better performance
