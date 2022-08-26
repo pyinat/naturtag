@@ -161,7 +161,7 @@ class ImageController(BaseController):
         self.input_obs_id.set_id(observation.id)
         self.input_taxon_id.set_id(observation.taxon.id)
         self.data_source_card.clear()
-        card = ObservationInfoCard(observation=observation, delayed_load=False)
+        card = ObservationInfoCard(obs=observation, delayed_load=False)
         card.on_click.connect(self.on_select_observation_tab)
         self.data_source_card.addWidget(card)
 
