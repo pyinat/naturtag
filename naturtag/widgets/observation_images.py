@@ -107,15 +107,21 @@ class ObservationList(InfoCardList):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def add_observation(self, observation: Observation, idx: int = None):
+    def add_observation(self, observation: Observation, idx: int = None) -> ObservationInfoCard:
         """Add a card immediately, and load its thumbnail from a separate thread"""
         card = ObservationInfoCard(observation)
         super().add_card(card, observation.thumbnail_url, idx=idx)
+        return card
 
-    def add_or_update_observation(self, observation: Observation, idx: int = 0):
-        """Move a card to the specified position, and add a new one if it doesn't exist"""
+    def add_or_update_observation(
+        self, observation: Observation, idx: int = 0
+    ) -> Optional[ObservationInfoCard]:
+        """Move a card to the specified position, and add a new one if it doesn't exist.
+        Return True if a new card was added.
+        """
         if not self.move_card(observation.id, idx):
-            self.add_observation(observation, idx)
+            return self.add_observation(observation, idx)
+        return None
 
     def set_observations(self, observations: Iterable[Observation]):
         """Replace all existing cards with new ones for the specified observations"""
