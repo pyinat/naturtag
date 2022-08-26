@@ -3,8 +3,10 @@ from logging import getLogger
 from typing import Iterable
 
 from pyinaturalist import Observation
+from PySide6.QtCore import Qt
 
 from naturtag.widgets.images import HoverPhoto, IconLabel, InfoCard, InfoCardList
+from naturtag.widgets.layouts import HorizontalLayout
 
 logger = getLogger(__name__)
 
@@ -28,7 +30,7 @@ class ObservationInfoCard(InfoCard):
 
     def __init__(self, observation: Observation, delayed_load: bool = True):
         super().__init__(card_id=observation.id)
-        self.setFixedHeight(130)
+        self.setFixedHeight(100)
         self.observation = observation
 
         if not delayed_load:
@@ -43,25 +45,43 @@ class ObservationInfoCard(InfoCard):
         else:
             self.title.setText('Unknown Taxon')
 
-        # Details: Date, place guess, quality grade, number of ids, number of photos
-        date = (
+        # Details: Date, place guess, number of ids and photos, quality grade
+        date_str = (
             observation.observed_on.strftime('%Y-%m-%d')
             if observation.observed_on
             else 'unknown date'
         )
         quality_icon = QUALITY_GRADE_ICONS.get(observation.quality_grade, 'mdi.chevron-up')
+        num_ids = observation.identifications_count or len(observation.identifications)
+        num_photos = len(observation.photos)
+        photos_icon = 'fa5.images' if num_photos > 1 else 'fa5.image'
+        quality_str = observation.quality_grade.replace('_', ' ').title()
 
-        self.add_line(IconLabel('fa5.calendar-alt', date, size=20))
-        self.add_line(
+        layout = HorizontalLayout()
+        layout.setSpacing(0)
+        layout.setAlignment(Qt.AlignLeft)
+        layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=20))
+        layout.addWidget(IconLabel('mdi.marker-check', str(num_ids), size=20))
+        layout.addWidget(IconLabel(photos_icon, str(num_photos), size=20))
+        layout.addWidget(IconLabel(quality_icon, quality_str, size=20))
+        self.details_layout.addLayout(layout)
+        self.details_layout.addWidget(
             IconLabel('fa.map-marker', observation.place_guess or observation.location, size=20)
         )
-        self.add_line(
-            IconLabel(
-                quality_icon,
-                f'IDs: {len(observation.identifications)} | Photos: {len(observation.photos)}',
-                size=20,
-            )
-        )
+
+        # Add more verbose details in tooltip
+        tooltip_lines = [
+            f'Observed on: {observation.observed_on}',
+            f'Submitted on: {observation.created_at}',
+            f'Taxon: {observation.taxon.full_name}',
+            f'Location: {observation.place_guess}',
+            f'Coordinates: {observation.location}',
+            f'Positional accuracy: {observation.positional_accuracy or 0}m',
+            f'Identifications: {num_ids}',
+            f'Photos: {num_photos}',
+            f'Quality grade: {observation.quality_grade}',
+        ]
+        self.setToolTip('\n'.join(tooltip_lines))
 
 
 class ObservationList(InfoCardList):
