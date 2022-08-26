@@ -91,8 +91,11 @@ class TaxonInfoSection(HorizontalLayout):
 
     def load(self, taxon: Taxon):
         """Load default photo + additional thumbnails"""
+        if self.selected_taxon and taxon.id == self.selected_taxon.id:
+            return
+
         # Append to history, unless we just loaded a taxon from history
-        if self.selected_taxon and taxon != self.history_taxon:
+        if self.selected_taxon and taxon.id != getattr(self.history_taxon, 'id', None):
             self.hist_prev.append(self.selected_taxon)
             self.hist_next.clear()
         logger.debug(
