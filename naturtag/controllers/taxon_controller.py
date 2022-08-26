@@ -46,8 +46,8 @@ class TaxonController(BaseController):
 
         # Selected taxon info
         self.taxon_info = TaxonInfoSection(self.threadpool)
-        self.taxon_info.on_select.connect(self.select_taxon)
-        self.taxon_info.on_select_obj.connect(self.display_taxon)
+        self.taxon_info.on_select_id.connect(self.select_taxon)
+        self.taxon_info.on_select.connect(self.display_taxon)
         self.taxonomy = TaxonomySection(self.threadpool)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)

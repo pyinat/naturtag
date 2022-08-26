@@ -10,6 +10,11 @@ from naturtag.widgets.layouts import HorizontalLayout
 
 logger = getLogger(__name__)
 
+GEOPRIVACY_ICONS = {
+    'open': 'mdi.map-marker-check',
+    'obscured': 'mdi.map-marker-question',
+    'private': 'mdi.map-marker-remove-variant',
+}
 QUALITY_GRADE_ICONS = {
     'casual': 'mdi.chevron-up',
     'needs_id': 'mdi.chevron-double-up',
@@ -28,58 +33,70 @@ class ObservationPhoto(HoverPhoto):
 class ObservationInfoCard(InfoCard):
     """Card containing an observation thumbnail and basic info"""
 
-    def __init__(self, observation: Observation, delayed_load: bool = True):
-        super().__init__(card_id=observation.id)
+    def __init__(self, obs: Observation, delayed_load: bool = True):
+        super().__init__(card_id=obs.id)
         self.setFixedHeight(100)
-        self.observation = observation
+        self.observation = obs
 
         if not delayed_load:
-            pixmap = self.thumbnail.get_pixmap(url=observation.thumbnail_url)
+            pixmap = self.thumbnail.get_pixmap(url=obs.thumbnail_url)
             self.thumbnail.setPixmap(pixmap)
 
         # Title: Taxon name
-        if observation.taxon:
-            t = observation.taxon
+        if obs.taxon:
+            t = obs.taxon
             common_name = f' ({t.preferred_common_name.title()})' if t.preferred_common_name else ''
             self.title.setText(f'{t.rank.title()}: <i>{t.name}</i>{common_name}')
         else:
             self.title.setText('Unknown Taxon')
 
         # Details: Date, place guess, number of ids and photos, quality grade
-        date_str = (
-            observation.observed_on.strftime('%Y-%m-%d')
-            if observation.observed_on
-            else 'unknown date'
-        )
-        quality_icon = QUALITY_GRADE_ICONS.get(observation.quality_grade, 'mdi.chevron-up')
-        num_ids = observation.identifications_count or len(observation.identifications)
-        num_photos = len(observation.photos)
-        photos_icon = 'fa5.images' if num_photos > 1 else 'fa5.image'
-        quality_str = observation.quality_grade.replace('_', ' ').title()
-
+        date_str = obs.observed_on.strftime('%Y-%m-%d') if obs.observed_on else 'unknown date'
+        num_ids = obs.identifications_count or len(obs.identifications)
+        num_photos = len(obs.photos)
         layout = HorizontalLayout()
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignLeft)
         layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=20))
         layout.addWidget(IconLabel('mdi.marker-check', str(num_ids), size=20))
-        layout.addWidget(IconLabel(photos_icon, str(num_photos), size=20))
-        layout.addWidget(IconLabel(quality_icon, quality_str, size=20))
+        layout.addWidget(
+            IconLabel(
+                'fa5.images' if num_photos > 1 else 'fa5.image',
+                str(num_photos),
+                size=20,
+            )
+        )
+        if obs.sounds:
+            layout.addWidget(
+                IconLabel(
+                    'ri.volume-up-fill',
+                    str(len(obs.sounds)),
+                    size=20,
+                )
+            )
+        layout.addWidget(
+            IconLabel(
+                QUALITY_GRADE_ICONS.get(obs.quality_grade, 'mdi.chevron-up'),
+                obs.quality_grade.replace('_', ' ').title(),
+                size=20,
+            )
+        )
         self.details_layout.addLayout(layout)
         self.details_layout.addWidget(
-            IconLabel('fa.map-marker', observation.place_guess or observation.location, size=20)
+            IconLabel('fa.map-marker', obs.place_guess or obs.location, size=20)
         )
 
         # Add more verbose details in tooltip
         tooltip_lines = [
-            f'Observed on: {observation.observed_on}',
-            f'Submitted on: {observation.created_at}',
-            f'Taxon: {observation.taxon.full_name}',
-            f'Location: {observation.place_guess}',
-            f'Coordinates: {observation.location}',
-            f'Positional accuracy: {observation.positional_accuracy or 0}m',
-            f'Identifications: {num_ids}',
+            f'Observed on: {obs.observed_on}',
+            f'Submitted on: {obs.created_at}',
+            f'Taxon: {obs.taxon.full_name}',
+            f'Location: {obs.place_guess}',
+            f'Coordinates: {obs.location}',
+            f'Positional accuracy: {obs.positional_accuracy or 0}m',
+            f'Identifications: {num_ids} ({obs.num_identification_agreements or 0} agree)',
             f'Photos: {num_photos}',
-            f'Quality grade: {observation.quality_grade}',
+            f'Sounds: {len(obs.sounds)}' f'Quality grade: {obs.quality_grade}',
         ]
         self.setToolTip('\n'.join(tooltip_lines))
 
@@ -145,7 +162,6 @@ class ObservationImageWindow(ImageWindow):
 
     def set_photo(self, photo: Photo):
         self.image.setPixmap(self.image.get_pixmap(url=photo.original_url))
-        self.image.description = str(self.observation)
 
     def remove_image(self):
         pass

@@ -65,6 +65,7 @@ class IconLabel(QWidget):
 
         self.icon = FAIcon(icon_str, size=size, **kwargs)
         self.label = QLabel(text)
+        self.label.setTextFormat(Qt.RichText)
         root = HorizontalLayout(self)
         root.addWidget(self.icon)
         root.addWidget(self.label)
