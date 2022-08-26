@@ -1,7 +1,7 @@
 """Image widgets specifically for taxon photos"""
 import re
 from logging import getLogger
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Iterable, Optional
 
 from pyinaturalist import Photo, Taxon, TaxonCount
 from PySide6.QtWidgets import QLabel
@@ -36,7 +36,7 @@ class TaxonInfoCard(InfoCard):
             self.thumbnail.setPixmap(pixmap)
 
         # Details
-        self.title.setText(f'<i>{taxon.name}</i>')
+        self.title.setText(f'{taxon.rank.title()} <i>{taxon.name}</i>')
         self.add_line(QLabel(taxon.rank.title()))
         self.add_line(QLabel((taxon.preferred_common_name or '').title()))
 
@@ -47,15 +47,19 @@ class TaxonList(InfoCardList):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def add_taxon(self, taxon: Taxon, idx: int = None):
+    def add_taxon(self, taxon: Taxon, idx: int = None) -> TaxonInfoCard:
         """Add a card immediately, and load its thumbnail from a separate thread"""
         card = TaxonInfoCard(taxon)
         super().add_card(card, taxon.default_photo.thumbnail_url, idx=idx)
+        return card
 
-    def add_or_update_taxon(self, taxon: Taxon, idx: int = 0):
-        """Move a card to the specified position, and add a new one if it doesn't exist"""
+    def add_or_update_taxon(self, taxon: Taxon, idx: int = 0) -> Optional[TaxonInfoCard]:
+        """Move a card to the specified position, and add a new one if it doesn't exist.
+        Return True if a new card was added.
+        """
         if not self.move_card(taxon.id, idx):
-            self.add_taxon(taxon, idx)
+            return self.add_taxon(taxon, idx)
+        return None
 
     def set_taxa(self, taxa: Iterable[Taxon]):
         """Replace all existing cards with new ones for the specified taxa"""
