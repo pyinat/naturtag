@@ -1,11 +1,11 @@
 """Image widgets specifically for observation photos"""
 from logging import getLogger
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
-from pyinaturalist import Observation
+from pyinaturalist import Observation, Photo
 from PySide6.QtCore import Qt
 
-from naturtag.widgets.images import HoverPhoto, IconLabel, InfoCard, InfoCardList
+from naturtag.widgets.images import HoverPhoto, IconLabel, ImageWindow, InfoCard, InfoCardList
 from naturtag.widgets.layouts import HorizontalLayout
 
 logger = getLogger(__name__)
@@ -106,3 +106,46 @@ class ObservationList(InfoCardList):
         for observation in observations:
             if observation is not None:
                 self.add_observation(observation)
+
+
+class ObservationImageWindow(ImageWindow):
+    """Display observation images in fullscreen as a separate window.
+    Uses URLs instead of local file paths.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.observation: Observation = None
+        self.photos: list[Photo] = None
+        self.selected_photo: Photo = None
+
+    @property
+    def idx(self) -> int:
+        """The index of the currently selected image"""
+        return self.photos.index(self.selected_photo)
+
+    def display_observation_fullscreen(self, observation_photo: ObservationPhoto):
+        """Open window to a selected observation image, and save other image URLs for navigation"""
+        idx = observation_photo.idx
+        obs = observation_photo.observation
+        if TYPE_CHECKING:
+            assert obs is not None
+
+        self.observation = obs
+        self.selected_photo = obs.photos[idx] if obs.photos else Photo()  # TODO
+        self.photos = obs.photos
+        self.image_paths = [photo.original_url for photo in self.photos]
+        self.set_photo(self.selected_photo)
+        self.showFullScreen()
+
+    def select_image_idx(self, idx: int):
+        """Select an image by index"""
+        self.selected_photo = self.photos[idx]
+        self.set_photo(self.selected_photo)
+
+    def set_photo(self, photo: Photo):
+        self.image.setPixmap(self.image.get_pixmap(url=photo.original_url))
+        self.image.description = str(self.observation)
+
+    def remove_image(self):
+        pass
