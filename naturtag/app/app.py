@@ -24,8 +24,7 @@ from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
-from naturtag.controllers import ImageController, TaxonController
-from naturtag.controllers.observation_controller import ObservationController
+from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.settings import Settings, setup
 from naturtag.widgets import VerticalLayout, init_handler
 

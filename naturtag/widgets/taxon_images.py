@@ -66,7 +66,9 @@ class TaxonList(InfoCardList):
 
 
 class TaxonImageWindow(ImageWindow):
-    """Display taxon images in fullscreen as a separate window. Uses URLs instead of local file paths."""
+    """Display taxon images in fullscreen as a separate window.
+    Uses URLs instead of local file paths.
+    """
 
     def __init__(self):
         super().__init__()
@@ -80,13 +82,13 @@ class TaxonImageWindow(ImageWindow):
         return self.photos.index(self.selected_photo)
 
     def display_taxon_fullscreen(self, taxon_photo: TaxonPhoto):
-        """Open window to a selected taxon image, and save other taxon image URLs for navigation"""
+        """Open window to a selected taxon image, and save other image URLs for navigation"""
         idx = taxon_photo.idx
         taxon = taxon_photo.taxon
         if TYPE_CHECKING:
             assert taxon is not None
 
-        self.taxon = taxon_photo.taxon
+        self.taxon = taxon
         self.selected_photo = taxon.taxon_photos[idx] if taxon.taxon_photos else taxon.default_photo
         self.photos = taxon.taxon_photos
         self.image_paths = [photo.original_url for photo in self.photos]

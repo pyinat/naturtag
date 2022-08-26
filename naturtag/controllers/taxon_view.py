@@ -27,8 +27,8 @@ logger = getLogger(__name__)
 class TaxonInfoSection(HorizontalLayout):
     """Section to display selected taxon photo and basic info"""
 
-    on_select = Signal(int)  #: A taxon was selected from 'parent' button
-    on_select_obj = Signal(Taxon)  # :A taxon was selected from nav buttons or another screen
+    on_select = Signal(int)  #: A taxon ID was selected (from 'parent' button)
+    on_select_obj = Signal(Taxon)  #: A taxon object was selected (from nav or another screen)
 
     def __init__(self, threadpool: ThreadPool):
         super().__init__()
@@ -38,7 +38,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.history_taxon: Taxon = None  # Set when loading from history, to avoid loops
         self.selected_taxon: Taxon = None
 
-        self.group_box = QGroupBox('Selected Taxon')
+        self.group_box = QGroupBox('No taxon selected')
         root = VerticalLayout(self.group_box)
         images = HorizontalLayout()
         root.addLayout(images)
@@ -47,7 +47,6 @@ class TaxonInfoSection(HorizontalLayout):
 
         # Medium taxon default photo
         self.image = TaxonPhoto(hover_icon=True)
-        self.image.setObjectName('selected_taxon')
         self.image.setFixedHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
         images.addWidget(self.image)

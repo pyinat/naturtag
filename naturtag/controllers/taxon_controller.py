@@ -84,11 +84,11 @@ class TaxonController(BaseController):
         self.selected_taxon = taxon
         if notify:
             self.on_select.emit(taxon)
-        self.taxon_info.load(self.selected_taxon)
-        self.taxonomy.load(self.selected_taxon)
+        self.taxon_info.load(taxon)
+        self.taxonomy.load(taxon)
         self.bind_selection(self.taxonomy.ancestors_list.cards)
         self.bind_selection(self.taxonomy.children_list.cards)
-        logger.debug(f'Loaded taxon {self.selected_taxon.id}')
+        logger.debug(f'Loaded taxon {taxon.id}')
 
     def set_search_results(self, taxa: list[Taxon]):
         """Load search results into Results tab"""
