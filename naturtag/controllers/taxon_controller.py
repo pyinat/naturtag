@@ -196,12 +196,18 @@ class TaxonTabs(QTabWidget):
         """Update history and frequent lists with the selected taxon. If it was already in one or
         both lists, update its position in the list(s).
         """
-        self.recent.add_or_update_taxon(taxon)
+        new_cards = []
         self.user_taxa.update_history(taxon.id)
+        if card := self.recent.add_or_update_taxon(taxon):
+            new_cards.append(card)
 
         idx = self.user_taxa.frequent_idx(taxon.id)
         if idx is not None:
-            self.frequent.add_or_update_taxon(taxon, idx)
+            if card := self.frequent.add_or_update_taxon(taxon, idx):
+                new_cards.append(card)
+
+        if new_cards:
+            self.on_load.emit(new_cards)
 
     def resizeEvent(self, event):
         """On resize, show tab labels if there is enough room for at least a couple characters each

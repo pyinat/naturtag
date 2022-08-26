@@ -25,8 +25,6 @@ logger = getLogger(__name__)
 
 
 class TaxonSearch(VerticalLayout):
-    """Taxon search"""
-
     on_results = Signal(list)  #: New search results were loaded
     on_reset = Signal()  #: Input fields were reset
 
