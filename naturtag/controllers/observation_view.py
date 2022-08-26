@@ -1,13 +1,13 @@
 """Components for displaying taxon info"""
 # TODO: code reuse with taxon_view
+# TODO: nav history
 import webbrowser
 from collections import deque
 from logging import getLogger
-from typing import Iterator
 
-from pyinaturalist import Observation, Taxon
-from PySide6.QtCore import QEvent, Qt, QThread, Signal
-from PySide6.QtWidgets import QGroupBox, QPushButton
+from pyinaturalist import Observation
+from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton
 
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
@@ -15,10 +15,12 @@ from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
+    IconLabel,
     ObservationImageWindow,
     ObservationPhoto,
     VerticalLayout,
 )
+from naturtag.widgets.observation_images import GEOPRIVACY_ICONS, QUALITY_GRADE_ICONS
 
 logger = getLogger(__name__)
 
@@ -26,38 +28,44 @@ logger = getLogger(__name__)
 class ObservationInfoSection(HorizontalLayout):
     """Section to display selected observation photos and info"""
 
-    on_select_obj = Signal(Observation)  #: An observation was selected
+    on_select = Signal(Observation)  #: An observation was selected
 
     def __init__(self, threadpool: ThreadPool):
         super().__init__()
         self.threadpool = threadpool
-        # self.hist_prev: deque[Taxon] = deque()  # Viewing history for current session only
-        # self.hist_next: deque[Taxon] = deque()  # Set when loading from history
-        # self.history_taxon: Taxon = None  # Set when loading from history, to avoid loops
+        self.hist_prev: deque[Observation] = deque()  # Viewing history for current session only
+        self.hist_next: deque[Observation] = deque()  # Set when loading from history
+        self.history_observation: Observation = None  # Set when loading from history, to avoid loop
         self.selected_observation: Observation = None
 
         self.group_box = QGroupBox('No observation selected')
         root = VerticalLayout(self.group_box)
+        root.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         images = HorizontalLayout()
+        images.setAlignment(Qt.AlignTop)
         root.addLayout(images)
         self.addWidget(self.group_box)
         self.setAlignment(Qt.AlignTop)
 
         # Medium default photo
         self.image = ObservationPhoto(hover_icon=True)
-        self.image.setFixedHeight(395)  # Height of 5 thumbnails + spacing
+        self.image.setMaximumHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
         images.addWidget(self.image)
 
         # Additional thumbnails
-        self.observation_thumbnails = GridLayout(n_columns=2)
-        self.observation_thumbnails.setSpacing(5)
-        self.observation_thumbnails.setAlignment(Qt.AlignTop)
-        images.addLayout(self.observation_thumbnails)
+        self.thumbnails = GridLayout(n_columns=2)
+        self.thumbnails.setSpacing(5)
+        self.thumbnails.setAlignment(Qt.AlignTop)
+        images.addLayout(self.thumbnails)
+
+        self.details = VerticalLayout()
+        self.details.setSpacing(0)
+        root.addLayout(self.details)
 
         # Back and Forward buttons: We already have the full Observation object
-        # button_layout = HorizontalLayout()
-        # root.addLayout(button_layout)
+        button_layout = HorizontalLayout()
+        root.addLayout(button_layout)
         # self.prev_button = QPushButton('Back')
         # self.prev_button.setIcon(fa_icon('ei.chevron-left'))
         # self.prev_button.clicked.connect(self.prev)
@@ -77,18 +85,18 @@ class ObservationInfoSection(HorizontalLayout):
         # button_layout.addWidget(self.parent_button)
 
         # # Link button: Open web browser to taxon info page
-        # self.link_button = QPushButton('View on iNaturalist')
-        # self.link_button.setIcon(fa_icon('mdi.web', primary=True))
-        # self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_observation.url))
-        # button_layout.addWidget(self.link_button)
+        self.link_button = QPushButton('View on iNaturalist')
+        self.link_button.setIcon(fa_icon('mdi.web', primary=True))
+        self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_observation.uri))
+        button_layout.addWidget(self.link_button)
 
         # Fullscreen image viewer
         self.image_window = ObservationImageWindow()
         self.image.on_click.connect(self.image_window.display_observation_fullscreen)
 
-    def load(self, observation: Observation):
+    def load(self, obs: Observation):
         """Load default photo + additional thumbnails"""
-        if self.selected_observation and observation.id == self.selected_observation.id:
+        if self.selected_observation and obs.id == self.selected_observation.id:
             return
 
         # Append to history, unless we just loaded a taxon from history
@@ -102,24 +110,83 @@ class ObservationInfoSection(HorizontalLayout):
 
         # Set title and main photo
         self.history_taxon = None
-        self.selected_observation = observation
-        self.group_box.setTitle(observation.taxon.full_name)
-        self.image.observation = observation
+        self.selected_observation = obs
+        self.group_box.setTitle(obs.taxon.full_name)
+        self.image.observation = obs
         self.image.set_pixmap_async(
             self.threadpool,
-            photo=observation.photos[0],  # TODO: add Observation.default_photo in pyinat
+            photo=obs.photos[0],  # TODO: add Observation.default_photo in pyinat
             priority=QThread.HighPriority,
         )
         # self._update_nav_buttons()
 
         # Load additional thumbnails
-        self.observation_thumbnails.clear()
-        for i, photo in enumerate(observation.photos[1:11] if observation.photos else []):
-            thumb = ObservationPhoto(observation=observation, idx=i + 1)
+        self.thumbnails.clear()
+        for i, photo in enumerate(obs.photos[1:11] if obs.photos else []):
+            thumb = ObservationPhoto(observation=obs, idx=i + 1)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_observation_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
-            self.observation_thumbnails.add_widget(thumb)
+            self.thumbnails.add_widget(thumb)
+
+        # Load observation details
+        # TODO: code reuse with ObservationInfoCard
+        # TODO: Format description in text box with border
+        observed_date_str = (
+            obs.observed_on.strftime('%Y-%m-%d %H:%M:%S') if obs.observed_on else 'unknown date'
+        )
+        created_date_str = (
+            obs.created_at.strftime('%Y-%m-%d %H:%M:%S') if obs.observed_on else 'unknown date'
+        )
+        num_ids = obs.identifications_count or len(obs.identifications)
+        quality_str = obs.quality_grade.replace('_', ' ').title()
+        self.details.clear()
+        description = QLabel(obs.description)
+        description.setWordWrap(True)
+        description.setMaximumWidth(500)
+        self.details.addWidget(description)
+        self.details.addWidget(
+            IconLabel('fa5.calendar-alt', f'<b>Observed on:</b> {observed_date_str}', size=20)
+        )
+        self.details.addWidget(
+            IconLabel('fa5.calendar-alt', f'<b>Submitted on:</b> {created_date_str}', size=20)
+        )
+        self.details.addWidget(
+            IconLabel(
+                'mdi.marker-check',
+                f'<b>Identifications:</b> {num_ids} ({obs.num_identification_agreements or 0} agree)',
+                size=20,
+            )
+        )
+        self.details.addWidget(
+            IconLabel(
+                QUALITY_GRADE_ICONS.get(obs.quality_grade, 'mdi.chevron-up'),
+                f'<b>Quality grade:</b> {quality_str}',
+                size=20,
+            )
+        )
+        self.details.addWidget(
+            IconLabel(
+                'mdi.map-marker',
+                f'<b>Location:</b> {obs.private_place_guess or obs.place_guess}',
+                size=20,
+            )
+        )
+        self.details.addWidget(
+            IconLabel(
+                GEOPRIVACY_ICONS.get(obs.geoprivacy, 'mdi.map-marker'),
+                f'<b>Coordinates:</b> {obs.private_location or obs.location} '
+                f'({obs.geoprivacy or "Unknown geoprivacy"})',
+                size=20,
+            )
+        )
+        self.details.addWidget(
+            IconLabel(
+                'mdi.map-marker-radius',
+                f'<b>Positional accuracy:</b> {obs.positional_accuracy or 0}m',
+                size=20,
+            )
+        )
 
     # def prev(self):
     #     if not self.hist_prev:
@@ -135,17 +202,9 @@ class ObservationInfoSection(HorizontalLayout):
     #     self.hist_prev.append(self.selected_observation)
     #     self.on_select_obj.emit(self.history_taxon)
 
-    def enterEvent(self, event: QEvent):
-        self.open_overlay.setVisible(True)
-        return super().enterEvent(event)
-
-    def leaveEvent(self, event: QEvent) -> None:
-        self.open_overlay.setVisible(False)
-        return super().leaveEvent(event)
-
     def select_observation(self, observation: Observation):
         self.load(observation)
-        self.on_select_obj.emit(observation)
+        self.on_select.emit(observation)
 
     # def _update_nav_buttons(self):
     #     """Update status and tooltip for 'back', 'forward', 'parent', and 'view on iNat' buttons"""

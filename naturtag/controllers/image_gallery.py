@@ -407,7 +407,7 @@ class ThumbnailMetaIcons(QLabel):
 
         self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
         self.observation_icon = FAIcon('fa.binoculars', secondary=True, size=20)
-        self.geo_icon = FAIcon('fa.map-marker', secondary=True, size=20)
+        self.geo_icon = FAIcon('mdi.map-marker', secondary=True, size=20)
         self.tag_icon = FAIcon('fa.tags', secondary=True, size=20)
         self.sidecar_icon = FAIcon('mdi.xml', secondary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)

@@ -20,13 +20,9 @@ class ObservationController(BaseController):
         self.root.setAlignment(Qt.AlignLeft)
         self.selected_observation: Observation = None
 
-        # TODO: basically everything
-        # self.root.addWidget(QLabel("Observation"))
-
         # Selected observation info
         self.obs_info = ObservationInfoSection(self.threadpool)
-        # self.obs_info.on_select.connect(self.select_observation)
-        self.obs_info.on_select_obj.connect(self.display_observation)
+        self.obs_info.on_select.connect(self.display_observation)
         obs_layout = VerticalLayout()
         obs_layout.addLayout(self.obs_info)
         self.root.addLayout(obs_layout)

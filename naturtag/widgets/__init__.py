@@ -13,6 +13,7 @@ from naturtag.widgets.images import (
     HoverIcon,
     HoverPhoto,
     FAIcon,
+    IconLabel,
     InfoCard,
     InfoCardList,
     ImageWindow,
