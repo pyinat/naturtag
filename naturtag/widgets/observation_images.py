@@ -1,6 +1,6 @@
 """Image widgets specifically for observation photos"""
 from logging import getLogger
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Iterable, Optional
 
 from pyinaturalist import Observation, Photo
 from PySide6.QtCore import Qt
@@ -58,11 +58,11 @@ class ObservationInfoCard(InfoCard):
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignLeft)
         layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=20))
-        layout.addWidget(IconLabel('mdi.marker-check', str(num_ids), size=20))
+        layout.addWidget(IconLabel('mdi.marker-check', num_ids, size=20))
         layout.addWidget(
             IconLabel(
                 'fa5.images' if num_photos > 1 else 'fa5.image',
-                str(num_photos),
+                num_photos,
                 size=20,
             )
         )
@@ -70,7 +70,7 @@ class ObservationInfoCard(InfoCard):
             layout.addWidget(
                 IconLabel(
                     'ri.volume-up-fill',
-                    str(len(obs.sounds)),
+                    len(obs.sounds),
                     size=20,
                 )
             )

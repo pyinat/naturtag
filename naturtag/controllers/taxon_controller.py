@@ -48,7 +48,7 @@ class TaxonController(BaseController):
         self.taxon_info = TaxonInfoSection(self.threadpool)
         self.taxon_info.on_select_id.connect(self.select_taxon)
         self.taxon_info.on_select.connect(self.display_taxon)
-        self.taxonomy = TaxonomySection(self.threadpool)
+        self.taxonomy = TaxonomySection(self.threadpool, self.user_taxa)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
@@ -127,16 +127,19 @@ class TaxonTabs(QTabWidget):
         self._init_complete = False
 
         self.results = self.add_tab(
-            TaxonList(threadpool), 'mdi6.layers-search', 'Results', 'Search results'
+            TaxonList(threadpool, user_taxa), 'mdi6.layers-search', 'Results', 'Search results'
         )
         self.recent = self.add_tab(
-            TaxonList(threadpool), 'fa5s.history', 'Recent', 'Recently viewed taxa'
+            TaxonList(threadpool, user_taxa), 'fa5s.history', 'Recent', 'Recently viewed taxa'
         )
         self.frequent = self.add_tab(
-            TaxonList(threadpool), 'ri.bar-chart-fill', 'Frequent', 'Frequently viewed taxa'
+            TaxonList(threadpool, user_taxa),
+            'ri.bar-chart-fill',
+            'Frequent',
+            'Frequently viewed taxa',
         )
         self.observed = self.add_tab(
-            TaxonList(threadpool), 'fa5s.binoculars', 'Observed', 'Taxa observed by you'
+            TaxonList(threadpool, user_taxa), 'fa5s.binoculars', 'Observed', 'Taxa observed by you'
         )
 
         # Add a delay before loading user taxa on startup
