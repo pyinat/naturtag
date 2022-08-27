@@ -230,8 +230,8 @@ class GridLayout(LayoutMixin, QGridLayout):
         self._col = 0
         self._row = 0
 
-    def add_widget(self, item):
-        self.addWidget(item, self._row, self._col)
+    def addWidget(self, item):
+        super().addWidget(item, self._row, self._col)
         self._col += 1
         if self._n_columns and self._col >= self._n_columns:
             self._col = 0

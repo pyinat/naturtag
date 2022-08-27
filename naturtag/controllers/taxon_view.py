@@ -122,7 +122,7 @@ class TaxonInfoSection(HorizontalLayout):
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_taxon_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
-            self.thumbnails.add_widget(thumb)
+            self.thumbnails.addWidget(thumb)
 
     def prev(self):
         if not self.hist_prev:
