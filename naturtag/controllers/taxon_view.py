@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QGroupBox, QPushButton
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import SIZE_SM
+from naturtag.settings import UserTaxa
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
@@ -160,15 +161,19 @@ class TaxonInfoSection(HorizontalLayout):
 class TaxonomySection(HorizontalLayout):
     """Section to display ancestors and children of selected taxon"""
 
-    def __init__(self, threadpool: ThreadPool):
+    def __init__(self, threadpool: ThreadPool, user_taxa: UserTaxa):
         super().__init__()
 
-        self.ancestors_group = self.add_group('Ancestors', width=400, min_height=False)
-        self.ancestors_list = TaxonList(threadpool)
+        self.ancestors_group = self.add_group(
+            'Ancestors', min_width=400, max_width=500, policy_min_height=False
+        )
+        self.ancestors_list = TaxonList(threadpool, user_taxa)
         self.ancestors_group.addWidget(self.ancestors_list.scroller)
 
-        self.children_group = self.add_group('Children', width=400, min_height=False)
-        self.children_list = TaxonList(threadpool)
+        self.children_group = self.add_group(
+            'Children', min_width=400, max_width=500, policy_min_height=False
+        )
+        self.children_list = TaxonList(threadpool, user_taxa)
         self.children_group.addWidget(self.children_list.scroller)
 
     def load(self, taxon: Taxon):

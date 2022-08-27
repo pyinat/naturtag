@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
-from naturtag.constants import SIZE_ICON, SIZE_SM, PathOrStr
+from naturtag.constants import SIZE_ICON, SIZE_SM, IntOrStr, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
 from naturtag.widgets.layouts import HorizontalLayout
 
@@ -54,7 +54,7 @@ class IconLabel(QWidget):
     def __init__(
         self,
         icon_str: str,
-        text: str,
+        text: IntOrStr,
         size: int = SIZE_ICON[0],
         parent: QWidget = None,
         **kwargs,
@@ -64,6 +64,8 @@ class IconLabel(QWidget):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.icon = FAIcon(icon_str, size=size, **kwargs)
+        if isinstance(text, int):
+            text = format_int(text)
         self.label = QLabel(text)
         self.label.setTextFormat(Qt.RichText)
         root = HorizontalLayout(self)
@@ -455,3 +457,12 @@ class ImageWindow(StylableWidget):
         elif idx >= len(self.image_paths):
             idx = 0
         return idx
+
+
+def format_int(value: int) -> str:
+    if value >= 1000000:
+        return f'{int(value/1000000)}M'
+    elif value >= 10000:
+        return f'{int(value/1000)}K'
+    else:
+        return str(value)
