@@ -4,7 +4,7 @@ from pyinaturalist import Observation
 from PySide6.QtCore import Qt, QThread, Signal, Slot
 
 from naturtag.client import INAT_CLIENT
-from naturtag.controllers import BaseController, ObservationInfoSection
+from naturtag.controllers import BaseController, ObservationInfoSection, ObservationSearch
 from naturtag.widgets import HorizontalLayout, VerticalLayout
 
 logger = getLogger(__name__)
@@ -19,6 +19,13 @@ class ObservationController(BaseController):
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
         self.selected_observation: Observation = None
+
+        # Search inputs
+        self.search = ObservationSearch(self.settings)
+        # self.search.autocomplete.on_select.connect(self.select_taxon)
+        # self.search.on_results.connect(self.set_search_results)
+        # self.on_select.connect(self.search.set_taxon)
+        self.root.addLayout(self.search)
 
         # Selected observation info
         self.obs_info = ObservationInfoSection(self.threadpool)
