@@ -15,7 +15,7 @@ from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
-    IconLabel,
+    IconLabelList,
     ObservationImageWindow,
     ObservationPhoto,
     VerticalLayout,
@@ -39,13 +39,13 @@ class ObservationInfoSection(HorizontalLayout):
         self.selected_observation: Observation = None
 
         self.group_box = QGroupBox('No observation selected')
+        self.setAlignment(Qt.AlignTop)
         root = VerticalLayout(self.group_box)
         root.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         images = HorizontalLayout()
         images.setAlignment(Qt.AlignTop)
         root.addLayout(images)
         self.addWidget(self.group_box)
-        self.setAlignment(Qt.AlignTop)
 
         # Medium default photo
         self.image = ObservationPhoto(hover_icon=True)
@@ -59,9 +59,15 @@ class ObservationInfoSection(HorizontalLayout):
         self.thumbnails.setAlignment(Qt.AlignTop)
         images.addLayout(self.thumbnails)
 
-        self.details = VerticalLayout()
-        self.details.setSpacing(0)
-        root.addLayout(self.details)
+        # Selected observation details
+        self.description = QLabel()
+        self.description.setWordWrap(True)
+        self.description.setMaximumWidth(500)
+        self.details = IconLabelList()
+        details_container = VerticalLayout()
+        details_container.addWidget(self.description)
+        details_container.addWidget(self.details)
+        root.addLayout(details_container)
 
         # Back and Forward buttons: We already have the full Observation object
         button_layout = HorizontalLayout()
@@ -127,7 +133,7 @@ class ObservationInfoSection(HorizontalLayout):
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_observation_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
-            self.thumbnails.add_widget(thumb)
+            self.thumbnails.addWidget(thumb)
 
         # Load observation details
         # TODO: code reuse with ObservationInfoCard
@@ -140,52 +146,32 @@ class ObservationInfoSection(HorizontalLayout):
         )
         num_ids = obs.identifications_count or len(obs.identifications)
         quality_str = obs.quality_grade.replace('_', ' ').title()
+        self.description.setText(obs.description)
+
         self.details.clear()
-        description = QLabel(obs.description)
-        description.setWordWrap(True)
-        description.setMaximumWidth(500)
-        self.details.addWidget(description)
-        self.details.addWidget(
-            IconLabel('fa5.calendar-alt', f'<b>Observed on:</b> {observed_date_str}', size=20)
+        self.details.add_line('fa5.calendar-alt', f'<b>Observed on:</b> {observed_date_str}')
+        self.details.add_line('fa5.calendar-alt', f'<b>Submitted on:</b> {created_date_str}')
+        self.details.add_line(
+            'mdi.marker-check',
+            f'<b>Identifications:</b> {num_ids} ({obs.num_identification_agreements or 0} agree)',
         )
-        self.details.addWidget(
-            IconLabel('fa5.calendar-alt', f'<b>Submitted on:</b> {created_date_str}', size=20)
+
+        self.details.add_line(
+            QUALITY_GRADE_ICONS.get(obs.quality_grade, 'mdi.chevron-up'),
+            f'<b>Quality grade:</b> {quality_str}',
         )
-        self.details.addWidget(
-            IconLabel(
-                'mdi.marker-check',
-                f'<b>Identifications:</b> {num_ids} ({obs.num_identification_agreements or 0} agree)',
-                size=20,
-            )
+        self.details.add_line(
+            'mdi.map-marker',
+            f'<b>Location:</b> {obs.private_place_guess or obs.place_guess}',
         )
-        self.details.addWidget(
-            IconLabel(
-                QUALITY_GRADE_ICONS.get(obs.quality_grade, 'mdi.chevron-up'),
-                f'<b>Quality grade:</b> {quality_str}',
-                size=20,
-            )
+        self.details.add_line(
+            GEOPRIVACY_ICONS.get(obs.geoprivacy, 'mdi.map-marker'),
+            f'<b>Coordinates:</b> {obs.private_location or obs.location} '
+            f'({obs.geoprivacy or "Unknown geoprivacy"})',
         )
-        self.details.addWidget(
-            IconLabel(
-                'mdi.map-marker',
-                f'<b>Location:</b> {obs.private_place_guess or obs.place_guess}',
-                size=20,
-            )
-        )
-        self.details.addWidget(
-            IconLabel(
-                GEOPRIVACY_ICONS.get(obs.geoprivacy, 'mdi.map-marker'),
-                f'<b>Coordinates:</b> {obs.private_location or obs.location} '
-                f'({obs.geoprivacy or "Unknown geoprivacy"})',
-                size=20,
-            )
-        )
-        self.details.addWidget(
-            IconLabel(
-                'mdi.map-marker-radius',
-                f'<b>Positional accuracy:</b> {obs.positional_accuracy or 0}m',
-                size=20,
-            )
+        self.details.add_line(
+            'mdi.map-marker-radius',
+            f'<b>Positional accuracy:</b> {obs.positional_accuracy or 0}m',
         )
 
     # def prev(self):

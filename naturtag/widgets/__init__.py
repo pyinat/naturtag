@@ -14,6 +14,7 @@ from naturtag.widgets.images import (
     HoverPhoto,
     FAIcon,
     IconLabel,
+    IconLabelList,
     InfoCard,
     InfoCardList,
     ImageWindow,

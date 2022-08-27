@@ -144,7 +144,7 @@ class IconicTaxonFilters(QWidget):
         for id, name in SELECTABLE_ICONIC_TAXA.items():
             button = IconicTaxonButton(id, name)
             button.clicked.connect(self.on_click)
-            self.button_layout.add_widget(button)
+            self.button_layout.addWidget(button)
 
     @property
     def selected_iconic_taxa(self) -> list[int]:
