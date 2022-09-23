@@ -94,6 +94,7 @@ class ObservationInfoSection(HorizontalLayout):
         self.link_button = QPushButton('View on iNaturalist')
         self.link_button.setIcon(fa_icon('mdi.web', primary=True))
         self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_observation.uri))
+        self.link_button.setEnabled(False)
         button_layout.addWidget(self.link_button)
 
         # Fullscreen image viewer
@@ -124,7 +125,7 @@ class ObservationInfoSection(HorizontalLayout):
             photo=obs.photos[0],  # TODO: add Observation.default_photo in pyinat
             priority=QThread.HighPriority,
         )
-        # self._update_nav_buttons()
+        self._update_nav_buttons()
 
         # Load additional thumbnails
         self.thumbnails.clear()
@@ -192,14 +193,15 @@ class ObservationInfoSection(HorizontalLayout):
         self.load(observation)
         self.on_select.emit(observation)
 
-    # def _update_nav_buttons(self):
-    #     """Update status and tooltip for 'back', 'forward', 'parent', and 'view on iNat' buttons"""
-    #     self.prev_button.setEnabled(bool(self.hist_prev))
-    #     self.prev_button.setToolTip(self.hist_prev[-1].full_name if self.hist_prev else None)
-    #     self.next_button.setEnabled(bool(self.hist_next))
-    #     self.next_button.setToolTip(self.hist_next[0].full_name if self.hist_next else None)
-    #     self.parent_button.setEnabled(bool(self.selected_observation.parent))
-    #     self.parent_button.setToolTip(
-    #         self.selected_observation.parent.full_name if self.selected_observation.parent else None
-    #     )
-    #     self.link_button.setToolTip(self.selected_observation.url)
+    def _update_nav_buttons(self):
+        """Update status and tooltip for 'back', 'forward', 'parent', and 'view on iNat' buttons"""
+        # self.prev_button.setEnabled(bool(self.hist_prev))
+        # self.prev_button.setToolTip(self.hist_prev[-1].full_name if self.hist_prev else None)
+        # self.next_button.setEnabled(bool(self.hist_next))
+        # self.next_button.setToolTip(self.hist_next[0].full_name if self.hist_next else None)
+        # self.parent_button.setEnabled(bool(self.selected_observation.parent))
+        # self.parent_button.setToolTip(
+        #     self.selected_observation.parent.full_name if self.selected_observation.parent else None
+        # )
+        self.link_button.setEnabled(True)
+        self.link_button.setToolTip(self.selected_observation.uri)
