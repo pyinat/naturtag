@@ -39,7 +39,7 @@ class ObservationInfoCard(InfoCard):
         self.observation = obs
 
         if not delayed_load:
-            pixmap = self.thumbnail.get_pixmap(url=obs.thumbnail_url)
+            pixmap = self.thumbnail.get_pixmap(url=obs.default_photo.thumbnail_url)
             self.thumbnail.setPixmap(pixmap)
 
         # Title: Taxon name

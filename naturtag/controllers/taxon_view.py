@@ -77,12 +77,14 @@ class TaxonInfoSection(HorizontalLayout):
         self.parent_button = QPushButton('Parent')
         self.parent_button.setIcon(fa_icon('ei.chevron-up'))
         self.parent_button.clicked.connect(self.select_parent)
+        self.parent_button.setEnabled(False)
         button_layout.addWidget(self.parent_button)
 
         # Link button: Open web browser to taxon info page
         self.link_button = QPushButton('View on iNaturalist')
         self.link_button.setIcon(fa_icon('mdi.web', primary=True))
         self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_taxon.url))
+        self.link_button.setEnabled(False)
         button_layout.addWidget(self.link_button)
 
         # Fullscreen image viewer
@@ -155,6 +157,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.parent_button.setToolTip(
             self.selected_taxon.parent.full_name if self.selected_taxon.parent else None
         )
+        self.link_button.setEnabled(True)
         self.link_button.setToolTip(self.selected_taxon.url)
 
 
