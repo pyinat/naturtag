@@ -12,9 +12,9 @@ from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
-from naturtag.constants import SIZE_ICON, SIZE_SM, PathOrStr
+from naturtag.constants import SIZE_ICON, SIZE_ICON_SM, SIZE_SM, IntOrStr, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
-from naturtag.widgets.layouts import HorizontalLayout
+from naturtag.widgets.layouts import GridLayout, HorizontalLayout
 
 if TYPE_CHECKING:
     from naturtag.app.threadpool import ThreadPool
@@ -54,7 +54,7 @@ class IconLabel(QWidget):
     def __init__(
         self,
         icon_str: str,
-        text: str,
+        text: IntOrStr,
         size: int = SIZE_ICON[0],
         parent: QWidget = None,
         **kwargs,
@@ -64,11 +64,35 @@ class IconLabel(QWidget):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.icon = FAIcon(icon_str, size=size, **kwargs)
+        if isinstance(text, int):
+            text = format_int(text)
         self.label = QLabel(text)
+        self.label.setTextFormat(Qt.RichText)
         root = HorizontalLayout(self)
         root.addWidget(self.icon)
         root.addWidget(self.label)
         root.setAlignment(Qt.AlignLeft)
+
+
+class IconLabelList(QWidget):
+    """Widget that uses a grid to display a list of icons with labels"""
+
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.grid = GridLayout(self, n_columns=2)
+        self.grid.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+
+    def add_line(self, icon_str: str, text: IntOrStr, size: int = SIZE_ICON_SM[0], **kwargs):
+        icon = FAIcon(icon_str, size=size, **kwargs)
+        self.grid.addWidget(icon)
+
+        text = format_int(text) if isinstance(text, int) else text
+        label = QLabel(text)
+        label.setTextFormat(Qt.RichText)
+        self.grid.addWidget(label)
+
+    def clear(self):
+        self.grid.clear()
 
 
 class PixmapLabel(QLabel):
@@ -454,3 +478,12 @@ class ImageWindow(StylableWidget):
         elif idx >= len(self.image_paths):
             idx = 0
         return idx
+
+
+def format_int(value: int) -> str:
+    if value >= 1000000:
+        return f'{int(value/1000000)}M'
+    elif value >= 10000:
+        return f'{int(value/1000)}K'
+    else:
+        return str(value)

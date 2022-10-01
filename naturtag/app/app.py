@@ -24,8 +24,7 @@ from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_stylesheet, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
-from naturtag.controllers import ImageController, TaxonController
-from naturtag.controllers.observation_controller import ObservationController
+from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.settings import Settings, setup
 from naturtag.widgets import VerticalLayout, init_handler
 
@@ -100,8 +99,8 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.setIconSize(QSize(32, 32))
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
-        self.tabs.addTab(self.observation_controller, fa_icon('fa5s.binoculars'), 'Observations')
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
+        self.tabs.addTab(self.observation_controller, fa_icon('fa5s.binoculars'), 'Observation')
 
         # Root layout: tabs + progress bar
         self.root_widget = QWidget()

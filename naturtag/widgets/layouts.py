@@ -50,7 +50,9 @@ class GroupMixin(MIXIN_BASE):
         name: str,
         parent: QLayout = None,
         width: int = None,
-        min_height: bool = True,
+        min_width: int = None,
+        max_width: int = None,
+        policy_min_height: bool = True,
     ) -> GroupBoxLayout:
         """Add a new groupbox to the widget or layout"""
         group_box_layout = GroupBoxLayout(name)
@@ -58,7 +60,11 @@ class GroupMixin(MIXIN_BASE):
         parent.addWidget(group_box_layout.box)
         if width:
             group_box_layout.box.setFixedWidth(width)
-        if min_height:
+        if min_width:
+            group_box_layout.box.setMinimumWidth(min_width)
+        if max_width:
+            group_box_layout.box.setMaximumWidth(max_width)
+        if policy_min_height:
             group_box_layout.box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
         return group_box_layout
 
@@ -224,8 +230,8 @@ class GridLayout(LayoutMixin, QGridLayout):
         self._col = 0
         self._row = 0
 
-    def add_widget(self, item):
-        self.addWidget(item, self._row, self._col)
+    def addWidget(self, item):
+        super().addWidget(item, self._row, self._col)
         self._col += 1
         if self._n_columns and self._col >= self._n_columns:
             self._col = 0
