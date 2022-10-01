@@ -1,11 +1,11 @@
 from logging import getLogger
 
 from pyinaturalist import Observation
-from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtCore import Qt, QThread, Signal, Slot
 
 from naturtag.client import INAT_CLIENT
-from naturtag.controllers import BaseController
-from naturtag.widgets import HorizontalLayout
+from naturtag.controllers import BaseController, ObservationInfoSection, ObservationSearch
+from naturtag.widgets import HorizontalLayout, VerticalLayout
 
 logger = getLogger(__name__)
 
@@ -20,8 +20,19 @@ class ObservationController(BaseController):
         self.root.setAlignment(Qt.AlignLeft)
         self.selected_observation: Observation = None
 
-        # TODO: basically everything
-        # self.root.addWidget(QLabel("Observation"))
+        # Search inputs
+        self.search = ObservationSearch(self.settings)
+        # self.search.autocomplete.on_select.connect(self.select_taxon)
+        # self.search.on_results.connect(self.set_search_results)
+        # self.on_select.connect(self.search.set_taxon)
+        self.root.addLayout(self.search)
+
+        # Selected observation info
+        self.obs_info = ObservationInfoSection(self.threadpool)
+        self.obs_info.on_select.connect(self.display_observation)
+        obs_layout = VerticalLayout()
+        obs_layout.addLayout(self.obs_info)
+        self.root.addLayout(obs_layout)
 
     def select_observation(self, observation_id: int):
         # Don't need to do anything if this observation is already selected
@@ -35,7 +46,9 @@ class ObservationController(BaseController):
         )
         future.on_result.connect(self.display_observation)
 
+    @Slot(Observation)
     def display_observation(self, observation: Observation):
         self.selected_observation = observation
         self.on_select.emit(observation)
+        self.obs_info.load(observation)
         logger.debug(f'Loaded observation {observation.id}')

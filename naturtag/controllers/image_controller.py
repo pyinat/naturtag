@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from pyinaturalist import Observation, Taxon
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QSizePolicy
 
 from naturtag.controllers import BaseController, ImageGallery
@@ -31,19 +31,19 @@ class ImageController(BaseController):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         photo_layout = VerticalLayout(self)
+        top_section_layout = HorizontalLayout()
+        top_section_layout.setAlignment(Qt.AlignLeft)
+        photo_layout.addLayout(top_section_layout)
         self.on_new_metadata.connect(self.update_metadata)
 
         # Input group
-        group_box = QGroupBox('Selected metadata source')
-        group_box.setFixedHeight(170)
-        # group_box.setFixedWidth(800)
-        group_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
-        data_source_layout = HorizontalLayout(group_box)
-        photo_layout.addWidget(group_box)
+        group_box = QGroupBox('Quick entry')
+        group_box.setFixedHeight(150)
+        group_box.setFixedWidth(200)
+        top_section_layout.addWidget(group_box)
 
         # Input fields
-        inputs_layout = VerticalLayout()
-        data_source_layout.addLayout(inputs_layout)
+        inputs_layout = VerticalLayout(group_box)
         self.input_obs_id = IdInput()
         inputs_layout.addWidget(QLabel('Observation ID:'))
         inputs_layout.addWidget(self.input_obs_id)
@@ -56,9 +56,12 @@ class ImageController(BaseController):
         self.input_taxon_id.on_select.connect(self.on_select_taxon_id)
 
         # Selected taxon/observation info
-        data_source_layout.addStretch()
-        self.data_source_card = HorizontalLayout()
-        data_source_layout.addLayout(self.data_source_card)
+        group_box = QGroupBox('Metadata source')
+        group_box.setFixedHeight(150)
+        group_box.setMinimumWidth(400)
+        group_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
+        top_section_layout.addWidget(group_box)
+        self.data_source_card = HorizontalLayout(group_box)
 
         # Clear info when clearing an input field
         self.input_obs_id.on_clear.connect(self.data_source_card.clear)
@@ -158,7 +161,7 @@ class ImageController(BaseController):
         self.input_obs_id.set_id(observation.id)
         self.input_taxon_id.set_id(observation.taxon.id)
         self.data_source_card.clear()
-        card = ObservationInfoCard(observation=observation, delayed_load=False)
+        card = ObservationInfoCard(obs=observation, delayed_load=False)
         card.on_click.connect(self.on_select_observation_tab)
         self.data_source_card.addWidget(card)
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from platformdirs import user_data_dir
-from pyinaturalist.constants import ICONIC_TAXA, RANKS, Dimensions
+from pyinaturalist.constants import ICONIC_TAXA, RANKS, Dimensions, IntOrStr
 
 # Packaged assets
 PKG_DIR = Path(__file__).parent.parent

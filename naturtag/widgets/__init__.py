@@ -13,6 +13,8 @@ from naturtag.widgets.images import (
     HoverIcon,
     HoverPhoto,
     FAIcon,
+    IconLabel,
+    IconLabelList,
     InfoCard,
     InfoCardList,
     ImageWindow,
@@ -20,7 +22,11 @@ from naturtag.widgets.images import (
 )
 from naturtag.widgets.inputs import IdInput
 from naturtag.widgets.logger import QtRichHandler, init_handler
-from naturtag.widgets.observation_images import ObservationInfoCard, ObservationPhoto
+from naturtag.widgets.observation_images import (
+    ObservationImageWindow,
+    ObservationInfoCard,
+    ObservationPhoto,
+)
 from naturtag.widgets.taxon_images import (
     TaxonImageWindow,
     TaxonInfoCard,
