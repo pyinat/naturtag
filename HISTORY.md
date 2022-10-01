@@ -1,7 +1,9 @@
 # History
 
 ## 0.8.0 (Unreleased)
-* If an observation is selected, show a summary of basic observation details on main screen
+* Add tab for basic observation details
+* When an observation is selected, show a summary of basic observation details on main screen
+* Display observation count and leaf taxon count on taxon info cards
 * In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
 
 ## 0.7.0 (2022-07-29)
