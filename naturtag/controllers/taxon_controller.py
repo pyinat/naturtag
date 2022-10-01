@@ -46,9 +46,9 @@ class TaxonController(BaseController):
 
         # Selected taxon info
         self.taxon_info = TaxonInfoSection(self.threadpool)
-        self.taxon_info.on_select.connect(self.select_taxon)
-        self.taxon_info.on_select_obj.connect(self.display_taxon)
-        self.taxonomy = TaxonomySection(self.threadpool)
+        self.taxon_info.on_select_id.connect(self.select_taxon)
+        self.taxon_info.on_select.connect(self.display_taxon)
+        self.taxonomy = TaxonomySection(self.threadpool, self.user_taxa)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
@@ -84,11 +84,11 @@ class TaxonController(BaseController):
         self.selected_taxon = taxon
         if notify:
             self.on_select.emit(taxon)
-        self.taxon_info.load(self.selected_taxon)
-        self.taxonomy.load(self.selected_taxon)
+        self.taxon_info.load(taxon)
+        self.taxonomy.load(taxon)
         self.bind_selection(self.taxonomy.ancestors_list.cards)
         self.bind_selection(self.taxonomy.children_list.cards)
-        logger.debug(f'Loaded taxon {self.selected_taxon.id}')
+        logger.debug(f'Loaded taxon {taxon.id}')
 
     def set_search_results(self, taxa: list[Taxon]):
         """Load search results into Results tab"""
@@ -127,16 +127,19 @@ class TaxonTabs(QTabWidget):
         self._init_complete = False
 
         self.results = self.add_tab(
-            TaxonList(threadpool), 'mdi6.layers-search', 'Results', 'Search results'
+            TaxonList(threadpool, user_taxa), 'mdi6.layers-search', 'Results', 'Search results'
         )
         self.recent = self.add_tab(
-            TaxonList(threadpool), 'fa5s.history', 'Recent', 'Recently viewed taxa'
+            TaxonList(threadpool, user_taxa), 'fa5s.history', 'Recent', 'Recently viewed taxa'
         )
         self.frequent = self.add_tab(
-            TaxonList(threadpool), 'ri.bar-chart-fill', 'Frequent', 'Frequently viewed taxa'
+            TaxonList(threadpool, user_taxa),
+            'ri.bar-chart-fill',
+            'Frequent',
+            'Frequently viewed taxa',
         )
         self.observed = self.add_tab(
-            TaxonList(threadpool), 'fa5s.binoculars', 'Observed', 'Taxa observed by you'
+            TaxonList(threadpool, user_taxa), 'fa5s.binoculars', 'Observed', 'Taxa observed by you'
         )
 
         # Add a delay before loading user taxa on startup
@@ -196,12 +199,18 @@ class TaxonTabs(QTabWidget):
         """Update history and frequent lists with the selected taxon. If it was already in one or
         both lists, update its position in the list(s).
         """
-        self.recent.add_or_update_taxon(taxon)
+        new_cards = []
         self.user_taxa.update_history(taxon.id)
+        if card := self.recent.add_or_update_taxon(taxon):
+            new_cards.append(card)
 
         idx = self.user_taxa.frequent_idx(taxon.id)
         if idx is not None:
-            self.frequent.add_or_update_taxon(taxon, idx)
+            if card := self.frequent.add_or_update_taxon(taxon, idx):
+                new_cards.append(card)
+
+        if new_cards:
+            self.on_load.emit(new_cards)
 
     def resizeEvent(self, event):
         """On resize, show tab labels if there is enough room for at least a couple characters each
