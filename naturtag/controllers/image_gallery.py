@@ -207,6 +207,7 @@ class ThumbnailCard(StylableWidget):
 
     def set_metadata(self, metadata: MetaMetadata):
         """Update UI based on new metadata"""
+        logger.debug(f'New metadata: {metadata}')
         self.metadata = metadata
         self.context_menu.refresh_actions(self)
         self.icons.refresh_icons(metadata)
@@ -418,7 +419,6 @@ class ThumbnailMetaIcons(QLabel):
 
     def refresh_icons(self, metadata: MetaMetadata):
         """Update icons based on the available metadata"""
-        logger.debug(f'Refreshing: {metadata}')
         self.taxon_icon.set_enabled(metadata.has_taxon)
         self.observation_icon.set_enabled(metadata.has_observation)
         self.geo_icon.set_enabled(metadata.has_coordinates)
