@@ -17,7 +17,7 @@ SPINNER = ICONS_DIR / 'spinner_250px.svg'
 
 # Local settings & data paths
 APP_DIR = Path(user_data_dir()) / 'Naturtag'
-DB_PATH = APP_DIR / 'observations.db'
+DB_PATH = APP_DIR / 'naturtag.db'
 IMAGE_CACHE = APP_DIR / 'images.db'
 LOGFILE = APP_DIR / 'naturtag.log'
 CONFIG_PATH = APP_DIR / 'settings.yml'

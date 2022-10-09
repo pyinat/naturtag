@@ -4,22 +4,19 @@
 
 DATA_DIR=$HOME/.local/share/pyinaturalist/
 SRC_DB=$DATA_DIR/observations.db
-DEST_DB=observations.db
+DEST_DB=naturtag.db
 TAXON_CSV=taxon.csv
 TAXON_FTS_CSV=taxon_fts.csv
 ARCHIVE=taxonomy_all_languages.tar.gz
 
 echo 'Exporting Taxon table...'
 sqlite3 -header -csv $SRC_DB \
-    "SELECT * FROM taxon \
-     WHERE observations_count >= 1;" \
+    "SELECT * FROM taxon;" \
     > $TAXON_CSV
 
 echo 'Exporting FTS table...'
 sqlite3 -header -csv $SRC_DB \
-    "SELECT * \
-     FROM taxon_fts \
-     WHERE count_rank > 0;" \
+    "SELECT * FROM taxon_fts;" \
     > $TAXON_FTS_CSV
 
 echo 'Importing Taxon table...'
