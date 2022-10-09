@@ -1,9 +1,11 @@
-""" Basic utilities for reading and writing settings from config files """
+"""Basic utilities for reading and writing settings from config files"""
+import sqlite3
 from collections import Counter, OrderedDict
 from itertools import chain
 from logging import getLogger
 from pathlib import Path
 from tarfile import TarFile
+from tempfile import TemporaryDirectory
 from typing import Iterable, Optional
 
 import yaml
@@ -11,7 +13,8 @@ from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
 from pyinaturalist import TaxonCounts
-from pyinaturalist_convert import create_tables
+from pyinaturalist_convert import create_tables, load_table
+from pyinaturalist_convert.fts import create_fts5_table, vacuum_analyze
 
 from naturtag.constants import (
     CONFIG_PATH,
@@ -21,7 +24,7 @@ from naturtag.constants import (
     MAX_DIR_HISTORY,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
-    PACKAGED_FTS_DB,
+    PACKAGED_DB,
     USER_TAXA_PATH,
     PathOrStr,
 )
@@ -233,26 +236,51 @@ class UserTaxa(YamlMixin):
         return super(UserTaxa, cls).read()  # type: ignore
 
 
-def setup(settings: Settings):
+def setup(settings: Settings, overwrite: bool = False):
     """Run any first-time setup steps, if needed:
-    * Extract packaged full text search database to user data directory
     * Create database tables
+    * Extract packaged taxonomy data and load into SQLite
     """
-    if settings.setup_complete:
-        logger.debug('First-time setup not needed')
+    if settings.setup_complete and not overwrite:
+        logger.debug('First-time setup already done')
         return
 
     logger.info('Running first-time setup')
-    if not DB_PATH.is_file():
-        logger.debug('Initializing text search database')
-        with TarFile.open(PACKAGED_FTS_DB) as tar:
-            tar.extractall(path=DB_PATH.parent)
+    if DB_PATH.is_file():
+        logger.warning('Taxon database already exists; attempting to update')
+        if overwrite:
+            with sqlite3.connect(DB_PATH) as conn:
+                conn.execute('DROP TABLE taxon')
+                conn.execute('DROP TABLE taxon_fts')
 
-    logger.debug('Creating remaining tables')
-    create_tables(DB_PATH)
+    with TemporaryDirectory() as tmp_dir_name:
+        tmp_dir = Path(tmp_dir_name)
+        with TarFile.open(PACKAGED_DB) as tar:
+            tar.extractall(path=tmp_dir)
 
+        create_tables(DB_PATH)
+        create_fts5_table(DB_PATH)
+        load_table(tmp_dir / 'taxon.csv', DB_PATH, table_name='taxon')
+        load_table(tmp_dir / 'taxon_fts.csv', DB_PATH, table_name='taxon_fts')
+        vacuum_analyze(['taxon', 'taxon_fts'], DB_PATH)
+
+    logger.info('Setup complete')
     settings.setup_complete = True
     settings.write()
+
+
+def init_taxon_db():
+
+    with TemporaryDirectory() as tmpdirname:
+        with TarFile.open(PACKAGED_DB) as tar:
+            tar.extractall(path=tmpdirname)
+
+        db_path = 'test.db'
+        create_tables(db_path)
+        create_fts5_table(db_path)
+        load_table(tmpdirname / 'taxon.csv', db_path, table_name='taxon')
+        load_table(tmpdirname / 'taxon_fts.csv', db_path, table_name='taxon_fts')
+        vacuum_analyze(['taxon', 'taxon_fts'], db_path)
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
