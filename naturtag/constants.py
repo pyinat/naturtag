@@ -10,14 +10,14 @@ PKG_DIR = Path(__file__).parent.parent
 ASSETS_DIR = PKG_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
 CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
-PACKAGED_FTS_DB = ASSETS_DIR / 'taxon-fts-en.tar.gz'
+PACKAGED_DB = ASSETS_DIR / 'taxonomy.tar.gz'
 APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
 SPINNER = ICONS_DIR / 'spinner_250px.svg'
 
 # Local settings & data paths
 APP_DIR = Path(user_data_dir()) / 'Naturtag'
-DB_PATH = APP_DIR / 'observations.db'
+DB_PATH = APP_DIR / 'naturtag.db'
 IMAGE_CACHE = APP_DIR / 'images.db'
 LOGFILE = APP_DIR / 'naturtag.log'
 CONFIG_PATH = APP_DIR / 'settings.yml'
