@@ -10,7 +10,6 @@ from naturtag.app.threadpool import ThreadPool
 from naturtag.client import INAT_CLIENT
 from naturtag.constants import MAX_DISPLAY_OBSERVED
 from naturtag.controllers import BaseController, TaxonInfoSection, TaxonomySection, TaxonSearch
-from naturtag.metadata.inat_metadata import get_observed_taxa
 from naturtag.settings import Settings, UserTaxa
 from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
 
@@ -99,7 +98,7 @@ class TaxonController(BaseController):
         self.bind_selection(self.tabs.results.cards)
 
     def bind_selection(self, taxon_cards: Iterable[TaxonInfoCard]):
-        """Connect click signal from each taxon card to select_taxon()"""
+        """Connect click signal from each taxon card"""
         for taxon_card in taxon_cards:
             taxon_card.on_click.connect(self.select_taxon)
 
@@ -151,6 +150,7 @@ class TaxonTabs(QTabWidget):
         return taxon_list
 
     def load_user_taxa(self):
+        logger.info('Fetching user-observed taxa')
         display_ids = self.user_taxa.display_ids
 
         def get_recent_taxa():
@@ -160,12 +160,24 @@ class TaxonTabs(QTabWidget):
         future = self.threadpool.schedule(get_recent_taxa, priority=QThread.LowPriority)
         future.on_result.connect(self.display_recent)
 
-        future = self.threadpool.schedule(
-            lambda: get_observed_taxa(self.settings.username, self.settings.casual_observations),
-            priority=QThread.LowPriority,
-        )
+        future = self.threadpool.schedule(self.get_user_observed_taxa, priority=QThread.LowPriority)
         future.on_result.connect(self.display_observed)
         self._init_complete = True
+
+    def get_user_observed_taxa(self) -> TaxonCounts:
+        """Get counts of taxa observed by the user, ordered by number of observations descending"""
+        if not self.settings.username:
+            return []
+
+        # False will return *only* casual observations
+        verifiable = None if self.settings.casual_observations else True
+
+        taxon_counts = INAT_CLIENT.observations.species_counts(
+            user_login=self.settings.username,
+            verifiable=verifiable,
+        )
+        logger.info(f'{len(taxon_counts)} user-observed taxa found')
+        return sorted(taxon_counts, key=lambda x: x.count, reverse=True)
 
     @Slot(list)
     def display_recent(self, taxa: list[Taxon]):

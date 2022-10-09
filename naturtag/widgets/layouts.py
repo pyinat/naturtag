@@ -65,7 +65,8 @@ class GroupMixin(MIXIN_BASE):
         if max_width:
             group_box_layout.box.setMaximumWidth(max_width)
         if policy_min_height:
-            group_box_layout.box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
+            x_policy = QSizePolicy.Fixed if width else QSizePolicy.Minimum
+            group_box_layout.box.setSizePolicy(x_policy, QSizePolicy.Minimum)
         return group_box_layout
 
 

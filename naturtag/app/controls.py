@@ -251,7 +251,6 @@ class UserDirs(QObject):
         """Remove an image directory from Favorites menu"""
         logger.debug(f'Removing favorite: {image_dir}')
         self.settings.remove_favorite_dir(image_dir)
-        self.settings.write()
         if action := self.favorite_dirs.pop(image_dir, None):
             self.favorite_dirs_submenu.removeAction(action)
 

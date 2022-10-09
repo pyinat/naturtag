@@ -323,6 +323,7 @@ class InfoCard(StylableWidget):
         self.title.setTextFormat(Qt.RichText)
         self.title.setObjectName('h1')
         self.details_layout = VerticalLayout()
+        self.details_layout.setAlignment(Qt.AlignLeft)
         self.details_layout.addWidget(self.title)
         card_layout.addLayout(self.details_layout)
 

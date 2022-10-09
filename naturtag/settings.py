@@ -1,6 +1,7 @@
 """Basic utilities for reading and writing settings from config files"""
 import sqlite3
 from collections import Counter, OrderedDict
+from datetime import datetime
 from itertools import chain
 from logging import getLogger
 from pathlib import Path
@@ -38,6 +39,10 @@ def make_converter() -> Converter:
     converter = pyyaml.make_converter()
     converter.register_unstructure_hook(Path, str)
     converter.register_structure_hook(Path, lambda obj, cls: Path(obj))
+    converter.register_unstructure_hook(datetime, lambda obj: obj.isoformat() if obj else None)
+    converter.register_structure_hook(
+        datetime, lambda obj, cls: datetime.fromisoformat(obj) if obj else None
+    )
     return converter
 
 
@@ -131,6 +136,7 @@ class Settings(YamlMixin):
 
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
+    last_obs_check: datetime = field(default=None)
 
     @classmethod
     def read(cls) -> 'Settings':
@@ -143,6 +149,10 @@ class Settings(YamlMixin):
             return self.recent_image_dirs[0]
         else:
             return self.default_image_dir
+
+    def set_obs_checkpoint(self):
+        self.last_obs_check = datetime.utcnow().replace(microsecond=0)
+        self.write()
 
     def add_favorite_dir(self, image_dir: Path):
         if image_dir not in self.favorite_image_dirs:
@@ -158,6 +168,7 @@ class Settings(YamlMixin):
     def remove_favorite_dir(self, image_dir: Path):
         if image_dir in self.favorite_image_dirs:
             self.favorite_image_dirs.remove(image_dir)
+        self.write()
 
     def remove_recent_dir(self, image_dir: Path):
         if image_dir in self.recent_image_dirs:
@@ -259,11 +270,13 @@ def setup(settings: Settings = None, overwrite: bool = False, download: bool = F
 
     logger.info('Running first-time setup')
     if DB_PATH.is_file():
-        logger.warning('Taxon database already exists; attempting to update')
         if overwrite:
+            logger.info('Overwriting exiting taxon tables')
             with sqlite3.connect(DB_PATH) as conn:
                 conn.execute('DROP TABLE taxon')
                 conn.execute('DROP TABLE taxon_fts')
+        else:
+            logger.warning('Taxon database already exists; attempting to update')
 
     # Create SQLite file with tables if they don't already exist
     create_tables(DB_PATH)

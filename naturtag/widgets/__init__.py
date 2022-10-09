@@ -25,6 +25,7 @@ from naturtag.widgets.logger import QtRichHandler, init_handler
 from naturtag.widgets.observation_images import (
     ObservationImageWindow,
     ObservationInfoCard,
+    ObservationList,
     ObservationPhoto,
 )
 from naturtag.widgets.taxon_images import (
