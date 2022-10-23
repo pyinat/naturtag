@@ -48,7 +48,7 @@ If no images are specified, the generated keywords will be printed.
 ### Shell Completion
 Shell tab-completion is available for bash and fish shells. To install, run:
 ```
-naturtag --install-completion [shell name]
+naturtag --install [shell name]
 ```
 
 \b
