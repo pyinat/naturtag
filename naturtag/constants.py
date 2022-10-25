@@ -10,7 +10,7 @@ PKG_DIR = Path(__file__).parent.parent
 ASSETS_DIR = PKG_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
 CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
-PACKAGED_DB = ASSETS_DIR / 'taxonomy.tar.gz'
+PACKAGED_TAXON_DB = ASSETS_DIR / 'taxonomy.tar.gz'
 APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
 SPINNER = ICONS_DIR / 'spinner_250px.svg'
@@ -26,6 +26,7 @@ USER_TAXA_PATH = APP_DIR / 'stored_taxa.yml'
 # Project info
 DOCS_URL = 'https://naturtag.readthedocs.io/en/latest/app.html'
 REPO_URL = 'https://github.com/pyinat/naturtag'
+TAXON_DB_URL = 'https://github.com/pyinat/naturtag/raw/main/assets/taxonomy.tar.gz'
 
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
