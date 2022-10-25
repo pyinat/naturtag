@@ -8,6 +8,7 @@ from tarfile import TarFile
 from tempfile import TemporaryDirectory
 from typing import Iterable, Optional
 
+import requests
 import yaml
 from attr import define, field
 from cattr import Converter
@@ -24,7 +25,8 @@ from naturtag.constants import (
     MAX_DIR_HISTORY,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
-    PACKAGED_DB,
+    PACKAGED_TAXON_DB,
+    TAXON_DB_URL,
     USER_TAXA_PATH,
     PathOrStr,
 )
@@ -236,11 +238,21 @@ class UserTaxa(YamlMixin):
         return super(UserTaxa, cls).read()  # type: ignore
 
 
-def setup(settings: Settings, overwrite: bool = False):
+def setup(settings: Settings = None, overwrite: bool = False, download: bool = False):
     """Run any first-time setup steps, if needed:
     * Create database tables
     * Extract packaged taxonomy data and load into SQLite
+
+    Note: taxonomy data is included with PyInstaller packages and platform-specific installers,
+    but not with plain python package on PyPI (to keep package size small).
+    Use `download=True` to fetch the missing data.
+
+    Args:
+        settings: Existing settings object
+        overwrite: Overwrite an existing taxon database, if it already exists
+        download: Download taxon data (full text search + basic taxon details)
     """
+    settings = settings or Settings.read()
     if settings.setup_complete and not overwrite:
         logger.debug('First-time setup already done')
         return
@@ -253,34 +265,52 @@ def setup(settings: Settings, overwrite: bool = False):
                 conn.execute('DROP TABLE taxon')
                 conn.execute('DROP TABLE taxon_fts')
 
-    with TemporaryDirectory() as tmp_dir_name:
-        tmp_dir = Path(tmp_dir_name)
-        with TarFile.open(PACKAGED_DB) as tar:
-            tar.extractall(path=tmp_dir)
+    # Create SQLite file with tables if they don't already exist
+    create_tables(DB_PATH)
+    create_fts5_table(DB_PATH)
+    _load_taxon_db(download)
 
-        create_tables(DB_PATH)
-        create_fts5_table(DB_PATH)
-        load_table(tmp_dir / 'taxon.csv', DB_PATH, table_name='taxon')
-        load_table(tmp_dir / 'taxon_fts.csv', DB_PATH, table_name='taxon_fts')
-        vacuum_analyze(['taxon', 'taxon_fts'], DB_PATH)
+    # Indicate some columns are missing and need to be filled in from API
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute('UPDATE taxon SET partial=1')
+
+    vacuum_analyze(['taxon', 'taxon_fts'], DB_PATH)
 
     logger.info('Setup complete')
     settings.setup_complete = True
     settings.write()
 
 
-def init_taxon_db():
+# TODO: Currently this isn't exposed through the UI or CLI; requires calling `setup(download=True)`.
+#   Not sure yet if this is a good idea to include.
+def _download_taxon_db():
+    logger.info(f'Downloading {TAXON_DB_URL} to {PACKAGED_TAXON_DB}')
+    r = requests.get(TAXON_DB_URL, stream=True)
+    with open(PACKAGED_TAXON_DB, 'wb') as f:
+        f.write(r.content)
 
-    with TemporaryDirectory() as tmpdirname:
-        with TarFile.open(PACKAGED_DB) as tar:
-            tar.extractall(path=tmpdirname)
 
-        db_path = 'test.db'
-        create_tables(db_path)
-        create_fts5_table(db_path)
-        load_table(tmpdirname / 'taxon.csv', db_path, table_name='taxon')
-        load_table(tmpdirname / 'taxon_fts.csv', db_path, table_name='taxon_fts')
-        vacuum_analyze(['taxon', 'taxon_fts'], db_path)
+def _load_taxon_db(download: bool = False):
+    """Load taxon tables from packaged data, if available"""
+    # Optionally download data if it doesn't exist locally
+    if not PACKAGED_TAXON_DB.is_file():
+        if download:
+            _download_taxon_db()
+            _load_taxon_db()
+        else:
+            logger.warning(
+                'Pre-packaged taxon FTS database does not exist; '
+                'taxon text search and autocomplete will not be available'
+            )
+            return
+
+    with TemporaryDirectory() as tmp_dir_name:
+        tmp_dir = Path(tmp_dir_name)
+        with TarFile.open(PACKAGED_TAXON_DB) as tar:
+            tar.extractall(path=tmp_dir)
+
+        load_table(tmp_dir / 'taxon.csv', DB_PATH, table_name='taxon')
+        load_table(tmp_dir / 'taxon_fts.csv', DB_PATH, table_name='taxon_fts')
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
