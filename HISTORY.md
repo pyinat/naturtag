@@ -5,6 +5,7 @@
 * When an observation is selected, show a summary of basic observation details on main screen
 * Display observation count and leaf taxon count on taxon info cards
 * In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
+* Add support for alternate XMP sidecar path format, if it already exists (`basename.ext.xmp` instead of `basename.xmp`)
 
 ## 0.7.0 (2022-07-29)
 * Rebuilt UI from scratch using Qt
