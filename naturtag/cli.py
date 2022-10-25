@@ -48,7 +48,7 @@ If no images are specified, the generated keywords will be printed.
 ### Shell Completion
 Shell tab-completion is available for bash and fish shells. To install, run:
 ```
-naturtag --install-completion [shell name]
+naturtag --install [shell name]
 ```
 
 \b
@@ -77,7 +77,7 @@ from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
-from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR
+from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR, DB_PATH
 from naturtag.metadata import refresh_tags, strip_url, tag_images
 from naturtag.metadata.keyword_metadata import KeywordMetadata
 from naturtag.metadata.meta_metadata import MetaMetadata
@@ -94,7 +94,7 @@ class TaxonParam(click.ParamType):
     name = 'taxon'
 
     def shell_complete(self, ctx, param, incomplete):
-        results = TaxonAutocompleter().search(incomplete)
+        results = TaxonAutocompleter(DB_PATH).search(incomplete)
         grouped_results = defaultdict(list)
         for taxon in results:
             grouped_results[taxon.id].append(taxon.name)
@@ -229,7 +229,7 @@ def search_taxa_by_name(taxon: str, verbose: bool = False) -> Optional[int]:
     """
     response = get_taxa_autocomplete(q=taxon)
     results = response.get('results', [])[:10]
-    # results = TaxonAutocompleter().search(taxon)
+    # results = TaxonAutocompleter(DB_PATH).search(taxon)
 
     # No results
     if not results:
