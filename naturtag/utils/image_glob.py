@@ -13,13 +13,18 @@ from naturtag.constants import IMAGE_FILETYPES, PathOrStr
 logger = getLogger().getChild(__name__)
 
 
-def get_valid_image_paths(paths_or_uris: Iterable[PathOrStr], recursive: bool = False) -> set[Path]:
+def get_valid_image_paths(
+    paths_or_uris: Iterable[PathOrStr],
+    recursive: bool = False,
+    include_sidecars: bool = False,
+) -> set[Path]:
     """
     Get all images of supported filetypes from one or more dirs and/or image paths, including URIs.
 
     Args:
         paths: Paths or file URIs to images and/or image directories
         recursive: Recursively get images from subdirectories
+        include_sidecars: Allow loading a sidecar file without an associated image
 
     Returns:
          Combined list of image file paths
@@ -36,7 +41,7 @@ def get_valid_image_paths(paths_or_uris: Iterable[PathOrStr], recursive: bool = 
         path = uri_to_path(path)
         if path.is_dir():
             image_paths.extend(get_images_from_dir(path, recursive=recursive))
-        elif is_image_path(path):
+        elif is_image_path(path, include_sidecars=include_sidecars):
             image_paths.append(path)
         else:
             logger.warning(f'Not a valid path: {path}')
@@ -80,9 +85,12 @@ def glob_paths(path_patterns: Iterable[PathOrStr]) -> list[Path]:
     ]
 
 
-def is_image_path(path: Path) -> bool:
+def is_image_path(path: Path, include_sidecars: bool = False) -> bool:
     """Determine if a path points to a valid image of a supported type"""
-    return path.is_file() and any(fnmatch(path.suffix.lower(), ext) for ext in IMAGE_FILETYPES)
+    valid_exts = IMAGE_FILETYPES
+    if include_sidecars:
+        valid_exts.append('*.xmp')
+    return path.is_file() and any(fnmatch(path.suffix.lower(), ext) for ext in valid_exts)
 
 
 def uri_to_path(path_or_uri) -> Path:

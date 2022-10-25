@@ -142,8 +142,8 @@ def _strip_url_or_name(ctx, param, value):
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
-    flickr_format,
     image_paths,
+    flickr_format,
     print_tags,
     refresh,
     observation,
@@ -184,13 +184,18 @@ def tag(
         click.echo('Images refreshed')
         ctx.exit()
 
-    metadata_list = list(tag_images(image_paths, observation, taxon))
-    if not metadata_list:
+    metadata_objs = tag_images(
+        image_paths,
+        observation_id=observation,
+        taxon_id=taxon,
+        include_sidecars=True,
+    )
+    if not metadata_objs:
         return
 
     # Print keywords if specified
     if not image_paths or verbose or flickr_format:
-        print_metadata(metadata_list[0].keyword_meta, flickr_format)
+        print_metadata(list(metadata_objs)[0].keyword_meta, flickr_format)
 
 
 def print_all_metadata(
