@@ -1,8 +1,7 @@
 import re
 from logging import getLogger
-from os.path import isfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from pyexiv2 import Image
 
@@ -32,7 +31,7 @@ class ImageMetadata:
         if not self.image_path.is_file():
             return {}, {}, {}
         exif, iptc, xmp = self._safe_read_metadata(self.image_path)
-        if isfile(self.sidecar_path):
+        if self.has_sidecar:
             s_exif, s_iptc, s_xmp = self._safe_read_metadata(self.sidecar_path)
             exif.update(s_exif)
             iptc.update(s_iptc)
@@ -87,7 +86,11 @@ class ImageMetadata:
 
     @property
     def has_sidecar(self) -> bool:
-        return self.sidecar_path.is_file()
+        return not self.is_sidecar and self.sidecar_path.is_file()
+
+    @property
+    def is_sidecar(self) -> bool:
+        return self.image_path.suffix.lower() == '.xmp'
 
     @property
     def filtered_exif(self) -> dict[str, Any]:
@@ -115,36 +118,42 @@ class ImageMetadata:
         self.iptc.update(_filter_tags('Iptc.'))
         self.xmp.update(_filter_tags('Xmp.'))
 
-    def write(self, exif: bool = True, iptc: bool = True, xmp: bool = True, sidecar: bool = True):
+    def write(
+        self,
+        write_exif: bool = True,
+        write_iptc: bool = True,
+        write_xmp: bool = True,
+        write_sidecar: bool = True,
+    ):
         """Write current metadata to image and sidecar"""
         fixed_xmp = self._fix_xmp()
 
-        if TYPE_CHECKING:
-            assert self.image_path is not None and self.sidecar_path is not None
-
         # Write embedded metadata
-        if any([exif, iptc, xmp]):
+        if any([write_exif, write_iptc, write_xmp]):
             logger.info(f'Writing metadata to {self.image_path}')
             img = self._read_exiv2_image(self.image_path)
-        if exif:
+        if write_exif:
             img.modify_exif(self.simple_exif)
-        if iptc:
+        if write_iptc:
             img.modify_iptc(self.iptc)
-        if xmp:
+        if write_xmp:
             img.modify_xmp(fixed_xmp)
-        img.close()
+        if any([write_exif, write_iptc, write_xmp]):
+            img.close()
+        if write_sidecar and not self.is_sidecar:
+            self._write_sidecar(fixed_xmp)
 
+    def _write_sidecar(self, fixed_xmp: dict):
         # Create new sidecar file stub, if needed
-        if sidecar and not isfile(self.sidecar_path):
+        if not self.sidecar_path.is_file():
             with open(self.sidecar_path, 'w') as f:
                 f.write(NEW_XMP_CONTENTS.strip())
 
         # Write sidecar metadata
-        if sidecar:
-            logger.info(f'Writing metadata to {self.sidecar_path}')
-            sidecar_img = self._read_exiv2_image(self.sidecar_path)
-            sidecar_img.modify_xmp(fixed_xmp)
-            sidecar_img.close()
+        logger.info(f'Writing metadata to {self.sidecar_path}')
+        sidecar_img = self._read_exiv2_image(self.sidecar_path)
+        sidecar_img.modify_xmp(fixed_xmp)
+        sidecar_img.close()
 
     # TODO: Now modifying History results in "XMP Toolkit error 102: Indexing applied to non-array"
     def _fix_xmp(self):
