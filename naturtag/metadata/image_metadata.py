@@ -23,32 +23,31 @@ logger = getLogger().getChild(__name__)
 class ImageMetadata:
     """Class for reading & writing basic image metadata"""
 
-    def __init__(self, image_path: PathOrStr = None):
-        self.image_path = Path(image_path) if image_path else None
-        self.xmp_path = self.image_path.with_suffix('.xmp') if self.image_path else None
+    def __init__(self, image_path: PathOrStr = ''):
+        self.image_path = Path(image_path)
         self.exif, self.iptc, self.xmp = self.read_metadata()
 
     def read_metadata(self):
         """Read all formats of metadata from image + sidecar file"""
-        if not self.image_path:
+        if not self.image_path.is_file():
             return {}, {}, {}
         exif, iptc, xmp = self._safe_read_metadata(self.image_path)
-        if isfile(self.xmp_path):
-            s_exif, s_iptc, s_xmp = self._safe_read_metadata(self.xmp_path)
+        if isfile(self.sidecar_path):
+            s_exif, s_iptc, s_xmp = self._safe_read_metadata(self.sidecar_path)
             exif.update(s_exif)
             iptc.update(s_iptc)
             xmp.update(s_xmp)
 
-        paths = str(self.image_path) + (f' + {self.xmp_path}' if isfile(self.xmp_path) else '')
+        sidecar_str = f' + {self.sidecar_path}' if self.sidecar_path.is_file() else ''
         counts = ' | '.join([f'EXIF: {len(exif)}', f'IPTC: {len(iptc)}', f'XMP: {len(xmp)}'])
-        logger.debug(f'Total tags found in {paths}: {counts}')
+        logger.debug(f'Total tags found in {self.image_path}{sidecar_str}: {counts}')
 
         return exif, iptc, xmp
 
     def _safe_read_metadata(self, path, encoding='utf-8'):
         """Attempt to read metadata, with error handling"""
         logger.debug(f'Reading metadata from: {path} ({encoding})')
-        img = self.read_exiv2_image(path)
+        img = self._read_exiv2_image(path)
         if not img:
             return {}, {}, {}
 
@@ -64,9 +63,31 @@ class ImageMetadata:
 
         return exif, iptc, xmp
 
+    @staticmethod
+    def _read_exiv2_image(path: PathOrStr) -> Image:
+        """
+        Read an image with basic error handling. Note: Exiv2 ``RuntimeError`` usually means
+        corrupted metadata. See: https://dev.exiv2.org/issues/637#note-1
+        """
+        try:
+            return Image(str(path))
+        except RuntimeError:
+            logger.exception(f'Failed to read corrupted metadata from {path}')
+            return None
+
     @property
-    def has_sidecar(self):
-        return isfile(self.xmp_path)
+    def sidecar_path(self) -> Path:
+        """Get the path to a sidecar file for this image. May be in the format:
+        * ``{basename}.xmp`` (default)
+        * ``{basename}.{ext}.{xmp}`` (used only if it already exists)
+        """
+        default_path = self.image_path.with_suffix('.xmp')
+        alt_path = self.image_path.with_suffix(f'{self.image_path.suffix}.xmp')
+        return alt_path if alt_path.is_file() else default_path
+
+    @property
+    def has_sidecar(self) -> bool:
+        return self.sidecar_path.is_file()
 
     @property
     def filtered_exif(self) -> dict[str, Any]:
@@ -81,18 +102,6 @@ class ImageMetadata:
     def simple_exif(self) -> dict[str, str]:
         """Convert all EXIF tags with list values into strings"""
         return {k: ','.join(v) if isinstance(v, list) else v for k, v in self.exif.items()}
-
-    @staticmethod
-    def read_exiv2_image(path: PathOrStr) -> Image:
-        """
-        Read an image with basic error handling. Note: Exiv2 ``RuntimeError`` usually means
-        corrupted metadata. See: https://dev.exiv2.org/issues/637#note-1
-        """
-        try:
-            return Image(str(path))
-        except RuntimeError:
-            logger.exception(f'Failed to read corrupted metadata from {path}')
-            return None
 
     def update(self, new_metadata: dict):
         """Update arbitrary EXIF, IPTC, and/or XMP metadata"""
@@ -111,12 +120,12 @@ class ImageMetadata:
         fixed_xmp = self._fix_xmp()
 
         if TYPE_CHECKING:
-            assert self.image_path is not None and self.xmp_path is not None
+            assert self.image_path is not None and self.sidecar_path is not None
 
         # Write embedded metadata
         if any([exif, iptc, xmp]):
             logger.info(f'Writing metadata to {self.image_path}')
-            img = self.read_exiv2_image(self.image_path)
+            img = self._read_exiv2_image(self.image_path)
         if exif:
             img.modify_exif(self.simple_exif)
         if iptc:
@@ -126,14 +135,14 @@ class ImageMetadata:
         img.close()
 
         # Create new sidecar file stub, if needed
-        if sidecar and not isfile(self.xmp_path):
-            with open(self.xmp_path, 'w') as f:
+        if sidecar and not isfile(self.sidecar_path):
+            with open(self.sidecar_path, 'w') as f:
                 f.write(NEW_XMP_CONTENTS.strip())
 
         # Write sidecar metadata
         if sidecar:
-            logger.info(f'Writing metadata to {self.xmp_path}')
-            sidecar_img = self.read_exiv2_image(self.xmp_path)
+            logger.info(f'Writing metadata to {self.sidecar_path}')
+            sidecar_img = self._read_exiv2_image(self.sidecar_path)
             sidecar_img.modify_xmp(fixed_xmp)
             sidecar_img.close()
 
