@@ -25,6 +25,7 @@ def tag_images(
     observation_id: int = None,
     taxon_id: int = None,
     recursive: bool = False,
+    include_sidecars: bool = False,
     settings: Settings = None,
 ) -> list[MetaMetadata]:
     """
@@ -48,6 +49,7 @@ def tag_images(
         observation_id: ID of an iNaturalist observation
         taxon_id: ID of an iNaturalist species or other taxon
         recursive: Recursively search subdirectories for valid image files
+        include_sidecars: Allow loading a sidecar file without an associated image
         settings: Settings for metadata types to generate
 
     Returns:
@@ -71,14 +73,21 @@ def tag_images(
     ):
         img_metadata = MetaMetadata(image_path).merge(inat_metadata)
         img_metadata.write(
-            exif=settings.exif,
-            iptc=settings.iptc,
-            xmp=settings.xmp,
-            sidecar=settings.sidecar,
+            write_exif=settings.exif,
+            write_iptc=settings.iptc,
+            write_xmp=settings.xmp,
+            write_sidecar=settings.sidecar,
         )
         return img_metadata
 
-    return [_tag_image(image_path) for image_path in get_valid_image_paths(image_paths, recursive)]
+    return [
+        _tag_image(image_path)
+        for image_path in get_valid_image_paths(
+            image_paths,
+            recursive=recursive,
+            include_sidecars=include_sidecars,
+        )
+    ]
 
 
 def get_inat_metadata(
@@ -273,10 +282,10 @@ def _refresh_tags(metadata: MetaMetadata, settings: Settings = None) -> MetaMeta
         metadata=metadata,
     )
     metadata.write(
-        exif=settings.exif,
-        iptc=settings.iptc,
-        xmp=settings.xmp,
-        sidecar=settings.sidecar,
+        write_exif=settings.exif,
+        write_iptc=settings.iptc,
+        write_xmp=settings.xmp,
+        write_sidecar=settings.sidecar,
     )
     return metadata
 

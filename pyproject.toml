@@ -37,10 +37,14 @@ pillow                      = '>=9.1'
 pyexiv2                     = '>=2.6.2'
 # TODO: Stable releases
 # pyinaturalist               = '>=0.18'
-pyinaturalist               = {git="https://github.com/pyinat/pyinaturalist.git"}
+# pyinaturalist               = {git="https://github.com/pyinat/pyinaturalist.git"}
+pyinaturalist               = '0.18.0dev0'
 # pyinaturalist-convert       = '>=0.6.0'
-pyinaturalist-convert       = {git="https://github.com/pyinat/pyinaturalist-convert.git"}
-pyside6                     = '^6.3.0'
+# pyinaturalist-convert       = {git="https://github.com/pyinat/pyinaturalist-convert.git"}
+pyinaturalist-convert       = '0.6.0dev0'
+pyside6                     = '6.3.0'
+# TODO: Update to 6.4.0 when pyqt releases compatibility fixes
+# pyside6                     = '^6.4.0'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
 qtmodern                    = '^0.2'
