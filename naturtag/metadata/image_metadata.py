@@ -155,7 +155,6 @@ class ImageMetadata:
         sidecar_img.modify_xmp(fixed_xmp)
         sidecar_img.close()
 
-    # TODO: Now modifying History results in "XMP Toolkit error 102: Indexing applied to non-array"
     def _fix_xmp(self):
         """Fix some invalid XMP tags"""
         for k, v in self.xmp.items():
@@ -163,10 +162,14 @@ class ImageMetadata:
             if isinstance(v, dict):
                 self.xmp[k] = list(v.values())[0]
             # exiv2 can't modify XMP History
-            elif 'History' in k:
+            if k.endswith('History'):
                 self.xmp[k] = None
+
             # XMP won't accept both a single value and an array with the same key
-            elif k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
-                self.xmp[nonarray_key] = None
+            # TODO: This fixes some edge cases, but in others causes another error:
+            #   "XMP Toolkit error 102: Indexing applied to non-array"
+            # elif k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
+            #     self.xmp[nonarray_key] = None
+
         self.xmp = {k: v for k, v in self.xmp.items() if v is not None}
         return self.xmp
