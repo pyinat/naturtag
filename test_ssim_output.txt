@@ -1,0 +1,79 @@
+Testing test_ssim_pil
+------------------------------
+78513963.jpg | 78513963_500px.jpg:	0.93
+78513963.jpg | 78513963_1000px_darkened.jpg:	0.76
+78513963.jpg | 78513963_1000px_low_contrast.jpg:	0.77
+78513963.jpg | 48849031626_af2065ab64_k.jpg:	0.45
+78513963_500px.jpg | 78513963_1000px_darkened.jpg:	0.73
+78513963_500px.jpg | 78513963_1000px_low_contrast.jpg:	0.76
+78513963_500px.jpg | 48849031626_af2065ab64_k.jpg:	0.26
+78513963_1000px_darkened.jpg | 78513963_1000px_low_contrast.jpg:	0.65
+78513963_1000px_darkened.jpg | 48849031626_af2065ab64_k.jpg:	0.37
+78513963_1000px_low_contrast.jpg | 48849031626_af2065ab64_k.jpg:	0.48
+78513963.jpg | 78513963.jpg:	1.00
+Elapsed: 11.03s (avg: 1.10s)
+
+Testing test_pyssim
+------------------------------
+78513963.jpg | 78513963_500px.jpg:	0.89
+78513963.jpg | 78513963_1000px_darkened.jpg:	0.78
+78513963.jpg | 78513963_1000px_low_contrast.jpg:	0.88
+78513963.jpg | 48849031626_af2065ab64_k.jpg:	0.62
+78513963_500px.jpg | 78513963_1000px_darkened.jpg:	0.78
+78513963_500px.jpg | 78513963_1000px_low_contrast.jpg:	0.88
+78513963_500px.jpg | 48849031626_af2065ab64_k.jpg:	0.40
+78513963_1000px_darkened.jpg | 78513963_1000px_low_contrast.jpg:	0.78
+78513963_1000px_darkened.jpg | 48849031626_af2065ab64_k.jpg:	0.51
+78513963_1000px_low_contrast.jpg | 48849031626_af2065ab64_k.jpg:	0.62
+78513963.jpg | 78513963.jpg:	1.00
+Elapsed: 2.28s (avg: 0.23s)
+
+Testing test_tf_uint8
+------------------------------
+2022-10-30 12:45:20.523454: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory
+2022-10-30 12:45:20.523495: W tensorflow/stream_executor/cuda/cuda_driver.cc:263] failed call to cuInit: UNKNOWN ERROR (303)
+2022-10-30 12:45:20.523533: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (GERTY): /proc/driver/nvidia/version does not exist
+2022-10-30 12:45:20.523770: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+78513963.jpg | 78513963_500px.jpg:	0.92
+78513963.jpg | 78513963_1000px_darkened.jpg:	0.76
+78513963.jpg | 78513963_1000px_low_contrast.jpg:	0.77
+78513963.jpg | 48849031626_af2065ab64_k.jpg:	0.49
+78513963_500px.jpg | 78513963_1000px_darkened.jpg:	0.73
+78513963_500px.jpg | 78513963_1000px_low_contrast.jpg:	0.77
+78513963_500px.jpg | 48849031626_af2065ab64_k.jpg:	0.31
+78513963_1000px_darkened.jpg | 78513963_1000px_low_contrast.jpg:	0.65
+78513963_1000px_darkened.jpg | 48849031626_af2065ab64_k.jpg:	0.41
+78513963_1000px_low_contrast.jpg | 48849031626_af2065ab64_k.jpg:	0.53
+78513963.jpg | 78513963.jpg:	1.00
+Elapsed: 3.31s (avg: 0.33s)
+
+Testing test_tf_float32
+------------------------------
+78513963.jpg | 78513963_500px.jpg:	0.68
+78513963.jpg | 78513963_1000px_darkened.jpg:	0.43
+78513963.jpg | 78513963_1000px_low_contrast.jpg:	0.45
+78513963.jpg | 48849031626_af2065ab64_k.jpg:	-0.00
+78513963_500px.jpg | 78513963_1000px_darkened.jpg:	0.50
+78513963_500px.jpg | 78513963_1000px_low_contrast.jpg:	0.53
+78513963_500px.jpg | 48849031626_af2065ab64_k.jpg:	-0.01
+78513963_1000px_darkened.jpg | 78513963_1000px_low_contrast.jpg:	0.48
+78513963_1000px_darkened.jpg | 48849031626_af2065ab64_k.jpg:	-0.00
+78513963_1000px_low_contrast.jpg | 48849031626_af2065ab64_k.jpg:	-0.00
+78513963.jpg | 78513963.jpg:	1.00
+Elapsed: 3.25s (avg: 0.32s)
+
+Testing test_scikit_image
+------------------------------
+78513963.jpg | 78513963_500px.jpg:	0.96
+78513963.jpg | 78513963_1000px_darkened.jpg:	0.79
+78513963.jpg | 78513963_1000px_low_contrast.jpg:	0.90
+78513963.jpg | 48849031626_af2065ab64_k.jpg:	0.62
+78513963_500px.jpg | 78513963_1000px_darkened.jpg:	0.78
+78513963_500px.jpg | 78513963_1000px_low_contrast.jpg:	0.88
+78513963_500px.jpg | 48849031626_af2065ab64_k.jpg:	0.40
+78513963_1000px_darkened.jpg | 78513963_1000px_low_contrast.jpg:	0.79
+78513963_1000px_darkened.jpg | 48849031626_af2065ab64_k.jpg:	0.51
+78513963_1000px_low_contrast.jpg | 48849031626_af2065ab64_k.jpg:	0.62
+78513963.jpg | 78513963.jpg:	1.00
+Elapsed: 1.29s (avg: 0.13s)
