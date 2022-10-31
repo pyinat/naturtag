@@ -143,15 +143,15 @@ class ObservationInfoSection(HorizontalLayout):
             obs.observed_on.strftime('%Y-%m-%d %H:%M:%S') if obs.observed_on else 'unknown date'
         )
         created_date_str = (
-            obs.created_at.strftime('%Y-%m-%d %H:%M:%S') if obs.observed_on else 'unknown date'
+            obs.created_at.strftime('%Y-%m-%d %H:%M:%S') if obs.created_at else 'unknown date'
         )
         num_ids = obs.identifications_count or len(obs.identifications)
-        quality_str = obs.quality_grade.replace('_', ' ').title()
+        quality_str = obs.quality_grade.replace('_', ' ').title().replace('Id', 'ID')
         self.description.setText(obs.description)
 
         self.details.clear()
         self.details.add_line('fa5.calendar-alt', f'<b>Observed on:</b> {observed_date_str}')
-        self.details.add_line('fa5.calendar-alt', f'<b>Submitted on:</b> {created_date_str}')
+        self.details.add_line('fa5.calendar-alt', f'<b>Created on:</b> {created_date_str}')
         self.details.add_line(
             'mdi.marker-check',
             f'<b>Identifications:</b> {num_ids} ({obs.num_identification_agreements or 0} agree)',

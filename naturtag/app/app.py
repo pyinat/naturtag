@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
         self.tabs.setIconSize(QSize(32, 32))
         self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
         self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
-        self.tabs.addTab(self.observation_controller, fa_icon('fa5s.binoculars'), 'Observation')
+        self.tabs.addTab(self.observation_controller, fa_icon('fa5s.binoculars'), 'Observations')
 
         # Root layout: tabs + progress bar
         self.root_widget = QWidget()

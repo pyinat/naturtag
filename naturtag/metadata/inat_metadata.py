@@ -7,7 +7,7 @@ from logging import getLogger
 from typing import Iterable, Optional
 from urllib.parse import urlparse
 
-from pyinaturalist import Observation, Taxon, TaxonCounts
+from pyinaturalist import Observation, Taxon
 from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
@@ -141,33 +141,6 @@ def get_inat_metadata(
     # Convert and add DwC metadata
     metadata.update(_get_dwc_terms(observation, taxon))
     return metadata
-
-
-def get_observed_taxa(username: str, include_casual: bool = False, **kwargs) -> TaxonCounts:
-    """Get counts of taxa observed by the user, ordered by number of observations descending"""
-    if not username:
-        return {}
-    taxon_counts = INAT_CLIENT.observations.species_counts(
-        user_login=username,
-        verifiable=None if include_casual else True,  # False will return *only* casual observations
-        **kwargs,
-    )
-    logger.info(f'{len(taxon_counts)} user-observed taxa found')
-    return sorted(taxon_counts, key=lambda x: x.count, reverse=True)
-
-
-def _get_records_from_metadata(metadata: 'MetaMetadata') -> tuple[Taxon, Observation]:
-    """Get observation and/or taxon records based on image metadata"""
-    logger.info(f'Searching for matching taxon and/or observation for {metadata.image_path}')
-    taxon, observation = None, None
-
-    if metadata.has_observation:
-        observation = INAT_CLIENT.observations(metadata.observation_id)
-        taxon = observation.taxon
-    elif metadata.has_taxon:
-        taxon = INAT_CLIENT.taxa(metadata.taxon_id)
-
-    return taxon, observation
 
 
 def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:

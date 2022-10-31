@@ -1,5 +1,6 @@
 """Image widgets specifically for observation photos"""
 from logging import getLogger
+from string import capwords
 from typing import TYPE_CHECKING, Iterable, Optional
 
 from pyinaturalist import Observation, Photo
@@ -45,7 +46,9 @@ class ObservationInfoCard(InfoCard):
         # Title: Taxon name
         if obs.taxon:
             t = obs.taxon
-            common_name = f' ({t.preferred_common_name.title()})' if t.preferred_common_name else ''
+            common_name = (
+                f' ({capwords(t.preferred_common_name)})' if t.preferred_common_name else ''
+            )
             self.title.setText(f'{t.rank.title()}: <i>{t.name}</i>{common_name}')
         else:
             self.title.setText('Unknown Taxon')
@@ -96,13 +99,14 @@ class ObservationInfoCard(InfoCard):
             f'Positional accuracy: {obs.positional_accuracy or 0}m',
             f'Identifications: {num_ids} ({obs.num_identification_agreements or 0} agree)',
             f'Photos: {num_photos}',
-            f'Sounds: {len(obs.sounds)}' f'Quality grade: {obs.quality_grade}',
+            f'Sounds: {len(obs.sounds)}',
+            f'Quality grade: {obs.quality_grade}',
         ]
         self.setToolTip('\n'.join(tooltip_lines))
 
 
 class ObservationList(InfoCardList):
-    """A scrollable list of TaxonInfoCards"""
+    """A scrollable list of ObservationInfoCards"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -110,7 +114,7 @@ class ObservationList(InfoCardList):
     def add_observation(self, observation: Observation, idx: int = None) -> ObservationInfoCard:
         """Add a card immediately, and load its thumbnail from a separate thread"""
         card = ObservationInfoCard(observation)
-        super().add_card(card, observation.thumbnail_url, idx=idx)
+        super().add_card(card, observation.default_photo.thumbnail_url, idx=idx)
         return card
 
     def add_or_update_observation(

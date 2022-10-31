@@ -1,16 +1,26 @@
+from datetime import datetime
 from hashlib import md5
 from itertools import chain
 from logging import getLogger
 from time import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, Iterator, List
 
 from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import format_file_size
-from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
+from pyinaturalist_convert.db import (
+    DbObservation,
+    DbUser,
+    get_db_taxa,
+    get_session,
+    save_observations,
+    save_taxa,
+)
+
+# from pyinaturalist_convert.db import get_db_observations
 from requests_cache import SQLiteDict
 
-from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID
+from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -63,6 +73,25 @@ class ObservationDbController(ObservationController):
         results = super().search(**params).all()
         save_observations(results, DB_PATH)
         return WrapperPaginator(results)
+
+    def get_user_observations(
+        self, username: str, updated_since: datetime = None, limit: int = 50
+    ) -> List[Observation]:
+        # Fetch and save any new observations
+        new_observations = self.search(
+            user_login=username,
+            updated_since=updated_since,
+            refresh=True,
+        ).all()
+        if len(new_observations) >= limit:
+            new_observations = sorted(
+                new_observations, key=lambda obs: obs.created_at, reverse=True
+            )
+            return new_observations[:limit]
+
+        # Get up to `limit` most recent saved observations
+        obs = get_db_observations(username=username, limit=limit, order_by_date=True)
+        return list(obs)
 
 
 class TaxonDbController(TaxonController):
@@ -126,7 +155,6 @@ class TaxonDbController(TaxonController):
 
 
 # TODO: Set expiration on 'original' and 'large' size images using URL patterns
-#   Requires changes in ClientSession to update urls_expire_after param for requests-cache
 class ImageSession(ClientSession):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -161,6 +189,36 @@ class ImageSession(ClientSession):
         """Get the total cache size in bytes, and the number of cached files"""
         size = format_file_size(self.image_cache.size)
         return f'{size} ({len(self.image_cache)} files)'
+
+
+# TODO: Update this in pyinaturalist_convert.db
+def get_db_observations(
+    db_path: PathOrStr = DB_PATH,
+    ids: Iterable[int] = None,
+    username: str = None,
+    limit: int = None,
+    order_by_date: bool = False,
+) -> Iterator[Observation]:
+    """Load observation records and associated taxa from SQLite"""
+    from sqlalchemy import select
+
+    stmt = (
+        select(DbObservation)
+        .join(DbObservation.taxon, isouter=True)
+        .join(DbObservation.user, isouter=True)
+    )
+    if ids:
+        stmt = stmt.where(DbObservation.id.in_(list(ids)))  # type: ignore
+    if username:
+        stmt = stmt.where(DbUser.login == username)
+    if limit:
+        stmt = stmt.limit(limit)
+    if order_by_date:
+        stmt = stmt.order_by(DbObservation.observed_on.desc())
+
+    with get_session(db_path) as session:
+        for obs in session.execute(stmt):
+            yield obs[0].to_model()
 
 
 def get_url_hash(url: str) -> str:
