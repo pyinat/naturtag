@@ -145,7 +145,7 @@ class ObservationInfoSection(HorizontalLayout):
         created_date_str = (
             obs.created_at.strftime('%Y-%m-%d %H:%M:%S') if obs.created_at else 'unknown date'
         )
-        num_ids = obs.identifications_count or len(obs.identifications)
+        num_ids = obs.identifications_count or 0
         quality_str = obs.quality_grade.replace('_', ' ').title().replace('Id', 'ID')
         self.description.setText(obs.description)
 

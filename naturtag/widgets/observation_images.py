@@ -55,7 +55,7 @@ class ObservationInfoCard(InfoCard):
 
         # Details: Date, place guess, number of ids and photos, quality grade
         date_str = obs.observed_on.strftime('%Y-%m-%d') if obs.observed_on else 'unknown date'
-        num_ids = obs.identifications_count or len(obs.identifications)
+        num_ids = obs.identifications_count or 0
         num_photos = len(obs.photos)
         layout = HorizontalLayout()
         layout.setSpacing(0)
