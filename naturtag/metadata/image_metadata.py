@@ -155,18 +155,24 @@ class ImageMetadata:
         sidecar_img.modify_xmp(fixed_xmp)
         sidecar_img.close()
 
-    # TODO: Now modifying History results in "XMP Toolkit error 102: Indexing applied to non-array"
     def _fix_xmp(self):
-        """Fix some invalid XMP tags"""
+        """Fix some invalid/incompatible XMP tags"""
         for k, v in self.xmp.items():
             # Flatten dict values, like {'lang="x-default"': value} -> value
             if isinstance(v, dict):
                 self.xmp[k] = list(v.values())[0]
-            # exiv2 can't modify XMP History
-            elif 'History' in k:
+
+            # exiv2 can't modify XMP Media Management History (or even write existing values??)
+            if k.startswith('Xmp.xmpMM.History'):
                 self.xmp[k] = None
+
             # XMP won't accept both a single value and an array with the same key
-            elif k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
-                self.xmp[nonarray_key] = None
+            # TODO: This fixes some edge cases, with errors like:
+            #   "XMP Toolkit error 102: Composite nodes can't have values"
+            # But in other cases, it causes a different error:
+            #   "XMP Toolkit error 102: Indexing applied to non-array"
+            # elif k.endswith(']') and (nonarray_key := ARRAY_IDX_PATTERN.sub('', k)) in self.xmp:
+            #     self.xmp[nonarray_key] = None
+
         self.xmp = {k: v for k, v in self.xmp.items() if v is not None}
         return self.xmp

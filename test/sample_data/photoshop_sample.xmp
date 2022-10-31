@@ -1,0 +1,77 @@
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 4.4.0-Exiv2">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:GIMP="http://www.gimp.org/xmp/"
+    xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+    xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
+    xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+   xmpMM:DocumentID="gimp:docid:gimp:fc420dd6-93ec-40fa-b86e-df1c161f19db"
+   xmpMM:InstanceID="xmp.iid:74beb575-c995-4e2e-bf10-831ec0da4e95"
+   xmpMM:OriginalDocumentID="xmp.did:e7130a75-e47e-44c7-9dfd-f3aefc7792b7"
+   <xmpMM:History>
+    <rdf:Seq>
+        <rdf:li stEvt:action="created" stEvt:instanceID="xmp.iid:4D9C1E280B37E111A568FF94F417581A" stEvt:when="2012-01-04T20:32:52+01:00" stEvt:softwareAgent="Adobe Photoshop CS5 Windows"/>
+        <rdf:li stEvt:action="converted" stEvt:parameters="from image/png to image/jpeg"/>
+        <rdf:li stEvt:action="saved" stEvt:instanceID="xmp.iid:4E9C1E280B37E111A568FF94F417581A" stEvt:when="2012-01-04T20:34:45+01:00" stEvt:softwareAgent="Adobe Photoshop CS5 Windows" stEvt:changed="/"/>
+    </rdf:Seq>
+   </xmpMM:History>
+   dc:Format="image/jpeg"
+   GIMP:API="2.0"
+   GIMP:Platform="Linux"
+   GIMP:TimeStamp="1667172066815301"
+   GIMP:Version="2.10.30"
+   xmp:CreatorTool="GIMP 2.10"
+   dwc:taxonID="10277"
+   dwc:taxonRank="species"
+   dwc:scientificName="Pheucticus chrysopeplus"
+   dwc:kingdom="Animalia"
+   dwc:phylum="Chordata"
+   dwc:class="Aves"
+   dwc:order="Passeriformes"
+   dwc:family="Cardinalidae"
+   dwc:genus="Pheucticus"
+   dwc:vernacularName="Yellow Grosbeak">
+   <dc:subject>
+    <rdf:Seq>
+     <rdf:li>"Perching Birds"</rdf:li>
+     <rdf:li>"Pheucticus Grosbeaks"</rdf:li>
+     <rdf:li>"Yellow Grosbeak"</rdf:li>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Birds</rdf:li>
+     <rdf:li>Chordates</rdf:li>
+     <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
+     <rdf:li>taxonomy:phylum=Chordata</rdf:li>
+     <rdf:li>taxonomy:subphylum=Vertebrata</rdf:li>
+     <rdf:li>taxonomy:class=Aves</rdf:li>
+     <rdf:li>taxonomy:order=Passeriformes</rdf:li>
+     <rdf:li>taxonomy:family=Cardinalidae</rdf:li>
+     <rdf:li>taxonomy:genus=Pheucticus</rdf:li>
+     <rdf:li>"taxonomy:species=Pheucticus chrysopeplus"</rdf:li>
+     <rdf:li>inat:taxon_id=10277</rdf:li>
+     <rdf:li>dwc:taxonID=10277</rdf:li>
+    </rdf:Seq>
+   </dc:subject>
+   <lr:hierarchicalSubject>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia|Chordata</rdf:li>
+     <rdf:li>Animalia|Chordata|Aves</rdf:li>
+     <rdf:li>Animalia|Chordata|Aves|Passeriformes</rdf:li>
+     <rdf:li>Animalia|Chordata|Aves|Passeriformes|Cardinalidae</rdf:li>
+     <rdf:li>Animalia|Chordata|Aves|Passeriformes|Cardinalidae|Pheucticus</rdf:li>
+     <rdf:li>Animalia|Chordata|Aves|Passeriformes|Cardinalidae|Pheucticus|Pheucticus chrysopeplus</rdf:li>
+     <rdf:li>Animals|Chordates</rdf:li>
+     <rdf:li>Animals|Chordates|Birds</rdf:li>
+     <rdf:li>Animals|Chordates|Birds|"Perching Birds"</rdf:li>
+     <rdf:li>Animals|Chordates|Birds|"Perching Birds"|"Pheucticus Grosbeaks"</rdf:li>
+     <rdf:li>Animals|Chordates|Birds|"Perching Birds"|"Pheucticus Grosbeaks"|"Yellow Grosbeak"</rdf:li>
+    </rdf:Seq>
+   </lr:hierarchicalSubject>
+  </rdf:Description>
+</rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>
