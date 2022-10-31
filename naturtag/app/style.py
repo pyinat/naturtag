@@ -1,9 +1,9 @@
 from logging import getLogger
 
+import qdarktheme
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
 from qtawesome import icon
-from qtmodern.styles import _STYLESHEET as BASE_STYLESHEET
 
 from naturtag.constants import QSS_PATH
 
@@ -35,24 +35,18 @@ def fa_icon(icon_name, secondary: bool = False, **kwargs):
     )
 
 
-def set_stylesheet(obj=None):
-    obj = obj or QApplication.instance()
-    logger.debug(f'Loading stylesheet: {QSS_PATH}')
-
-    with open(BASE_STYLESHEET) as f:
-        obj.setStyleSheet(f.read())
-    with open(QSS_PATH) as f:
-        obj.setStyleSheet(f.read())
-
-
 def set_theme(dark_mode: bool = True):
-    logger.debug(f"Setting theme: {'dark' if dark_mode else 'light'}")
-    palette = dark_palette() if dark_mode else light_palette()
-
     app = QApplication.instance()
-    app.setStyle('Fusion')
+    theme_str = 'dark' if dark_mode else 'light'
+    logger.debug(f'Setting theme: {theme_str}')
+
+    palette = qdarktheme.load_palette(theme_str)
     app.setPalette(palette)
-    set_stylesheet()
+
+    base_stylesheet = qdarktheme.load_stylesheet(theme=theme_str)
+    with open(QSS_PATH) as f:
+        extra_stylesheet = f.read()
+    app.setStyleSheet(base_stylesheet + '\n' + extra_stylesheet)
 
 
 def dark_palette() -> QPalette:

@@ -17,11 +17,10 @@ from PySide6.QtWidgets import (
     QTabWidget,
     QWidget,
 )
-from qtmodern.windows import ModernWindow
 
 from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
-from naturtag.app.style import fa_icon, set_stylesheet, set_theme
+from naturtag.app.style import fa_icon, set_theme
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
@@ -199,7 +198,7 @@ class MainWindow(QMainWindow):
 
     def reload_qss(self):
         """Reload Qt stylesheet"""
-        set_stylesheet(self)
+        set_theme(dark_mode=self.settings.dark_mode)
 
     def show_settings(self):
         """Show the settings menu"""
@@ -230,7 +229,7 @@ def main():
 
     app.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
     set_theme(dark_mode=settings.dark_mode)
-    window = ModernWindow(MainWindow(settings))
+    window = MainWindow(settings)
     window.show()
     splash.finish(window)
     sys.exit(app.exec())
