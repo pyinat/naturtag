@@ -20,7 +20,7 @@ InfoCard {
     border-radius: 6px;
 }
 InfoCard:hover {
-    background: rgba(46, 70, 94, 0.33);
+    background: palette(link-visited);
 }
 InfoCardList {
     background: palette(alternate-base);

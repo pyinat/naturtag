@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Union
 
 import qdarktheme
 from PySide6.QtGui import QColor, QPalette
@@ -7,7 +8,7 @@ from qtawesome import icon
 
 from naturtag.constants import QSS_PATH
 
-CustomPalette = dict[QPalette.ColorRole, str]
+CustomPalette = dict[QPalette.ColorRole, Union[str, tuple]]
 
 YELLOWGREEN = '#9acd32'
 YELLOWGREEN_DARK = '#82c32d'
@@ -55,7 +56,7 @@ def set_theme(dark_mode: bool = True):
 
 
 def mod_dark_palette(palette: QPalette) -> QPalette:
-    enabled = {
+    enabled: CustomPalette = {
         # QPalette.AlternateBase: (66, 66, 66),
         # QPalette.Base: (42, 42, 42),
         # QPalette.BrightText: (180, 180, 180),
@@ -67,7 +68,7 @@ def mod_dark_palette(palette: QPalette) -> QPalette:
         # QPalette.HighlightedText: (180, 180, 180),
         # QPalette.Light: (180, 180, 180),
         QPalette.Link: YELLOWGREEN,  # Secondary highlight
-        # QPalette.LinkVisited: (80, 80, 80),
+        QPalette.LinkVisited: (46, 70, 94, 85),  # Hover highlight
         # QPalette.Midlight: (90, 90, 90),
         # QPalette.Shadow: (20, 20, 20),
         # QPalette.Text: (180, 180, 180),
@@ -81,7 +82,7 @@ def mod_dark_palette(palette: QPalette) -> QPalette:
 
 
 def mod_light_palette(palette) -> QPalette:
-    enabled = {
+    enabled: CustomPalette = {
         # QPalette.AlternateBase: (245, 245, 245),
         # QPalette.Base: (237, 237, 237),
         # QPalette.BrightText: (0, 0, 0),
@@ -92,7 +93,7 @@ def mod_light_palette(palette) -> QPalette:
         # QPalette.HighlightedText: (0, 0, 0),
         # QPalette.Light: (180, 180, 180),
         QPalette.Link: YELLOWGREEN,
-        # QPalette.LinkVisited: (222, 222, 222),
+        QPalette.LinkVisited: (181, 202, 244, 85),
         # QPalette.Midlight: (200, 200, 200),
         # QPalette.Shadow: (20, 20, 20),
         # QPalette.Text: (0, 0, 0),
@@ -106,8 +107,11 @@ def mod_light_palette(palette) -> QPalette:
 
 
 def _modify_palette(palette: QPalette, enabled: CustomPalette, disabled: CustomPalette) -> QPalette:
-    for role, color_str in enabled.items():
-        palette.setColor(role, QColor(color_str))
-    for role, color_str in disabled.items():
-        palette.setColor(QPalette.Disabled, role, QColor(color_str))
+    def _get_qcolor(color):
+        return QColor(*color) if isinstance(color, tuple) else QColor(color)
+
+    for role, color in enabled.items():
+        palette.setColor(role, _get_qcolor(color))
+    for role, color in disabled.items():
+        palette.setColor(QPalette.Disabled, role, _get_qcolor(color))
     return palette
