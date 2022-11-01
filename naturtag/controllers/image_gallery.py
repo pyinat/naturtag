@@ -404,7 +404,7 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout = HorizontalLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
-        self.setGeometry(9, img_size[0] - 11, 116, 20)
+        self.setGeometry(9, img_size[0] - 11, 130, 20)
 
         self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
         self.observation_icon = FAIcon('fa.binoculars', secondary=True, size=20)
