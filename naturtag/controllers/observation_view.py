@@ -48,7 +48,7 @@ class ObservationInfoSection(HorizontalLayout):
         self.addWidget(self.group_box)
 
         # Medium default photo
-        self.image = ObservationPhoto(hover_icon=True)
+        self.image = ObservationPhoto(hover_icon=True, hover_event=False)  # Disabled until 1st load
         self.image.setMaximumHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
         images.addWidget(self.image)
@@ -119,6 +119,7 @@ class ObservationInfoSection(HorizontalLayout):
         self.history_taxon = None
         self.selected_observation = obs
         self.group_box.setTitle(obs.taxon.full_name)
+        self.image.hover_event = True
         self.image.observation = obs
         self.image.set_pixmap_async(
             self.threadpool,

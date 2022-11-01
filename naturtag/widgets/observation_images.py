@@ -1,7 +1,7 @@
 """Image widgets specifically for observation photos"""
 from logging import getLogger
 from string import capwords
-from typing import TYPE_CHECKING, Iterable, Optional
+from typing import Iterable, Optional
 
 from pyinaturalist import Observation, Photo
 from PySide6.QtCore import Qt
@@ -155,8 +155,8 @@ class ObservationImageWindow(ImageWindow):
         """Open window to a selected observation image, and save other image URLs for navigation"""
         idx = observation_photo.idx
         obs = observation_photo.observation
-        if TYPE_CHECKING:
-            assert obs is not None
+        if not obs:
+            return
 
         self.observation = obs
         self.selected_photo = obs.photos[idx] if obs.photos else Photo()  # TODO

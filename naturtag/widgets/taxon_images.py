@@ -112,8 +112,8 @@ class TaxonImageWindow(ImageWindow):
         """Open window to a selected taxon image, and save other image URLs for navigation"""
         idx = taxon_photo.idx
         taxon = taxon_photo.taxon
-        if TYPE_CHECKING:
-            assert taxon is not None
+        if not taxon:
+            return
 
         self.taxon = taxon
         self.selected_photo = taxon.taxon_photos[idx] if taxon.taxon_photos else taxon.default_photo
