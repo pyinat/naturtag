@@ -3,12 +3,12 @@ Includes plain images, cards, scrollable lists, and fullscreen image views.
 """
 from logging import getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias
+from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
-from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
+from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
@@ -338,9 +338,12 @@ class InfoCard(StylableWidget):
         self.details_layout.addWidget(self.title)
         card_layout.addLayout(self.details_layout)
 
-    def add_line(self, widget: QWidget):
-        """Add a widget as a line of info to the card"""
-        self.details_layout.addWidget(widget)
+    def add_row(self, item: Union[QLayout, QWidget]):
+        """Add a layout or widget as a row of info to the card"""
+        if isinstance(item, QLayout):
+            self.details_layout.addLayout(item)
+        else:
+            self.details_layout.addWidget(item)
 
     def enterEvent(self, event):
         """Note on hover effect:

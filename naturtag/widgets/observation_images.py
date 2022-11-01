@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Iterable, Optional
 from pyinaturalist import Observation, Photo
 from PySide6.QtCore import Qt
 
+from naturtag.constants import SIZE_ICON_SM
 from naturtag.widgets.images import HoverPhoto, IconLabel, ImageWindow, InfoCard, InfoCardList
 from naturtag.widgets.layouts import HorizontalLayout
 
@@ -57,16 +58,17 @@ class ObservationInfoCard(InfoCard):
         date_str = obs.observed_on.strftime('%Y-%m-%d') if obs.observed_on else 'unknown date'
         num_ids = obs.identifications_count or 0
         num_photos = len(obs.photos)
+        icon_size = SIZE_ICON_SM[0]
         layout = HorizontalLayout()
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignLeft)
-        layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=20))
-        layout.addWidget(IconLabel('mdi.marker-check', num_ids, size=20))
+        layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=icon_size))
+        layout.addWidget(IconLabel('mdi.marker-check', num_ids, size=icon_size))
         layout.addWidget(
             IconLabel(
                 'fa5.images' if num_photos > 1 else 'fa5.image',
                 num_photos,
-                size=20,
+                size=icon_size,
             )
         )
         if obs.sounds:
@@ -74,20 +76,18 @@ class ObservationInfoCard(InfoCard):
                 IconLabel(
                     'ri.volume-up-fill',
                     len(obs.sounds),
-                    size=20,
+                    size=icon_size,
                 )
             )
         layout.addWidget(
             IconLabel(
                 QUALITY_GRADE_ICONS.get(obs.quality_grade, 'mdi.chevron-up'),
                 obs.quality_grade.replace('_', ' ').title(),
-                size=20,
+                size=icon_size,
             )
         )
-        self.details_layout.addLayout(layout)
-        self.details_layout.addWidget(
-            IconLabel('fa.map-marker', obs.place_guess or obs.location, size=20)
-        )
+        self.add_row(layout)
+        self.add_row(IconLabel('fa.map-marker', obs.place_guess or obs.location, size=icon_size))
 
         # Add more verbose details in tooltip
         tooltip_lines = [
