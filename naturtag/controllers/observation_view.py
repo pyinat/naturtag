@@ -130,7 +130,7 @@ class ObservationInfoSection(HorizontalLayout):
         # Load additional thumbnails
         self.thumbnails.clear()
         for i, photo in enumerate(obs.photos[1:11] if obs.photos else []):
-            thumb = ObservationPhoto(observation=obs, idx=i + 1)
+            thumb = ObservationPhoto(observation=obs, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_observation_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')

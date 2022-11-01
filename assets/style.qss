@@ -30,7 +30,7 @@ ThumbnailCard > QLabel {
     background-color: rgba(0, 0, 0, 0.3);
     font-size: 11pt;
 }
-ThumbnailCard > QLabel#metadata-icons {
+ThumbnailCard > QLabel#metadata_icons {
     background-color: rgba(0, 0, 0, 0.5);
     font-size: 11pt;
 }

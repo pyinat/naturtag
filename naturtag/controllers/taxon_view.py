@@ -120,7 +120,7 @@ class TaxonInfoSection(HorizontalLayout):
         # Load additional thumbnails
         self.thumbnails.clear()
         for i, photo in enumerate(taxon.taxon_photos[1:11] if taxon.taxon_photos else []):
-            thumb = TaxonPhoto(taxon=taxon, idx=i + 1)
+            thumb = TaxonPhoto(taxon=taxon, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_taxon_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
