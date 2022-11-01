@@ -54,7 +54,7 @@ sqlalchemy                  = '^1.4.36'
 furo                        = {optional=true, version='^2022.9'}
 linkify-it-py               = {optional=true, version='^1.0.1'}
 myst-parser                 = {optional=true, version='>=0.17,<0.19'}
-sphinx                      = {optional=true, version='^4.5.0'}
+sphinx                      = {optional=true, version='>=4.5,<6.0'}
 sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
 sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
