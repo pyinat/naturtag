@@ -1,6 +1,7 @@
 """Image widgets specifically for taxon photos"""
 import re
 from logging import getLogger
+from string import capwords
 from typing import TYPE_CHECKING, Iterable, Optional
 
 from pyinaturalist import Photo, Taxon
@@ -46,7 +47,7 @@ class TaxonInfoCard(InfoCard):
 
         # Details
         self.title.setText(f'{taxon.rank.title()}: <i>{taxon.name}</i>')
-        self.add_line(QLabel((taxon.preferred_common_name or '').title()))
+        self.add_line(QLabel(capwords(taxon.preferred_common_name or '')))
         layout = HorizontalLayout()
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignLeft)
