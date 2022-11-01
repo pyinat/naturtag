@@ -198,7 +198,9 @@ class RankList(HorizontalLayout):
 
         ranks = RANKS if all_ranks else COMMON_RANKS
         self.dropdown = QComboBox()
-        self.dropdown.addItems([''] + ranks[::-1])
+        # Workaround for miscalculated padding in pyqtdarktheme
+        #   (which appears to a add a check icon to the left, but doesn't account for its width)
+        self.dropdown.addItems([''] + [f'{r}   ' for r in ranks[::-1]])
         self.addWidget(self.dropdown)
 
     def reset(self):
