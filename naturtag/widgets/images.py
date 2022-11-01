@@ -333,6 +333,9 @@ class InfoCard(StylableWidget):
         self.title = QLabel()
         self.title.setTextFormat(Qt.RichText)
         self.title.setObjectName('h2')
+        # Don't let text steal mouse focus; pass click events to the card
+        self.title.mouseReleaseEvent = self.mouseReleaseEvent
+
         self.details_layout = VerticalLayout()
         self.details_layout.setAlignment(Qt.AlignLeft)
         self.details_layout.addWidget(self.title)
