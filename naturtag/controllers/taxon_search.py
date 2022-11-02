@@ -5,7 +5,7 @@ from typing import Optional
 from pyinaturalist import IconPhoto, Taxon
 from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QWidget
+from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import INAT_CLIENT
@@ -24,7 +24,7 @@ from naturtag.widgets.images import FAIcon
 logger = getLogger(__name__)
 
 
-class TaxonSearch(VerticalLayout):
+class TaxonSearch(QWidget):
     on_results = Signal(list)  #: New search results were loaded
     on_reset = Signal()  #: Input fields were reset
 
@@ -32,21 +32,24 @@ class TaxonSearch(VerticalLayout):
         super().__init__()
         self.selected_taxon: Taxon = None
         self.settings = settings
-        self.setAlignment(Qt.AlignTop)
+        self.root = VerticalLayout(self)
+        self.root.setAlignment(Qt.AlignTop)
+        self.setMinimumWidth(400)
+        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
 
         # Taxon name autocomplete
         self.autocomplete = TaxonAutocomplete()
-        search_group = self.add_group('Search', self, width=400)
+        search_group = self.root.add_group('Search', self.root)
         search_group.addWidget(self.autocomplete)
         self.autocomplete.returnPressed.connect(self.search)
 
         # Category inputs
         self.iconic_taxon_filters = IconicTaxonFilters()
-        categories = self.add_group('Categories', self, width=400)
+        categories = self.root.add_group('Categories', self.root)
         categories.addWidget(self.iconic_taxon_filters)
 
         # Rank inputs
-        self.ranks = self.add_group('Rank', self, width=400)
+        self.ranks = self.root.add_group('Rank', self.root)
         self.reset_ranks()
 
         # Clear exact rank after selecting min or max, and vice versa
@@ -57,7 +60,7 @@ class TaxonSearch(VerticalLayout):
 
         # Button to search for children of selected taxon
         # TODO: If more than one toggle filter is added, consolidate with settings_menu.ToggleSetting
-        group_box = self.add_group('Parent', self, width=400)
+        group_box = self.root.add_group('Parent', self.root)
         button_layout = HorizontalLayout()
         button_layout.setAlignment(Qt.AlignLeft)
         button_layout.addWidget(FAIcon('mdi.file-tree', size=20))
@@ -72,17 +75,17 @@ class TaxonSearch(VerticalLayout):
         # Search/reset buttons
         button_layout = HorizontalLayout()
         search_button = QPushButton('Search')
-        search_button.setMaximumWidth(200)
+        # search_button.setMaximumWidth(200)
         search_button.setIcon(fa_icon('fa.search'))
         search_button.clicked.connect(self.search)
         button_layout.addWidget(search_button)
 
         reset_button = QPushButton('Reset')
-        reset_button.setMaximumWidth(200)
+        # reset_button.setMaximumWidth(200)
         reset_button.setIcon(fa_icon('mdi.backspace'))
         reset_button.clicked.connect(self.reset)
         button_layout.addWidget(reset_button)
-        self.addLayout(button_layout)
+        self.root.addLayout(button_layout)
 
     def search(self):
         """Search for taxa with the currently selected filters"""

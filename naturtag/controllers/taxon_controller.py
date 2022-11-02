@@ -3,7 +3,7 @@ from typing import Iterable
 
 from pyinaturalist import Taxon, TaxonCount, TaxonCounts
 from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal, Slot
-from PySide6.QtWidgets import QTabWidget, QWidget
+from PySide6.QtWidgets import QSizePolicy, QSplitter, QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.app.threadpool import ThreadPool
@@ -23,35 +23,49 @@ class TaxonController(BaseController):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.selected_taxon: Taxon = None
         self.user_taxa = UserTaxa.read()
-
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
-        self.selected_taxon: Taxon = None
+
+        # Left group (search + tabbed lists)
+        # -----------------------------------
+
+        left_group = QWidget()
+        left_layout = HorizontalLayout(left_group)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.addWidget(left_group)
+        self.root.addWidget(splitter)
 
         # Search inputs
         self.search = TaxonSearch(self.settings)
         self.search.autocomplete.on_select.connect(self.select_taxon)
         self.search.on_results.connect(self.set_search_results)
         self.on_select.connect(self.search.set_taxon)
-        self.root.addLayout(self.search)
+        left_layout.addWidget(self.search)
 
         # Search results & user taxa
         self.tabs = TaxonTabs(self.settings, self.threadpool, self.user_taxa)
         self.tabs.on_load.connect(self.bind_selection)
-        self.root.addWidget(self.tabs)
+        left_layout.addWidget(self.tabs)
         self.on_select.connect(self.tabs.update_history)
         self.search.on_reset.connect(self.tabs.results.clear)
+
+        # Right group (taxon info + ancestry + children)
+        # ----------------------------------------------
+        # TODO: Allow taxonomy section to move to the right instead of underneath taxon info
+
+        right_group = QWidget()
+        right_layout = VerticalLayout(right_group)
+        splitter.addWidget(right_group)
 
         # Selected taxon info
         self.taxon_info = TaxonInfoSection(self.threadpool)
         self.taxon_info.on_select_id.connect(self.select_taxon)
         self.taxon_info.on_select.connect(self.display_taxon)
         self.taxonomy = TaxonomySection(self.threadpool, self.user_taxa)
-        taxon_layout = VerticalLayout()
-        taxon_layout.addLayout(self.taxon_info)
-        taxon_layout.addLayout(self.taxonomy)
-        self.root.addLayout(taxon_layout)
+        right_layout.addLayout(self.taxon_info)
+        right_layout.addLayout(self.taxonomy)
 
         # Navigation keyboard shortcuts
         self.add_shortcut('Alt+Left', self.taxon_info.prev)
@@ -118,8 +132,8 @@ class TaxonTabs(QTabWidget):
         super().__init__(parent)
         self.setElideMode(Qt.ElideRight)
         self.setIconSize(QSize(32, 32))
-        self.setMinimumWidth(240)
-        self.setMaximumWidth(510)
+        self.setMinimumWidth(300)
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.settings = settings
         self.threadpool = threadpool
         self.user_taxa = user_taxa
