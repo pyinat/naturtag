@@ -1,12 +1,14 @@
 """Image widgets specifically for taxon photos"""
 import re
 from logging import getLogger
+from string import capwords
 from typing import TYPE_CHECKING, Iterable, Optional
 
 from pyinaturalist import Photo, Taxon
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel
 
+from naturtag.constants import SIZE_ICON_SM
 from naturtag.widgets import (
     HorizontalLayout,
     HoverPhoto,
@@ -46,16 +48,17 @@ class TaxonInfoCard(InfoCard):
 
         # Details
         self.title.setText(f'{taxon.rank.title()}: <i>{taxon.name}</i>')
-        self.add_line(QLabel((taxon.preferred_common_name or '').title()))
+        self.add_row(QLabel(capwords(taxon.preferred_common_name or '')))
+        icon_size = SIZE_ICON_SM[0]
         layout = HorizontalLayout()
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignLeft)
-        layout.addWidget(IconLabel('fa.binoculars', taxon.observations_count or 0, size=20))
+        layout.addWidget(IconLabel('fa.binoculars', taxon.observations_count or 0, size=icon_size))
         if taxon.complete_species_count:
-            layout.addWidget(IconLabel('mdi.leaf', taxon.complete_species_count, size=20))
+            layout.addWidget(IconLabel('mdi.leaf', taxon.complete_species_count, size=icon_size))
         if user_observations_count:
-            layout.addWidget(IconLabel('fa5s.user', user_observations_count, size=20))
-        self.details_layout.addLayout(layout)
+            layout.addWidget(IconLabel('fa5s.user', user_observations_count, size=icon_size))
+        self.add_row(layout)
 
 
 class TaxonList(InfoCardList):
@@ -109,8 +112,8 @@ class TaxonImageWindow(ImageWindow):
         """Open window to a selected taxon image, and save other image URLs for navigation"""
         idx = taxon_photo.idx
         taxon = taxon_photo.taxon
-        if TYPE_CHECKING:
-            assert taxon is not None
+        if not taxon:
+            return
 
         self.taxon = taxon
         self.selected_photo = taxon.taxon_photos[idx] if taxon.taxon_photos else taxon.default_photo

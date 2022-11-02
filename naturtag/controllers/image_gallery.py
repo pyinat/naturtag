@@ -179,7 +179,7 @@ class ThumbnailCard(StylableWidget):
 
         self.context_menu = ThumbnailContextMenu(self)
         self.icons = ThumbnailMetaIcons(self)
-        self.icons.setObjectName('metadata-icons')
+        self.icons.setObjectName('metadata_icons')
 
         # Filename label
         text = re.sub('([_-])', '\\1\u200b', self.image_path.name)  # To allow word wrapping
@@ -288,7 +288,7 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
 
     def __init__(self, parent: QWidget, size: Dimensions = SIZE_DEFAULT):
         # We will generate a thumbnail of final size; no scaling needed
-        super().__init__(parent, scale=False)
+        super().__init__(parent, rounded=True, scale=False)
         self.thumbnail_size = size
         self.setFixedSize(*size)
 
@@ -404,7 +404,7 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout = HorizontalLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
-        self.setGeometry(9, img_size[0] - 11, 116, 20)
+        self.setGeometry(9, img_size[0] - 11, 130, 20)
 
         self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
         self.observation_icon = FAIcon('fa.binoculars', secondary=True, size=20)

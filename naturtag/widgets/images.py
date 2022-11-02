@@ -3,12 +3,12 @@ Includes plain images, cards, scrollable lists, and fullscreen image views.
 """
 from logging import getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias
+from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 
 from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, QThread, Signal
-from PySide6.QtGui import QFont, QIcon, QPainter, QPixmap
-from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy, QWidget
+from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
+from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
@@ -110,6 +110,7 @@ class PixmapLabel(QLabel):
         url: str = None,
         description: str = None,
         resample: bool = True,
+        rounded: bool = False,
         scale: bool = True,
         idx: int = 0,
     ):
@@ -120,6 +121,7 @@ class PixmapLabel(QLabel):
         self.idx = idx
         self.path = None
         self.description = description
+        self.rounded = rounded
         self.scale = scale
         self.xform = Qt.SmoothTransformation if resample else Qt.FastTransformation
         if path or url:
@@ -184,14 +186,24 @@ class PixmapLabel(QLabel):
         super().mouseReleaseEvent(event)
 
     def paintEvent(self, event):
-        """Draw optional description text in the upper left corner of the image"""
+        """Optionally draw rounded corners and/or image description text"""
         super().paintEvent(event)
-        if not self.description:
-            return
+        if self.rounded:
+            self._draw_rounded_corners()
+        if self.description:
+            self._draw_description_text()
 
+    def _draw_rounded_corners(self):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        brush = QBrush(self._pixmap)
+        painter.setBrush(brush)
+        painter.drawRoundedRect(self._pixmap.rect(), 6, 6)
+
+    def _draw_description_text(self):
+        painter = QPainter(self)
         font = QFont()
         font.setPixelSize(16)
-        painter = QPainter(self)
         painter.setFont(font)
 
         # Get text dimensions
@@ -201,7 +213,7 @@ class PixmapLabel(QLabel):
         text_width = painter.fontMetrics().horizontalAdvance(longest_line)
         text_height = metrics.height() * len(lines)
 
-        # Draw text with a a semitransparent background
+        # Draw text with a semitransparent background
         bg_color = self.palette().dark().color()
         bg_color.setAlpha(128)
         painter.fillRect(0, 0, text_width + 2, text_height + 2, bg_color)
@@ -228,13 +240,11 @@ class HoverMixin(MIXIN_BASE):
 
     Args:
         hover_icon: Add an 'open' icon on hover
-        disable_hover_event: Don't automatically show overlay on hover
+        hover_event: Set to ``False`` to disable overlay on hover
             (e.g., to use parent widget hover event instead)
     """
 
-    def __init__(
-        self, *args, hover_icon: bool = False, disable_hover_event: bool = False, **kwargs
-    ):
+    def __init__(self, *args, hover_icon: bool = False, hover_event: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self.overlay = FAIcon('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
         self.overlay.setAlignment(Qt.AlignTop)
@@ -242,19 +252,19 @@ class HoverMixin(MIXIN_BASE):
         self.overlay.setGeometry(self.geometry())
         self.overlay.setObjectName('hover_overlay')
         self.overlay.setVisible(False)
-        self.disable_hover_event = disable_hover_event
+        self.hover_event = hover_event
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.overlay.setFixedSize(self.size())
 
     def enterEvent(self, event):
-        if not self.disable_hover_event:
+        if self.hover_event:
             self.overlay.setVisible(True)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        if not self.disable_hover_event:
+        if self.hover_event:
             self.overlay.setVisible(False)
         super().leaveEvent(event)
 
@@ -314,22 +324,29 @@ class InfoCard(StylableWidget):
         self.card_id = card_id
 
         # Image
-        self.thumbnail = HoverPhoto(disable_hover_event=True)  # Use card hover event instead
+        self.thumbnail = HoverPhoto(rounded=True, hover_event=False)  # Use card hover event
         self.thumbnail.setFixedSize(*SIZE_SM)
+        self.thumbnail.setObjectName('thumbnail')
         card_layout.addWidget(self.thumbnail)
 
         # Details
         self.title = QLabel()
         self.title.setTextFormat(Qt.RichText)
-        self.title.setObjectName('h1')
+        self.title.setObjectName('h2')
+        # Don't let text steal mouse focus; pass click events to the card
+        self.title.mouseReleaseEvent = self.mouseReleaseEvent
+
         self.details_layout = VerticalLayout()
         self.details_layout.setAlignment(Qt.AlignLeft)
         self.details_layout.addWidget(self.title)
         card_layout.addLayout(self.details_layout)
 
-    def add_line(self, widget: QWidget):
-        """Add a widget as a line of info to the card"""
-        self.details_layout.addWidget(widget)
+    def add_row(self, item: Union[QLayout, QWidget]):
+        """Add a layout or widget as a row of info to the card"""
+        if isinstance(item, QLayout):
+            self.details_layout.addLayout(item)
+        else:
+            self.details_layout.addWidget(item)
 
     def enterEvent(self, event):
         """Note on hover effect:

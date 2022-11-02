@@ -1,16 +1,16 @@
 QGroupBox {
-    font: bold 16pt;
+    font: bold 14pt;
     border: 2px solid palette(midlight);
     border-radius: 6px;
     margin-top: 10px;
     padding:5px;
 }
-QGroupBox::title {
+/* QGroupBox::title {
     subcontrol-origin:  margin;
     subcontrol-position: top left;
     left: 7px;
     padding: 0px 5px 0px 5px;
-}
+} */
 QScrollArea {
     background: palette(midlight);
 }
@@ -20,27 +20,24 @@ InfoCard {
     border-radius: 6px;
 }
 InfoCard:hover {
-    background: palette(dark);
+    background: palette(link-visited);
 }
 InfoCardList {
     background: palette(alternate-base);
 }
 
-ThumbnailCard {
-    background: palette(base);
-}
 ThumbnailCard > QLabel {
     background-color: rgba(0, 0, 0, 0.3);
     font-size: 11pt;
 }
-ThumbnailCard > QLabel#metadata-icons {
+ThumbnailCard > QLabel#metadata_icons {
     background-color: rgba(0, 0, 0, 0.5);
     font-size: 11pt;
 }
 
-StylableWidget#gallery_scroll_panel {
+/* StylableWidget#gallery_scroll_panel {
     background: palette(base);
-}
+} */
 
 QLabel#hover_overlay {
     background-color: rgba(0, 0, 0, 0.3);
@@ -52,7 +49,10 @@ QLabel#h1_italic {
     font: bold italic 16pt;
 }
 QLabel#h2 {
-    font: bold 14pt;
+    font: bold 13pt;
+}
+QLabel#h2_italic {
+    font: bold italic 13pt;
 }
 QLabel#h3 {
     font: bold 12pt;

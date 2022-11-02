@@ -1,20 +1,22 @@
 from logging import getLogger
+from typing import Union
 
+import qdarktheme
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
 from qtawesome import icon
-from qtmodern.styles import _STYLESHEET as BASE_STYLESHEET
 
 from naturtag.constants import QSS_PATH
 
-YELLOWGREEN = (154, 205, 50)
-YELLOWGREEN_DARK = (130, 195, 45)
-PALEBLUE = (128, 207, 238)
-PALEBLUE_DARK = (98, 190, 227)
-GRAYBLUE = (63, 113, 172)
-SILVER = (173, 168, 182)
+CustomPalette = dict[QPalette.ColorRole, Union[str, tuple]]
 
-# LIGHT_GREEN_INAT = (116, 172, 0)
+YELLOWGREEN = '#9acd32'
+YELLOWGREEN_DARK = '#82c32d'
+PALEBLUE = '#80cfee'
+PALEBLUE_DARK = '#62bee3'
+
+# GRAYBLUE = (63, 113, 172)
+# SILVER = (173, 168, 182)
 # PRPL = (200, 0, 200)
 # LAVENDER = (180, 180, 255)
 # UMBER = (95, 84, 73)
@@ -35,100 +37,81 @@ def fa_icon(icon_name, secondary: bool = False, **kwargs):
     )
 
 
-def set_stylesheet(obj=None):
-    obj = obj or QApplication.instance()
-    logger.debug(f'Loading stylesheet: {QSS_PATH}')
-
-    with open(BASE_STYLESHEET) as f:
-        obj.setStyleSheet(f.read())
-    with open(QSS_PATH) as f:
-        obj.setStyleSheet(f.read())
-
-
 def set_theme(dark_mode: bool = True):
-    logger.debug(f"Setting theme: {'dark' if dark_mode else 'light'}")
-    palette = dark_palette() if dark_mode else light_palette()
-
     app = QApplication.instance()
-    app.setStyle('Fusion')
+    theme_str = 'dark' if dark_mode else 'light'
+    logger.debug(f'Setting theme: {theme_str}')
+
+    palette = qdarktheme.load_palette(theme_str)
+    if dark_mode:
+        palette = mod_dark_palette(palette)
+    else:
+        palette = mod_light_palette(palette)
     app.setPalette(palette)
-    set_stylesheet()
+
+    base_stylesheet = qdarktheme.load_stylesheet(theme=theme_str)
+    with open(QSS_PATH) as f:
+        extra_stylesheet = f.read()
+    app.setStyleSheet(base_stylesheet + '\n' + extra_stylesheet)
 
 
-def dark_palette() -> QPalette:
-    base = {
-        QPalette.AlternateBase: (66, 66, 66),
-        QPalette.Base: (42, 42, 42),
-        QPalette.BrightText: (180, 180, 180),
-        QPalette.Button: (53, 53, 53),
-        QPalette.ButtonText: (180, 180, 180),
-        QPalette.Dark: (35, 35, 35),
+def mod_dark_palette(palette: QPalette) -> QPalette:
+    enabled: CustomPalette = {
+        # QPalette.AlternateBase: (66, 66, 66),
+        # QPalette.Base: (42, 42, 42),
+        # QPalette.BrightText: (180, 180, 180),
+        # QPalette.Button: (53, 53, 53),
+        # QPalette.ButtonText: (180, 180, 180),
+        # QPalette.Dark: (35, 35, 35),
         # QPalette.Highlight: (42, 130, 218),
         QPalette.Highlight: PALEBLUE,
-        QPalette.HighlightedText: (180, 180, 180),
-        QPalette.Light: (180, 180, 180),
+        # QPalette.HighlightedText: (180, 180, 180),
+        # QPalette.Light: (180, 180, 180),
         QPalette.Link: YELLOWGREEN,  # Secondary highlight
-        QPalette.LinkVisited: (80, 80, 80),
-        QPalette.Midlight: (90, 90, 90),
-        # QPalette.Midlight: CERULEAN,
-        QPalette.Shadow: (20, 20, 20),
-        QPalette.Text: (180, 180, 180),
-        QPalette.ToolTipBase: (53, 53, 53),
-        QPalette.ToolTipText: (180, 180, 180),
-        # QPalette.ToolTipText: LAVENDER,
-        QPalette.Window: (53, 53, 53),
-        QPalette.WindowText: (180, 180, 180),
-        # QPalette.WindowText: PRPL,
+        QPalette.LinkVisited: (46, 70, 94, 85),  # Hover highlight
+        # QPalette.Midlight: (90, 90, 90),
+        # QPalette.Shadow: (20, 20, 20),
+        # QPalette.Text: (180, 180, 180),
+        # QPalette.ToolTipBase: (53, 53, 53),
+        # QPalette.ToolTipText: (180, 180, 180),
+        # QPalette.Window: (53, 53, 53),
+        # QPalette.WindowText: (180, 180, 180),
     }
-    disabled = {
-        QPalette.ButtonText: (127, 127, 127),
-        QPalette.Highlight: (80, 80, 80),
-        QPalette.HighlightedText: (127, 127, 127),
-        QPalette.Text: (127, 127, 127),
-        QPalette.WindowText: (127, 127, 127),
-    }
-
-    palette = QPalette()
-    for role, rgb in base.items():
-        palette.setColor(role, QColor(*rgb))
-    for role, rgb in disabled.items():
-        palette.setColor(QPalette.Disabled, role, QColor(*rgb))
-    return palette
+    disabled: CustomPalette = {}
+    return _modify_palette(palette, enabled, disabled)
 
 
-def light_palette() -> QPalette:
-    base = {
-        QPalette.AlternateBase: (245, 245, 245),
-        QPalette.Base: (237, 237, 237),
-        QPalette.BrightText: (0, 0, 0),
-        QPalette.Button: (240, 240, 240),
-        QPalette.ButtonText: (0, 0, 0),
-        QPalette.Dark: (225, 225, 225),
-        # QPalette.Highlight: (76, 163, 224),
+def mod_light_palette(palette) -> QPalette:
+    enabled: CustomPalette = {
+        # QPalette.AlternateBase: (245, 245, 245),
+        # QPalette.Base: (237, 237, 237),
+        # QPalette.BrightText: (0, 0, 0),
+        # QPalette.Button: (240, 240, 240),
+        # QPalette.ButtonText: (0, 0, 0),
+        # QPalette.Dark: (225, 225, 225),
         QPalette.Highlight: PALEBLUE_DARK,
-        QPalette.HighlightedText: (0, 0, 0),
-        QPalette.Light: (180, 180, 180),
+        # QPalette.HighlightedText: (0, 0, 0),
+        # QPalette.Light: (180, 180, 180),
         QPalette.Link: YELLOWGREEN,
-        QPalette.LinkVisited: (222, 222, 222),
-        QPalette.Midlight: (200, 200, 200),
-        QPalette.Shadow: (20, 20, 20),
-        QPalette.Text: (0, 0, 0),
-        QPalette.ToolTipBase: (240, 240, 240),
-        QPalette.ToolTipText: (0, 0, 0),
-        QPalette.Window: (240, 240, 240),
-        QPalette.WindowText: (0, 0, 0),
+        QPalette.LinkVisited: (181, 202, 244, 85),
+        # QPalette.Midlight: (200, 200, 200),
+        # QPalette.Shadow: (20, 20, 20),
+        # QPalette.Text: (0, 0, 0),
+        # QPalette.ToolTipBase: (240, 240, 240),
+        # QPalette.ToolTipText: (0, 0, 0),
+        # QPalette.Window: (240, 240, 240),
+        # QPalette.WindowText: (0, 0, 0),
     }
-    disabled = {
-        QPalette.WindowText: (115, 115, 115),
-        QPalette.Text: (115, 115, 115),
-        QPalette.ButtonText: (115, 115, 115),
-        QPalette.Highlight: (190, 190, 190),
-        QPalette.HighlightedText: (115, 115, 115),
-    }
+    disabled: CustomPalette = {}
+    return _modify_palette(palette, enabled, disabled)
 
-    palette = QPalette()
-    for role, rgb in base.items():
-        palette.setColor(role, QColor(*rgb))
-    for role, rgb in disabled.items():
-        palette.setColor(QPalette.Disabled, role, QColor(*rgb))
+
+def _modify_palette(palette: QPalette, enabled: CustomPalette, disabled: CustomPalette) -> QPalette:
+    def _get_qcolor(color):
+        return QColor(*color) if isinstance(color, tuple) else QColor(color)
+
+    for role, color in enabled.items():
+        palette.setColor(role, _get_qcolor(color))
+    for role, color in disabled.items():
+        palette.setColor(QPalette.Disabled, role, _get_qcolor(color))
     return palette

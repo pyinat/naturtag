@@ -47,7 +47,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.setAlignment(Qt.AlignTop)
 
         # Medium taxon default photo
-        self.image = TaxonPhoto(hover_icon=True)
+        self.image = TaxonPhoto(hover_icon=True, hover_event=False)  # Disabled until 1st load
         self.image.setFixedHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
         images.addWidget(self.image)
@@ -109,6 +109,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.history_taxon = None
         self.selected_taxon = taxon
         self.group_box.setTitle(taxon.full_name)
+        self.image.hover_event = True
         self.image.taxon = taxon
         self.image.set_pixmap_async(
             self.threadpool,
@@ -120,7 +121,7 @@ class TaxonInfoSection(HorizontalLayout):
         # Load additional thumbnails
         self.thumbnails.clear()
         for i, photo in enumerate(taxon.taxon_photos[1:11] if taxon.taxon_photos else []):
-            thumb = TaxonPhoto(taxon=taxon, idx=i + 1)
+            thumb = TaxonPhoto(taxon=taxon, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_taxon_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')

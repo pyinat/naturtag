@@ -48,7 +48,7 @@ class ObservationInfoSection(HorizontalLayout):
         self.addWidget(self.group_box)
 
         # Medium default photo
-        self.image = ObservationPhoto(hover_icon=True)
+        self.image = ObservationPhoto(hover_icon=True, hover_event=False)  # Disabled until 1st load
         self.image.setMaximumHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
         images.addWidget(self.image)
@@ -119,6 +119,7 @@ class ObservationInfoSection(HorizontalLayout):
         self.history_taxon = None
         self.selected_observation = obs
         self.group_box.setTitle(obs.taxon.full_name)
+        self.image.hover_event = True
         self.image.observation = obs
         self.image.set_pixmap_async(
             self.threadpool,
@@ -130,7 +131,7 @@ class ObservationInfoSection(HorizontalLayout):
         # Load additional thumbnails
         self.thumbnails.clear()
         for i, photo in enumerate(obs.photos[1:11] if obs.photos else []):
-            thumb = ObservationPhoto(observation=obs, idx=i + 1)
+            thumb = ObservationPhoto(observation=obs, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_observation_fullscreen)
             thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
@@ -145,7 +146,7 @@ class ObservationInfoSection(HorizontalLayout):
         created_date_str = (
             obs.created_at.strftime('%Y-%m-%d %H:%M:%S') if obs.created_at else 'unknown date'
         )
-        num_ids = obs.identifications_count or len(obs.identifications)
+        num_ids = obs.identifications_count or 0
         quality_str = obs.quality_grade.replace('_', ' ').title().replace('Id', 'ID')
         self.description.setText(obs.description)
 
