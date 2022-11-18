@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Export taxonomy data into a SQLite db
-# Including common name text search for all languages
+# Export all taxonomy data into a SQLite db, including common name text search for all languages
+# This is too large to include in naturtag packages, but can be uploaded to GitHub Releases as an
+# optional download
 
 DATA_DIR=$HOME/.local/share/pyinaturalist/
 SRC_DB=$DATA_DIR/observations.db
