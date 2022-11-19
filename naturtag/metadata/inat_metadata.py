@@ -222,7 +222,7 @@ def refresh_tags(
     image_paths: Iterable[PathOrStr],
     recursive: bool = False,
     settings: Settings = None,
-):
+) -> list[MetaMetadata]:
     """Refresh metadata for previously tagged images
 
     Example:
@@ -235,15 +235,26 @@ def refresh_tags(
         image_paths: Paths to images to tag
         recursive: Recursively search subdirectories for valid image files
         settings: Settings for metadata types to generate
+
+    Returns:
+        Updated metadata objects for updated images only
     """
-    for image_path in get_valid_image_paths(image_paths, recursive):
+    metadata_objs = [
         _refresh_tags(MetaMetadata(image_path), settings)
+        for image_path in get_valid_image_paths(image_paths, recursive)
+    ]
+    return [m for m in metadata_objs if m]
 
 
-def _refresh_tags(metadata: MetaMetadata, settings: Settings = None) -> MetaMetadata:
-    """Refresh existing metadata for a single image with latest observation and/or taxon data"""
+def _refresh_tags(metadata: MetaMetadata, settings: Settings = None) -> Optional[MetaMetadata]:
+    """Refresh existing metadata for a single image with latest observation and/or taxon data.
+
+    Returns:
+        Updated metadata if existing IDs were found, otherwise ``None``
+    """
     if not metadata.has_observation and not metadata.has_taxon:
-        return metadata
+        logger.debug(f'No IDs found in {metadata.image_path}')
+        return None
 
     logger.info(f'Refreshing tags for {metadata.image_path}')
     settings = settings or Settings.read()

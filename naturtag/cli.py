@@ -187,8 +187,8 @@ def refresh(recursive, image_paths):
     naturtag refresh -r image_directory
     ```
     """
-    refresh_tags(image_paths, recursive=recursive)
-    click.echo('Images refreshed')
+    metadata_objs = refresh_tags(image_paths, recursive=recursive)
+    click.echo(f'{len(metadata_objs)} Images refreshed')
 
 
 @main.command()

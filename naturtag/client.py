@@ -3,7 +3,7 @@ from hashlib import md5
 from itertools import chain
 from logging import getLogger
 from time import time
-from typing import TYPE_CHECKING, Iterable, Iterator, List
+from typing import TYPE_CHECKING, Iterable, Iterator
 
 from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
@@ -76,7 +76,7 @@ class ObservationDbController(ObservationController):
 
     def get_user_observations(
         self, username: str, updated_since: datetime = None, limit: int = 50
-    ) -> List[Observation]:
+    ) -> list[Observation]:
         # Fetch and save any new observations
         new_observations = self.search(
             user_login=username,
