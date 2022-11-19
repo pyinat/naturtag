@@ -64,6 +64,12 @@ class Toolbar(QToolBar):
         )
 
         # Extra actions not added to the toolbar, but used by the menu
+        self.reset_db_button = self.add_button(
+            '&Reset database',
+            tooltip='Reset local taxonomy & observation database',
+            icon='mdi6.database-remove',
+            visible=False,
+        )
         self.settings_button = self.add_button(
             '&Settings',
             tooltip='Settings',
@@ -134,6 +140,9 @@ class Toolbar(QToolBar):
         view_menu = menu.addMenu('&View')
         view_menu.addAction(self.fullscreen_button)
         view_menu.addAction(self.show_toolbar_button)
+
+        tools_menu = menu.addMenu('&Tools')
+        tools_menu.addAction(self.reset_db_button)
 
         settings_menu = menu.addMenu('&Settings')
         settings_menu.addAction(self.settings_button)
