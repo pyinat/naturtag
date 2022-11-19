@@ -64,7 +64,7 @@ class YamlMixin:
         if not cls.path.is_file():
             return cls()
 
-        logger.info(f'Reading {cls.__name__} from {cls.path}')
+        logger.debug(f'Reading {cls.__name__} from {cls.path}')
         with open(cls.path) as f:
             attrs_dict = yaml.safe_load(f)
             return YamlConverter.structure(attrs_dict, cl=cls)

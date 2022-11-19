@@ -39,6 +39,7 @@ If no images are specified, the generated keywords will be printed.
 import os
 from collections import defaultdict
 from importlib.metadata import version as pkg_version
+from logging import basicConfig, getLogger
 from pathlib import Path
 from re import DOTALL, MULTILINE, compile
 from shutil import copyfile
@@ -47,10 +48,11 @@ from typing import Optional
 import click
 from click.shell_completion import CompletionItem
 from click_help_colors import HelpColorsGroup
-from pyinaturalist import ICONIC_EMOJI, enable_logging, get_taxa_autocomplete
+from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
 from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
+from rich.logging import RichHandler
 from rich.table import Column, Table
 
 from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR, DB_PATH
@@ -93,12 +95,16 @@ def _strip_url_or_name(ctx, param, value):
     help_options_color='cyan',
 )
 @click.pass_context
-@click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
+@click.option('-v', '--verbose', count=True, help='Show verbose output (up to 3 times)')
 @click.option('--version', is_flag=True, help='Show version')
 def main(ctx, verbose, version):
     ctx.meta['verbose'] = verbose
-    if verbose:
-        enable_logging(level='DEBUG')
+    if verbose == 1:
+        enable_logging(level='INFO', external_level='WARNING')
+    elif verbose == 2:
+        enable_logging(level='DEBUG', external_level='INFO')
+    elif verbose == 3:
+        enable_logging(level='DEBUG', external_level='DEBUG')
     if version:
         v = pkg_version('naturtag')
         click.echo(f'naturtag v{v}')
@@ -232,6 +238,26 @@ def install(ctx, all, db, shell, force):
     if all or db:
         click.echo('Initializing database...')
         setup(Settings.read(), overwrite=force)
+
+
+def enable_logging(level: str = 'INFO', external_level: str = 'WARNING'):
+    """Configure logging to standard output with prettier tracebacks, formatting, and terminal
+    colors (if supported).
+
+    Args:
+        level: Logging level to use for naturtag
+        external_level: Logging level to use for other libraries
+    """
+
+    basicConfig(
+        format='%(message)s',
+        datefmt='[%m-%d %H:%M:%S]',
+        handlers=[RichHandler(rich_tracebacks=True, markup=True)],
+        level=external_level,
+    )
+    getLogger('naturtag').setLevel(level)
+    getLogger('pyinaturalist').setLevel(external_level)
+    getLogger('pyinaturalist_convert').setLevel(external_level)
 
 
 def print_all_metadata(

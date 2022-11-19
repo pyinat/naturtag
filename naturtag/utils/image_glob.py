@@ -33,7 +33,7 @@ def get_valid_image_paths(
         return set()
 
     image_paths = []
-    logger.info(f'Getting images from paths: {paths_or_uris}')
+    logger.debug(f'Getting images from paths: {paths_or_uris}')
 
     for path in paths_or_uris:
         if not path:
@@ -63,7 +63,7 @@ def get_images_from_dir(path: Path, recursive: bool = False) -> list[Path]:
     """
     patterns = {f'**/{ext}' for ext in IMAGE_FILETYPES} if recursive else IMAGE_FILETYPES
     paths = glob_paths([path / pattern for pattern in patterns])
-    logger.info(f'{len(paths)} images found in directory: {path}')
+    logger.debug(f'{len(paths)} images found in directory: {path}')
     return paths
 
 

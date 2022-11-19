@@ -131,7 +131,7 @@ def get_inat_metadata(
             keywords.extend(_get_hierarchical_keywords(common_keywords))
     keywords.extend(_get_id_keywords(observation_id, taxon_id))
 
-    logger.info(f'{len(keywords)} total keywords generated')
+    logger.debug(f'{len(keywords)} total keywords generated')
     metadata.update_keywords(keywords)
 
     # Convert and add coordinates
@@ -239,6 +239,7 @@ def refresh_tags(
     Returns:
         Updated metadata objects for updated images only
     """
+    settings = settings or Settings.read()
     metadata_objs = [
         _refresh_tags(MetaMetadata(image_path), settings)
         for image_path in get_valid_image_paths(image_paths, recursive)
@@ -256,7 +257,7 @@ def _refresh_tags(metadata: MetaMetadata, settings: Settings = None) -> Optional
         logger.debug(f'No IDs found in {metadata.image_path}')
         return None
 
-    logger.info(f'Refreshing tags for {metadata.image_path}')
+    logger.debug(f'Refreshing tags for {metadata.image_path}')
     settings = settings or Settings.read()
     metadata = get_inat_metadata(  # type: ignore
         observation_id=metadata.observation_id,
