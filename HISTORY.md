@@ -1,12 +1,23 @@
 # History
 
 ## 0.8.0 (Unreleased)
+**UI:**
 * Add tab for basic observation details
 * When an observation is selected, show a summary of basic observation details on main screen
 * Display observation count and leaf taxon count on taxon info cards
 * In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
 * Add support for alternate XMP sidecar path format, if it already exists (`basename.ext.xmp` instead of `basename.xmp`)
-* Add CLI support for selecting a sidecar file directly (instead of via an associated image file)
+
+**CLI:**
+* Allow selecting a sidecar file directly (instead of via an associated image file)
+* Allow selecting any file type with an associated sidecar (e.g., for RAW image files)
+
+**Database:**
+* Include data for most commonly observed taxa with PyInstaller packages and platform-specific installers
+* Pre-compute ancestor IDs, child IDs, iconic taxon, observation count, and leaf taxon count based
+  on RG observations from GBIF export
+* Preserve photo order when loading observations from db
+* When updating taxon record from API, don't overwrite pre-computed stats with null values
 
 ## 0.7.0 (2022-07-29)
 * Rebuilt UI from scratch using Qt

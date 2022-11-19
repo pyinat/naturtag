@@ -283,7 +283,7 @@ def setup(settings: Settings = None, overwrite: bool = False, download: bool = F
     create_fts5_table(DB_PATH)
     _load_taxon_db(download)
 
-    # Indicate some columns are missing and need to be filled in from API
+    # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute('UPDATE taxon SET partial=1')
 
