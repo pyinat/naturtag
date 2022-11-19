@@ -42,19 +42,6 @@ Multiple paths are supported, as well as glob patterns, for example:
 `0001.jpg IMG*.jpg ~/observations/**.jpg`
 
 If no images are specified, the generated keywords will be printed.
-
-\b
-### Shell Completion
-Shell tab-completion is available for bash and fish shells. To install, run:
-```
-naturtag --install [shell name]
-```
-
-\b
-This will provide tab-completion for options as well as taxon names, for example:
-```
-naturtag -t corm<TAB>
-```
 """
 # TODO: Show all matched taxon names if more than one match per taxon ID
 # TODO: Bash doesn't support completion help text, so currently only shows IDs
@@ -69,7 +56,7 @@ from typing import Optional
 
 import click
 from click.shell_completion import CompletionItem
-from click_help_colors import HelpColorsCommand, HelpColorsGroup
+from click_help_colors import HelpColorsGroup
 from pyinaturalist import ICONIC_EMOJI, enable_logging, get_taxa_autocomplete
 from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
@@ -151,11 +138,6 @@ def main(ctx, verbose, version):
     type=TaxonParam(),
     callback=_strip_url_or_name,
 )
-@click.option(
-    '--install',
-    type=click.Choice(['all', 'bash', 'fish']),
-    help='Install shell completion scripts',
-)
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
@@ -165,13 +147,8 @@ def tag(
     refresh,
     observation,
     taxon,
-    install,
 ):
-    if install:
-        install_shell_completion(install)
-        setup(Settings.read())
-        ctx.exit()
-    elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
+    if sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
         click.secho('Specify either a taxon, observation, or refresh', fg='red')
         click.echo(ctx.get_help())
         ctx.exit()
@@ -204,6 +181,49 @@ def tag(
     # Print keywords if specified
     if not image_paths or ctx.meta['verbose'] or flickr:
         print_metadata(list(metadata_objs)[0].keyword_meta, flickr)
+
+
+@main.command()
+@click.pass_context
+@click.option('-a', '--all', is_flag=True, help='Install all features')
+@click.option('-d', '--db', is_flag=True, help='Initialize taxonomy database')
+@click.option(
+    '-s',
+    '--shell',
+    type=click.Choice(['bash', 'fish']),
+    help='Install shell completion scripts',
+)
+@click.option(
+    '-f',
+    '--force',
+    is_flag=True,
+    help='Reset database if it already exists',
+)
+def install(ctx, all, db, shell, force):
+    """Install shell completion and other features.
+
+    \b
+    Shell tab-completion is available for bash and fish shells. To install, run:
+    ```
+    naturtag install -s [shell name]
+    ```
+
+    \b
+    This will provide tab-completion for CLI options as well as taxon names, for example:
+    ```
+    naturtag tag -t corm<TAB>
+    ```
+    """
+    if not any([all, db, shell]):
+        click.echo('Specify at least one feature to install')
+        click.echo(ctx.get_help())
+        ctx.exit()
+
+    if all or shell:
+        install_shell_completion('all' if all else shell)
+    if all or db:
+        click.echo('Initializing database...')
+        setup(Settings.read(), overwrite=force)
 
 
 def print_all_metadata(
@@ -327,3 +347,4 @@ def _install_bash_completion():
 
 
 tag.help = colorize_help_text(CLI_HELP)
+install.help = colorize_help_text(install.help)
