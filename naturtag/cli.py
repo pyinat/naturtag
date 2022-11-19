@@ -19,16 +19,6 @@ taxonomy metadata, while specifying an observation (`-o, --observation`)
 will fetch taxonomy plus observation metadata.
 
 \b
-### Refresh
-If you previously tagged images with at least a taxon or observation ID, you
-can use (`-r, --refresh`) to re-fetch the latest metadata for those images.
-This is useful, for example, if you update an observation on iNaturalist or
-someone else identifies it for you.
-```
-naturtag -r image.jpg
-```
-
-\b
 ### Species Search
 You may also search for species by name. If there are multiple results, you
 will be prompted to choose from the top 10 search results:
@@ -37,8 +27,8 @@ naturtag -t 'indigo bunting'
 ```
 
 \b
-### Images
-Multiple paths are supported, as well as glob patterns, for example:
+### Image Paths
+Multiple paths are supported, as well as directories and glob patterns, for example:
 `0001.jpg IMG*.jpg ~/observations/**.jpg`
 
 If no images are specified, the generated keywords will be printed.
@@ -129,7 +119,6 @@ def main(ctx, verbose, version):
     is_flag=True,
     help='Print existing tags for previously tagged images',
 )
-@click.option('-r', '--refresh', is_flag=True, help='Refresh metadata for previously tagged images')
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
 @click.option(
     '-t',
@@ -144,15 +133,14 @@ def tag(
     image_paths,
     flickr,
     print_tags,
-    refresh,
     observation,
     taxon,
 ):
-    if sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
-        click.secho('Specify either a taxon, observation, or refresh', fg='red')
+    if sum([1 for arg in [observation, taxon, print_tags] if arg]) != 1:
+        click.secho('Specify either a taxon, observation, or refresh\n', fg='red')
         click.echo(ctx.get_help())
         ctx.exit()
-    elif (print_tags or refresh) and not image_paths:
+    elif print_tags and not image_paths:
         click.secho('Specify images', fg='red')
         ctx.exit()
     elif isinstance(taxon, str):
@@ -163,10 +151,6 @@ def tag(
     # Print or refresh images instead of tagging with new IDs
     if print_tags:
         print_all_metadata(image_paths, flickr)
-        ctx.exit()
-    if refresh:
-        refresh_tags(image_paths, recursive=True)
-        click.echo('Images refreshed')
         ctx.exit()
 
     metadata_objs = tag_images(
@@ -181,6 +165,30 @@ def tag(
     # Print keywords if specified
     if not image_paths or ctx.meta['verbose'] or flickr:
         print_metadata(list(metadata_objs)[0].keyword_meta, flickr)
+
+
+@main.command()
+@click.option('-r', '--recursive', is_flag=True, help='Recursively search subdirectories')
+@click.argument('image_paths', nargs=-1)
+def refresh(recursive, image_paths):
+    """Refresh metadata for previously tagged images.
+
+    Us this command for images that have been previously tagged images with at least a taxon or
+    observation ID. This will download the latest metadata for those images and update their tags.
+    This is useful, for example, when you update observations on iNaturalist, or when someone else
+    identifies your observations for you.
+
+    Like the `tag` command, image files, directories, and glob patterns are supported.
+
+    \b
+    Examples:
+    ```
+    naturtag refresh image_1.jpg image_2.jpg
+    naturtag refresh -r image_directory
+    ```
+    """
+    refresh_tags(image_paths, recursive=recursive)
+    click.echo('Images refreshed')
 
 
 @main.command()
@@ -347,4 +355,5 @@ def _install_bash_completion():
 
 
 tag.help = colorize_help_text(CLI_HELP)
+refresh.help = colorize_help_text(refresh.help)
 install.help = colorize_help_text(install.help)
