@@ -44,10 +44,10 @@ class Toolbar(QToolBar):
             shortcut='Ctrl+V',
         )
         self.clear_button = self.add_button(
-            '&Clear', tooltip='Clear open images', icon='fa.remove', shortcut='Ctrl+Shift+X'
+            '&Clear', tooltip='Clear open images', icon='fa.remove', shortcut='Ctrl+X'
         )
         self.refresh_button = self.add_button(
-            '&Refresh',
+            '&Refresh tags',
             tooltip='Refresh previously tagged images with latest observation/taxon data',
             icon='fa.refresh',
             shortcut='F5',
@@ -74,7 +74,6 @@ class Toolbar(QToolBar):
             '&Settings',
             tooltip='Settings',
             icon='fa.gear',
-            shortcut='Ctrl+Shift+S',
             visible=False,
         )
         self.exit_button = self.add_button(
