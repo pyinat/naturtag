@@ -9,8 +9,8 @@ ARCHIVE=assets/taxonomy.tar.gz
 
 echo 'Exporting Taxon table...'
 sqlite3 -header -csv $SRC_DB \
-    "SELECT id, ancestor_ids, child_ids, iconic_taxon_id, leaf_taxa_count, observations_count, name, parent_id, preferred_common_name, rank FROM taxon \
-     WHERE observations_count >= 10 \
+    "SELECT id, ancestor_ids, child_ids, iconic_taxon_id, leaf_taxa_count, observations_count_rg, name, parent_id, preferred_common_name, rank FROM taxon \
+     WHERE observations_count_rg >= 10 \
      ;" \
     > $TAXON_CSV
 
