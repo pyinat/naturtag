@@ -28,8 +28,8 @@ sqlite3 --csv $DEST_DB ".import $TAXON_CSV taxon"
 
 echo 'Importing FTS table...'
 python -c "\
-from pyinaturalist_convert.fts import create_fts5_table;\
-create_fts5_table('$DEST_DB')"
+from pyinaturalist_convert.fts import create_taxon_fts_table;\
+create_taxon_fts_table('$DEST_DB')"
 sqlite3 --csv $DEST_DB ".import $TAXON_FTS_CSV taxon_fts"
 
 echo 'Optimizing tables...'

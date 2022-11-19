@@ -16,7 +16,11 @@ from cattr import Converter
 from cattr.preconf import pyyaml
 from pyinaturalist import TaxonCounts
 from pyinaturalist_convert import create_tables, load_table
-from pyinaturalist_convert.fts import create_fts5_table, vacuum_analyze
+from pyinaturalist_convert.fts import (
+    create_observation_fts_table,
+    create_taxon_fts_table,
+    vacuum_analyze,
+)
 
 from naturtag.constants import (
     CONFIG_PATH,
@@ -136,7 +140,7 @@ class Settings(YamlMixin):
 
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
-    last_obs_check: datetime = field(default=None)
+    last_obs_check: Optional[datetime] = field(default=None)
 
     @classmethod
     def read(cls) -> 'Settings':
@@ -269,21 +273,22 @@ def setup(settings: Settings = None, overwrite: bool = False, download: bool = F
         return
 
     logger.info('Running first-time setup')
-    if DB_PATH.is_file():
-        if overwrite:
-            logger.info('Overwriting exiting taxon tables')
-            with sqlite3.connect(DB_PATH) as conn:
-                conn.execute('DROP TABLE IF EXISTS observation')
-                conn.execute('DROP TABLE IF EXISTS taxon')
-                conn.execute('DROP TABLE IF EXISTS taxon_fts')
-                conn.execute('DROP TABLE IF EXISTS photo')
-                conn.execute('DROP TABLE IF EXISTS user')
-        else:
-            logger.warning('Taxon database already exists; attempting to update')
+    if overwrite:
+        logger.info('Overwriting exiting tables')
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.execute('DROP TABLE IF EXISTS observation')
+            conn.execute('DROP TABLE IF EXISTS observation_fts')
+            conn.execute('DROP TABLE IF EXISTS taxon')
+            conn.execute('DROP TABLE IF EXISTS taxon_fts')
+            conn.execute('DROP TABLE IF EXISTS photo')
+            conn.execute('DROP TABLE IF EXISTS user')
+    elif DB_PATH.is_file():
+        logger.warning('Database already exists; attempting to update')
 
     # Create SQLite file with tables if they don't already exist
     create_tables(DB_PATH)
-    create_fts5_table(DB_PATH)
+    create_taxon_fts_table(DB_PATH)
+    create_observation_fts_table(DB_PATH)
     _load_taxon_db(download)
 
     # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
