@@ -132,6 +132,7 @@ class MainWindow(QMainWindow):
         self.toolbar.clear_button.triggered.connect(self.image_controller.clear)
         self.toolbar.refresh_button.triggered.connect(self.image_controller.refresh)
         self.toolbar.fullscreen_button.triggered.connect(self.toggle_fullscreen)
+        self.toolbar.reset_db_button.triggered.connect(self.reset_db)
         self.toolbar.settings_button.triggered.connect(self.show_settings)
         self.toolbar.exit_button.triggered.connect(QApplication.instance().quit)
         self.toolbar.docs_button.triggered.connect(self.open_docs)
@@ -199,6 +200,19 @@ class MainWindow(QMainWindow):
     def reload_qss(self):
         """Reload Qt stylesheet"""
         set_theme(dark_mode=self.settings.dark_mode)
+
+    # TODO: progress spinner
+    def reset_db(self):
+        """Reset the database"""
+        response = QMessageBox.question(
+            self,
+            'Reset database?',
+            'This will delete all observation and taxonomy data saved in the local database. Continue?',
+        )
+        if response == QMessageBox.Yes:
+            self.info('Resetting database...')
+            setup(self.settings, overwrite=True)
+            self.info('Database reset complete')
 
     def show_settings(self):
         """Show the settings menu"""

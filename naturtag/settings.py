@@ -273,8 +273,11 @@ def setup(settings: Settings = None, overwrite: bool = False, download: bool = F
         if overwrite:
             logger.info('Overwriting exiting taxon tables')
             with sqlite3.connect(DB_PATH) as conn:
-                conn.execute('DROP TABLE taxon')
-                conn.execute('DROP TABLE taxon_fts')
+                conn.execute('DROP TABLE IF EXISTS observation')
+                conn.execute('DROP TABLE IF EXISTS taxon')
+                conn.execute('DROP TABLE IF EXISTS taxon_fts')
+                conn.execute('DROP TABLE IF EXISTS photo')
+                conn.execute('DROP TABLE IF EXISTS user')
         else:
             logger.warning('Taxon database already exists; attempting to update')
 
