@@ -294,6 +294,7 @@ def setup(settings: Settings = None, overwrite: bool = False, download: bool = F
 
     logger.info('Setup complete')
     settings.setup_complete = True
+    settings.last_obs_check = None
     settings.write()
 
 
