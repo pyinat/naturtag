@@ -54,10 +54,9 @@ from rich.box import SIMPLE_HEAVY
 from rich.table import Column, Table
 
 from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR, DB_PATH
-from naturtag.metadata import refresh_tags, strip_url, tag_images
-from naturtag.metadata.keyword_metadata import KeywordMetadata
-from naturtag.metadata.meta_metadata import MetaMetadata
+from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, strip_url, tag_images
 from naturtag.settings import Settings, setup
+from naturtag.utils.image_glob import get_valid_image_paths
 
 CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
 CODE_INLINE = compile(r'`([^`]+?)`')
@@ -109,6 +108,7 @@ def main(ctx, verbose, version):
         click.echo(ctx.get_help())
 
 
+# TODO: Support tab-completion for files (while also supporting glob patterns)
 @main.command()
 @click.pass_context
 @click.option('-f', '--flickr', is_flag=True, help='Output tags in a Flickr-compatible format')
@@ -240,7 +240,7 @@ def print_all_metadata(
     hierarchical: bool = False,
 ):
     """Print keyword metadata for all specified files"""
-    for image_path in image_paths:
+    for image_path in get_valid_image_paths(image_paths):
         metadata = MetaMetadata(image_path)
         click.secho(f'\n{image_path}', fg='white')
         print_metadata(metadata.keyword_meta, flickr, hierarchical)
