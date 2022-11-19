@@ -57,8 +57,8 @@ class TaxonController(BaseController):
         self.add_shortcut('Alt+Left', self.taxon_info.prev)
         self.add_shortcut('Alt+Right', self.taxon_info.next)
         self.add_shortcut('Alt+Up', self.taxon_info.select_parent)
-        self.add_shortcut('Ctrl+Shift+R', self.search.reset)
         self.add_shortcut('Ctrl+Shift+Enter', self.search.search)
+        self.add_shortcut('Ctrl+Shift+X', self.search.reset)
 
     def select_taxon(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a

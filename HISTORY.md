@@ -18,6 +18,7 @@
   on RG observations from GBIF export
 * Preserve photo order when loading observations from db
 * When updating taxon record from API, don't overwrite pre-computed stats with null values
+* Add menu button to reset database (Tools > Reset database)
 
 ## 0.7.0 (2022-07-29)
 * Rebuilt UI from scratch using Qt

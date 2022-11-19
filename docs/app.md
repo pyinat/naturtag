@@ -135,10 +135,11 @@ Key(s)         | Action                      | Tab/Screen
 `Ctrl+O`       | Open file browser           | Photos
 `Ctrl+V`       | Paste photos or iNat URLs   | Photos
 `Ctrl+R`       | Run image tagger            | Photos
-`Ctrl+Shift+X` | Clear selected images       | Photos
+`Ctrl+X`       | Clear selected images       | Photos
 `F5`           | Refresh photo metadata      | Photos
-⠀              |                             |
-`Ctrl+Enter`   | Run search                  | Species
+               |                             |
+`Ctrl+Enter` | Run search              | Species
+`Ctrl+Shift+X` | Clear search fields         | Species
 `Alt+Left`     | View previous taxon         | Species
 `Alt+Right`    | View next taxon             | Species
 `Alt+Up`       | View parent taxon           | Species
