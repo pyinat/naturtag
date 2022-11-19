@@ -1,47 +1,12 @@
-CLI_HELP = """
-Write iNaturalist metadata to the console or to image files.
-
-\b
-### Species & Observation IDs
-Either a species or observation may be specified, either by ID or URL.
-For example, all of the following options will fetch the same taxonomy
-metadata:
-```
-naturtag -t 48978 image.jpg
-naturtag -t https://www.inaturalist.org/taxa/48978-Dirona-picta image.jpg
-naturtag -o 45524803 image.jpg
-naturtag -o https://www.inaturalist.org/observations/45524803 image.jpg
-```
-
-\b
-The difference is that specifying a species (`-t, --taxon`) will fetch only
-taxonomy metadata, while specifying an observation (`-o, --observation`)
-will fetch taxonomy plus observation metadata.
-
-\b
-### Species Search
-You may also search for species by name. If there are multiple results, you
-will be prompted to choose from the top 10 search results:
-```
-naturtag -t 'indigo bunting'
-```
-
-\b
-### Image Paths
-Multiple paths are supported, as well as directories and glob patterns, for example:
-`0001.jpg IMG*.jpg ~/observations/**.jpg`
-
-If no images are specified, the generated keywords will be printed.
-"""
 # TODO: Show all matched taxon names if more than one match per taxon ID
 # TODO: Bash doesn't support completion help text, so currently only shows IDs
 # TODO: Use table formatting from pyinaturalist if format_taxa
 import os
+import re
 from collections import defaultdict
 from importlib.metadata import version as pkg_version
 from logging import basicConfig, getLogger
 from pathlib import Path
-from re import DOTALL, MULTILINE, compile
 from shutil import copyfile
 from typing import Optional
 
@@ -60,9 +25,9 @@ from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, strip
 from naturtag.settings import setup
 from naturtag.utils.image_glob import get_valid_image_paths
 
-CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
-CODE_INLINE = compile(r'`([^`]+?)`')
-HEADER = compile(r'^\s*#+\s*(.*)$', MULTILINE)
+CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
+CODE_INLINE = re.compile(r'`([^`]+?)`')
+HEADER = re.compile(r'^\s*#+\s*(.*)$', re.MULTILINE)
 
 
 class TaxonParam(click.ParamType):
@@ -142,6 +107,42 @@ def tag(
     observation,
     taxon,
 ):
+    """Write iNaturalist metadata to the console or to image files.
+
+    \b
+    ### Image Paths
+    Multiple paths are supported, as well as directories and glob patterns,
+    for example:
+    ```
+    0001.jpg IMG*.jpg ~/observations/**.jpg
+    ```
+
+    If no images are specified, the generated keywords will be printed.
+
+    \b
+    ### Species & Observation IDs
+    Either a species or observation may be specified, either by ID or URL.
+    For example, all of the following options will fetch the same taxonomy
+    metadata:
+    ```
+    nt tag -t 48978 image.jpg
+    nt tag -t https://www.inaturalist.org/taxa/48978-Dirona-picta image.jpg
+    nt tag -o 45524803 image.jpg
+    nt tag -o https://www.inaturalist.org/observations/45524803 image.jpg
+    ```
+
+    The difference is that specifying a species (`-t, --taxon`) will fetch only
+    taxonomy metadata, while specifying an observation (`-o, --observation`)
+    will fetch taxonomy plus observation metadata.
+
+    \b
+    ### Species Search
+    You may also search for species by name. If there are multiple results, you
+    will be prompted to choose from the top 10 search results:
+    ```
+    nt tag -t 'indigo bunting'
+    ```
+    """
     if sum([1 for arg in [observation, taxon, print_tags] if arg]) != 1:
         click.secho('Specify either a taxon, observation, or refresh\n', fg='red')
         click.echo(ctx.get_help())
@@ -182,7 +183,7 @@ def tag(
 def refresh(recursive, image_paths):
     """Refresh metadata for previously tagged images.
 
-    Us this command for images that have been previously tagged images with at least a taxon or
+    Use this command for images that have been previously tagged images with at least a taxon or
     observation ID. This will download the latest metadata for those images and update their tags.
     This is useful, for example, when you update observations on iNaturalist, or when someone else
     identifies your observations for you.
@@ -190,10 +191,10 @@ def refresh(recursive, image_paths):
     Like the `tag` command, image files, directories, and glob patterns are supported.
 
     \b
-    Examples:
+    ### Examples
     ```
-    naturtag refresh image_1.jpg image_2.jpg
-    naturtag refresh -r image_directory
+    nt refresh image_1.jpg image_2.jpg
+    nt refresh -r image_directory
     ```
     """
     # Run first-time setup if necessary
@@ -225,13 +226,13 @@ def install(ctx, all, db, shell, force):
     \b
     Shell tab-completion is available for bash and fish shells. To install, run:
     ```
-    naturtag install -s [shell name]
+    nt install -s [shell name]
     ```
 
     \b
     This will provide tab-completion for CLI options as well as taxon names, for example:
     ```
-    naturtag tag -t corm<TAB>
+    nt tag -t corm<TAB>
     ```
     """
     if not any([all, db, shell]):
@@ -348,6 +349,7 @@ def format_taxa(results, verbose: bool = False) -> Table:
 
 def colorize_help_text(text):
     """Colorize code blocks and headers in CLI help text"""
+    text = re.sub(r'^    ', '', text, flags=re.MULTILINE)
     text = HEADER.sub(click.style(r'\1:', 'blue', bold=True), text)
     text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
     text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
@@ -386,6 +388,5 @@ def _install_bash_completion():
     print(f'source {completion_dir}/*.bash\n')
 
 
-tag.help = colorize_help_text(CLI_HELP)
-refresh.help = colorize_help_text(refresh.help)
-install.help = colorize_help_text(install.help)
+for cmd in [tag, refresh, install]:
+    cmd.help = colorize_help_text(cmd.help)

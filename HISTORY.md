@@ -9,6 +9,12 @@
 * Add support for alternate XMP sidecar path format, if it already exists (`basename.ext.xmp` instead of `basename.xmp`)
 
 **CLI:**
+* Split CLI into subcommands:
+  * `tag`: Main tagging features
+  * `refresh`: Refresh tags for previously tagged images
+  * `install`: install shell completion + taxonomy database
+* Add 3 verbosity levels (`nt -v[vv]`)
+* Update `nt tag -p` to accept directories and glob patterns
 * Allow selecting a sidecar file directly (instead of via an associated image file)
 * Allow selecting any file type with an associated sidecar (e.g., for RAW image files)
 
