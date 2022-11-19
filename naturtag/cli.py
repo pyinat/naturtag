@@ -1,6 +1,5 @@
 CLI_HELP = """
-Get taxonomy tags from an iNaturalist observation or taxon, and write them
-either to the console or to local image metadata.
+Write iNaturalist metadata to the console or to image files.
 
 \b
 ### Species & Observation IDs
@@ -70,7 +69,7 @@ from typing import Optional
 
 import click
 from click.shell_completion import CompletionItem
-from click_help_colors import HelpColorsCommand
+from click_help_colors import HelpColorsCommand, HelpColorsGroup
 from pyinaturalist import ICONIC_EMOJI, enable_logging, get_taxa_autocomplete
 from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
@@ -111,11 +110,31 @@ def _strip_url_or_name(ctx, param, value):
     return strip_url(value) or value
 
 
-@click.command(cls=HelpColorsCommand, help_headers_color='blue', help_options_color='cyan')
-@click.pass_context
-@click.option(
-    '-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format'
+@click.group(
+    cls=HelpColorsGroup,
+    invoke_without_command=True,
+    help_headers_color='blue',
+    help_options_color='cyan',
 )
+@click.pass_context
+@click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
+@click.option('--version', is_flag=True, help='Show version')
+def main(ctx, verbose, version):
+    ctx.meta['verbose'] = verbose
+    if verbose:
+        enable_logging(level='DEBUG')
+    if version:
+        v = pkg_version('naturtag')
+        click.echo(f'naturtag v{v}')
+        click.echo(f'User data directory: {APP_DIR}')
+        ctx.exit()
+    elif not ctx.invoked_subcommand:
+        click.echo(ctx.get_help())
+
+
+@main.command()
+@click.pass_context
+@click.option('-f', '--flickr', is_flag=True, help='Output tags in a Flickr-compatible format')
 @click.option(
     '-p',
     '--print',
@@ -137,29 +156,20 @@ def _strip_url_or_name(ctx, param, value):
     type=click.Choice(['all', 'bash', 'fish']),
     help='Install shell completion scripts',
 )
-@click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
-@click.option('--version', is_flag=True, help='Show version')
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
     image_paths,
-    flickr_format,
+    flickr,
     print_tags,
     refresh,
     observation,
     taxon,
     install,
-    verbose,
-    version,
 ):
     if install:
         install_shell_completion(install)
         setup(Settings.read())
-        ctx.exit()
-    elif version:
-        v = pkg_version('naturtag')
-        click.echo(f'naturtag v{v}')
-        click.echo(f'User data directory: {APP_DIR}')
         ctx.exit()
     elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
         click.secho('Specify either a taxon, observation, or refresh', fg='red')
@@ -169,15 +179,13 @@ def tag(
         click.secho('Specify images', fg='red')
         ctx.exit()
     elif isinstance(taxon, str):
-        taxon = search_taxa_by_name(taxon, verbose)
+        taxon = search_taxa_by_name(taxon, verbose=ctx.meta['verbose'])
         if not taxon:
             ctx.exit()
-    if verbose:
-        enable_logging(level='DEBUG')
 
     # Print or refresh images instead of tagging with new IDs
     if print_tags:
-        print_all_metadata(image_paths, flickr_format)
+        print_all_metadata(image_paths, flickr)
         ctx.exit()
     if refresh:
         refresh_tags(image_paths, recursive=True)
@@ -194,29 +202,29 @@ def tag(
         return
 
     # Print keywords if specified
-    if not image_paths or verbose or flickr_format:
-        print_metadata(list(metadata_objs)[0].keyword_meta, flickr_format)
+    if not image_paths or ctx.meta['verbose'] or flickr:
+        print_metadata(list(metadata_objs)[0].keyword_meta, flickr)
 
 
 def print_all_metadata(
     image_paths: list[str],
-    flickr_format: bool = False,
+    flickr: bool = False,
     hierarchical: bool = False,
 ):
     """Print keyword metadata for all specified files"""
     for image_path in image_paths:
         metadata = MetaMetadata(image_path)
         click.secho(f'\n{image_path}', fg='white')
-        print_metadata(metadata.keyword_meta, flickr_format, hierarchical)
+        print_metadata(metadata.keyword_meta, flickr, hierarchical)
 
 
 def print_metadata(
     keyword_meta: KeywordMetadata,
-    flickr_format: bool = False,
+    flickr: bool = False,
     hierarchical: bool = False,
 ):
     """Print keyword metadata for a single observation/taxa"""
-    if flickr_format:
+    if flickr:
         print(keyword_meta.flickr_tags)
         return
 
@@ -318,6 +326,4 @@ def _install_bash_completion():
     print(f'source {completion_dir}/*.bash\n')
 
 
-# Main CLI entry point
-main = tag
 tag.help = colorize_help_text(CLI_HELP)
