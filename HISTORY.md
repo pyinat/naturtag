@@ -18,7 +18,7 @@
 * Add support for alternate XMP sidecar path format, if it already exists
 * Support selecting a sidecar file directly (instead of via an associated image file)
 * Support selecting any file type with an associated sidecar (e.g., for RAW image files)
-
+  * Works with individual paths or glob patterns, but not for directories
 
 **Database:**
 * Include data for most commonly observed taxa with PyInstaller packages and platform-specific installers

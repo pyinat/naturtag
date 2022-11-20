@@ -44,6 +44,15 @@ def test_get_valid_image_paths__dir():
     assert len(get_valid_image_paths([ICONS_DIR])) == 6
 
 
+def test_get_valid_image_paths__glob():
+    expected = SAMPLE_DATA_DIR / 'raw_with_sidecar.jpg'
+    result_path = list(get_valid_image_paths([f'{SAMPLE_DATA_DIR}/*.jpg']))[0]
+    assert result_path == expected
+
+    result_path = list(get_valid_image_paths([SAMPLE_DATA_DIR / '*.jpg']))[0]
+    assert result_path == expected
+
+
 def test_get_valid_image_paths__recursive():
     assert len(get_valid_image_paths([ASSETS_DIR], recursive=True)) == 28
 
@@ -76,6 +85,26 @@ def test_get_valid_image_paths__raw_without_sidecar():
     # Passing a raw image path should create a sidecar if it doesn't exist
     result_path = list(get_valid_image_paths([raw_path], create_sidecars=True))[0]
     assert result_path == sidecar_path
+
+
+def test_get_valid_image_paths__glob_raw_with_sidecar():
+    raw_glob = SAMPLE_DATA_DIR / '*.ORF'
+    sidecar_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.xmp'
+    assert len(get_valid_image_paths([raw_glob])) == 0
+
+    result_path = list(get_valid_image_paths([raw_glob], include_sidecars=True))[0]
+    assert result_path == sidecar_path
+
+
+def test_get_valid_image_paths__glob_raw_without_sidecar():
+    raw_glob = SAMPLE_DATA_DIR / '*.ORF'
+    sidecar_path_1 = SAMPLE_DATA_DIR / 'raw_with_sidecar.xmp'  # exists
+    sidecar_path_2 = SAMPLE_DATA_DIR / 'raw_without_sidecar.xmp'  # Doesn't exist
+    assert len(get_valid_image_paths([raw_glob])) == 0
+
+    results = list(get_valid_image_paths([raw_glob], include_sidecars=True, create_sidecars=True))
+    assert sidecar_path_1 in results
+    assert sidecar_path_2 in results
 
 
 def test_get_valid_image_paths__removes_duplicates():

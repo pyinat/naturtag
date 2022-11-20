@@ -4,6 +4,7 @@ from glob import glob
 from itertools import chain
 from logging import getLogger
 from pathlib import Path, PosixPath, PureWindowsPath
+from typing import Iterator
 from urllib.parse import unquote_plus, urlparse
 
 from pyinaturalist import Iterable
@@ -43,7 +44,7 @@ def get_valid_image_paths(
     image_paths = []
     logger.debug(f'Getting images from paths: {paths_or_uris}')
 
-    for path in paths_or_uris:
+    for path in _expand_globs(paths_or_uris):
         if not path:
             continue
 
@@ -51,10 +52,10 @@ def get_valid_image_paths(
         sidecar_path = get_sidecar_path(path)
         if path.is_dir():
             image_paths.extend(get_images_from_dir(path, recursive=recursive))
-        elif is_image_path(path, include_sidecars=include_sidecars):
-            image_paths.append(path)
         elif '*' in str(path):
             image_paths.extend(glob_paths([path]))
+        elif is_image_path(path, include_sidecars=include_sidecars):
+            image_paths.append(path)
         elif include_sidecars and sidecar_path.is_file():
             logger.debug(f'{path} is not writable; using existing sidecar: {sidecar_path}')
             image_paths.append(sidecar_path)
@@ -83,6 +84,15 @@ def get_images_from_dir(path: Path, recursive: bool = False) -> list[Path]:
     paths = glob_paths([path / pattern for pattern in patterns])
     logger.debug(f'{len(paths)} images found in directory: {path}')
     return paths
+
+
+def _expand_globs(paths: Iterable[PathOrStr]) -> Iterator[PathOrStr]:
+    """Expand any glob patterns in a list of paths"""
+    for path in paths:
+        if '*' in str(path):
+            yield from glob_paths([path])
+        else:
+            yield path
 
 
 def glob_paths(path_patterns: Iterable[PathOrStr]) -> list[Path]:
