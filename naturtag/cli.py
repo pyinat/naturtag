@@ -57,7 +57,7 @@ from rich.table import Column, Table
 
 from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR, DB_PATH
 from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, strip_url, tag_images
-from naturtag.settings import Settings, setup
+from naturtag.settings import setup
 from naturtag.utils.image_glob import get_valid_image_paths
 
 CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
@@ -159,6 +159,9 @@ def tag(
         print_all_metadata(image_paths, flickr)
         ctx.exit()
 
+    # Run first-time setup if necessary
+    setup()
+
     metadata_objs = tag_images(
         image_paths,
         observation_id=observation,
@@ -193,6 +196,9 @@ def refresh(recursive, image_paths):
     naturtag refresh -r image_directory
     ```
     """
+    # Run first-time setup if necessary
+    setup()
+
     metadata_objs = refresh_tags(image_paths, recursive=recursive)
     click.echo(f'{len(metadata_objs)} Images refreshed')
 
@@ -237,7 +243,7 @@ def install(ctx, all, db, shell, force):
         install_shell_completion('all' if all else shell)
     if all or db:
         click.echo('Initializing database...')
-        setup(Settings.read(), overwrite=force)
+        setup(overwrite=force)
 
 
 def enable_logging(level: str = 'INFO', external_level: str = 'WARNING'):
