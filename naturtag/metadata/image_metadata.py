@@ -6,6 +6,7 @@ from typing import Any
 from pyexiv2 import Image
 
 from naturtag.constants import EXIF_HIDE_PREFIXES, PathOrStr
+from naturtag.utils.image_glob import get_sidecar_path
 
 # Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
 NEW_XMP_CONTENTS = """
@@ -80,9 +81,7 @@ class ImageMetadata:
         * ``{basename}.xmp`` (default)
         * ``{basename}.{ext}.{xmp}`` (used only if it already exists)
         """
-        default_path = self.image_path.with_suffix('.xmp')
-        alt_path = self.image_path.with_suffix(f'{self.image_path.suffix}.xmp')
-        return alt_path if alt_path.is_file() else default_path
+        return get_sidecar_path(self.image_path)
 
     @property
     def has_sidecar(self) -> bool:
@@ -127,6 +126,8 @@ class ImageMetadata:
     ):
         """Write current metadata to image and sidecar"""
         fixed_xmp = self._fix_xmp()
+        if self.is_sidecar:
+            _create_sidecar_stub(self.image_path)
 
         # Write embedded metadata
         if any([write_exif, write_iptc, write_xmp]):
@@ -144,13 +145,8 @@ class ImageMetadata:
             self._write_sidecar(fixed_xmp)
 
     def _write_sidecar(self, fixed_xmp: dict):
-        # Create new sidecar file stub, if needed
-        if not self.sidecar_path.is_file():
-            with open(self.sidecar_path, 'w') as f:
-                f.write(NEW_XMP_CONTENTS.strip())
-
-        # Write sidecar metadata
         logger.info(f'Writing metadata to {self.sidecar_path}')
+        _create_sidecar_stub(self.sidecar_path)
         sidecar_img = self._read_exiv2_image(self.sidecar_path)
         sidecar_img.modify_xmp(fixed_xmp)
         sidecar_img.close()
@@ -176,3 +172,10 @@ class ImageMetadata:
 
         self.xmp = {k: v for k, v in self.xmp.items() if v is not None}
         return self.xmp
+
+
+def _create_sidecar_stub(path: Path):
+    """Create new sidecar file stub, if needed"""
+    if not path.is_file():
+        with open(path, 'w') as f:
+            f.write(NEW_XMP_CONTENTS.strip())

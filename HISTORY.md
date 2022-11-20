@@ -15,8 +15,10 @@
   * `install`: install shell completion + taxonomy database
 * Add 3 verbosity levels (`nt -v[vv]`)
 * Update `nt tag -p` to accept directories and glob patterns
-* Allow selecting a sidecar file directly (instead of via an associated image file)
-* Allow selecting any file type with an associated sidecar (e.g., for RAW image files)
+* Add support for alternate XMP sidecar path format, if it already exists
+* Support selecting a sidecar file directly (instead of via an associated image file)
+* Support selecting any file type with an associated sidecar (e.g., for RAW image files)
+
 
 **Database:**
 * Include data for most commonly observed taxa with PyInstaller packages and platform-specific installers

@@ -5,6 +5,7 @@ import pytest
 
 from naturtag.constants import APP_LOGO, ASSETS_DIR, ICONS_DIR
 from naturtag.utils.image_glob import get_valid_image_paths, uri_to_path
+from test.conftest import SAMPLE_DATA_DIR
 
 
 @pytest.mark.parametrize(
@@ -49,6 +50,32 @@ def test_get_valid_image_paths__recursive():
 
 def test_get_valid_image_paths__uri():
     assert get_valid_image_paths([f'file://{APP_LOGO.absolute()}']) == {APP_LOGO}
+
+
+def test_get_valid_image_paths__sidecar():
+    sidecar_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.xmp'
+    assert len(get_valid_image_paths([sidecar_path])) == 0
+    assert len(get_valid_image_paths([sidecar_path], include_sidecars=True)) == 1
+
+
+def test_get_valid_image_paths__raw_with_sidecar():
+    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
+    sidecar_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.xmp'
+    assert len(get_valid_image_paths([raw_path])) == 0
+
+    # Passing a raw image (or other non-writable file) path should use its sidecar if it exists
+    result_path = list(get_valid_image_paths([raw_path], include_sidecars=True))[0]
+    assert result_path == sidecar_path
+
+
+def test_get_valid_image_paths__raw_without_sidecar():
+    raw_path = SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF'
+    sidecar_path = SAMPLE_DATA_DIR / 'raw_without_sidecar.xmp'  # Doesn't exist
+    assert len(get_valid_image_paths([raw_path])) == 0
+
+    # Passing a raw image path should create a sidecar if it doesn't exist
+    result_path = list(get_valid_image_paths([raw_path], create_sidecars=True))[0]
+    assert result_path == sidecar_path
 
 
 def test_get_valid_image_paths__removes_duplicates():
