@@ -1,91 +1,33 @@
-CLI_HELP = """
-Get taxonomy tags from an iNaturalist observation or taxon, and write them
-either to the console or to local image metadata.
-
-\b
-### Species & Observation IDs
-Either a species or observation may be specified, either by ID or URL.
-For example, all of the following options will fetch the same taxonomy
-metadata:
-```
-naturtag -t 48978 image.jpg
-naturtag -t https://www.inaturalist.org/taxa/48978-Dirona-picta image.jpg
-naturtag -o 45524803 image.jpg
-naturtag -o https://www.inaturalist.org/observations/45524803 image.jpg
-```
-
-\b
-The difference is that specifying a species (`-t, --taxon`) will fetch only
-taxonomy metadata, while specifying an observation (`-o, --observation`)
-will fetch taxonomy plus observation metadata.
-
-\b
-### Refresh
-If you previously tagged images with at least a taxon or observation ID, you
-can use (`-r, --refresh`) to re-fetch the latest metadata for those images.
-This is useful, for example, if you update an observation on iNaturalist or
-someone else identifies it for you.
-```
-naturtag -r image.jpg
-```
-
-\b
-### Species Search
-You may also search for species by name. If there are multiple results, you
-will be prompted to choose from the top 10 search results:
-```
-naturtag -t 'indigo bunting'
-```
-
-\b
-### Images
-Multiple paths are supported, as well as glob patterns, for example:
-`0001.jpg IMG*.jpg ~/observations/**.jpg`
-
-If no images are specified, the generated keywords will be printed.
-
-\b
-### Shell Completion
-Shell tab-completion is available for bash and fish shells. To install, run:
-```
-naturtag --install [shell name]
-```
-
-\b
-This will provide tab-completion for options as well as taxon names, for example:
-```
-naturtag -t corm<TAB>
-```
-"""
 # TODO: Show all matched taxon names if more than one match per taxon ID
 # TODO: Bash doesn't support completion help text, so currently only shows IDs
 # TODO: Use table formatting from pyinaturalist if format_taxa
 import os
+import re
 from collections import defaultdict
 from importlib.metadata import version as pkg_version
+from logging import basicConfig, getLogger
 from pathlib import Path
-from re import DOTALL, MULTILINE, compile
 from shutil import copyfile
 from typing import Optional
 
 import click
 from click.shell_completion import CompletionItem
-from click_help_colors import HelpColorsCommand
-from pyinaturalist import ICONIC_EMOJI, enable_logging, get_taxa_autocomplete
+from click_help_colors import HelpColorsGroup
+from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
 from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
+from rich.logging import RichHandler
 from rich.table import Column, Table
 
 from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR, DB_PATH
-from naturtag.metadata import refresh_tags, strip_url, tag_images
-from naturtag.metadata.keyword_metadata import KeywordMetadata
-from naturtag.metadata.meta_metadata import MetaMetadata
-from naturtag.settings import Settings, setup
+from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, strip_url, tag_images
+from naturtag.settings import setup
+from naturtag.utils.image_glob import get_valid_image_paths
 
-CODE_BLOCK = compile(r'```\n\s*(.+?)```\s*\n', DOTALL)
-CODE_INLINE = compile(r'`([^`]+?)`')
-HEADER = compile(r'^\s*#+\s*(.*)$', MULTILINE)
+CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
+CODE_INLINE = re.compile(r'`([^`]+?)`')
+HEADER = re.compile(r'^\s*#+\s*(.*)$', re.MULTILINE)
 
 
 class TaxonParam(click.ParamType):
@@ -111,11 +53,36 @@ def _strip_url_or_name(ctx, param, value):
     return strip_url(value) or value
 
 
-@click.command(cls=HelpColorsCommand, help_headers_color='blue', help_options_color='cyan')
-@click.pass_context
-@click.option(
-    '-f', '--flickr-format', is_flag=True, help='Output tags in a Flickr-compatible format'
+@click.group(
+    cls=HelpColorsGroup,
+    invoke_without_command=True,
+    help_headers_color='blue',
+    help_options_color='cyan',
 )
+@click.pass_context
+@click.option('-v', '--verbose', count=True, help='Show verbose output (up to 3 times)')
+@click.option('--version', is_flag=True, help='Show version')
+def main(ctx, verbose, version):
+    ctx.meta['verbose'] = verbose
+    if verbose == 1:
+        enable_logging(level='INFO', external_level='WARNING')
+    elif verbose == 2:
+        enable_logging(level='DEBUG', external_level='INFO')
+    elif verbose == 3:
+        enable_logging(level='DEBUG', external_level='DEBUG')
+    if version:
+        v = pkg_version('naturtag')
+        click.echo(f'naturtag v{v}')
+        click.echo(f'User data directory: {APP_DIR}')
+        ctx.exit()
+    elif not ctx.invoked_subcommand:
+        click.echo(ctx.get_help())
+
+
+# TODO: Support tab-completion for files (while also supporting glob patterns)
+@main.command()
+@click.pass_context
+@click.option('-f', '--flickr', is_flag=True, help='Output tags in a Flickr-compatible format')
 @click.option(
     '-p',
     '--print',
@@ -123,7 +90,6 @@ def _strip_url_or_name(ctx, param, value):
     is_flag=True,
     help='Print existing tags for previously tagged images',
 )
-@click.option('-r', '--refresh', is_flag=True, help='Refresh metadata for previously tagged images')
 @click.option('-o', '--observation', help='Observation ID or URL', callback=_strip_url)
 @click.option(
     '-t',
@@ -132,57 +98,70 @@ def _strip_url_or_name(ctx, param, value):
     type=TaxonParam(),
     callback=_strip_url_or_name,
 )
-@click.option(
-    '--install',
-    type=click.Choice(['all', 'bash', 'fish']),
-    help='Install shell completion scripts',
-)
-@click.option('-v', '--verbose', is_flag=True, help='Show debug logs')
-@click.option('--version', is_flag=True, help='Show version')
 @click.argument('image_paths', nargs=-1)
 def tag(
     ctx,
     image_paths,
-    flickr_format,
+    flickr,
     print_tags,
-    refresh,
     observation,
     taxon,
-    install,
-    verbose,
-    version,
 ):
-    if install:
-        install_shell_completion(install)
-        setup(Settings.read())
-        ctx.exit()
-    elif version:
-        v = pkg_version('naturtag')
-        click.echo(f'naturtag v{v}')
-        click.echo(f'User data directory: {APP_DIR}')
-        ctx.exit()
-    elif sum([1 for arg in [observation, taxon, print_tags, refresh] if arg]) != 1:
-        click.secho('Specify either a taxon, observation, or refresh', fg='red')
+    """Write iNaturalist metadata to the console or to image files.
+
+    \b
+    ### Image Paths
+    Multiple paths are supported, as well as directories and glob patterns,
+    for example:
+    ```
+    0001.jpg IMG*.jpg ~/observations/**.jpg
+    ```
+
+    If no images are specified, the generated keywords will be printed.
+
+    \b
+    ### Species & Observation IDs
+    Either a species or observation may be specified, either by ID or URL.
+    For example, all of the following options will fetch the same taxonomy
+    metadata:
+    ```
+    nt tag -t 48978 image.jpg
+    nt tag -t https://www.inaturalist.org/taxa/48978-Dirona-picta image.jpg
+    nt tag -o 45524803 image.jpg
+    nt tag -o https://www.inaturalist.org/observations/45524803 image.jpg
+    ```
+
+    The difference is that specifying a species (`-t, --taxon`) will fetch only
+    taxonomy metadata, while specifying an observation (`-o, --observation`)
+    will fetch taxonomy plus observation metadata.
+
+    \b
+    ### Species Search
+    You may also search for species by name. If there are multiple results, you
+    will be prompted to choose from the top 10 search results:
+    ```
+    nt tag -t 'indigo bunting'
+    ```
+    """
+    if sum([1 for arg in [observation, taxon, print_tags] if arg]) != 1:
+        click.secho('Specify either a taxon, observation, or refresh\n', fg='red')
         click.echo(ctx.get_help())
         ctx.exit()
-    elif (print_tags or refresh) and not image_paths:
+    elif print_tags and not image_paths:
         click.secho('Specify images', fg='red')
         ctx.exit()
     elif isinstance(taxon, str):
-        taxon = search_taxa_by_name(taxon, verbose)
+        taxon = search_taxa_by_name(taxon, verbose=ctx.meta['verbose'])
         if not taxon:
             ctx.exit()
-    if verbose:
-        enable_logging(level='DEBUG')
 
     # Print or refresh images instead of tagging with new IDs
     if print_tags:
-        print_all_metadata(image_paths, flickr_format)
+        print_all_metadata(image_paths, flickr)
         ctx.exit()
-    if refresh:
-        refresh_tags(image_paths, recursive=True)
-        click.echo('Images refreshed')
-        ctx.exit()
+
+    # Run first-time setup if necessary
+    setup()
 
     metadata_objs = tag_images(
         image_paths,
@@ -194,29 +173,119 @@ def tag(
         return
 
     # Print keywords if specified
-    if not image_paths or verbose or flickr_format:
-        print_metadata(list(metadata_objs)[0].keyword_meta, flickr_format)
+    if not image_paths or ctx.meta['verbose'] or flickr:
+        print_metadata(list(metadata_objs)[0].keyword_meta, flickr)
+
+
+@main.command()
+@click.option('-r', '--recursive', is_flag=True, help='Recursively search subdirectories')
+@click.argument('image_paths', nargs=-1)
+def refresh(recursive, image_paths):
+    """Refresh metadata for previously tagged images.
+
+    Use this command for images that have been previously tagged images with at least a taxon or
+    observation ID. This will download the latest metadata for those images and update their tags.
+    This is useful, for example, when you update observations on iNaturalist, or when someone else
+    identifies your observations for you.
+
+    Like the `tag` command, image files, directories, and glob patterns are supported.
+
+    \b
+    ### Examples
+    ```
+    nt refresh image_1.jpg image_2.jpg
+    nt refresh -r image_directory
+    ```
+    """
+    # Run first-time setup if necessary
+    setup()
+
+    metadata_objs = refresh_tags(image_paths, recursive=recursive)
+    click.echo(f'{len(metadata_objs)} Images refreshed')
+
+
+@main.command()
+@click.pass_context
+@click.option('-a', '--all', is_flag=True, help='Install all features')
+@click.option('-d', '--db', is_flag=True, help='Initialize taxonomy database')
+@click.option(
+    '-s',
+    '--shell',
+    type=click.Choice(['bash', 'fish']),
+    help='Install shell completion scripts',
+)
+@click.option(
+    '-f',
+    '--force',
+    is_flag=True,
+    help='Reset database if it already exists',
+)
+def install(ctx, all, db, shell, force):
+    """Install shell completion and other features.
+
+    \b
+    Shell tab-completion is available for bash and fish shells. To install, run:
+    ```
+    nt install -s [shell name]
+    ```
+
+    \b
+    This will provide tab-completion for CLI options as well as taxon names, for example:
+    ```
+    nt tag -t corm<TAB>
+    ```
+    """
+    if not any([all, db, shell]):
+        click.echo('Specify at least one feature to install')
+        click.echo(ctx.get_help())
+        ctx.exit()
+
+    if all or shell:
+        install_shell_completion('all' if all else shell)
+    if all or db:
+        click.echo('Initializing database...')
+        setup(overwrite=force)
+
+
+def enable_logging(level: str = 'INFO', external_level: str = 'WARNING'):
+    """Configure logging to standard output with prettier tracebacks, formatting, and terminal
+    colors (if supported).
+
+    Args:
+        level: Logging level to use for naturtag
+        external_level: Logging level to use for other libraries
+    """
+
+    basicConfig(
+        format='%(message)s',
+        datefmt='[%m-%d %H:%M:%S]',
+        handlers=[RichHandler(rich_tracebacks=True, markup=True)],
+        level=external_level,
+    )
+    getLogger('naturtag').setLevel(level)
+    getLogger('pyinaturalist').setLevel(external_level)
+    getLogger('pyinaturalist_convert').setLevel(external_level)
 
 
 def print_all_metadata(
     image_paths: list[str],
-    flickr_format: bool = False,
+    flickr: bool = False,
     hierarchical: bool = False,
 ):
     """Print keyword metadata for all specified files"""
-    for image_path in image_paths:
+    for image_path in get_valid_image_paths(image_paths):
         metadata = MetaMetadata(image_path)
         click.secho(f'\n{image_path}', fg='white')
-        print_metadata(metadata.keyword_meta, flickr_format, hierarchical)
+        print_metadata(metadata.keyword_meta, flickr, hierarchical)
 
 
 def print_metadata(
     keyword_meta: KeywordMetadata,
-    flickr_format: bool = False,
+    flickr: bool = False,
     hierarchical: bool = False,
 ):
     """Print keyword metadata for a single observation/taxa"""
-    if flickr_format:
+    if flickr:
         print(keyword_meta.flickr_tags)
         return
 
@@ -280,6 +349,7 @@ def format_taxa(results, verbose: bool = False) -> Table:
 
 def colorize_help_text(text):
     """Colorize code blocks and headers in CLI help text"""
+    text = re.sub(r'^    ', '', text, flags=re.MULTILINE)
     text = HEADER.sub(click.style(r'\1:', 'blue', bold=True), text)
     text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
     text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
@@ -318,6 +388,5 @@ def _install_bash_completion():
     print(f'source {completion_dir}/*.bash\n')
 
 
-# Main CLI entry point
-main = tag
-tag.help = colorize_help_text(CLI_HELP)
+for cmd in [tag, refresh, install]:
+    cmd.help = colorize_help_text(cmd.help)

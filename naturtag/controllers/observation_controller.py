@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Iterable, List
+from typing import Iterable
 
 from pyinaturalist import Observation
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
@@ -74,7 +74,7 @@ class ObservationController(BaseController):
         future.on_result.connect(self.display_user_observations)
 
     # TODO: Paginate results
-    def get_user_observations(self) -> List[Observation]:
+    def get_user_observations(self) -> list[Observation]:
         if not self.settings.username:
             return []
         observations = INAT_CLIENT.observations.get_user_observations(
@@ -86,7 +86,7 @@ class ObservationController(BaseController):
         return observations
 
     @Slot(list)
-    def display_user_observations(self, observations: List[Observation]):
+    def display_user_observations(self, observations: list[Observation]):
         self.user_observations.set_observations(observations)
         self.bind_selection(self.user_observations.cards)
 

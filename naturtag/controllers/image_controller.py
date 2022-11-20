@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import TYPE_CHECKING
+from typing import Optional
 
 from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, Signal, Slot
@@ -97,11 +97,10 @@ class ImageController(BaseController):
         self.info(f'{len(image_paths)} images tagged with metadata for {selected_id}')
 
     @Slot(MetaMetadata)
-    def update_metadata(self, metadata: MetaMetadata):
-        if TYPE_CHECKING:
-            assert metadata.image_path is not None
-        image = self.gallery.images[metadata.image_path]
-        image.update_metadata(metadata)
+    def update_metadata(self, metadata: Optional[MetaMetadata]):
+        if metadata and metadata.image_path:
+            image = self.gallery.images[metadata.image_path]
+            image.update_metadata(metadata)
 
     def refresh(self):
         """Refresh metadata for any previously tagged images"""
