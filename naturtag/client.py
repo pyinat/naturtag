@@ -3,24 +3,15 @@ from hashlib import md5
 from itertools import chain
 from logging import getLogger
 from time import time
-from typing import TYPE_CHECKING, Iterable, Iterator, Optional
+from typing import TYPE_CHECKING, Optional
 
 from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import format_file_size
-from pyinaturalist_convert.db import (
-    DbObservation,
-    DbUser,
-    get_db_taxa,
-    get_session,
-    save_observations,
-    save_taxa,
-)
-
-# from pyinaturalist_convert.db import get_db_observations
+from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
-from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
+from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -193,36 +184,6 @@ class ImageSession(ClientSession):
         """Get the total cache size in bytes, and the number of cached files"""
         size = format_file_size(self.image_cache.size)
         return f'{size} ({len(self.image_cache)} files)'
-
-
-# TODO: Update this in pyinaturalist_convert.db
-def get_db_observations(
-    db_path: PathOrStr = DB_PATH,
-    ids: Optional[Iterable[int]] = None,
-    username: Optional[str] = None,
-    limit: Optional[int] = None,
-    order_by_date: bool = False,
-) -> Iterator[Observation]:
-    """Load observation records and associated taxa from SQLite"""
-    from sqlalchemy import select
-
-    stmt = (
-        select(DbObservation)
-        .join(DbObservation.taxon, isouter=True)
-        .join(DbObservation.user, isouter=True)
-    )
-    if ids:
-        stmt = stmt.where(DbObservation.id.in_(list(ids)))  # type: ignore
-    if username:
-        stmt = stmt.where(DbUser.login == username)
-    if limit:
-        stmt = stmt.limit(limit)
-    if order_by_date:
-        stmt = stmt.order_by(DbObservation.observed_on.desc())
-
-    with get_session(db_path) as session:
-        for obs in session.execute(stmt):
-            yield obs[0].to_model()
 
 
 def get_url_hash(url: str) -> str:
