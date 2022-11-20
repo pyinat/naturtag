@@ -53,6 +53,8 @@ def get_valid_image_paths(
             image_paths.extend(get_images_from_dir(path, recursive=recursive))
         elif is_image_path(path, include_sidecars=include_sidecars):
             image_paths.append(path)
+        elif '*' in str(path):
+            image_paths.extend(glob_paths([path]))
         elif include_sidecars and sidecar_path.is_file():
             logger.debug(f'{path} is not writable; using existing sidecar: {sidecar_path}')
             image_paths.append(sidecar_path)
