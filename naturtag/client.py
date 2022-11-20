@@ -2,6 +2,7 @@ from datetime import datetime
 from hashlib import md5
 from itertools import chain
 from logging import getLogger
+from pathlib import Path
 from time import time
 from typing import TYPE_CHECKING, Optional
 
@@ -22,8 +23,9 @@ logger = getLogger(__name__)
 class iNatDbClient(iNatClient):
     """API client class that uses a local SQLite database to cache observations and taxa (when searched by ID)"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, db_path: Path = DB_PATH, **kwargs):
         super().__init__(**kwargs)
+        self.db_path = db_path
         self.taxa = TaxonDbController(self)
         self.observations = ObservationDbController(self, taxon_controller=self.taxa)
 
@@ -41,7 +43,10 @@ class ObservationDbController(ObservationController):
         """Get observations by ID; first from the database, then from the API"""
         # Get any observations saved in the database (unless refreshing)
         start = time()
-        observations = [] if refresh else list(get_db_observations(DB_PATH, ids=observation_ids))
+        if refresh:
+            observations = []
+        else:
+            observations = list(get_db_observations(self.client.db_path, ids=observation_ids))
         logger.debug(f'{len(observations)} observations found in database')
 
         # Get remaining observations from the API and save to the database
@@ -50,7 +55,7 @@ class ObservationDbController(ObservationController):
             logger.debug(f'Fetching remaining {len(remaining_ids)} observations from API')
             api_results = super().from_ids(*remaining_ids, **params).all()
             observations.extend(api_results)
-            save_observations(api_results, DB_PATH)
+            save_observations(api_results, self.client.db_path)
 
         # Add full taxonomy to observations, if specified
         if taxonomy:
@@ -62,7 +67,7 @@ class ObservationDbController(ObservationController):
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        save_observations(results, DB_PATH)
+        save_observations(results, self.client.db_path)
         return WrapperPaginator(results)
 
     def get_user_observations(
@@ -105,13 +110,15 @@ class TaxonDbController(TaxonController):
             logger.debug(f'Fetching remaining {len(remaining_ids)} taxa from API')
             api_results = super().from_ids(*remaining_ids, **params).all() if remaining_ids else []
             taxa.extend(api_results)
-            save_taxa(api_results, DB_PATH)
+            save_taxa(api_results, self.client.db_path)
 
         logger.debug(f'Finished in {time()-start:.2f} seconds')
         return WrapperPaginator(taxa)
 
     def _get_db_taxa(self, taxon_ids: list[int], accept_partial: bool = False):
-        db_results = list(get_db_taxa(DB_PATH, ids=taxon_ids, accept_partial=accept_partial))
+        db_results = list(
+            get_db_taxa(self.client.db_path, ids=taxon_ids, accept_partial=accept_partial)
+        )
         if not accept_partial:
             db_results = self._get_taxonomy(db_results)
         return db_results
@@ -147,9 +154,9 @@ class TaxonDbController(TaxonController):
 
 # TODO: Set expiration on 'original' and 'large' size images using URL patterns
 class ImageSession(ClientSession):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, cache_path: Path = IMAGE_CACHE, **kwargs):
         super().__init__(*args, **kwargs)
-        self.image_cache = SQLiteDict(IMAGE_CACHE, 'images', no_serializer=True)
+        self.image_cache = SQLiteDict(cache_path, 'images', no_serializer=True)
 
     def get_image(
         self, photo: Photo, url: Optional[str] = None, size: Optional[str] = None

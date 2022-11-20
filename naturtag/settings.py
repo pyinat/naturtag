@@ -253,7 +253,12 @@ class UserTaxa(YamlMixin):
         return super(UserTaxa, cls).read()  # type: ignore
 
 
-def setup(settings: Optional[Settings] = None, overwrite: bool = False, download: bool = False):
+def setup(
+    settings: Optional[Settings] = None,
+    overwrite: bool = False,
+    download: bool = False,
+    db_path: Path = DB_PATH,
+):
     """Run any first-time setup steps, if needed:
     * Create database tables
     * Extract packaged taxonomy data and load into SQLite
@@ -275,27 +280,27 @@ def setup(settings: Optional[Settings] = None, overwrite: bool = False, download
     logger.info('Running first-time setup')
     if overwrite:
         logger.info('Overwriting exiting tables')
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(db_path) as conn:
             conn.execute('DROP TABLE IF EXISTS observation')
             conn.execute('DROP TABLE IF EXISTS observation_fts')
             conn.execute('DROP TABLE IF EXISTS taxon')
             conn.execute('DROP TABLE IF EXISTS taxon_fts')
             conn.execute('DROP TABLE IF EXISTS photo')
             conn.execute('DROP TABLE IF EXISTS user')
-    elif DB_PATH.is_file():
+    elif db_path.is_file():
         logger.warning('Database already exists; attempting to update')
 
     # Create SQLite file with tables if they don't already exist
-    create_tables(DB_PATH)
-    create_taxon_fts_table(DB_PATH)
-    create_observation_fts_table(DB_PATH)
-    _load_taxon_db(download)
+    create_tables(db_path)
+    create_taxon_fts_table(db_path)
+    create_observation_fts_table(db_path)
+    _load_taxon_db(download, db_path)
 
     # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
-    with sqlite3.connect(DB_PATH) as conn:
+    with sqlite3.connect(db_path) as conn:
         conn.execute('UPDATE taxon SET partial=1')
 
-    vacuum_analyze(['taxon', 'taxon_fts'], DB_PATH)
+    vacuum_analyze(['taxon', 'taxon_fts'], db_path)
 
     logger.info('Setup complete')
     settings.setup_complete = True
@@ -312,7 +317,7 @@ def _download_taxon_db():
         f.write(r.content)
 
 
-def _load_taxon_db(download: bool = False):
+def _load_taxon_db(download: bool = False, db_path: Path = DB_PATH):
     """Load taxon tables from packaged data, if available"""
     # Optionally download data if it doesn't exist locally
     if not PACKAGED_TAXON_DB.is_file():
@@ -331,8 +336,8 @@ def _load_taxon_db(download: bool = False):
         with TarFile.open(PACKAGED_TAXON_DB) as tar:
             tar.extractall(path=tmp_dir)
 
-        load_table(tmp_dir / 'taxon.csv', DB_PATH, table_name='taxon')
-        load_table(tmp_dir / 'taxon_fts.csv', DB_PATH, table_name='taxon_fts')
+        load_table(tmp_dir / 'taxon.csv', db_path, table_name='taxon')
+        load_table(tmp_dir / 'taxon_fts.csv', db_path, table_name='taxon_fts')
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
