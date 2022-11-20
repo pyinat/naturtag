@@ -86,6 +86,7 @@ def tag_images(
             image_paths,
             recursive=recursive,
             include_sidecars=include_sidecars,
+            create_sidecars=settings.sidecar,
         )
     ]
 
@@ -242,7 +243,9 @@ def refresh_tags(
     settings = settings or Settings.read()
     metadata_objs = [
         _refresh_tags(MetaMetadata(image_path), settings)
-        for image_path in get_valid_image_paths(image_paths, recursive)
+        for image_path in get_valid_image_paths(
+            image_paths, recursive, create_sidecars=settings.sidecar
+        )
     ]
     return [m for m in metadata_objs if m]
 

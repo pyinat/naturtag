@@ -4,4 +4,5 @@ import prettyprinter
 
 prettyprinter.install_extras(exclude=['django'])
 
-SAMPLE_DATA_DIR = Path(__file__).parent.parent / 'assets' / 'demo_images'
+DEMO_IMAGES_DIR = Path(__file__).parent.parent / 'assets' / 'demo_images'
+SAMPLE_DATA_DIR = Path(__file__).parent / 'sample_data'

@@ -64,12 +64,15 @@ def _strip_url_or_name(ctx, param, value):
 @click.option('--version', is_flag=True, help='Show version')
 def main(ctx, verbose, version):
     ctx.meta['verbose'] = verbose
+    if verbose == 0:
+        enable_logging(level='WARNING', external_level='ERROR')
     if verbose == 1:
         enable_logging(level='INFO', external_level='WARNING')
     elif verbose == 2:
         enable_logging(level='DEBUG', external_level='INFO')
-    elif verbose == 3:
+    elif verbose >= 3:
         enable_logging(level='DEBUG', external_level='DEBUG')
+
     if version:
         v = pkg_version('naturtag')
         click.echo(f'naturtag v{v}')
@@ -171,6 +174,7 @@ def tag(
     )
     if not metadata_objs:
         return
+    click.echo(f'{len(metadata_objs)} images tagged')
 
     # Print keywords if specified
     if not image_paths or ctx.meta['verbose'] or flickr:
