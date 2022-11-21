@@ -22,7 +22,7 @@ from rich.table import Column, Table
 
 from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR, DB_PATH
 from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, strip_url, tag_images
-from naturtag.settings import setup
+from naturtag.settings import Settings, setup
 from naturtag.utils.image_glob import get_valid_image_paths
 
 CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
@@ -36,7 +36,8 @@ class TaxonParam(click.ParamType):
     name = 'taxon'
 
     def shell_complete(self, ctx, param, incomplete):
-        results = TaxonAutocompleter(DB_PATH).search(incomplete)
+        db_path = Settings.read().db_path
+        results = TaxonAutocompleter(db_path).search(incomplete)
         grouped_results = defaultdict(list)
         for taxon in results:
             grouped_results[taxon.id].append(taxon.name)
@@ -76,7 +77,7 @@ def main(ctx, verbose, version):
     if version:
         v = pkg_version('naturtag')
         click.echo(f'naturtag v{v}')
-        click.echo(f'User data directory: {APP_DIR}')
+        click.echo(f'User data directory: {Settings.read().data_dir}')
         ctx.exit()
     elif not ctx.invoked_subcommand:
         click.echo(ctx.get_help())

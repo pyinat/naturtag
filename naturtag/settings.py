@@ -1,4 +1,5 @@
 """Basic utilities for reading and writing settings from config files"""
+# TODO: use user data dir for logfile
 import sqlite3
 from collections import Counter, OrderedDict
 from datetime import datetime
@@ -25,9 +26,7 @@ from pyinaturalist_convert.fts import (
 from naturtag.constants import (
     APP_DIR,
     CONFIG_PATH,
-    DB_PATH,
     DEFAULT_WINDOW_SIZE,
-    LOGFILE,
     MAX_DIR_HISTORY,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
@@ -63,6 +62,9 @@ class YamlMixin:
     @classmethod
     def read(cls, path: Path) -> 'YamlMixin':
         """Read settings from config file"""
+        path = path or cls.path
+
+        # New file; no contents to read
         if not path.is_file():
             return cls(path=path)
 
@@ -72,8 +74,8 @@ class YamlMixin:
         obj = YamlConverter.structure(attrs_dict, cl=cls)
 
         # Config file may be a stub that specifies an alternate path; if so, read from that path
-        if cls.path and cls.path != path:
-            return cls.read(cls.path)
+        if obj.path and obj.path != path:
+            return cls.read(obj.path)
 
         obj.path = path
         return obj
@@ -113,7 +115,6 @@ class Settings(YamlMixin):
     # Logging settings
     log_level: str = doc_field(default='INFO', doc='Logging level')
     log_level_external: str = field(default='INFO')
-    logfile: Path = field(default=LOGFILE, converter=Path)
     show_logs: bool = doc_field(default=False, doc='Show a tab with application logs')
 
     # iNaturalist
@@ -154,6 +155,26 @@ class Settings(YamlMixin):
     @classmethod
     def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
         return super(Settings, cls).read(path)  # type: ignore
+ user data directory
+    @property
+    def data_dir(self) -> Path:
+        return self.path.parent
+
+    @property
+    def db_path(self) -> Path:
+        return self.data_dir / 'naturtag.db'
+
+    @property
+    def image_cache_path(self) -> Path:
+        return self.data_dir / 'images.db'
+
+    @property
+    def logfile(self) -> Path:
+        return self.data_dir / 'naturtag.log'
+
+    @property
+    def user_taxa_path(self) -> Path:
+        return self.data_dir / 'user_taxa.yml'
 
     @property
     def start_image_dir(self) -> Path:
@@ -163,6 +184,7 @@ class Settings(YamlMixin):
         else:
             return self.default_image_dir
 
+    # Shortcuts for application files within the
     def set_obs_checkpoint(self):
         self.last_obs_check = datetime.utcnow().replace(microsecond=0)
         self.write()
@@ -190,7 +212,7 @@ class Settings(YamlMixin):
 
 # TODO: This doesn't necessarily need to be human-readable/editable;
 #   maybe it could go in SQLite instead?
-@define(auto_attribs=False)
+@define(auto_attribs=False, slots=False)
 class UserTaxa(YamlMixin):
     """Relevant taxon IDs stored for the current user"""
 
@@ -266,7 +288,6 @@ def setup(
     settings: Optional[Settings] = None,
     overwrite: bool = False,
     download: bool = False,
-    db_path: Path = DB_PATH,
 ):
     """Run any first-time setup steps, if needed:
     * Create database tables
@@ -282,6 +303,7 @@ def setup(
         download: Download taxon data (full text search + basic taxon details)
     """
     settings = settings or Settings.read()
+    db_path = settings.db_path
     if settings.setup_complete and not overwrite:
         logger.debug('First-time setup already done')
         return
@@ -303,7 +325,7 @@ def setup(
     create_tables(db_path)
     create_taxon_fts_table(db_path)
     create_observation_fts_table(db_path)
-    _load_taxon_db(download, db_path)
+    _load_taxon_db(db_path, download)
 
     # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
     with sqlite3.connect(db_path) as conn:
@@ -326,7 +348,7 @@ def _download_taxon_db():
         f.write(r.content)
 
 
-def _load_taxon_db(download: bool = False, db_path: Path = DB_PATH):
+def _load_taxon_db(db_path: Path, download: bool = False):
     """Load taxon tables from packaged data, if available"""
     # Optionally download data if it doesn't exist locally
     if not PACKAGED_TAXON_DB.is_file():
