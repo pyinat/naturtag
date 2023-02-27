@@ -40,7 +40,7 @@ pyexiv2                     = '>=2.6.2'
 pyinaturalist               = {git="https://github.com/pyinat/pyinaturalist.git"}
 # pyinaturalist-convert       = '>=0.6.0'
 pyinaturalist-convert       = {git="https://github.com/pyinat/pyinaturalist-convert.git"}
-pyside6                     = '6.3.0'
+pyside6                     = '6.4.2'
 # TODO: Update to 6.4.0 when qtpy releases compatibility fixes
 #   Currently causes: AttributeError('Cannot reassign members.')
 # pyside6                     = '^6.4.0'
