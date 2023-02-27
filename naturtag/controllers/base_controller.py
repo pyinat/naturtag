@@ -1,3 +1,5 @@
+from typing import Optional
+
 from PySide6.QtCore import Signal
 
 from naturtag.app.threadpool import ThreadPool
@@ -10,7 +12,7 @@ class BaseController(StylableWidget):
 
     on_message = Signal(str)  #: Forward a message to status bar
 
-    def __init__(self, settings: Settings, threadpool: ThreadPool = None):
+    def __init__(self, settings: Settings, threadpool: Optional[ThreadPool] = None):
         super().__init__()
         self.settings = settings
         self.threadpool: ThreadPool = threadpool  # type: ignore

@@ -30,7 +30,7 @@ logger = getLogger(__name__)
 class TaxonPhoto(HoverPhoto):
     """A photo with a taxon reference and hover effect"""
 
-    def __init__(self, taxon: Taxon = None, **kwargs):
+    def __init__(self, taxon: Optional[Taxon] = None, **kwargs):
         super().__init__(**kwargs)
         self.taxon = taxon
 
@@ -68,7 +68,7 @@ class TaxonList(InfoCardList):
         super().__init__(threadpool, **kwargs)
         self.user_taxa = user_taxa
 
-    def add_taxon(self, taxon: Taxon, idx: int = None) -> TaxonInfoCard:
+    def add_taxon(self, taxon: Taxon, idx: Optional[int] = None) -> TaxonInfoCard:
         """Add a card immediately, and load its thumbnail from a separate thread"""
         card = TaxonInfoCard(
             taxon, user_observations_count=self.user_taxa.observed.get(taxon.id, 0)

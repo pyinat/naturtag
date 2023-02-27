@@ -109,7 +109,7 @@ class Toolbar(QToolBar):
         name: str,
         tooltip: str,
         icon: str,
-        shortcut: str = None,
+        shortcut: Optional[str] = None,
         visible: bool = True,
     ) -> QAction:
         action = QAction(fa_icon(icon), name, self)

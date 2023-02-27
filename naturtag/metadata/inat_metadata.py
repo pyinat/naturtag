@@ -22,11 +22,11 @@ logger = getLogger().getChild(__name__)
 
 def tag_images(
     image_paths: Iterable[PathOrStr],
-    observation_id: int = None,
-    taxon_id: int = None,
+    observation_id: Optional[int] = None,
+    taxon_id: Optional[int] = None,
     recursive: bool = False,
     include_sidecars: bool = False,
-    settings: Settings = None,
+    settings: Optional[Settings] = None,
 ) -> list[MetaMetadata]:
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
@@ -92,11 +92,11 @@ def tag_images(
 
 
 def get_inat_metadata(
-    observation_id: int = None,
-    taxon_id: int = None,
+    observation_id: Optional[int] = None,
+    taxon_id: Optional[int] = None,
     common_names: bool = False,
     hierarchical: bool = False,
-    metadata: MetaMetadata = None,
+    metadata: Optional[MetaMetadata] = None,
 ) -> Optional[MetaMetadata]:
     """Create or update image metadata based on an iNaturalist observation and/or taxon"""
     metadata = metadata or MetaMetadata()
@@ -149,7 +149,9 @@ def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
     return [_quote(f'taxonomy:{t.rank}={t.name}') for t in taxon.ancestors + [taxon]]
 
 
-def _get_id_keywords(observation_id: int = None, taxon_id: int = None) -> list[str]:
+def _get_id_keywords(
+    observation_id: Optional[int] = None, taxon_id: Optional[int] = None
+) -> list[str]:
     keywords = []
     if taxon_id:
         keywords.append(f'inat:taxon_id={taxon_id}')
@@ -188,7 +190,9 @@ def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
     return hier_keywords
 
 
-def _get_dwc_terms(observation: Observation = None, taxon: Taxon = None) -> dict[str, str]:
+def _get_dwc_terms(
+    observation: Optional[Observation] = None, taxon: Optional[Taxon] = None
+) -> dict[str, str]:
     """Convert either an observation or taxon into XMP-formatted Darwin Core terms"""
 
     # Get terms only for specific namespaces
@@ -222,7 +226,7 @@ def get_ids_from_url(url: str) -> IntTuple:
 def refresh_tags(
     image_paths: Iterable[PathOrStr],
     recursive: bool = False,
-    settings: Settings = None,
+    settings: Optional[Settings] = None,
 ) -> list[MetaMetadata]:
     """Refresh metadata for previously tagged images
 
@@ -250,7 +254,9 @@ def refresh_tags(
     return [m for m in metadata_objs if m]
 
 
-def _refresh_tags(metadata: MetaMetadata, settings: Settings = None) -> Optional[MetaMetadata]:
+def _refresh_tags(
+    metadata: MetaMetadata, settings: Optional[Settings] = None
+) -> Optional[MetaMetadata]:
     """Refresh existing metadata for a single image with latest observation and/or taxon data.
 
     Returns:

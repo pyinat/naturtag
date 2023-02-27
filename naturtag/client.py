@@ -3,7 +3,7 @@ from hashlib import md5
 from itertools import chain
 from logging import getLogger
 from time import time
-from typing import TYPE_CHECKING, Iterable, Iterator
+from typing import TYPE_CHECKING, Iterable, Iterator, Optional
 
 from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
@@ -75,7 +75,7 @@ class ObservationDbController(ObservationController):
         return WrapperPaginator(results)
 
     def get_user_observations(
-        self, username: str, updated_since: datetime = None, limit: int = 50
+        self, username: str, updated_since: Optional[datetime] = None, limit: int = 50
     ) -> list[Observation]:
         # Fetch and save any new observations
         new_observations = self.search(
@@ -160,7 +160,9 @@ class ImageSession(ClientSession):
         super().__init__(*args, **kwargs)
         self.image_cache = SQLiteDict(IMAGE_CACHE, 'images', no_serializer=True)
 
-    def get_image(self, photo: Photo, url: str = None, size: str = None) -> bytes:
+    def get_image(
+        self, photo: Photo, url: Optional[str] = None, size: Optional[str] = None
+    ) -> bytes:
         """Get an image from the cache, if it exists; otherwise, download and cache a new one"""
         if not url:
             url = photo.url_size(size) if size else photo.url
@@ -176,7 +178,9 @@ class ImageSession(ClientSession):
         self.image_cache[image_hash] = data
         return data
 
-    def get_pixmap(self, photo: Photo = None, url: str = None, size: str = None) -> 'QPixmap':
+    def get_pixmap(
+        self, photo: Optional[Photo] = None, url: Optional[str] = None, size: Optional[str] = None
+    ) -> 'QPixmap':
         from PySide6.QtGui import QPixmap
 
         if url and not photo:
@@ -194,9 +198,9 @@ class ImageSession(ClientSession):
 # TODO: Update this in pyinaturalist_convert.db
 def get_db_observations(
     db_path: PathOrStr = DB_PATH,
-    ids: Iterable[int] = None,
-    username: str = None,
-    limit: int = None,
+    ids: Optional[Iterable[int]] = None,
+    username: Optional[str] = None,
+    limit: Optional[int] = None,
     order_by_date: bool = False,
 ) -> Iterator[Observation]:
     """Load observation records and associated taxa from SQLite"""

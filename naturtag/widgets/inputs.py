@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Optional
 
 from PySide6.QtCore import QEvent, Signal
 from PySide6.QtGui import QAction, QIntValidator
@@ -24,7 +25,7 @@ class IdInput(QLineEdit):
         self.findChild(QAction).triggered.connect(self.on_clear)
         self.returnPressed.connect(self.select)
 
-    def focusOutEvent(self, event: QEvent = None):
+    def focusOutEvent(self, event: Optional[QEvent] = None):
         self.select()
         return super().focusOutEvent(event)
 

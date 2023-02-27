@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Iterable
+from typing import Iterable, Optional
 
 from pyinaturalist import Taxon, TaxonCount, TaxonCounts
 from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal, Slot
@@ -113,7 +113,7 @@ class TaxonTabs(QTabWidget):
         settings: Settings,
         threadpool: ThreadPool,
         user_taxa: UserTaxa,
-        parent: QWidget = None,
+        parent: Optional[QWidget] = None,
     ):
         super().__init__(parent)
         self.setElideMode(Qt.ElideRight)

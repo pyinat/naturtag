@@ -1,6 +1,6 @@
 from itertools import chain
 from logging import getLogger
-from typing import Any
+from typing import Any, Optional
 
 from naturtag.constants import HIER_KEYWORD_TAGS, KEYWORD_TAGS, RANKS
 
@@ -14,14 +14,16 @@ class KeywordMetadata:
     Container for combining, parsing, and organizing keyword metadata into relevant categories
     """
 
-    def __init__(self, metadata: dict[str, Any] = None, keywords: list[str] = None):
+    def __init__(
+        self, metadata: Optional[dict[str, Any]] = None, keywords: Optional[list[str]] = None
+    ):
         """Initialize with full metadata or keywords only"""
         self.keywords = keywords or self._get_combined_keywords(metadata)
         self.kv_keywords = self._get_kv_keywords()
         self.hier_keywords = self._get_hierarchical_keywords()
         self.normal_keywords = self._get_normal_keywords()
 
-    def _get_combined_keywords(self, metadata: dict[str, Any] = None) -> list[str]:
+    def _get_combined_keywords(self, metadata: Optional[dict[str, Any]] = None) -> list[str]:
         """Get keywords from all metadata formats"""
         if not metadata:
             return []

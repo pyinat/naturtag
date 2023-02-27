@@ -253,7 +253,7 @@ class UserTaxa(YamlMixin):
         return super(UserTaxa, cls).read()  # type: ignore
 
 
-def setup(settings: Settings = None, overwrite: bool = False, download: bool = False):
+def setup(settings: Optional[Settings] = None, overwrite: bool = False, download: bool = False):
     """Run any first-time setup steps, if needed:
     * Create database tables
     * Extract packaged taxonomy data and load into SQLite

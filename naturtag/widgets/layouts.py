@@ -30,7 +30,7 @@ else:
 class GroupBoxLayout(QVBoxLayout):
     """GroupBox with a default layout"""
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: Optional[str] = None):
         self.box = QGroupBox(name)
         super().__init__(self.box)
 
@@ -48,10 +48,10 @@ class GroupMixin(MIXIN_BASE):
     def add_group(
         self,
         name: str,
-        parent: QLayout = None,
-        width: int = None,
-        min_width: int = None,
-        max_width: int = None,
+        parent: Optional[QLayout] = None,
+        width: Optional[int] = None,
+        min_width: Optional[int] = None,
+        max_width: Optional[int] = None,
         policy_min_height: bool = True,
     ) -> GroupBoxLayout:
         """Add a new groupbox to the widget or layout"""
@@ -155,7 +155,7 @@ class FlowLayout(LayoutMixin, QLayout):
         super().setGeometry(rect)
         self._do_layout(rect)
 
-    def sizeHint(self, which: Qt.SizeHint = None, constraint: QSize = None):
+    def sizeHint(self, which: Optional[Qt.SizeHint] = None, constraint: Optional[QSize] = None):
         which = which or Qt.MinimumSize
         if which == Qt.SizeHint.MinimumSize:
             return self.minimumSize()
@@ -182,7 +182,7 @@ class FlowLayout(LayoutMixin, QLayout):
         top = self.getContentsMargins()[1]
         return size + QSize(2 * top, 2 * top)
 
-    def preferredSize(self, constraint: QSize = None):
+    def preferredSize(self, constraint: Optional[QSize] = None):
         max_width = constraint.width() if constraint and constraint.width() >= 0 else 1440
         max_height = self.heightForWidth(max_width)
         size = QSize(max_width, max_height)
@@ -225,7 +225,7 @@ class FlowLayout(LayoutMixin, QLayout):
 
 
 class GridLayout(LayoutMixin, QGridLayout):
-    def __init__(self, parent=None, n_columns: int = None):
+    def __init__(self, parent=None, n_columns: Optional[int] = None):
         super().__init__(parent)
         self._n_columns = n_columns
         self._col = 0

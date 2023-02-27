@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Optional
 
 from attr import fields
 from PySide6.QtCore import Qt, Signal
@@ -139,7 +140,7 @@ class SettingsMenu(BaseController):
 class SettingContainer(HorizontalLayout):
     """Layout for an icon, description, and input widget for a single setting"""
 
-    def __init__(self, icon_str: str, setting_attr: str, setting_title: str = None):
+    def __init__(self, icon_str: str, setting_attr: str, setting_title: Optional[str] = None):
         super().__init__()
         self.setAlignment(Qt.AlignLeft)
         self.addWidget(FAIcon(icon_str, size=32))
@@ -164,8 +165,8 @@ class ChoiceSetting(SettingContainer):
         settings: Settings,
         icon_str: str,
         setting_attr: str,
-        setting_title: str = None,
-        choices: list = None,
+        setting_title: Optional[str] = None,
+        choices: Optional[list] = None,
     ):
         super().__init__(icon_str, setting_attr, setting_title)
 
@@ -187,8 +188,8 @@ class TextSetting(SettingContainer):
         settings: Settings,
         icon_str: str,
         setting_attr: str,
-        setting_title: str = None,
-        validator: QValidator = None,
+        setting_title: Optional[str] = None,
+        validator: Optional[QValidator] = None,
     ):
         super().__init__(icon_str, setting_attr, setting_title)
 
@@ -210,8 +211,8 @@ class PathSetting(SettingContainer):
         settings: Settings,
         icon_str: str,
         setting_attr: str,
-        setting_title: str = None,
-        dialog_parent: QWidget = None,
+        setting_title: Optional[str] = None,
+        dialog_parent: Optional[QWidget] = None,
     ):
         super().__init__(icon_str, setting_attr, setting_title)
         self.settings = settings
@@ -266,7 +267,7 @@ class ToggleSetting(SettingContainer):
         settings: Settings,
         icon_str: str,
         setting_attr: str,
-        setting_title: str = None,
+        setting_title: Optional[str] = None,
     ):
         super().__init__(icon_str, setting_attr, setting_title)
 

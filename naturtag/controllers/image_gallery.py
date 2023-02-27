@@ -77,7 +77,7 @@ class ImageGallery(BaseController):
         self.images = {}
         self.flow_layout.clear()
 
-    def load_file_dialog(self, start_dir: PathOrStr = None):
+    def load_file_dialog(self, start_dir: Optional[PathOrStr] = None):
         """Show a file chooser dialog"""
         image_paths, _ = QFileDialog.getOpenFileNames(
             self,
@@ -298,7 +298,7 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         """
         return generate_thumbnail(path, self.thumbnail_size), MetaMetadata(path)
 
-    def set_pixmap_meta_async(self, threadpool: ThreadPool, path: PathOrStr = None):
+    def set_pixmap_meta_async(self, threadpool: ThreadPool, path: Optional[PathOrStr] = None):
         """Generate a photo thumbnail and read its metadata from a separate thread, and render it
         in the main thread when complete
         """
@@ -384,7 +384,7 @@ class ThumbnailContextMenu(QMenu):
         text: str,
         tooltip: str,
         enabled: bool = True,
-        callback: Callable = None,
+        callback: Optional[Callable] = None,
     ):
         action = QAction(fa_icon(icon), text, parent)
         action.setStatusTip(tooltip)

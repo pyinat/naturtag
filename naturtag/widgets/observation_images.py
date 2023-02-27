@@ -27,7 +27,7 @@ QUALITY_GRADE_ICONS = {
 class ObservationPhoto(HoverPhoto):
     """A photo with an observation reference and hover effect"""
 
-    def __init__(self, observation: Observation = None, **kwargs):
+    def __init__(self, observation: Optional[Observation] = None, **kwargs):
         super().__init__(**kwargs)
         self.observation = observation
 
@@ -111,7 +111,9 @@ class ObservationList(InfoCardList):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def add_observation(self, observation: Observation, idx: int = None) -> ObservationInfoCard:
+    def add_observation(
+        self, observation: Observation, idx: Optional[int] = None
+    ) -> ObservationInfoCard:
         """Add a card immediately, and load its thumbnail from a separate thread"""
         card = ObservationInfoCard(observation)
         super().add_card(card, observation.default_photo.thumbnail_url, idx=idx)

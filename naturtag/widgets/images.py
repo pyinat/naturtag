@@ -32,7 +32,7 @@ class FAIcon(QLabel):
     def __init__(
         self,
         icon_str: str,
-        parent: QWidget = None,
+        parent: Optional[QWidget] = None,
         secondary: bool = False,
         size: int = SIZE_ICON[0],
     ):
@@ -56,7 +56,7 @@ class IconLabel(QWidget):
         icon_str: str,
         text: IntOrStr,
         size: int = SIZE_ICON[0],
-        parent: QWidget = None,
+        parent: Optional[QWidget] = None,
         **kwargs,
     ):
         super().__init__(parent)
@@ -77,7 +77,7 @@ class IconLabel(QWidget):
 class IconLabelList(QWidget):
     """Widget that uses a grid to display a list of icons with labels"""
 
-    def __init__(self, parent: QWidget = None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
         self.grid = GridLayout(self, n_columns=2)
         self.grid.setAlignment(Qt.AlignTop | Qt.AlignLeft)
@@ -104,11 +104,11 @@ class PixmapLabel(QLabel):
 
     def __init__(
         self,
-        parent: QWidget = None,
-        pixmap: QPixmap = None,
-        path: PathOrStr = None,
-        url: str = None,
-        description: str = None,
+        parent: Optional[QWidget] = None,
+        pixmap: Optional[QPixmap] = None,
+        path: Optional[PathOrStr] = None,
+        url: Optional[str] = None,
+        description: Optional[str] = None,
         resample: bool = True,
         rounded: bool = False,
         scale: bool = True,
@@ -130,10 +130,10 @@ class PixmapLabel(QLabel):
 
     def get_pixmap(
         self,
-        path: PathOrStr = None,
-        photo: Photo = None,
-        size: str = None,
-        url: str = None,
+        path: Optional[PathOrStr] = None,
+        photo: Optional[Photo] = None,
+        size: Optional[str] = None,
+        url: Optional[str] = None,
     ) -> QPixmap:
         """Fetch a pixmap from either a local path or remote URL.
         This does not render the image, so it is safe to run from any thread.
@@ -152,10 +152,10 @@ class PixmapLabel(QLabel):
         self,
         threadpool: 'ThreadPool',
         priority: QThread.Priority = QThread.NormalPriority,
-        path: PathOrStr = None,
-        photo: Photo = None,
+        path: Optional[PathOrStr] = None,
+        photo: Optional[Photo] = None,
         size: str = 'medium',
-        url: str = None,
+        url: Optional[str] = None,
     ):
         """Fetch a photo from a separate thread, and render it in the main thread when complete"""
         future = threadpool.schedule(
@@ -317,7 +317,7 @@ class InfoCard(StylableWidget):
 
     on_click = Signal(int)
 
-    def __init__(self, card_id: int = None):
+    def __init__(self, card_id: Optional[int] = None):
         super().__init__()
         card_layout = HorizontalLayout(self)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -371,7 +371,7 @@ class InfoCard(StylableWidget):
 class InfoCardList(StylableWidget):
     """A scrollable list of InfoCards"""
 
-    def __init__(self, threadpool: 'ThreadPool', parent: QWidget = None):
+    def __init__(self, threadpool: 'ThreadPool', parent: Optional[QWidget] = None):
         super().__init__(parent)
         self.threadpool = threadpool
         self.root = VerticalLayout(self)
@@ -389,7 +389,7 @@ class InfoCardList(StylableWidget):
             if isinstance(item, InfoCard):
                 yield item
 
-    def add_card(self, card: InfoCard, thumbnail_url: str, idx: int = None):
+    def add_card(self, card: InfoCard, thumbnail_url: str, idx: Optional[int] = None):
         """Add a card immediately, and load its thumbnail from a separate thread"""
         if idx is not None:
             self.root.insertWidget(idx, card)

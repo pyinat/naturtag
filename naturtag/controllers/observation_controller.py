@@ -12,7 +12,6 @@ logger = getLogger(__name__)
 
 
 class ObservationController(BaseController):
-
     on_select = Signal(Observation)  #: An observation was selected
 
     def __init__(self, *args, **kwargs):

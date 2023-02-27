@@ -150,7 +150,7 @@ class IconicTaxonFilters(QWidget):
     def selected_iconic_taxa(self) -> list[int]:
         return [t.taxon_id for t in self.button_layout.widgets if t.isChecked()]
 
-    def reset(self, except_id: str = None):
+    def reset(self, except_id: Optional[str] = None):
         """Reset all buttons, or all except one"""
         for button in self.button_layout.widgets:
             if button.taxon_id != except_id:
