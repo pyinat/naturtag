@@ -35,7 +35,7 @@ class ThreadPool(QThreadPool):
         self.progress.add()
         worker = Worker(callback, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
-        self.start(worker, priority)
+        self.start(worker, priority.value)
         return worker.signals
 
     def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
