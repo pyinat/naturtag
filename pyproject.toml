@@ -57,7 +57,7 @@ sphinxcontrib-apidoc        = {optional=true, version='^0.3'}
 coverage = '^6.3'
 nox = '^2021.10.1'
 nox-poetry = '^1.0'
-pre-commit = '^2.16'
+pre-commit = '^3.1'
 prettyprinter = '^0.18.0'
 pyinstaller = '^5.0'
 pytest = '^7.0'
