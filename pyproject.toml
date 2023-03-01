@@ -41,7 +41,7 @@ pyside6                     = '^6.4.0'
 pyqtdarktheme               = "^1.1.1"
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
-sqlalchemy                  = '^1.4.36'
+sqlalchemy                  = '>=1.4.36,<3.0.0'
 
 # Documentation dependencies needed for Readthedocs builds
 furo                        = {optional=true, version='^2022.9'}
