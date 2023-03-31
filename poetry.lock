@@ -498,6 +498,18 @@ test-randomorder = ["pytest-randomly"]
 tox = ["tox"]
 
 [[package]]
+name = "darkdetect"
+version = "0.7.1"
+description = "Detect OS Dark Mode from Python"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "darkdetect-0.7.1-py2.py3-none-any.whl", hash = "sha256:3efe69f8ecd5f1b7f4fbb0d1d93f656b0e493c45cc49222380ffe2a529cbc866"},
+    {file = "darkdetect-0.7.1.tar.gz", hash = "sha256:47be3cf5134432ddb616bbffc927237718407914993c82809983e7ccebf49013"},
+]
+
+[[package]]
 name = "distlib"
 version = "0.3.6"
 description = "Distribution utilities"
@@ -1424,15 +1436,18 @@ files = [
 
 [[package]]
 name = "pyqtdarktheme"
-version = "1.2.1"
+version = "2.1.0"
 description = "Flat dark theme for PySide and PyQt."
 category = "main"
 optional = false
 python-versions = ">=3.7,<3.12"
 files = [
-    {file = "pyqtdarktheme-1.2.1-py3-none-any.whl", hash = "sha256:d9b790c7eb5b955dac9c01789e833838815b3e399be89ba8cc3306041d4e00a2"},
-    {file = "pyqtdarktheme-1.2.1.tar.gz", hash = "sha256:1b85e679175413fb1e7375d821178a25e1e7e2943e1dd1d1e8b630385c759933"},
+    {file = "pyqtdarktheme-2.1.0-py3-none-any.whl", hash = "sha256:8739d99502230fbaca42551ea033c9ae31c81c4ebfec2f1ffde38f32a18bea7a"},
+    {file = "pyqtdarktheme-2.1.0.tar.gz", hash = "sha256:5f8274ddfa3a5481ed9743cdb0f9debfeb7ff695b3a0d202a8104361d17dadb8"},
 ]
+
+[package.dependencies]
+darkdetect = ">=0.7.1,<0.8.0"
 
 [[package]]
 name = "pyrate-limiter"
@@ -2338,4 +2353,4 @@ docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-autodoc-typehi
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "50de9a37515e2f3e16ac8777c1f3996b293d0e5d4caed751388cd99ef8c1c43a"
+content-hash = "468d5cb514b002ed323d1b1e9e4a0e13c29a50b135c9b78d62e796ab48000fa9"
