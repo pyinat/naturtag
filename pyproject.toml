@@ -55,7 +55,7 @@ sphinxcontrib-apidoc        = {optional=true, version='^0.3'}
 
 [tool.poetry.dev-dependencies]
 coverage = '^6.3'
-nox = '^2021.10.1'
+nox = '^2022.11.21'
 nox-poetry = '^1.0'
 pre-commit = '^3.1'
 prettyprinter = '^0.18.0'
