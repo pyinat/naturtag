@@ -55,6 +55,32 @@ def set_theme(dark_mode: bool = True):
     app.setStyleSheet(base_stylesheet + '\n' + extra_stylesheet)
 
 
+# TODO: Update to use qdarktheme.setup_theme() from version 2
+#   Requires strings for both color names and values?
+def set_theme_2(dark_mode: bool = True):
+    theme_str = 'dark' if dark_mode else 'light'
+    logger.debug(f'Setting theme: {theme_str}')
+
+    dark_palette = {
+        'highlight': PALEBLUE,
+        'link': YELLOWGREEN,  # Secondary highlight
+        'link-visited': (46, 70, 94, 85),  # Hover highlight
+    }
+    light_palette = {
+        'highlight': PALEBLUE_DARK,
+        'link': YELLOWGREEN,
+        'link-visited': (181, 202, 244, 85),
+    }
+
+    with open(QSS_PATH) as f:
+        extra_stylesheet = f.read()
+    qdarktheme.setup_theme(
+        theme=theme_str,
+        additional_qss=extra_stylesheet,
+        custom_colors={'[dark]': dark_palette, '[light]': light_palette},
+    )
+
+
 def mod_dark_palette(palette: QPalette) -> QPalette:
     enabled: CustomPalette = {
         # QPalette.AlternateBase: (66, 66, 66),

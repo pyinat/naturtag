@@ -36,30 +36,30 @@ click-help-colors           = '>=0.9'
 pillow                      = '>=9.1'
 pyexiv2                     = '>=2.6.2'
 pyinaturalist               = '>=0.18'
-pyinaturalist-convert       = '>=0.6.0'
+pyinaturalist-convert       = '>=0.6.1'
 pyside6                     = '^6.4.0'
-pyqtdarktheme               = "^1.1.1"
+pyqtdarktheme               = '^2.1.0'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
-sqlalchemy                  = '^1.4.36'
+sqlalchemy                  = '^2.0.8'
 
 # Documentation dependencies needed for Readthedocs builds
-furo                        = {optional=true, version='^2022.9'}
+furo                        = {optional=true, version='^2023.3'}
 linkify-it-py               = {optional=true, version='^1.0.1'}
 myst-parser                 = {optional=true, version='>=0.17,<0.19'}
-sphinx                      = {optional=true, version='^4.5.0'}
+sphinx                      = {optional=true, version='^5.2'}
 sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
 sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
 sphinxcontrib-apidoc        = {optional=true, version='^0.3'}
 
 [tool.poetry.dev-dependencies]
-coverage = '^6.3'
-nox = '^2021.10.1'
+coverage = '^7.0'
+nox = '^2022.11'
 nox-poetry = '^1.0'
-pre-commit = '^2.16'
+pre-commit = '^3.1'
 prettyprinter = '^0.18.0'
-pyinstaller = '^5.0'
+pyinstaller = '^5.9'
 pytest = '^7.0'
 pytest-cov = '>=3.0'
 pytest-xdist = '>=2.2'
