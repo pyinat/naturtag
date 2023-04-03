@@ -8,7 +8,7 @@ SRC_DB=$DATA_DIR/observations.db
 DEST_DB=naturtag.db
 TAXON_CSV=taxon.csv
 TAXON_FTS_CSV=taxon_fts.csv
-ARCHIVE=taxonomy_all_languages.tar.gz
+ARCHIVE=taxonomy_full.tar.gz
 
 echo 'Exporting Taxon table...'
 sqlite3 -header -csv $SRC_DB \
