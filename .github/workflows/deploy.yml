@@ -26,13 +26,16 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
       fail-fast: false
+    defaults:
+      run:
+        shell: bash
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
-      - uses: snok/install-poetry@v1.3.3
+      - uses: snok/install-poetry@v1.3
         with:
           virtualenvs-in-project: true
 
@@ -76,15 +79,17 @@ jobs:
       - name: Finish pyinstaller package (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          tar -xvzf dist\naturtag\assets\taxonomy.tar.gz --directory dist\naturtag\assets\
-          Remove-Item dist\naturtag\assets\taxonomy.tar.gz
-          tar -C dist\naturtag\ -czvf naturtag-windows.tar.gz .
-          echo "DIST_NAME=windows" >> $env:GITHUB_ENV
+          tar -xvzf dist/naturtag/assets/taxonomy.tar.gz --directory dist/naturtag/assets/
+          rm dist/naturtag/assets/taxonomy.tar.gz
+          tar -C dist/naturtag/ -czvf naturtag-windows.tar.gz .
+          echo "DIST_NAME=windows" >> $GITHUB_ENV
 
       # Build deb, snap, and rpm packages
       - name: Build Linux packages with FPM
         if : ${{ matrix.os == 'ubuntu-latest' }}
         run: |
+          export GEM_HOME="$(ruby -e 'puts Gem.user_dir')"
+          export PATH="$PATH:$GEM_HOME/bin"
           gem install fpm --user-install
           cd packaging
           ./build_fpm.sh
