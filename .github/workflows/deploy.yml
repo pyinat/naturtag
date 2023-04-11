@@ -41,7 +41,7 @@ jobs:
 
       - name: Install system packages
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt-get install -y libegl-dev libxcb1-dev libxcb-image0 libxcb-render0 libwebp-dev libpng16-16 rpm
+        run: sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
 
       - name: Cache python packages
         id: cache
