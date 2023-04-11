@@ -45,7 +45,7 @@ name = "Babel"
 version = "2.12.1"
 description = "Internationalization utilities"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7"
 
 [[package]]
@@ -1399,7 +1399,7 @@ docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-autodoc-typehi
 [metadata]
 lock-version = "1.1"
 python-versions = '>=3.10,<3.11'
-content-hash = "949f0674b176a015110758d86b7f64057b052718722876a6287151e12c8faf99"
+content-hash = "b7c93a683f86eb905a27361c06090d850c5559f1ff53b7e1c2f33f0791579d9b"
 
 [metadata.files]
 alabaster = [
