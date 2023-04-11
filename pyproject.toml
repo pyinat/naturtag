@@ -42,6 +42,7 @@ pyqtdarktheme               = '^2.1.0'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
 sqlalchemy                  = '^2.0.8'
+tablib                      = '^3.0'
 
 # Documentation dependencies needed for Readthedocs builds
 furo                        = {optional=true, version='^2023.3'}
