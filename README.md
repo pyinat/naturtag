@@ -75,7 +75,7 @@ For that use case, this tool supports [Simple Darwin Core](https://dwc.tdwg.org/
 
 ## Installation
 See [GitHub Releases](https://github.com/pyinat/naturtag/releases) for downloads and
-[Installation](https://naturtag.readthedocs.io/en/latest/installation.html)
+[Installation](https://naturtag.readthedocs.io/en/stable/installation.html)
 for platform-specific instructions.
 
 To just install naturtag as a python package, run:
@@ -96,14 +96,14 @@ And tools to search and browse species to tag your images with:
 
 ![Screenshot](assets/screenshots/taxon-search.png)
 
-See [Application Guide](https://naturtag.readthedocs.io/en/latest/app.html) for more details.
+See [Application Guide](https://naturtag.readthedocs.io/en/stable/app.html) for more details.
 
 ### CLI
 Naturtag also includes a command-line interface. It takes an observation or species, plus some image
 files, and generates EXIF and XMP metadata to write to those images. You can see it in action here:
 [![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
 
-See [CLI documentation](https://naturtag.readthedocs.io/en/latest/cli.html) for more details.
+See [CLI documentation](https://naturtag.readthedocs.io/en/stable/cli.html) for more details.
 
 ### Library
 You can also import `naturtag` as a python library, and use its main features in your own scripts or
@@ -118,7 +118,7 @@ tag_images(['img1.jpg', 'img2.jpg'], observation_id=1234)
 refresh_tags(['~/observations/'], recursive=True)
 ```
 
-See [API Reference](https://naturtag.readthedocs.io/en/latest/reference.html) for more details.
+See [API Reference](https://naturtag.readthedocs.io/en/stable/reference.html) for more details.
 
 
 ## Development Status
