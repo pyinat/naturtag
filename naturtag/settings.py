@@ -41,8 +41,10 @@ logger = getLogger().getChild(__name__)
 
 def make_converter() -> Converter:
     converter = pyyaml.make_converter()
-    converter.register_unstructure_hook(Path, str)
-    converter.register_structure_hook(Path, lambda obj, cls: Path(obj).expanduser())
+    converter.register_unstructure_hook(Path, lambda obj: str(obj) if obj else None)
+    converter.register_structure_hook(
+        Path, lambda obj, cls: Path(obj).expanduser() if obj else None
+    )
     converter.register_unstructure_hook(datetime, lambda obj: obj.isoformat() if obj else None)
     converter.register_structure_hook(
         datetime, lambda obj, cls: datetime.fromisoformat(obj) if obj else None
@@ -57,7 +59,7 @@ YamlConverter = make_converter()
 class YamlMixin:
     """Attrs class mixin that converts to and from a YAML file"""
 
-    path: Path = field(default=None, converter=Path)
+    path: Optional[Path] = field(default=None)
 
     @classmethod
     def read(cls, path: Path) -> 'YamlMixin':
@@ -155,10 +157,10 @@ class Settings(YamlMixin):
     @classmethod
     def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
         return super(Settings, cls).read(path)  # type: ignore
- user data directory
+
     @property
     def data_dir(self) -> Path:
-        return self.path.parent
+        return self.path.parent  # type: ignore
 
     @property
     def db_path(self) -> Path:
@@ -354,7 +356,6 @@ def _load_taxon_db(db_path: Path, download: bool = False):
     if not PACKAGED_TAXON_DB.is_file():
         if download:
             _download_taxon_db()
-            _load_taxon_db()
         else:
             logger.warning(
                 'Pre-packaged taxon FTS database does not exist; '

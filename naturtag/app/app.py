@@ -22,6 +22,7 @@ from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_theme
 from naturtag.app.threadpool import ThreadPool
+from naturtag.client import ImageSession, iNatDbClient
 from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.settings import Settings, setup
@@ -50,9 +51,11 @@ class MainWindow(QMainWindow):
         )
 
         # Run any first-time setup steps, if needed
+        setup(settings)
         self.settings = settings
         self.user_dirs = UserDirs(settings)
-        setup(settings)
+        self.client = iNatDbClient(settings.db_path)
+        self.img_session = ImageSession(settings.image_cache_path)
 
         # Controllers
         self.settings_menu = SettingsMenu(self.settings)

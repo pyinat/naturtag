@@ -20,7 +20,7 @@ from rich.box import SIMPLE_HEAVY
 from rich.logging import RichHandler
 from rich.table import Column, Table
 
-from naturtag.constants import APP_DIR, CLI_COMPLETE_DIR, DB_PATH
+from naturtag.constants import CLI_COMPLETE_DIR
 from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, strip_url, tag_images
 from naturtag.settings import Settings, setup
 from naturtag.utils.image_glob import get_valid_image_paths

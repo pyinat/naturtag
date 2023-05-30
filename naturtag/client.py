@@ -12,7 +12,7 @@ from pyinaturalist.converters import format_file_size
 from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
-from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID
+from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -24,6 +24,7 @@ class iNatDbClient(iNatClient):
     """API client class that uses a local SQLite database to cache observations and taxa (when searched by ID)"""
 
     def __init__(self, db_path: Path = DB_PATH, **kwargs):
+        kwargs.setdefault('cache_control', False)
         super().__init__(**kwargs)
         self.db_path = db_path
         self.taxa = TaxonDbController(self)
@@ -155,7 +156,7 @@ class TaxonDbController(TaxonController):
 # TODO: Set expiration on 'original' and 'large' size images using URL patterns
 class ImageSession(ClientSession):
     def __init__(self, *args, cache_path: Path = IMAGE_CACHE, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, per_second=5, per_minute=400, **kwargs)
         self.image_cache = SQLiteDict(cache_path, 'images', no_serializer=True)
 
     def get_image(
@@ -177,9 +178,19 @@ class ImageSession(ClientSession):
         return data
 
     def get_pixmap(
-        self, photo: Optional[Photo] = None, url: Optional[str] = None, size: Optional[str] = None
+        self,
+        path: Optional[PathOrStr] = None,
+        photo: Optional[Photo] = None,
+        url: Optional[str] = None,
+        size: Optional[str] = None,
     ) -> 'QPixmap':
+        """Fetch a pixmap from either a local path or remote URL.
+        This does not render the image, so it is safe to run from any thread.
+        """
         from PySide6.QtGui import QPixmap
+
+        if path:
+            return QPixmap(str(path))
 
         if url and not photo:
             photo = Photo(url=url)
@@ -204,5 +215,6 @@ def get_url_hash(url: str) -> str:
     return f'{thumbnail_hash}.{ext}'
 
 
-INAT_CLIENT = iNatDbClient(cache_control=False)
-IMG_SESSION = ImageSession(expire_after=-1, per_second=5, per_minute=400)
+# TODO: Refactoring to not depend on global session and client objects
+INAT_CLIENT = iNatDbClient()
+IMG_SESSION = ImageSession()
