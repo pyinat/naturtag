@@ -242,9 +242,9 @@ def main():
     app = QApplication(sys.argv)
     splash = QSplashScreen(QPixmap(str(APP_LOGO)).scaledToHeight(512))
     splash.show()
-    settings = Settings.read()
-
     app.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
+
+    settings = Settings.read()
     set_theme(dark_mode=settings.dark_mode)
     window = MainWindow(settings)
     window.show()

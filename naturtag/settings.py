@@ -158,6 +158,7 @@ class Settings(YamlMixin):
     def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
         return super(Settings, cls).read(path)  # type: ignore
 
+    # Shortcuts for application files within the user data dir
     @property
     def data_dir(self) -> Path:
         return self.path.parent  # type: ignore
@@ -186,7 +187,6 @@ class Settings(YamlMixin):
         else:
             return self.default_image_dir
 
-    # Shortcuts for application files within the
     def set_obs_checkpoint(self):
         self.last_obs_check = datetime.utcnow().replace(microsecond=0)
         self.write()

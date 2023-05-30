@@ -87,7 +87,9 @@ class ObservationDbController(ObservationController):
             return new_observations[:limit]
 
         # Get up to `limit` most recent saved observations
-        obs = get_db_observations(username=username, limit=limit, order_by_date=True)
+        obs = get_db_observations(
+            self.client.db_path, username=username, limit=limit, order_by_date=True
+        )
         return list(obs)
 
 
