@@ -22,6 +22,7 @@ class TaxonAutocomplete(QLineEdit):
         super().__init__()
         self.setClearButtonEnabled(True)
         self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
+        self.settings = settings
         self.taxa: dict[str, int] = {}
 
         completer = QCompleter()
@@ -52,7 +53,9 @@ class TaxonAutocomplete(QLineEdit):
     # TODO: Input delay
     def search(self, q: str):
         if len(q) > 1 and q not in self.taxa:
-            self.taxa = {t.name: t.id for t in self.taxon_completer.search(q)}
+            language = self.settings.locale if self.settings.search_locale else None
+            results = self.taxon_completer.search(q, language=language)
+            self.taxa = {t.name: t.id for t in results}
             self.model.setStringList(self.taxa.keys())
 
     @Slot(str)
