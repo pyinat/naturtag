@@ -130,6 +130,9 @@ class Settings(YamlMixin):
     preferred_place_id: int = doc_field(
         default=1, converter=int, doc='Place preference for regional species common names'
     )
+    search_locale: bool = doc_field(
+        default=True, doc='Search common names for only your selected locale'
+    )
     username: str = doc_field(default='', doc='Your iNaturalist username')
 
     # Metadata

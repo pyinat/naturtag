@@ -16,11 +16,14 @@ from PySide6.QtWidgets import (
 
 from naturtag.controllers import BaseController
 from naturtag.settings import Settings
+from naturtag.utils import read_locales
 from naturtag.widgets import FAIcon, HorizontalLayout, ToggleSwitch, VerticalLayout
 
 logger = getLogger(__name__)
 
 
+# TODO: Show both locale code and display name. Currently the displayed value has to be the same as
+#   the value written to config.
 class SettingsMenu(BaseController):
     """Application settings menu, with input widgets connected to values in settings file"""
 
@@ -28,11 +31,23 @@ class SettingsMenu(BaseController):
         super().__init__(settings)
         self.settings = settings
         self.settings_layout = VerticalLayout(self)
+        # Dictionary of locale codes and display names
+        self.locales = {k: f'{k}: {v}' for k, v in read_locales().items()}
 
         # iNaturalist settings
         inat = self.add_group('iNaturalist', self.settings_layout)
         inat.addLayout(TextSetting(settings, icon_str='fa.user', setting_attr='username'))
-        inat.addLayout(TextSetting(settings, icon_str='fa.globe', setting_attr='locale'))
+        inat.addLayout(
+            ChoiceSetting(
+                settings,
+                icon_str='fa.globe',
+                setting_attr='locale',
+                choices=list(self.locales.keys()),
+            )
+        )
+        inat.addLayout(
+            ToggleSetting(settings, icon_str='fa.language', setting_attr='search_locale')
+        )
         inat.addLayout(
             IntSetting(
                 settings, icon_str='mdi.home-city-outline', setting_attr='preferred_place_id'
