@@ -35,7 +35,7 @@ class TaxonSearch(VerticalLayout):
         self.setAlignment(Qt.AlignTop)
 
         # Taxon name autocomplete
-        self.autocomplete = TaxonAutocomplete()
+        self.autocomplete = TaxonAutocomplete(settings)
         search_group = self.add_group('Search', self, width=400)
         search_group.addWidget(self.autocomplete)
         self.autocomplete.returnPressed.connect(self.search)

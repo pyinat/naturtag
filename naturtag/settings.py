@@ -1,4 +1,5 @@
 """Basic utilities for reading and writing settings from config files"""
+# TODO: use user data dir for logfile
 import sqlite3
 from collections import Counter, OrderedDict
 from datetime import datetime
@@ -23,10 +24,9 @@ from pyinaturalist_convert.fts import (
 )
 
 from naturtag.constants import (
+    APP_DIR,
     CONFIG_PATH,
-    DB_PATH,
     DEFAULT_WINDOW_SIZE,
-    LOGFILE,
     MAX_DIR_HISTORY,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
@@ -41,8 +41,10 @@ logger = getLogger().getChild(__name__)
 
 def make_converter() -> Converter:
     converter = pyyaml.make_converter()
-    converter.register_unstructure_hook(Path, str)
-    converter.register_structure_hook(Path, lambda obj, cls: Path(obj))
+    converter.register_unstructure_hook(Path, lambda obj: str(obj) if obj else None)
+    converter.register_structure_hook(
+        Path, lambda obj, cls: Path(obj).expanduser() if obj else None
+    )
     converter.register_unstructure_hook(datetime, lambda obj: obj.isoformat() if obj else None)
     converter.register_structure_hook(
         datetime, lambda obj, cls: datetime.fromisoformat(obj) if obj else None
@@ -53,36 +55,50 @@ def make_converter() -> Converter:
 YamlConverter = make_converter()
 
 
+@define
 class YamlMixin:
     """Attrs class mixin that converts to and from a YAML file"""
 
-    path: Path
+    path: Optional[Path] = field(default=None)
 
     @classmethod
-    def read(cls) -> 'YamlMixin':
+    def read(cls, path: Path) -> 'YamlMixin':
         """Read settings from config file"""
-        if not cls.path.is_file():
-            return cls()
+        path = path or cls.path
 
-        logger.debug(f'Reading {cls.__name__} from {cls.path}')
-        with open(cls.path) as f:
+        # New file; no contents to read
+        if not path.is_file():
+            return cls(path=path)
+
+        logger.debug(f'Reading {cls.__name__} from {path}')
+        with open(path) as f:
             attrs_dict = yaml.safe_load(f)
-            return YamlConverter.structure(attrs_dict, cl=cls)
+        obj = YamlConverter.structure(attrs_dict, cl=cls)
+
+        # Config file may be a stub that specifies an alternate path; if so, read from that path
+        if obj.path and obj.path != path:
+            return cls.read(obj.path)
+
+        obj.path = path
+        return obj
 
     def write(self):
         """Write settings to config file"""
         logger.info(f'Writing {self.__class__.__name__} to {self.path}')
         logger.debug(str(self))
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-
         attrs_dict = YamlConverter.unstructure(self)
+
+        # Only keep 'path' if it's not the default
+        if self.path.parent == APP_DIR:
+            attrs_dict.pop('path')
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.path, 'w') as f:
             yaml.safe_dump(attrs_dict, f)
 
-    @classmethod
-    def reset_defaults(cls) -> 'YamlMixin':
-        cls().write()
-        return cls.read()
+    def reset_defaults(self):
+        self.__class__(path=self.path).write()
+        self = self.__class__.read(path=self.path)
 
 
 def doc_field(doc: str = '', **kwargs):
@@ -94,8 +110,6 @@ def doc_field(doc: str = '', **kwargs):
 
 @define
 class Settings(YamlMixin):
-    path = CONFIG_PATH
-
     # Display settings
     dark_mode: bool = field(default=False)
     window_size: tuple[int, int] = field(default=DEFAULT_WINDOW_SIZE)
@@ -103,7 +117,6 @@ class Settings(YamlMixin):
     # Logging settings
     log_level: str = doc_field(default='INFO', doc='Logging level')
     log_level_external: str = field(default='INFO')
-    logfile: Path = field(default=LOGFILE, converter=Path)
     show_logs: bool = doc_field(default=False, doc='Show a tab with application logs')
 
     # iNaturalist
@@ -136,15 +149,34 @@ class Settings(YamlMixin):
     )
     recent_image_dirs: list[Path] = field(factory=list)
     favorite_image_dirs: list[Path] = field(factory=list)
-    # data_dir: Path = field(default=DATA_DIR, converter=Path)
 
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
     last_obs_check: Optional[datetime] = field(default=None)
 
     @classmethod
-    def read(cls) -> 'Settings':
-        return super(Settings, cls).read()  # type: ignore
+    def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
+        return super(Settings, cls).read(path)  # type: ignore
+
+    @property
+    def data_dir(self) -> Path:
+        return self.path.parent  # type: ignore
+
+    @property
+    def db_path(self) -> Path:
+        return self.data_dir / 'naturtag.db'
+
+    @property
+    def image_cache_path(self) -> Path:
+        return self.data_dir / 'images.db'
+
+    @property
+    def logfile(self) -> Path:
+        return self.data_dir / 'naturtag.log'
+
+    @property
+    def user_taxa_path(self) -> Path:
+        return self.data_dir / 'user_taxa.yml'
 
     @property
     def start_image_dir(self) -> Path:
@@ -154,6 +186,7 @@ class Settings(YamlMixin):
         else:
             return self.default_image_dir
 
+    # Shortcuts for application files within the
     def set_obs_checkpoint(self):
         self.last_obs_check = datetime.utcnow().replace(microsecond=0)
         self.write()
@@ -179,11 +212,11 @@ class Settings(YamlMixin):
             self.recent_image_dirs.remove(image_dir)
 
 
-@define(auto_attribs=False)
+# TODO: This doesn't necessarily need to be human-readable/editable;
+#   maybe it could go in SQLite instead?
+@define(auto_attribs=False, slots=False)
 class UserTaxa(YamlMixin):
     """Relevant taxon IDs stored for the current user"""
-
-    path = USER_TAXA_PATH
 
     history: list[int] = field(factory=list)
     starred: list[int] = field(factory=list)
@@ -193,6 +226,10 @@ class UserTaxa(YamlMixin):
     def __attrs_post_init__(self):
         """Initialize frequent taxa counter"""
         self.frequent = Counter(self.history)
+
+    @classmethod
+    def read(cls, path: Path = USER_TAXA_PATH) -> 'UserTaxa':
+        return super(UserTaxa, cls).read(path)  # type: ignore
 
     @property
     def display_ids(self) -> set[int]:
@@ -248,12 +285,12 @@ class UserTaxa(YamlMixin):
         ]
         return '\n'.join(sizes)
 
-    @classmethod
-    def read(cls) -> 'UserTaxa':
-        return super(UserTaxa, cls).read()  # type: ignore
 
-
-def setup(settings: Optional[Settings] = None, overwrite: bool = False, download: bool = False):
+def setup(
+    settings: Optional[Settings] = None,
+    overwrite: bool = False,
+    download: bool = False,
+):
     """Run any first-time setup steps, if needed:
     * Create database tables
     * Extract packaged taxonomy data and load into SQLite
@@ -268,6 +305,7 @@ def setup(settings: Optional[Settings] = None, overwrite: bool = False, download
         download: Download taxon data (full text search + basic taxon details)
     """
     settings = settings or Settings.read()
+    db_path = settings.db_path
     if settings.setup_complete and not overwrite:
         logger.debug('First-time setup already done')
         return
@@ -275,27 +313,27 @@ def setup(settings: Optional[Settings] = None, overwrite: bool = False, download
     logger.info('Running first-time setup')
     if overwrite:
         logger.info('Overwriting exiting tables')
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(db_path) as conn:
             conn.execute('DROP TABLE IF EXISTS observation')
             conn.execute('DROP TABLE IF EXISTS observation_fts')
             conn.execute('DROP TABLE IF EXISTS taxon')
             conn.execute('DROP TABLE IF EXISTS taxon_fts')
             conn.execute('DROP TABLE IF EXISTS photo')
             conn.execute('DROP TABLE IF EXISTS user')
-    elif DB_PATH.is_file():
+    elif db_path.is_file():
         logger.warning('Database already exists; attempting to update')
 
     # Create SQLite file with tables if they don't already exist
-    create_tables(DB_PATH)
-    create_taxon_fts_table(DB_PATH)
-    create_observation_fts_table(DB_PATH)
-    _load_taxon_db(download)
+    create_tables(db_path)
+    create_taxon_fts_table(db_path)
+    create_observation_fts_table(db_path)
+    _load_taxon_db(db_path, download)
 
     # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
-    with sqlite3.connect(DB_PATH) as conn:
+    with sqlite3.connect(db_path) as conn:
         conn.execute('UPDATE taxon SET partial=1')
 
-    vacuum_analyze(['taxon', 'taxon_fts'], DB_PATH)
+    vacuum_analyze(['taxon', 'taxon_fts'], db_path)
 
     logger.info('Setup complete')
     settings.setup_complete = True
@@ -312,13 +350,12 @@ def _download_taxon_db():
         f.write(r.content)
 
 
-def _load_taxon_db(download: bool = False):
+def _load_taxon_db(db_path: Path, download: bool = False):
     """Load taxon tables from packaged data, if available"""
     # Optionally download data if it doesn't exist locally
     if not PACKAGED_TAXON_DB.is_file():
         if download:
             _download_taxon_db()
-            _load_taxon_db()
         else:
             logger.warning(
                 'Pre-packaged taxon FTS database does not exist; '
@@ -331,8 +368,8 @@ def _load_taxon_db(download: bool = False):
         with TarFile.open(PACKAGED_TAXON_DB) as tar:
             tar.extractall(path=tmp_dir)
 
-        load_table(tmp_dir / 'taxon.csv', DB_PATH, table_name='taxon')
-        load_table(tmp_dir / 'taxon_fts.csv', DB_PATH, table_name='taxon_fts')
+        load_table(tmp_dir / 'taxon.csv', db_path, table_name='taxon')
+        load_table(tmp_dir / 'taxon_fts.csv', db_path, table_name='taxon_fts')
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:

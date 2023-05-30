@@ -22,7 +22,8 @@ from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_theme
 from naturtag.app.threadpool import ThreadPool
-from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
+from naturtag.client import ImageSession, iNatDbClient
+from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.settings import Settings, setup
 from naturtag.widgets import VerticalLayout, init_handler
@@ -50,9 +51,11 @@ class MainWindow(QMainWindow):
         )
 
         # Run any first-time setup steps, if needed
+        setup(settings)
         self.settings = settings
         self.user_dirs = UserDirs(settings)
-        setup(settings)
+        self.client = iNatDbClient(settings.db_path)
+        self.img_session = ImageSession(settings.image_cache_path)
 
         # Controllers
         self.settings_menu = SettingsMenu(self.settings)
@@ -187,7 +190,7 @@ class MainWindow(QMainWindow):
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
-        app_dir_link = f"<a href='{APP_DIR}'>{APP_DIR}</a>"
+        app_dir_link = f"<a href='{self.settings.data_dir}'>{self.settings.data_dir}</a>"
 
         about.setText(
             f'<b>Naturtag v{version}</b><br/>'

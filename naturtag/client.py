@@ -2,22 +2,14 @@ from datetime import datetime
 from hashlib import md5
 from itertools import chain
 from logging import getLogger
+from pathlib import Path
 from time import time
-from typing import TYPE_CHECKING, Iterable, Iterator, Optional
+from typing import TYPE_CHECKING, Optional
 
 from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import format_file_size
-from pyinaturalist_convert.db import (
-    DbObservation,
-    DbUser,
-    get_db_taxa,
-    get_session,
-    save_observations,
-    save_taxa,
-)
-
-# from pyinaturalist_convert.db import get_db_observations
+from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
 from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
@@ -31,8 +23,10 @@ logger = getLogger(__name__)
 class iNatDbClient(iNatClient):
     """API client class that uses a local SQLite database to cache observations and taxa (when searched by ID)"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, db_path: Path = DB_PATH, **kwargs):
+        kwargs.setdefault('cache_control', False)
         super().__init__(**kwargs)
+        self.db_path = db_path
         self.taxa = TaxonDbController(self)
         self.observations = ObservationDbController(self, taxon_controller=self.taxa)
 
@@ -50,7 +44,10 @@ class ObservationDbController(ObservationController):
         """Get observations by ID; first from the database, then from the API"""
         # Get any observations saved in the database (unless refreshing)
         start = time()
-        observations = [] if refresh else list(get_db_observations(DB_PATH, ids=observation_ids))
+        if refresh:
+            observations = []
+        else:
+            observations = list(get_db_observations(self.client.db_path, ids=observation_ids))
         logger.debug(f'{len(observations)} observations found in database')
 
         # Get remaining observations from the API and save to the database
@@ -59,7 +56,7 @@ class ObservationDbController(ObservationController):
             logger.debug(f'Fetching remaining {len(remaining_ids)} observations from API')
             api_results = super().from_ids(*remaining_ids, **params).all()
             observations.extend(api_results)
-            save_observations(api_results, DB_PATH)
+            save_observations(api_results, self.client.db_path)
 
         # Add full taxonomy to observations, if specified
         if taxonomy:
@@ -71,7 +68,7 @@ class ObservationDbController(ObservationController):
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        save_observations(results, DB_PATH)
+        save_observations(results, self.client.db_path)
         return WrapperPaginator(results)
 
     def get_user_observations(
@@ -114,13 +111,15 @@ class TaxonDbController(TaxonController):
             logger.debug(f'Fetching remaining {len(remaining_ids)} taxa from API')
             api_results = super().from_ids(*remaining_ids, **params).all() if remaining_ids else []
             taxa.extend(api_results)
-            save_taxa(api_results, DB_PATH)
+            save_taxa(api_results, self.client.db_path)
 
         logger.debug(f'Finished in {time()-start:.2f} seconds')
         return WrapperPaginator(taxa)
 
     def _get_db_taxa(self, taxon_ids: list[int], accept_partial: bool = False):
-        db_results = list(get_db_taxa(DB_PATH, ids=taxon_ids, accept_partial=accept_partial))
+        db_results = list(
+            get_db_taxa(self.client.db_path, ids=taxon_ids, accept_partial=accept_partial)
+        )
         if not accept_partial:
             db_results = self._get_taxonomy(db_results)
         return db_results
@@ -156,9 +155,9 @@ class TaxonDbController(TaxonController):
 
 # TODO: Set expiration on 'original' and 'large' size images using URL patterns
 class ImageSession(ClientSession):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.image_cache = SQLiteDict(IMAGE_CACHE, 'images', no_serializer=True)
+    def __init__(self, *args, cache_path: Path = IMAGE_CACHE, **kwargs):
+        super().__init__(*args, per_second=5, per_minute=400, **kwargs)
+        self.image_cache = SQLiteDict(cache_path, 'images', no_serializer=True)
 
     def get_image(
         self, photo: Photo, url: Optional[str] = None, size: Optional[str] = None
@@ -179,9 +178,19 @@ class ImageSession(ClientSession):
         return data
 
     def get_pixmap(
-        self, photo: Optional[Photo] = None, url: Optional[str] = None, size: Optional[str] = None
+        self,
+        path: Optional[PathOrStr] = None,
+        photo: Optional[Photo] = None,
+        url: Optional[str] = None,
+        size: Optional[str] = None,
     ) -> 'QPixmap':
+        """Fetch a pixmap from either a local path or remote URL.
+        This does not render the image, so it is safe to run from any thread.
+        """
         from PySide6.QtGui import QPixmap
+
+        if path:
+            return QPixmap(str(path))
 
         if url and not photo:
             photo = Photo(url=url)
@@ -195,36 +204,6 @@ class ImageSession(ClientSession):
         return f'{size} ({len(self.image_cache)} files)'
 
 
-# TODO: Update this in pyinaturalist_convert.db
-def get_db_observations(
-    db_path: PathOrStr = DB_PATH,
-    ids: Optional[Iterable[int]] = None,
-    username: Optional[str] = None,
-    limit: Optional[int] = None,
-    order_by_date: bool = False,
-) -> Iterator[Observation]:
-    """Load observation records and associated taxa from SQLite"""
-    from sqlalchemy import select
-
-    stmt = (
-        select(DbObservation)
-        .join(DbObservation.taxon, isouter=True)
-        .join(DbObservation.user, isouter=True)
-    )
-    if ids:
-        stmt = stmt.where(DbObservation.id.in_(list(ids)))  # type: ignore
-    if username:
-        stmt = stmt.where(DbUser.login == username)
-    if limit:
-        stmt = stmt.limit(limit)
-    if order_by_date:
-        stmt = stmt.order_by(DbObservation.observed_on.desc())
-
-    with get_session(db_path) as session:
-        for obs in session.execute(stmt):
-            yield obs[0].to_model()
-
-
 def get_url_hash(url: str) -> str:
     """Generate a hash to use as a cache key from an image URL, appended with the file extension
 
@@ -236,5 +215,6 @@ def get_url_hash(url: str) -> str:
     return f'{thumbnail_hash}.{ext}'
 
 
-INAT_CLIENT = iNatDbClient(cache_control=False)
-IMG_SESSION = ImageSession(expire_after=-1, per_second=5, per_minute=400)
+# TODO: Refactoring to not depend on global session and client objects
+INAT_CLIENT = iNatDbClient()
+IMG_SESSION = ImageSession()
