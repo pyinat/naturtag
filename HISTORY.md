@@ -7,6 +7,9 @@
 * Display observation count and leaf taxon count on taxon info cards
 * In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
 * Add support for alternate XMP sidecar path format, if it already exists (`basename.ext.xmp` instead of `basename.xmp`)
+* Add support for displaying and searching common names in any language supported by iNaturalist.org
+    * Uses the `locale` setting from settings menu
+    * The packaged taxon DB only contains english names, but a full version can be downloaded [here](https://github.com/pyinat/naturtag/releases/download/untagged-e757223556c30fa118ba/taxonomy_full.tar.gz)
 
 **CLI:**
 * Split CLI into subcommands:

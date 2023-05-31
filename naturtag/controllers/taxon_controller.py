@@ -74,7 +74,8 @@ class TaxonController(BaseController):
         if self.tabs._init_complete:
             self.threadpool.cancel()
         future = self.threadpool.schedule(
-            lambda: INAT_CLIENT.taxa(taxon_id), priority=QThread.HighPriority
+            lambda: INAT_CLIENT.taxa(taxon_id, locale=self.settings.locale),
+            priority=QThread.HighPriority,
         )
         future.on_result.connect(lambda taxon: self.display_taxon(taxon))
 
@@ -155,7 +156,9 @@ class TaxonTabs(QTabWidget):
 
         def get_recent_taxa():
             logger.info(f'Loading {len(display_ids)} user taxa')
-            return INAT_CLIENT.taxa.from_ids(*display_ids, accept_partial=True).all()
+            return INAT_CLIENT.taxa.from_ids(
+                *display_ids, locale=self.settings.locale, accept_partial=True
+            ).all()
 
         future = self.threadpool.schedule(get_recent_taxa, priority=QThread.LowPriority)
         future.on_result.connect(self.display_recent)

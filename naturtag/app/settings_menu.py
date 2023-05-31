@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 
 from naturtag.controllers import BaseController
 from naturtag.settings import Settings
+from naturtag.utils import read_locales
 from naturtag.widgets import FAIcon, HorizontalLayout, ToggleSwitch, VerticalLayout
 
 logger = getLogger(__name__)
@@ -28,11 +29,23 @@ class SettingsMenu(BaseController):
         super().__init__(settings)
         self.settings = settings
         self.settings_layout = VerticalLayout(self)
+        # Dictionary of locale codes and display names
+        self.locales = {k: f'{v} ({k})' for k, v in read_locales().items()}
 
         # iNaturalist settings
         inat = self.add_group('iNaturalist', self.settings_layout)
         inat.addLayout(TextSetting(settings, icon_str='fa.user', setting_attr='username'))
-        inat.addLayout(TextSetting(settings, icon_str='fa.globe', setting_attr='locale'))
+        inat.addLayout(
+            ChoiceAltDisplaySetting(
+                settings,
+                icon_str='fa.globe',
+                setting_attr='locale',
+                choices=self.locales,
+            )
+        )
+        inat.addLayout(
+            ToggleSetting(settings, icon_str='fa.language', setting_attr='search_locale')
+        )
         inat.addLayout(
             IntSetting(
                 settings, icon_str='mdi.home-city-outline', setting_attr='preferred_place_id'
@@ -176,6 +189,35 @@ class ChoiceSetting(SettingContainer):
         widget = QComboBox()
         widget.addItems(choices or [])
         widget.setCurrentText(str(getattr(settings, setting_attr)))
+        widget.currentTextChanged.connect(set_text)
+        self.addWidget(widget)
+
+
+class ChoiceAltDisplaySetting(SettingContainer):
+    def __init__(
+        self,
+        settings: Settings,
+        icon_str: str,
+        setting_attr: str,
+        setting_title: Optional[str] = None,
+        choices: Optional[dict] = None,
+    ):
+        """Modified ChoiceSetting that allows the display value to differ from the setting value"""
+        super().__init__(icon_str, setting_attr, setting_title)
+        choices = choices or {}
+        self.lookup = {v: k for k, v in choices.items()}
+        reverse_lookup = choices
+
+        current_value = str(getattr(settings, setting_attr))
+        current_display_value = reverse_lookup.get(current_value) or current_value
+
+        # On setting value, first look up correct value based on display text
+        def set_text(text):
+            setattr(settings, setting_attr, self.lookup[text])
+
+        widget = QComboBox()
+        widget.addItems(choices.values() or [])
+        widget.setCurrentText(current_display_value)
         widget.currentTextChanged.connect(set_text)
         self.addWidget(widget)
 

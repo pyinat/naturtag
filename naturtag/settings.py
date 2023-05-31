@@ -62,12 +62,12 @@ class YamlMixin:
     path: Optional[Path] = field(default=None)
 
     @classmethod
-    def read(cls, path: Path) -> 'YamlMixin':
+    def read(cls, path: Optional[Path]) -> 'YamlMixin':
         """Read settings from config file"""
         path = path or cls.path
 
         # New file; no contents to read
-        if not path.is_file():
+        if not path or not path.is_file():
             return cls(path=path)
 
         logger.debug(f'Reading {cls.__name__} from {path}')
@@ -130,6 +130,9 @@ class Settings(YamlMixin):
     preferred_place_id: int = doc_field(
         default=1, converter=int, doc='Place preference for regional species common names'
     )
+    search_locale: bool = doc_field(
+        default=True, doc='Search common names for only your selected locale'
+    )
     username: str = doc_field(default='', doc='Your iNaturalist username')
 
     # Metadata
@@ -155,7 +158,7 @@ class Settings(YamlMixin):
     last_obs_check: Optional[datetime] = field(default=None)
 
     @classmethod
-    def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
+    def read(cls, path: Path = CONFIG_PATH) -> 'Settings':  # type: ignore
         return super(Settings, cls).read(path)  # type: ignore
 
     # Shortcuts for application files within the user data dir
@@ -228,7 +231,7 @@ class UserTaxa(YamlMixin):
         self.frequent = Counter(self.history)
 
     @classmethod
-    def read(cls, path: Path = USER_TAXA_PATH) -> 'UserTaxa':
+    def read(cls, path: Path = USER_TAXA_PATH) -> 'UserTaxa':  # type: ignore
         return super(UserTaxa, cls).read(path)  # type: ignore
 
     @property
