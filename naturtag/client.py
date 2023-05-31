@@ -159,7 +159,7 @@ class TaxonDbController(TaxonController):
 class ImageSession(ClientSession):
     def __init__(self, *args, cache_path: Path = IMAGE_CACHE, **kwargs):
         super().__init__(*args, per_second=5, per_minute=400, **kwargs)
-        self.image_cache = SQLiteDict(cache_path, 'images', no_serializer=True)
+        self.image_cache = SQLiteDict(cache_path, 'images', serializer=None)
 
     def get_image(
         self, photo: Photo, url: Optional[str] = None, size: Optional[str] = None
