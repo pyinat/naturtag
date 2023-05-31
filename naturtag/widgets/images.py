@@ -67,14 +67,18 @@ class IconLabel(QWidget):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.icon = FAIcon(icon_str, size=size, **kwargs)
-        if isinstance(text, int):
-            text = format_int(text)
-        self.label = QLabel(text)
+        self.label = QLabel()
         self.label.setTextFormat(Qt.RichText)
+        self.set_text(text)
         root = HorizontalLayout(self)
         root.addWidget(self.icon)
         root.addWidget(self.label)
         root.setAlignment(Qt.AlignLeft)
+
+    def set_text(self, text: IntOrStr):
+        if isinstance(text, int):
+            text = format_int(text)
+        self.label.setText(text)
 
 
 class IconLabelList(QWidget):

@@ -65,6 +65,10 @@ class ObservationDbController(ObservationController):
         logger.debug(f'Finished in {time()-start:.2f} seconds')
         return WrapperPaginator(observations)
 
+    def count(self, username: str, **params) -> int:
+        """Get the total number of observations matching the specified criteria"""
+        return super().search(user_login=username, refresh=True, **params).count()
+
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
@@ -72,23 +76,38 @@ class ObservationDbController(ObservationController):
         return WrapperPaginator(results)
 
     def get_user_observations(
-        self, username: str, updated_since: Optional[datetime] = None, limit: int = 50
+        self,
+        username: str,
+        updated_since: Optional[datetime] = None,
+        limit: int = 50,
+        page: int = 1,
     ) -> list[Observation]:
-        # Fetch and save any new observations
-        new_observations = self.search(
-            user_login=username,
-            updated_since=updated_since,
-            refresh=True,
-        ).all()
+        """Fetch any new observations from the API since last search, save them to the db, and then
+        return up to `limit` most recent observations from the db
+        """
+        # TODO: Initial load should be done in a separate thread
+        new_observations = []
+        if page == 1:
+            new_observations = self.search(
+                user_login=username,
+                updated_since=updated_since,
+                refresh=True,
+            ).all()
+
+        # If there are enough new results to fill first page, return them directly
         if len(new_observations) >= limit:
             new_observations = sorted(
                 new_observations, key=lambda obs: obs.created_at, reverse=True
             )
             return new_observations[:limit]
 
-        # Get up to `limit` most recent saved observations
+        # Otherwise get up to `limit` most recent saved observations from the db
         obs = get_db_observations(
-            self.client.db_path, username=username, limit=limit, order_by_date=True
+            self.client.db_path,
+            username=username,
+            limit=limit,
+            page=page,
+            order_by_created=True,
         )
         return list(obs)
 
