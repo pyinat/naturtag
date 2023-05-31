@@ -1,7 +1,7 @@
 [tool.poetry]
 name = 'naturtag'
 version = '0.8.0'
-description = 'A tool for tagging your iNaturalist photo collection with observation metadata'
+description = 'Tag your nature photos with iNat taxonomy and observation metadata'
 authors = ['Jordan Cook']
 license = 'MIT'
 readme = 'README.md'
@@ -11,6 +11,7 @@ documentation = 'https://naturtag.readthedocs.io'
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',
+    'Environment :: MacOS X',
     'Environment :: Win32 (MS Windows)',
     'Environment :: X11 Applications',
     'Intended Audience :: Developers',
@@ -22,7 +23,7 @@ include = [
     { path = '*.kv' },
     { path = '*.md' },
     { path = '*.yml' },
-    { path = 'assets'},
+    { path = 'assets' },
     { path = 'docs', format = 'sdist' },
     { path = 'test', format = 'sdist' }
 ]
@@ -37,7 +38,7 @@ pillow                      = '>=9.1'
 pyexiv2                     = '>=2.6.2'
 pyinaturalist               = '>=0.18'
 pyinaturalist-convert       = '>=0.6.1'
-# 6.5.1 Introduces a weird bug with settings menu
+# 6.5.1 Introduces a weird bug with settings menu (see PYSIDE-2346)
 pyside6                     = '6.5.0'
 pyqtdarktheme               = '^2.1.0'
 pyyaml                      = '>=6.0'

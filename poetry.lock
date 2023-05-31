@@ -1001,7 +1001,7 @@ docs = ["furo (==2022.9.15)", "myst-parser (>=0.17)", "sphinx (>=4.3.0,<5.0.0)",
 
 [[package]]
 name = "rich"
-version = "13.3.5"
+version = "13.4.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
@@ -2177,8 +2177,8 @@ requests-ratelimiter = [
     {file = "requests_ratelimiter-0.4.0-py3-none-any.whl", hash = "sha256:4c41dc0bb5a58ef668283a0512d55d075bc4b82487d1765382512bdbec37c6a5"},
 ]
 rich = [
-    {file = "rich-13.3.5-py3-none-any.whl", hash = "sha256:69cdf53799e63f38b95b9bf9c875f8c90e78dd62b2f00c13a911c7a3b9fa4704"},
-    {file = "rich-13.3.5.tar.gz", hash = "sha256:2d11b9b8dd03868f09b4fffadc84a6a8cda574e40dc90821bd845720ebb8e89c"},
+    {file = "rich-13.4.1-py3-none-any.whl", hash = "sha256:d204aadb50b936bf6b1a695385429d192bc1fdaf3e8b907e8e26f4c4e4b5bf75"},
+    {file = "rich-13.4.1.tar.gz", hash = "sha256:76f6b65ea7e5c5d924ba80e322231d7cb5b5981aa60bfc1e694f1bc097fe6fe1"},
 ]
 SecretStorage = [
     {file = "SecretStorage-3.3.3-py3-none-any.whl", hash = "sha256:f356e6628222568e3af06f2eba8df495efa13b3b63081dafd4f7d9a7b7bc9f99"},
