@@ -62,12 +62,12 @@ class YamlMixin:
     path: Optional[Path] = field(default=None)
 
     @classmethod
-    def read(cls, path: Path) -> 'YamlMixin':
+    def read(cls, path: Optional[Path]) -> 'YamlMixin':
         """Read settings from config file"""
         path = path or cls.path
 
         # New file; no contents to read
-        if not path.is_file():
+        if not path or not path.is_file():
             return cls(path=path)
 
         logger.debug(f'Reading {cls.__name__} from {path}')
@@ -158,7 +158,7 @@ class Settings(YamlMixin):
     last_obs_check: Optional[datetime] = field(default=None)
 
     @classmethod
-    def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
+    def read(cls, path: Path = CONFIG_PATH) -> 'Settings':  # type: ignore
         return super(Settings, cls).read(path)  # type: ignore
 
     # Shortcuts for application files within the user data dir
@@ -231,7 +231,7 @@ class UserTaxa(YamlMixin):
         self.frequent = Counter(self.history)
 
     @classmethod
-    def read(cls, path: Path = USER_TAXA_PATH) -> 'UserTaxa':
+    def read(cls, path: Path = USER_TAXA_PATH) -> 'UserTaxa':  # type: ignore
         return super(UserTaxa, cls).read(path)  # type: ignore
 
     @property

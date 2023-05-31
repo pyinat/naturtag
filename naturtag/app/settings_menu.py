@@ -204,6 +204,7 @@ class ChoiceAltDisplaySetting(SettingContainer):
     ):
         """Modified ChoiceSetting that allows the display value to differ from the setting value"""
         super().__init__(icon_str, setting_attr, setting_title)
+        choices = choices or {}
         self.lookup = {v: k for k, v in choices.items()}
         reverse_lookup = choices
 
