@@ -48,7 +48,7 @@ tablib                      = '^3.0'
 
 # Documentation dependencies needed for Readthedocs builds
 furo                        = {optional=true, version='^2023.3'}
-linkify-it-py               = {optional=true, version='^1.0.1'}
+linkify-it-py               = {optional=true, version='^2.0.2'}
 myst-parser                 = {optional=true, version='>=0.17,<0.19'}
 sphinx                      = {optional=true, version='^5.2'}
 sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
