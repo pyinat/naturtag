@@ -1,9 +1,9 @@
 ﻿[Setup]
-AIVersion=9.1
+AIVersion=9.3
 AIEdition=1
 GUID={01329D81-576C-42FE-9850-9C4C03F161FB}
 AppName=Naturtag
-AppVersion=v0.7.0
+AppVersion=v0.8.0-beta
 AppDescription=
 CompanyName=
 WebSite=https://naturtag.readthedocs.io
@@ -56,7 +56,6 @@ UpdateURL=https://raw.githubusercontent.com/pyinat/naturtag/main/packaging/lates
 CheckUpdateBefore=0
 CheckUpdaterTitle=0
 CheckUseDownloader=0
-UpdaterNewDialog=0
 AllowChangeUpdate=0
 AutoCheckUpdate=0
 UpdateFrequency=2
@@ -140,12 +139,15 @@ CustomActionCommand=<WebSite>
 CustomActionChecked=0
 CustomActionAdmin=0
 TotalFiles=2
-SourceDirFiles=209
-SourceDirSize=134393029
+SourceDirFiles=1050
+SourceDirSize=162253011
 
 [GUI]
 FontName=Verdana
 LogoMode=1
+LogoOffset=0
+LogoIconSize=2
+Theme=0
 LogoAlignClient=0
 LogoAutoSize=1
 LogoStretch=0
