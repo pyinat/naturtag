@@ -1,8 +1,8 @@
 # Naturtag
 
-[![Build status](https://github.com/JWCook/naturtag/workflows/Build/badge.svg)](https://github.com/JWCook/naturtag/actions)
+[![Build status](https://github.com/pyinat/naturtag/workflows/Build/badge.svg?branch=main)](https://github.com/JWCook/naturtag/actions)
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=stable)](https://naturtag.readthedocs.io/en/stable/)
-[![GitHub issues](https://img.shields.io/github/issues/JWCook/naturtag)](https://github.com/JWCook/naturtag/issues)
+[![GitHub issues](https://img.shields.io/github/issues/pyinat/naturtag)](https://github.com/pyinat/naturtag/issues)
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
 
@@ -26,16 +26,14 @@
 ## Summary
 Naturtag is a tool for nature photographers that adds useful metadata to describe the organisms in
 your photos. It includes a **desktop application**, a **command-line interface**, and can also be
-used as a **python library**.
+used as a **python library**. It is mainly intended for use with [iNaturalist](https://www.inaturalist.org), but can also be used independently.
 
-It is mainly intended for use with [iNaturalist](https://www.inaturalist.org); it can tag your
-photos with either complete observation metadata, or just taxonomy metadata.
-
+Naturtag gathers complete observation metadata (for iNaturalist observation photos), or just taxonomy metadata (for everything else). It then embeds this information in your local photo collection using
+[XMP](https://en.wikipedia.org/wiki/Extensible_Metadata_Platform) and
+[EXIF](https://en.wikipedia.org/wiki/Exif) metadata.
 
 ## Use Cases
-Naturtag embeds this information in your local photo collection using
-[XMP](https://en.wikipedia.org/wiki/Extensible_Metadata_Platform) and
-[EXIF](https://en.wikipedia.org/wiki/Exif) metadata. This has a variety of uses, including:
+This image metadata has a variety of uses, including:
 
 ### Local photo organization
 Naturtag can tag your photos with **hierarchical keywords** (aka structured keywords), which
