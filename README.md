@@ -120,13 +120,13 @@ refresh_tags(['~/observations/'], recursive=True)
 
 See [API Reference](https://naturtag.readthedocs.io/en/stable/reference.html) for more details.
 
-
 ## Development Status
-* See [Issues](https://github.com/JWCook/naturtag/issues?q=) for planned features and current progress.
-* If you have any suggestions, questions, or requests, please
-  [create an issue](https://github.com/JWCook/naturtag/issues/new/choose), or ping me (**@jcook**)
-  on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
-* When I'm not working on this, I'm usually working on other libraries that naturtag benefits from, including
-  [requests-cache](https://requests-cache.readthedocs.io),
-  [pyinaturalist](https://pyinaturalist.readthedocs.io), and
-  [pyinaturalist-convert](https://github.com/JWCook/pyinaturalist-convert).
+* See [Issues](https://github.com/pyinat/naturtag/issues) for planned features and current progress.
+* If you have any problems, suggestions, or questions about naturtag, you can:
+  * [Create an issue](https://github.com/pyinat/naturtag/issues/new/choose)
+  * [Create a discussion](https://github.com/orgs/pyinat/discussions)
+  * Ping me (**@jcook**) on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
+* When I'm not working on this, I'm often working on other libraries that naturtag benefits from, including
+  [pyinaturalist](https://pyinaturalist.readthedocs.io),
+  [pyinaturalist-convert](https://github.com/pyinat/pyinaturalist-convert), and
+  [requests-cache](https://requests-cache.readthedocs.io).
