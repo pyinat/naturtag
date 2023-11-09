@@ -24,13 +24,13 @@ files = [
 
 [[package]]
 name = "argcomplete"
-version = "3.1.4"
+version = "3.1.6"
 description = "Bash tab completion for argparse"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "argcomplete-3.1.4-py3-none-any.whl", hash = "sha256:fbe56f8cda08aa9a04b307d8482ea703e96a6a801611acb4be9bf3942017989f"},
-    {file = "argcomplete-3.1.4.tar.gz", hash = "sha256:72558ba729e4c468572609817226fb0a6e7e9a0a7d477b882be168c0b4a62b94"},
+    {file = "argcomplete-3.1.6-py3-none-any.whl", hash = "sha256:71f4683bc9e6b0be85f2b2c1224c47680f210903e23512cfebfe5a41edfd883a"},
+    {file = "argcomplete-3.1.6.tar.gz", hash = "sha256:3b1f07d133332547a53c79437527c00be48cca3807b1d4ca5cab1b26313386a6"},
 ]
 
 [package.extras]
@@ -312,20 +312,20 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "click-help-colors"
-version = "0.9.2"
+version = "0.9.3"
 description = "Colorization of help messages in Click"
 optional = false
 python-versions = "*"
 files = [
-    {file = "click-help-colors-0.9.2.tar.gz", hash = "sha256:756245e542d29226bb3bc056bfa58886f212ba2b82f4e8cf5fc884176ac96d72"},
-    {file = "click_help_colors-0.9.2-py3-none-any.whl", hash = "sha256:82ef028cb0a332a154fa42fd7cca2c728a019b32bcb5a26bb32367551014a16f"},
+    {file = "click-help-colors-0.9.3.tar.gz", hash = "sha256:463a848936c84549597767e24bc56166fee4b3ac2da33c5ac79562dc1402d46c"},
+    {file = "click_help_colors-0.9.3-py3-none-any.whl", hash = "sha256:c0732b17dc637dc8fbb52574349670c186ffbb84f23cb68d173e68c193145a79"},
 ]
 
 [package.dependencies]
 click = ">=7.0,<9"
 
 [package.extras]
-dev = ["pytest"]
+dev = ["mypy", "pytest"]
 
 [[package]]
 name = "colorama"
@@ -574,19 +574,19 @@ six = ">=1.12,<2.0"
 
 [[package]]
 name = "furo"
-version = "2023.3.27"
+version = "2023.9.10"
 description = "A clean customisable Sphinx documentation theme."
 optional = true
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "furo-2023.3.27-py3-none-any.whl", hash = "sha256:4ab2be254a2d5e52792d0ca793a12c35582dd09897228a6dd47885dabd5c9521"},
-    {file = "furo-2023.3.27.tar.gz", hash = "sha256:b99e7867a5cc833b2b34d7230631dd6558c7a29f93071fdbb5709634bb33c5a5"},
+    {file = "furo-2023.9.10-py3-none-any.whl", hash = "sha256:513092538537dc5c596691da06e3c370714ec99bc438680edc1debffb73e5bfc"},
+    {file = "furo-2023.9.10.tar.gz", hash = "sha256:5707530a476d2a63b8cad83b4f961f3739a69f4b058bcf38a03a39fa537195b2"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = "*"
 pygments = ">=2.7"
-sphinx = ">=5.0,<7.0"
+sphinx = ">=6.0,<8.0"
 sphinx-basic-ng = "*"
 
 [[package]]
@@ -777,13 +777,13 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "keyring"
-version = "24.2.0"
+version = "24.3.0"
 description = "Store and access your passwords safely."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "keyring-24.2.0-py3-none-any.whl", hash = "sha256:4901caaf597bfd3bbd78c9a0c7c4c29fcd8310dab2cffefe749e916b6527acd6"},
-    {file = "keyring-24.2.0.tar.gz", hash = "sha256:ca0746a19ec421219f4d713f848fa297a661a8a8c1504867e55bfb5e09091509"},
+    {file = "keyring-24.3.0-py3-none-any.whl", hash = "sha256:4446d35d636e6a10b8bce7caa66913dd9eca5fd222ca03a3d42c38608ac30836"},
+    {file = "keyring-24.3.0.tar.gz", hash = "sha256:e730ecffd309658a08ee82535a3b5ec4b4c8669a9be11efb66249d8e0aeb9a25"},
 ]
 
 [package.dependencies]
@@ -794,9 +794,9 @@ pywin32-ctypes = {version = ">=0.2.0", markers = "sys_platform == \"win32\""}
 SecretStorage = {version = ">=3.2", markers = "sys_platform == \"linux\""}
 
 [package.extras]
-completion = ["shtab"]
-docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
+completion = ["shtab (>=1.1.0)"]
+docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
+testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
 
 [[package]]
 name = "linkify-it-py"
@@ -1289,64 +1289,65 @@ docs = ["furo (>=2022.9,<2023.0)", "ipython (>=7.25.0,<8.0.0)", "linkify-it-py (
 
 [[package]]
 name = "pyinaturalist-convert"
-version = "0.6.1"
-description = "Tools to convert observation data to and from a variety of useful formats"
+version = "0.6.2"
+description = "Data conversion tools for iNaturalist observations and taxonomy"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "pyinaturalist_convert-0.6.1-py3-none-any.whl", hash = "sha256:bccea193554087e015b3fd3b7ea6a34f5991f9f4276ba4a6a9bcbe4849bc3688"},
-    {file = "pyinaturalist_convert-0.6.1.tar.gz", hash = "sha256:7531e866e8387741eb8b56c9bbe3dabf52254c0cf9229cf27eae1e5982ee9c01"},
+    {file = "pyinaturalist_convert-0.6.2-py3-none-any.whl", hash = "sha256:fb78203ff4fc301c6c95801897f91e9ba2f0a9e9ffb5ce155d2cb0a6027de86e"},
+    {file = "pyinaturalist_convert-0.6.2.tar.gz", hash = "sha256:73fc6dbec127c808b43d90af61bb82485ab4eb67c414cffaf5ac54b5a39c1b50"},
 ]
 
 [package.dependencies]
-flatten-dict = ">=0.4.0,<0.5.0"
+flatten-dict = ">=0.4"
 pyinaturalist = ">=0.18"
 
 [package.extras]
-all = ["boto3 (>=1.20)", "geojson (>=2.5)", "gpxpy (>=1.4.2,<2.0.0)", "odfpy (>=1.4)", "openpyxl (>=2.6)", "pandas (>=1.2)", "pyarrow (>=10.0)", "pyyaml (>=6.0)", "sqlalchemy (>=2.0,<3.0)", "tables (>=3.6)", "tablib (>=3.0,<4.0)", "tabulate", "xlrd", "xlwt", "xmltodict (>=0.12)"]
+all = ["boto3 (>=1.20)", "geojson (>=2.5)", "gpxpy (>=1.4)", "odfpy (>=1.4)", "openpyxl (>=2.6)", "pandas (>=1.2)", "pyarrow (>=10.0)", "pyyaml (>=6.0)", "sqlalchemy (>=2.0,<3.0)", "tables (>=3.6)", "tablib (>=3.0)", "tabulate", "xlrd", "xlwt", "xmltodict (>=0.12)"]
 db = ["sqlalchemy (>=2.0,<3.0)"]
-docs = ["furo (>=2022.9,<2023.0)", "myst-parser (>=0.19,<0.20)", "sphinx (>=5.2,<6.0)", "sphinx-autodoc-typehints (>=1.17,<2.0)", "sphinx-copybutton (>=0.5)", "sphinx-design (>=0.2)"]
+docs = ["furo (>=2023.9,<2024.0)", "myst-parser (>1.0)", "sphinx (>=6.2,<7.0)", "sphinx-autodoc-typehints (==1.20)", "sphinx-copybutton (>=0.5)", "sphinx-design (>=0.5)"]
 dwc = ["xmltodict (>=0.12)"]
 feather = ["pandas (>=1.2)", "pyarrow (>=10.0)"]
 geojson = ["geojson (>=2.5)"]
-gpx = ["gpxpy (>=1.4.2,<2.0.0)"]
+gpx = ["gpxpy (>=1.4)"]
 hdf = ["pandas (>=1.2)", "tables (>=3.6)"]
-html = ["markuppy (>=1.12)", "tablib (>=3.0,<4.0)"]
+html = ["markuppy (>=1.12)", "tablib (>=3.0)"]
 odp = ["boto3 (>=1.20)"]
 parquet = ["pandas (>=1.2)", "pyarrow (>=10.0)"]
 xlsx = ["openpyxl (>=2.6)", "pandas (>=1.2)"]
 
 [[package]]
 name = "pyinstaller"
-version = "5.13.2"
+version = "6.2.0"
 description = "PyInstaller bundles a Python application and all its dependencies into a single package."
 optional = false
-python-versions = "<3.13,>=3.7"
+python-versions = "<3.13,>=3.8"
 files = [
-    {file = "pyinstaller-5.13.2-py3-none-macosx_10_13_universal2.whl", hash = "sha256:16cbd66b59a37f4ee59373a003608d15df180a0d9eb1a29ff3bfbfae64b23d0f"},
-    {file = "pyinstaller-5.13.2-py3-none-manylinux2014_aarch64.whl", hash = "sha256:8f6dd0e797ae7efdd79226f78f35eb6a4981db16c13325e962a83395c0ec7420"},
-    {file = "pyinstaller-5.13.2-py3-none-manylinux2014_i686.whl", hash = "sha256:65133ed89467edb2862036b35d7c5ebd381670412e1e4361215e289c786dd4e6"},
-    {file = "pyinstaller-5.13.2-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:7d51734423685ab2a4324ab2981d9781b203dcae42839161a9ee98bfeaabdade"},
-    {file = "pyinstaller-5.13.2-py3-none-manylinux2014_s390x.whl", hash = "sha256:2c2fe9c52cb4577a3ac39626b84cf16cf30c2792f785502661286184f162ae0d"},
-    {file = "pyinstaller-5.13.2-py3-none-manylinux2014_x86_64.whl", hash = "sha256:c63ef6133eefe36c4b2f4daf4cfea3d6412ece2ca218f77aaf967e52a95ac9b8"},
-    {file = "pyinstaller-5.13.2-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:aadafb6f213549a5906829bb252e586e2cf72a7fbdb5731810695e6516f0ab30"},
-    {file = "pyinstaller-5.13.2-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:b2e1c7f5cceb5e9800927ddd51acf9cc78fbaa9e79e822c48b0ee52d9ce3c892"},
-    {file = "pyinstaller-5.13.2-py3-none-win32.whl", hash = "sha256:421cd24f26144f19b66d3868b49ed673176765f92fa9f7914cd2158d25b6d17e"},
-    {file = "pyinstaller-5.13.2-py3-none-win_amd64.whl", hash = "sha256:ddcc2b36052a70052479a9e5da1af067b4496f43686ca3cdda99f8367d0627e4"},
-    {file = "pyinstaller-5.13.2-py3-none-win_arm64.whl", hash = "sha256:27cd64e7cc6b74c5b1066cbf47d75f940b71356166031deb9778a2579bb874c6"},
-    {file = "pyinstaller-5.13.2.tar.gz", hash = "sha256:c8e5d3489c3a7cc5f8401c2d1f48a70e588f9967e391c3b06ddac1f685f8d5d2"},
+    {file = "pyinstaller-6.2.0-py3-none-macosx_10_13_universal2.whl", hash = "sha256:a1adbd3cf25dc90926d783eae0f444d65cdfecc7bcdf6da522c3ae3ff47b4c25"},
+    {file = "pyinstaller-6.2.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:29d164394f1e949072f78a64c1e040f1c47b7f4aff08514c7666a031c8b44996"},
+    {file = "pyinstaller-6.2.0-py3-none-manylinux2014_i686.whl", hash = "sha256:ba602a38d7403de89c38b8956b221ce6de0280730d269bab522492fcad82ee33"},
+    {file = "pyinstaller-6.2.0-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:ebac06d99b80d2035594c3cc2fb5f2612d86289edd0510dbcbeb20a873f51d5a"},
+    {file = "pyinstaller-6.2.0-py3-none-manylinux2014_s390x.whl", hash = "sha256:fcfabc0ff1d38a4262c051dea3fdc1f7f106405c1f1b491b4c79cd28df19cab6"},
+    {file = "pyinstaller-6.2.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:104430686149b2f1c135b2c17aa2967c85d54ef77dc92feb4e179ec846c0c467"},
+    {file = "pyinstaller-6.2.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:e87fd60292b53bb9965cb5a84122875469a2bd475fd0d0db0052a3f1be351f75"},
+    {file = "pyinstaller-6.2.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:8ec9d6c98972bb922cedb16a6638257aa66e5deadd79e2953f3464696237c413"},
+    {file = "pyinstaller-6.2.0-py3-none-win32.whl", hash = "sha256:e5561e9a9b946d835c8dbc11ae4c16cc21e62bc77d10cc043406dc2992dfb4c6"},
+    {file = "pyinstaller-6.2.0-py3-none-win_amd64.whl", hash = "sha256:3b586196277c4c54b69880650984c39c28bb6258c2b4b64200032e6ac69d53a0"},
+    {file = "pyinstaller-6.2.0-py3-none-win_arm64.whl", hash = "sha256:d0c87b605bf13c3a04dfaa1d2fa7cd36765b8137000eeadccba865e1d6a19bf0"},
+    {file = "pyinstaller-6.2.0.tar.gz", hash = "sha256:1ce77043929bf525be38289d78feecde0fcf15506215eda6500176a8715c5047"},
 ]
 
 [package.dependencies]
 altgraph = "*"
 macholib = {version = ">=1.8", markers = "sys_platform == \"darwin\""}
+packaging = ">=22.0"
 pefile = {version = ">=2022.5.30", markers = "sys_platform == \"win32\""}
 pyinstaller-hooks-contrib = ">=2021.4"
 pywin32-ctypes = {version = ">=0.2.1", markers = "sys_platform == \"win32\""}
 setuptools = ">=42.0.0"
 
 [package.extras]
-encryption = ["tinyaes (>=1.0.0)"]
+completion = ["argcomplete"]
 hook-testing = ["execnet (>=1.5.0)", "psutil", "pytest (>=2.7.3)"]
 
 [[package]]
@@ -1391,60 +1392,54 @@ docs = ["furo (>=2022.3.4,<2023.0.0)", "myst-parser (>=0.17)", "sphinx (>=4.3.0,
 
 [[package]]
 name = "pyside6"
-version = "6.5.0"
+version = "6.6.0"
 description = "Python bindings for the Qt cross-platform application and UI framework"
 optional = false
-python-versions = "<3.12,>=3.7"
+python-versions = "<3.13,>=3.8"
 files = [
-    {file = "PySide6-6.5.0-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:cb059a0f3d4b763451a1e8dec440784dff1728e9ace6cb81c541cc1354c5f3dc"},
-    {file = "PySide6-6.5.0-cp37-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:5102c57841b15facb0aeca1f23d689ebc528a609bf5fb907f1ef2747f6415001"},
-    {file = "PySide6-6.5.0-cp37-abi3-win_amd64.whl", hash = "sha256:13e8e96aa7a89840575505f50b9635e6450bf413ff46288d1085b3a9f8b225c1"},
-    {file = "PySide6-6.5.0-pp39-pypy39_pp73-macosx_10_9_universal2.whl", hash = "sha256:f30e1d0319ea4d2ddac654c58377079a40f38c4cac7b6fd631902f91190c1fc8"},
-    {file = "PySide6-6.5.0-pp39-pypy39_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:c1c7244a4e83b3a4ea965f4a85776ebc64fa3c9b4af77ad70b22e64ccec3d451"},
-    {file = "PySide6-6.5.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:7242fe09aaeb3399152fa1c6c25098b93df945620a4bd81a37de0ecb2f64fd5d"},
+    {file = "PySide6-6.6.0-cp38-abi3-macosx_11_0_universal2.whl", hash = "sha256:8103f14ed46a05e81acccbfc8388e3321e392fe54f3aa4a13336bd2ed8af5cd4"},
+    {file = "PySide6-6.6.0-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:d487eab0f9bfc5c9141b474093e16207ff48cd9335e6465a01deb8dff0693fbc"},
+    {file = "PySide6-6.6.0-cp38-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:f40917b7a0c5c7f0c7faaa87e66ffa3b58d9d1d3d977d30fc07e193b82dd6749"},
+    {file = "PySide6-6.6.0-cp38-abi3-win_amd64.whl", hash = "sha256:d41dfcfa32c89502cdaa20206b7e2aba199072f94b424bc6a4d6f50b10f4eb5a"},
 ]
 
 [package.dependencies]
-PySide6-Addons = "6.5.0"
-PySide6-Essentials = "6.5.0"
-shiboken6 = "6.5.0"
+PySide6-Addons = "6.6.0"
+PySide6-Essentials = "6.6.0"
+shiboken6 = "6.6.0"
 
 [[package]]
 name = "pyside6-addons"
-version = "6.5.0"
+version = "6.6.0"
 description = "Python bindings for the Qt cross-platform application and UI framework (Addons)"
 optional = false
-python-versions = "<3.12,>=3.7"
+python-versions = "<3.13,>=3.8"
 files = [
-    {file = "PySide6_Addons-6.5.0-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:d29e84d0b54c5fdeb6cc405d537788a648da975cc58e37f0df3a17cd11a67f1d"},
-    {file = "PySide6_Addons-6.5.0-cp37-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:29551ca63a1cbc0fcd17fa9e477282857e2c66c3a55fdb9754b75519d5adf89a"},
-    {file = "PySide6_Addons-6.5.0-cp37-abi3-win_amd64.whl", hash = "sha256:db7a6117c3f944b4827204ed7f346030fc10c602521f278310a78021567df28f"},
-    {file = "PySide6_Addons-6.5.0-pp39-pypy39_pp73-macosx_10_9_universal2.whl", hash = "sha256:fd5bc46cfffac7afa2f76c3dc6cb6f567a0ad1276d8177797c1bc152aec50f35"},
-    {file = "PySide6_Addons-6.5.0-pp39-pypy39_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:9ed197a05f1c279d1589d8535040fe5e21b92fa19933e38de962050cb58f6c05"},
-    {file = "PySide6_Addons-6.5.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:1a9545df3e77c656a3708eaa3584d98ff41720c7dadf344d5126d66e83d0ab5a"},
+    {file = "PySide6_Addons-6.6.0-cp38-abi3-macosx_11_0_universal2.whl", hash = "sha256:82fe1bb6a1aabf5ab3d8632072dc908aa37fc75b4b46e520258c441bd6b103fb"},
+    {file = "PySide6_Addons-6.6.0-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:5c56e963b841aeaacbc9ca8ca34df45308818dbd6fc59faa2b5a00a299e9892b"},
+    {file = "PySide6_Addons-6.6.0-cp38-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:e145514a7c37ee3a6ad0ddd693f805ccff6fbd9640a24fb2ef6b7f852882d3e9"},
+    {file = "PySide6_Addons-6.6.0-cp38-abi3-win_amd64.whl", hash = "sha256:414864f7cfbdf8ac4c5a745566a515f18b6018d5730bf5489cc2716b5e1fcd9b"},
 ]
 
 [package.dependencies]
-PySide6-Essentials = "6.5.0"
-shiboken6 = "6.5.0"
+PySide6-Essentials = "6.6.0"
+shiboken6 = "6.6.0"
 
 [[package]]
 name = "pyside6-essentials"
-version = "6.5.0"
+version = "6.6.0"
 description = "Python bindings for the Qt cross-platform application and UI framework (Essentials)"
 optional = false
-python-versions = "<3.12,>=3.7"
+python-versions = "<3.13,>=3.8"
 files = [
-    {file = "PySide6_Essentials-6.5.0-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:4517e27fc540d9e645ea12dea82c8b29c042d66aaef46960a125cccdf0079800"},
-    {file = "PySide6_Essentials-6.5.0-cp37-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:f00d4f10758cdc3f49f94465ead788ad294dac7d9cc5e1cc0610e97c2bdfc8d7"},
-    {file = "PySide6_Essentials-6.5.0-cp37-abi3-win_amd64.whl", hash = "sha256:bc2e0a9dafe383ab965e98b6ddf73f709da3736197dea8eab265fd3e524db993"},
-    {file = "PySide6_Essentials-6.5.0-pp39-pypy39_pp73-macosx_10_9_universal2.whl", hash = "sha256:58a88a099171c55a7e41e519208c9ca93661d277bb73c5897a2e3f2cbe5248b7"},
-    {file = "PySide6_Essentials-6.5.0-pp39-pypy39_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:0287ec94ee1923d430bb20836bc649a5c76a59281245de469d7f759cc73c5ea7"},
-    {file = "PySide6_Essentials-6.5.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:987c2ec04c35481c841de9b25931d2d074eb7d2e591aa5628041b2ca2df96d0e"},
+    {file = "PySide6_Essentials-6.6.0-cp38-abi3-macosx_11_0_universal2.whl", hash = "sha256:26d27e3e3a18acbc770a69a30774fd345414fe4932fcb89d2cfc4fc130c3eb33"},
+    {file = "PySide6_Essentials-6.6.0-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:60284641619f964e1cb4d53cf3169d7a385e0378b74edb75610918d2aea1c4e5"},
+    {file = "PySide6_Essentials-6.6.0-cp38-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:37d5d9c6ee696a17890f07e7ce1f88f890174bd4aca29f47922ecc959ab28352"},
+    {file = "PySide6_Essentials-6.6.0-cp38-abi3-win_amd64.whl", hash = "sha256:97bbe33f584a09cef6a3fbc1295fb0fd7acaac345bc0f5601bf45d41c91683ac"},
 ]
 
 [package.dependencies]
-shiboken6 = "6.5.0"
+shiboken6 = "6.6.0"
 
 [[package]]
 name = "pytest"
@@ -1488,13 +1483,13 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-xdist"
-version = "3.3.1"
+version = "3.4.0"
 description = "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest-xdist-3.3.1.tar.gz", hash = "sha256:d5ee0520eb1b7bcca50a60a518ab7a7707992812c578198f8b44fdfac78e8c93"},
-    {file = "pytest_xdist-3.3.1-py3-none-any.whl", hash = "sha256:ff9daa7793569e6a68544850fd3927cd257cc03a7ef76c95e86915355e82b5f2"},
+    {file = "pytest-xdist-3.4.0.tar.gz", hash = "sha256:3a94a931dd9e268e0b871a877d09fe2efb6175c2c23d60d56a6001359002b832"},
+    {file = "pytest_xdist-3.4.0-py3-none-any.whl", hash = "sha256:e513118bf787677a427e025606f55e95937565e06dfaac8d87f55301e57ae607"},
 ]
 
 [package.dependencies]
@@ -1746,17 +1741,15 @@ testing-integration = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "jar
 
 [[package]]
 name = "shiboken6"
-version = "6.5.0"
+version = "6.6.0"
 description = "Python/C++ bindings helper module"
 optional = false
-python-versions = "<3.12,>=3.7"
+python-versions = "<3.13,>=3.8"
 files = [
-    {file = "shiboken6-6.5.0-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:2d7fe6534a51ec9c96b82fc6275cf75e85ab29276a9778aed756465f81adf0c1"},
-    {file = "shiboken6-6.5.0-cp37-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:46ff977f96c9d45dba3c3a313628356fd40e4423bb65bf2d9870b73396fad8be"},
-    {file = "shiboken6-6.5.0-cp37-abi3-win_amd64.whl", hash = "sha256:aee9708517821aaef547c83d689bf524d6f217d47232cb313d9af9e630215eed"},
-    {file = "shiboken6-6.5.0-pp39-pypy39_pp73-macosx_10_9_universal2.whl", hash = "sha256:6e2874ea013d4cea7819935977bffa4c634ebcaabcb5287798df9f0c2f10c4c0"},
-    {file = "shiboken6-6.5.0-pp39-pypy39_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:72888ebc5ef7295df27197c0af726bd6731e2a883b346e448e2c740b3e34bc2f"},
-    {file = "shiboken6-6.5.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:1bba668221a5cf40186cea93ced018cf788d7476d50968a3f073ebbe41ce712d"},
+    {file = "shiboken6-6.6.0-cp38-abi3-macosx_11_0_universal2.whl", hash = "sha256:bf23c43e53ffe6097853666ced05358c6640c378e992902a36c4cf77efb0223b"},
+    {file = "shiboken6-6.6.0-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:456b89fb4b323e0c5002d92e4d346b48bb4e709db801208df8a0d6b4f5efc33d"},
+    {file = "shiboken6-6.6.0-cp38-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:fb8c683206c3365f9240fff7f908485384893b02efb089b69ff816b4390baa9a"},
+    {file = "shiboken6-6.6.0-cp38-abi3-win_amd64.whl", hash = "sha256:e62b2610b84f0ff7ed0181a4c535849cdc0654127097b5ef561cf0a33078f245"},
 ]
 
 [[package]]
@@ -1794,25 +1787,25 @@ files = [
 
 [[package]]
 name = "sphinx"
-version = "5.3.0"
+version = "6.2.1"
 description = "Python documentation generator"
 optional = true
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "Sphinx-5.3.0.tar.gz", hash = "sha256:51026de0a9ff9fc13c05d74913ad66047e104f56a129ff73e174eb5c3ee794b5"},
-    {file = "sphinx-5.3.0-py3-none-any.whl", hash = "sha256:060ca5c9f7ba57a08a1219e547b269fadf125ae25b06b9fa7f66768efb652d6d"},
+    {file = "Sphinx-6.2.1.tar.gz", hash = "sha256:6d56a34697bb749ffa0152feafc4b19836c755d90a7c59b72bc7dfd371b9cc6b"},
+    {file = "sphinx-6.2.1-py3-none-any.whl", hash = "sha256:97787ff1fa3256a3eef9eda523a63dbf299f7b47e053cfcf684a1c2a8380c912"},
 ]
 
 [package.dependencies]
 alabaster = ">=0.7,<0.8"
 babel = ">=2.9"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
-docutils = ">=0.14,<0.20"
+docutils = ">=0.18.1,<0.20"
 imagesize = ">=1.3"
 Jinja2 = ">=3.0"
 packaging = ">=21.0"
-Pygments = ">=2.12"
-requests = ">=2.5.0"
+Pygments = ">=2.13"
+requests = ">=2.25.0"
 snowballstemmer = ">=2.0"
 sphinxcontrib-applehelp = "*"
 sphinxcontrib-devhelp = "*"
@@ -1823,8 +1816,8 @@ sphinxcontrib-serializinghtml = ">=1.1.5"
 
 [package.extras]
 docs = ["sphinxcontrib-websupport"]
-lint = ["docutils-stubs", "flake8 (>=3.5.0)", "flake8-bugbear", "flake8-comprehensions", "flake8-simplify", "isort", "mypy (>=0.981)", "sphinx-lint", "types-requests", "types-typed-ast"]
-test = ["cython", "html5lib", "pytest (>=4.6)", "typed_ast"]
+lint = ["docutils-stubs", "flake8 (>=3.5.0)", "flake8-simplify", "isort", "mypy (>=0.990)", "ruff", "sphinx-lint", "types-requests"]
+test = ["cython", "filelock", "html5lib", "pytest (>=4.6)"]
 
 [[package]]
 name = "sphinx-autodoc-typehints"
@@ -2193,18 +2186,17 @@ six = "*"
 
 [[package]]
 name = "urllib3"
-version = "2.0.7"
+version = "2.1.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "urllib3-2.0.7-py3-none-any.whl", hash = "sha256:fdb6d215c776278489906c2f8916e6e7d4f5a9b602ccbcfdf7f016fc8da0596e"},
-    {file = "urllib3-2.0.7.tar.gz", hash = "sha256:c97dfde1f7bd43a71c8d2a58e369e9b2bf692d1334ea9f9cae55add7d0dd0f84"},
+    {file = "urllib3-2.1.0-py3-none-any.whl", hash = "sha256:55901e917a5896a349ff771be919f8bd99aff50b79fe58fec595eb37bbc56bb3"},
+    {file = "urllib3-2.1.0.tar.gz", hash = "sha256:df7aa8afb0148fa78488e7899b2c59b5f4ffcfa82e6c54ccb9dd37c1d7b52d54"},
 ]
 
 [package.extras]
 brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)"]
-secure = ["certifi", "cryptography (>=1.9)", "idna (>=2.0.0)", "pyopenssl (>=17.1.0)", "urllib3-secure-extra"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
@@ -2249,5 +2241,5 @@ docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-autodoc-typehi
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.10,<3.11"
-content-hash = "0181fc5bb951f27f955c75fb58233e47853c341973bb84c497b0836bfc97ac92"
+python-versions = ">=3.10,<3.12"
+content-hash = "a0276b2572ab1973a250a7295d7ee6f28a15d35068d5eec49d8a86a931df2492"

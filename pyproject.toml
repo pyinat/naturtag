@@ -29,28 +29,26 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-# Can update to python 3.11 once PySide6 supports it
-python                      = '>=3.10,<3.11'
+python                      = '>=3.10,<3.12'
 attrs                       = '>=21.2'
 click                       = '>=8.0'
 click-help-colors           = '>=0.9'
 pillow                      = '>=10.0'
 pyexiv2                     = '>=2.6.2'
 pyinaturalist               = '>=0.18'
-pyinaturalist-convert       = '>=0.6.1'
-# 6.5.1 Introduces a weird bug with settings menu (see PYSIDE-2346)
-pyside6                     = '6.5.0'
+pyinaturalist-convert       = '>=0.6.2'
+pyside6                     = '^6.6.0'
 pyqtdarktheme               = '^2.1.0'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
-sqlalchemy                  = '^2.0.8'
+sqlalchemy                  = '^2.0.23'
 tablib                      = '^3.0'
 
 # Documentation dependencies needed for Readthedocs builds
-furo                        = {optional=true, version='^2023.3'}
+furo                        = {optional=true, version='^2023.9'}
 linkify-it-py               = {optional=true, version='^2.0'}
 myst-parser                 = {optional=true, version='^1.0'}
-sphinx                      = {optional=true, version='^5.2'}
+sphinx                      = {optional=true, version='^6.2'}
 sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
 sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
@@ -63,8 +61,8 @@ nox = '^2023.4'
 nox-poetry = '^1.0'
 pre-commit = '^3.5'
 prettyprinter = '^0.18.0'
-pyinstaller = '^5.12'
-pytest = '^7.3'
+pyinstaller = '^6.1'
+pytest = '^7.4'
 pytest-cov = '>=3.0'
 pytest-xdist = '>=2.2'
 
