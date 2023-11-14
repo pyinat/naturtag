@@ -106,3 +106,4 @@ ROOT_TAXON_ID = 48460
 IntTuple = tuple[Optional[int], Optional[int]]
 StrTuple = tuple[str, str]
 PathOrStr = Union[Path, str]
+IconDimensions = Union[int, tuple[int, int]]

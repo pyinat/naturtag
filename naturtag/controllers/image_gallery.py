@@ -191,7 +191,7 @@ class ThumbnailCard(StylableWidget):
         layout.addWidget(self.label)
 
         # Icon shown when an image is tagged or updated
-        self.check = FAIcon('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT[0])
+        self.check = FAIcon('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT)
         self.check.setVisible(False)
 
     def load_image(self):
