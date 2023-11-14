@@ -54,8 +54,8 @@ class TaxonController(BaseController):
         self.root.addLayout(taxon_layout)
 
         # Navigation keyboard shortcuts
-        self.add_shortcut('Alt+Left', self.taxon_info.prev)
-        self.add_shortcut('Alt+Right', self.taxon_info.next)
+        self.add_shortcut('Ctrl+Left', self.taxon_info.prev)
+        self.add_shortcut('Ctrl+Right', self.taxon_info.next)
         self.add_shortcut('Alt+Up', self.taxon_info.select_parent)
         self.add_shortcut('Ctrl+Shift+Enter', self.search.search)
         self.add_shortcut('Ctrl+Shift+X', self.search.reset)

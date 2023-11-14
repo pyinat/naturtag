@@ -107,10 +107,10 @@ class ImageGallery(BaseController):
     def load_image(self, image_path: Path, delayed_load: bool = False) -> Optional['ThumbnailCard']:
         """Load an image"""
         if not image_path.is_file():
-            logger.info(f'File does not exist: {image_path}')
+            logger.debug(f'File does not exist: {image_path}')
             return None
         elif image_path in self.images:
-            logger.info(f'Image already loaded: {image_path}')
+            logger.debug(f'Image already loaded: {image_path}')
             return None
 
         logger.info(f'Loading {image_path}')

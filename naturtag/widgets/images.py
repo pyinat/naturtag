@@ -136,6 +136,7 @@ class PixmapLabel(QLabel):
         self.setPixmap(pixmap)
 
     # TODO: Need quite a bit of refactoring to not depend on global session object
+    #   Pass app.img_session as a parameter instead
     def get_pixmap(self, *args, **kwargs) -> QPixmap:
         """Fetch a pixmap from either a local path or remote URL.
         This does not render the image, so it is safe to run from any thread.

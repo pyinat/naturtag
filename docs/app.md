@@ -128,27 +128,32 @@ To add a directory to favorites select **Add a favorite** from the favorites sub
 To remove a directory from favorites, Ctrl-click the directory from the favorites submenu.
 
 ## Keyboard Shortcuts
-Some keyboard shortcuts are included for convenience:
+Some keyboard shortcuts are included for convenience.
+These are listed below, along with the tab or screen they primarily apply to:
 
 Key(s)         | Action                      | Tab/Screen
 ------         | ------                      | ----------
 `Ctrl+O`       | Open file browser           | Photos
 `Ctrl+V`       | Paste photos or iNat URLs   | Photos
 `Ctrl+R`       | Run image tagger            | Photos
+`Ctrl+Shift+R` | Run image tag refresh       | Photos
 `Ctrl+X`       | Clear selected images       | Photos
-`F5`           | Refresh photo metadata      | Photos
                |                             |
-`Ctrl+Enter` | Run search              | Species
+`Ctrl+Enter`   | Run search                  | Species
 `Ctrl+Shift+X` | Clear search fields         | Species
-`Alt+Left`     | View previous taxon         | Species
-`Alt+Right`    | View next taxon             | Species
+`Ctrl+Left`    | View previous taxon         | Species
+`Ctrl+Right`   | View next taxon             | Species
 `Alt+Up`       | View parent taxon           | Species
-⠀              |                             |
+               |                             |
+`F5`           | Refresh observations        | Observations
+`Ctrl+Left`    | View previous page          | Observations
+`Ctrl+Right`   | View next page              | Observations
+               |                             |
 `Left`         | View previous image         | Fullscreen image (local photo or taxon)
 `Right`        | View next image             | Fullscreen image (local photo or taxon)
 `Escape`       | Exit fullscreen view        | Fullscreen image (local photo or taxon)
 `Del`          | Remove image from selection | Fullscreen image (local photo)
-⠀              |                             |
+               |                             |
 `Ctrl+Tab`     | Cycle through tabs          | All
 `Ctrl+Shift+F` | Add a directory to favorites| All
 `Ctrl+Shift+T` | Toggle toolbar visibility   | All

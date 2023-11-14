@@ -52,7 +52,7 @@ class ObservationController(BaseController):
         user_obs_group_box.addLayout(button_layout)
         self.prev_button = QPushButton('Prev')
         self.prev_button.setIcon(fa_icon('ei.chevron-left'))
-        self.prev_button.clicked.connect(self.get_prev_page)
+        self.prev_button.clicked.connect(self.prev_page)
         self.prev_button.setEnabled(False)
         button_layout.addWidget(self.prev_button)
 
@@ -62,7 +62,7 @@ class ObservationController(BaseController):
 
         self.next_button = QPushButton('Next')
         self.next_button.setIcon(fa_icon('ei.chevron-right'))
-        self.next_button.clicked.connect(self.get_next_page)
+        self.next_button.clicked.connect(self.next_page)
         self.next_button.setEnabled(False)
         button_layout.addWidget(self.next_button)
 
@@ -72,6 +72,10 @@ class ObservationController(BaseController):
         obs_layout = VerticalLayout()
         obs_layout.addLayout(self.obs_info)
         self.root.addLayout(obs_layout)
+
+        # Navigation keyboard shortcuts
+        self.add_shortcut('Ctrl+Left', self.prev_page)
+        self.add_shortcut('Ctrl+Right', self.next_page)
 
         # Add a delay before loading user observations on startup
         QTimer.singleShot(1, self.load_user_observations)
@@ -123,10 +127,9 @@ class ObservationController(BaseController):
 
         # TODO: Depending on order of operations, this could be counted from the db instead of API.
         # Maybe do that except on initial observation load?
-        if not self.total_pages:
-            total_results = INAT_CLIENT.observations.count(username=self.settings.username)
-            self.total_pages = (total_results // DEFAULT_PAGE_SIZE) + 1
-            logger.info('Total user observations: %s (%s pages)', total_results, self.total_pages)
+        total_results = INAT_CLIENT.observations.count(username=self.settings.username)
+        self.total_pages = (total_results // DEFAULT_PAGE_SIZE) + 1
+        logger.debug('Total user observations: %s (%s pages)', total_results, self.total_pages)
 
         observations = INAT_CLIENT.observations.get_user_observations(
             username=self.settings.username,
@@ -136,19 +139,18 @@ class ObservationController(BaseController):
         )
         return observations
 
-    def get_next_page(self):
+    def next_page(self):
         if self.page < self.total_pages:
             self.page += 1
             self.load_user_observations()
 
-    def get_prev_page(self):
+    def prev_page(self):
         if self.page > 1:
             self.page -= 1
             self.load_user_observations()
 
     def refresh(self):
         self.page = 1
-        self.total_pages = 1
         self.load_user_observations()
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):

@@ -33,6 +33,12 @@ class Toolbar(QToolBar):
         self.run_button = self.add_button(
             '&Run', tooltip='Apply tags to images', icon='fa.play', shortcut='Ctrl+R'
         )
+        self.refresh_tags_button = self.add_button(
+            'Refresh &tags',
+            tooltip='Refresh previously tagged images with latest observation/taxon data',
+            icon='msc.debug-rerun',
+            shortcut='Ctrl+Shift+R',
+        )
         self.addSeparator()
         self.open_button = self.add_button(
             '&Open', tooltip='Open images', icon='ri.image-add-fill', shortcut='Ctrl+O'
@@ -46,9 +52,10 @@ class Toolbar(QToolBar):
         self.clear_button = self.add_button(
             '&Clear', tooltip='Clear open images', icon='fa.remove', shortcut='Ctrl+X'
         )
-        self.refresh_button = self.add_button(
-            '&Refresh tags',
-            tooltip='Refresh previously tagged images with latest observation/taxon data',
+        self.addSeparator()
+        self.refresh_obs_button = self.add_button(
+            '&Refresh observations',
+            tooltip='Refresh local observations with latest data from iNaturalist',
             icon='fa.refresh',
             shortcut='F5',
         )
@@ -126,14 +133,15 @@ class Toolbar(QToolBar):
         """Populate the application menu using actions defined on the toolbar"""
         file_menu = menu.addMenu('&File')
         file_menu.addAction(self.run_button)
+        file_menu.addAction(self.refresh_tags_button)
         file_menu.addAction(self.open_button)
 
         file_menu.addMenu(self.user_dirs.favorite_dirs_submenu)
         file_menu.addMenu(self.user_dirs.recent_dirs_submenu)
 
+        file_menu.addAction(self.refresh_obs_button)
         file_menu.addAction(self.paste_button)
         file_menu.addAction(self.clear_button)
-        file_menu.addAction(self.refresh_button)
         file_menu.addAction(self.exit_button)
 
         view_menu = menu.addMenu('&View')
