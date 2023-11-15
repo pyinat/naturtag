@@ -103,10 +103,8 @@ class ObservationController(BaseController):
             logger.info('Unknown user; skipping observation load')
             return
 
-        logger.info('Fetching user observations')
-        future = self.app.threadpool.schedule(
-            self.get_user_observations, priority=QThread.LowPriority
-        )
+        logger.info(f'Fetching user observations page {self.page}')
+        future = self.threadpool.schedule(self.get_user_observations, priority=QThread.LowPriority)
         future.on_result.connect(self.display_user_observations)
 
     def next_page(self):
@@ -149,7 +147,7 @@ class ObservationController(BaseController):
             obs_card.on_click.connect(self.select_observation)
 
     def update_pagination_buttons(self):
-        """Update pagination buttons based on current page"""
+        """UI: Update pagination buttons based on current page"""
         self.prev_button.setEnabled(self.page > 1)
         self.next_button.setEnabled(self.page < self.total_pages)
         self.page_label.setText(f'Page {self.page} / {self.total_pages}')
@@ -183,7 +181,7 @@ class ObservationController(BaseController):
 
     def load_all_user_observations(self):
         """Fetch and save all new/updated user observations"""
-        logger.info('Fetching user observations')
+        logger.info('Fetching all new/udpated user observations')
         future = self.threadpool.schedule(self.refresh_paginated, priority=QThread.LowPriority)
         future.on_result.connect(self.update_pagination_buttons)
 
