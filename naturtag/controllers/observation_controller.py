@@ -33,6 +33,7 @@ class ObservationController(BaseController):
         self.page = 1
         self.total_pages = 0
         self.total_results = 0
+        self.loaded_pages = 0
         # TODO: Cache pages while navigating back and forth?
         # self.pages: dict[int, list[ObservationInfoCard]] = {}
 
@@ -160,6 +161,11 @@ class ObservationController(BaseController):
     # TODO: Store a Paginator object instead of page number?
     def get_user_observations(self) -> list[Observation]:
         """Fetch a single page of user observations"""
+        if not self.settings.username:
+            return []
+
+        # self.settings.set_obs_checkpoint()
+
         # TODO: Depending on order of operations, this could be counted from the db instead of API.
         # Maybe do that except on initial observation load?
         self.total_results = self.app.client.observations.count(username=self.app.settings.username)
@@ -174,3 +180,26 @@ class ObservationController(BaseController):
         )
         self.app.settings.set_obs_checkpoint()
         return observations
+
+    def load_all_user_observations(self):
+        """Fetch and save all new/updated user observations"""
+        logger.info('Fetching user observations')
+        future = self.threadpool.schedule(self.refresh_paginated, priority=QThread.LowPriority)
+        future.on_result.connect(self.update_pagination_buttons)
+
+    def refresh_paginated(self):
+        """refresh user observations, starting from the last checkpoint.
+        Update progress bar with each page. When done, enable the 'next page' button.
+        """
+        updated_since = self.settings.last_obs_check
+        self.settings.set_obs_checkpoint()
+
+        self.page = 1
+        for _page in INAT_CLIENT.observations.refresh_user_observations(
+            username=self.settings.username,
+            updated_since=updated_since,
+        ):
+            pass
+        # Save updated checkpoint once all pages are loaded
+        self.settings.write()
+        # self.load_user_observations()
