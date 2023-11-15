@@ -38,6 +38,9 @@ SIZE_SM = (75, 75)
 SIZE_DEFAULT = (250, 250)
 SIZE_LG = (500, 500)
 
+# TODO: Make this user-configurable
+DEFAULT_PAGE_SIZE = 50
+
 # Relevant groups of image metadata tags
 EXIF_HIDE_PREFIXES = [
     'Exif.Image.PrintImageMatching',
@@ -106,3 +109,4 @@ ROOT_TAXON_ID = 48460
 IntTuple = tuple[Optional[int], Optional[int]]
 StrTuple = tuple[str, str]
 PathOrStr = Union[Path, str]
+IconDimensions = Union[int, tuple[int, int]]

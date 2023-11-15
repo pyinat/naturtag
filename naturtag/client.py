@@ -12,7 +12,7 @@ from pyinaturalist.converters import format_file_size
 from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
-from naturtag.constants import DB_PATH, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
+from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -65,6 +65,11 @@ class ObservationDbController(ObservationController):
         logger.debug(f'Finished in {time()-start:.2f} seconds')
         return WrapperPaginator(observations)
 
+    def count(self, username: str, **params) -> int:
+        """Get the total number of observations matching the specified criteria"""
+        return super().search(user_login=username, refresh=True, **params).count()
+
+    # TODO: Save one page at a time
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
@@ -72,23 +77,43 @@ class ObservationDbController(ObservationController):
         return WrapperPaginator(results)
 
     def get_user_observations(
-        self, username: str, updated_since: Optional[datetime] = None, limit: int = 50
+        self,
+        username: str,
+        updated_since: Optional[datetime] = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        page: int = 1,
     ) -> list[Observation]:
-        # Fetch and save any new observations
-        new_observations = self.search(
-            user_login=username,
-            updated_since=updated_since,
-            refresh=True,
-        ).all()
+        """Fetch any new observations from the API since last search, save them to the db, and then
+        return up to `limit` most recent observations from the db
+        """
+        # TODO: Initial load should be done in a separate thread
+        logger.debug(f'Fetching new user observations since {updated_since}')
+        new_observations = []
+        if page == 1:
+            new_observations = self.search(
+                user_login=username,
+                updated_since=updated_since,
+                refresh=True,
+            ).all()
+        logger.debug(f'{len(new_observations)} new observations found')
+
+        if not limit:
+            return []
+
+        # If there are enough new results to fill first page, return them directly
         if len(new_observations) >= limit:
             new_observations = sorted(
                 new_observations, key=lambda obs: obs.created_at, reverse=True
             )
             return new_observations[:limit]
 
-        # Get up to `limit` most recent saved observations
+        # Otherwise get up to `limit` most recent saved observations from the db
         obs = get_db_observations(
-            self.client.db_path, username=username, limit=limit, order_by_date=True
+            self.client.db_path,
+            username=username,
+            limit=limit,
+            page=page,
+            order_by_created=True,
         )
         return list(obs)
 
@@ -147,7 +172,7 @@ class TaxonDbController(TaxonController):
             taxon.children = [extended_taxa[id] for id in taxon.child_ids]
         return taxa
 
-    # TODO: Don't use all
+    # TODO: Save one page at a time
     def search(self, **params) -> WrapperPaginator[Taxon]:
         """Search taxa, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
@@ -217,6 +242,6 @@ def get_url_hash(url: str) -> str:
     return f'{thumbnail_hash}.{ext}'
 
 
-# TODO: Refactoring to not depend on global session and client objects
+# TODO: Refactor to depend on app.client and session objects instead of these module-level globals
 INAT_CLIENT = iNatDbClient()
 IMG_SESSION = ImageSession()

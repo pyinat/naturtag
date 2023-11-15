@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
 from naturtag.client import IMG_SESSION
-from naturtag.constants import SIZE_ICON, SIZE_ICON_SM, SIZE_SM, IntOrStr, PathOrStr
+from naturtag.constants import SIZE_ICON, SIZE_ICON_SM, SIZE_SM, IconDimensions, IntOrStr, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
 from naturtag.widgets.layouts import GridLayout, HorizontalLayout
 
@@ -34,12 +34,14 @@ class FAIcon(QLabel):
         icon_str: str,
         parent: Optional[QWidget] = None,
         secondary: bool = False,
-        size: int = SIZE_ICON[0],
+        size: IconDimensions = SIZE_ICON,
     ):
         super().__init__(parent)
+        x = size if isinstance(size, int) else size[0]
+        y = size if isinstance(size, int) else size[1]
         self.icon = fa_icon(icon_str, secondary=secondary)
-        self.icon_size = QSize(size, size)
-        self.setPixmap(self.icon.pixmap(size, size, mode=QIcon.Mode.Normal))
+        self.icon_size = QSize(x, y)
+        self.setPixmap(self.icon.pixmap(x, y, mode=QIcon.Mode.Normal))
 
     def set_enabled(self, enabled: bool = True):
         self.setPixmap(
@@ -55,23 +57,28 @@ class IconLabel(QWidget):
         self,
         icon_str: str,
         text: IntOrStr,
-        size: int = SIZE_ICON[0],
+        size: IconDimensions = SIZE_ICON,
         parent: Optional[QWidget] = None,
         **kwargs,
     ):
         super().__init__(parent)
-        self.setFixedHeight(size + 15)
+        y = size if isinstance(size, int) else size[1]
+        self.setFixedHeight(y + 15)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.icon = FAIcon(icon_str, size=size, **kwargs)
-        if isinstance(text, int):
-            text = format_int(text)
-        self.label = QLabel(text)
+        self.label = QLabel()
         self.label.setTextFormat(Qt.RichText)
+        self.set_text(text)
         root = HorizontalLayout(self)
         root.addWidget(self.icon)
         root.addWidget(self.label)
         root.setAlignment(Qt.AlignLeft)
+
+    def set_text(self, text: IntOrStr):
+        if isinstance(text, int):
+            text = format_int(text)
+        self.label.setText(text)
 
 
 class IconLabelList(QWidget):
@@ -129,6 +136,7 @@ class PixmapLabel(QLabel):
         self.setPixmap(pixmap)
 
     # TODO: Need quite a bit of refactoring to not depend on global session object
+    #   Pass app.img_session as a parameter instead
     def get_pixmap(self, *args, **kwargs) -> QPixmap:
         """Fetch a pixmap from either a local path or remote URL.
         This does not render the image, so it is safe to run from any thread.

@@ -182,7 +182,7 @@ class TaxonomySection(HorizontalLayout):
 
     def load(self, taxon: Taxon):
         """Populate taxon ancestors and children"""
-        logger.info(f'Loading {len(taxon.ancestors)} ancestors and {len(taxon.children)} children')
+        logger.debug(f'Loading {len(taxon.ancestors)} ancestors and {len(taxon.children)} children')
 
         def get_label(text: str, items: list) -> str:
             return text + (f' ({len(items)})' if items else '')

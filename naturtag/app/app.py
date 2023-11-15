@@ -130,10 +130,11 @@ class MainWindow(QMainWindow):
         # Toolbar actions
         self.toolbar = Toolbar(self, self.user_dirs)
         self.toolbar.run_button.triggered.connect(self.image_controller.run)
+        self.toolbar.refresh_tags_button.triggered.connect(self.image_controller.refresh)
         self.toolbar.open_button.triggered.connect(self.image_controller.gallery.load_file_dialog)
         self.toolbar.paste_button.triggered.connect(self.image_controller.paste)
         self.toolbar.clear_button.triggered.connect(self.image_controller.clear)
-        self.toolbar.refresh_button.triggered.connect(self.image_controller.refresh)
+        self.toolbar.refresh_obs_button.triggered.connect(self.observation_controller.refresh)
         self.toolbar.fullscreen_button.triggered.connect(self.toggle_fullscreen)
         self.toolbar.reset_db_button.triggered.connect(self.reset_db)
         self.toolbar.settings_button.triggered.connect(self.show_settings)

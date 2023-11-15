@@ -49,15 +49,16 @@ class TaxonInfoCard(InfoCard):
         # Details
         self.title.setText(f'{taxon.rank.title()}: <i>{taxon.name}</i>')
         self.add_row(QLabel(capwords(taxon.preferred_common_name or '')))
-        icon_size = SIZE_ICON_SM[0]
         layout = HorizontalLayout()
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignLeft)
-        layout.addWidget(IconLabel('fa.binoculars', taxon.observations_count or 0, size=icon_size))
+        layout.addWidget(
+            IconLabel('fa.binoculars', taxon.observations_count or 0, size=SIZE_ICON_SM)
+        )
         if taxon.complete_species_count:
-            layout.addWidget(IconLabel('mdi.leaf', taxon.complete_species_count, size=icon_size))
+            layout.addWidget(IconLabel('mdi.leaf', taxon.complete_species_count, size=SIZE_ICON_SM))
         if user_observations_count:
-            layout.addWidget(IconLabel('fa5s.user', user_observations_count, size=icon_size))
+            layout.addWidget(IconLabel('fa5s.user', user_observations_count, size=SIZE_ICON_SM))
         self.add_row(layout)
 
 
