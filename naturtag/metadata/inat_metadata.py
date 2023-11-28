@@ -14,7 +14,7 @@ from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, IntTuple, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.settings import Settings
-from naturtag.utils.image_glob import get_valid_image_paths
+from naturtag.utils import get_valid_image_paths
 
 DWC_NAMESPACES = ['dcterms', 'dwc']
 logger = getLogger().getChild(__name__)
@@ -137,7 +137,7 @@ def get_inat_metadata(
 
     # Convert and add coordinates
     if observation:
-        metadata.update_coordinates(observation.location)
+        metadata.update_coordinates(observation.location, observation.positional_accuracy)
 
     # Convert and add DwC metadata
     metadata.update(_get_dwc_terms(observation, taxon))

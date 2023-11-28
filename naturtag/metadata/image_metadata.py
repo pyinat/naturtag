@@ -21,7 +21,7 @@ logger = getLogger().getChild(__name__)
 
 
 class ImageMetadata:
-    """Class for reading & writing basic image metadata"""
+    """Wrapper class for reading & writing basic image metadata with exiv2"""
 
     def __init__(self, image_path: PathOrStr = ''):
         self.image_path = Path(image_path)

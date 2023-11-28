@@ -23,6 +23,9 @@
 * Support selecting any file type with an associated sidecar (e.g., for RAW image files)
   * Works with individual paths or glob patterns, but not for directories
 
+**Metadata:**
+* Add support for GPS positional accuracy
+
 **Database:**
 * Include data for most commonly observed taxa with PyInstaller packages and platform-specific installers
 * Pre-compute ancestor IDs, child IDs, iconic taxon, observation count, and leaf taxon count based

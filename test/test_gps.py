@@ -64,16 +64,18 @@ def test_convert_coords__invalid():
 
 
 def test_to_exif_coords():
-    assert to_exif_coords(DECIMAL_DEGREES) == {
+    assert to_exif_coords(DECIMAL_DEGREES, 50) == {
         'Exif.GPSInfo.GPSLatitude': '37/1 46/1 98039/10000',
         'Exif.GPSInfo.GPSLatitudeRef': 'N',
         'Exif.GPSInfo.GPSLongitude': '122/1 29/1 102839/10000',
         'Exif.GPSInfo.GPSLongitudeRef': 'W',
+        'Exif.GPSInfo.GPSHPositioningError': '50',
     }
 
 
 def test_to_xmp_coords():
-    assert to_xmp_coords(DECIMAL_DEGREES) == {
+    assert to_xmp_coords(DECIMAL_DEGREES, 50) == {
         'Xmp.exif.GPSLatitude': '37,46.16339999999991N',
         'Xmp.exif.GPSLongitude': '122,29.171399999999267W',
+        'Xmp.exif.GPSHPositioningError': '50',
     }
