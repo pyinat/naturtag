@@ -1,7 +1,7 @@
 """Adapted from examples in Python & Qt6 by Martin Fitzpatrick"""
 from logging import getLogger
 from threading import RLock
-from typing import Callable
+from typing import Callable, Optional
 
 from PySide6.QtCore import (
     QEasingCurve,
@@ -12,6 +12,7 @@ from PySide6.QtCore import (
     QThreadPool,
     QTimer,
     Signal,
+    Slot,
 )
 from PySide6.QtWidgets import QGraphicsOpacityEffect, QProgressBar
 
@@ -29,23 +30,30 @@ class ThreadPool(QThreadPool):
         self.progress = ProgressBar()
 
     def schedule(
-        self, callback: Callable, priority: QThread.Priority = QThread.NormalPriority, **kwargs
+        self,
+        callback: Callable,
+        priority: QThread.Priority = QThread.NormalPriority,
+        total_results: Optional[int] = None,
+        increment_length: bool = False,
+        **kwargs,
     ) -> 'WorkerSignals':
         """Schedule a task to be run by the next available worker thread"""
-        self.progress.add()
-        worker = Worker(callback, **kwargs)
+        self.progress.add(total_results or 1)
+        worker = Worker(callback, increment_length=increment_length, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
         self.start(worker, priority.value)
         return worker.signals
 
-    def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
-        """Schedule multiple tasks to be run by the next available worker thread"""
-        self.progress.add(len(callbacks))
-        for callback in callbacks:
-            worker = Worker(callback, **kwargs)
-            worker.signals.on_progress.connect(self.progress.advance)
-            self.start(worker)
-        return worker.signals
+    # def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
+    #     """Schedule multiple tasks to be run by the next available worker thread"""
+    #     self.progress.add(len(callbacks))
+    #     all_signals = []
+    #     for callback in callbacks:
+    #         worker = Worker(callback, **kwargs)
+    #         worker.signals.on_progress.connect(self.progress.advance)
+    #         self.start(worker)
+    #         all_signals.append(worker.signals)
+    #     return all_signals
 
     def cancel(self):
         """Cancel all queued tasks and reset progress bar. Currently running tasks will be allowed
@@ -62,11 +70,12 @@ class Worker(QRunnable):
     done.
     """
 
-    def __init__(self, callback: Callable, **kwargs):
+    def __init__(self, callback: Callable, increment_length: bool = False, **kwargs):
         super().__init__()
         self.callback = callback
         self.kwargs = kwargs
         self.signals = WorkerSignals()
+        self.increment_length = increment_length
 
     def run(self):
         try:
@@ -76,7 +85,8 @@ class Worker(QRunnable):
             self.signals.on_error.emit(e)
         else:
             self.signals.on_result.emit(result)
-        self.signals.on_progress.emit()
+        increment = len(result) if self.increment_length and isinstance(result, list) else 1
+        self.signals.on_progress.emit(increment)
 
 
 class WorkerSignals(QObject):
@@ -84,7 +94,7 @@ class WorkerSignals(QObject):
 
     on_error = Signal(Exception)  #: Return exception info on error
     on_result = Signal(object)  #: Return result on completion
-    on_progress = Signal()  #: Increment progress bar
+    on_progress = Signal(int)  #: Increment progress bar
 
 
 class ProgressBar(QProgressBar):
@@ -108,6 +118,7 @@ class ProgressBar(QProgressBar):
         with self.lock:
             self.setMaximum(self.maximum() + amount)
 
+    @Slot(int)
     def advance(self, amount: int = 1):
         with self.lock:
             new_value = min(self.value() + amount, self.maximum())

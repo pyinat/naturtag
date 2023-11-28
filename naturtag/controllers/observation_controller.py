@@ -80,6 +80,9 @@ class ObservationController(BaseController):
         # Add a delay before loading user observations on startup
         QTimer.singleShot(1, self.load_user_observations)
 
+    # Actions triggered directly by UI
+    # ----------------------------------------
+
     def select_observation(self, observation_id: int):
         """Select an observation to display full details"""
         # Don't need to do anything if this observation is already selected
@@ -93,8 +96,32 @@ class ObservationController(BaseController):
         )
         future.on_result.connect(self.display_observation)
 
+    def load_user_observations(self):
+        """Fetch and display a single page of user observations"""
+        logger.info('Fetching user observations')
+        future = self.threadpool.schedule(self.get_user_observations, priority=QThread.LowPriority)
+        future.on_result.connect(self.display_user_observations)
+
+    def next_page(self):
+        if self.page < self.total_pages:
+            self.page += 1
+            self.load_user_observations()
+
+    def prev_page(self):
+        if self.page > 1:
+            self.page -= 1
+            self.load_user_observations()
+
+    def refresh(self):
+        self.page = 1
+        self.load_user_observations()
+
+    # UI helper functions (slots triggered after worker threads complete)
+    # ----------------------------------------
+
     @Slot(Observation)
     def display_observation(self, observation: Observation):
+        """Display full details for a single observation"""
         self.selected_observation = observation
         self.on_select.emit(observation)
         self.obs_info.load(observation)
@@ -102,6 +129,7 @@ class ObservationController(BaseController):
 
     @Slot(list)
     def display_user_observations(self, observations: list[Observation]):
+        """Display a page of observations"""
         # Update observation list
         self.user_observations.set_observations(observations)
         self.bind_selection(self.user_observations.cards)
@@ -111,14 +139,18 @@ class ObservationController(BaseController):
         self.next_button.setEnabled(self.page < self.total_pages)
         self.page_label.setText(f'Page {self.page} / {self.total_pages}')
 
-    def load_user_observations(self):
-        logger.info('Fetching user observations')
-        future = self.threadpool.schedule(self.get_user_observations, priority=QThread.LowPriority)
-        future.on_result.connect(self.display_user_observations)
+    def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
+        """Connect click signal from each observation card"""
+        for obs_card in obs_cards:
+            obs_card.on_click.connect(self.select_observation)
 
-    # TODO: Handle casual_observations setting
+    # I/O bound functions run from worker threads
+    # ----------------------------------------
+
+    # TODO: Handle casual_observations setting?
     # TODO: Store a Paginator object instead of page number?
     def get_user_observations(self) -> list[Observation]:
+        """Fetch a single page of user observations"""
         if not self.settings.username:
             return []
 
@@ -138,22 +170,3 @@ class ObservationController(BaseController):
             page=self.page,
         )
         return observations
-
-    def next_page(self):
-        if self.page < self.total_pages:
-            self.page += 1
-            self.load_user_observations()
-
-    def prev_page(self):
-        if self.page > 1:
-            self.page -= 1
-            self.load_user_observations()
-
-    def refresh(self):
-        self.page = 1
-        self.load_user_observations()
-
-    def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
-        """Connect click signal from each observation card"""
-        for obs_card in obs_cards:
-            obs_card.on_click.connect(self.select_observation)
