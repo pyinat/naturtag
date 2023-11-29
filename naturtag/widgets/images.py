@@ -5,13 +5,11 @@ from logging import getLogger
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 
-from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.client import IMG_SESSION
 from naturtag.constants import SIZE_ICON, SIZE_ICON_SM, SIZE_SM, IconDimensions, IntOrStr, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
 from naturtag.widgets.layouts import GridLayout, HorizontalLayout
@@ -22,6 +20,28 @@ else:
     MIXIN_BASE = object
 
 logger = getLogger(__name__)
+
+
+def set_pixmap_async(
+    pixmap_label: QLabel,
+    priority: QThread.Priority = QThread.NormalPriority,
+    **kwargs,
+):
+    """Fetch an image from a separate thread, and render it in the main thread when complete"""
+    from naturtag.controllers import get_app
+
+    app = get_app()
+    future = app.threadpool.schedule(app.img_session.get_pixmap, priority=priority, **kwargs)
+    future.on_result.connect(pixmap_label.setPixmap)
+
+
+def set_pixmap(pixmap_label: QLabel, *args, **kwargs):
+    """Fetch an image from either a local path or remote URL."""
+    from naturtag.controllers import get_app
+
+    app = get_app()
+    pixmap = app.img_session.get_pixmap(*args, **kwargs)
+    pixmap_label.setPixmap(pixmap)
 
 
 class FAIcon(QLabel):
@@ -129,42 +149,13 @@ class PixmapLabel(QLabel):
         self.rounded = rounded
         self.scale = scale
         self.xform = Qt.SmoothTransformation if resample else Qt.FastTransformation
-        if path or url:
-            pixmap = self.get_pixmap(path=path, url=url)
         self.setPixmap(pixmap)
-
-    # TODO: Need quite a bit of refactoring to not depend on global session object
-    #   Pass app.img_session as a parameter instead
-    def get_pixmap(self, *args, **kwargs) -> QPixmap:
-        """Fetch a pixmap from either a local path or remote URL.
-        This does not render the image, so it is safe to run from any thread.
-        """
-        return IMG_SESSION.get_pixmap(*args, **kwargs)
+        if path or url:
+            set_pixmap(self, path=path, url=url)
 
     def setPixmap(self, pixmap: QPixmap):
         self._pixmap = pixmap
         super().setPixmap(self.scaledPixmap())
-
-    def set_pixmap_async(
-        self,
-        priority: QThread.Priority = QThread.NormalPriority,
-        path: Optional[PathOrStr] = None,
-        photo: Optional[Photo] = None,
-        size: str = 'medium',
-        url: Optional[str] = None,
-    ):
-        """Fetch a photo from a separate thread, and render it in the main thread when complete"""
-        from naturtag.controllers import get_app
-
-        future = get_app().threadpool.schedule(
-            self.get_pixmap,
-            priority=priority,
-            path=path,
-            photo=photo,
-            url=url,
-            size=size,
-        )
-        future.on_result.connect(self.setPixmap)
 
     def clear(self):
         self.setPixmap(QPixmap())
@@ -392,7 +383,7 @@ class InfoCardList(StylableWidget):
             self.root.insertWidget(idx, card)
         else:
             self.root.addWidget(card)
-        card.thumbnail.set_pixmap_async(url=thumbnail_url)
+        set_pixmap_async(card.thumbnail, url=thumbnail_url)
 
     def clear(self):
         self.root.clear()

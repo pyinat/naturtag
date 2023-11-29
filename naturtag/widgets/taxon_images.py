@@ -16,6 +16,7 @@ from naturtag.widgets import (
     ImageWindow,
     InfoCard,
     InfoCardList,
+    set_pixmap,
 )
 
 if TYPE_CHECKING:
@@ -42,8 +43,7 @@ class TaxonInfoCard(InfoCard):
         self.setFixedHeight(90)
         self.taxon = taxon
         if not delayed_load:
-            pixmap = self.thumbnail.get_pixmap(url=taxon.default_photo.thumbnail_url)
-            self.thumbnail.setPixmap(pixmap)
+            set_pixmap(self.thumbnail, url=taxon.default_photo.thumbnail_url)
 
         # Details
         self.title.setText(f'{taxon.rank.title()}: <i>{taxon.name}</i>')
@@ -128,7 +128,7 @@ class TaxonImageWindow(ImageWindow):
         self.set_photo(self.selected_photo)
 
     def set_photo(self, photo: Photo):
-        self.image.setPixmap(self.image.get_pixmap(url=photo.original_url))
+        set_pixmap(self.image, url=photo.original_url)
         attribution = (
             ATTRIBUTION_STRIP_PATTERN.sub('', photo.attribution or '')
             .replace('(c)', '©')

@@ -9,7 +9,7 @@ from typing import Iterable, Optional
 from pyinaturalist import Observation, Taxon
 from pyinaturalist_convert import to_dwc
 
-from naturtag.client import INAT_CLIENT, iNatDbClient
+from naturtag.client import iNatDbClient
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.settings import Settings
@@ -55,8 +55,8 @@ def tag_images(
     Returns:
         Updated image metadata for each image
     """
-    client = client or INAT_CLIENT
     settings = settings or Settings.read()
+    client = client or iNatDbClient(settings.db_path)
 
     observation = client.from_ids(observation_id, taxon_id)
     if not observation:
@@ -115,8 +115,8 @@ def refresh_tags(
     Returns:
         Updated metadata objects for updated images only
     """
-    client = client or INAT_CLIENT
     settings = settings or Settings.read()
+    client = client or iNatDbClient(settings.db_path)
     metadata_objs = [
         _refresh_tags(MetaMetadata(image_path), client, settings)
         for image_path in get_valid_image_paths(

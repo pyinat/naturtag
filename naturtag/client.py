@@ -268,8 +268,3 @@ def get_url_hash(url: str) -> str:
     thumbnail_hash = md5(url.encode()).hexdigest()
     ext = Photo(url=url).ext
     return f'{thumbnail_hash}.{ext}'
-
-
-# TODO: Refactor to depend on app.client and session objects instead of these module-level globals
-INAT_CLIENT = iNatDbClient()
-IMG_SESSION = ImageSession()

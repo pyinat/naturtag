@@ -18,6 +18,7 @@ from naturtag.widgets import (
     ObservationImageWindow,
     ObservationPhoto,
     VerticalLayout,
+    set_pixmap_async,
 )
 from naturtag.widgets.observation_images import GEOPRIVACY_ICONS, QUALITY_GRADE_ICONS
 
@@ -119,8 +120,9 @@ class ObservationInfoSection(HorizontalLayout):
         self.group_box.setTitle(obs.taxon.full_name)
         self.image.hover_event = True
         self.image.observation = obs
-        self.image.set_pixmap_async(
-            photo=obs.photos[0],  # TODO: add Observation.default_photo in pyinat
+        set_pixmap_async(
+            self.image,
+            photo=Observation.default_photo,
             priority=QThread.HighPriority,
         )
         self._update_nav_buttons()
@@ -131,7 +133,7 @@ class ObservationInfoSection(HorizontalLayout):
             thumb = ObservationPhoto(observation=obs, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_observation_fullscreen)
-            thumb.set_pixmap_async(photo=photo, size='thumbnail')
+            set_pixmap_async(thumb, photo=photo, size='thumbnail')
             self.thumbnails.addWidget(thumb)
 
         # Load observation details

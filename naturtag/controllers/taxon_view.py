@@ -10,7 +10,6 @@ from PySide6.QtWidgets import QGroupBox, QPushButton
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import SIZE_SM
-from naturtag.controllers import get_app
 from naturtag.settings import UserTaxa
 from naturtag.widgets import (
     GridLayout,
@@ -18,6 +17,7 @@ from naturtag.widgets import (
     TaxonImageWindow,
     TaxonInfoCard,
     TaxonList,
+    set_pixmap_async,
 )
 from naturtag.widgets.layouts import VerticalLayout
 from naturtag.widgets.taxon_images import TaxonPhoto
@@ -110,7 +110,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.group_box.setTitle(taxon.full_name)
         self.image.hover_event = True
         self.image.taxon = taxon
-        self.image.set_pixmap_async(photo=taxon.default_photo, priority=QThread.HighPriority)
+        set_pixmap_async(self.image, photo=taxon.default_photo, priority=QThread.HighPriority)
         self._update_nav_buttons()
 
         # Load additional thumbnails
@@ -119,7 +119,7 @@ class TaxonInfoSection(HorizontalLayout):
             thumb = TaxonPhoto(taxon=taxon, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_taxon_fullscreen)
-            thumb.set_pixmap_async(photo=photo, size='thumbnail')
+            set_pixmap_async(thumb, photo=photo, size='thumbnail')
             self.thumbnails.addWidget(thumb)
 
     def prev(self):
