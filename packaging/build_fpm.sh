@@ -13,7 +13,7 @@ mkdir -p $PKG_DIR/opt
 mkdir -p $PKG_DIR/usr/share/applications
 mkdir -p $PKG_DIR/usr/share/icons/hicolor/scalable/apps
 cp -r $SRC_DIR $PKG_DIR/opt/
-cp $ASSETS_DIR/naturtag.desktop $PKG_DIR/usr/share/applications/
+cp naturtag.desktop $PKG_DIR/usr/share/applications/
 cp $ASSETS_DIR/icons/logo.svg $PKG_DIR/usr/share/icons/hicolor/scalable/apps/naturtag.svg
 
 # Set file permissions
