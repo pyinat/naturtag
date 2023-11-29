@@ -30,6 +30,34 @@ class iNatDbClient(iNatClient):
         self.taxa = TaxonDbController(self)
         self.observations = ObservationDbController(self, taxon_controller=self.taxa)
 
+    def from_ids(
+        self, observation_id: Optional[int] = None, taxon_id: Optional[int] = None
+    ) -> Optional[Observation]:
+        """Get an iNaturalist observation and/or taxon matching the specified ID(s). If only a taxon ID
+        is provided, the observation will be a placeholder with only the taxon field populated.
+        """
+        # Get observation record, if available
+        if observation_id:
+            observation = self.observations(observation_id, refresh=True)
+            taxon_id = observation.taxon.id
+        # Otherwise, use an empty placeholder observation
+        else:
+            observation = Observation()
+
+        # Observation.taxon doesn't include ancestors, so we always need to fetch the full taxon record
+        observation.taxon = self.taxa(taxon_id)
+        if not observation.taxon:
+            logger.warning(f'No taxon found: {taxon_id}')
+            return None
+
+        # If there's a taxon only (no observation), check for any taxonomy changes
+        # TODO: Add this to pyinat: https://github.com/pyinat/pyinaturalist/issues/444
+        synonyms = observation.taxon.current_synonymous_taxon_ids
+        if not observation_id and not observation.taxon.is_active and len(synonyms or []) == 1:
+            observation.taxon = self.taxa(synonyms[0], refresh=True)
+
+        return observation
+
 
 # TODO: Expiration?
 class ObservationDbController(ObservationController):

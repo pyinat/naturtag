@@ -6,7 +6,8 @@ from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QSizePolicy
 
 from naturtag.controllers import BaseController, ImageGallery
-from naturtag.metadata import MetaMetadata, _refresh_tags, get_ids_from_url, tag_images
+from naturtag.metadata import MetaMetadata, _refresh_tags, tag_images
+from naturtag.utils import get_ids_from_url
 from naturtag.widgets import (
     HorizontalLayout,
     IdInput,

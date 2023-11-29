@@ -5,16 +5,15 @@
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
 from logging import getLogger
 from typing import Iterable, Optional
-from urllib.parse import urlparse
 
 from pyinaturalist import Observation, Taxon
 from pyinaturalist_convert import to_dwc
 
 from naturtag.client import INAT_CLIENT
-from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, IntTuple, PathOrStr
+from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.settings import Settings
-from naturtag.utils import get_valid_image_paths
+from naturtag.utils import get_valid_image_paths, quote
 
 DWC_NAMESPACES = ['dcterms', 'dwc']
 logger = getLogger().getChild(__name__)
@@ -56,16 +55,16 @@ def tag_images(
         Updated image metadata for each image
     """
     settings = settings or Settings.read()
-    inat_metadata = get_inat_metadata(
-        observation_id=observation_id,
-        taxon_id=taxon_id,
+    observation = INAT_CLIENT.from_ids(observation_id, taxon_id)
+    if not observation:
+        return []
+
+    inat_metadata = observation_to_metadata(
+        observation,
         common_names=settings.common_names,
         hierarchical=settings.hierarchical,
     )
-
-    if not inat_metadata:
-        return []
-    elif not image_paths:
+    if not image_paths:
         return [inat_metadata]
 
     def _tag_image(
@@ -91,144 +90,12 @@ def tag_images(
     ]
 
 
-def get_inat_metadata(
-    observation_id: Optional[int] = None,
-    taxon_id: Optional[int] = None,
-    common_names: bool = False,
-    hierarchical: bool = False,
-    metadata: Optional[MetaMetadata] = None,
-) -> Optional[MetaMetadata]:
-    """Create or update image metadata based on an iNaturalist observation and/or taxon"""
-    metadata = metadata or MetaMetadata()
-    observation, taxon = None, None
-
-    # Get observation and/or taxon records
-    if observation_id:
-        observation = INAT_CLIENT.observations(observation_id, refresh=True)
-        taxon_id = observation.taxon.id
-
-    # Observation.taxon doesn't include ancestors, so we always need to fetch the full taxon record
-    taxon = INAT_CLIENT.taxa(taxon_id, refresh=True)
-    if not taxon:
-        logger.warning(f'No taxon found: {taxon_id}')
-        return None
-
-    # If there's a taxon only (no observation), check for any taxonomy changes
-    if (
-        not observation_id
-        and not taxon.is_active
-        and len(taxon.current_synonymous_taxon_ids or []) == 1
-    ):
-        taxon = INAT_CLIENT.taxa(taxon.current_synonymous_taxon_ids[0], refresh=True)
-
-    # Get all specified keyword categories
-    keywords = _get_taxonomy_keywords(taxon)
-    if hierarchical:
-        keywords.extend(_get_taxon_hierarchical_keywords(taxon))
-    if common_names:
-        common_keywords = _get_common_keywords(taxon)
-        keywords.extend(common_keywords)
-        if hierarchical:
-            keywords.extend(_get_hierarchical_keywords(common_keywords))
-    keywords.extend(_get_id_keywords(observation_id, taxon_id))
-
-    logger.debug(f'{len(keywords)} total keywords generated')
-    metadata.update_keywords(keywords)
-
-    # Convert and add coordinates
-    if observation:
-        metadata.update_coordinates(observation.location, observation.positional_accuracy)
-
-    # Convert and add DwC metadata
-    metadata.update(_get_dwc_terms(observation, taxon))
-    return metadata
-
-
-def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
-    """Format a list of taxa into rank keywords"""
-    return [_quote(f'taxonomy:{t.rank}={t.name}') for t in taxon.ancestors + [taxon]]
-
-
-def _get_id_keywords(
-    observation_id: Optional[int] = None, taxon_id: Optional[int] = None
-) -> list[str]:
-    keywords = []
-    if taxon_id:
-        keywords.append(f'inat:taxon_id={taxon_id}')
-        keywords.append(f'dwc:taxonID={taxon_id}')
-    if observation_id:
-        keywords.append(f'inat:observation_id={observation_id}')
-        keywords.append(f'dwc:catalogNumber={observation_id}')
-    return keywords
-
-
-def _get_common_keywords(taxon: Taxon) -> list[str]:
-    """Format a list of taxa into common name keywords.
-    Filters out terms that aren't useful to keep as tags.
-    """
-    keywords = [
-        t.preferred_common_name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS
-    ]
-
-    def is_ignored(kw):
-        return any([ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS])
-
-    return [_quote(kw) for kw in keywords if kw and not is_ignored(kw)]
-
-
-def _get_taxon_hierarchical_keywords(taxon: Taxon) -> list[str]:
-    """Get hierarchical keywords for a taxon"""
-    keywords = [t.name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS]
-    return _get_hierarchical_keywords(keywords)
-
-
-def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
-    """Translate a sorted list of flat keywords into pipe-delimited hierarchical keywords"""
-    hier_keywords = [keywords[0]]
-    for k in keywords[1:]:
-        hier_keywords.append(f'{hier_keywords[-1]}|{k}')
-    return hier_keywords
-
-
-def _get_dwc_terms(
-    observation: Optional[Observation] = None, taxon: Optional[Taxon] = None
-) -> dict[str, str]:
-    """Convert either an observation or taxon into XMP-formatted Darwin Core terms"""
-
-    # Get terms only for specific namespaces
-    # Note: exiv2 will automatically add recognized XML namespace URLs when adding properties
-    def format_key(k):
-        namespace, term = k.split(':')
-        return f'Xmp.{namespace}.{term}' if namespace in DWC_NAMESPACES else None
-
-    # Convert to DwC, then to XMP tags
-    dwc = to_dwc(observations=observation, taxa=taxon)[0]
-    return {format_key(k): v for k, v in dwc.items() if format_key(k)}
-
-
-def get_ids_from_url(url: str) -> IntTuple:
-    """If a URL is provided containing an ID, return the taxon or observation ID.
-
-    Returns:
-        ``(observation_id, taxon_id)``
-    """
-    observation_id, taxon_id = None, None
-    id = strip_url(url)
-
-    if 'observation' in url:
-        observation_id = id
-    elif 'taxa' in url:
-        taxon_id = id
-
-    return observation_id, taxon_id
-
-
 def refresh_tags(
     image_paths: Iterable[PathOrStr],
     recursive: bool = False,
     settings: Optional[Settings] = None,
 ) -> list[MetaMetadata]:
-    """Refresh metadata for previously tagged images
+    """Refresh metadata for previously tagged images with latest observation and/or taxon data.
 
     Example:
 
@@ -257,7 +124,7 @@ def refresh_tags(
 def _refresh_tags(
     metadata: MetaMetadata, settings: Optional[Settings] = None
 ) -> Optional[MetaMetadata]:
-    """Refresh existing metadata for a single image with latest observation and/or taxon data.
+    """Refresh existing metadata for a single image
 
     Returns:
         Updated metadata if existing IDs were found, otherwise ``None``
@@ -268,13 +135,14 @@ def _refresh_tags(
 
     logger.debug(f'Refreshing tags for {metadata.image_path}')
     settings = settings or Settings.read()
-    metadata = get_inat_metadata(  # type: ignore
-        observation_id=metadata.observation_id,
-        taxon_id=metadata.taxon_id,
+    observation = INAT_CLIENT.from_ids(metadata.observation_id, metadata.taxon_id)
+    metadata = observation_to_metadata(
+        observation,
         common_names=settings.common_names,
         hierarchical=settings.hierarchical,
         metadata=metadata,
     )
+
     metadata.write(
         write_exif=settings.exif,
         write_iptc=settings.iptc,
@@ -284,15 +152,90 @@ def _refresh_tags(
     return metadata
 
 
-def strip_url(value: str) -> Optional[int]:
-    """If a URL is provided containing an ID, return just the ID"""
-    try:
-        path = urlparse(value).path
-        return int(path.split('/')[-1].split('-')[0])
-    except (TypeError, ValueError):
-        return None
+def observation_to_metadata(
+    observation: Observation,
+    metadata: Optional[MetaMetadata] = None,
+    common_names: bool = False,
+    hierarchical: bool = False,
+) -> MetaMetadata:
+    """Get image metadata from an Observation object"""
+    metadata = metadata or MetaMetadata()
+
+    # Get all specified keyword categories
+    keywords = _get_taxonomy_keywords(observation.taxon)
+    if hierarchical:
+        keywords.extend(_get_taxon_hierarchical_keywords(observation.taxon))
+    if common_names:
+        common_keywords = _get_common_keywords(observation.taxon)
+        keywords.extend(common_keywords)
+        if hierarchical:
+            keywords.extend(_get_hierarchical_keywords(common_keywords))
+    keywords.extend(_get_id_keywords(observation.id, observation.taxon.id))
+
+    logger.debug(f'{len(keywords)} total keywords generated')
+    metadata.update_keywords(keywords)
+
+    # Convert and add coordinates
+    # TODO: Add other metdata like title, description, tags, etc.
+    if observation:
+        metadata.update_coordinates(observation.location, observation.positional_accuracy)
+
+    def _format_key(k):
+        """Get DwC terms as XMP tags.
+        Note: exiv2 will automatically add recognized XML namespace URLs when adding properties
+        """
+        namespace, term = k.split(':')
+        return f'Xmp.{namespace}.{term}' if namespace in DWC_NAMESPACES else None
+
+    # Convert and add DwC metadata
+    dwc = to_dwc(observations=[observation], taxa=[observation.taxon])[0]
+    dwc_xmp = {_format_key(k): v for k, v in dwc.items() if _format_key(k)}
+    metadata.update(dwc_xmp)
+
+    return metadata
 
 
-def _quote(s: str) -> str:
-    """Surround keyword in quotes if it contains whitespace"""
-    return f'"{s}"' if ' ' in s else s
+def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
+    """Format a list of taxa into rank keywords"""
+    return [quote(f'taxonomy:{t.rank}={t.name}') for t in taxon.ancestors + [taxon]]
+
+
+def _get_id_keywords(
+    observation_id: Optional[int] = None, taxon_id: Optional[int] = None
+) -> list[str]:
+    keywords = []
+    if taxon_id:
+        keywords.append(f'inat:taxon_id={taxon_id}')
+        keywords.append(f'dwc:taxonID={taxon_id}')
+    if observation_id:
+        keywords.append(f'inat:observation_id={observation_id}')
+        keywords.append(f'dwc:catalogNumber={observation_id}')
+    return keywords
+
+
+def _get_common_keywords(taxon: Taxon) -> list[str]:
+    """Format a list of taxa into common name keywords.
+    Filters out terms that aren't useful to keep as tags.
+    """
+    keywords = [
+        t.preferred_common_name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS
+    ]
+
+    def is_ignored(kw):
+        return any([ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS])
+
+    return [quote(kw) for kw in keywords if kw and not is_ignored(kw)]
+
+
+def _get_taxon_hierarchical_keywords(taxon: Taxon) -> list[str]:
+    """Get hierarchical keywords for a taxon"""
+    keywords = [t.name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS]
+    return _get_hierarchical_keywords(keywords)
+
+
+def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
+    """Translate a sorted list of flat keywords into pipe-delimited hierarchical keywords"""
+    hier_keywords = [keywords[0]]
+    for k in keywords[1:]:
+        hier_keywords.append(f'{hier_keywords[-1]}|{k}')
+    return hier_keywords
