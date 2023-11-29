@@ -191,7 +191,7 @@ class Settings(YamlMixin):
 
     def set_obs_checkpoint(self):
         self.last_obs_check = datetime.utcnow().replace(microsecond=0)
-        self.write()
+        # self.write()
 
     def add_favorite_dir(self, image_dir: Path):
         if image_dir not in self.favorite_image_dirs:

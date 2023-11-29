@@ -174,3 +174,29 @@ class ObservationController(BaseController):
         )
         self.app.settings.set_obs_checkpoint()
         return observations
+
+    # TODO
+    # ----------------------------------------
+
+    def load_all_user_observations(self):
+        """Fetch and save all new/updated user observations"""
+        logger.info('Fetching all new/udpated user observations')
+        future = self.threadpool.schedule(self.refresh_paginated, priority=QThread.LowPriority)
+        future.on_result.connect(self.update_pagination_buttons)
+
+    def refresh_paginated(self):
+        """Refresh user observations, starting from the last checkpoint.
+        Update progress bar with each page. When done, enable the 'next page' button.
+        """
+        updated_since = self.settings.last_obs_check
+        self.settings.set_obs_checkpoint()
+
+        self.page = 1
+        for page in self.app.client.observations.refresh_user_observations(
+            username=self.settings.username,
+            updated_since=updated_since,
+        ):
+            pass
+        # Save updated checkpoint once all pages are loaded
+        self.settings.write()
+        # self.load_user_observations()

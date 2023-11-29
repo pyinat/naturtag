@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Optional
 from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import format_file_size
+from pyinaturalist_convert import Iterator
 from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
@@ -97,12 +98,50 @@ class ObservationDbController(ObservationController):
         """Get the total number of observations matching the specified criteria"""
         return super().search(user_login=username, refresh=True, **params).count()
 
-    # TODO: Save one page at a time
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
+        # TODO: Save one page at a time?
+        # Option 1:
+        # all_results = []
+        # query = super().search(**params)
+        # while not query.exhausted:
+        #     obs_page = self.next_page()
+        #     all_results += obs_page
+        #     self.save(obs_page)
+        #
+        # Option 2:
+        # results = []
+        # for obs_page in self._search_paginated(**params):
+        #     results += obs_page
+
         results = super().search(**params).all()
         self.save(results)
         return WrapperPaginator(results)
+
+    def refresh_user_observations(
+        self,
+        username: str,
+        updated_since: Optional[datetime] = None,
+    ) -> Iterator[list[Observation]]:
+        """Fetch any new observations from the API since last search and save them to the db"""
+        logger.debug(f'Fetching new user observations updated since {updated_since}')
+        total = 0
+        for page in self._search_paginated(
+            user_login=username,
+            updated_since=updated_since,
+            refresh=True,
+        ):
+            yield page
+            total += len(page)
+        logger.debug(f'{total} new observations found')
+
+    def _search_paginated(self, **params) -> Iterator[list[Observation]]:
+        """Search observations, saving and yielding results one page at a time"""
+        query = super().search(**params)
+        while not query.exhausted:
+            obs_page = self.next_page()
+            self.save(obs_page)
+            yield obs_page
 
     def get_user_observations(
         self,
@@ -114,16 +153,14 @@ class ObservationDbController(ObservationController):
         """Fetch any new observations from the API since last search, save them to the db, and then
         return up to `limit` most recent observations from the db
         """
-        # TODO: Initial load should be done in a separate thread
-        logger.debug(f'Fetching new user observations since {updated_since}')
         new_observations = []
         if page == 1:
             new_observations = self.search(
                 user_login=username,
                 updated_since=updated_since,
                 refresh=True,
+                limit=limit,
             ).all()
-        logger.debug(f'{len(new_observations)} new observations found')
 
         if not limit:
             return []
