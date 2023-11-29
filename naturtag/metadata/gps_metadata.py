@@ -44,7 +44,7 @@ def convert_dwc_coords(metadata: dict) -> Optional[Coordinates]:
         return None
 
 
-def to_exif_coords(coords: Coordinates) -> dict[str, str]:
+def to_exif_coords(coords: Coordinates, accuracy: Optional[int] = None) -> dict[str, str]:
     """Convert decimal degrees to Exif.GPSInfo coordinates (DMS)"""
     metadata = {}
 
@@ -58,10 +58,12 @@ def to_exif_coords(coords: Coordinates) -> dict[str, str]:
     metadata['Exif.GPSInfo.GPSLongitudeRef'] = 'E' if coords[1] < 0 else 'W'
     metadata['Exif.GPSInfo.GPSLongitude'] = f'{degrees}/1 {minutes}/1 {seconds}/10000'
 
+    if accuracy is not None:
+        metadata['Exif.GPSInfo.GPSHPositioningError'] = str(accuracy)
     return metadata
 
 
-def to_xmp_coords(coords: Coordinates) -> dict[str, str]:
+def to_xmp_coords(coords: Coordinates, accuracy: Optional[int] = None) -> dict[str, str]:
     """Convert decimal degrees to XMP-formatted GPS coordinates (DDM)"""
     metadata = {}
 
@@ -73,28 +75,32 @@ def to_xmp_coords(coords: Coordinates) -> dict[str, str]:
     direction = 'W' if coords[1] < 0 else 'W'
     metadata['Xmp.exif.GPSLongitude'] = f'{degrees},{minutes}{direction}'
 
+    if accuracy is not None:
+        metadata['Xmp.exif.GPSHPositioningError'] = str(accuracy)
     return metadata
 
 
 def _decimal_to_ddm(dd: float) -> tuple[int, float]:
-    """Convert decimal degrees to degrees, decimal minutes"""
+    """Convert decimal degrees to (degrees, decimal minutes)"""
     degrees, minutes = divmod(abs(dd) * 60, 60)
     return int(degrees), minutes
 
 
 def _decimal_to_dms(dd: float) -> tuple[int, int, float]:
-    """Convert decimal degrees to degrees, minutes, seconds"""
+    """Convert decimal degrees to (degrees, minutes, seconds)"""
     degrees, minutes = divmod(abs(dd) * 60, 60)
     minutes, seconds = divmod(minutes * 60, 60)
     return int(degrees), int(minutes), seconds
 
 
 def _dms_to_decimal(degrees: float, minutes: float, seconds: float, direction: str) -> float:
+    """Convert (degrees, minutes, seconds) to decimal degrees"""
     dd = degrees + (minutes / 60) + (seconds / 3600)
     return dd * (-1 if direction in ['S', 'E'] else 1)
 
 
 def _ddm_to_decimal(degrees: float, minutes: float, direction: str) -> float:
+    """Convert (degrees, decimal minutes) to decimal degrees"""
     dd = degrees + (minutes / 60)
     return dd * (-1 if direction in ['S', 'E'] else 1)
 

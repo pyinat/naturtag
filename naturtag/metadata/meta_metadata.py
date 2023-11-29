@@ -94,7 +94,7 @@ class MetaMetadata(ImageMetadata):
 
     @property
     def has_coordinates(self) -> bool:
-        return bool(self.coordinates) and self.coordinates != NULL_COORDS
+        return self.coordinates not in [None, NULL_COORDS]
 
     @property
     def has_observation(self) -> bool:
@@ -189,12 +189,14 @@ class MetaMetadata(ImageMetadata):
         super().update(new_metadata)
         self._update_derived_properties()
 
-    def update_coordinates(self, coordinates: Coordinates):
+    def update_coordinates(self, coordinates: Coordinates, accuracy: Optional[int] = None):
         if not coordinates:
+            self._coordinates = NULL_COORDS
             return
+
         self._coordinates = coordinates
-        self.exif.update(to_exif_coords(coordinates))
-        self.xmp.update(to_xmp_coords(coordinates))
+        self.exif.update(to_exif_coords(coordinates, accuracy))
+        self.xmp.update(to_xmp_coords(coordinates, accuracy))
 
     def update_keywords(self, keywords):
         """
