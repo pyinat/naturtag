@@ -1,10 +1,12 @@
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QApplication
 
-from naturtag.app.threadpool import ThreadPool
-from naturtag.settings import Settings
 from naturtag.widgets.layouts import StylableWidget
+
+if TYPE_CHECKING:
+    from naturtag.app import NaturtagApp
 
 
 class BaseController(StylableWidget):
@@ -12,7 +14,6 @@ class BaseController(StylableWidget):
 
     on_message = Signal(str)  #: Forward a message to status bar
 
-    def __init__(self, settings: Settings, threadpool: Optional[ThreadPool] = None):
-        super().__init__()
-        self.settings = settings
-        self.threadpool: ThreadPool = threadpool  # type: ignore
+    @property
+    def app(self) -> 'NaturtagApp':
+        return QApplication.instance()

@@ -52,8 +52,8 @@ class ImageGallery(BaseController):
     on_select_taxon = Signal(int)  #: A taxon was selected from context menu
     on_select_observation = Signal(int)  #: An observation was selected from context menu
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        super().__init__()
         self.setAcceptDrops(True)
         self.images: dict[Path, ThumbnailCard] = {}
         self.image_window = ImageWindow()
@@ -82,7 +82,7 @@ class ImageGallery(BaseController):
         image_paths, _ = QFileDialog.getOpenFileNames(
             self,
             caption='Open image files:',
-            dir=str(start_dir or self.settings.start_image_dir),
+            dir=str(start_dir or self.app.settings.start_image_dir),
             filter=f'Image files ({" ".join(IMAGE_FILETYPES)})',
         )
         self.load_images(image_paths)
@@ -100,7 +100,7 @@ class ImageGallery(BaseController):
 
         # Then load actual images
         for thumbnail_card in filter(None, cards):
-            thumbnail_card.load_image_async(self.threadpool)
+            thumbnail_card.load_image_async(self.app.threadpool)
 
         self.on_load_images.emit(new_images)
 

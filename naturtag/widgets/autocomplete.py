@@ -5,7 +5,7 @@ from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal, Slot
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.app.style import fa_icon
-from naturtag.settings import Settings
+from naturtag.controllers import get_app
 
 logger = getLogger(__name__)
 
@@ -18,11 +18,10 @@ class TaxonAutocomplete(QLineEdit):
     on_select = Signal(int)  #: An autocomplete result was selected
     on_tab = Signal()  #: Tab key was pressed
 
-    def __init__(self, settings: Settings):
+    def __init__(self):
         super().__init__()
         self.setClearButtonEnabled(True)
         self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
-        self.settings = settings
         self.taxa: dict[str, int] = {}
 
         completer = QCompleter()
@@ -32,7 +31,7 @@ class TaxonAutocomplete(QLineEdit):
         self.on_tab.connect(self.next_result)
 
         # Results are fetched from FTS5, and passed to the completer via an intermediate model
-        self.taxon_completer = TaxonAutocompleter(settings.db_path)
+        self.taxon_completer = TaxonAutocompleter(get_app().settings.db_path)
         self.textChanged.connect(self.search)
         self.model = QStringListModel()
         completer.activated.connect(self.select_taxon)
@@ -53,7 +52,8 @@ class TaxonAutocomplete(QLineEdit):
     # TODO: Input delay
     def search(self, q: str):
         if len(q) > 1 and q not in self.taxa:
-            language = self.settings.locale if self.settings.search_locale else None
+            app = get_app()
+            language = app.settings.locale if app.settings.search_locale else None
             results = self.taxon_completer.search(q, language=language)
             self.taxa = {t.name: t.id for t in results}
             self.model.setStringList(self.taxa.keys())

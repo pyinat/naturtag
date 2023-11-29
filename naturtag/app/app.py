@@ -39,29 +39,41 @@ except ImportError:
 logger = getLogger(__name__)
 
 
-# TODO: Global access to Settings object instead of passing it around everywhere?
-class MainWindow(QMainWindow):
-    def __init__(self, settings: Settings):
-        super().__init__()
-        self.setWindowTitle('Naturtag')
-        self.resize(*settings.window_size)
-        self.threadpool = ThreadPool()
-        log_handler = init_handler(
-            settings.log_level, root_level=settings.log_level_external, logfile=settings.logfile
-        )
+class NaturtagApp(QApplication):
+    def __init__(self, *args, settings: Settings, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setApplicationName('Naturtag')
+        self.setOrganizationName('pyinat')
+        self.setApplicationVersion(pkg_version('naturtag'))
 
         # Run any first-time setup steps, if needed
         setup(settings)
+
+        # Globally available application objects
         self.settings = settings
-        self.user_dirs = UserDirs(settings)
         self.client = iNatDbClient(settings.db_path)
         self.img_session = ImageSession(settings.image_cache_path)
+        self.log_handler = init_handler(
+            self.settings.log_level,
+            root_level=self.settings.log_level_external,
+            logfile=self.settings.logfile,
+        )
+        self.threadpool = ThreadPool()
+        self.user_dirs = UserDirs(self.settings)
+
+
+class MainWindow(QMainWindow):
+    def __init__(self, app: NaturtagApp):
+        super().__init__()
+        self.setWindowTitle('Naturtag')
+        self.resize(*app.settings.window_size)
+        self.app = app
 
         # Controllers
-        self.settings_menu = SettingsMenu(self.settings)
-        self.image_controller = ImageController(self.settings, self.threadpool)
-        self.taxon_controller = TaxonController(self.settings, self.threadpool)
-        self.observation_controller = ObservationController(self.settings, self.threadpool)
+        self.settings_menu = SettingsMenu()
+        self.image_controller = ImageController()
+        self.taxon_controller = TaxonController()
+        self.observation_controller = ObservationController()
 
         # Connect controllers and their widgets to statusbar info
         self.settings_menu.on_message.connect(self.info)
@@ -108,12 +120,14 @@ class MainWindow(QMainWindow):
         self.root_widget = QWidget()
         self.root = VerticalLayout(self.root_widget)
         self.root.addWidget(self.tabs)
-        self.root.addWidget(self.threadpool.progress)
+        self.root.addWidget(self.app.threadpool.progress)
         self.setCentralWidget(self.root_widget)
 
         # Optionally show Logs tab
-        self.log_tab_idx = self.tabs.addTab(log_handler.widget, fa_icon('fa.file-text-o'), 'Logs')
-        self.tabs.setTabVisible(self.log_tab_idx, self.settings.show_logs)
+        self.log_tab_idx = self.tabs.addTab(
+            self.app.log_handler.widget, fa_icon('fa.file-text-o'), 'Logs'
+        )
+        self.tabs.setTabVisible(self.log_tab_idx, self.app.settings.show_logs)
 
         # Switch to differet tab if requested from Photos tab
         self.image_controller.on_select_taxon_tab.connect(
@@ -124,11 +138,11 @@ class MainWindow(QMainWindow):
         )
 
         # Connect file picker <--> recent/favorite dirs
-        self.image_controller.gallery.on_load_images.connect(self.user_dirs.add_recent_dirs)
-        self.user_dirs.on_dir_open.connect(self.image_controller.gallery.load_file_dialog)
+        self.image_controller.gallery.on_load_images.connect(self.app.user_dirs.add_recent_dirs)
+        self.app.user_dirs.on_dir_open.connect(self.image_controller.gallery.load_file_dialog)
 
         # Toolbar actions
-        self.toolbar = Toolbar(self, self.user_dirs)
+        self.toolbar = Toolbar(self, self.app.user_dirs)
         self.toolbar.run_button.triggered.connect(self.image_controller.run)
         self.toolbar.refresh_tags_button.triggered.connect(self.image_controller.refresh)
         self.toolbar.open_button.triggered.connect(self.image_controller.gallery.load_file_dialog)
@@ -154,7 +168,7 @@ class MainWindow(QMainWindow):
         )
 
         # Debug
-        if settings.debug:
+        if self.app.settings.debug:
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
@@ -162,7 +176,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, _):
         """Save settings before closing the app"""
-        self.settings.write()
+        self.app.settings.write()
         self.taxon_controller.user_taxa.write()
 
     def info(self, message: str):
@@ -191,7 +205,7 @@ class MainWindow(QMainWindow):
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
-        app_dir_link = f"<a href='{self.settings.data_dir}'>{self.settings.data_dir}</a>"
+        app_dir_link = f"<a href='{self.app.settings.data_dir}'>{self.app.settings.data_dir}</a>"
 
         about.setText(
             f'<b>Naturtag v{version}</b><br/>'
@@ -203,7 +217,7 @@ class MainWindow(QMainWindow):
 
     def reload_qss(self):
         """Reload Qt stylesheet"""
-        set_theme(dark_mode=self.settings.dark_mode)
+        set_theme(dark_mode=self.app.settings.dark_mode)
 
     # TODO: progress spinner
     def reset_db(self):
@@ -215,7 +229,7 @@ class MainWindow(QMainWindow):
         )
         if response == QMessageBox.Yes:
             self.info('Resetting database...')
-            setup(self.settings, overwrite=True)
+            setup(self.app.settings, overwrite=True)
             self.info('Database reset complete')
 
     def show_settings(self):
@@ -240,14 +254,14 @@ class MainWindow(QMainWindow):
 
 
 def main():
-    app = QApplication(sys.argv)
+    settings = Settings.read()
+    app = NaturtagApp(sys.argv, settings=settings)
     splash = QSplashScreen(QPixmap(str(APP_LOGO)).scaledToHeight(512))
     splash.show()
     app.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
 
-    settings = Settings.read()
     set_theme(dark_mode=settings.dark_mode)
-    window = MainWindow(settings)
+    window = MainWindow(app)
     window.show()
     splash.finish(window)
     sys.exit(app.exec())

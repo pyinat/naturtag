@@ -10,7 +10,6 @@ from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton
 
 from naturtag.app.style import fa_icon
-from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
     GridLayout,
@@ -30,9 +29,8 @@ class ObservationInfoSection(HorizontalLayout):
 
     on_select = Signal(Observation)  #: An observation was selected
 
-    def __init__(self, threadpool: ThreadPool):
+    def __init__(self):
         super().__init__()
-        self.threadpool = threadpool
         self.hist_prev: deque[Observation] = deque()  # Viewing history for current session only
         self.hist_next: deque[Observation] = deque()  # Set when loading from history
         self.history_observation: Observation = None  # Set when loading from history, to avoid loop
@@ -122,7 +120,6 @@ class ObservationInfoSection(HorizontalLayout):
         self.image.hover_event = True
         self.image.observation = obs
         self.image.set_pixmap_async(
-            self.threadpool,
             photo=obs.photos[0],  # TODO: add Observation.default_photo in pyinat
             priority=QThread.HighPriority,
         )
@@ -134,7 +131,7 @@ class ObservationInfoSection(HorizontalLayout):
             thumb = ObservationPhoto(observation=obs, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_observation_fullscreen)
-            thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
+            thumb.set_pixmap_async(photo=photo, size='thumbnail')
             self.thumbnails.addWidget(thumb)
 
         # Load observation details

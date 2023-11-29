@@ -19,7 +19,6 @@ from naturtag.widgets import (
 )
 
 if TYPE_CHECKING:
-    from naturtag.app.threadpool import ThreadPool
     from naturtag.settings import UserTaxa
 
 ATTRIBUTION_STRIP_PATTERN = re.compile(r',?\s+uploaded by.*')
@@ -65,8 +64,8 @@ class TaxonInfoCard(InfoCard):
 class TaxonList(InfoCardList):
     """A scrollable list of TaxonInfoCards"""
 
-    def __init__(self, threadpool: 'ThreadPool', user_taxa: 'UserTaxa', **kwargs):
-        super().__init__(threadpool, **kwargs)
+    def __init__(self, user_taxa: 'UserTaxa', **kwargs):
+        super().__init__(**kwargs)
         self.user_taxa = user_taxa
 
     def add_taxon(self, taxon: Taxon, idx: Optional[int] = None) -> TaxonInfoCard:

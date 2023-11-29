@@ -17,8 +17,6 @@ from naturtag.widgets import StylableWidget, VerticalLayout
 from naturtag.widgets.layouts import GridLayout, HorizontalLayout
 
 if TYPE_CHECKING:
-    from naturtag.app.threadpool import ThreadPool
-
     MIXIN_BASE: TypeAlias = QWidget
 else:
     MIXIN_BASE = object
@@ -149,7 +147,6 @@ class PixmapLabel(QLabel):
 
     def set_pixmap_async(
         self,
-        threadpool: 'ThreadPool',
         priority: QThread.Priority = QThread.NormalPriority,
         path: Optional[PathOrStr] = None,
         photo: Optional[Photo] = None,
@@ -157,7 +154,9 @@ class PixmapLabel(QLabel):
         url: Optional[str] = None,
     ):
         """Fetch a photo from a separate thread, and render it in the main thread when complete"""
-        future = threadpool.schedule(
+        from naturtag.controllers import get_app
+
+        future = get_app().threadpool.schedule(
             self.get_pixmap,
             priority=priority,
             path=path,
@@ -370,9 +369,8 @@ class InfoCard(StylableWidget):
 class InfoCardList(StylableWidget):
     """A scrollable list of InfoCards"""
 
-    def __init__(self, threadpool: 'ThreadPool', parent: Optional[QWidget] = None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
-        self.threadpool = threadpool
         self.root = VerticalLayout(self)
         self.root.setAlignment(Qt.AlignTop)
         self.root.setContentsMargins(0, 5, 5, 0)
@@ -394,7 +392,7 @@ class InfoCardList(StylableWidget):
             self.root.insertWidget(idx, card)
         else:
             self.root.addWidget(card)
-        card.thumbnail.set_pixmap_async(self.threadpool, url=thumbnail_url)
+        card.thumbnail.set_pixmap_async(url=thumbnail_url)
 
     def clear(self):
         self.root.clear()

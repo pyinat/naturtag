@@ -9,8 +9,8 @@ from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import QGroupBox, QPushButton
 
 from naturtag.app.style import fa_icon
-from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import SIZE_SM
+from naturtag.controllers import get_app
 from naturtag.settings import UserTaxa
 from naturtag.widgets import (
     GridLayout,
@@ -31,9 +31,8 @@ class TaxonInfoSection(HorizontalLayout):
     on_select = Signal(Taxon)  #: A taxon object was selected (from nav or another screen)
     on_select_id = Signal(int)  #: A taxon ID was selected (from 'parent' button)
 
-    def __init__(self, threadpool: ThreadPool):
+    def __init__(self):
         super().__init__()
-        self.threadpool = threadpool
         self.hist_prev: deque[Taxon] = deque()  # Viewing history for current session only
         self.hist_next: deque[Taxon] = deque()  # Set when loading from history
         self.history_taxon: Taxon = None  # Set when loading from history, to avoid loop
@@ -111,11 +110,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.group_box.setTitle(taxon.full_name)
         self.image.hover_event = True
         self.image.taxon = taxon
-        self.image.set_pixmap_async(
-            self.threadpool,
-            photo=taxon.default_photo,
-            priority=QThread.HighPriority,
-        )
+        self.image.set_pixmap_async(photo=taxon.default_photo, priority=QThread.HighPriority)
         self._update_nav_buttons()
 
         # Load additional thumbnails
@@ -124,7 +119,7 @@ class TaxonInfoSection(HorizontalLayout):
             thumb = TaxonPhoto(taxon=taxon, idx=i + 1, rounded=True)
             thumb.setFixedSize(*SIZE_SM)
             thumb.on_click.connect(self.image_window.display_taxon_fullscreen)
-            thumb.set_pixmap_async(self.threadpool, photo=photo, size='thumbnail')
+            thumb.set_pixmap_async(photo=photo, size='thumbnail')
             self.thumbnails.addWidget(thumb)
 
     def prev(self):
@@ -165,19 +160,19 @@ class TaxonInfoSection(HorizontalLayout):
 class TaxonomySection(HorizontalLayout):
     """Section to display ancestors and children of selected taxon"""
 
-    def __init__(self, threadpool: ThreadPool, user_taxa: UserTaxa):
+    def __init__(self, user_taxa: UserTaxa):
         super().__init__()
 
         self.ancestors_group = self.add_group(
             'Ancestors', min_width=400, max_width=500, policy_min_height=False
         )
-        self.ancestors_list = TaxonList(threadpool, user_taxa)
+        self.ancestors_list = TaxonList(user_taxa)
         self.ancestors_group.addWidget(self.ancestors_list.scroller)
 
         self.children_group = self.add_group(
             'Children', min_width=400, max_width=500, policy_min_height=False
         )
-        self.children_list = TaxonList(threadpool, user_taxa)
+        self.children_list = TaxonList(user_taxa)
         self.children_group.addWidget(self.children_list.scroller)
 
     def load(self, taxon: Taxon):

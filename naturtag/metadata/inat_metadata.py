@@ -9,7 +9,7 @@ from typing import Iterable, Optional
 from pyinaturalist import Observation, Taxon
 from pyinaturalist_convert import to_dwc
 
-from naturtag.client import INAT_CLIENT
+from naturtag.client import INAT_CLIENT, iNatDbClient
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, PathOrStr
 from naturtag.metadata import MetaMetadata
 from naturtag.settings import Settings
@@ -25,6 +25,7 @@ def tag_images(
     taxon_id: Optional[int] = None,
     recursive: bool = False,
     include_sidecars: bool = False,
+    client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
 ) -> list[MetaMetadata]:
     """
@@ -54,8 +55,10 @@ def tag_images(
     Returns:
         Updated image metadata for each image
     """
+    client = client or INAT_CLIENT
     settings = settings or Settings.read()
-    observation = INAT_CLIENT.from_ids(observation_id, taxon_id)
+
+    observation = client.from_ids(observation_id, taxon_id)
     if not observation:
         return []
 
@@ -93,6 +96,7 @@ def tag_images(
 def refresh_tags(
     image_paths: Iterable[PathOrStr],
     recursive: bool = False,
+    client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
 ) -> list[MetaMetadata]:
     """Refresh metadata for previously tagged images with latest observation and/or taxon data.
@@ -111,9 +115,10 @@ def refresh_tags(
     Returns:
         Updated metadata objects for updated images only
     """
+    client = client or INAT_CLIENT
     settings = settings or Settings.read()
     metadata_objs = [
-        _refresh_tags(MetaMetadata(image_path), settings)
+        _refresh_tags(MetaMetadata(image_path), client, settings)
         for image_path in get_valid_image_paths(
             image_paths, recursive, create_sidecars=settings.sidecar
         )
@@ -122,7 +127,7 @@ def refresh_tags(
 
 
 def _refresh_tags(
-    metadata: MetaMetadata, settings: Optional[Settings] = None
+    metadata: MetaMetadata, client: iNatDbClient, settings: Settings
 ) -> Optional[MetaMetadata]:
     """Refresh existing metadata for a single image
 
@@ -135,7 +140,7 @@ def _refresh_tags(
 
     logger.debug(f'Refreshing tags for {metadata.image_path}')
     settings = settings or Settings.read()
-    observation = INAT_CLIENT.from_ids(metadata.observation_id, metadata.taxon_id)
+    observation = client.from_ids(metadata.observation_id, metadata.taxon_id)
     metadata = observation_to_metadata(
         observation,
         common_names=settings.common_names,
