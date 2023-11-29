@@ -7,7 +7,14 @@ from pyinaturalist import Observation, Photo
 from PySide6.QtCore import Qt
 
 from naturtag.constants import SIZE_ICON_SM
-from naturtag.widgets.images import HoverPhoto, IconLabel, ImageWindow, InfoCard, InfoCardList
+from naturtag.widgets.images import (
+    HoverPhoto,
+    IconLabel,
+    ImageWindow,
+    InfoCard,
+    InfoCardList,
+    set_pixmap,
+)
 from naturtag.widgets.layouts import HorizontalLayout
 
 logger = getLogger(__name__)
@@ -41,8 +48,7 @@ class ObservationInfoCard(InfoCard):
         self.observation = obs
 
         if not delayed_load:
-            pixmap = self.thumbnail.get_pixmap(url=obs.default_photo.thumbnail_url)
-            self.thumbnail.setPixmap(pixmap)
+            set_pixmap(self.thumbnail, url=obs.default_photo.thumbnail_url)
 
         # Title: Taxon name
         if obs.taxon:
@@ -173,7 +179,7 @@ class ObservationImageWindow(ImageWindow):
         self.set_photo(self.selected_photo)
 
     def set_photo(self, photo: Photo):
-        self.image.setPixmap(self.image.get_pixmap(url=photo.original_url))
+        set_pixmap(self.image, url=photo.original_url)
 
     def remove_image(self):
         pass

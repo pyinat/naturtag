@@ -8,9 +8,8 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.client import INAT_CLIENT
 from naturtag.constants import COMMON_RANKS, RANKS, SELECTABLE_ICONIC_TAXA
-from naturtag.settings import Settings
+from naturtag.controllers import get_app
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
@@ -28,14 +27,13 @@ class TaxonSearch(VerticalLayout):
     on_results = Signal(list)  #: New search results were loaded
     on_reset = Signal()  #: Input fields were reset
 
-    def __init__(self, settings: Settings):
+    def __init__(self):
         super().__init__()
         self.selected_taxon: Taxon = None
-        self.settings = settings
         self.setAlignment(Qt.AlignTop)
 
         # Taxon name autocomplete
-        self.autocomplete = TaxonAutocomplete(settings)
+        self.autocomplete = TaxonAutocomplete()
         search_group = self.add_group('Search', self, width=400)
         search_group.addWidget(self.autocomplete)
         self.autocomplete.returnPressed.connect(self.search)
@@ -86,18 +84,20 @@ class TaxonSearch(VerticalLayout):
 
     def search(self):
         """Search for taxa with the currently selected filters"""
+        client = QApplication.instance().client
         taxon_ids = self.iconic_taxon_filters.selected_iconic_taxa
         if self.search_children_switch.isChecked():
             taxon_ids.append(self.selected_taxon.id)
 
-        taxa = INAT_CLIENT.taxa.search(
+        settings = get_app().settings
+        taxa = client.taxa.search(
             q=self.autocomplete.text(),
             taxon_id=taxon_ids,
             rank=self.exact_rank.text,
             min_rank=self.min_rank.text,
             max_rank=self.max_rank.text,
-            preferred_place_id=self.settings.preferred_place_id,
-            locale=self.settings.locale,
+            preferred_place_id=settings.preferred_place_id,
+            locale=settings.locale,
             limit=30,
         ).all()
 
@@ -113,13 +113,10 @@ class TaxonSearch(VerticalLayout):
         self.on_reset.emit()
 
     def reset_ranks(self):
-        self.exact_rank = RankList('Exact', 'fa5s.equals', all_ranks=self.settings.all_ranks)
-        self.min_rank = RankList(
-            'Minimum', 'fa5s.greater-than-equal', all_ranks=self.settings.all_ranks
-        )
-        self.max_rank = RankList(
-            'Maximum', 'fa5s.less-than-equal', all_ranks=self.settings.all_ranks
-        )
+        settings = get_app().settings
+        self.exact_rank = RankList('Exact', 'fa5s.equals', all_ranks=settings.all_ranks)
+        self.min_rank = RankList('Minimum', 'fa5s.greater-than-equal', all_ranks=settings.all_ranks)
+        self.max_rank = RankList('Maximum', 'fa5s.less-than-equal', all_ranks=settings.all_ranks)
         self.ranks.clear()
         self.ranks.addLayout(self.exact_rank)
         self.ranks.addLayout(self.min_rank)

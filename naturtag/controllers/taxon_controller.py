@@ -6,11 +6,15 @@ from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QTabWidget, QWidget
 
 from naturtag.app.style import fa_icon
-from naturtag.app.threadpool import ThreadPool
-from naturtag.client import INAT_CLIENT
 from naturtag.constants import MAX_DISPLAY_OBSERVED
-from naturtag.controllers import BaseController, TaxonInfoSection, TaxonomySection, TaxonSearch
-from naturtag.settings import Settings, UserTaxa
+from naturtag.controllers import (
+    BaseController,
+    TaxonInfoSection,
+    TaxonomySection,
+    TaxonSearch,
+    get_app,
+)
+from naturtag.settings import UserTaxa
 from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
 
 logger = getLogger(__name__)
@@ -21,33 +25,33 @@ class TaxonController(BaseController):
 
     on_select = Signal(Taxon)  #: A taxon was selected
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user_taxa = UserTaxa.read(self.settings.user_taxa_path)
+    def __init__(self):
+        super().__init__()
+        self.user_taxa = UserTaxa.read(self.app.settings.user_taxa_path)
 
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
         self.selected_taxon: Taxon = None
 
         # Search inputs
-        self.search = TaxonSearch(self.settings)
+        self.search = TaxonSearch()
         self.search.autocomplete.on_select.connect(self.select_taxon)
         self.search.on_results.connect(self.set_search_results)
         self.on_select.connect(self.search.set_taxon)
         self.root.addLayout(self.search)
 
         # Search results & user taxa
-        self.tabs = TaxonTabs(self.settings, self.threadpool, self.user_taxa)
+        self.tabs = TaxonTabs(self.user_taxa)
         self.tabs.on_load.connect(self.bind_selection)
         self.root.addWidget(self.tabs)
         self.on_select.connect(self.tabs.update_history)
         self.search.on_reset.connect(self.tabs.results.clear)
 
         # Selected taxon info
-        self.taxon_info = TaxonInfoSection(self.threadpool)
+        self.taxon_info = TaxonInfoSection()
         self.taxon_info.on_select_id.connect(self.select_taxon)
         self.taxon_info.on_select.connect(self.display_taxon)
-        self.taxonomy = TaxonomySection(self.threadpool, self.user_taxa)
+        self.taxonomy = TaxonomySection(self.user_taxa)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)
         taxon_layout.addLayout(self.taxonomy)
@@ -71,10 +75,11 @@ class TaxonController(BaseController):
 
         # Fetch taxon record
         logger.info(f'Selecting taxon {taxon_id}')
+        client = self.app.client
         if self.tabs._init_complete:
-            self.threadpool.cancel()
-        future = self.threadpool.schedule(
-            lambda: INAT_CLIENT.taxa(taxon_id, locale=self.settings.locale),
+            self.app.threadpool.cancel()
+        future = self.app.threadpool.schedule(
+            lambda: client.taxa(taxon_id, locale=self.app.settings.locale),
             priority=QThread.HighPriority,
         )
         future.on_result.connect(lambda taxon: self.display_taxon(taxon))
@@ -111,8 +116,6 @@ class TaxonTabs(QTabWidget):
 
     def __init__(
         self,
-        settings: Settings,
-        threadpool: ThreadPool,
         user_taxa: UserTaxa,
         parent: Optional[QWidget] = None,
     ):
@@ -121,25 +124,32 @@ class TaxonTabs(QTabWidget):
         self.setIconSize(QSize(32, 32))
         self.setMinimumWidth(240)
         self.setMaximumWidth(510)
-        self.settings = settings
-        self.threadpool = threadpool
         self.user_taxa = user_taxa
         self._init_complete = False
 
         self.results = self.add_tab(
-            TaxonList(threadpool, user_taxa), 'mdi6.layers-search', 'Results', 'Search results'
+            TaxonList(user_taxa),
+            'mdi6.layers-search',
+            'Results',
+            'Search results',
         )
         self.recent = self.add_tab(
-            TaxonList(threadpool, user_taxa), 'fa5s.history', 'Recent', 'Recently viewed taxa'
+            TaxonList(user_taxa),
+            'fa5s.history',
+            'Recent',
+            'Recently viewed taxa',
         )
         self.frequent = self.add_tab(
-            TaxonList(threadpool, user_taxa),
+            TaxonList(user_taxa),
             'ri.bar-chart-fill',
             'Frequent',
             'Frequently viewed taxa',
         )
         self.observed = self.add_tab(
-            TaxonList(threadpool, user_taxa), 'fa5s.binoculars', 'Observed', 'Taxa observed by you'
+            TaxonList(user_taxa),
+            'fa5s.binoculars',
+            'Observed',
+            'Taxa observed by you',
         )
 
         # Add a delay before loading user taxa on startup
@@ -152,31 +162,34 @@ class TaxonTabs(QTabWidget):
 
     def load_user_taxa(self):
         logger.info('Fetching user-observed taxa')
+        app = get_app()
+        client = app.client
         display_ids = self.user_taxa.display_ids
 
         def get_recent_taxa():
             logger.info(f'Loading {len(display_ids)} user taxa')
-            return INAT_CLIENT.taxa.from_ids(
-                *display_ids, locale=self.settings.locale, accept_partial=True
+            return client.taxa.from_ids(
+                *display_ids, locale=app.settings.locale, accept_partial=True
             ).all()
 
-        future = self.threadpool.schedule(get_recent_taxa, priority=QThread.LowPriority)
+        future = app.threadpool.schedule(get_recent_taxa, priority=QThread.LowPriority)
         future.on_result.connect(self.display_recent)
 
-        future = self.threadpool.schedule(self.get_user_observed_taxa, priority=QThread.LowPriority)
+        future = app.threadpool.schedule(self.get_user_observed_taxa, priority=QThread.LowPriority)
         future.on_result.connect(self.display_observed)
         self._init_complete = True
 
     def get_user_observed_taxa(self) -> TaxonCounts:
         """Get counts of taxa observed by the user, ordered by number of observations descending"""
-        if not self.settings.username:
+        app = get_app()
+        if not app.settings.username:
             return []
 
         # False will return *only* casual observations
-        verifiable = None if self.settings.casual_observations else True
+        verifiable = None if app.settings.casual_observations else True
 
-        taxon_counts = INAT_CLIENT.observations.species_counts(
-            user_login=self.settings.username,
+        taxon_counts = app.client.observations.species_counts(
+            user_login=app.settings.username,
             verifiable=verifiable,
         )
         logger.info(f'{len(taxon_counts)} user-observed taxa found')

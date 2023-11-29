@@ -6,7 +6,6 @@ from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLabel, QPushButton
 
 from naturtag.app.style import fa_icon
-from naturtag.client import INAT_CLIENT
 from naturtag.constants import DEFAULT_PAGE_SIZE
 from naturtag.controllers import BaseController, ObservationInfoSection
 from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList, VerticalLayout
@@ -17,14 +16,14 @@ logger = getLogger(__name__)
 class ObservationController(BaseController):
     on_select = Signal(Observation)  #: An observation was selected
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        super().__init__()
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
         self.selected_observation: Observation = None
 
         # Search inputs
-        # self.search = ObservationSearch(self.settings)
+        # self.search = ObservationSearch(self.app.settings)
         # self.search.autocomplete.on_select.connect(self.select_taxon)
         # self.search.on_results.connect(self.set_search_results)
         # self.on_select.connect(self.search.set_taxon)
@@ -37,7 +36,7 @@ class ObservationController(BaseController):
         # self.pages: dict[int, list[ObservationInfoCard]] = {}
 
         # User observations
-        self.user_observations = ObservationList(self.threadpool)
+        self.user_observations = ObservationList()
         user_obs_group_box = self.add_group(
             'My Observations',
             self.root,
@@ -67,7 +66,7 @@ class ObservationController(BaseController):
         button_layout.addWidget(self.next_button)
 
         # Selected observation info
-        self.obs_info = ObservationInfoSection(self.threadpool)
+        self.obs_info = ObservationInfoSection()
         self.obs_info.on_select.connect(self.display_observation)
         obs_layout = VerticalLayout()
         obs_layout.addLayout(self.obs_info)
@@ -90,8 +89,8 @@ class ObservationController(BaseController):
             return
 
         logger.info(f'Selecting observation {observation_id}')
-        future = self.threadpool.schedule(
-            lambda: INAT_CLIENT.observations(observation_id, taxonomy=True),
+        future = self.app.threadpool.schedule(
+            lambda: self.app.client.observations(observation_id, taxonomy=True),
             priority=QThread.HighPriority,
         )
         future.on_result.connect(self.display_observation)
@@ -99,7 +98,9 @@ class ObservationController(BaseController):
     def load_user_observations(self):
         """Fetch and display a single page of user observations"""
         logger.info('Fetching user observations')
-        future = self.threadpool.schedule(self.get_user_observations, priority=QThread.LowPriority)
+        future = self.app.threadpool.schedule(
+            self.get_user_observations, priority=QThread.LowPriority
+        )
         future.on_result.connect(self.display_user_observations)
 
     def next_page(self):
@@ -151,20 +152,20 @@ class ObservationController(BaseController):
     # TODO: Store a Paginator object instead of page number?
     def get_user_observations(self) -> list[Observation]:
         """Fetch a single page of user observations"""
-        if not self.settings.username:
+        if not self.app.settings.username:
             return []
 
-        updated_since = self.settings.last_obs_check
-        self.settings.set_obs_checkpoint()
+        updated_since = self.app.settings.last_obs_check
+        self.app.settings.set_obs_checkpoint()
 
         # TODO: Depending on order of operations, this could be counted from the db instead of API.
         # Maybe do that except on initial observation load?
-        total_results = INAT_CLIENT.observations.count(username=self.settings.username)
+        total_results = self.app.client.observations.count(username=self.app.settings.username)
         self.total_pages = (total_results // DEFAULT_PAGE_SIZE) + 1
         logger.debug('Total user observations: %s (%s pages)', total_results, self.total_pages)
 
-        observations = INAT_CLIENT.observations.get_user_observations(
-            username=self.settings.username,
+        observations = self.app.client.observations.get_user_observations(
+            username=self.app.settings.username,
             updated_since=updated_since,
             limit=DEFAULT_PAGE_SIZE,
             page=self.page,

@@ -6,7 +6,8 @@ from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QSizePolicy
 
 from naturtag.controllers import BaseController, ImageGallery
-from naturtag.metadata import MetaMetadata, _refresh_tags, get_ids_from_url, tag_images
+from naturtag.metadata import MetaMetadata, _refresh_tags, tag_images
+from naturtag.utils import get_ids_from_url
 from naturtag.widgets import (
     HorizontalLayout,
     IdInput,
@@ -28,8 +29,8 @@ class ImageController(BaseController):
     on_select_observation_id = Signal(int)  #: An observation ID was entered
     on_select_observation_tab = Signal()  #: Request to switch to observation tab
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        super().__init__()
         photo_layout = VerticalLayout(self)
         top_section_layout = HorizontalLayout()
         top_section_layout.setAlignment(Qt.AlignLeft)
@@ -68,7 +69,7 @@ class ImageController(BaseController):
         self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
 
         # Image gallery
-        self.gallery = ImageGallery(self.settings, self.threadpool)
+        self.gallery = ImageGallery()
         self.gallery.on_select_observation.connect(self.on_select_observation_tab)
         self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
@@ -89,10 +90,16 @@ class ImageController(BaseController):
         logger.info(f'Tagging {len(image_paths)} images with metadata for {selected_id}')
 
         def tag_image(image_path):
-            return tag_images([image_path], obs_id, taxon_id, settings=self.settings)[0]
+            return tag_images(
+                [image_path],
+                obs_id,
+                taxon_id,
+                client=self.app.client,
+                settings=self.app.settings,
+            )[0]
 
         for image_path in image_paths:
-            future = self.threadpool.schedule(tag_image, image_path=image_path)
+            future = self.app.threadpool.schedule(tag_image, image_path=image_path)
             future.on_result.connect(self.update_metadata)
         self.info(f'{len(image_paths)} images tagged with metadata for {selected_id}')
 
@@ -110,8 +117,8 @@ class ImageController(BaseController):
             return
 
         for image in images:
-            future = self.threadpool.schedule(
-                lambda: _refresh_tags(image.metadata, self.settings),
+            future = self.app.threadpool.schedule(
+                lambda: _refresh_tags(image.metadata, self.app.client, self.app.settings),
             )
             future.on_result.connect(self.update_metadata)
         self.info(f'{len(images)} images updated')

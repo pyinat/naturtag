@@ -19,6 +19,8 @@ from naturtag.widgets.images import (
     InfoCardList,
     ImageWindow,
     PixmapLabel,
+    set_pixmap,
+    set_pixmap_async,
 )
 from naturtag.widgets.inputs import IdInput
 from naturtag.widgets.logger import QtRichHandler, init_handler

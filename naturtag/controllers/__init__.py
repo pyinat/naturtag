@@ -1,5 +1,16 @@
 # flake8: noqa: F401
 # isort: skip_file
+from typing import TYPE_CHECKING
+from PySide6.QtWidgets import QApplication
+
+
+if TYPE_CHECKING:
+    from naturtag.app import NaturtagApp
+
+
+def get_app() -> 'NaturtagApp':
+    return QApplication.instance()
+
 
 from naturtag.controllers.base_controller import BaseController
 from naturtag.controllers.image_gallery import ImageGallery

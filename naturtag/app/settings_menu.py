@@ -25,78 +25,116 @@ logger = getLogger(__name__)
 class SettingsMenu(BaseController):
     """Application settings menu, with input widgets connected to values in settings file"""
 
-    def __init__(self, settings: Settings):
-        super().__init__(settings)
-        self.settings = settings
+    def __init__(self):
+        super().__init__()
         self.settings_layout = VerticalLayout(self)
         # Dictionary of locale codes and display names
         self.locales = {k: f'{v} ({k})' for k, v in read_locales().items()}
 
         # iNaturalist settings
         inat = self.add_group('iNaturalist', self.settings_layout)
-        inat.addLayout(TextSetting(settings, icon_str='fa.user', setting_attr='username'))
+        inat.addLayout(
+            TextSetting(
+                self.app.settings,
+                icon_str='fa.user',
+                setting_attr='username',
+            )
+        )
         inat.addLayout(
             ChoiceAltDisplaySetting(
-                settings,
+                self.app.settings,
                 icon_str='fa.globe',
                 setting_attr='locale',
                 choices=self.locales,
             )
         )
         inat.addLayout(
-            ToggleSetting(settings, icon_str='fa.language', setting_attr='search_locale')
-        )
-        inat.addLayout(
-            IntSetting(
-                settings, icon_str='mdi.home-city-outline', setting_attr='preferred_place_id'
+            ToggleSetting(
+                self.app.settings,
+                icon_str='fa.language',
+                setting_attr='search_locale',
             )
         )
         inat.addLayout(
-            ToggleSetting(settings, icon_str='mdi6.cat', setting_attr='casual_observations')
+            IntSetting(
+                self.app.settings,
+                icon_str='mdi.home-city-outline',
+                setting_attr='preferred_place_id',
+            )
+        )
+        inat.addLayout(
+            ToggleSetting(
+                self.app.settings,
+                icon_str='mdi6.cat',
+                setting_attr='casual_observations',
+            )
         )
         self.all_ranks = ToggleSetting(
-            settings, icon_str='fa.chevron-circle-up', setting_attr='all_ranks'
+            self.app.settings,
+            icon_str='fa.chevron-circle-up',
+            setting_attr='all_ranks',
         )
         inat.addLayout(self.all_ranks)
 
         # Metadata settings
         metadata = self.add_group('Metadata', self.settings_layout)
         metadata.addLayout(
-            ToggleSetting(settings, icon_str='fa.language', setting_attr='common_names')
-        )
-        metadata.addLayout(
-            ToggleSetting(settings, icon_str='mdi.file-tree', setting_attr='hierarchical')
-        )
-        metadata.addLayout(
-            ToggleSetting(settings, icon_str='fa5s.file-code', setting_attr='sidecar')
-        )
-        metadata.addLayout(
             ToggleSetting(
-                settings, icon_str='fa5s.file-alt', setting_attr='exif', setting_title='EXIF'
+                self.app.settings,
+                icon_str='fa.language',
+                setting_attr='common_names',
             )
         )
         metadata.addLayout(
             ToggleSetting(
-                settings, icon_str='fa5s.file-alt', setting_attr='iptc', setting_title='IPTC'
+                self.app.settings,
+                icon_str='mdi.file-tree',
+                setting_attr='hierarchical',
             )
         )
         metadata.addLayout(
             ToggleSetting(
-                settings, icon_str='fa5s.file-alt', setting_attr='xmp', setting_title='XMP'
+                self.app.settings,
+                icon_str='fa5s.file-code',
+                setting_attr='sidecar',
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                self.app.settings,
+                icon_str='fa5s.file-alt',
+                setting_attr='exif',
+                setting_title='EXIF',
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                self.app.settings,
+                icon_str='fa5s.file-alt',
+                setting_attr='iptc',
+                setting_title='IPTC',
+            )
+        )
+        metadata.addLayout(
+            ToggleSetting(
+                self.app.settings,
+                icon_str='fa5s.file-alt',
+                setting_attr='xmp',
+                setting_title='XMP',
             )
         )
 
         # User data settings
         user_data = self.add_group('User Data', self.settings_layout)
         use_last_dir = ToggleSetting(
-            settings,
+            self.app.settings,
             icon_str='mdi.folder-clock-outline',
             setting_attr='use_last_dir',
             setting_title='Use last directory',
         )
         user_data.addLayout(use_last_dir)
         self.default_image_dir = PathSetting(
-            settings,
+            self.app.settings,
             icon_str='fa5.images',
             setting_attr='default_image_dir',
             setting_title='Default image directory',
@@ -105,7 +143,7 @@ class SettingsMenu(BaseController):
         user_data.addLayout(self.default_image_dir)
 
         # Disable default_image_dir option when use_last_dir is enabled
-        self.default_image_dir.setEnabled(not settings.use_last_dir)
+        self.default_image_dir.setEnabled(not self.app.settings.use_last_dir)
         use_last_dir.on_click.connect(
             lambda checked: self.default_image_dir.setEnabled(not checked)
         )
@@ -113,7 +151,7 @@ class SettingsMenu(BaseController):
         # Display settings
         display = self.add_group('Display', self.settings_layout)
         self.dark_mode = ToggleSetting(
-            settings,
+            self.app.settings,
             icon_str='mdi.theme-light-dark',
             setting_attr='dark_mode',
         )
@@ -122,13 +160,13 @@ class SettingsMenu(BaseController):
         # Debug settings
         debug = self.add_group('Debug', self.settings_layout)
         self.show_logs = ToggleSetting(
-            settings,
+            self.app.settings,
             icon_str='fa.file-text-o',
             setting_attr='show_logs',
         )
         debug.addLayout(self.show_logs)
         self.log_level = ChoiceSetting(
-            settings,
+            self.app.settings,
             icon_str='fa.thermometer-2',
             setting_attr='log_level',
             choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
@@ -145,7 +183,7 @@ class SettingsMenu(BaseController):
 
     def closeEvent(self, event):
         """Save settings when closing the window"""
-        self.settings.write()
+        self.app.settings.write()
         self.on_message.emit('Settings saved')
         event.accept()
 

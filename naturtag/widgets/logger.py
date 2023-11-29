@@ -22,7 +22,7 @@ def init_handler(
     root.setLevel(root_level)
     root.addHandler(qt_handler)
 
-    # iI a logfile is specified, add a FileHandler with a separate formatter
+    # If a logfile is specified, add a FileHandler with a separate formatter
     if logfile:
         handler = FileHandler(filename=str(logfile))
         handler.setFormatter(
