@@ -30,7 +30,7 @@ For example, some tools may use EXIF only, while others may use a combination of
 
 ### Sidecar files
 A sidecar file can be saved alongside a photo that contains all XMP metadata.
-This has the advantage of non-desctructive edits (not needing to modify the original image file),
+This has the advantage of non-destructive edits (not needing to modify the original image file),
 and also lets you associate the metadata with a RAW image file.
 
 The sidecar will have the same filename as the image, but with a `.xmp` extension. For example:

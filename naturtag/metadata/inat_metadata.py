@@ -181,7 +181,7 @@ def observation_to_metadata(
     metadata.update_keywords(keywords)
 
     # Convert and add coordinates
-    # TODO: Add other metdata like title, description, tags, etc.
+    # TODO: Add other metadata like title, description, tags, etc.
     if observation:
         metadata.update_coordinates(observation.location, observation.positional_accuracy)
 

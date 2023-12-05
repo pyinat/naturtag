@@ -184,7 +184,7 @@ class Settings(YamlMixin):
 
     @property
     def start_image_dir(self) -> Path:
-        """Get the starting directory for image selection, depeding on settings"""
+        """Get the starting directory for image selection, depending on settings"""
         if self.use_last_dir and self.recent_image_dirs:
             return self.recent_image_dirs[0]
         else:
