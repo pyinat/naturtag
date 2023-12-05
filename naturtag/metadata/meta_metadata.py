@@ -231,7 +231,7 @@ def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
     Simplify/deduplicate dict keys, to reduce variations in similarly-named keys
 
     Example::
-        >>> simplify_keys({'my_namepace:Sub_Family': 'Panorpinae'})
+        >>> simplify_keys({'my_namespace:Sub_Family': 'Panorpinae'})
         {'subfamily': 'Panorpinae'}
 
     Returns:

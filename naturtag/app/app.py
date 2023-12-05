@@ -129,7 +129,7 @@ class MainWindow(QMainWindow):
         )
         self.tabs.setTabVisible(self.log_tab_idx, self.app.settings.show_logs)
 
-        # Switch to differet tab if requested from Photos tab
+        # Switch to different tab if requested from Photos tab
         self.image_controller.on_select_taxon_tab.connect(
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )

@@ -5,7 +5,7 @@ Platform-specific installation instructions are below:
 <!-- TODO: portable (.tar.gz) download links & instructions -->
 
 ```{warning}
-These packages and installers are brand new, and not yet throughly tested on all platforms.
+These packages and installers are brand new, and not yet thoroughly tested on all platforms.
 Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if you find any issues!
 ```
 
