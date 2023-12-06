@@ -32,23 +32,24 @@ class ObservationController(BaseController):
         # Pagination
         self.page = 1
         self.total_pages = 0
+        self.total_results = 0
         # TODO: Cache pages while navigating back and forth?
         # self.pages: dict[int, list[ObservationInfoCard]] = {}
 
         # User observations
         self.user_observations = ObservationList()
-        user_obs_group_box = self.add_group(
+        self.user_obs_group_box = self.add_group(
             'My Observations',
             self.root,
             min_width=500,
             max_width=800,
             policy_min_height=False,
         )
-        user_obs_group_box.addWidget(self.user_observations.scroller)
+        self.user_obs_group_box.addWidget(self.user_observations.scroller)
 
         # Pagination buttons + label
         button_layout = HorizontalLayout()
-        user_obs_group_box.addLayout(button_layout)
+        self.user_obs_group_box.addLayout(button_layout)
         self.prev_button = QPushButton('Prev')
         self.prev_button.setIcon(fa_icon('ei.chevron-left'))
         self.prev_button.clicked.connect(self.prev_page)
@@ -138,6 +139,8 @@ class ObservationController(BaseController):
         self.user_observations.set_observations(observations)
         self.bind_selection(self.user_observations.cards)
         self.update_pagination_buttons()
+        if self.total_results:
+            self.user_obs_group_box.set_title(f'My Observations ({self.total_results})')
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
@@ -159,9 +162,9 @@ class ObservationController(BaseController):
         """Fetch a single page of user observations"""
         # TODO: Depending on order of operations, this could be counted from the db instead of API.
         # Maybe do that except on initial observation load?
-        total_results = self.app.client.observations.count(username=self.app.settings.username)
-        self.total_pages = (total_results // DEFAULT_PAGE_SIZE) + 1
-        logger.debug('Total user observations: %s (%s pages)', total_results, self.total_pages)
+        self.total_results = self.app.client.observations.count(username=self.app.settings.username)
+        self.total_pages = (self.total_results // DEFAULT_PAGE_SIZE) + 1
+        logger.debug('Total user observations: %s (%s pages)', self.total_results, self.total_pages)
 
         observations = self.app.client.observations.get_user_observations(
             username=self.app.settings.username,
