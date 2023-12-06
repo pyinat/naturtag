@@ -124,7 +124,7 @@ class Settings(YamlMixin):
         default=False, doc='Show all available taxonomic rank filters on taxon search page'
     )
     casual_observations: bool = doc_field(
-        default=True, doc='Include casual observations in searches'
+        default=True, doc='Include taxa from casual observations in user taxa list'
     )
     locale: str = doc_field(default='en', doc='Locale preference for species common names')
     preferred_place_id: int = doc_field(

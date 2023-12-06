@@ -97,6 +97,10 @@ class ObservationController(BaseController):
 
     def load_user_observations(self):
         """Fetch and display a single page of user observations"""
+        if not self.app.settings.username:
+            logger.info('Unknown user; skipping observation load')
+            return
+
         logger.info('Fetching user observations')
         future = self.app.threadpool.schedule(
             self.get_user_observations, priority=QThread.LowPriority
@@ -131,19 +135,20 @@ class ObservationController(BaseController):
     @Slot(list)
     def display_user_observations(self, observations: list[Observation]):
         """Display a page of observations"""
-        # Update observation list
         self.user_observations.set_observations(observations)
         self.bind_selection(self.user_observations.cards)
-
-        # Update pagination buttons based on current page
-        self.prev_button.setEnabled(self.page > 1)
-        self.next_button.setEnabled(self.page < self.total_pages)
-        self.page_label.setText(f'Page {self.page} / {self.total_pages}')
+        self.update_pagination_buttons()
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
         for obs_card in obs_cards:
             obs_card.on_click.connect(self.select_observation)
+
+    def update_pagination_buttons(self):
+        """Update pagination buttons based on current page"""
+        self.prev_button.setEnabled(self.page > 1)
+        self.next_button.setEnabled(self.page < self.total_pages)
+        self.page_label.setText(f'Page {self.page} / {self.total_pages}')
 
     # I/O bound functions run from worker threads
     # ----------------------------------------
@@ -152,12 +157,6 @@ class ObservationController(BaseController):
     # TODO: Store a Paginator object instead of page number?
     def get_user_observations(self) -> list[Observation]:
         """Fetch a single page of user observations"""
-        if not self.app.settings.username:
-            return []
-
-        updated_since = self.app.settings.last_obs_check
-        self.app.settings.set_obs_checkpoint()
-
         # TODO: Depending on order of operations, this could be counted from the db instead of API.
         # Maybe do that except on initial observation load?
         total_results = self.app.client.observations.count(username=self.app.settings.username)
@@ -166,8 +165,9 @@ class ObservationController(BaseController):
 
         observations = self.app.client.observations.get_user_observations(
             username=self.app.settings.username,
-            updated_since=updated_since,
+            updated_since=self.app.settings.last_obs_check,
             limit=DEFAULT_PAGE_SIZE,
             page=self.page,
         )
+        self.app.settings.set_obs_checkpoint()
         return observations

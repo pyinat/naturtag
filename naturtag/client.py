@@ -84,7 +84,7 @@ class ObservationDbController(ObservationController):
             logger.debug(f'Fetching remaining {len(remaining_ids)} observations from API')
             api_results = super().from_ids(*remaining_ids, **params).all()
             observations.extend(api_results)
-            save_observations(api_results, self.client.db_path)
+            self.save(api_results)
 
         # Add full taxonomy to observations, if specified
         if taxonomy:
@@ -101,7 +101,7 @@ class ObservationDbController(ObservationController):
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        save_observations(results, self.client.db_path)
+        self.save(results)
         return WrapperPaginator(results)
 
     def get_user_observations(
@@ -135,7 +135,9 @@ class ObservationDbController(ObservationController):
             )
             return new_observations[:limit]
 
-        # Otherwise get up to `limit` most recent saved observations from the db
+        # Otherwise get up to `limit` most recent saved observations from the db. This includes ones
+        # we just fetched and saved; otherwise we can't accurately sort a mix of API results and db
+        # results by created date in a single query.
         obs = get_db_observations(
             self.client.db_path,
             username=username,
@@ -144,6 +146,10 @@ class ObservationDbController(ObservationController):
             order_by_created=True,
         )
         return list(obs)
+
+    def save(self, observations: list[Observation]):
+        """Save observations to the database"""
+        save_observations(observations, self.client.db_path)
 
 
 class TaxonDbController(TaxonController):
