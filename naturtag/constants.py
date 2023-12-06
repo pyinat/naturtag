@@ -26,12 +26,10 @@ SPINNER = ICONS_DIR / 'spinner_250px.svg'
 APP_DIR = Path(user_data_dir()) / 'Naturtag'
 DB_PATH = APP_DIR / 'naturtag.db'
 IMAGE_CACHE = APP_DIR / 'images.db'
-LOGFILE = APP_DIR / 'naturtag.log'
 CONFIG_PATH = APP_DIR / 'settings.yml'
-USER_TAXA_PATH = APP_DIR / 'stored_taxa.yml'
 
 # Project info
-DOCS_URL = 'https://naturtag.readthedocs.io/en/latest/app.html'
+DOCS_URL = 'https://naturtag.readthedocs.io/en/stable/app.html'
 REPO_URL = 'https://github.com/pyinat/naturtag'
 TAXON_DB_URL = 'https://github.com/pyinat/naturtag/raw/main/assets/data/taxonomy.tar.gz'
 

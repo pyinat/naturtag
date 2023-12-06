@@ -32,7 +32,6 @@ from naturtag.constants import (
     MAX_DISPLAY_OBSERVED,
     PACKAGED_TAXON_DB,
     TAXON_DB_URL,
-    USER_TAXA_PATH,
     PathOrStr,
 )
 
@@ -231,7 +230,7 @@ class UserTaxa(YamlMixin):
         self.frequent = Counter(self.history)
 
     @classmethod
-    def read(cls, path: Path = USER_TAXA_PATH) -> 'UserTaxa':  # type: ignore
+    def read(cls, path: Path) -> 'UserTaxa':  # type: ignore
         return super(UserTaxa, cls).read(path)  # type: ignore
 
     @property
