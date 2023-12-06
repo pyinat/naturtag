@@ -1,6 +1,6 @@
 # Naturtag
 
-[![Build status](https://github.com/pyinat/naturtag/workflows/Build/badge.svg?branch=main)](https://github.com/JWCook/naturtag/actions)
+[![Build status](https://github.com/pyinat/naturtag/workflows/Build/badge.svg?branch=main)](https://github.com/pyinat/naturtag/actions)
 [![Documentation Status](https://readthedocs.org/projects/naturtag/badge/?version=stable)](https://naturtag.readthedocs.io/en/stable/)
 [![GitHub issues](https://img.shields.io/github/issues/pyinat/naturtag)](https://github.com/pyinat/naturtag/issues)
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)

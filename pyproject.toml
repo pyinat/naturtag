@@ -5,8 +5,8 @@ description = 'Tag your nature photos with iNat taxonomy and observation metadat
 authors = ['Jordan Cook']
 license = 'MIT'
 readme = 'README.md'
-homepage = 'https://github.com/JWCook/naturtag'
-repository = 'https://github.com/JWCook/naturtag'
+homepage = 'https://github.com/pyinat/naturtag'
+repository = 'https://github.com/pyinat/naturtag'
 documentation = 'https://naturtag.readthedocs.io'
 classifiers = [
     'Development Status :: 3 - Alpha',
@@ -20,12 +20,18 @@ classifiers = [
     'Typing :: Typed',
 ]
 include = [
-    { path = '*.kv' },
     { path = '*.md' },
-    { path = '*.yml' },
     { path = 'assets' },
     { path = 'docs', format = 'sdist' },
-    { path = 'test', format = 'sdist' }
+    { path = 'test', format = 'sdist' },
+]
+exclude = [
+    "assets/demo_images/*",
+    "assets/screenshots/*",
+    "assets/icons/*-preview.*",
+    "assets/icons/*.bmp",
+    "assets/icons/*.xcf",
+
 ]
 
 [tool.poetry.dependencies]
@@ -69,8 +75,14 @@ pytest-xdist = '>=2.2'
 [tool.poetry.extras]
 all = []
 docs = [
-    'furo', 'linkify-it-py', 'myst-parser', 'sphinx', 'sphinx-autodoc-typehints',
-    'sphinx-copybutton', 'sphinx-design','sphinxcontrib-apidoc',
+    'furo',
+    'linkify-it-py',
+    'myst-parser',
+    'sphinx',
+    'sphinx-autodoc-typehints',
+    'sphinx-copybutton',
+    'sphinx-design',
+    'sphinxcontrib-apidoc',
 ]
 
 [tool.poetry.scripts]

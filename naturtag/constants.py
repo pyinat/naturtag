@@ -5,13 +5,19 @@ from typing import Optional, Union
 from platformdirs import user_data_dir
 from pyinaturalist.constants import ICONIC_TAXA, RANKS, Dimensions, IntOrStr
 
-# Packaged assets
-PKG_DIR = Path(__file__).parent.parent
+# Packaged asset directories
+PKG_DIR = Path(__file__).parent
+ROOT_DIR = PKG_DIR.parent
 ASSETS_DIR = PKG_DIR / 'assets'
+if not ASSETS_DIR.exists():
+    ASSETS_DIR = ROOT_DIR / 'assets'
+DATA_DIR = ASSETS_DIR / 'data'
 ICONS_DIR = ASSETS_DIR / 'icons'
+
+# Packaged asset files
 CLI_COMPLETE_DIR = ASSETS_DIR / 'autocomplete'
-PACKAGED_TAXON_DB = ASSETS_DIR / 'taxonomy.tar.gz'
-LOCALES_PATH = ASSETS_DIR / 'locales.json'
+PACKAGED_TAXON_DB = DATA_DIR / 'taxonomy.tar.gz'
+LOCALES_PATH = DATA_DIR / 'locales.json'
 APP_ICON = ICONS_DIR / 'logo.ico'
 APP_LOGO = ICONS_DIR / 'logo.png'
 SPINNER = ICONS_DIR / 'spinner_250px.svg'
@@ -27,7 +33,7 @@ USER_TAXA_PATH = APP_DIR / 'stored_taxa.yml'
 # Project info
 DOCS_URL = 'https://naturtag.readthedocs.io/en/latest/app.html'
 REPO_URL = 'https://github.com/pyinat/naturtag'
-TAXON_DB_URL = 'https://github.com/pyinat/naturtag/raw/main/assets/taxonomy.tar.gz'
+TAXON_DB_URL = 'https://github.com/pyinat/naturtag/raw/main/assets/data/taxonomy.tar.gz'
 
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
@@ -78,7 +84,7 @@ HIER_KEYWORD_TAGS = [
 # Theme/window/display settings
 DEFAULT_WINDOW_SIZE = (1500, 1024)
 MAX_LABEL_CHARS = 80
-QSS_PATH = ASSETS_DIR / 'style.qss'
+QSS_PATH = DATA_DIR / 'style.qss'
 MAX_DISPLAY_HISTORY = 50  # Max number of history items to display at a time
 MAX_DISPLAY_OBSERVED = 100  # Max number of observed taxa to display at a time
 MAX_DIR_HISTORY = 10

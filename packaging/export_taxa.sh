@@ -5,7 +5,7 @@ DATA_DIR=$HOME/.local/share/pyinaturalist/
 SRC_DB=$DATA_DIR/observations.db
 TAXON_CSV=taxon.csv
 TAXON_FTS_CSV=taxon_fts.csv
-ARCHIVE=assets/taxonomy.tar.gz
+ARCHIVE=assets/data/taxonomy.tar.gz
 
 echo 'Exporting Taxon table...'
 sqlite3 -header -csv $SRC_DB \

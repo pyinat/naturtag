@@ -7,6 +7,7 @@ PROJECT_NAME = 'naturtag'
 PROJECT_DIR = Path('.').absolute()
 ASSETS_DIR = PROJECT_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
+ASSETS_DATA_DIR = ASSETS_DIR / 'data'
 PACKAGE_DIR = PROJECT_DIR / 'naturtag'
 
 LOCAL_VENV_DIR = Path('~/.virtualenvs/naturtag').expanduser().absolute()
@@ -45,8 +46,8 @@ a = Analysis(
     datas=[
         (str(ICONS_DIR / '*.ico'), 'assets/icons'),
         (str(ICONS_DIR / '*.png'), 'assets/icons'),
-        (str(ASSETS_DIR / '*.qss'), 'assets'),
-        (str(ASSETS_DIR / '*.tar.gz'), 'assets'),
+        (str(ASSETS_DATA_DIR / '*.qss'), 'assets/data'),
+        (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
     ],
     hiddenimports=hiddenimports,
     hookspath=[],
