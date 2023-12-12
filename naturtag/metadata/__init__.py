@@ -1,5 +1,5 @@
 """Main classes for processing image metadata"""
-# flake8: noqa: F401
+# flake8: noqa: F401, F403
 # isort:skip_file
 
 from naturtag.metadata.image_metadata import ImageMetadata

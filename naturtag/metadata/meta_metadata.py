@@ -61,7 +61,7 @@ class MetaMetadata(ImageMetadata):
         self._summary = None
         self._observation = None
         self.keyword_meta = KeywordMetadata(self.combined)
-        self.inaturalist_ids  # for side effect
+        self.inaturalist_ids  # for side effect  # noqa
 
     @property
     def combined(self) -> dict[str, Any]:

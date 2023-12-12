@@ -94,10 +94,6 @@ naturtag-ui = 'naturtag.app.app:main'
 requires = ['poetry-core>=1.0.0']
 build-backend = 'poetry.core.masonry.api'
 
-[tool.black]
-skip-string-normalization = true
-line-length = 100
-
 [tool.coverage.html]
 directory = 'test-reports'
 
@@ -106,17 +102,26 @@ branch = true
 source = ['naturtag']
 
 [tool.coverage.report]
-exclude_lines = [
-    'pragma: no cover',
-    'if TYPE_CHECKING:',
-]
-
-[tool.isort]
-profile = 'black'
-line_length = 100
-skip_gitignore = true
-known_first_party = ['test']
+exclude_lines = ['pragma: no cover', 'if TYPE_CHECKING:']
 
 [tool.mypy]
 ignore_missing_imports = true
 files = ['naturtag']
+
+[tool.ruff]
+fix = true
+unsafe-fixes = true
+line-length = 100
+output-format = 'grouped'
+select = ['B', 'C4', 'C90', 'E', 'F']
+ignore = ['B023']
+target-version = 'py310'
+
+[tool.ruff.format]
+quote-style = 'single'
+
+[tool.ruff.lint.isort]
+known-first-party = ['test']
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120

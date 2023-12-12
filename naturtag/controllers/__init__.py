@@ -1,4 +1,4 @@
-# flake8: noqa: F401
+# flake8: noqa: E402, F401
 # isort: skip_file
 from typing import TYPE_CHECKING
 from PySide6.QtWidgets import QApplication
