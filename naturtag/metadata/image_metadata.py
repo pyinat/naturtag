@@ -97,7 +97,7 @@ class ImageMetadata:
         return {
             k: v
             for k, v in self.exif.items()
-            if not any([k.startswith(prefix) for prefix in EXIF_HIDE_PREFIXES])
+            if not any(k.startswith(prefix) for prefix in EXIF_HIDE_PREFIXES)
         }
 
     @property

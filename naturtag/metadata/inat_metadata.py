@@ -227,7 +227,7 @@ def _get_common_keywords(taxon: Taxon) -> list[str]:
     ]
 
     def is_ignored(kw):
-        return any([ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS])
+        return any(ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS)
 
     return [quote(kw) for kw in keywords if kw and not is_ignored(kw)]
 
