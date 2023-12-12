@@ -32,7 +32,6 @@ from naturtag.constants import (
     MAX_DISPLAY_OBSERVED,
     PACKAGED_TAXON_DB,
     TAXON_DB_URL,
-    USER_TAXA_PATH,
     PathOrStr,
 )
 
@@ -124,7 +123,7 @@ class Settings(YamlMixin):
         default=False, doc='Show all available taxonomic rank filters on taxon search page'
     )
     casual_observations: bool = doc_field(
-        default=True, doc='Include casual observations in searches'
+        default=True, doc='Include taxa from casual observations in user taxa list'
     )
     locale: str = doc_field(default='en', doc='Locale preference for species common names')
     preferred_place_id: int = doc_field(
@@ -231,7 +230,7 @@ class UserTaxa(YamlMixin):
         self.frequent = Counter(self.history)
 
     @classmethod
-    def read(cls, path: Path = USER_TAXA_PATH) -> 'UserTaxa':  # type: ignore
+    def read(cls, path: Path) -> 'UserTaxa':  # type: ignore
         return super(UserTaxa, cls).read(path)  # type: ignore
 
     @property

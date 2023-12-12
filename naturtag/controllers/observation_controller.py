@@ -32,23 +32,24 @@ class ObservationController(BaseController):
         # Pagination
         self.page = 1
         self.total_pages = 0
+        self.total_results = 0
         # TODO: Cache pages while navigating back and forth?
         # self.pages: dict[int, list[ObservationInfoCard]] = {}
 
         # User observations
         self.user_observations = ObservationList()
-        user_obs_group_box = self.add_group(
+        self.user_obs_group_box = self.add_group(
             'My Observations',
             self.root,
             min_width=500,
             max_width=800,
             policy_min_height=False,
         )
-        user_obs_group_box.addWidget(self.user_observations.scroller)
+        self.user_obs_group_box.addWidget(self.user_observations.scroller)
 
         # Pagination buttons + label
         button_layout = HorizontalLayout()
-        user_obs_group_box.addLayout(button_layout)
+        self.user_obs_group_box.addLayout(button_layout)
         self.prev_button = QPushButton('Prev')
         self.prev_button.setIcon(fa_icon('ei.chevron-left'))
         self.prev_button.clicked.connect(self.prev_page)
@@ -97,6 +98,10 @@ class ObservationController(BaseController):
 
     def load_user_observations(self):
         """Fetch and display a single page of user observations"""
+        if not self.app.settings.username:
+            logger.info('Unknown user; skipping observation load')
+            return
+
         logger.info('Fetching user observations')
         future = self.app.threadpool.schedule(
             self.get_user_observations, priority=QThread.LowPriority
@@ -131,19 +136,22 @@ class ObservationController(BaseController):
     @Slot(list)
     def display_user_observations(self, observations: list[Observation]):
         """Display a page of observations"""
-        # Update observation list
         self.user_observations.set_observations(observations)
         self.bind_selection(self.user_observations.cards)
-
-        # Update pagination buttons based on current page
-        self.prev_button.setEnabled(self.page > 1)
-        self.next_button.setEnabled(self.page < self.total_pages)
-        self.page_label.setText(f'Page {self.page} / {self.total_pages}')
+        self.update_pagination_buttons()
+        if self.total_results:
+            self.user_obs_group_box.set_title(f'My Observations ({self.total_results})')
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
         for obs_card in obs_cards:
             obs_card.on_click.connect(self.select_observation)
+
+    def update_pagination_buttons(self):
+        """Update pagination buttons based on current page"""
+        self.prev_button.setEnabled(self.page > 1)
+        self.next_button.setEnabled(self.page < self.total_pages)
+        self.page_label.setText(f'Page {self.page} / {self.total_pages}')
 
     # I/O bound functions run from worker threads
     # ----------------------------------------
@@ -152,22 +160,17 @@ class ObservationController(BaseController):
     # TODO: Store a Paginator object instead of page number?
     def get_user_observations(self) -> list[Observation]:
         """Fetch a single page of user observations"""
-        if not self.app.settings.username:
-            return []
-
-        updated_since = self.app.settings.last_obs_check
-        self.app.settings.set_obs_checkpoint()
-
         # TODO: Depending on order of operations, this could be counted from the db instead of API.
         # Maybe do that except on initial observation load?
-        total_results = self.app.client.observations.count(username=self.app.settings.username)
-        self.total_pages = (total_results // DEFAULT_PAGE_SIZE) + 1
-        logger.debug('Total user observations: %s (%s pages)', total_results, self.total_pages)
+        self.total_results = self.app.client.observations.count(username=self.app.settings.username)
+        self.total_pages = (self.total_results // DEFAULT_PAGE_SIZE) + 1
+        logger.debug('Total user observations: %s (%s pages)', self.total_results, self.total_pages)
 
         observations = self.app.client.observations.get_user_observations(
             username=self.app.settings.username,
-            updated_since=updated_since,
+            updated_since=self.app.settings.last_obs_check,
             limit=DEFAULT_PAGE_SIZE,
             page=self.page,
         )
+        self.app.settings.set_obs_checkpoint()
         return observations

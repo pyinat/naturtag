@@ -5,11 +5,10 @@
 * Add tab for basic observation details
 * When an observation is selected, show a summary of basic observation details on main screen
 * Display observation count and leaf taxon count on taxon info cards
-* In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
-* Add support for alternate XMP sidecar path format, if it already exists (`basename.ext.xmp` instead of `basename.xmp`)
 * Add support for displaying and searching common names in any language supported by iNaturalist.org
     * Uses the `locale` setting from settings menu
     * The packaged taxon DB only contains english names, but a full version can be downloaded [here](https://github.com/pyinat/naturtag/releases/download/untagged-e757223556c30fa118ba/taxonomy_full.tar.gz)
+* Add dialog to prompt for username on first startup
 
 **CLI:**
 * Split CLI into subcommands:
@@ -25,6 +24,8 @@
 
 **Metadata:**
 * Add support for GPS positional accuracy
+* Add support for alternate XMP sidecar path format, if it already exists (`basename.ext.xmp` instead of `basename.xmp`)
+* In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
 
 **Database:**
 * Include data for most commonly observed taxa with PyInstaller packages and platform-specific installers

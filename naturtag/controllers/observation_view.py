@@ -122,7 +122,8 @@ class ObservationInfoSection(HorizontalLayout):
         self.image.observation = obs
         set_pixmap_async(
             self.image,
-            photo=Observation.default_photo,
+            photo=obs.default_photo,
+            size='medium',
             priority=QThread.HighPriority,
         )
         self._update_nav_buttons()

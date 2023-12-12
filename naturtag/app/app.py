@@ -9,6 +9,7 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
+    QInputDialog,
     QLineEdit,
     QMainWindow,
     QMessageBox,
@@ -40,19 +41,21 @@ logger = getLogger(__name__)
 
 
 class NaturtagApp(QApplication):
-    def __init__(self, *args, settings: Settings, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setApplicationName('Naturtag')
-        self.setOrganizationName('pyinat')
         self.setApplicationVersion(pkg_version('naturtag'))
+        self.setOrganizationName('pyinat')
+        self.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
+        self.settings = Settings.read()
 
+    def post_init(self):
         # Run any first-time setup steps, if needed
-        setup(settings)
+        setup(self.settings)
 
         # Globally available application objects
-        self.settings = settings
-        self.client = iNatDbClient(settings.db_path)
-        self.img_session = ImageSession(settings.image_cache_path)
+        self.client = iNatDbClient(self.settings.db_path)
+        self.img_session = ImageSession(self.settings.image_cache_path)
         self.log_handler = init_handler(
             self.settings.log_level,
             root_level=self.settings.log_level_external,
@@ -174,6 +177,21 @@ class MainWindow(QMainWindow):
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.observation_controller.select_observation(56830941)
 
+    def check_username(self):
+        """If username isn't saved, show popup dialog to prompt user to enter it"""
+        if self.app.settings.username:
+            return
+
+        username, ok = QInputDialog.getText(
+            self,
+            'iNaturalist username',
+            'Enter your iNaturalist username to fetch your observations',
+        )
+        if ok:
+            self.app.settings.username = username
+            self.app.settings.write()
+            self.observation_controller.load_user_observations()
+
     def closeEvent(self, _):
         """Save settings before closing the app"""
         self.app.settings.write()
@@ -254,16 +272,16 @@ class MainWindow(QMainWindow):
 
 
 def main():
-    settings = Settings.read()
-    app = NaturtagApp(sys.argv, settings=settings)
+    app = NaturtagApp(sys.argv)
     splash = QSplashScreen(QPixmap(str(APP_LOGO)).scaledToHeight(512))
     splash.show()
-    app.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
+    app.post_init()
 
-    set_theme(dark_mode=settings.dark_mode)
+    set_theme(dark_mode=app.settings.dark_mode)
     window = MainWindow(app)
     window.show()
     splash.finish(window)
+    window.check_username()
     sys.exit(app.exec())
 
 

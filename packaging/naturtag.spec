@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PyInstaller.compat import is_darwin, is_linux, is_win
 
-BUILD_PY_VERSION = '3.10'
+BUILD_PY_VERSION = '3.11'
 PROJECT_NAME = 'naturtag'
 PROJECT_DIR = Path('.').absolute()
 ASSETS_DIR = PROJECT_DIR / 'assets'

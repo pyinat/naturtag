@@ -13,6 +13,11 @@ on:
         description: 'Version number for pre-release package (defaults to build number)'
         required: false
         default: ''
+      publish:
+        description: 'Set to "false" to skip publishing to PyPI'
+        required: false
+        default: 'true'
+
 env:
   LATEST_PY_VERSION: '3.11'
 
@@ -32,36 +37,37 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
       - uses: snok/install-poetry@v1.3
         with:
           virtualenvs-in-project: true
 
+      # Install binary + python dependencies
       - name: Install system packages
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
-
       - name: Cache python packages
         id: cache
         uses: actions/cache@v3
         with:
           path: .venv
           key: venv-${{ env.LATEST_PY_VERSION }}-pyinstaller-${{ matrix.os }}-${{ hashFiles('poetry.lock') }}
-      - name: Install dependencies
+      - name: Install python packages
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           poetry install -v --without dev
           poetry run pip install -U pyinstaller setuptools
-      - name: Build PyInstaller package
+
+      - name: Build pyinstaller package
         run: poetry run pyinstaller -y packaging/naturtag.spec
 
       # Include taxon FTS db, compress, and set platform name
       - name: Finish pyinstaller package (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          ASSETS=dist/naturtag/assets
+          ASSETS=dist/naturtag/_internal/assets/data
           tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
           rm $ASSETS/taxonomy.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-linux.tar.gz .
@@ -70,7 +76,7 @@ jobs:
       - name: Finish pyinstaller package (macOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          ASSETS=dist/naturtag.app/Contents/Resources/assets
+          ASSETS=dist/naturtag.app/Contents/Resources/assets/data
           tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
           rm $ASSETS/taxonomy.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-macos.tar.gz .
@@ -79,8 +85,9 @@ jobs:
       - name: Finish pyinstaller package (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          tar -xvzf dist/naturtag/assets/taxonomy.tar.gz --directory dist/naturtag/assets/
-          rm dist/naturtag/assets/taxonomy.tar.gz
+          ASSETS=dist/naturtag/_internal/assets/data
+          tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
+          rm $ASSETS/taxonomy.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-windows.tar.gz .
           echo "DIST_NAME=windows" >> $GITHUB_ENV
 
@@ -144,13 +151,15 @@ jobs:
 
   # Publish python package to PyPI
   release-pypi-package:
-    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.pre-release-suffix
+    if: |
+      github.event.inputs.publish == 'true'
+      && (startsWith(github.ref, 'refs/tags/v') || github.event.inputs.pre-release-suffix)
     runs-on: ubuntu-latest
     permissions:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
       - uses: snok/install-poetry@v1.3.3

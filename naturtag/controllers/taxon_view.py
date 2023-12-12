@@ -110,7 +110,12 @@ class TaxonInfoSection(HorizontalLayout):
         self.group_box.setTitle(taxon.full_name)
         self.image.hover_event = True
         self.image.taxon = taxon
-        set_pixmap_async(self.image, photo=taxon.default_photo, priority=QThread.HighPriority)
+        set_pixmap_async(
+            self.image,
+            photo=taxon.default_photo,
+            size='medium',
+            priority=QThread.HighPriority,
+        )
         self._update_nav_buttons()
 
         # Load additional thumbnails
