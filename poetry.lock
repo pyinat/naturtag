@@ -1936,13 +1936,13 @@ theme-sbt = ["sphinx-book-theme (>=1.0,<2.0)"]
 
 [[package]]
 name = "sphinxcontrib-apidoc"
-version = "0.4.0"
+version = "0.5.0"
 description = "A Sphinx extension for running 'sphinx-apidoc' on each build"
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "sphinxcontrib-apidoc-0.4.0.tar.gz", hash = "sha256:fe59d15882472aa93c2737afbdea6bedb34ce35cbd34aa4947909f5df1500aad"},
-    {file = "sphinxcontrib_apidoc-0.4.0-py3-none-any.whl", hash = "sha256:18b9fb0cd4816758ec5f8be41c64f8924991dd40fd7b10e666ec9eed2800baff"},
+    {file = "sphinxcontrib-apidoc-0.5.0.tar.gz", hash = "sha256:65efcd92212a5f823715fb95ee098b458a6bb09a5ee617d9ed3dead97177cd55"},
+    {file = "sphinxcontrib_apidoc-0.5.0-py3-none-any.whl", hash = "sha256:c671d644d6dc468be91b813dcddf74d87893bff74fe8f1b8b01b69408f0fb776"},
 ]
 
 [package.dependencies]
@@ -2280,4 +2280,4 @@ docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-autodoc-typehi
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "399524d39bec9e56ad2e7c96f206b63e777d4e53e885b116572b892ea6905269"
+content-hash = "8ea8c30f7339ee5af5c58aca45987a4c665c7b7a053cc303e95dd893eccf94e7"
