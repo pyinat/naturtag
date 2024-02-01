@@ -51,7 +51,7 @@ sqlalchemy                  = '^2.0.23'
 tablib                      = '^3.0'
 
 # Documentation dependencies needed for Readthedocs builds
-furo                        = {optional=true, version='^2023.9'}
+furo                        = {optional=true, version='^2024.1'}
 linkify-it-py               = {optional=true, version='^2.0'}
 myst-parser                 = {optional=true, version='^2.0'}
 sphinx                      = {optional=true, version='^6.2'}
