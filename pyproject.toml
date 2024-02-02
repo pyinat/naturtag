@@ -58,7 +58,7 @@ sphinx                      = {optional=true, version='^6.2'}
 sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
 sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
-sphinxcontrib-apidoc        = {optional=true, version='^0.4'}
+sphinxcontrib-apidoc        = {optional=true, version='^0.5'}
 
 [tool.poetry.dev-dependencies]
 babel                       = '>=2.0'
@@ -113,9 +113,11 @@ fix = true
 unsafe-fixes = true
 line-length = 100
 output-format = 'grouped'
+target-version = 'py310'
+
+[tool.ruff.lint]
 select = ['B', 'C4', 'C90', 'E', 'F']
 ignore = ['B023']
-target-version = 'py310'
 
 [tool.ruff.format]
 quote-style = 'single'

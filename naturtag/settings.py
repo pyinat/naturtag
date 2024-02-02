@@ -63,7 +63,8 @@ class YamlMixin:
     @classmethod
     def read(cls, path: Optional[Path]) -> 'YamlMixin':
         """Read settings from config file"""
-        path = path or cls.path
+        # TODO: conflicts with class variable access?
+        path = path or cls.path  # type: ignore
 
         # New file; no contents to read
         if not path or not path.is_file():
