@@ -68,7 +68,7 @@ nox-poetry                  = '^1.0'
 pre-commit                  = '^3.5'
 prettyprinter               = '^0.18'
 pyinstaller                 = '^6.1'
-pytest                      = '^7.4'
+pytest                      = '^8.0'
 pytest-cov                  = '>=3.0'
 pytest-xdist                = '>=2.2'
 
