@@ -2,6 +2,7 @@
 * https://doc.qt.io/qtforpython/examples/example_widgets_layouts_flowlayout.html
 * Many hours of frustration
 """
+
 from logging import getLogger
 from typing import TYPE_CHECKING, Callable, Iterator, Optional, TypeAlias
 

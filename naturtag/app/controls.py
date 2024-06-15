@@ -4,6 +4,7 @@
 * Menu bar
 * Global keyboard shortcuts
 """
+
 from functools import partial
 from logging import getLogger
 from pathlib import Path

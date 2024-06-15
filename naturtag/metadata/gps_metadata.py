@@ -1,4 +1,5 @@
 """Utilities for converting GPS coordinates to/from EXIF and XMP image metadata"""
+
 import re
 from typing import Optional
 

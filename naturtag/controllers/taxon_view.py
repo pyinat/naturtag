@@ -1,4 +1,5 @@
 """Components for displaying taxon info"""
+
 import webbrowser
 from collections import deque
 from logging import getLogger

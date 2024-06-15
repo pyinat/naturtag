@@ -1,4 +1,5 @@
 """Components for searching for taxa"""
+
 from logging import getLogger
 from typing import Optional
 

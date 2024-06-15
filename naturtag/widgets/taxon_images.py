@@ -1,4 +1,5 @@
 """Image widgets specifically for taxon photos"""
+
 import re
 from logging import getLogger
 from string import capwords

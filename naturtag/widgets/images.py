@@ -1,6 +1,7 @@
 """Generic image widgets and base classes for other page-specific widgets.
 Includes plain images, cards, scrollable lists, and fullscreen image views.
 """
+
 from logging import getLogger
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
