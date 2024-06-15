@@ -1,4 +1,5 @@
 """Components for searching for observations"""
+
 from logging import getLogger
 
 from pyinaturalist import Observation

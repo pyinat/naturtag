@@ -1,4 +1,5 @@
 """Internationalization utilities"""
+
 import json
 import sqlite3
 from logging import getLogger

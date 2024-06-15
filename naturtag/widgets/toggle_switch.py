@@ -1,6 +1,7 @@
 """Material-style toggle switch.
 Source: https://stackoverflow.com/a/51825815/15592055
 """
+
 from PySide6.QtCore import Property, QPropertyAnimation, QRectF, QSize, Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QAbstractButton, QSizePolicy

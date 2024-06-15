@@ -1,6 +1,5 @@
 """Misc URL and string parsing utilities"""
 
-
 from typing import Optional
 from urllib.parse import urlparse
 

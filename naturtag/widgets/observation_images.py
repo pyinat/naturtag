@@ -1,4 +1,5 @@
 """Image widgets specifically for observation photos"""
+
 from logging import getLogger
 from string import capwords
 from typing import Iterable, Optional

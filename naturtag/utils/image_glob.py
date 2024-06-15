@@ -1,4 +1,5 @@
 """Utilities for finding and resolving image paths from directories, URIs, and/or glob patterns"""
+
 from fnmatch import fnmatch
 from glob import glob
 from itertools import chain
