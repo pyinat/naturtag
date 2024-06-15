@@ -1,4 +1,5 @@
 """Main Qt app window and entry point"""
+
 import sys
 import webbrowser
 from datetime import datetime

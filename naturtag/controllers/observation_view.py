@@ -1,4 +1,5 @@
 """Components for displaying taxon info"""
+
 # TODO: code reuse with taxon_view
 # TODO: nav history
 import webbrowser

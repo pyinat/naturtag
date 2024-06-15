@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Get app version from poetry config"""
+
 from pathlib import Path
 
 import tomlkit

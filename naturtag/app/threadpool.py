@@ -1,4 +1,5 @@
 """Adapted from examples in Python & Qt6 by Martin Fitzpatrick"""
+
 from logging import getLogger
 from threading import RLock
 from typing import Callable, Optional
