@@ -6,13 +6,32 @@ from pathlib import Path
 from time import time
 from typing import TYPE_CHECKING, Optional
 
-from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
+from pyinaturalist import (
+    ClientSession,
+    Observation,
+    Photo,
+    Taxon,
+    WrapperPaginator,
+    iNatClient,
+)
+from pyinaturalist.constants import MultiInt
 from pyinaturalist.controllers import ObservationController, TaxonController
-from pyinaturalist.converters import format_file_size
-from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
+from pyinaturalist.converters import ensure_list, format_file_size
+from pyinaturalist_convert.db import (
+    get_db_observations,
+    get_db_taxa,
+    save_observations,
+    save_taxa,
+)
 from requests_cache import SQLiteDict
 
-from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
+from naturtag.constants import (
+    DB_PATH,
+    DEFAULT_PAGE_SIZE,
+    IMAGE_CACHE,
+    ROOT_TAXON_ID,
+    PathOrStr,
+)
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -30,7 +49,7 @@ class iNatDbClient(iNatClient):
         self.taxa = TaxonDbController(self)
         self.observations = ObservationDbController(self, taxon_controller=self.taxa)
 
-    def from_ids(
+    def from_id(
         self, observation_id: Optional[int] = None, taxon_id: Optional[int] = None
     ) -> Optional[Observation]:
         """Get an iNaturalist observation and/or taxon matching the specified ID(s). If only a taxon ID
@@ -67,11 +86,16 @@ class ObservationDbController(ObservationController):
         self.taxon_controller = taxon_controller
 
     def from_ids(
-        self, *observation_ids, refresh: bool = False, taxonomy: bool = False, **params
+        self,
+        observation_ids: MultiInt,
+        refresh: bool = False,
+        taxonomy: bool = False,
+        **params,
     ) -> WrapperPaginator[Observation]:
         """Get observations by ID; first from the database, then from the API"""
         # Get any observations saved in the database (unless refreshing)
         start = time()
+        observation_ids = ensure_list(observation_ids)
         if refresh:
             observations = []
         else:
@@ -82,7 +106,7 @@ class ObservationDbController(ObservationController):
         remaining_ids = set(observation_ids) - {obs.id for obs in observations}
         if remaining_ids:
             logger.debug(f'Fetching remaining {len(remaining_ids)} observations from API')
-            api_results = super().from_ids(*remaining_ids, **params).all()
+            api_results = super().from_ids(remaining_ids, **params).all()
             observations.extend(api_results)
             self.save(api_results)
 
@@ -155,7 +179,7 @@ class ObservationDbController(ObservationController):
 class TaxonDbController(TaxonController):
     def from_ids(
         self,
-        *taxon_ids: int,
+        taxon_ids: MultiInt,
         accept_partial: bool = False,
         refresh: bool = False,
         **params,
@@ -163,14 +187,15 @@ class TaxonDbController(TaxonController):
         """Get taxa by ID; first from the database, then from the API"""
         # Get any taxa saved in the database (unless refreshing)
         start = time()
-        taxa = [] if refresh else self._get_db_taxa(list(taxon_ids), accept_partial)
+        taxon_ids = ensure_list(taxon_ids)
+        taxa = [] if refresh else self._get_db_taxa(taxon_ids, accept_partial)
         logger.debug(f'{len(taxa)} taxa found in database')
 
         # Get remaining taxa from the API and save to the database
         remaining_ids = set(taxon_ids) - {taxon.id for taxon in taxa}
         if remaining_ids:
             logger.debug(f'Fetching remaining {len(remaining_ids)} taxa from API')
-            api_results = super().from_ids(*remaining_ids, **params).all() if remaining_ids else []
+            api_results = super().from_ids(remaining_ids, **params).all() if remaining_ids else []
             taxa.extend(api_results)
             save_taxa(api_results, self.client.db_path)
 
@@ -193,7 +218,7 @@ class TaxonDbController(TaxonController):
         Besides, some may be missing and need to be fetched from the API.
         """
         fetch_ids = chain.from_iterable([t.ancestor_ids + t.child_ids for t in taxa])
-        extended_taxa = {t.id: t for t in self.from_ids(*set(fetch_ids), accept_partial=True)}
+        extended_taxa = {t.id: t for t in self.from_ids(set(fetch_ids), accept_partial=True)}
 
         for taxon in taxa:
             # Depending on data source, the taxon itself may have already been added to ancestry

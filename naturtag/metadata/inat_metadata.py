@@ -59,7 +59,7 @@ def tag_images(
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
 
-    observation = client.from_ids(observation_id, taxon_id)
+    observation = client.from_id(observation_id, taxon_id)
     if not observation:
         return []
 
@@ -141,7 +141,7 @@ def _refresh_tags(
 
     logger.debug(f'Refreshing tags for {metadata.image_path}')
     settings = settings or Settings.read()
-    observation = client.from_ids(metadata.observation_id, metadata.taxon_id)
+    observation = client.from_id(metadata.observation_id, metadata.taxon_id)
     metadata = observation_to_metadata(
         observation,
         common_names=settings.common_names,
