@@ -26,9 +26,11 @@ class ThreadPool(QThreadPool):
     bar.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, n_worker_threads: int = 0, **kwargs):
         super().__init__(**kwargs)
         self.progress = ProgressBar()
+        if n_worker_threads:
+            self.setMaxThreadCount(n_worker_threads)
 
     def schedule(
         self,

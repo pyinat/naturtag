@@ -62,7 +62,7 @@ class NaturtagApp(QApplication):
             root_level=self.settings.log_level_external,
             logfile=self.settings.logfile,
         )
-        self.threadpool = ThreadPool()
+        self.threadpool = ThreadPool(n_worker_threads=self.settings.n_worker_threads)
         self.user_dirs = UserDirs(self.settings)
 
 

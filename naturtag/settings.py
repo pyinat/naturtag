@@ -122,14 +122,17 @@ class Settings(YamlMixin):
 
     # iNaturalist
     all_ranks: bool = doc_field(
-        default=False, doc='Show all available taxonomic rank filters on taxon search page'
+        default=False,
+        doc='Show all available taxonomic rank filters on taxon search page',
     )
     casual_observations: bool = doc_field(
         default=True, doc='Include taxa from casual observations in user taxa list'
     )
     locale: str = doc_field(default='en', doc='Locale preference for species common names')
     preferred_place_id: int = doc_field(
-        default=1, converter=int, doc='Place preference for regional species common names'
+        default=1,
+        converter=int,
+        doc='Place preference for regional species common names',
     )
     search_locale: bool = doc_field(
         default=True, doc='Search common names for only your selected locale'
@@ -154,9 +157,11 @@ class Settings(YamlMixin):
     recent_image_dirs: list[Path] = field(factory=list)
     favorite_image_dirs: list[Path] = field(factory=list)
 
+    # Internal
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
     last_obs_check: Optional[datetime] = field(default=None)
+    n_worker_threads: int = field(default=1)
 
     @classmethod
     def read(cls, path: Path = CONFIG_PATH) -> 'Settings':  # type: ignore

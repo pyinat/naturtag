@@ -169,7 +169,7 @@ class TaxonTabs(QTabWidget):
         def get_recent_taxa():
             logger.info(f'Loading {len(display_ids)} user taxa')
             return client.taxa.from_ids(
-                *display_ids, locale=app.settings.locale, accept_partial=True
+                display_ids, locale=app.settings.locale, accept_partial=True
             ).all()
 
         future = app.threadpool.schedule(get_recent_taxa, priority=QThread.LowPriority)
