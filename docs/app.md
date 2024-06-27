@@ -138,22 +138,18 @@ Key(s)         | Action                      | Tab/Screen
 `Ctrl+R`       | Run image tagger            | Photos
 `Ctrl+Shift+R` | Run image tag refresh       | Photos
 `Ctrl+X`       | Clear selected images       | Photos
-               |                             |
 `Ctrl+Enter`   | Run search                  | Species
 `Ctrl+Shift+X` | Clear search fields         | Species
 `Ctrl+Left`    | View previous taxon         | Species
 `Ctrl+Right`   | View next taxon             | Species
 `Alt+Up`       | View parent taxon           | Species
-               |                             |
 `F5`           | Refresh observations        | Observations
 `Ctrl+Left`    | View previous page          | Observations
 `Ctrl+Right`   | View next page              | Observations
-               |                             |
 `Left`         | View previous image         | Fullscreen image (local photo or taxon)
 `Right`        | View next image             | Fullscreen image (local photo or taxon)
 `Escape`       | Exit fullscreen view        | Fullscreen image (local photo or taxon)
 `Del`          | Remove image from selection | Fullscreen image (local photo)
-               |                             |
 `Ctrl+Tab`     | Cycle through tabs          | All
 `Ctrl+Shift+F` | Add a directory to favorites| All
 `Ctrl+Shift+T` | Toggle toolbar visibility   | All

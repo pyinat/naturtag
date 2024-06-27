@@ -84,9 +84,7 @@ pip install naturtag
 ## Usage
 
 ### GUI
-The main interface for this project is still a work in progress.
-
-It includes an interface for selecting and tagging images:
+Naturtag is primarily a desktop application. It includes an interface for selecting and tagging images:
 
 ![Screenshot](assets/screenshots/image-selector.png)
 

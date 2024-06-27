@@ -1,10 +1,11 @@
+(library)=
 # {fa}`list` API Reference
 This section documents all the modules included in naturtag. Many of these are internal modules,
 and likely only relevant if you are interested in contributing to naturtag.
 
 ## Main entry points
-To use some of the features of naturtag in your own code, the following functions and classes are
-the main entry points:
+To use the core tagging features in your own code, the following functions and classes are the main
+entry points:
 
 ```{eval-rst}
 .. currentmodule:: naturtag.metadata.inat_metadata

@@ -1,12 +1,12 @@
 # {fa}`download` Installation
-Package downloads can be found on [GitHub Releases](https://github.com/pyinat/naturtag/releases).
+Downloads can be found on [GitHub Releases](https://github.com/pyinat/naturtag/releases).
 Platform-specific installation instructions are below:
 
 <!-- TODO: portable (.tar.gz) download links & instructions -->
 
 ```{warning}
-These packages and installers are brand new, and not yet thoroughly tested on all platforms.
-Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if you find any issues!
+These packages and installers have not yet been thoroughly tested on all platforms.
+Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if you encounter any installation issues!
 ```
 
 ::::{tab-set}
@@ -64,7 +64,7 @@ A Windows installer is available here:
 
 
 ## Python package
-You can also install naturtag as a regular python package, if you prefer:
+You can also use naturtag as a {ref}`plain python library <library>`, if you prefer:
 * First, [install python 3.10](https://www.python.org/downloads/) if you don't have it yet.
 * It's recommended to install into a [virtual environment](https://docs.python.org/3/library/venv.html).
 * Install with `pip`:

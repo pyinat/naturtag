@@ -2,7 +2,7 @@
 
 ## 0.8.0 (Unreleased)
 **UI:**
-* Add tab for basic observation details
+* Add tab for browsing user's observations
 * When an observation is selected, show a summary of basic observation details on main screen
 * Display observation count and leaf taxon count on taxon info cards
 * Add support for displaying and searching common names in any language supported by iNaturalist.org
