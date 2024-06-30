@@ -1,16 +1,17 @@
 # Build pyinstaller package prior to creating Windows installer
 
-# Create virtualenv
-# python -m venv  $env:USERPROFILE\.virtualenvs\naturtag
+# Create virtualenv (if needed)
+# python3.11 -m venv  $env:USERPROFILE\.virtualenvs\naturtag
 
-# Install poetry
+# Install poetry (if needed)
 # Invoke-WebRequest -Uri https://install.python-poetry.org -OutFile install-poetry.py
 # python install-poetry.py --preview
 # ~\AppData\Roaming\Python\Scripts\poetry.exe config virtualenvs.create false
 
 # Install dependencies
 . ~\.virtualenvs\naturtag\Scripts\activate.ps1
-poetry install -v --no-dev
+poetry self update
+poetry install -v --only main
 pip install -U setuptools pyinstaller
 pyinstaller -y packaging\naturtag.spec
 
@@ -19,6 +20,3 @@ pyinstaller -y packaging\naturtag.spec
 #  2. Run installer
 #  3. Open Naturtag and test basic features
 Invoke-Item packaging\naturtag.aip
-
-# Launch InstallForge
-# Invoke-Item packaging\naturtag.ifp

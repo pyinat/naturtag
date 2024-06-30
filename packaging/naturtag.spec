@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from PyInstaller.compat import is_darwin, is_linux, is_win
+from PyInstaller.utils.hooks import copy_metadata
 
 BUILD_PY_VERSION = '3.11'
 PROJECT_NAME = 'naturtag'
@@ -17,9 +18,16 @@ VENV_DIR = CI_VENV_DIR if CI_VENV_DIR.is_dir() else LOCAL_VENV_DIR
 LIB_DIR_WIN = VENV_DIR / 'Lib' / 'site-packages' / 'pyexiv2' / 'lib'
 LIB_DIR_NIX = VENV_DIR / 'lib' / f'python{BUILD_PY_VERSION}' / 'site-packages' / 'pyexiv2' / 'lib'
 
-# Define platform-specific dependencies
 binaries = []
+datas = [
+    (str(ICONS_DIR / '*.ico'), 'assets/icons'),
+    (str(ICONS_DIR / '*.png'), 'assets/icons'),
+    (str(ASSETS_DATA_DIR / '*.qss'), 'assets/data'),
+    (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
+]
 hiddenimports = []
+
+# Define platform-specific dependencies
 if is_win:
     binaries = [
         (str(LIB_DIR_WIN / 'exiv2.dll'), '.'),
@@ -39,16 +47,14 @@ elif is_linux:
 else:
     raise NotImplementedError
 
+# Ensure package metadata is available for importlib.metadata
+datas += copy_metadata('naturtag')
+
 a = Analysis(
     [str(PACKAGE_DIR / 'app' / 'app.py')],
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
-    datas=[
-        (str(ICONS_DIR / '*.ico'), 'assets/icons'),
-        (str(ICONS_DIR / '*.png'), 'assets/icons'),
-        (str(ASSETS_DATA_DIR / '*.qss'), 'assets/data'),
-        (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
-    ],
+    datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
