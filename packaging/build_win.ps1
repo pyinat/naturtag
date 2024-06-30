@@ -10,7 +10,8 @@
 
 # Install dependencies
 . ~\.virtualenvs\naturtag\Scripts\activate.ps1
-poetry install -v --no-dev
+poetry self update
+poetry install -v --only main
 pip install -U setuptools pyinstaller
 pyinstaller -y packaging\naturtag.spec
 

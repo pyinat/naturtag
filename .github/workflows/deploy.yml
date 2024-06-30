@@ -57,7 +57,7 @@ jobs:
       - name: Install python packages
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          poetry install -v --without dev
+          poetry install -v --only main
           poetry run pip install -U pyinstaller setuptools
 
       - name: Build pyinstaller package
