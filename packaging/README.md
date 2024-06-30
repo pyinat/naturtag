@@ -27,5 +27,7 @@ This directory contains scripts and config for building Naturtag packages in the
 
 ## Release
 * Create and push new git tag. This will trigger jobs to build packages and create a new GitHub release.
-* Manually upload full taxonomy db (`taxonomy-full.tar.gz`) to the new release's assets
-* Manually upload Windows installer (`naturtag-installer.exe`) to the new release's assets
+* Most release assets will be built by the CI job, except for the following, which must be uploaded manually:
+  * Full taxonomy db (`taxonomy-full.tar.gz`)
+  * Windows installer (`naturtag-installer.exe`)
+* Publish the GitHub release (by default, it will be created in draft mode)

@@ -148,6 +148,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: 'naturtag*'
+          body: |
+            See changelog for release details: https://github.com/pyinat/naturtag/blob/main/HISTORY.md
+            See docs for installation instructions: https://naturtag.readthedocs.io/en/stable/installation.html
+          draft: true
 
   # Publish python package to PyPI
   release-pypi-package:
