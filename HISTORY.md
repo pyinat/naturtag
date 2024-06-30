@@ -28,6 +28,7 @@
 * In refresh mode, check for taxonomy changes and update tags with the new taxon (1:1 changes only)
 
 **Database:**
+* Update packaged taxonomy db with iNaturalist data from June 2024
 * Include data for most commonly observed taxa with PyInstaller packages and platform-specific installers
 * Pre-compute ancestor IDs, child IDs, iconic taxon, observation count, and leaf taxon count based
   on RG observations from GBIF export
