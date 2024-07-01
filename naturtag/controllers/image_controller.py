@@ -24,10 +24,8 @@ class ImageController(BaseController):
     """Controller for selecting and tagging local image files"""
 
     on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
-    on_select_taxon_id = Signal(int)  #: A taxon ID was entered
-    on_select_taxon_tab = Signal()  #: Request to switch to taxon tab
-    on_select_observation_id = Signal(int)  #: An observation ID was entered
-    on_select_observation_tab = Signal()  #: Request to switch to observation tab
+    on_view_taxon_id = Signal()  #: Request to switch to taxon tab
+    on_view_observation_id = Signal()  #: Request to switch to observation tab
 
     def __init__(self):
         super().__init__()
@@ -53,8 +51,8 @@ class ImageController(BaseController):
         inputs_layout.addWidget(self.input_taxon_id)
 
         # Notify other controllers when an ID is selected from input text
-        self.input_obs_id.on_select.connect(self.on_select_observation_id)
-        self.input_taxon_id.on_select.connect(self.on_select_taxon_id)
+        self.input_obs_id.on_select.connect(self.select_observation_by_id)
+        self.input_taxon_id.on_select.connect(self.select_taxon_by_id)
 
         # Selected taxon/observation info
         group_box = QGroupBox('Metadata source')
@@ -70,8 +68,6 @@ class ImageController(BaseController):
 
         # Image gallery
         self.gallery = ImageGallery()
-        self.gallery.on_select_observation.connect(self.on_select_observation_tab)
-        self.gallery.on_select_taxon.connect(self.on_select_taxon_tab)
         photo_layout.addWidget(self.gallery)
 
     def run(self):
@@ -139,28 +135,36 @@ class ImageController(BaseController):
         # Check for IDs if an iNat URL was pasted
         observation_id, taxon_id = get_ids_from_url(text)
         if observation_id:
-            self.on_select_observation_id.emit(observation_id)
+            self.select_observation_by_id(observation_id)
         elif taxon_id:
-            self.on_select_taxon_id.emit(taxon_id)
+            self.select_taxon_by_id(taxon_id)
         # If not an iNat URL, check for valid image paths
         else:
             self.gallery.load_images(text.splitlines())
 
+    # TODO
+    def select_taxon_by_id(self, taxon_id: int):
+        pass
+
+    # TODO
+    def select_observation_by_id(self, observation_id: int):
+        pass
+
     @Slot(Taxon)
     def select_taxon(self, taxon: Taxon):
-        """Update input info from a taxon object (loaded from Species tab)"""
+        """Update input info from a taxon object"""
         if self.input_taxon_id.text() == str(taxon.id):
             return
 
         self.input_taxon_id.set_id(taxon.id)
         self.data_source_card.clear()
         card = TaxonInfoCard(taxon=taxon, delayed_load=False)
-        card.on_click.connect(self.on_select_taxon_tab)
+        card.on_click.connect(self.on_view_taxon_id)
         self.data_source_card.addWidget(card)
 
     @Slot(Observation)
     def select_observation(self, observation: Observation):
-        """Update input info from an observation object (loaded from Observations tab)"""
+        """Update input info from an observation object"""
         if self.input_obs_id.text() == str(observation.id):
             return
 
@@ -168,7 +172,7 @@ class ImageController(BaseController):
         self.input_taxon_id.set_id(observation.taxon.id)
         self.data_source_card.clear()
         card = ObservationInfoCard(obs=observation, delayed_load=False)
-        card.on_click.connect(self.on_select_observation_tab)
+        card.on_click.connect(self.on_view_observation_id)
         self.data_source_card.addWidget(card)
 
     def info(self, message: str):
