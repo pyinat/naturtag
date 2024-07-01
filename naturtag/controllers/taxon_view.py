@@ -29,15 +29,20 @@ logger = getLogger(__name__)
 class TaxonInfoSection(HorizontalLayout):
     """Section to display selected taxon photo and basic info"""
 
-    on_select = Signal(Taxon)  #: A taxon object was selected (from nav or another screen)
-    on_select_id = Signal(int)  #: A taxon ID was selected (from 'parent' button)
+    on_select = Signal(Taxon)  #: A taxon was selected for tagging
+    on_view_observations = Signal(Taxon)  #: A taxon was selected for filtering observations
+
+    # When selecting a taxon for viewing, a signal is sent to controller instead of handling here,
+    #   since there are multiple sections to load (not just this class)
+    on_view_taxon = Signal(Taxon)  #: A taxon was selected for viewing (from nav or another screen)
+    on_view_taxon_by_id = Signal(int)  #: A taxon ID was selected for viewing (from 'parent' button)
 
     def __init__(self):
         super().__init__()
         self.hist_prev: deque[Taxon] = deque()  # Viewing history for current session only
         self.hist_next: deque[Taxon] = deque()  # Set when loading from history
         self.history_taxon: Taxon = None  # Set when loading from history, to avoid loop
-        self.selected_taxon: Taxon = None
+        self.displayed_taxon: Taxon = None
 
         self.group_box = QGroupBox('No taxon selected')
         root = VerticalLayout(self.group_box)
@@ -47,7 +52,7 @@ class TaxonInfoSection(HorizontalLayout):
         self.setAlignment(Qt.AlignTop)
 
         # Medium taxon default photo
-        self.image = TaxonPhoto(hover_icon=True, hover_event=False)  # Disabled until 1st load
+        self.image = TaxonPhoto(hover_icon=True, hover_event=False)  # Disabled until first load
         self.image.setFixedHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
         images.addWidget(self.image)
@@ -58,34 +63,59 @@ class TaxonInfoSection(HorizontalLayout):
         self.thumbnails.setAlignment(Qt.AlignTop)
         images.addLayout(self.thumbnails)
 
-        # Back and Forward buttons: We already have the full Taxon object
-        button_layout = HorizontalLayout()
+        # Button layout
+        button_layout = VerticalLayout()
+        button_row_1 = HorizontalLayout()
+        button_row_2 = HorizontalLayout()
+        button_layout.addLayout(button_row_1)
+        button_layout.addLayout(button_row_2)
         root.addLayout(button_layout)
+
+        # Back and Forward buttons: We already have the full Taxon object
         self.prev_button = QPushButton('Back')
         self.prev_button.setIcon(fa_icon('ei.chevron-left'))
         self.prev_button.clicked.connect(self.prev)
         self.prev_button.setEnabled(False)
-        button_layout.addWidget(self.prev_button)
+        button_row_1.addWidget(self.prev_button)
 
         self.next_button = QPushButton('Forward')
         self.next_button.setIcon(fa_icon('ei.chevron-right'))
         self.next_button.clicked.connect(self.next)
         self.next_button.setEnabled(False)
-        button_layout.addWidget(self.next_button)
+        button_row_1.addWidget(self.next_button)
 
-        # Parent button: We need to fetch the full Taxon object, so just pass the ID
+        # Parent button: Full Taxon object isn't available, so just pass the ID
         self.parent_button = QPushButton('Parent')
         self.parent_button.setIcon(fa_icon('ei.chevron-up'))
         self.parent_button.clicked.connect(self.select_parent)
         self.parent_button.setEnabled(False)
-        button_layout.addWidget(self.parent_button)
+        button_row_1.addWidget(self.parent_button)
+
+        # Select button: Use taxon for tagging
+        self.select_button = QPushButton('Select')
+        self.select_button.setIcon(fa_icon('fa.tag', primary=True))
+        self.select_button.clicked.connect(lambda: self.on_select.emit(self.displayed_taxon))
+        self.select_button.setEnabled(False)
+        self.select_button.setToolTip('Select this taxon for tagging')
+        button_row_2.addWidget(self.select_button)
+
+        # View observations button
+        # TODO: Observation filters
+        self.view_observations_button = QPushButton('View Observations')
+        self.view_observations_button.setIcon(fa_icon('fa5s.binoculars', primary=True))
+        self.view_observations_button.clicked.connect(
+            lambda: self.on_view_observations.emit(self.displayed_taxon.id)
+        )
+        self.view_observations_button.setEnabled(False)
+        self.select_button.setToolTip('View your observations of this taxon')
+        button_row_2.addWidget(self.view_observations_button)
 
         # Link button: Open web browser to taxon info page
         self.link_button = QPushButton('View on iNaturalist')
         self.link_button.setIcon(fa_icon('mdi.web', primary=True))
-        self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_taxon.url))
+        self.link_button.clicked.connect(lambda: webbrowser.open(self.displayed_taxon.url))
         self.link_button.setEnabled(False)
-        button_layout.addWidget(self.link_button)
+        button_row_2.addWidget(self.link_button)
 
         # Fullscreen image viewer
         self.image_window = TaxonImageWindow()
@@ -93,12 +123,12 @@ class TaxonInfoSection(HorizontalLayout):
 
     def load(self, taxon: Taxon):
         """Load default photo + additional thumbnails"""
-        if self.selected_taxon and taxon.id == self.selected_taxon.id:
+        if self.displayed_taxon and taxon.id == self.displayed_taxon.id:
             return
 
         # Append to nav history, unless we just loaded a taxon from history
-        if self.selected_taxon and taxon.id != getattr(self.history_taxon, 'id', None):
-            self.hist_prev.append(self.selected_taxon)
+        if self.displayed_taxon and taxon.id != getattr(self.history_taxon, 'id', None):
+            self.hist_prev.append(self.displayed_taxon)
             self.hist_next.clear()
         logger.debug(
             f'Navigation: {" | ".join([t.name for t in self.hist_prev])} | [{taxon.name}] | '
@@ -107,7 +137,7 @@ class TaxonInfoSection(HorizontalLayout):
 
         # Set title and main photo
         self.history_taxon = None
-        self.selected_taxon = taxon
+        self.displayed_taxon = taxon
         self.group_box.setTitle(taxon.full_name)
         self.image.hover_event = True
         self.image.taxon = taxon
@@ -117,7 +147,7 @@ class TaxonInfoSection(HorizontalLayout):
             size='medium',
             priority=QThread.HighPriority,
         )
-        self._update_nav_buttons()
+        self._update_buttons()
 
         # Load additional thumbnails
         self.thumbnails.clear()
@@ -132,35 +162,33 @@ class TaxonInfoSection(HorizontalLayout):
         if not self.hist_prev:
             return
         self.history_taxon = self.hist_prev.pop()
-        self.hist_next.appendleft(self.selected_taxon)
-        self.on_select.emit(self.history_taxon)
+        self.hist_next.appendleft(self.displayed_taxon)
+        self.on_view_taxon.emit(self.history_taxon)
 
     def next(self):
         if not self.hist_next:
             return
         self.history_taxon = self.hist_next.popleft()
-        self.hist_prev.append(self.selected_taxon)
-        self.on_select.emit(self.history_taxon)
-
-    def select_taxon(self, taxon: Taxon):
-        self.load(taxon)
-        self.on_select.emit(taxon)
+        self.hist_prev.append(self.displayed_taxon)
+        self.on_view_taxon.emit(self.history_taxon)
 
     def select_parent(self):
-        self.on_select_id.emit(self.selected_taxon.parent_id)
+        self.on_view_taxon_by_id.emit(self.displayed_taxon.parent_id)
 
-    def _update_nav_buttons(self):
-        """Update status and tooltip for 'back', 'forward', 'parent', and 'view on iNat' buttons"""
+    def _update_buttons(self):
+        """Update status and tooltip for nav and selection buttons"""
         self.prev_button.setEnabled(bool(self.hist_prev))
         self.prev_button.setToolTip(self.hist_prev[-1].full_name if self.hist_prev else None)
         self.next_button.setEnabled(bool(self.hist_next))
         self.next_button.setToolTip(self.hist_next[0].full_name if self.hist_next else None)
-        self.parent_button.setEnabled(bool(self.selected_taxon.parent))
+        self.parent_button.setEnabled(bool(self.displayed_taxon.parent))
         self.parent_button.setToolTip(
-            self.selected_taxon.parent.full_name if self.selected_taxon.parent else None
+            self.displayed_taxon.parent.full_name if self.displayed_taxon.parent else None
         )
+        self.select_button.setEnabled(True)
+        # self.view_observations_button.setEnabled(True)
         self.link_button.setEnabled(True)
-        self.link_button.setToolTip(self.selected_taxon.url)
+        self.link_button.setToolTip(self.displayed_taxon.url)
 
 
 class TaxonomySection(HorizontalLayout):

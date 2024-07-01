@@ -35,7 +35,7 @@ class TaxonController(BaseController):
 
         # Search inputs
         self.search = TaxonSearch()
-        self.search.autocomplete.on_select.connect(self.select_taxon)
+        self.search.autocomplete.on_select.connect(self.display_taxon_by_id)
         self.search.on_results.connect(self.set_search_results)
         self.on_select.connect(self.search.set_taxon)
         self.root.addLayout(self.search)
@@ -49,8 +49,8 @@ class TaxonController(BaseController):
 
         # Selected taxon info
         self.taxon_info = TaxonInfoSection()
-        self.taxon_info.on_select_id.connect(self.select_taxon)
-        self.taxon_info.on_select.connect(self.display_taxon)
+        self.taxon_info.on_view_taxon_by_id.connect(self.display_taxon_by_id)
+        self.taxon_info.on_view_taxon.connect(self.display_taxon)
         self.taxonomy = TaxonomySection(self.user_taxa)
         taxon_layout = VerticalLayout()
         taxon_layout.addLayout(self.taxon_info)
@@ -60,11 +60,12 @@ class TaxonController(BaseController):
         # Navigation keyboard shortcuts
         self.add_shortcut('Ctrl+Left', self.taxon_info.prev)
         self.add_shortcut('Ctrl+Right', self.taxon_info.next)
-        self.add_shortcut('Alt+Up', self.taxon_info.select_parent)
+        self.add_shortcut('Ctrl+Up', self.taxon_info.select_parent)
         self.add_shortcut('Ctrl+Shift+Enter', self.search.search)
         self.add_shortcut('Ctrl+Shift+X', self.search.reset)
 
-    def select_taxon(self, taxon_id: int):
+    @Slot(int)
+    def display_taxon_by_id(self, taxon_id: int):
         """Load a taxon by ID and update info display. Taxon API request will be sent from a
         separate thread, return to main thread, and then display info will be loaded from a separate
         thread.
@@ -106,7 +107,7 @@ class TaxonController(BaseController):
     def bind_selection(self, taxon_cards: Iterable[TaxonInfoCard]):
         """Connect click signal from each taxon card"""
         for taxon_card in taxon_cards:
-            taxon_card.on_click.connect(self.select_taxon)
+            taxon_card.on_click.connect(self.display_taxon_by_id)
 
 
 class TaxonTabs(QTabWidget):

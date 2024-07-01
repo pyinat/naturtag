@@ -87,24 +87,18 @@ class MainWindow(QMainWindow):
         self.observation_controller.on_message.connect(self.info)
 
         # Select observation/taxon from image context menu, ID input fields, and iconic taxa filters
-        self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
+        self.image_controller.gallery.on_select_taxon.connect(
+            self.taxon_controller.display_taxon_by_id
+        )
         self.image_controller.gallery.on_select_observation.connect(
             self.observation_controller.display_observation_by_id
         )
         self.image_controller.on_select_observation_id.connect(
             self.observation_controller.display_observation_by_id
         )
-        self.image_controller.on_select_taxon_id.connect(self.taxon_controller.select_taxon)
+        self.image_controller.on_select_taxon_id.connect(self.taxon_controller.display_taxon_by_id)
         self.taxon_controller.search.iconic_taxon_filters.on_select.connect(
-            self.taxon_controller.select_taxon
-        )
-
-        # Update photo tab when a taxon is selected
-        self.taxon_controller.on_select.connect(self.image_controller.select_taxon)
-
-        # Update photo tab when an observation is selected
-        self.observation_controller.obs_info.on_select.connect(
-            self.image_controller.select_observation
+            self.taxon_controller.display_taxon_by_id
         )
 
         # Settings that take effect immediately
@@ -133,6 +127,7 @@ class MainWindow(QMainWindow):
         self.tabs.setTabVisible(self.log_tab_idx, self.app.settings.show_logs)
 
         # Switch to different tab if requested from Photos tab
+        # TODO: this could be simplified a bit: connect both select and switch from controller.gallery
         self.image_controller.on_select_taxon_tab.connect(
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )
@@ -146,6 +141,26 @@ class MainWindow(QMainWindow):
         )
         self.observation_controller.obs_info.on_view_taxon.connect(
             lambda: self.tabs.setCurrentWidget(self.taxon_controller)
+        )
+
+        # Display observation and switch tabs for 'view observations' button
+        # self.observation_controller.obs_info.on_view_taxon.connect(
+        #     lambda taxon: self.taxon_controller.display_taxon(taxon, notify=False)
+        # )
+        # self.observation_controller.obs_info.on_view_taxon.connect(
+        #     lambda: self.tabs.setCurrentWidget(self.taxon_controller)
+        # )
+
+        # Select taxon or observation for tagging and switch to Photos tab
+        self.taxon_controller.taxon_info.on_select.connect(self.image_controller.select_taxon)
+        self.taxon_controller.taxon_info.on_select.connect(
+            lambda: self.tabs.setCurrentWidget(self.image_controller)
+        )
+        self.observation_controller.obs_info.on_select.connect(
+            self.image_controller.select_observation
+        )
+        self.observation_controller.obs_info.on_select.connect(
+            lambda: self.tabs.setCurrentWidget(self.image_controller)
         )
 
         # Connect file picker <--> recent/favorite dirs
