@@ -6,7 +6,7 @@ import webbrowser
 from collections import deque
 from logging import getLogger
 
-from pyinaturalist import Observation
+from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton
 
@@ -29,7 +29,8 @@ logger = getLogger(__name__)
 class ObservationInfoSection(HorizontalLayout):
     """Section to display selected observation photos and info"""
 
-    on_select = Signal(Observation)  #: An observation was selected
+    on_select = Signal(Observation)  #: An observation was selected for tagging
+    on_view_taxon = Signal(Taxon)  #: A taxon was selected for viewing
 
     def __init__(self):
         super().__init__()
@@ -90,7 +91,24 @@ class ObservationInfoSection(HorizontalLayout):
         # self.parent_button.clicked.connect(self.select_parent)
         # button_layout.addWidget(self.parent_button)
 
-        # # Link button: Open web browser to taxon info page
+        # Select button: Use observation for tagging
+        self.select_button = QPushButton('Select')
+        self.select_button.setIcon(fa_icon('fa.tag', primary=True))
+        self.select_button.clicked.connect(lambda: self.on_select.emit(self.selected_observation))
+        self.select_button.setEnabled(False)
+        self.select_button.setToolTip('Select this observation for tagging')
+        button_layout.addWidget(self.select_button)
+
+        # View taxon button
+        self.view_taxon_button = QPushButton('View Taxon')
+        self.view_taxon_button.setIcon(fa_icon('fa5s.spider', primary=True))
+        self.view_taxon_button.clicked.connect(
+            lambda: self.on_view_taxon.emit(self.selected_observation.taxon)
+        )
+        self.view_taxon_button.setEnabled(False)
+        button_layout.addWidget(self.view_taxon_button)
+
+        # Link button: Open web browser to observation info page
         self.link_button = QPushButton('View on iNaturalist')
         self.link_button.setIcon(fa_icon('mdi.web', primary=True))
         self.link_button.clicked.connect(lambda: webbrowser.open(self.selected_observation.uri))
@@ -127,7 +145,7 @@ class ObservationInfoSection(HorizontalLayout):
             size='medium',
             priority=QThread.HighPriority,
         )
-        self._update_nav_buttons()
+        self._update_buttons()
 
         # Load additional thumbnails
         self.thumbnails.clear()
@@ -169,7 +187,7 @@ class ObservationInfoSection(HorizontalLayout):
         )
         self.details.add_line(
             GEOPRIVACY_ICONS.get(obs.geoprivacy, 'mdi.map-marker'),
-            f'<b>Coordinates:</b> {obs.private_location or obs.location} '
+            f"<b>Coordinates:</b> {obs.private_location or obs.location} "
             f'({obs.geoprivacy or "Unknown geoprivacy"})',
         )
         self.details.add_line(
@@ -191,12 +209,8 @@ class ObservationInfoSection(HorizontalLayout):
     #     self.hist_prev.append(self.selected_observation)
     #     self.on_select_obj.emit(self.history_taxon)
 
-    def select_observation(self, observation: Observation):
-        self.load(observation)
-        self.on_select.emit(observation)
-
-    def _update_nav_buttons(self):
-        """Update status and tooltip for 'back', 'forward', 'parent', and 'view on iNat' buttons"""
+    def _update_buttons(self):
+        """Update status and tooltip for nav and selection buttons"""
         # self.prev_button.setEnabled(bool(self.hist_prev))
         # self.prev_button.setToolTip(self.hist_prev[-1].full_name if self.hist_prev else None)
         # self.next_button.setEnabled(bool(self.hist_next))
@@ -207,3 +221,8 @@ class ObservationInfoSection(HorizontalLayout):
         # )
         self.link_button.setEnabled(True)
         self.link_button.setToolTip(self.selected_observation.uri)
+        self.view_taxon_button.setEnabled(True)
+        self.view_taxon_button.setToolTip(
+            f'See details for {self.selected_observation.taxon.full_name}'
+        )
+        self.select_button.setEnabled(True)

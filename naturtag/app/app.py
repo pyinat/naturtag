@@ -89,10 +89,10 @@ class MainWindow(QMainWindow):
         # Select observation/taxon from image context menu, ID input fields, and iconic taxa filters
         self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
         self.image_controller.gallery.on_select_observation.connect(
-            self.observation_controller.select_observation
+            self.observation_controller.display_observation_by_id
         )
         self.image_controller.on_select_observation_id.connect(
-            self.observation_controller.select_observation
+            self.observation_controller.display_observation_by_id
         )
         self.image_controller.on_select_taxon_id.connect(self.taxon_controller.select_taxon)
         self.taxon_controller.search.iconic_taxon_filters.on_select.connect(
@@ -102,10 +102,9 @@ class MainWindow(QMainWindow):
         # Update photo tab when a taxon is selected
         self.taxon_controller.on_select.connect(self.image_controller.select_taxon)
 
-        # Update photo and taxon tabs when an observation is selected
-        self.observation_controller.on_select.connect(self.image_controller.select_observation)
-        self.observation_controller.on_select.connect(
-            lambda obs: self.taxon_controller.display_taxon(obs.taxon, notify=False)
+        # Update photo tab when an observation is selected
+        self.observation_controller.obs_info.on_select.connect(
+            self.image_controller.select_observation
         )
 
         # Settings that take effect immediately
@@ -139,6 +138,14 @@ class MainWindow(QMainWindow):
         )
         self.image_controller.on_select_observation_tab.connect(
             lambda: self.tabs.setCurrentWidget(self.observation_controller)
+        )
+
+        # Display taxon and switch tabs for 'view taxon' button
+        self.observation_controller.obs_info.on_view_taxon.connect(
+            lambda taxon: self.taxon_controller.display_taxon(taxon, notify=False)
+        )
+        self.observation_controller.obs_info.on_view_taxon.connect(
+            lambda: self.tabs.setCurrentWidget(self.taxon_controller)
         )
 
         # Connect file picker <--> recent/favorite dirs
@@ -176,7 +183,7 @@ class MainWindow(QMainWindow):
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
-            self.observation_controller.select_observation(56830941)
+            self.observation_controller.display_observation_by_id(56830941)
 
     def check_username(self):
         """If username isn't saved, show popup dialog to prompt user to enter it"""
