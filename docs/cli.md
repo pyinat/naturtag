@@ -22,7 +22,13 @@ initialize it for the first time, reset it, or download missing data for taxon t
 
 Options:
 ```bash
+-d, --download           Download taxonomy data if it does not exist locally
 -f, --force              Reset database if it already exists
+```
+
+Example: Full reset and download, with debug logs:
+```bash
+nt -vv setup db -f -d
 ```
 
 ### Shell
