@@ -349,12 +349,6 @@ def setup(
     create_observation_fts_table(db_path)
     _load_taxon_db(db_path, download)
 
-    # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
-    # with sqlite3.connect(db_path) as conn:
-    #     conn.execute('UPDATE taxon SET partial=1')
-
-    vacuum_analyze(['taxon', 'taxon_fts'], db_path)
-
     logger.info('Setup complete')
     settings.setup_complete = True
     settings.last_obs_check = None
@@ -363,6 +357,7 @@ def setup(
 
 # TODO: Currently this isn't exposed through the UI or CLI; requires calling `setup(download=True)`.
 #   Not sure yet if this is a good idea to include.
+# TODO: Option to download full taxon db (all languages)
 def _download_taxon_db():
     logger.info(f'Downloading {TAXON_DB_URL} to {PACKAGED_TAXON_DB}')
     r = requests.get(TAXON_DB_URL, stream=True)
@@ -391,6 +386,12 @@ def _load_taxon_db(db_path: Path, download: bool = False):
 
         load_table(tmp_dir / 'taxon.csv', db_path, table_name='taxon')
         load_table(tmp_dir / 'taxon_fts.csv', db_path, table_name='taxon_fts')
+
+    # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
+    with sqlite3.connect(db_path) as conn:
+        conn.execute('UPDATE taxon SET partial=1')
+
+    vacuum_analyze(['taxon', 'taxon_fts'], db_path)
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
