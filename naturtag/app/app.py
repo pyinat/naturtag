@@ -27,7 +27,8 @@ from naturtag.app.threadpool import ThreadPool
 from naturtag.client import ImageSession, iNatDbClient
 from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
-from naturtag.settings import Settings, setup
+from naturtag.settings import Settings
+from naturtag.setup import setup
 from naturtag.widgets import VerticalLayout, init_handler
 
 # Provide an application group so Windows doesn't use the default 'python' icon
