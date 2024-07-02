@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QGroupBox, QPushButton
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import SIZE_SM
-from naturtag.storage import UserTaxa
+from naturtag.storage import AppState
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
@@ -195,7 +195,7 @@ class TaxonInfoSection(HorizontalLayout):
 class TaxonomySection(HorizontalLayout):
     """Section to display ancestors and children of selected taxon"""
 
-    def __init__(self, user_taxa: UserTaxa):
+    def __init__(self, user_taxa: AppState):
         super().__init__()
 
         self.ancestors_group = self.add_group(

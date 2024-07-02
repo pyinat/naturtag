@@ -5,7 +5,6 @@ from logging import getLogger
 from pathlib import Path
 from tarfile import TarFile
 from tempfile import TemporaryDirectory
-from typing import Optional
 
 import requests
 from pyinaturalist_convert import create_tables, load_table
@@ -15,17 +14,17 @@ from pyinaturalist_convert.fts import (
     vacuum_analyze,
 )
 
-from naturtag.constants import PACKAGED_TAXON_DB, TAXON_DB_URL
-from naturtag.storage import Settings
+from naturtag.constants import DB_PATH, PACKAGED_TAXON_DB, TAXON_DB_URL
+from naturtag.storage import AppState
 
 logger = getLogger().getChild(__name__)
 
 
 def setup(
-    settings: Optional[Settings] = None,
+    db_path: Path = DB_PATH,
     overwrite: bool = False,
     download: bool = False,
-):
+) -> AppState:
     """Run any first-time setup steps, if needed:
     * Create database tables
     * Extract packaged taxonomy data and load into SQLite
@@ -35,15 +34,16 @@ def setup(
     Use `download=True` to fetch the missing data.
 
     Args:
-        settings: Existing settings object
+        db_path: SQLite database path
         overwrite: Overwrite an existing taxon database, if it already exists
         download: Download taxon data (full text search + basic taxon details)
     """
-    settings = settings or Settings.read()
-    db_path = settings.db_path
-    if settings.setup_complete and not overwrite:
+    # Check if setup is needed
+    app_state = AppState.read(db_path)
+    app_state.check_version_change()
+    if app_state.setup_complete and not overwrite:
         logger.debug('Database setup already done')
-        return
+        return app_state
 
     logger.info('Running database setup')
     if overwrite:
@@ -64,10 +64,11 @@ def setup(
     create_observation_fts_table(db_path)
     _load_taxon_db(db_path, download)
 
+    app_state.setup_complete = True
+    app_state.last_obs_check = None
+    app_state.write()
     logger.info('Setup complete')
-    settings.setup_complete = True
-    settings.last_obs_check = None
-    settings.write()
+    return app_state
 
 
 # TODO: Currently this isn't exposed through the UI; requires calling `setup(download=True)` or

@@ -2,17 +2,16 @@
 
 # TODO: Finish and document portable mode / storing config and data in a user-specified path
 from datetime import datetime
-from importlib.metadata import version as pkg_version
 from logging import getLogger
 from pathlib import Path
 from typing import Optional
 
 import yaml
 from attr import define, field
-from cattr import Converter
-from cattr.preconf import pyyaml
+from cattrs import Converter
+from cattrs.preconf import pyyaml
 
-from naturtag.constants import APP_DIR, CONFIG_PATH, DEFAULT_WINDOW_SIZE, MAX_DIR_HISTORY, PathOrStr
+from naturtag.constants import APP_DIR, CONFIG_PATH, MAX_DIR_HISTORY, PathOrStr
 
 logger = getLogger().getChild(__name__)
 
@@ -45,7 +44,6 @@ def doc_field(doc: str = '', **kwargs):
 class Settings:
     # Display settings
     dark_mode: bool = field(default=False)
-    window_size: tuple[int, int] = field(default=DEFAULT_WINDOW_SIZE)
 
     # Logging settings
     log_level: str = doc_field(default='INFO', doc='Logging level')
@@ -92,9 +90,6 @@ class Settings:
 
     # Internal
     debug: bool = field(default=False)
-    setup_complete: bool = field(default=False)
-    last_obs_check: Optional[datetime] = field(default=None)
-    last_version: str = field(default='')
     n_worker_threads: int = field(default=1)
 
     # Shortcuts for application files within the user data dir
@@ -155,15 +150,6 @@ class Settings:
         with open(self.path, 'w') as f:
             yaml.safe_dump(attrs_dict, f)
 
-    def check_version_change(self):
-        """Check if the app version has changed since the last run"""
-        current_version = pkg_version('naturtag')
-        if self.last_version != current_version:
-            logger.info(f'Updated from {self.last_version} to {current_version}')
-            self.last_version = current_version
-            self.setup_complete = False
-            self.write()
-
     def add_favorite_dir(self, image_dir: Path):
         if image_dir not in self.favorite_image_dirs:
             self.favorite_image_dirs.append(image_dir)
@@ -188,7 +174,3 @@ class Settings:
         """Reset all settings to defaults"""
         self.__class__(path=self.path).write()
         self = self.__class__.read(path=self.path)
-
-    def set_obs_checkpoint(self):
-        self.last_obs_check = datetime.utcnow().replace(microsecond=0)
-        self.write()

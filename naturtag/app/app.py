@@ -47,9 +47,9 @@ class NaturtagApp(QApplication):
         self.setApplicationVersion(pkg_version('naturtag'))
         self.setOrganizationName('pyinat')
         self.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
-        self.settings = Settings.read()
 
     def post_init(self):
+        self.settings = Settings.read()
         self.log_handler = init_handler(
             self.settings.log_level,
             root_level=self.settings.log_level_external,
@@ -57,8 +57,7 @@ class NaturtagApp(QApplication):
         )
 
         # Run initial/post-update setup steps, if needed
-        self.settings.check_version_change()
-        setup(self.settings)
+        self.state = setup(self.settings.db_path)
 
         # Globally available application objects
         self.client = iNatDbClient(self.settings.db_path)
@@ -71,7 +70,7 @@ class MainWindow(QMainWindow):
     def __init__(self, app: NaturtagApp):
         super().__init__()
         self.setWindowTitle('Naturtag')
-        self.resize(*app.settings.window_size)
+        self.resize(*app.state.window_size)
         self.app = app
 
         # Controllers
@@ -211,7 +210,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, _):
         """Save settings before closing the app"""
         self.app.settings.write()
-        self.taxon_controller.user_taxa.write()
+        self.app.state.write()
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""

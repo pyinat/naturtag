@@ -14,7 +14,7 @@ from naturtag.controllers import (
     TaxonSearch,
     get_app,
 )
-from naturtag.storage import UserTaxa
+from naturtag.storage import AppState
 from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
 
 logger = getLogger(__name__)
@@ -27,7 +27,7 @@ class TaxonController(BaseController):
 
     def __init__(self):
         super().__init__()
-        self.user_taxa = UserTaxa.read(self.app.settings.db_path)
+        self.user_taxa = self.app.state
 
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
@@ -118,7 +118,7 @@ class TaxonTabs(QTabWidget):
 
     def __init__(
         self,
-        user_taxa: UserTaxa,
+        user_taxa: AppState,
         parent: Optional[QWidget] = None,
     ):
         super().__init__(parent)
@@ -222,6 +222,7 @@ class TaxonTabs(QTabWidget):
         """After fetching observation taxon counts for the user, add info cards for them"""
         self.observed.set_taxa(list(taxon_counts)[:MAX_DISPLAY_OBSERVED])
         self.user_taxa.update_observed(taxon_counts)
+        self.user_taxa.write()
         self.on_load.emit(list(self.observed.cards))
 
     @Slot(Taxon)
