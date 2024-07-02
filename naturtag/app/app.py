@@ -24,10 +24,9 @@ from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.style import fa_icon, set_theme
 from naturtag.app.threadpool import ThreadPool
-from naturtag.client import ImageSession, iNatDbClient
 from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
-from naturtag.settings import Settings, setup
+from naturtag.storage import ImageSession, Settings, iNatDbClient, setup
 from naturtag.widgets import VerticalLayout, init_handler
 
 # Provide an application group so Windows doesn't use the default 'python' icon
@@ -48,20 +47,21 @@ class NaturtagApp(QApplication):
         self.setApplicationVersion(pkg_version('naturtag'))
         self.setOrganizationName('pyinat')
         self.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
-        self.settings = Settings.read()
 
     def post_init(self):
-        # Run any first-time setup steps, if needed
-        setup(self.settings)
-
-        # Globally available application objects
-        self.client = iNatDbClient(self.settings.db_path)
-        self.img_session = ImageSession(self.settings.image_cache_path)
+        self.settings = Settings.read()
         self.log_handler = init_handler(
             self.settings.log_level,
             root_level=self.settings.log_level_external,
             logfile=self.settings.logfile,
         )
+
+        # Run initial/post-update setup steps, if needed
+        self.state = setup(self.settings.db_path)
+
+        # Globally available application objects
+        self.client = iNatDbClient(self.settings.db_path)
+        self.img_session = ImageSession(self.settings.image_cache_path)
         self.threadpool = ThreadPool(n_worker_threads=self.settings.n_worker_threads)
         self.user_dirs = UserDirs(self.settings)
 
@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
     def __init__(self, app: NaturtagApp):
         super().__init__()
         self.setWindowTitle('Naturtag')
-        self.resize(*app.settings.window_size)
+        self.resize(*app.state.window_size)
         self.app = app
 
         # Controllers
@@ -210,7 +210,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, _):
         """Save settings before closing the app"""
         self.app.settings.write()
-        self.taxon_controller.user_taxa.write()
+        self.app.state.write()
 
     def info(self, message: str):
         """Show a message both in the status bar and in the logs"""
@@ -238,7 +238,8 @@ class MainWindow(QMainWindow):
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
-        app_dir_link = f"<a href='{self.app.settings.data_dir}'>{self.app.settings.data_dir}</a>"
+        data_dir = self.app.settings.data_dir
+        app_dir_link = f"<a href='file://{data_dir}'>{data_dir}</a>"
 
         about.setText(
             f'<b>Naturtag v{version}</b><br/>'

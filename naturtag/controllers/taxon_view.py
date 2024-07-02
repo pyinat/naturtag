@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QGroupBox, QPushButton
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import SIZE_SM
-from naturtag.settings import UserTaxa
+from naturtag.storage import AppState
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
@@ -101,13 +101,14 @@ class TaxonInfoSection(HorizontalLayout):
 
         # View observations button
         # TODO: Observation filters
-        self.view_observations_button = QPushButton('View Observations')
-        self.view_observations_button.setIcon(fa_icon('fa5s.binoculars', primary=True))
-        self.view_observations_button.clicked.connect(
-            lambda: self.on_view_observations.emit(self.displayed_taxon.id)
-        )
+        # self.view_observations_button = QPushButton('View Observations')
+        self.view_observations_button = QPushButton('')
+        # self.view_observations_button.setIcon(fa_icon('fa5s.binoculars', primary=True))
+        # self.view_observations_button.clicked.connect(
+        #     lambda: self.on_view_observations.emit(self.displayed_taxon.id)
+        # )
         self.view_observations_button.setEnabled(False)
-        self.select_button.setToolTip('View your observations of this taxon')
+        # self.select_button.setToolTip('View your observations of this taxon')
         button_row_2.addWidget(self.view_observations_button)
 
         # Link button: Open web browser to taxon info page
@@ -194,7 +195,7 @@ class TaxonInfoSection(HorizontalLayout):
 class TaxonomySection(HorizontalLayout):
     """Section to display ancestors and children of selected taxon"""
 
-    def __init__(self, user_taxa: UserTaxa):
+    def __init__(self, user_taxa: AppState):
         super().__init__()
 
         self.ancestors_group = self.add_group(

@@ -14,7 +14,7 @@
 * Split CLI into subcommands:
   * `tag`: Main tagging features
   * `refresh`: Refresh tags for previously tagged images
-  * `install`: install shell completion + taxonomy database
+  * `setup`: install shell completion + taxonomy database
 * Add 3 verbosity levels (`nt -v[vv]`)
 * Update `nt tag -p` to accept directories and glob patterns
 * Add support for alternate XMP sidecar path format, if it already exists

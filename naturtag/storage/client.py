@@ -1,40 +1,18 @@
 from datetime import datetime
-from hashlib import md5
 from itertools import chain
 from logging import getLogger
 from pathlib import Path
 from time import time
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
-from pyinaturalist import (
-    ClientSession,
-    Observation,
-    Photo,
-    Taxon,
-    WrapperPaginator,
-    iNatClient,
-)
+from pyinaturalist import Observation, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.constants import MultiInt
 from pyinaturalist.controllers import ObservationController, TaxonController
-from pyinaturalist.converters import ensure_list, format_file_size
-from pyinaturalist_convert.db import (
-    get_db_observations,
-    get_db_taxa,
-    save_observations,
-    save_taxa,
-)
-from requests_cache import SQLiteDict
+from pyinaturalist.converters import ensure_list
+from pyinaturalist_convert import index_observation_text
+from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 
-from naturtag.constants import (
-    DB_PATH,
-    DEFAULT_PAGE_SIZE,
-    IMAGE_CACHE,
-    ROOT_TAXON_ID,
-    PathOrStr,
-)
-
-if TYPE_CHECKING:
-    from PySide6.QtGui import QPixmap
+from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, ROOT_TAXON_ID
 
 logger = getLogger(__name__)
 
@@ -125,7 +103,8 @@ class ObservationDbController(ObservationController):
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        self.save(results)
+        if results:
+            self.save(results)
         return WrapperPaginator(results)
 
     def get_user_observations(
@@ -172,8 +151,9 @@ class ObservationDbController(ObservationController):
         return list(obs)
 
     def save(self, observations: list[Observation]):
-        """Save observations to the database"""
+        """Save observations to the database (full records + text search index)"""
         save_observations(observations, self.client.db_path)
+        index_observation_text(observations, self.client.db_path)
 
 
 class TaxonDbController(TaxonController):
@@ -237,65 +217,3 @@ class TaxonDbController(TaxonController):
         results = super().search(**params).all()
         save_taxa(results)
         return WrapperPaginator(results)
-
-
-# TODO: Set expiration on 'original' and 'large' size images using URL patterns
-class ImageSession(ClientSession):
-    def __init__(self, *args, cache_path: Path = IMAGE_CACHE, **kwargs):
-        super().__init__(*args, per_second=5, per_minute=400, **kwargs)
-        self.image_cache = SQLiteDict(cache_path, 'images', serializer=None)
-
-    def get_image(
-        self, photo: Photo, url: Optional[str] = None, size: Optional[str] = None
-    ) -> bytes:
-        """Get an image from the cache, if it exists; otherwise, download and cache a new one"""
-        if not url:
-            url = photo.url_size(size) if size else photo.url
-        if not url:
-            raise ValueError('No URL or photo object specified')
-        image_hash = f'{get_url_hash(url)}.{photo.ext}'
-        try:
-            return self.image_cache[image_hash]
-        except KeyError:
-            pass
-
-        data = self.get(url).content
-        self.image_cache[image_hash] = data
-        return data
-
-    def get_pixmap(
-        self,
-        path: Optional[PathOrStr] = None,
-        photo: Optional[Photo] = None,
-        url: Optional[str] = None,
-        size: Optional[str] = None,
-    ) -> 'QPixmap':
-        """Fetch a pixmap from either a local path or remote URL.
-        This does not render the image, so it is safe to run from any thread.
-        """
-        from PySide6.QtGui import QPixmap
-
-        if path:
-            return QPixmap(str(path))
-
-        if url and not photo:
-            photo = Photo(url=url)
-        pixmap = QPixmap()
-        pixmap.loadFromData(self.get_image(photo, url, size), format=photo.ext)  # type: ignore
-        return pixmap
-
-    def cache_size(self) -> str:
-        """Get the total cache size in bytes, and the number of cached files"""
-        size = format_file_size(self.image_cache.size)
-        return f'{size} ({len(self.image_cache)} files)'
-
-
-def get_url_hash(url: str) -> str:
-    """Generate a hash to use as a cache key from an image URL, appended with the file extension
-
-    Args:
-        source: File path or URI for image source
-    """
-    thumbnail_hash = md5(url.encode()).hexdigest()
-    ext = Photo(url=url).ext
-    return f'{thumbnail_hash}.{ext}'

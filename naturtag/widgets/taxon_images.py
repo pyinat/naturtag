@@ -21,7 +21,7 @@ from naturtag.widgets import (
 )
 
 if TYPE_CHECKING:
-    from naturtag.settings import UserTaxa
+    from naturtag.storage import AppState
 
 ATTRIBUTION_STRIP_PATTERN = re.compile(r',?\s+uploaded by.*')
 
@@ -65,7 +65,7 @@ class TaxonInfoCard(InfoCard):
 class TaxonList(InfoCardList):
     """A scrollable list of TaxonInfoCards"""
 
-    def __init__(self, user_taxa: 'UserTaxa', **kwargs):
+    def __init__(self, user_taxa: 'AppState', **kwargs):
         super().__init__(**kwargs)
         self.user_taxa = user_taxa
 

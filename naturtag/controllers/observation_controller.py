@@ -170,9 +170,9 @@ class ObservationController(BaseController):
 
         observations = self.app.client.observations.get_user_observations(
             username=self.app.settings.username,
-            updated_since=self.app.settings.last_obs_check,
+            updated_since=self.app.state.last_obs_check,
             limit=DEFAULT_PAGE_SIZE,
             page=self.page,
         )
-        self.app.settings.set_obs_checkpoint()
+        self.app.state.set_obs_checkpoint()
         return observations
