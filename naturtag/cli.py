@@ -210,29 +210,47 @@ def refresh(recursive, image_paths):
     click.echo(f'{len(metadata_objs)} Images refreshed')
 
 
-@main.command()
-@click.pass_context
-@click.option('-a', '--all', is_flag=True, help='Install all features')
-@click.option('-d', '--db', is_flag=True, help='Initialize taxonomy database')
-@click.option(
-    '-s',
-    '--shell',
-    type=click.Choice(['bash', 'fish']),
-    help='Install shell completion scripts',
-)
+@main.group(name='setup')
+def setup_group():
+    """Setup commands"""
+
+
+@setup_group.command()
 @click.option(
     '-f',
     '--force',
     is_flag=True,
     help='Reset database if it already exists',
 )
-def install(ctx, all, db, shell, force):
-    """Install shell completion and other features.
+def db(force):
+    """Set up Naturtag's local database.
+
+    Naturtag uses a SQLite database to store observation and taxonomy data. This command can
+    initialize it for the first time, reset it, or download missing data for taxon text search.
+    """
+    click.echo('Initializing database...')
+    setup(overwrite=force)
+
+
+@setup_group.command()
+@click.option(
+    '-s',
+    '--shell',
+    type=click.Choice(['bash', 'fish']),
+    help='Install completion script for a specific shell only',
+)
+def shell(shell):
+    """Install shell tab-completion for naturtag.
 
     \b
-    Shell tab-completion is available for bash and fish shells. To install, run:
+    Completion is available for bash and fish shells. To install, run:
     ```
-    nt install -s [shell name]
+    nt setup shell
+    ```
+
+    Or for a specific shell only:
+    ```
+    nt setup shell -s [shell name]
     ```
 
     \b
@@ -241,16 +259,7 @@ def install(ctx, all, db, shell, force):
     nt tag -t corm<TAB>
     ```
     """
-    if not any([all, db, shell]):
-        click.echo('Specify at least one feature to install')
-        click.echo(ctx.get_help())
-        ctx.exit()
-
-    if all or shell:
-        install_shell_completion('all' if all else shell)
-    if all or db:
-        click.echo('Initializing database...')
-        setup(overwrite=force)
+    install_shell_completion(shell or 'all')
 
 
 def enable_logging(level: str = 'INFO', external_level: str = 'WARNING'):
@@ -394,5 +403,5 @@ def _install_bash_completion():
     print(f'source {completion_dir}/*.bash\n')
 
 
-for cmd in [tag, refresh, install]:
+for cmd in [tag, refresh, db, shell]:
     cmd.help = colorize_help_text(cmd.help)
