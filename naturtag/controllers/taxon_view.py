@@ -101,13 +101,14 @@ class TaxonInfoSection(HorizontalLayout):
 
         # View observations button
         # TODO: Observation filters
-        self.view_observations_button = QPushButton('View Observations')
-        self.view_observations_button.setIcon(fa_icon('fa5s.binoculars', primary=True))
-        self.view_observations_button.clicked.connect(
-            lambda: self.on_view_observations.emit(self.displayed_taxon.id)
-        )
+        # self.view_observations_button = QPushButton('View Observations')
+        self.view_observations_button = QPushButton('')
+        # self.view_observations_button.setIcon(fa_icon('fa5s.binoculars', primary=True))
+        # self.view_observations_button.clicked.connect(
+        #     lambda: self.on_view_observations.emit(self.displayed_taxon.id)
+        # )
         self.view_observations_button.setEnabled(False)
-        self.select_button.setToolTip('View your observations of this taxon')
+        # self.select_button.setToolTip('View your observations of this taxon')
         button_row_2.addWidget(self.view_observations_button)
 
         # Link button: Open web browser to taxon info page

@@ -6,32 +6,15 @@ from pathlib import Path
 from time import time
 from typing import TYPE_CHECKING, Optional
 
-from pyinaturalist import (
-    ClientSession,
-    Observation,
-    Photo,
-    Taxon,
-    WrapperPaginator,
-    iNatClient,
-)
+from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.constants import MultiInt
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import ensure_list, format_file_size
-from pyinaturalist_convert.db import (
-    get_db_observations,
-    get_db_taxa,
-    save_observations,
-    save_taxa,
-)
+from pyinaturalist_convert import index_observation_text
+from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
-from naturtag.constants import (
-    DB_PATH,
-    DEFAULT_PAGE_SIZE,
-    IMAGE_CACHE,
-    ROOT_TAXON_ID,
-    PathOrStr,
-)
+from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
