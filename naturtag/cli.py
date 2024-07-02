@@ -217,19 +217,31 @@ def setup_group():
 
 @setup_group.command()
 @click.option(
+    '-d',
+    '--download',
+    is_flag=True,
+    help='Download taxonomy data if it does not exist locally',
+)
+@click.option(
     '-f',
     '--force',
     is_flag=True,
     help='Reset database if it already exists',
 )
-def db(force):
+def db(download, force):
     """Set up Naturtag's local database.
 
     Naturtag uses a SQLite database to store observation and taxonomy data. This command can
     initialize it for the first time, reset it, or download missing data for taxon text search.
+
+    \b
+    Example: Full reset and download, with debug logs:
+    ```
+    nt -vv setup db -f -d
+    ```
     """
     click.echo('Initializing database...')
-    setup(overwrite=force)
+    setup(overwrite=force, download=download)
 
 
 @setup_group.command()
