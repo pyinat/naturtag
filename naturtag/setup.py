@@ -70,8 +70,8 @@ def setup(
     settings.write()
 
 
-# TODO: Currently this isn't exposed through the UI or CLI; requires calling `setup(download=True)`.
-#   Not sure yet if this is a good idea to include.
+# TODO: Currently this isn't exposed through the UI; requires calling `setup(download=True)` or
+#  `nt setup db --download``. Not sure yet if this is a good idea to include.
 # TODO: Option to download full taxon db (all languages)
 def _download_taxon_db():
     logger.info(f'Downloading {TAXON_DB_URL} to {PACKAGED_TAXON_DB}')

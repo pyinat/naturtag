@@ -7,29 +7,45 @@ It takes an observation or species, plus some image files, and generates EXIF an
 write to those images. You can see it in action here:
 [![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
 
-```{note}
-See `nt <command> --help` for full usage information of any command.
+## General usage
+* Help: See `nt <command> --help` for full usage information of any command.
+* Output verbosity: Run `nt -v[vv]` for more verbose debug output.
+
+## Setup
+The `setup` command group can run first-time setup steps and set up optional features of naturtag.
+
+### Database
+The `setup db` command sets up Naturtag's local database.
+
+Naturtag uses a SQLite database to store observation and taxonomy data. This command can
+initialize it for the first time, reset it, or download missing data for taxon text search.
+
+Options:
+```bash
+-f, --force              Reset database if it already exists
 ```
 
-## Install
-The `install` command sets up optional shell completion and other features.
+### Shell
+The `setup shell` command sets up optional shell tab-completion.
+
+Options:
+```bash
+-s, --shell [bash|fish]  Install completion script for a specific shell only
+```
 
 Shell tab-completion is available for bash and fish shells. To install, run:
 ```bash
-nt install -s [shell name]
+nt setup shell
+```
+
+Or for a specific shell only:
+```bash
+nt setup shell -s [shell name]
 ```
 
 This will provide tab-completion for CLI options as well as taxon names, for example:
 ```bash
 nt tag -t corm<TAB>
-```
-
-Options:
-```bash
--a, --all                Install all features
--d, --db                 Initialize taxonomy database
--s, --shell [bash|fish]  Install shell completion scripts
--f, --force              Reset database if it already exists
 ```
 
 ## Tag
