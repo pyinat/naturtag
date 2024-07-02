@@ -27,7 +27,8 @@ from naturtag.app.threadpool import ThreadPool
 from naturtag.client import ImageSession, iNatDbClient
 from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
-from naturtag.settings import Settings, setup
+from naturtag.settings import Settings
+from naturtag.setup import setup
 from naturtag.widgets import VerticalLayout, init_handler
 
 # Provide an application group so Windows doesn't use the default 'python' icon
@@ -51,7 +52,8 @@ class NaturtagApp(QApplication):
         self.settings = Settings.read()
 
     def post_init(self):
-        # Run any first-time setup steps, if needed
+        # Run initial/post-update setup steps, if needed
+        self.settings.check_version_change()
         setup(self.settings)
 
         # Globally available application objects
@@ -238,7 +240,8 @@ class MainWindow(QMainWindow):
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
-        app_dir_link = f"<a href='{self.app.settings.data_dir}'>{self.app.settings.data_dir}</a>"
+        data_dir = self.app.settings.data_dir
+        app_dir_link = f"<a href='file://{data_dir}'>{data_dir}</a>"
 
         about.setText(
             f'<b>Naturtag v{version}</b><br/>'

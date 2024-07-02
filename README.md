@@ -96,7 +96,17 @@ See [Application Guide](https://naturtag.readthedocs.io/en/stable/app.html) for 
 
 ### CLI
 Naturtag also includes a command-line interface. It takes an observation or species, plus some image
-files, and generates EXIF and XMP metadata to write to those images. You can see it in action here:
+files, and generates EXIF and XMP metadata to write to those images.
+
+Example:
+```bash
+# Tag images with metadata from observation ID 5432
+nt tag -o 5432 img1.jpg img2.jpg
+
+# Refresh previously tagged images with latest observation and taxonomy metadata
+nt refresh -r ~/observations
+```
+You can see it in action here:
 [![asciicast](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi.svg)](https://asciinema.org/a/0a6gzpt7AI9QpGoq0OGMDOxqi)
 
 See [CLI documentation](https://naturtag.readthedocs.io/en/stable/cli.html) for more details.
@@ -108,7 +118,7 @@ applications. Basic example:
 from naturtag import tag_images, refresh_tags
 
 # Tag images with full observation metadata
-tag_images(['img1.jpg', 'img2.jpg'], observation_id=1234)
+tag_images(['img1.jpg', 'img2.jpg'], observation_id=5432)
 
 # Refresh previously tagged images with latest observation and taxonomy metadata
 refresh_tags(['~/observations/'], recursive=True)

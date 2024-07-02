@@ -6,32 +6,15 @@ from pathlib import Path
 from time import time
 from typing import TYPE_CHECKING, Optional
 
-from pyinaturalist import (
-    ClientSession,
-    Observation,
-    Photo,
-    Taxon,
-    WrapperPaginator,
-    iNatClient,
-)
+from pyinaturalist import ClientSession, Observation, Photo, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.constants import MultiInt
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import ensure_list, format_file_size
-from pyinaturalist_convert.db import (
-    get_db_observations,
-    get_db_taxa,
-    save_observations,
-    save_taxa,
-)
+from pyinaturalist_convert import index_observation_text
+from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
 from requests_cache import SQLiteDict
 
-from naturtag.constants import (
-    DB_PATH,
-    DEFAULT_PAGE_SIZE,
-    IMAGE_CACHE,
-    ROOT_TAXON_ID,
-    PathOrStr,
-)
+from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, IMAGE_CACHE, ROOT_TAXON_ID, PathOrStr
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QPixmap
@@ -125,7 +108,8 @@ class ObservationDbController(ObservationController):
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        self.save(results)
+        if results:
+            self.save(results)
         return WrapperPaginator(results)
 
     def get_user_observations(
@@ -172,8 +156,9 @@ class ObservationDbController(ObservationController):
         return list(obs)
 
     def save(self, observations: list[Observation]):
-        """Save observations to the database"""
+        """Save observations to the database (full records + text search index)"""
         save_observations(observations, self.client.db_path)
+        index_observation_text(observations, self.client.db_path)
 
 
 class TaxonDbController(TaxonController):

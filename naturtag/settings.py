@@ -1,28 +1,19 @@
-"""Basic utilities for reading and writing settings from config files"""
+"""Utilities for reading and writing settings from config files"""
 
 # TODO: use user data dir for logfile
-import sqlite3
 from collections import Counter, OrderedDict
 from datetime import datetime
+from importlib.metadata import version as pkg_version
 from itertools import chain
 from logging import getLogger
 from pathlib import Path
-from tarfile import TarFile
-from tempfile import TemporaryDirectory
 from typing import Iterable, Optional
 
-import requests
 import yaml
 from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
 from pyinaturalist import TaxonCounts
-from pyinaturalist_convert import create_tables, load_table
-from pyinaturalist_convert.fts import (
-    create_observation_fts_table,
-    create_taxon_fts_table,
-    vacuum_analyze,
-)
 
 from naturtag.constants import (
     APP_DIR,
@@ -31,8 +22,6 @@ from naturtag.constants import (
     MAX_DIR_HISTORY,
     MAX_DISPLAY_HISTORY,
     MAX_DISPLAY_OBSERVED,
-    PACKAGED_TAXON_DB,
-    TAXON_DB_URL,
     PathOrStr,
 )
 
@@ -161,6 +150,7 @@ class Settings(YamlMixin):
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
     last_obs_check: Optional[datetime] = field(default=None)
+    last_version: str = field(default='')
     n_worker_threads: int = field(default=1)
 
     @classmethod
@@ -196,9 +186,14 @@ class Settings(YamlMixin):
         else:
             return self.default_image_dir
 
-    def set_obs_checkpoint(self):
-        self.last_obs_check = datetime.utcnow().replace(microsecond=0)
-        self.write()
+    def check_version_change(self):
+        """Check if the app version has changed since the last run"""
+        current_version = pkg_version('naturtag')
+        if self.last_version != current_version:
+            logger.info(f'Updated from {self.last_version} to {current_version}')
+            self.last_version = current_version
+            self.setup_complete = False
+            self.write()
 
     def add_favorite_dir(self, image_dir: Path):
         if image_dir not in self.favorite_image_dirs:
@@ -219,6 +214,10 @@ class Settings(YamlMixin):
     def remove_recent_dir(self, image_dir: Path):
         if image_dir in self.recent_image_dirs:
             self.recent_image_dirs.remove(image_dir)
+
+    def set_obs_checkpoint(self):
+        self.last_obs_check = datetime.utcnow().replace(microsecond=0)
+        self.write()
 
 
 # TODO: This doesn't necessarily need to be human-readable/editable;
@@ -293,92 +292,6 @@ class UserTaxa(YamlMixin):
             f'Observed: {len(self.observed)}',
         ]
         return '\n'.join(sizes)
-
-
-def setup(
-    settings: Optional[Settings] = None,
-    overwrite: bool = False,
-    download: bool = False,
-):
-    """Run any first-time setup steps, if needed:
-    * Create database tables
-    * Extract packaged taxonomy data and load into SQLite
-
-    Note: taxonomy data is included with PyInstaller packages and platform-specific installers,
-    but not with plain python package on PyPI (to keep package size small).
-    Use `download=True` to fetch the missing data.
-
-    Args:
-        settings: Existing settings object
-        overwrite: Overwrite an existing taxon database, if it already exists
-        download: Download taxon data (full text search + basic taxon details)
-    """
-    settings = settings or Settings.read()
-    db_path = settings.db_path
-    if settings.setup_complete and not overwrite:
-        logger.debug('First-time setup already done')
-        return
-
-    logger.info('Running first-time setup')
-    if overwrite:
-        logger.info('Overwriting exiting tables')
-        with sqlite3.connect(db_path) as conn:
-            conn.execute('DROP TABLE IF EXISTS observation')
-            conn.execute('DROP TABLE IF EXISTS observation_fts')
-            conn.execute('DROP TABLE IF EXISTS taxon')
-            conn.execute('DROP TABLE IF EXISTS taxon_fts')
-            conn.execute('DROP TABLE IF EXISTS photo')
-            conn.execute('DROP TABLE IF EXISTS user')
-    elif db_path.is_file():
-        logger.warning('Database already exists; attempting to update')
-
-    # Create SQLite file with tables if they don't already exist
-    create_tables(db_path)
-    create_taxon_fts_table(db_path)
-    create_observation_fts_table(db_path)
-    _load_taxon_db(db_path, download)
-
-    # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
-    with sqlite3.connect(db_path) as conn:
-        conn.execute('UPDATE taxon SET partial=1')
-
-    vacuum_analyze(['taxon', 'taxon_fts'], db_path)
-
-    logger.info('Setup complete')
-    settings.setup_complete = True
-    settings.last_obs_check = None
-    settings.write()
-
-
-# TODO: Currently this isn't exposed through the UI or CLI; requires calling `setup(download=True)`.
-#   Not sure yet if this is a good idea to include.
-def _download_taxon_db():
-    logger.info(f'Downloading {TAXON_DB_URL} to {PACKAGED_TAXON_DB}')
-    r = requests.get(TAXON_DB_URL, stream=True)
-    with open(PACKAGED_TAXON_DB, 'wb') as f:
-        f.write(r.content)
-
-
-def _load_taxon_db(db_path: Path, download: bool = False):
-    """Load taxon tables from packaged data, if available"""
-    # Optionally download data if it doesn't exist locally
-    if not PACKAGED_TAXON_DB.is_file():
-        if download:
-            _download_taxon_db()
-        else:
-            logger.warning(
-                'Pre-packaged taxon FTS database does not exist; '
-                'taxon text search and autocomplete will not be available'
-            )
-            return
-
-    with TemporaryDirectory() as tmp_dir_name:
-        tmp_dir = Path(tmp_dir_name)
-        with TarFile.open(PACKAGED_TAXON_DB) as tar:
-            tar.extractall(path=tmp_dir)
-
-        load_table(tmp_dir / 'taxon.csv', db_path, table_name='taxon')
-        load_table(tmp_dir / 'taxon_fts.csv', db_path, table_name='taxon_fts')
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
