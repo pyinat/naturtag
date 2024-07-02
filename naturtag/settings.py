@@ -4,6 +4,7 @@
 import sqlite3
 from collections import Counter, OrderedDict
 from datetime import datetime
+from importlib.metadata import version as pkg_version
 from itertools import chain
 from logging import getLogger
 from pathlib import Path
@@ -197,9 +198,14 @@ class Settings(YamlMixin):
         else:
             return self.default_image_dir
 
-    def set_obs_checkpoint(self):
-        self.last_obs_check = datetime.utcnow().replace(microsecond=0)
-        self.write()
+    def check_version_change(self):
+        """Check if the app version has changed since the last run"""
+        current_version = pkg_version('naturtag')
+        if self.last_version != current_version:
+            logger.info(f'Updated from {self.last_version} to {current_version}')
+            self.last_version = current_version
+            self.setup_complete = False
+            self.write()
 
     def add_favorite_dir(self, image_dir: Path):
         if image_dir not in self.favorite_image_dirs:
@@ -220,6 +226,10 @@ class Settings(YamlMixin):
     def remove_recent_dir(self, image_dir: Path):
         if image_dir in self.recent_image_dirs:
             self.recent_image_dirs.remove(image_dir)
+
+    def set_obs_checkpoint(self):
+        self.last_obs_check = datetime.utcnow().replace(microsecond=0)
+        self.write()
 
 
 # TODO: This doesn't necessarily need to be human-readable/editable;
