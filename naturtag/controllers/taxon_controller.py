@@ -14,7 +14,7 @@ from naturtag.controllers import (
     TaxonSearch,
     get_app,
 )
-from naturtag.settings import UserTaxa
+from naturtag.storage import UserTaxa
 from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
 
 logger = getLogger(__name__)

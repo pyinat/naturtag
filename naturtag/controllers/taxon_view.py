@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QGroupBox, QPushButton
 
 from naturtag.app.style import fa_icon
 from naturtag.constants import SIZE_SM
-from naturtag.settings import UserTaxa
+from naturtag.storage import UserTaxa
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,

@@ -21,7 +21,7 @@ from naturtag.widgets import (
 )
 
 if TYPE_CHECKING:
-    from naturtag.settings import UserTaxa
+    from naturtag.storage import UserTaxa
 
 ATTRIBUTION_STRIP_PATTERN = re.compile(r',?\s+uploaded by.*')
 

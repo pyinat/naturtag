@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from naturtag.controllers import BaseController
-from naturtag.settings import Settings
+from naturtag.storage import Settings
 from naturtag.utils import read_locales
 from naturtag.widgets import FAIcon, HorizontalLayout, ToggleSwitch, VerticalLayout
 

@@ -16,7 +16,7 @@ from pyinaturalist_convert.fts import (
 )
 
 from naturtag.constants import PACKAGED_TAXON_DB, TAXON_DB_URL
-from naturtag.settings import Settings
+from naturtag.storage import Settings
 
 logger = getLogger().getChild(__name__)
 

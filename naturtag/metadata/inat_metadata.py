@@ -10,10 +10,9 @@ from typing import Iterable, Optional
 from pyinaturalist import Observation, Taxon
 from pyinaturalist_convert import to_dwc
 
-from naturtag.client import iNatDbClient
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, PathOrStr
 from naturtag.metadata import MetaMetadata
-from naturtag.settings import Settings
+from naturtag.storage import Settings, iNatDbClient
 from naturtag.utils import get_valid_image_paths, quote
 
 DWC_NAMESPACES = ['dcterms', 'dwc']

@@ -22,8 +22,7 @@ from rich.table import Column, Table
 
 from naturtag.constants import CLI_COMPLETE_DIR
 from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, tag_images
-from naturtag.settings import Settings
-from naturtag.setup import setup
+from naturtag.storage import Settings, setup
 from naturtag.utils import get_valid_image_paths, strip_url
 
 CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
