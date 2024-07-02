@@ -238,7 +238,8 @@ class MainWindow(QMainWindow):
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
-        app_dir_link = f"<a href='{self.app.settings.data_dir}'>{self.app.settings.data_dir}</a>"
+        data_dir = self.app.settings.data_dir
+        app_dir_link = f"<a href='file://{data_dir}'>{data_dir}</a>"
 
         about.setText(
             f'<b>Naturtag v{version}</b><br/>'
