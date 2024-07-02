@@ -1,30 +1,18 @@
 """Utilities for reading and writing settings from config files"""
 
 # TODO: Finish and document portable mode / storing config and data in a user-specified path
-# TODO: Use user data dir for logfile
-from collections import Counter, OrderedDict
 from datetime import datetime
 from importlib.metadata import version as pkg_version
-from itertools import chain
 from logging import getLogger
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Optional
 
 import yaml
 from attr import define, field
 from cattr import Converter
 from cattr.preconf import pyyaml
-from pyinaturalist import TaxonCounts
 
-from naturtag.constants import (
-    APP_DIR,
-    CONFIG_PATH,
-    DEFAULT_WINDOW_SIZE,
-    MAX_DIR_HISTORY,
-    MAX_DISPLAY_HISTORY,
-    MAX_DISPLAY_OBSERVED,
-    PathOrStr,
-)
+from naturtag.constants import APP_DIR, CONFIG_PATH, DEFAULT_WINDOW_SIZE, MAX_DIR_HISTORY, PathOrStr
 
 logger = getLogger().getChild(__name__)
 
@@ -44,53 +32,6 @@ def make_converter() -> Converter:
 
 
 YamlConverter = make_converter()
-
-
-@define
-class YamlMixin:
-    """Attrs class mixin that converts to and from a YAML file"""
-
-    path: Optional[Path] = field(default=None)
-
-    @classmethod
-    def read(cls, path: Optional[Path]) -> 'YamlMixin':
-        """Read settings from config file"""
-        # TODO: conflicts with class variable access?
-        path = path or cls.path  # type: ignore
-
-        # New file; no contents to read
-        if not path or not path.is_file():
-            return cls(path=path)
-
-        logger.debug(f'Reading {cls.__name__} from {path}')
-        with open(path) as f:
-            attrs_dict = yaml.safe_load(f)
-        obj = YamlConverter.structure(attrs_dict, cl=cls)
-
-        # Config file may be a stub that specifies an alternate path; if so, read from that path
-        if obj.path and obj.path != path:
-            return cls.read(obj.path)
-
-        obj.path = path
-        return obj
-
-    def write(self):
-        """Write settings to config file"""
-        logger.info(f'Writing {self.__class__.__name__} to {self.path}')
-        logger.debug(str(self))
-        attrs_dict = YamlConverter.unstructure(self)
-
-        # Only keep 'path' if it's not the default
-        if self.path.parent == APP_DIR:
-            attrs_dict.pop('path')
-
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.path, 'w') as f:
-            yaml.safe_dump(attrs_dict, f)
-
-    def reset_defaults(self):
-        self.__class__(path=self.path).write()
-        self = self.__class__.read(path=self.path)
 
 
 def doc_field(doc: str = '', **kwargs):
@@ -174,10 +115,6 @@ class Settings:
         return self.data_dir / 'naturtag.log'
 
     @property
-    def user_taxa_path(self) -> Path:
-        return self.data_dir / 'user_taxa.yml'
-
-    @property
     def start_image_dir(self) -> Path:
         """Get the starting directory for image selection, depending on settings"""
         if self.use_last_dir and self.recent_image_dirs:
@@ -192,7 +129,7 @@ class Settings:
         if not path or not path.is_file():
             return cls(path=path)
 
-        logger.debug(f'Reading {cls.__name__} from {path}')
+        logger.debug(f'Reading settings from {path}')
         with open(path) as f:
             attrs_dict = yaml.safe_load(f)
         obj = YamlConverter.structure(attrs_dict, cl=cls)
@@ -255,82 +192,3 @@ class Settings:
     def set_obs_checkpoint(self):
         self.last_obs_check = datetime.utcnow().replace(microsecond=0)
         self.write()
-
-
-# TODO: This doesn't necessarily need to be human-readable/editable;
-#   maybe it could go in SQLite instead?
-@define(auto_attribs=False, slots=False)
-class UserTaxa(YamlMixin):
-    """Relevant taxon IDs stored for the current user"""
-
-    history: list[int] = field(factory=list)
-    starred: list[int] = field(factory=list)
-    observed: dict[int, int] = field(factory=dict)
-    frequent: Counter[int] = None  # type: ignore
-
-    def __attrs_post_init__(self):
-        """Initialize frequent taxa counter"""
-        self.frequent = Counter(self.history)
-
-    @classmethod
-    def read(cls, path: Path) -> 'UserTaxa':  # type: ignore
-        return super(UserTaxa, cls).read(path)  # type: ignore
-
-    @property
-    def display_ids(self) -> set[int]:
-        """Return top history, frequent, observed, and starred taxa combined.
-        Returns only unique IDs, since a given taxon may appear in more than one list.
-        """
-        top_ids = [self.top_history, self.top_frequent, self.top_observed, self.starred]
-        return set(chain.from_iterable(top_ids))
-
-    @property
-    def top_history(self) -> list[int]:
-        """Get the most recently viewed unique taxa"""
-        return _top_unique_ids(self.history[::-1])
-
-    @property
-    def top_frequent(self) -> list[int]:
-        """Get the most frequently viewed taxa"""
-        return [t[0] for t in self.frequent.most_common(MAX_DISPLAY_HISTORY)]
-
-    @property
-    def top_observed(self) -> list[int]:
-        """Get the most commonly observed taxa"""
-        return _top_unique_ids(self.observed.keys(), MAX_DISPLAY_OBSERVED)
-
-    def frequent_idx(self, taxon_id: int) -> Optional[int]:
-        """Return the position of a taxon in the frequent list, if it's in the top
-        ``MAX_DISPLAY_HISTORY`` taxa.
-        """
-        try:
-            return self.top_frequent.index(taxon_id)
-        except ValueError:
-            return None
-
-    def view_count(self, taxon_id: int) -> int:
-        """Return the number of times this taxon has been viewed"""
-        return self.frequent.get(taxon_id, 0)
-
-    def update_history(self, taxon_id: int):
-        """Update history and frequent with a new or existing taxon ID"""
-        self.history.append(taxon_id)
-        self.frequent.update([taxon_id])
-
-    def update_observed(self, taxon_counts: TaxonCounts):
-        self.observed = {t.id: t.count for t in taxon_counts}
-        self.write()
-
-    def __str__(self):
-        sizes = [
-            f'History: {len(self.history)}',
-            f'Starred: {len(self.starred)}',
-            f'Frequent: {len(self.frequent)}',
-            f'Observed: {len(self.observed)}',
-        ]
-        return '\n'.join(sizes)
-
-
-def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
-    """Get the top unique IDs from a list, preserving order"""
-    return list(OrderedDict.fromkeys(ids))[:n]

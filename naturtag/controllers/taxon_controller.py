@@ -27,7 +27,7 @@ class TaxonController(BaseController):
 
     def __init__(self):
         super().__init__()
-        self.user_taxa = UserTaxa.read(self.app.settings.user_taxa_path)
+        self.user_taxa = UserTaxa.read(self.app.settings.db_path)
 
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)

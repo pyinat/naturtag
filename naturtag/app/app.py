@@ -50,6 +50,12 @@ class NaturtagApp(QApplication):
         self.settings = Settings.read()
 
     def post_init(self):
+        self.log_handler = init_handler(
+            self.settings.log_level,
+            root_level=self.settings.log_level_external,
+            logfile=self.settings.logfile,
+        )
+
         # Run initial/post-update setup steps, if needed
         self.settings.check_version_change()
         setup(self.settings)
@@ -57,11 +63,6 @@ class NaturtagApp(QApplication):
         # Globally available application objects
         self.client = iNatDbClient(self.settings.db_path)
         self.img_session = ImageSession(self.settings.image_cache_path)
-        self.log_handler = init_handler(
-            self.settings.log_level,
-            root_level=self.settings.log_level_external,
-            logfile=self.settings.logfile,
-        )
         self.threadpool = ThreadPool(n_worker_threads=self.settings.n_worker_threads)
         self.user_dirs = UserDirs(self.settings)
 
