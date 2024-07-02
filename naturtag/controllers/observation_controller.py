@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Iterable
 
-from pyinaturalist import Observation
+from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLabel, QPushButton
 
@@ -14,13 +14,13 @@ logger = getLogger(__name__)
 
 
 class ObservationController(BaseController):
-    on_select = Signal(Observation)  #: An observation was selected
+    on_view_taxon = Signal(Taxon)  #: Request to switch to taxon tab
 
     def __init__(self):
         super().__init__()
         self.root = HorizontalLayout(self)
         self.root.setAlignment(Qt.AlignLeft)
-        self.selected_observation: Observation = None
+        self.displayed_observation: Observation = None
 
         # Search inputs
         # self.search = ObservationSearch(self.app.settings)
@@ -66,9 +66,8 @@ class ObservationController(BaseController):
         self.next_button.setEnabled(False)
         button_layout.addWidget(self.next_button)
 
-        # Selected observation info
+        # Full observation info viewer
         self.obs_info = ObservationInfoSection()
-        self.obs_info.on_select.connect(self.display_observation)
         obs_layout = VerticalLayout()
         obs_layout.addLayout(self.obs_info)
         self.root.addLayout(obs_layout)
@@ -83,13 +82,13 @@ class ObservationController(BaseController):
     # Actions triggered directly by UI
     # ----------------------------------------
 
-    def select_observation(self, observation_id: int):
-        """Select an observation to display full details"""
-        # Don't need to do anything if this observation is already selected
-        if self.selected_observation and self.selected_observation.id == observation_id:
+    def display_observation_by_id(self, observation_id: int):
+        """Display full observation details"""
+        # Don't need to do anything if this observation is already displayed
+        if self.displayed_observation and self.displayed_observation.id == observation_id:
             return
 
-        logger.info(f'Selecting observation {observation_id}')
+        logger.info(f'Loading observation {observation_id}')
         future = self.app.threadpool.schedule(
             lambda: self.app.client.observations(observation_id, taxonomy=True),
             priority=QThread.HighPriority,
@@ -128,8 +127,7 @@ class ObservationController(BaseController):
     @Slot(Observation)
     def display_observation(self, observation: Observation):
         """Display full details for a single observation"""
-        self.selected_observation = observation
-        self.on_select.emit(observation)
+        self.displayed_observation = observation
         self.obs_info.load(observation)
         logger.debug(f'Loaded observation {observation.id}')
 
@@ -145,7 +143,7 @@ class ObservationController(BaseController):
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
         for obs_card in obs_cards:
-            obs_card.on_click.connect(self.select_observation)
+            obs_card.on_click.connect(self.display_observation_by_id)
 
     def update_pagination_buttons(self):
         """Update pagination buttons based on current page"""
@@ -164,7 +162,11 @@ class ObservationController(BaseController):
         # Maybe do that except on initial observation load?
         self.total_results = self.app.client.observations.count(username=self.app.settings.username)
         self.total_pages = (self.total_results // DEFAULT_PAGE_SIZE) + 1
-        logger.debug('Total user observations: %s (%s pages)', self.total_results, self.total_pages)
+        logger.debug(
+            'Total user observations: %s (%s pages)',
+            self.total_results,
+            self.total_pages,
+        )
 
         observations = self.app.client.observations.get_user_observations(
             username=self.app.settings.username,

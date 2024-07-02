@@ -49,8 +49,8 @@ class ImageGallery(BaseController):
     """Container for displaying local image thumbnails & info"""
 
     on_load_images = Signal(list)  #: New images have been loaded
-    on_select_taxon = Signal(int)  #: A taxon was selected from context menu
-    on_select_observation = Signal(int)  #: An observation was selected from context menu
+    on_view_taxon_id = Signal(int)  #: A taxon was selected from context menu
+    on_view_observation_id = Signal(int)  #: An observation was selected from context menu
 
     def __init__(self):
         super().__init__()
@@ -69,7 +69,6 @@ class ImageGallery(BaseController):
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setWidget(self.scroll_panel)
-        root.addLayout(self.flow_layout)
         root.addWidget(scroll_area)
 
     def clear(self):
@@ -128,8 +127,8 @@ class ImageGallery(BaseController):
         thumbnail.on_remove.connect(self.remove_image)
         thumbnail.on_select.connect(self.select_image)
         thumbnail.on_copy.connect(self.on_message)
-        thumbnail.context_menu.on_select_taxon.connect(self.on_select_taxon)
-        thumbnail.context_menu.on_select_observation.connect(self.on_select_observation)
+        thumbnail.context_menu.on_view_taxon_id.connect(self.on_view_taxon_id)
+        thumbnail.context_menu.on_view_observation_id.connect(self.on_view_observation_id)
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -314,8 +313,8 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
 class ThumbnailContextMenu(QMenu):
     """Context menu for local image thumbnails"""
 
-    on_select_taxon = Signal(int)  #: A taxon was selected from context menu
-    on_select_observation = Signal(int)  #: An observation was selected from context menu
+    on_view_taxon_id = Signal(int)  #: A taxon was selected from context menu
+    on_view_observation_id = Signal(int)  #: An observation was selected from context menu
 
     def refresh_actions(self, thumbnail_card: ThumbnailCard):
         """Update menu actions based on the available metadata"""
@@ -328,7 +327,7 @@ class ThumbnailContextMenu(QMenu):
             text='View Taxon',
             tooltip=f'View taxon {meta.taxon_id} in naturtag',
             enabled=meta.has_taxon,
-            callback=lambda: self.on_select_taxon.emit(meta.taxon_id),
+            callback=lambda: self.on_view_taxon_id.emit(meta.taxon_id),
         )
         self._add_action(
             parent=thumbnail_card,
@@ -344,7 +343,7 @@ class ThumbnailContextMenu(QMenu):
             text='View Observation',
             tooltip=f'View observation {meta.observation_id} in naturtag',
             enabled=meta.has_observation,
-            callback=lambda: self.on_select_observation.emit(meta.observation_id),
+            callback=lambda: self.on_view_observation_id.emit(meta.observation_id),
         )
         self._add_action(
             parent=thumbnail_card,

@@ -86,28 +86,6 @@ class MainWindow(QMainWindow):
         self.taxon_controller.on_message.connect(self.info)
         self.observation_controller.on_message.connect(self.info)
 
-        # Select observation/taxon from image context menu, ID input fields, and iconic taxa filters
-        self.image_controller.gallery.on_select_taxon.connect(self.taxon_controller.select_taxon)
-        self.image_controller.gallery.on_select_observation.connect(
-            self.observation_controller.select_observation
-        )
-        self.image_controller.on_select_observation_id.connect(
-            self.observation_controller.select_observation
-        )
-        self.image_controller.on_select_taxon_id.connect(self.taxon_controller.select_taxon)
-        self.taxon_controller.search.iconic_taxon_filters.on_select.connect(
-            self.taxon_controller.select_taxon
-        )
-
-        # Update photo tab when a taxon is selected
-        self.taxon_controller.on_select.connect(self.image_controller.select_taxon)
-
-        # Update photo and taxon tabs when an observation is selected
-        self.observation_controller.on_select.connect(self.image_controller.select_observation)
-        self.observation_controller.on_select.connect(
-            lambda obs: self.taxon_controller.display_taxon(obs.taxon, notify=False)
-        )
-
         # Settings that take effect immediately
         self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
         self.settings_menu.dark_mode.on_click.connect(set_theme)
@@ -133,12 +111,48 @@ class MainWindow(QMainWindow):
         )
         self.tabs.setTabVisible(self.log_tab_idx, self.app.settings.show_logs)
 
-        # Switch to different tab if requested from Photos tab
-        self.image_controller.on_select_taxon_tab.connect(
-            lambda: self.tabs.setCurrentWidget(self.taxon_controller)
+        # Photos tab: view taxon and switch tab
+        self.image_controller.gallery.on_view_taxon_id.connect(
+            self.taxon_controller.display_taxon_by_id
         )
-        self.image_controller.on_select_observation_tab.connect(
-            lambda: self.tabs.setCurrentWidget(self.observation_controller)
+        self.image_controller.gallery.on_view_taxon_id.connect(self.switch_tab_taxa)
+        self.image_controller.on_view_taxon_id.connect(self.taxon_controller.display_taxon_by_id)
+        self.image_controller.on_view_taxon_id.connect(self.switch_tab_taxa)
+
+        # Photos tab: view observation and switch tab
+        self.image_controller.gallery.on_view_observation_id.connect(
+            self.observation_controller.display_observation_by_id
+        )
+        self.image_controller.gallery.on_view_observation_id.connect(self.switch_tab_observations)
+        self.image_controller.on_view_observation_id.connect(
+            self.observation_controller.display_observation_by_id
+        )
+        self.image_controller.on_view_observation_id.connect(self.switch_tab_observations)
+
+        # Species tab: View observation and switch tab
+        # self.taxon_controller.taxon_info.on_view_observations.connect(
+        #     lambda obs: self.observation_controller.display_observation(obs, notify=False)
+        # )
+        # self.taxon_controller.taxon_info.on_view_observations.connect(self.switch_tab_observations)
+
+        # Species tab: Select taxon for tagging and switch to Photos tab
+        self.taxon_controller.taxon_info.on_select.connect(self.image_controller.select_taxon)
+        self.taxon_controller.taxon_info.on_select.connect(
+            lambda: self.tabs.setCurrentWidget(self.image_controller)
+        )
+
+        # Observations tab: View taxon and switch tab
+        self.observation_controller.obs_info.on_view_taxon.connect(
+            lambda taxon: self.taxon_controller.display_taxon(taxon, notify=False)
+        )
+        self.observation_controller.obs_info.on_view_taxon.connect(self.switch_tab_taxa)
+
+        # Observations tab: Select observation for tagging and switch to Photos tab
+        self.observation_controller.obs_info.on_select.connect(
+            self.image_controller.select_observation
+        )
+        self.observation_controller.obs_info.on_select.connect(
+            lambda: self.tabs.setCurrentWidget(self.image_controller)
         )
 
         # Connect file picker <--> recent/favorite dirs
@@ -176,7 +190,7 @@ class MainWindow(QMainWindow):
             QShortcut(QKeySequence('F9'), self).activated.connect(self.reload_qss)
             demo_images = list((ASSETS_DIR / 'demo_images').glob('*.jpg'))
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
-            self.observation_controller.select_observation(56830941)
+            self.observation_controller.display_observation_by_id(56830941)
 
     def check_username(self):
         """If username isn't saved, show popup dialog to prompt user to enter it"""
@@ -254,6 +268,15 @@ class MainWindow(QMainWindow):
     def show_settings(self):
         """Show the settings menu"""
         self.settings_menu.show()
+
+    def switch_tab_observations(self):
+        self.tabs.setCurrentWidget(self.observation_controller)
+
+    def switch_tab_taxa(self):
+        self.tabs.setCurrentWidget(self.taxon_controller)
+
+    def switch_tab_photos(self):
+        self.tabs.setCurrentWidget(self.image_controller)
 
     def toggle_fullscreen(self) -> bool:
         """Toggle fullscreen, and change icon for toolbar fullscreen button"""
