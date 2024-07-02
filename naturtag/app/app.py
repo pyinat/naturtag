@@ -44,14 +44,20 @@ logger = getLogger(__name__)
 class NaturtagApp(QApplication):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.app_version = pkg_version('naturtag')
         self.setApplicationName('Naturtag')
-        self.setApplicationVersion(pkg_version('naturtag'))
+        self.setApplicationVersion(self.app_version)
         self.setOrganizationName('pyinat')
         self.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
         self.settings = Settings.read()
 
     def post_init(self):
-        # Run any first-time setup steps, if needed
+        # Run initial/post-update setup steps, if needed
+        if self.settings.last_version != self.app_version:
+            logger.info(f'Updated from {self.settings.last_version} to {self.app_version}')
+            self.settings.last_version = self.app_version
+            self.settings.setup_complete = False
+            self.settings.write()
         setup(self.settings)
 
         # Globally available application objects

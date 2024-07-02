@@ -161,6 +161,7 @@ class Settings(YamlMixin):
     debug: bool = field(default=False)
     setup_complete: bool = field(default=False)
     last_obs_check: Optional[datetime] = field(default=None)
+    last_version: str = field(default='')
     n_worker_threads: int = field(default=1)
 
     @classmethod
@@ -316,10 +317,10 @@ def setup(
     settings = settings or Settings.read()
     db_path = settings.db_path
     if settings.setup_complete and not overwrite:
-        logger.debug('First-time setup already done')
+        logger.debug('Database setup already done')
         return
 
-    logger.info('Running first-time setup')
+    logger.info('Running database setup')
     if overwrite:
         logger.info('Overwriting exiting tables')
         with sqlite3.connect(db_path) as conn:
@@ -339,8 +340,8 @@ def setup(
     _load_taxon_db(db_path, download)
 
     # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
-    with sqlite3.connect(db_path) as conn:
-        conn.execute('UPDATE taxon SET partial=1')
+    # with sqlite3.connect(db_path) as conn:
+    #     conn.execute('UPDATE taxon SET partial=1')
 
     vacuum_analyze(['taxon', 'taxon_fts'], db_path)
 
@@ -373,6 +374,7 @@ def _load_taxon_db(db_path: Path, download: bool = False):
             return
 
     with TemporaryDirectory() as tmp_dir_name:
+        logger.info('Loading packaged taxon data and text search index')
         tmp_dir = Path(tmp_dir_name)
         with TarFile.open(PACKAGED_TAXON_DB) as tar:
             tar.extractall(path=tmp_dir)
