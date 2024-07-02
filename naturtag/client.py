@@ -108,7 +108,8 @@ class ObservationDbController(ObservationController):
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        self.save(results)
+        if results:
+            self.save(results)
         return WrapperPaginator(results)
 
     def get_user_observations(
@@ -155,8 +156,9 @@ class ObservationDbController(ObservationController):
         return list(obs)
 
     def save(self, observations: list[Observation]):
-        """Save observations to the database"""
+        """Save observations to the database (full records + text search index)"""
         save_observations(observations, self.client.db_path)
+        index_observation_text(observations, self.client.db_path)
 
 
 class TaxonDbController(TaxonController):
