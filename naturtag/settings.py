@@ -1,6 +1,7 @@
 """Utilities for reading and writing settings from config files"""
 
-# TODO: use user data dir for logfile
+# TODO: Finish and document portable mode / storing config and data in a user-specified path
+# TODO: Use user data dir for logfile
 from collections import Counter, OrderedDict
 from datetime import datetime
 from importlib.metadata import version as pkg_version
@@ -29,6 +30,7 @@ logger = getLogger().getChild(__name__)
 
 
 def make_converter() -> Converter:
+    """Additional serialization steps not covered by cattrs yaml converter"""
     converter = pyyaml.make_converter()
     converter.register_unstructure_hook(Path, lambda obj: str(obj) if obj else None)
     converter.register_structure_hook(
@@ -99,7 +101,7 @@ def doc_field(doc: str = '', **kwargs):
 
 
 @define
-class Settings(YamlMixin):
+class Settings:
     # Display settings
     dark_mode: bool = field(default=False)
     window_size: tuple[int, int] = field(default=DEFAULT_WINDOW_SIZE)
@@ -137,6 +139,7 @@ class Settings(YamlMixin):
     xmp: bool = doc_field(default=True, doc='Write XMP metadata to image (embedded)')
 
     # User data directories
+    path: Optional[Path] = doc_field(default=None, doc='Alternate config path')
     default_image_dir: Path = doc_field(
         default=Path('~').expanduser(), doc='Open file chooser in a specific directory'
     )
@@ -152,10 +155,6 @@ class Settings(YamlMixin):
     last_obs_check: Optional[datetime] = field(default=None)
     last_version: str = field(default='')
     n_worker_threads: int = field(default=1)
-
-    @classmethod
-    def read(cls, path: Path = CONFIG_PATH) -> 'Settings':  # type: ignore
-        return super(Settings, cls).read(path)  # type: ignore
 
     # Shortcuts for application files within the user data dir
     @property
@@ -186,6 +185,39 @@ class Settings(YamlMixin):
         else:
             return self.default_image_dir
 
+    @classmethod
+    def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
+        """Read settings from config file"""
+        # New file; no contents to read
+        if not path or not path.is_file():
+            return cls(path=path)
+
+        logger.debug(f'Reading {cls.__name__} from {path}')
+        with open(path) as f:
+            attrs_dict = yaml.safe_load(f)
+        obj = YamlConverter.structure(attrs_dict, cl=cls)
+
+        # Config file may be a stub that specifies an alternate path; if so, read from that path
+        if obj.path and obj.path != path:
+            return cls.read(obj.path)
+
+        obj.path = path
+        return obj
+
+    def write(self):
+        """Write settings to config file"""
+        logger.info(f'Writing settings to {self.path}')
+        logger.debug(str(self))
+        attrs_dict = YamlConverter.unstructure(self)
+
+        # Only keep 'path' if it's not the default
+        if self.path.parent == APP_DIR:
+            attrs_dict.pop('path')
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.path, 'w') as f:
+            yaml.safe_dump(attrs_dict, f)
+
     def check_version_change(self):
         """Check if the app version has changed since the last run"""
         current_version = pkg_version('naturtag')
@@ -214,6 +246,11 @@ class Settings(YamlMixin):
     def remove_recent_dir(self, image_dir: Path):
         if image_dir in self.recent_image_dirs:
             self.recent_image_dirs.remove(image_dir)
+
+    def reset_defaults(self):
+        """Reset all settings to defaults"""
+        self.__class__(path=self.path).write()
+        self = self.__class__.read(path=self.path)
 
     def set_obs_checkpoint(self):
         self.last_obs_check = datetime.utcnow().replace(microsecond=0)
