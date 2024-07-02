@@ -8,18 +8,13 @@ from PySide6.QtWidgets import QLabel, QPushButton
 from naturtag.app.style import fa_icon
 from naturtag.constants import DEFAULT_PAGE_SIZE
 from naturtag.controllers import BaseController, ObservationInfoSection
-from naturtag.widgets import (
-    HorizontalLayout,
-    ObservationInfoCard,
-    ObservationList,
-    VerticalLayout,
-)
+from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList, VerticalLayout
 
 logger = getLogger(__name__)
 
 
 class ObservationController(BaseController):
-    on_view_taxon = Signal(Taxon)  #: A taxon was selected for viewing
+    on_view_taxon = Signal(Taxon)  #: Request to switch to taxon tab
 
     def __init__(self):
         super().__init__()
@@ -93,7 +88,7 @@ class ObservationController(BaseController):
         if self.displayed_observation and self.displayed_observation.id == observation_id:
             return
 
-        logger.info(f'Viewing observation {observation_id}')
+        logger.info(f'Loading observation {observation_id}')
         future = self.app.threadpool.schedule(
             lambda: self.app.client.observations(observation_id, taxonomy=True),
             priority=QThread.HighPriority,

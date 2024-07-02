@@ -30,7 +30,7 @@ class TaxonInfoSection(HorizontalLayout):
     """Section to display selected taxon photo and basic info"""
 
     on_select = Signal(Taxon)  #: A taxon was selected for tagging
-    on_view_observations = Signal(Taxon)  #: A taxon was selected for filtering observations
+    on_view_observations = Signal(Taxon)  #: Request to switch to observations tab
 
     # When selecting a taxon for viewing, a signal is sent to controller instead of handling here,
     #   since there are multiple sections to load (not just this class)

@@ -2,10 +2,10 @@ from logging import getLogger
 from typing import Optional
 
 from pyinaturalist import Observation, Taxon
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, QThread, Signal, Slot
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QSizePolicy
 
-from naturtag.controllers import BaseController, ImageGallery
+from naturtag.controllers import BaseController, ImageGallery, get_app
 from naturtag.metadata import MetaMetadata, _refresh_tags, tag_images
 from naturtag.utils import get_ids_from_url
 from naturtag.widgets import (
@@ -24,8 +24,8 @@ class ImageController(BaseController):
     """Controller for selecting and tagging local image files"""
 
     on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
-    on_view_taxon_id = Signal()  #: Request to switch to taxon tab
-    on_view_observation_id = Signal()  #: Request to switch to observation tab
+    on_view_taxon_id = Signal(int)  #: Request to switch to taxon tab
+    on_view_observation_id = Signal(int)  #: Request to switch to observation tab
 
     def __init__(self):
         super().__init__()
@@ -43,16 +43,14 @@ class ImageController(BaseController):
 
         # Input fields
         inputs_layout = VerticalLayout(group_box)
-        self.input_obs_id = IdInput()
-        inputs_layout.addWidget(QLabel('Observation ID:'))
-        inputs_layout.addWidget(self.input_obs_id)
         self.input_taxon_id = IdInput()
+        self.input_taxon_id.on_select.connect(self.select_taxon_by_id)
         inputs_layout.addWidget(QLabel('Taxon ID:'))
         inputs_layout.addWidget(self.input_taxon_id)
-
-        # Notify other controllers when an ID is selected from input text
+        self.input_obs_id = IdInput()
         self.input_obs_id.on_select.connect(self.select_observation_by_id)
-        self.input_taxon_id.on_select.connect(self.select_taxon_by_id)
+        inputs_layout.addWidget(QLabel('Observation ID:'))
+        inputs_layout.addWidget(self.input_obs_id)
 
         # Selected taxon/observation info
         group_box = QGroupBox('Metadata source')
@@ -61,10 +59,8 @@ class ImageController(BaseController):
         group_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
         top_section_layout.addWidget(group_box)
         self.data_source_card = HorizontalLayout(group_box)
-
-        # Clear info when clearing an input field
-        self.input_obs_id.on_clear.connect(self.data_source_card.clear)
-        self.input_taxon_id.on_clear.connect(self.data_source_card.clear)
+        self.selected_taxon_id: Optional[int] = None
+        self.selected_observation_id: Optional[int] = None
 
         # Image gallery
         self.gallery = ImageGallery()
@@ -77,7 +73,7 @@ class ImageController(BaseController):
             self.info('Select images to tag')
             return
 
-        obs_id, taxon_id = self.input_obs_id.text(), self.input_taxon_id.text()
+        obs_id, taxon_id = self.selected_taxon_id, self.selected_observation_id
         if not (obs_id or taxon_id):
             self.info('Select either an observation or an organism to tag images with')
             return
@@ -142,22 +138,46 @@ class ImageController(BaseController):
         else:
             self.gallery.load_images(text.splitlines())
 
-    # TODO
+    # Note: These methods duplicate "display_x_by_id" controller methods, but attempts at code reuse
+    #   added too much spaghetti
     def select_taxon_by_id(self, taxon_id: int):
-        pass
+        """Load a taxon by ID (pasted or directly entered)"""
+        if self.selected_taxon_id == taxon_id:
+            return
 
-    # TODO
+        app = get_app()
+        logger.info(f'Loading taxon {taxon_id}')
+        future = app.threadpool.schedule(
+            lambda: app.client.taxa(taxon_id, locale=app.settings.locale),
+            priority=QThread.HighPriority,
+        )
+        future.on_result.connect(self.select_taxon)
+
     def select_observation_by_id(self, observation_id: int):
-        pass
+        """Load an observation by ID (pasted or directly entered)"""
+        if self.selected_observation_id == observation_id:
+            return
+
+        app = get_app()
+        logger.info(f'Loading observation {observation_id}')
+        future = app.threadpool.schedule(
+            lambda: app.client.observations(observation_id, taxonomy=True),
+            priority=QThread.HighPriority,
+        )
+        future.on_result.connect(self.select_observation)
 
     @Slot(Taxon)
     def select_taxon(self, taxon: Taxon):
-        """Update input info from a taxon object"""
-        if self.input_taxon_id.text() == str(taxon.id):
+        """Update metadata info from a taxon object"""
+        if self.selected_taxon_id == taxon.id:
             return
 
-        self.input_taxon_id.set_id(taxon.id)
+        self.selected_taxon_id = taxon.id
+        self.selected_observation_id = None
+        self.input_obs_id.clear()
+        self.input_taxon_id.clear()
         self.data_source_card.clear()
+
         card = TaxonInfoCard(taxon=taxon, delayed_load=False)
         card.on_click.connect(self.on_view_taxon_id)
         self.data_source_card.addWidget(card)
@@ -165,12 +185,15 @@ class ImageController(BaseController):
     @Slot(Observation)
     def select_observation(self, observation: Observation):
         """Update input info from an observation object"""
-        if self.input_obs_id.text() == str(observation.id):
+        if self.selected_observation_id == observation.id:
             return
 
-        self.input_obs_id.set_id(observation.id)
-        self.input_taxon_id.set_id(observation.taxon.id)
+        self.selected_taxon_id = None
+        self.selected_observation_id = observation.id
+        self.input_obs_id.clear()
+        self.input_taxon_id.clear()
         self.data_source_card.clear()
+
         card = ObservationInfoCard(obs=observation, delayed_load=False)
         card.on_click.connect(self.on_view_observation_id)
         self.data_source_card.addWidget(card)

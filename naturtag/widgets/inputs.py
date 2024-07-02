@@ -31,7 +31,10 @@ class IdInput(QLineEdit):
 
     def select(self):
         if self.text():
-            self.on_select.emit(int(self.text()))
+            self.on_select.emit(self.get_id())
+
+    def get_id(self) -> int:
+        return int(self.text()) if self.text() else 0
 
     def set_id(self, id: int):
         self.setText(str(id))

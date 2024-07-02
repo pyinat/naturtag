@@ -76,7 +76,7 @@ class TaxonController(BaseController):
             return
 
         # Fetch taxon record
-        logger.info(f'Selecting taxon {taxon_id}')
+        logger.info(f'Loading taxon {taxon_id}')
         client = self.app.client
         if self.tabs._init_complete:
             self.app.threadpool.cancel()
@@ -84,7 +84,7 @@ class TaxonController(BaseController):
             lambda: client.taxa(taxon_id, locale=self.app.settings.locale),
             priority=QThread.HighPriority,
         )
-        future.on_result.connect(lambda taxon: self.display_taxon(taxon))
+        future.on_result.connect(self.display_taxon)
 
     @Slot(Taxon)
     def display_taxon(self, taxon: Taxon, notify: bool = True):
