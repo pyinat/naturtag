@@ -17,3 +17,6 @@ class BaseController(StylableWidget):
     @property
     def app(self) -> 'NaturtagApp':
         return QApplication.instance()
+
+    def info(self, message: str):
+        self.on_message.emit(message)

@@ -185,6 +185,9 @@ class MainWindow(QMainWindow):
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
+        # self.status_widget = QLabel('This is a status widget')
+        # self.statusbar.addWidget(self.status_widget)
+        # self.status_widget.setAttribute(Qt.WA_TransparentForMouseEvents)
 
         # Load any valid image paths provided on command line (or from drag & drop)
         self.image_controller.gallery.load_images(
@@ -218,9 +221,9 @@ class MainWindow(QMainWindow):
         self.app.settings.write()
         self.app.state.write()
 
-    def info(self, message: str):
+    def info(self, message: str, timeout: int = 3000):
         """Show a message both in the status bar and in the logs"""
-        self.statusbar.showMessage(message)
+        self.statusbar.showMessage(message, timeout)
         logger.info(message)
 
     def mousePressEvent(self, event):

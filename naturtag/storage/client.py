@@ -126,7 +126,10 @@ class ObservationDbController(ObservationController):
                 updated_since=updated_since,
                 refresh=True,
             ).all()
-        logger.debug(f'{len(new_observations)} new observations found')
+        if new_observations:
+            logger.info(f'{len(new_observations)} new observations found since {updated_since}')
+        else:
+            logger.info(f'No new observations found since {updated_since}')
 
         if not limit:
             return []
