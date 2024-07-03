@@ -122,7 +122,7 @@ class Toolbar(QToolBar):
     ) -> QAction:
         action = QAction(fa_icon(icon), name, self)
         if tooltip:
-            action.setStatusTip(tooltip)
+            action.setToolTip(tooltip)
         if shortcut:
             action.setShortcut(QKeySequence(shortcut))
         if visible:
@@ -198,8 +198,8 @@ class UserDirs(QObject):
             return None
         if save:
             self.settings.add_favorite_dir(image_dir)
+            logger.debug(f'Adding favorite: {image_dir}')
 
-        logger.debug(f'Adding favorite: {image_dir}')
         action = self.favorite_dirs_submenu.addAction(
             fa_icon('mdi.folder-star'),
             str(image_dir).replace(HOME_DIR, '~'),
