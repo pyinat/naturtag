@@ -1,7 +1,7 @@
 # Build pyinstaller package prior to creating Windows installer
 
 # Create virtualenv (if needed)
-# python3.11 -m venv  $env:USERPROFILE\.virtualenvs\naturtag
+# python3.12 -m venv  $env:USERPROFILE\.virtualenvs\naturtag
 
 # Install poetry (if needed)
 # Invoke-WebRequest -Uri https://install.python-poetry.org -OutFile install-poetry.py
