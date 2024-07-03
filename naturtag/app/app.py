@@ -94,9 +94,14 @@ class MainWindow(QMainWindow):
         # Tabs
         self.tabs = QTabWidget()
         self.tabs.setIconSize(QSize(32, 32))
-        self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
-        self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
-        self.tabs.addTab(self.observation_controller, fa_icon('fa5s.binoculars'), 'Observations')
+        idx = self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
+        self.tabs.setTabToolTip(idx, 'Add and tag local photos')
+        idx = self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
+        self.tabs.setTabToolTip(idx, 'Browse and search taxonomy')
+        idx = self.tabs.addTab(
+            self.observation_controller, fa_icon('fa5s.binoculars'), 'Observations'
+        )
+        self.tabs.setTabToolTip(idx, 'Browse your recent observations')
 
         # Root layout: tabs + progress bar
         self.root_widget = QWidget()
@@ -110,6 +115,7 @@ class MainWindow(QMainWindow):
             self.app.log_handler.widget, fa_icon('fa.file-text-o'), 'Logs'
         )
         self.tabs.setTabVisible(self.log_tab_idx, self.app.settings.show_logs)
+        self.tabs.setTabToolTip(self.log_tab_idx, 'View application logs')
 
         # Photos tab: view taxon and switch tab
         self.image_controller.gallery.on_view_taxon_id.connect(
@@ -179,6 +185,9 @@ class MainWindow(QMainWindow):
         self.addToolBar(self.toolbar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
+        # self.status_widget = QLabel('This is a status widget')
+        # self.statusbar.addWidget(self.status_widget)
+        # self.status_widget.setAttribute(Qt.WA_TransparentForMouseEvents)
 
         # Load any valid image paths provided on command line (or from drag & drop)
         self.image_controller.gallery.load_images(
@@ -212,9 +221,9 @@ class MainWindow(QMainWindow):
         self.app.settings.write()
         self.app.state.write()
 
-    def info(self, message: str):
+    def info(self, message: str, timeout: int = 3000):
         """Show a message both in the status bar and in the logs"""
-        self.statusbar.showMessage(message)
+        self.statusbar.showMessage(message, timeout)
         logger.info(message)
 
     def mousePressEvent(self, event):

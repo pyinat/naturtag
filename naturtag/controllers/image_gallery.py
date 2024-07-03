@@ -71,6 +71,20 @@ class ImageGallery(BaseController):
         scroll_area.setWidget(self.scroll_panel)
         root.addWidget(scroll_area)
 
+        # Help text
+        help = QWidget()
+        help.setContentsMargins(5, 10, 5, 10)
+        help_layout = HorizontalLayout(help)
+        help_layout.setAlignment(Qt.AlignLeft)
+        self.flow_layout.addWidget(help)
+        help_msg = QLabel(
+            'Select local photos to tag.\n'
+            'Drag and drop files onto the window,\n'
+            'or use the file browser (Ctrl+O).'
+        )
+        help_layout.addWidget(FAIcon('ei.info-circle'))
+        help_layout.addWidget(help_msg)
+
     def clear(self):
         """Clear all images from the viewer"""
         self.images = {}
@@ -111,6 +125,10 @@ class ImageGallery(BaseController):
         elif image_path in self.images:
             logger.debug(f'Image already loaded: {image_path}')
             return None
+
+        # Clear initial help text if still present
+        if not self.images:
+            self.flow_layout.clear()
 
         logger.info(f'Loading {image_path}')
         thumbnail_card = ThumbnailCard(image_path)

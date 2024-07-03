@@ -27,9 +27,8 @@ logger = getLogger(__name__)
 
 @define(auto_attribs=False, slots=False)
 class AppState:
-    """Application state container. This includes values that don't need to be
-    human-readable/editable; so, they don't need to be stored in settings.yml, and are persisted in
-    SQLite instead.
+    """Container for persistent application state info. This includes values that don't need to be
+    human-readable/editable; so, they and are persisted in SQLite instead of `settings.yml`.
     """
 
     db_path: Path = None  # type: ignore
@@ -117,7 +116,7 @@ class AppState:
     @classmethod
     def read(cls, db_path: Path = DB_PATH) -> 'AppState':
         """Read app state from SQLite database, or return a new instance if no state is found"""
-        logger.info(f'Reading app state from {db_path}')
+        logger.debug(f'Reading app state from {db_path}')
 
         try:
             with get_session(db_path) as session:
