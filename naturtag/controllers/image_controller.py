@@ -15,6 +15,7 @@ from naturtag.widgets import (
     TaxonInfoCard,
     VerticalLayout,
 )
+from naturtag.widgets.images import FAIcon
 
 logger = getLogger(__name__)
 
@@ -34,6 +35,26 @@ class ImageController(BaseController):
         top_section_layout.setAlignment(Qt.AlignLeft)
         photo_layout.addLayout(top_section_layout)
         self.on_new_metadata.connect(self.update_metadata)
+        self.selected_taxon_id: Optional[int] = None
+        self.selected_observation_id: Optional[int] = None
+
+        # Selected taxon/observation info
+        group_box = QGroupBox('Metadata source')
+        group_box.setFixedHeight(150)
+        group_box.setMinimumWidth(400)
+        group_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
+        top_section_layout.addWidget(group_box)
+        self.data_source_card = HorizontalLayout(group_box)
+        self.data_source_card.setAlignment(Qt.AlignLeft)
+
+        # Help text
+        help_msg = QLabel(
+            'Select a source of metadata to tag photos with.\n'
+            'Browse the Species or Observations tabs,\n'
+            'paste an iNaturalist URL, or enter an ID to the right.'
+        )
+        self.data_source_card.addWidget(FAIcon('ei.info-circle'))
+        self.data_source_card.addWidget(help_msg)
 
         # Input group
         group_box = QGroupBox('Quick entry')
@@ -51,16 +72,6 @@ class ImageController(BaseController):
         self.input_obs_id.on_select.connect(self.select_observation_by_id)
         inputs_layout.addWidget(QLabel('Observation ID:'))
         inputs_layout.addWidget(self.input_obs_id)
-
-        # Selected taxon/observation info
-        group_box = QGroupBox('Metadata source')
-        group_box.setFixedHeight(150)
-        group_box.setMinimumWidth(400)
-        group_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
-        top_section_layout.addWidget(group_box)
-        self.data_source_card = HorizontalLayout(group_box)
-        self.selected_taxon_id: Optional[int] = None
-        self.selected_observation_id: Optional[int] = None
 
         # Image gallery
         self.gallery = ImageGallery()
