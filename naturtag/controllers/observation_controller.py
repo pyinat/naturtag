@@ -101,7 +101,7 @@ class ObservationController(BaseController):
             logger.info('Unknown user; skipping observation load')
             return
 
-        logger.info('Fetching user observations')
+        self.info('Fetching user observations')
         future = self.app.threadpool.schedule(
             self.get_user_observations, priority=QThread.LowPriority
         )
@@ -139,6 +139,7 @@ class ObservationController(BaseController):
         self.update_pagination_buttons()
         if self.total_results:
             self.user_obs_group_box.set_title(f'My Observations ({self.total_results})')
+        self.info('')
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""

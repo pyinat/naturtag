@@ -119,12 +119,12 @@ class ImageController(BaseController):
             self.info('Select images to tag')
             return
 
+        self.info(f'Refreshing tags for {len(images)} images')
         for image in images:
             future = self.app.threadpool.schedule(
                 lambda: _refresh_tags(image.metadata, self.app.client, self.app.settings),
             )
             future.on_result.connect(self.update_metadata)
-        self.info(f'{len(images)} images updated')
 
     def clear(self):
         """Clear all images and input"""
@@ -208,6 +208,3 @@ class ImageController(BaseController):
         card = ObservationInfoCard(obs=observation, delayed_load=False)
         card.on_click.connect(self.on_view_observation_id)
         self.data_source_card.addWidget(card)
-
-    def info(self, message: str):
-        self.on_message.emit(message)

@@ -76,7 +76,7 @@ class TaxonController(BaseController):
             return
 
         # Fetch taxon record
-        logger.info(f'Loading taxon {taxon_id}')
+        self.info(f'Loading taxon {taxon_id}')
         client = self.app.client
         if self.tabs._init_complete:
             self.app.threadpool.cancel()
@@ -96,6 +96,7 @@ class TaxonController(BaseController):
         self.bind_selection(self.taxonomy.ancestors_list.cards)
         self.bind_selection(self.taxonomy.children_list.cards)
         logger.debug(f'Loaded taxon {taxon.id}')
+        self.info('')
 
     def set_search_results(self, taxa: list[Taxon]):
         """Load search results into Results tab"""
@@ -163,7 +164,7 @@ class TaxonTabs(QTabWidget):
         return taxon_list
 
     def load_user_taxa(self):
-        logger.info('Fetching user-observed taxa')
+        self.info('Fetching user-observed taxa')
         app = get_app()
         client = app.client
         display_ids = self.user_taxa.display_ids
