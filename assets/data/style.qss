@@ -14,6 +14,12 @@ QGroupBox {
 QScrollArea {
     background: palette(midlight);
 }
+QStatusBar {
+    min-height: 25px;
+}
+QStatusBar > QLabel {
+    font-size: 11pt;
+}
 
 InfoCard {
     background: palette(base);
