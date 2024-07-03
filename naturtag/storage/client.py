@@ -90,7 +90,7 @@ class ObservationDbController(ObservationController):
 
         # Add full taxonomy to observations, if specified
         if taxonomy:
-            self.taxon_controller._get_taxonomy([obs.taxon for obs in observations])
+            self.taxon_controller._add_taxonomy([obs.taxon for obs in observations])
 
         logger.debug(f'Finished in {time()-start:.2f} seconds')
         return WrapperPaginator(observations)
@@ -178,6 +178,7 @@ class TaxonDbController(TaxonController):
             api_results = super().from_ids(remaining_ids, **params).all() if remaining_ids else []
             taxa.extend(api_results)
             save_taxa(api_results, self.client.db_path)
+            api_results = self._add_db_taxonomy(api_results)
 
         logger.debug(f'Finished in {time()-start:.2f} seconds')
         return WrapperPaginator(taxa)
@@ -187,13 +188,13 @@ class TaxonDbController(TaxonController):
             get_db_taxa(self.client.db_path, ids=taxon_ids, accept_partial=accept_partial)
         )
         if not accept_partial:
-            db_results = self._get_taxonomy(db_results)
+            db_results = self._add_taxonomy(db_results)
         return db_results
 
-    def _get_taxonomy(self, taxa: list[Taxon]) -> list[Taxon]:
+    def _add_taxonomy(self, taxa: list[Taxon]) -> list[Taxon]:
         """Add ancestor and descendant records to all the specified taxa.
 
-        DB records only contain ancestor/child IDs, so we need another query to fetch full records
+        DB records only contain ancestor/child IDs, so we need another query to fetch full records.
         This could be done in SQL, but a many-to-many relationship with ancestors would get messy.
         Besides, some may be missing and need to be fetched from the API.
         """
@@ -209,6 +210,28 @@ class TaxonDbController(TaxonController):
                 if id not in [ROOT_TAXON_ID, taxon.id]
             ]
             taxon.children = [extended_taxa[id] for id in taxon.child_ids]
+        return taxa
+
+    def _add_db_taxonomy(self, taxa: list[Taxon]) -> list[Taxon]:
+        """Given new taxon records from the API, replace partial ancestors and children with any
+        that are stored locally. This is mainly for displaying aggregate values in the taxonomy
+        browser.
+        """
+        api_taxa = chain.from_iterable([t.ancestors + t.children for t in taxa])
+        partial_taxa = {t.id: t for t in api_taxa}
+        full_taxa = {
+            t.id: t
+            for t in get_db_taxa(
+                self.client.db_path, ids=list(partial_taxa.keys()), accept_partial=True
+            )
+        }
+        for taxon in taxa:
+            taxon.ancestors = [
+                full_taxa.get(id) or partial_taxa[id]
+                for id in taxon.ancestor_ids
+                if id not in [ROOT_TAXON_ID, taxon.id]
+            ]
+            taxon.children = [full_taxa.get(id) or partial_taxa[id] for id in taxon.child_ids]
         return taxa
 
     # TODO: Save one page at a time
