@@ -9,7 +9,6 @@ from pyinaturalist import Taxon
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import QGroupBox, QPushButton
 
-from naturtag.app.style import fa_icon
 from naturtag.constants import SIZE_SM
 from naturtag.storage import AppState
 from naturtag.widgets import (
@@ -21,6 +20,7 @@ from naturtag.widgets import (
     set_pixmap_async,
 )
 from naturtag.widgets.layouts import VerticalLayout
+from naturtag.widgets.style import fa_icon
 from naturtag.widgets.taxon_images import TaxonPhoto
 
 logger = getLogger(__name__)
