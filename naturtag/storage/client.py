@@ -36,7 +36,9 @@ class iNatDbClient(iNatClient):
         # Get observation record, if available
         if observation_id:
             observation = self.observations(observation_id, refresh=True)
-            taxon_id = observation.taxon.id
+            if not observation:
+                return None
+            taxon_id = observation.taxon.id if observation.taxon else None
         # Otherwise, use an empty placeholder observation
         else:
             observation = Observation()
