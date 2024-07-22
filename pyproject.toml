@@ -42,8 +42,8 @@ click-help-colors           = '>=0.9'
 pillow                      = '>=10.0'
 pyexiv2                     = '>=2.10'
 pyinaturalist               = '>=0.19'
-pyinaturalist-convert       = '>=0.6.2'
-pyside6                     = '^6.6.0'
+pyinaturalist-convert       = '>=0.6.5'
+pyside6                     = '^6.7.2'
 pyqtdarktheme               = '^2.1.0'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
@@ -51,10 +51,10 @@ sqlalchemy                  = '^2.0.23'
 tablib                      = '^3.0'
 
 # Documentation dependencies needed for Readthedocs builds
-furo                        = {optional=true, version='^2023.9'}
+furo                        = {optional=true, version='^2024.7'}
 linkify-it-py               = {optional=true, version='^2.0'}
-myst-parser                 = {optional=true, version='^2.0'}
-sphinx                      = {optional=true, version='^6.2'}
+myst-parser                 = {optional=true, version='^3.0'}
+sphinx                      = {optional=true, version='^7.4'}
 sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
 sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
