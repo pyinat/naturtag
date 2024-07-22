@@ -174,6 +174,7 @@ def tag(
         include_sidecars=True,
     )
     if not metadata_objs:
+        click.secho('No search results found', fg='red')
         return
     click.echo(f'{len(metadata_objs)} images tagged')
 

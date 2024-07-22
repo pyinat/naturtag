@@ -193,7 +193,8 @@ def observation_to_metadata(
         return f'Xmp.{namespace}.{term}' if namespace in DWC_NAMESPACES else None
 
     # Convert and add DwC metadata
-    dwc = to_dwc(observations=[observation], taxa=[observation.taxon])[0]
+    tag_observations = [observation] if observation.id else None
+    dwc = to_dwc(observations=tag_observations, taxa=[observation.taxon])[0]
     dwc_xmp = {_format_key(k): v for k, v in dwc.items() if _format_key(k)}
     metadata.update(dwc_xmp)
 

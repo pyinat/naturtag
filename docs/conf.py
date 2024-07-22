@@ -36,7 +36,6 @@ exclude_patterns = [
     'modules/modules.rst',
     'modules/naturtag.rst',
     'modules/naturtag.constants.rst',
-    'modules/naturtag.utils.rst',
 ]
 
 # Replace '{{version}}' in md files with current version

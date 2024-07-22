@@ -10,10 +10,10 @@ from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 
-from naturtag.app.style import fa_icon
 from naturtag.constants import SIZE_ICON, SIZE_ICON_SM, SIZE_SM, IconDimensions, IntOrStr, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
 from naturtag.widgets.layouts import GridLayout, HorizontalLayout
+from naturtag.widgets.style import fa_icon
 
 if TYPE_CHECKING:
     MIXIN_BASE: TypeAlias = QWidget

@@ -5,10 +5,10 @@ from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from naturtag.app.style import fa_icon
 from naturtag.constants import DEFAULT_PAGE_SIZE
 from naturtag.controllers import BaseController, ObservationInfoSection
 from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList, VerticalLayout
+from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 
