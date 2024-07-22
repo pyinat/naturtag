@@ -3,7 +3,7 @@ import re
 import webbrowser
 from logging import getLogger
 from pathlib import Path
-from typing import Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Callable, Iterable, Optional
 
 from PySide6.QtCore import (
     QEasingCurve,
@@ -26,8 +26,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from naturtag.app.style import fa_icon
-from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import IMAGE_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
 from naturtag.controllers import BaseController
 from naturtag.metadata import MetaMetadata
@@ -41,6 +39,10 @@ from naturtag.widgets import (
     VerticalLayout,
 )
 from naturtag.widgets.images import HoverMixin, PixmapLabel
+from naturtag.widgets.style import fa_icon
+
+if TYPE_CHECKING:
+    from naturtag.app.threadpool import ThreadPool
 
 logger = getLogger(__name__)
 
@@ -217,7 +219,7 @@ class ThumbnailCard(StylableWidget):
         self.image.setPixmap(pixmap)
         self.set_metadata(metadata)
 
-    def load_image_async(self, threadpool: ThreadPool):
+    def load_image_async(self, threadpool: 'ThreadPool'):
         """Load thumbnail + metadata in a separate thread"""
         self.image.set_pixmap_meta_async(threadpool, self.image_path)
         self.image.on_load_metadata.connect(self.set_metadata)
@@ -315,7 +317,7 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         """
         return generate_thumbnail(path, self.thumbnail_size), MetaMetadata(path)
 
-    def set_pixmap_meta_async(self, threadpool: ThreadPool, path: Optional[PathOrStr] = None):
+    def set_pixmap_meta_async(self, threadpool: 'ThreadPool', path: Optional[PathOrStr] = None):
         """Generate a photo thumbnail and read its metadata from a separate thread, and render it
         in the main thread when complete
         """

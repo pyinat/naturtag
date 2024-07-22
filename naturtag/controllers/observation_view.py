@@ -10,7 +10,6 @@ from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton
 
-from naturtag.app.style import fa_icon
 from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
     GridLayout,
@@ -22,6 +21,7 @@ from naturtag.widgets import (
     set_pixmap_async,
 )
 from naturtag.widgets.observation_images import GEOPRIVACY_ICONS, QUALITY_GRADE_ICONS
+from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 

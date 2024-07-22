@@ -8,7 +8,6 @@ from PySide6.QtCore import QSize, Qt, Signal, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QWidget
 
-from naturtag.app.style import fa_icon
 from naturtag.constants import COMMON_RANKS, RANKS, SELECTABLE_ICONIC_TAXA
 from naturtag.controllers import get_app
 from naturtag.widgets import (
@@ -20,6 +19,7 @@ from naturtag.widgets import (
     VerticalLayout,
 )
 from naturtag.widgets.images import FAIcon
+from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 

@@ -47,13 +47,10 @@ refresh_tags(['~/observations/'], recursive=True)
 :maxdepth: 1
 
 modules/naturtag.app
+modules/naturtag.cli
 modules/naturtag.controllers
 modules/naturtag.metadata
+modules/naturtag.storage
 modules/naturtag.widgets
-
-modules/naturtag.cli
-modules/naturtag.client
-modules/naturtag.settings
-modules/naturtag.utils.image_glob
-modules/naturtag.utils.thumbnails
+modules/naturtag.utils
 ```

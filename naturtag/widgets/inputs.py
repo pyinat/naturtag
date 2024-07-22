@@ -5,7 +5,7 @@ from PySide6.QtCore import QEvent, Signal
 from PySide6.QtGui import QAction, QIntValidator
 from PySide6.QtWidgets import QLineEdit, QToolButton
 
-from naturtag.app.style import fa_icon
+from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 

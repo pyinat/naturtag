@@ -5,7 +5,6 @@ from pyinaturalist import Taxon, TaxonCount, TaxonCounts
 from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QTabWidget, QWidget
 
-from naturtag.app.style import fa_icon
 from naturtag.constants import MAX_DISPLAY_OBSERVED
 from naturtag.controllers import (
     BaseController,
@@ -16,6 +15,7 @@ from naturtag.controllers import (
 )
 from naturtag.storage import AppState
 from naturtag.widgets import HorizontalLayout, TaxonInfoCard, TaxonList, VerticalLayout
+from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 

@@ -7,6 +7,7 @@ from naturtag.widgets.layouts import (
     StylableWidget,
     VerticalLayout,
 )
+from naturtag.widgets.style import fa_icon, set_theme
 from naturtag.widgets.autocomplete import TaxonAutocomplete
 from naturtag.widgets.images import (
     FullscreenPhoto,

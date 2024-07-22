@@ -4,8 +4,7 @@ from pyinaturalist_convert import TaxonAutocompleter
 from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal, Slot
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
-from naturtag.app.style import fa_icon
-from naturtag.controllers import get_app
+from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 
@@ -19,6 +18,8 @@ class TaxonAutocomplete(QLineEdit):
     on_tab = Signal()  #: Tab key was pressed
 
     def __init__(self):
+        from naturtag.controllers import get_app
+
         super().__init__()
         self.setClearButtonEnabled(True)
         self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
@@ -51,6 +52,8 @@ class TaxonAutocomplete(QLineEdit):
 
     # TODO: Input delay
     def search(self, q: str):
+        from naturtag.controllers import get_app
+
         if len(q) > 1 and q not in self.taxa:
             app = get_app()
             language = app.settings.locale if app.settings.search_locale else None

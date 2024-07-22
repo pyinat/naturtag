@@ -14,8 +14,8 @@ from PySide6.QtCore import QObject, QSize, Qt, Signal, Slot
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import QApplication, QFileDialog, QMenu, QSizePolicy, QToolBar, QWidget
 
-from naturtag.app.style import fa_icon
 from naturtag.storage import Settings
+from naturtag.widgets.style import fa_icon
 
 HOME_DIR = str(Path.home())
 logger = getLogger(__name__)
