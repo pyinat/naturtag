@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
-      - uses: snok/install-poetry@v1.3
+      - uses: snok/install-poetry@v1.4
         with:
           virtualenvs-in-project: true
 
@@ -156,7 +156,7 @@ jobs:
   # Publish python package to PyPI
   release-pypi-package:
     if: |
-      github.event.inputs.publish == 'true'
+      github.event.inputs.publish != 'false'
       && (startsWith(github.ref, 'refs/tags/v') || github.event.inputs.pre-release-suffix)
     runs-on: ubuntu-latest
     permissions:
@@ -166,7 +166,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
-      - uses: snok/install-poetry@v1.3.3
+      - uses: snok/install-poetry@v1.4
         with:
           virtualenvs-in-project: true
 
