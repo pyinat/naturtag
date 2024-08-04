@@ -55,7 +55,7 @@ furo                        = {optional=true, version='^2024.7'}
 linkify-it-py               = {optional=true, version='^2.0'}
 myst-parser                 = {optional=true, version='^3.0'}
 sphinx                      = {optional=true, version='^7.4'}
-sphinx-autodoc-typehints    = {optional=true, version='^1.17'}
+sphinx-autodoc-typehints    = {optional=true, version='^2.2'}
 sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
 sphinxcontrib-apidoc        = {optional=true, version='^0.5'}
