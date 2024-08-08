@@ -116,8 +116,8 @@ class ObservationDbController(ObservationController):
         limit: int = DEFAULT_PAGE_SIZE,
         page: int = 1,
     ) -> list[Observation]:
-        """Fetch any new observations from the API since last search, save them to the db, and then
-        return up to `limit` most recent observations from the db
+        """Fetch any new user observations from the API since last search, save them to the db,
+        and then return up to ``limit`` most recent observations from the db
         """
         # TODO: Initial load should be done in a separate thread
         logger.debug(f'Fetching new user observations since {updated_since}')
@@ -143,9 +143,9 @@ class ObservationDbController(ObservationController):
             )
             return new_observations[:limit]
 
-        # Otherwise get up to `limit` most recent saved observations from the db. This includes ones
-        # we just fetched and saved; otherwise we can't accurately sort a mix of API results and db
-        # results by created date in a single query.
+        # Otherwise get up to `limit` most recent saved observations from the db.
+        # This includes obs we just fetched and saved; a minor inefficiency, but we can't accurately
+        # sort a mix of API results and db results by created date within a single query.
         obs = get_db_observations(
             self.client.db_path,
             username=username,

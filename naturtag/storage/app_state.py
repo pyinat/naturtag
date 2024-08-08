@@ -28,7 +28,7 @@ logger = getLogger(__name__)
 @define(auto_attribs=False, slots=False)
 class AppState:
     """Container for persistent application state info. This includes values that don't need to be
-    human-readable/editable; so, they and are persisted in SQLite instead of `settings.yml`.
+    human-readable/editable, so they are persisted in SQLite instead of ``settings.yml``.
     """
 
     db_path: Path = None  # type: ignore
