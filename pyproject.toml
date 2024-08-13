@@ -35,7 +35,7 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python                      = '>=3.10,<3.12'
+python                      = '>=3.10,<3.13'
 attrs                       = '>=21.2'
 click                       = '>=8.0'
 click-help-colors           = '>=0.9'
@@ -44,7 +44,7 @@ pyexiv2                     = '>=2.10'
 pyinaturalist               = '>=0.19'
 pyinaturalist-convert       = '>=0.6.5'
 pyside6                     = '^6.7.2'
-pyqtdarktheme               = '^2.1.0'
+pyqtdarktheme-fork          = '^2.3.2'
 pyyaml                      = '>=6.0'
 qtawesome                   = '^1.1.1'
 sqlalchemy                  = '^2.0.23'
