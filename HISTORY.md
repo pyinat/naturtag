@@ -1,6 +1,6 @@
 # History
 
-## 0.8.0 (Unreleased)
+## 0.8.0 (2024-10-10)
 **UI:**
 * Add tab for browsing user's observations
 * When an observation is selected, show a summary of basic observation details on main screen
