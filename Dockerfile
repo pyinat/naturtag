@@ -2,7 +2,7 @@
 FROM stateoftheartio/qt6:6.7-gcc-aqt
 ARG QT_VERSION=6.7
 
-# Install python 3.11
+# Install python 3.12
 USER root
 RUN apt-get update \
     && apt-get install -y software-properties-common \
@@ -13,9 +13,9 @@ RUN apt-get update \
     git \
     p7zip \
     libpython3-dev \
-    python3.11-dev \
-    python3.11-venv \
-    python3.11-distutils
+    python3.12-dev \
+    python3.12-venv \
+    python3.12-distutils
 # clang \
 # libclang-10-dev \
 # ENV LLVM_INSTALL_DIR=/usr/lib/llvm-10
@@ -27,7 +27,7 @@ RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 USER user
 WORKDIR /home/user
 RUN mkdir -p ~/.virtualenvs \
-    && python3.11 -m venv ~/.virtualenvs/pyside6 \
+    && python3.12 -m venv ~/.virtualenvs/pyside6 \
     && . ~/.virtualenvs/pyside6/bin/activate \
     && python -m pip install -U pip setuptools
 
@@ -64,8 +64,8 @@ RUN cd /home/user/pyside-setup \
 # sed -i /home/user/pyside-setup/sources/pyside6/tests/pysidetest/hiddenobject.h -e 's/HiddenObject::HiddenObject() noexcept = default;//'
 
 # Python headers not found
-# export CPPFLAGS=-I/usr/include/python3.11
-# export CMAKE_INCLUDE_PATH=/usr/include/python3.11
+# export CPPFLAGS=-I/usr/include/python3.12
+# export CMAKE_INCLUDE_PATH=/usr/include/python3.12
 
 # Build with cmake (BROKEN)
 # RUN cmake -B /home/user/pyside-setup/build \
