@@ -84,7 +84,7 @@ class ImageController(BaseController):
             self.info('Select images to tag')
             return
 
-        obs_id, taxon_id = self.selected_taxon_id, self.selected_observation_id
+        obs_id, taxon_id = self.selected_observation_id, self.selected_taxon_id
         if not (obs_id or taxon_id):
             self.info('Select either an observation or an organism to tag images with')
             return
@@ -128,6 +128,8 @@ class ImageController(BaseController):
 
     def clear(self):
         """Clear all images and input"""
+        self.selected_taxon_id = None
+        self.selected_observation_id = None
         self.gallery.clear()
         self.input_obs_id.clear()
         self.input_taxon_id.clear()
