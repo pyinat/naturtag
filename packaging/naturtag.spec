@@ -25,7 +25,7 @@ datas = [
     (str(ASSETS_DATA_DIR / '*.qss'), 'assets/data'),
     (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
 ]
-hiddenimports = []
+
 
 # Define platform-specific dependencies
 if is_win:
@@ -33,7 +33,6 @@ if is_win:
         (str(LIB_DIR_WIN / 'exiv2.dll'), '.'),
         (str(LIB_DIR_WIN / f'py{BUILD_PY_VERSION}-win' / 'exiv2api.pyd'), '.'),
     ]
-    hiddenimports = ['win32timezone']
 elif is_darwin:
     binaries = [
         (str(LIB_DIR_NIX / 'libexiv2.dylib'), '.'),
@@ -55,7 +54,7 @@ a = Analysis(
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
     datas=datas,
-    hiddenimports=hiddenimports,
+    hiddenimports = [],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
