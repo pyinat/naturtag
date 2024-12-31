@@ -1,5 +1,8 @@
 # History
 
+## Unreleased
+* Fix issue with first-time installation on Windows
+
 ## 0.8.0 (2024-10-10)
 **UI:**
 * Add tab for browsing user's observations

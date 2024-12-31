@@ -121,7 +121,8 @@ class Settings:
     def read(cls, path: Path = CONFIG_PATH) -> 'Settings':
         """Read settings from config file"""
         # New file; no contents to read
-        if not path or not path.is_file():
+        if not path.is_file():
+            path.parent.mkdir(parents=True, exist_ok=True)
             return cls(path=path)
 
         logger.debug(f'Reading settings from {path}')

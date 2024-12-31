@@ -8,7 +8,9 @@ from naturtag.constants import PathOrStr
 
 
 def init_handler(
-    level: str = 'DEBUG', root_level: str = 'INFO', logfile: PathOrStr = 'log.log'
+    level: str = 'DEBUG',
+    root_level: str = 'INFO',
+    logfile: PathOrStr = 'naturtag.log',
 ) -> 'QtRichHandler':
     """Initialize logging handler and attach to root logger
 
