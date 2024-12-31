@@ -1583,54 +1583,54 @@ docs = ["furo (>=2022.3.4,<2023.0.0)", "myst-parser (>=0.17)", "sphinx (>=4.3.0,
 
 [[package]]
 name = "pyside6"
-version = "6.7.3"
+version = "6.8.1"
 description = "Python bindings for the Qt cross-platform application and UI framework"
 optional = false
-python-versions = "<3.13,>=3.9"
+python-versions = "<3.14,>=3.9"
 files = [
-    {file = "PySide6-6.7.3-cp39-abi3-macosx_11_0_universal2.whl", hash = "sha256:1c21c4cf6cdd29bd13bbd7a2514756a19188eab992b92af03e64bf06a9b33d5b"},
-    {file = "PySide6-6.7.3-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:a21480cc746358f70768975fcc452322f03b3c3622625bfb1743b40ce4e24beb"},
-    {file = "PySide6-6.7.3-cp39-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:c2a1313296c0088d1c3d231d0a8ccf0eda52b84139d0c4065fded76e4a4378f4"},
-    {file = "PySide6-6.7.3-cp39-abi3-win_amd64.whl", hash = "sha256:3ac8dcb4ca82d276e319f89dd99098b01061f255a2b9104216504aece5e0faf8"},
+    {file = "PySide6-6.8.1-cp39-abi3-macosx_12_0_universal2.whl", hash = "sha256:6d1fd95651cdbdea741af21e155350986eca31ff015fc4c721ce01c2a110a4cc"},
+    {file = "PySide6-6.8.1-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:7d6adc5d53313249bbe02edb673877c1d437e215d71e88da78412520653f5c9f"},
+    {file = "PySide6-6.8.1-cp39-abi3-manylinux_2_39_aarch64.whl", hash = "sha256:ddeeaeca8ebd0ddb1ded30dd33e9240a40f330cc91832de346ba6c9d0cd1253e"},
+    {file = "PySide6-6.8.1-cp39-abi3-win_amd64.whl", hash = "sha256:866eeaca3ffead6b9d30fa3ed395d5624da0246d7586c8b8207e77ac65d82458"},
 ]
 
 [package.dependencies]
-PySide6-Addons = "6.7.3"
-PySide6-Essentials = "6.7.3"
-shiboken6 = "6.7.3"
+PySide6-Addons = "6.8.1"
+PySide6-Essentials = "6.8.1"
+shiboken6 = "6.8.1"
 
 [[package]]
 name = "pyside6-addons"
-version = "6.7.3"
+version = "6.8.1"
 description = "Python bindings for the Qt cross-platform application and UI framework (Addons)"
 optional = false
-python-versions = "<3.13,>=3.9"
+python-versions = "<3.14,>=3.9"
 files = [
-    {file = "PySide6_Addons-6.7.3-cp39-abi3-macosx_11_0_universal2.whl", hash = "sha256:3174cb3a373c09c98740b452e8e8f4945d64cfa18ed8d43964111d570f0dc647"},
-    {file = "PySide6_Addons-6.7.3-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:bde1eb03dbffd089b50cd445847aaecaf4056cea84c49ea592d00f84f247251e"},
-    {file = "PySide6_Addons-6.7.3-cp39-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:5a9e0df31345fe6caea677d916ea48b53ba86f95cc6499c57f89e392447ad6db"},
-    {file = "PySide6_Addons-6.7.3-cp39-abi3-win_amd64.whl", hash = "sha256:d8a19c2b2446407724c81c33ebf3217eaabd092f0f72da8130c17079e04a7813"},
+    {file = "PySide6_Addons-6.8.1-cp39-abi3-macosx_12_0_universal2.whl", hash = "sha256:879c12346b4b76f5d5ee6499d8ca53b5666c0c998b8fdf8780f08f69ea95d6f9"},
+    {file = "PySide6_Addons-6.8.1-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:f80cc03c1ac54132c6f800aa461dced64acd7d1646898db164ccb56fe3c23dd4"},
+    {file = "PySide6_Addons-6.8.1-cp39-abi3-manylinux_2_39_aarch64.whl", hash = "sha256:570a25016d80046274f454ed0bb06734f478ce6c21be5dec62b624773fc7504e"},
+    {file = "PySide6_Addons-6.8.1-cp39-abi3-win_amd64.whl", hash = "sha256:d7c8c1e89ee0db84631d5b8fdb9129d9d2a0ffb3b4cb2f5192dc8367dd980db4"},
 ]
 
 [package.dependencies]
-PySide6-Essentials = "6.7.3"
-shiboken6 = "6.7.3"
+PySide6-Essentials = "6.8.1"
+shiboken6 = "6.8.1"
 
 [[package]]
 name = "pyside6-essentials"
-version = "6.7.3"
+version = "6.8.1"
 description = "Python bindings for the Qt cross-platform application and UI framework (Essentials)"
 optional = false
-python-versions = "<3.13,>=3.9"
+python-versions = "<3.14,>=3.9"
 files = [
-    {file = "PySide6_Essentials-6.7.3-cp39-abi3-macosx_11_0_universal2.whl", hash = "sha256:f9e08a4e9e7dc7b5ab72fde20abce8c97df7af1b802d9743f098f577dfe1f649"},
-    {file = "PySide6_Essentials-6.7.3-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:cda6fd26aead48f32e57f044d18aa75dc39265b49d7957f515ce7ac3989e7029"},
-    {file = "PySide6_Essentials-6.7.3-cp39-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:acdde06b74f26e7d26b4ae1461081b32a6cb17fcaa2a580050b5e0f0f12236c9"},
-    {file = "PySide6_Essentials-6.7.3-cp39-abi3-win_amd64.whl", hash = "sha256:f0950fcdcbcd4f2443336dc6a5fe692172adc225f876839583503ded0ab2f2a7"},
+    {file = "PySide6_Essentials-6.8.1-cp39-abi3-macosx_12_0_universal2.whl", hash = "sha256:bd05155245e3cd1572e68d72772e78fadfd713575bbfdd2c5e060d5278e390e9"},
+    {file = "PySide6_Essentials-6.8.1-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:2f600b149e65b57acd6a444edb17615adc42cc2491548ae443ccb574036d86b1"},
+    {file = "PySide6_Essentials-6.8.1-cp39-abi3-manylinux_2_39_aarch64.whl", hash = "sha256:bf8a3c9ee0b997eb18fb00cb09aacaa28b8a51ce3c295a252cc594c5530aba56"},
+    {file = "PySide6_Essentials-6.8.1-cp39-abi3-win_amd64.whl", hash = "sha256:d5ed4ddb149f36d65bc49ae4260b2d213ee88b2d9a309012ae27f38158c2d1b6"},
 ]
 
 [package.dependencies]
-shiboken6 = "6.7.3"
+shiboken6 = "6.8.1"
 
 [[package]]
 name = "pytest"
@@ -1950,15 +1950,15 @@ type = ["importlib_metadata (>=7.0.2)", "jaraco.develop (>=7.21)", "mypy (>=1.12
 
 [[package]]
 name = "shiboken6"
-version = "6.7.3"
+version = "6.8.1"
 description = "Python/C++ bindings helper module"
 optional = false
-python-versions = "<3.13,>=3.9"
+python-versions = "<3.14,>=3.9"
 files = [
-    {file = "shiboken6-6.7.3-cp39-abi3-macosx_11_0_universal2.whl", hash = "sha256:285fe3cf79be3135fe1ad1e2b9ff6db3a48698887425af6aa6ed7a05a9abc3d6"},
-    {file = "shiboken6-6.7.3-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:f0852e5781de78be5b13c140ec4c7fb9734e2aaf2986eb2d6a224363e03efccc"},
-    {file = "shiboken6-6.7.3-cp39-abi3-manylinux_2_31_aarch64.whl", hash = "sha256:f0dd635178e64a45be2f84c9f33dd79ac30328da87f834f21a0baf69ae210e6e"},
-    {file = "shiboken6-6.7.3-cp39-abi3-win_amd64.whl", hash = "sha256:5f29325dfa86fde0274240f1f38e421303749d3174ce3ada178715b5f4719db9"},
+    {file = "shiboken6-6.8.1-cp39-abi3-macosx_12_0_universal2.whl", hash = "sha256:9a2f51d1ddd3b6d193a0f0fdc09f8d41f2092bc664723c9b9efc1056660d0608"},
+    {file = "shiboken6-6.8.1-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:1dc4c1976809b0e68872bb98474cccd590455bdcd015f0e0639907e94af27b6a"},
+    {file = "shiboken6-6.8.1-cp39-abi3-manylinux_2_39_aarch64.whl", hash = "sha256:ab5b60602ca6227103138aae89c4f5df3b1b8e249cbc8ec9e6e2a57f20ad9a91"},
+    {file = "shiboken6-6.8.1-cp39-abi3-win_amd64.whl", hash = "sha256:3ea127fd72be113b73cacd70e06687ad6f83c1c888047833c7dcdd5cf8e7f586"},
 ]
 
 [[package]]
@@ -2486,4 +2486,4 @@ docs = ["furo", "linkify-it-py", "myst-parser", "sphinx", "sphinx-autodoc-typehi
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "b84cf54af88698b4c4692e51f310716d20c31714ee15692a4a9e3400751beed8"
+content-hash = "7fd7873169a4a4eaf55210759adf842d901ed749557ff1b428b25d1141a66b2d"
