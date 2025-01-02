@@ -63,7 +63,7 @@ sphinxcontrib-apidoc        = {optional=true, version='^0.5'}
 [tool.poetry.dev-dependencies]
 babel                       = '>=2.0'
 coverage                    = '^7.0'
-nox                         = '^2023.4'
+nox                         = '^2024.10'
 nox-poetry                  = '^1.0'
 pre-commit                  = '^4.0'
 prettyprinter               = '^0.18'
