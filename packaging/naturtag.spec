@@ -22,6 +22,7 @@ binaries = []
 datas = [
     (str(ICONS_DIR / '*.ico'), 'assets/icons'),
     (str(ICONS_DIR / '*.png'), 'assets/icons'),
+    (str(ASSETS_DATA_DIR / '*.json'), 'assets/data'),
     (str(ASSETS_DATA_DIR / '*.qss'), 'assets/data'),
     (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
 ]
