@@ -94,7 +94,7 @@ class ObservationDbController(ObservationController):
         if taxonomy:
             self.taxon_controller._add_taxonomy([obs.taxon for obs in observations])
 
-        logger.debug(f'Finished in {time()-start:.2f} seconds')
+        logger.debug(f'Finished in {time() - start:.2f} seconds')
         return WrapperPaginator(observations)
 
     def count(self, username: str, **params) -> int:
@@ -185,7 +185,7 @@ class TaxonDbController(TaxonController):
             save_taxa(api_results, self.client.db_path)
             api_results = self._add_db_taxonomy(api_results)
 
-        logger.debug(f'Finished in {time()-start:.2f} seconds')
+        logger.debug(f'Finished in {time() - start:.2f} seconds')
         return WrapperPaginator(taxa)
 
     def _get_db_taxa(self, taxon_ids: list[int], accept_partial: bool = False):

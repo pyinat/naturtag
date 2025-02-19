@@ -489,8 +489,8 @@ class ImageWindow(StylableWidget):
 
 def format_int(value: int) -> str:
     if value >= 1000000:
-        return f'{int(value/1000000)}M'
+        return f'{int(value / 1000000)}M'
     elif value >= 10000:
-        return f'{int(value/1000)}K'
+        return f'{int(value / 1000)}K'
     else:
         return str(value)

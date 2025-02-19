@@ -42,7 +42,7 @@ click-help-colors           = '>=0.9'
 pillow                      = '>=10.0'
 pyexiv2                     = '>=2.10'
 pyinaturalist               = '>=0.20'
-pyinaturalist-convert       = '>=0.6.7'
+pyinaturalist-convert       = '>=0.7.1'
 pyside6                     = '6.8.1'
 pyqtdarktheme-fork          = '^2.3.2'
 pyyaml                      = '>=6.0'
@@ -60,14 +60,14 @@ sphinx-copybutton           = {optional=true, version='>=0.5'}
 sphinx-design               = {optional=true, version='>=0.2'}
 sphinxcontrib-apidoc        = {optional=true, version='^0.5'}
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 babel                       = '>=2.0'
 coverage                    = '^7.0'
 nox                         = '^2023.4'
 nox-poetry                  = '^1.0'
 pre-commit                  = '^4.0'
 prettyprinter               = '^0.18'
-pyinstaller                 = '6.10.0'
+pyinstaller                 = '6.13.0'
 pytest                      = '^8.2'
 pytest-cov                  = '>=6.0'
 pytest-xdist                = '>=2.2'
