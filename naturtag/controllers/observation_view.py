@@ -187,7 +187,7 @@ class ObservationInfoSection(HorizontalLayout):
         )
         self.details.add_line(
             GEOPRIVACY_ICONS.get(obs.geoprivacy, 'mdi.map-marker'),
-            f"<b>Coordinates:</b> {obs.private_location or obs.location} "
+            f'<b>Coordinates:</b> {obs.private_location or obs.location} '
             f'({obs.geoprivacy or "Unknown geoprivacy"})',
         )
         self.details.add_line(
