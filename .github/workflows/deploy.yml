@@ -111,21 +111,21 @@ jobs:
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: naturtag-${{ env.DIST_NAME }}.tar.gz
           path: naturtag-${{ env.DIST_NAME }}.tar.gz
 
       - name: Upload disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: naturtag.dmg
           path: dist/naturtag.dmg
 
       - name: Upload FPM workflow artifacts (Linux)
         if : startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
