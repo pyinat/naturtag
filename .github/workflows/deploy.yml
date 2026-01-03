@@ -50,7 +50,7 @@ jobs:
         run: sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
       - name: Cache python packages
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .venv
           key: venv-${{ env.LATEST_PY_VERSION }}-pyinstaller-${{ matrix.os }}-${{ hashFiles('poetry.lock') }}
