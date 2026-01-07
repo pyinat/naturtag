@@ -1,7 +1,7 @@
 # Build pyinstaller package prior to creating Windows installer
 
 # Create virtualenv (if needed)
-# python3.12 -m venv  $env:USERPROFILE\.virtualenvs\naturtag
+# python3.14 -m venv  $env:USERPROFILE\.virtualenvs\naturtag
 
 # Install uv (if needed)
 # Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression

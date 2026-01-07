@@ -21,7 +21,7 @@ CLEAN_DIRS = [
 DEFAULT_COVERAGE_FORMATS = ['html', 'term']
 
 
-@nox.session(python=['3.10', '3.11', '3.12'])
+@nox.session(python=['3.14'])
 def test(session):
     """Run tests for a specific python version"""
     test_paths = session.posargs or ['test']
