@@ -1,8 +1,8 @@
 # Dev container with PySide6 built from source
-FROM stateoftheartio/qt6:6.7-gcc-aqt
-ARG QT_VERSION=6.7
+FROM carlonluca/qt-dev:6.10.1
+ARG QT_VERSION=6.10
 
-# Install python 3.12
+# Install python 3.14
 USER root
 RUN apt-get update \
     && apt-get install -y software-properties-common \
@@ -13,21 +13,20 @@ RUN apt-get update \
     git \
     p7zip \
     libpython3-dev \
-    python3.12-dev \
-    python3.12-venv \
-    python3.12-distutils
+    python3.14-dev \
+    python3.14-venv
 # clang \
 # libclang-10-dev \
 # ENV LLVM_INSTALL_DIR=/usr/lib/llvm-10
 
 # Cleanup
-RUN sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Set up virtualenv
-USER user
-WORKDIR /home/user
+USER ubuntu
+WORKDIR /home/ubuntu
 RUN mkdir -p ~/.virtualenvs \
-    && python3.12 -m venv ~/.virtualenvs/pyside6 \
+    && python3.14 -m venv ~/.virtualenvs/pyside6 \
     && . ~/.virtualenvs/pyside6/bin/activate \
     && python -m pip install -U pip setuptools
 
@@ -35,17 +34,17 @@ RUN mkdir -p ~/.virtualenvs \
 RUN curl -fLo libclang.7z https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_140-based-linux-Ubuntu20.04-gcc9.3-x86_64.7z \
     && 7zr x libclang.7z \
     && rm libclang.7z
-ENV LLVM_INSTALL_DIR=/home/user/libclang
+ENV LLVM_INSTALL_DIR=/home/ubuntu/libclang
 
 # Check out pyside6 setup repo
 RUN git clone https://code.qt.io/pyside/pyside-setup \
-    && cd /home/user/pyside-setup \
+    && cd /home/ubuntu/pyside-setup \
     && QT_TAG=$(git tag | grep '^[v?]${QT_VERSION}' | tail -n 1) \
     && echo "Selecting PySide6 $QT_TAG" \
     && git checkout $QT_TAG
 
 # Install dependencies and build with setuptools wrapper scripts
-RUN cd /home/user/pyside-setup \
+RUN cd /home/ubuntu/pyside-setup \
     && . ~/.virtualenvs/pyside6/bin/activate \
     && python -m pip install -r requirements.txt \
     && python setup.py build --parallel=4 --ignore-git \
@@ -64,8 +63,8 @@ RUN cd /home/user/pyside-setup \
 # sed -i /home/user/pyside-setup/sources/pyside6/tests/pysidetest/hiddenobject.h -e 's/HiddenObject::HiddenObject() noexcept = default;//'
 
 # Python headers not found
-# export CPPFLAGS=-I/usr/include/python3.12
-# export CMAKE_INCLUDE_PATH=/usr/include/python3.12
+# export CPPFLAGS=-I/usr/include/python3.14
+# export CMAKE_INCLUDE_PATH=/usr/include/python3.14
 
 # Build with cmake (BROKEN)
 # RUN cmake -B /home/user/pyside-setup/build \

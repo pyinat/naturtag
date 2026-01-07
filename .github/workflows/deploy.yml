@@ -19,7 +19,7 @@ on:
         default: 'true'
 
 env:
-  LATEST_PY_VERSION: '3.12'
+  LATEST_PY_VERSION: '3.13'
 
 # Required for creating a new release
 permissions:
@@ -36,32 +36,24 @@ jobs:
         shell: bash
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.LATEST_PY_VERSION }}
-      - uses: snok/install-poetry@v1.4
-        with:
-          virtualenvs-in-project: true
-
-      # Install binary + python dependencies
+      # Install binary dependencies
       - name: Install system packages
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
-      - name: Cache python packages
-        id: cache
-        uses: actions/cache@v5
+
+      # Install dependencies, with caching
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
         with:
-          path: .venv
-          key: venv-${{ env.LATEST_PY_VERSION }}-pyinstaller-${{ matrix.os }}-${{ hashFiles('poetry.lock') }}
-      - name: Install python packages
-        if: steps.cache.outputs.cache-hit != 'true'
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install python + dependencies
         run: |
-          poetry install -v --only main
-          poetry run pip install -U pyinstaller setuptools
+          uv python install ${{ env.LATEST_PY_VERSION }}
+          uv sync  --no-dev
 
       - name: Build pyinstaller package
-        run: poetry run pyinstaller -y packaging/naturtag.spec
+        run: uv run pyinstaller -y packaging/naturtag.spec
 
       # Include taxon FTS db, compress, and set platform name
       - name: Finish pyinstaller package (Linux)
@@ -163,12 +155,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.LATEST_PY_VERSION }}
-      - uses: snok/install-poetry@v1.4
-        with:
-          virtualenvs-in-project: true
+      - uses: astral-sh/setup-uv@v7
+      - run: uv python install ${{ env.LATEST_PY_VERSION }}
 
       - name: Set pre-release version
         if: github.event.inputs.pre-release-suffix
@@ -176,10 +164,12 @@ jobs:
           pre-release-suffix: ${{ github.event.inputs.pre-release-suffix }}
           pre-release-version: ${{ github.event.inputs.pre-release-version || github.run_number }}
         run: |
-          poetry version $(poetry version -s).${{ env.pre-release-suffix }}${{ env.pre-release-version }}
-          poetry version
+          CURRENT_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          NEW_VERSION="${CURRENT_VERSION}.${{ env.pre-release-suffix }}${{ env.pre-release-version }}"
+          sed -i "s/version = '${CURRENT_VERSION}'/version = '${NEW_VERSION}'/" pyproject.toml
+          echo "Updated version to ${NEW_VERSION}"
 
       - name: Build package distributions
-        run: poetry build
+        run: uv build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

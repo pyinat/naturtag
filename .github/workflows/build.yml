@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  LATEST_PY_VERSION: '3.12'
+  LATEST_PY_VERSION: '3.14'
   COVERAGE_ARGS: '--cov --cov-report=term --cov-report=xml'
 
 jobs:
@@ -17,29 +17,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.14']
 
     steps:
-      - uses: actions/setup-python@v6
-      - uses: actions/setup-python@v5
+      # Install dependencies, with caching
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
         with:
-          python-version: ${{ matrix.python-version }}
-      - uses: snok/install-poetry@v1.4
-        with:
-          virtualenvs-in-project: true
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install python + dependencies
+        run: |
+          uv python install ${{ matrix.python-version }}
+          uv sync --extra docs
       - name: Install Qt dependencies
         run: sudo apt-get install -y libegl1
-
-      # Cache packages per python version, and reuse until lockfile changes
-      - name: Cache python packages
-        id: cache
-        uses: actions/cache@v5
-        with:
-          path: .venv
-          key: venv-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: poetry install -v -E all
 
       # TODO: Need an alternate location for SQLite db
       # - name: Run CLI smoke test
@@ -48,7 +40,7 @@ jobs:
       #     naturtag -cdo 45524803
       #     naturtag -cdt 48978
       - name: Run unit tests
-        run: poetry run pytest ${{ env.COVERAGE_ARGS }} test
+        run: uv run pytest ${{ env.COVERAGE_ARGS }} test
 
       # TODO: Upload coverage report to codecov... once there's actual coverage to report
       # - name: "Upload coverage report to Codecov"
@@ -59,19 +51,24 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
         with:
-          python-version: ${{ env.LATEST_PY_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install python + dependencies
+        run: |
+          uv python install ${{ env.LATEST_PY_VERSION }}
+          uv sync --no-dev
       - name: Run style checks & linting
-        uses: pre-commit/action@v3.0.1
-      - name: Scan dependencies for known vulnerabilities
-        uses: pypa/gh-action-pip-audit@v1.1.0
-        with:
-          vulnerability-service: osv
-          # Ignore issues with pip and setuptools versions used by the action itself
-          ignore-vulns: |
-            GHSA-cx63-2mw6-8hw5
-            GHSA-mq26-g339-26xf
-            PYSEC-2023-228
-            PYSEC-2022-43012
+        uses: j178/prek-action@v1
+
+      # Note: pip-audit currently fails in check for  GHSA-rp8m-h266-53jh with:
+      #   packaging.version.InvalidVersion: Invalid version: '0.8.3ubuntu7.5'
+      # - name: Scan dependencies for known vulnerabilities
+      #   uses: pypa/gh-action-pip-audit@v1.1.0
+      #   with:
+      #     vulnerability-service: osv
+      #     # Ignore issues with pip and setuptools versions used by the action itself
+      #     ignore-vulns: |
+      #       GHSA-4xh5-x5gv-qwph

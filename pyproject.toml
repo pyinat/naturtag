@@ -1,29 +1,86 @@
-[tool.poetry]
+[project]
 name = 'naturtag'
-version = '0.8.1'
+version = '0.8.2'
 description = 'Tag your nature photos with iNat taxonomy and observation metadata'
-authors = ['Jordan Cook']
-license = 'MIT'
+authors = [{name = 'Jordan Cook'}]
+license = {text = 'MIT'}
 readme = 'README.md'
-homepage = 'https://github.com/pyinat/naturtag'
-repository = 'https://github.com/pyinat/naturtag'
-documentation = 'https://naturtag.readthedocs.io'
+requires-python = '>=3.14,<3.15'
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',
     'Environment :: MacOS X',
     'Environment :: Win32 (MS Windows)',
     'Environment :: X11 Applications',
+    'Operating System :: MacOS',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
     'Intended Audience :: Developers',
     'Intended Audience :: End Users/Desktop',
     'Intended Audience :: Science/Research',
     'Typing :: Typed',
 ]
+dependencies = [
+    'attrs>=21.2',
+    'click>=8.0',
+    'click-help-colors>=0.9',
+    'pillow>=10.0',
+    'pyexiv2>=2.10',
+    'pyinaturalist>=0.20',
+    'pyinaturalist-convert>=0.7.1',
+    'pyside6==6.10.1',
+    'pyqtdarktheme-fork~=2.3.4',
+    'pyyaml>=6.0',
+    'qtawesome~=1.4.0',
+    'sqlalchemy~=2.0.45',
+    'tablib~=3.9',
+]
+
+[project.optional-dependencies]
+docs = [
+    'furo~=2025.12.19',
+    'linkify-it-py>=2.0',
+    'myst-parser~=4.0',
+    'sphinx~=8.2',
+    'sphinx-autodoc-typehints~=3.5',
+    'sphinx-copybutton>=0.5',
+    'sphinx-design>=0.2',
+    'sphinxcontrib-apidoc>=0.6',
+]
+
+[project.scripts]
+nt = 'naturtag.cli:main'
+naturtag = 'naturtag.cli:main'
+naturtag-ui = 'naturtag.app.app:main'
+
+[project.urls]
+Homepage = 'https://github.com/pyinat/naturtag'
+Repository = 'https://github.com/pyinat/naturtag'
+Documentation = 'https://naturtag.readthedocs.io'
+
+[dependency-groups]
+dev = [
+    'babel>=2.0',
+    'nox>=2025.11',
+    'prek>=0.2',
+    'prettyprinter>=0.18',
+    'pyinstaller==6.17.0',
+    'pytest>=9.0',
+    'pytest-cov>=7.0',
+    'pytest-xdist>=3.8',
+]
+
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[tool.hatch.build.targets.sdist]
 include = [
-    { path = '*.md' },
-    { path = 'assets' },
-    { path = 'docs', format = 'sdist' },
-    { path = 'test', format = 'sdist' },
+    '*.md',
+    'naturtag',
+    'assets',
+    'docs',
+    'test',
 ]
 exclude = [
     'assets/demo_images/*',
@@ -31,68 +88,17 @@ exclude = [
     'assets/icons/*-preview.*',
     'assets/icons/*.bmp',
     'assets/icons/*.xcf',
-
 ]
 
-[tool.poetry.dependencies]
-python                      = '>=3.10,<3.13'
-attrs                       = '>=21.2'
-click                       = '>=8.0'
-click-help-colors           = '>=0.9'
-pillow                      = '>=10.0'
-pyexiv2                     = '>=2.10'
-pyinaturalist               = '>=0.20'
-pyinaturalist-convert       = '>=0.7.1'
-pyside6                     = '6.8.1'
-pyqtdarktheme-fork          = '^2.3.2'
-pyyaml                      = '>=6.0'
-qtawesome                   = '^1.1.1'
-sqlalchemy                  = '^2.0.23'
-tablib                      = '^3.0'
-
-# Documentation dependencies needed for Readthedocs builds
-furo                        = {optional=true, version='^2024.7'}
-linkify-it-py               = {optional=true, version='^2.0'}
-myst-parser                 = {optional=true, version='^3.0'}
-sphinx                      = {optional=true, version='^7.4'}
-sphinx-autodoc-typehints    = {optional=true, version='^2.2'}
-sphinx-copybutton           = {optional=true, version='>=0.5'}
-sphinx-design               = {optional=true, version='>=0.2'}
-sphinxcontrib-apidoc        = {optional=true, version='^0.5'}
-
-[tool.poetry.group.dev.dependencies]
-babel                       = '>=2.0'
-coverage                    = '^7.0'
-nox                         = '^2023.4'
-nox-poetry                  = '^1.0'
-pre-commit                  = '^4.0'
-prettyprinter               = '^0.18'
-pyinstaller                 = '6.13.0'
-pytest                      = '^8.2'
-pytest-cov                  = '>=6.0'
-pytest-xdist                = '>=2.2'
-
-[tool.poetry.extras]
-all = []
-docs = [
-    'furo',
-    'linkify-it-py',
-    'myst-parser',
-    'sphinx',
-    'sphinx-autodoc-typehints',
-    'sphinx-copybutton',
-    'sphinx-design',
-    'sphinxcontrib-apidoc',
+[tool.hatch.build.targets.wheel]
+packages = ['naturtag']
+exclude = [
+    'assets/demo_images/*',
+    'assets/screenshots/*',
+    'assets/icons/*-preview.*',
+    'assets/icons/*.bmp',
+    'assets/icons/*.xcf',
 ]
-
-[tool.poetry.scripts]
-nt = 'naturtag.cli:main'
-naturtag = 'naturtag.cli:main'
-naturtag-ui = 'naturtag.app.app:main'
-
-[build-system]
-requires = ['poetry-core>=1.0.0']
-build-backend = 'poetry.core.masonry.api'
 
 [tool.coverage.html]
 directory = 'test-reports'
@@ -113,11 +119,11 @@ fix = true
 unsafe-fixes = true
 line-length = 100
 output-format = 'grouped'
-target-version = 'py311'
+target-version = 'py314'
 
 [tool.ruff.lint]
 select = ['B', 'C4', 'C90', 'E', 'F', 'I']
-ignore = ['B023']
+ignore = ['B023', 'C420']
 
 [tool.ruff.format]
 quote-style = 'single'
