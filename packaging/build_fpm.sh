@@ -22,9 +22,8 @@ find $PKG_DIR/opt/naturtag/ -type d -exec chmod 755 -- {} +
 find $PKG_DIR/usr/share -type f -exec chmod 644 -- {} +
 chmod +x $PKG_DIR/opt/naturtag/naturtag
 
-# Get app version from poetry config
-poetry run pip install tomlkit  #  Shouldn't this already be installed?
-app_version=$(poetry run python get_version.py)
+# Get app version from pyproject.toml
+app_version=$(uv run python get_version.py)
 echo "Version: $app_version"
 
 # Build deb, snap, and rpm
