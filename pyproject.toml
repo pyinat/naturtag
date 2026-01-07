@@ -62,7 +62,7 @@ Documentation = 'https://naturtag.readthedocs.io'
 dev = [
     'babel>=2.0',
     'nox>=2025.11',
-    'pre-commit>=4.0',
+    'prek>=0.2',
     'prettyprinter>=0.18',
     'pyinstaller==6.17.0',
     'pytest>=9.0',
@@ -119,11 +119,11 @@ fix = true
 unsafe-fixes = true
 line-length = 100
 output-format = 'grouped'
-target-version = 'py311'
+target-version = 'py314'
 
 [tool.ruff.lint]
 select = ['B', 'C4', 'C90', 'E', 'F', 'I']
-ignore = ['B023']
+ignore = ['B023', 'C420']
 
 [tool.ruff.format]
 quote-style = 'single'

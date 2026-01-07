@@ -19,6 +19,7 @@ CLEAN_DIRS = [
     join('docs', 'modules'),
 ]
 DEFAULT_COVERAGE_FORMATS = ['html', 'term']
+DOC_BUILD_DIR = join('docs', '_build', 'html')
 
 
 @nox.session(python=['3.14'])
@@ -51,12 +52,10 @@ def coverage(session):
 @nox.session(python=False)
 def docs(session):
     """Build Sphinx documentation"""
-    cmd = 'sphinx-build docs docs/_build/html -j auto'
-    session.run(*cmd.split(' '))
+    session.run('sphinx-build', 'docs', DOC_BUILD_DIR, '-j', 'auto')
 
 
 @nox.session(python=False)
 def lint(session):
     """Run linters and code formatters via pre-commit"""
-    cmd = 'pre-commit run --all-files'
-    session.run(*cmd.split(' '))
+    session.run('prek', 'run', '--all-files')
