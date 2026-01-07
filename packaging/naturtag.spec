@@ -32,17 +32,17 @@ datas = [
 if is_win:
     binaries = [
         (str(LIB_DIR_WIN / 'exiv2.dll'), '.'),
-        (str(LIB_DIR_WIN / f'py{BUILD_PY_VERSION}-win' / 'exiv2api.pyd'), '.'),
+        (str(LIB_DIR_WIN / 'exiv2api.pyd'), '.'),
     ]
 elif is_darwin:
     binaries = [
         (str(LIB_DIR_NIX / 'libexiv2.dylib'), '.'),
-        (str(LIB_DIR_NIX / f'py{BUILD_PY_VERSION}-darwin' / 'exiv2api.so'), '.'),
+        (str(LIB_DIR_NIX / 'exiv2api.so'), '.'),
     ]
 elif is_linux:
     binaries = [
         (str(LIB_DIR_NIX / 'libexiv2.so'), '.'),
-        (str(LIB_DIR_NIX / f'py{BUILD_PY_VERSION}-linux' / 'exiv2api.so'), '.'),
+        (str(LIB_DIR_NIX / 'exiv2api.so'), '.'),
     ]
 else:
     raise NotImplementedError
