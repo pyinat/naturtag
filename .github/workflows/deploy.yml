@@ -36,8 +36,8 @@ jobs:
         shell: bash
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
       - uses: snok/install-poetry@v1.4
@@ -50,7 +50,7 @@ jobs:
         run: sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
       - name: Cache python packages
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .venv
           key: venv-${{ env.LATEST_PY_VERSION }}-pyinstaller-${{ matrix.os }}-${{ hashFiles('poetry.lock') }}
@@ -111,21 +111,21 @@ jobs:
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag-${{ env.DIST_NAME }}.tar.gz
           path: naturtag-${{ env.DIST_NAME }}.tar.gz
 
       - name: Upload disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag.dmg
           path: dist/naturtag.dmg
 
       - name: Upload FPM workflow artifacts (Linux)
         if : startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
@@ -136,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-app-packages
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
       - name: Collect artifacts from workflow subdirs
         run: |
           find . -type d -depth -name 'naturtag*' -exec mv {} {}_dir \;
@@ -162,8 +162,8 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LATEST_PY_VERSION }}
       - uses: snok/install-poetry@v1.4
