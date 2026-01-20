@@ -32,7 +32,7 @@ class Toolbar(QToolBar):
         self.user_dirs = user_dirs
 
         self.run_button = self.add_button(
-            '&Run', tooltip='Apply tags to images', icon='fa.play', shortcut='Ctrl+R'
+            '&Run', tooltip='Apply tags to images', icon='fa5s.play', shortcut='Ctrl+R'
         )
         self.refresh_tags_button = self.add_button(
             'Refresh &tags',
@@ -51,13 +51,13 @@ class Toolbar(QToolBar):
             shortcut='Ctrl+V',
         )
         self.clear_button = self.add_button(
-            '&Clear', tooltip='Clear open images', icon='fa.remove', shortcut='Ctrl+X'
+            '&Clear', tooltip='Clear open images', icon='ei.remove', shortcut='Ctrl+X'
         )
         self.addSeparator()
         self.refresh_obs_button = self.add_button(
             '&Refresh observations',
             tooltip='Refresh local observations with latest data from iNaturalist',
-            icon='fa.refresh',
+            icon='mdi.database-refresh',
             shortcut='F5',
         )
 
@@ -81,7 +81,7 @@ class Toolbar(QToolBar):
         self.settings_button = self.add_button(
             '&Settings',
             tooltip='Settings',
-            icon='fa.gear',
+            icon='fa6s.gear',
             visible=False,
         )
         self.exit_button = self.add_button(
@@ -94,14 +94,14 @@ class Toolbar(QToolBar):
         self.docs_button = self.add_button(
             '&Docs',
             tooltip='Open documentation',
-            icon='fa.question-circle',
+            icon='fa5.question-circle',
             shortcut='F1',
             visible=False,
         )
         self.about_button = self.add_button(
             '&About',
             tooltip='Application information',
-            icon='fa.info-circle',
+            icon='fa5s.info-circle',
             shortcut='Ctrl+F1',
             visible=False,
         )
@@ -169,7 +169,7 @@ class UserDirs(QObject):
         super().__init__()
         self.favorite_dirs: dict[Path, QAction] = {}
         self.favorite_dirs_submenu = QMenu('Open Favorites')
-        self.favorite_dirs_submenu.setIcon(fa_icon('fa.star'))
+        self.favorite_dirs_submenu.setIcon(fa_icon('fa5.star'))
 
         self.recent_dirs: dict[Path, QAction] = {}
         self.recent_dirs_submenu = QMenu('Open Recent')
@@ -179,7 +179,7 @@ class UserDirs(QObject):
         self.last_opened_action = QAction()
 
         # Add action to top of favorites submenu to add a new favorite
-        action = self.favorite_dirs_submenu.addAction(fa_icon('fa.star'), 'Add a favorite')
+        action = self.favorite_dirs_submenu.addAction(fa_icon('fa5.star'), 'Add a favorite')
         action.triggered.connect(self.choose_favorite_dir)
         action.setStatusTip('Add a new image directory to Favorites')
         action.setShortcut(QKeySequence('Ctrl+Shift+F'))
@@ -294,4 +294,6 @@ class UserDirs(QObject):
             self.remove_favorite_dir(image_dir)
             self.add_recent_dir(image_dir)
         else:
+            self.on_dir_open.emit(image_dir)
+            self.on_dir_open.emit(image_dir)
             self.on_dir_open.emit(image_dir)

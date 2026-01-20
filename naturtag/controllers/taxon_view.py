@@ -93,7 +93,7 @@ class TaxonInfoSection(HorizontalLayout):
 
         # Select button: Use taxon for tagging
         self.select_button = QPushButton('Select')
-        self.select_button.setIcon(fa_icon('fa.tag', primary=True))
+        self.select_button.setIcon(fa_icon('fa5s.tag', primary=True))
         self.select_button.clicked.connect(lambda: self.on_select.emit(self.displayed_taxon))
         self.select_button.setEnabled(False)
         self.select_button.setToolTip('Select this taxon for tagging')

@@ -93,7 +93,7 @@ class ObservationInfoSection(HorizontalLayout):
 
         # Select button: Use observation for tagging
         self.select_button = QPushButton('Select')
-        self.select_button.setIcon(fa_icon('fa.tag', primary=True))
+        self.select_button.setIcon(fa_icon('fa5s.tag', primary=True))
         self.select_button.clicked.connect(lambda: self.on_select.emit(self.selected_observation))
         self.select_button.setEnabled(False)
         self.select_button.setToolTip('Select this observation for tagging')

@@ -53,7 +53,7 @@ class TaxonInfoCard(InfoCard):
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignLeft)
         layout.addWidget(
-            IconLabel('fa.binoculars', taxon.observations_count or 0, size=SIZE_ICON_SM)
+            IconLabel('fa6s.binoculars', taxon.observations_count or 0, size=SIZE_ICON_SM)
         )
         if taxon.complete_species_count:
             layout.addWidget(IconLabel('mdi.leaf', taxon.complete_species_count, size=SIZE_ICON_SM))

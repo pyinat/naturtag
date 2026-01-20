@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
         # Tabs
         self.tabs = QTabWidget()
         self.tabs.setIconSize(QSize(32, 32))
-        idx = self.tabs.addTab(self.image_controller, fa_icon('fa.camera'), 'Photos')
+        idx = self.tabs.addTab(self.image_controller, fa_icon('fa6s.camera'), 'Photos')
         self.tabs.setTabToolTip(idx, 'Add and tag local photos')
         idx = self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
         self.tabs.setTabToolTip(idx, 'Browse and search taxonomy')
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
 
         # Optionally show Logs tab
         self.log_tab_idx = self.tabs.addTab(
-            self.app.log_handler.widget, fa_icon('fa.file-text-o'), 'Logs'
+            self.app.log_handler.widget, fa_icon('ph.file-text'), 'Logs'
         )
         self.tabs.setTabVisible(self.log_tab_idx, self.app.settings.show_logs)
         self.tabs.setTabToolTip(self.log_tab_idx, 'View application logs')

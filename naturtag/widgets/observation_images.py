@@ -94,7 +94,7 @@ class ObservationInfoCard(InfoCard):
             )
         )
         self.add_row(layout)
-        self.add_row(IconLabel('fa.map-marker', obs.place_guess or obs.location, size=icon_size))
+        self.add_row(IconLabel('fa5s.map-marker', obs.place_guess or obs.location, size=icon_size))
 
         # Add more verbose details in tooltip
         tooltip_lines = [

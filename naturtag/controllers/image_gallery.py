@@ -359,7 +359,7 @@ class ThumbnailContextMenu(QMenu):
         )
         self._add_action(
             parent=thumbnail_card,
-            icon='fa.binoculars',
+            icon='fa6s.binoculars',
             text='View Observation',
             tooltip=f'View observation {meta.observation_id} in naturtag',
             enabled=meta.has_observation,
@@ -367,7 +367,7 @@ class ThumbnailContextMenu(QMenu):
         )
         self._add_action(
             parent=thumbnail_card,
-            icon='fa.binoculars',
+            icon='fa6s.binoculars',
             text='View Observation on iNat',
             tooltip=f'View observation {meta.observation_id} on inaturalist.org',
             enabled=meta.has_observation,
@@ -390,7 +390,7 @@ class ThumbnailContextMenu(QMenu):
         )
         self._add_action(
             parent=thumbnail_card,
-            icon='fa.remove',
+            icon='ei.remove',
             text='Remove image',
             tooltip='Remove this image from the selection',
             callback=thumbnail_card.remove,
@@ -426,9 +426,9 @@ class ThumbnailMetaIcons(QLabel):
         self.setGeometry(9, img_size[0] - 11, 130, 20)
 
         self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
-        self.observation_icon = FAIcon('fa.binoculars', secondary=True, size=20)
+        self.observation_icon = FAIcon('fa6s.binoculars', secondary=True, size=20)
         self.geo_icon = FAIcon('mdi.map-marker', secondary=True, size=20)
-        self.tag_icon = FAIcon('fa.tags', secondary=True, size=20)
+        self.tag_icon = FAIcon('fa6s.tags', secondary=True, size=20)
         self.sidecar_icon = FAIcon('mdi.xml', secondary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)
         self.icon_layout.addWidget(self.observation_icon)

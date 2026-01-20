@@ -36,14 +36,14 @@ class SettingsMenu(BaseController):
         inat.addLayout(
             TextSetting(
                 self.app.settings,
-                icon_str='fa.user',
+                icon_str='fa6s.user',
                 setting_attr='username',
             )
         )
         inat.addLayout(
             ChoiceAltDisplaySetting(
                 self.app.settings,
-                icon_str='fa.globe',
+                icon_str='fa6s.globe',
                 setting_attr='locale',
                 choices=self.locales,
             )
@@ -51,7 +51,7 @@ class SettingsMenu(BaseController):
         inat.addLayout(
             ToggleSetting(
                 self.app.settings,
-                icon_str='fa.language',
+                icon_str='fa6s.language',
                 setting_attr='search_locale',
             )
         )
@@ -71,7 +71,7 @@ class SettingsMenu(BaseController):
         )
         self.all_ranks = ToggleSetting(
             self.app.settings,
-            icon_str='fa.chevron-circle-up',
+            icon_str='fa6s.circle-chevron-up',
             setting_attr='all_ranks',
         )
         inat.addLayout(self.all_ranks)
@@ -81,7 +81,7 @@ class SettingsMenu(BaseController):
         metadata.addLayout(
             ToggleSetting(
                 self.app.settings,
-                icon_str='fa.language',
+                icon_str='fa6s.language',
                 setting_attr='common_names',
             )
         )
@@ -161,13 +161,13 @@ class SettingsMenu(BaseController):
         debug = self.add_group('Debug', self.settings_layout)
         self.show_logs = ToggleSetting(
             self.app.settings,
-            icon_str='fa.file-text-o',
+            icon_str='ph.file-text',
             setting_attr='show_logs',
         )
         debug.addLayout(self.show_logs)
         self.log_level = ChoiceSetting(
             self.app.settings,
-            icon_str='fa.thermometer-2',
+            icon_str='fa5s.thermometer-half',
             setting_attr='log_level',
             choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
         )

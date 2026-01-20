@@ -72,7 +72,7 @@ class TaxonSearch(VerticalLayout):
         button_layout = HorizontalLayout()
         search_button = QPushButton('Search')
         search_button.setMaximumWidth(200)
-        search_button.setIcon(fa_icon('fa.search'))
+        search_button.setIcon(fa_icon('fa5s.search'))
         search_button.clicked.connect(self.search)
         button_layout.addWidget(search_button)
 
