@@ -2,6 +2,9 @@
 
 ## Unreleased
 * Fix issue with first-time installation on Windows
+* Add menu item to open app data/config dir
+* Include locale data in PyInstaller packages
+* Upgrade to Qt 6.10
 
 ## 0.8.0 (2024-10-10)
 **UI:**

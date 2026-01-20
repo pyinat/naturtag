@@ -72,6 +72,12 @@ class Toolbar(QToolBar):
         )
 
         # Extra actions not added to the toolbar, but used by the menu
+        self.open_app_dir_button = self.add_button(
+            '&Open app directory',
+            tooltip='Open application data/config directory',
+            icon='mdi.folder-cog',
+            visible=False,
+        )
         self.reset_db_button = self.add_button(
             '&Reset database',
             tooltip='Reset local taxonomy & observation database',
@@ -150,6 +156,7 @@ class Toolbar(QToolBar):
         view_menu.addAction(self.show_toolbar_button)
 
         tools_menu = menu.addMenu('&Tools')
+        tools_menu.addAction(self.open_app_dir_button)
         tools_menu.addAction(self.reset_db_button)
 
         settings_menu = menu.addMenu('&Settings')
@@ -294,6 +301,7 @@ class UserDirs(QObject):
             self.remove_favorite_dir(image_dir)
             self.add_recent_dir(image_dir)
         else:
+            self.on_dir_open.emit(image_dir)
             self.on_dir_open.emit(image_dir)
             self.on_dir_open.emit(image_dir)
             self.on_dir_open.emit(image_dir)

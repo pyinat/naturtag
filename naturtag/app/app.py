@@ -6,8 +6,8 @@ from datetime import datetime
 from importlib.metadata import version as pkg_version
 from logging import getLogger
 
-from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QIcon, QKeySequence, QPixmap, QShortcut
+from PySide6.QtCore import QSize, Qt, QUrl
+from PySide6.QtGui import QDesktopServices, QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QInputDialog,
@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
-from naturtag.constants import APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
+from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageSession, Settings, iNatDbClient, setup
 from naturtag.widgets import VerticalLayout, fa_icon, init_handler, set_theme
@@ -174,6 +174,7 @@ class MainWindow(QMainWindow):
         self.toolbar.refresh_obs_button.triggered.connect(self.observation_controller.refresh)
         self.toolbar.fullscreen_button.triggered.connect(self.toggle_fullscreen)
         self.toolbar.reset_db_button.triggered.connect(self.reset_db)
+        self.toolbar.open_app_dir_button.triggered.connect(self.open_app_dir)
         self.toolbar.settings_button.triggered.connect(self.show_settings)
         self.toolbar.exit_button.triggered.connect(QApplication.instance().quit)
         self.toolbar.docs_button.triggered.connect(self.open_docs)
@@ -231,6 +232,11 @@ class MainWindow(QMainWindow):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         super().mousePressEvent(event)
+
+    def open_app_dir(self):
+        """Open the native file explorer to the app data/config dir"""
+        url = QUrl.fromLocalFile(str(APP_DIR))
+        QDesktopServices.openUrl(url)
 
     def open_docs(self):
         """Open the documentation in a web browser"""
