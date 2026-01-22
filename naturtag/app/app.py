@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
         self.tabs.setIconSize(QSize(32, 32))
         idx = self.tabs.addTab(self.image_controller, fa_icon('fa6s.camera'), 'Photos')
         self.tabs.setTabToolTip(idx, 'Add and tag local photos')
-        idx = self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Species')
+        idx = self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Taxonomy')
         self.tabs.setTabToolTip(idx, 'Browse and search taxonomy')
         idx = self.tabs.addTab(
             self.observation_controller, fa_icon('fa5s.binoculars'), 'Observations'
@@ -134,13 +134,13 @@ class MainWindow(QMainWindow):
         )
         self.image_controller.on_view_observation_id.connect(self.switch_tab_observations)
 
-        # Species tab: View observation and switch tab
+        # Taxonomy tab: View observation and switch tab
         # self.taxon_controller.taxon_info.on_view_observations.connect(
         #     lambda obs: self.observation_controller.display_observation(obs, notify=False)
         # )
         # self.taxon_controller.taxon_info.on_view_observations.connect(self.switch_tab_observations)
 
-        # Species tab: Select taxon for tagging and switch to Photos tab
+        # Taxonomy tab: Select taxon for tagging and switch to Photos tab
         self.taxon_controller.taxon_info.on_select.connect(self.image_controller.select_taxon)
         self.taxon_controller.taxon_info.on_select.connect(
             lambda: self.tabs.setCurrentWidget(self.image_controller)

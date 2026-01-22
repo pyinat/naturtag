@@ -34,9 +34,10 @@ Use the {fa}`remove` button  in the toolbar (or `Ctrl+Shift+X`) to clear all sel
 ## Selecting a Metadata Source
 Next, you will specify an observation or species to use as a metadata source
 There are a few ways to do this:
+* Use the {ref}`obs-browser` page
+* Use the {ref}`taxon-browser` page
 * Paste an iNaturalist URL anywhere (with `Ctrl+V` or the {fas}`paste` **Paste** button from the toolbar)
 * Enter an iNaturalist observation ID or taxon ID
-* Use the {ref}`species-search` page
 
 (tagging-images)=
 ## Tagging Images
@@ -64,9 +65,9 @@ taxon_id:12345
 ```
 :::
 
-(species-search)=
-## Species Search
-The **Species** tab contains tools to search and browse species to tag your images with:
+(taxon-browser)=
+## Taxonomy Browser
+The **Taxonomy** tab contains tools to search and browse species to tag your images with:
 
 ![Screenshot](../assets/screenshots/taxon-search.png)
 
@@ -106,8 +107,17 @@ The additional tabs next to search results contain:
 
 ![Screenshot](../assets/screenshots/taxon-tabs.png)
 
+<!-- TODO -->
+(obs-browser)=
+## Observation Browser
+The **Observations** tab displays your recent observations that you can to tag your images with:
+
+```{note}
+WIP; details coming soon!
+```
+
 (app-settings)=
-### Settings
+## Settings
 See the **Settings** menu for some settings to customize the metadata that your images will be
 tagged with, iNaturalist info used in search filters, and other behavior:
 
@@ -117,7 +127,7 @@ tagged with, iNaturalist info used in search filters, and other behavior:
 The settings in the **Metadata** section also apply to the {ref}`cli`.
 ```
 
-### Image Directories
+## Image Directories
 Under the **File** menu, there are submenus with shortcuts to commonly used image directories:
 * **Open Recent** Will show the most recently used directories
 * **Open Favorites** Will show the directories you have marked as favorites

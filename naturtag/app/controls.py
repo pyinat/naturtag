@@ -56,7 +56,7 @@ class Toolbar(QToolBar):
         self.addSeparator()
         self.refresh_obs_button = self.add_button(
             '&Refresh observations',
-            tooltip='Refresh local observations with latest data from iNaturalist',
+            tooltip='Refresh observations with latest data from iNaturalist',
             icon='mdi.database-refresh',
             shortcut='F5',
         )
@@ -301,7 +301,4 @@ class UserDirs(QObject):
             self.remove_favorite_dir(image_dir)
             self.add_recent_dir(image_dir)
         else:
-            self.on_dir_open.emit(image_dir)
-            self.on_dir_open.emit(image_dir)
-            self.on_dir_open.emit(image_dir)
             self.on_dir_open.emit(image_dir)
