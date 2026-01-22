@@ -1,4 +1,4 @@
-name: Build
+name: Test
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.14']
+        python-version: ['3.14', '3.13']
 
     steps:
       # Install dependencies, with caching
@@ -43,7 +43,7 @@ jobs:
         run: uv run pytest ${{ env.COVERAGE_ARGS }} test
 
       # TODO: Upload coverage report to codecov... once there's actual coverage to report
-      # - name: "Upload coverage report to Codecov"
+      # - name: 'Upload coverage report to Codecov'
       #   if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
       #   uses: codecov/codecov-action@v3
 

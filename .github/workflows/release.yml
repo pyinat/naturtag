@@ -1,29 +1,13 @@
-name: Deploy
+# Build platform-specific packages and create a GitHub release with artifacts
+name: Release
 
 on:
   push:
     tags: ['v*']
   workflow_dispatch:
-    inputs:
-      pre-release-suffix:
-        description: 'Version suffix for pre-release package ("a", "b", "rc", etc.)'
-        required: false
-        default: ''
-      pre-release-version:
-        description: 'Version number for pre-release package (defaults to build number)'
-        required: false
-        default: ''
-      publish:
-        description: 'Publish package to PyPI'
-        required: false
-        default: 'true'
 
 env:
-  LATEST_PY_VERSION: '3.13'
-
-# Required for creating a new release
-permissions:
-  contents: write
+  PYTHON_VERSION: '3.13'
 
 jobs:
   build-app-packages:
@@ -49,7 +33,7 @@ jobs:
           cache-dependency-glob: uv.lock
       - name: Install python + dependencies
         run: |
-          uv python install ${{ env.LATEST_PY_VERSION }}
+          uv python install ${{ env.PYTHON_VERSION }}
           uv sync  --no-dev
 
       - name: Build pyinstaller package
@@ -63,7 +47,7 @@ jobs:
           tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
           rm $ASSETS/taxonomy.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-linux.tar.gz .
-          echo "DIST_NAME=linux" >> $GITHUB_ENV
+          echo 'DIST_NAME=linux' >> $GITHUB_ENV
 
       - name: Finish pyinstaller package (macOS)
         if: startsWith(matrix.os, 'macos')
@@ -72,7 +56,7 @@ jobs:
           tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
           rm $ASSETS/taxonomy.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-macos.tar.gz .
-          echo "DIST_NAME=macos" >> $GITHUB_ENV
+          echo 'DIST_NAME=macos' >> $GITHUB_ENV
 
       - name: Finish pyinstaller package (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -81,14 +65,14 @@ jobs:
           tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
           rm $ASSETS/taxonomy.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-windows.tar.gz .
-          echo "DIST_NAME=windows" >> $GITHUB_ENV
+          echo 'DIST_NAME=windows' >> $GITHUB_ENV
 
       # Build deb, snap, and rpm packages
       - name: Build Linux packages with FPM
-        if : startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
-          export GEM_HOME="$(ruby -e 'puts Gem.user_dir')"
-          export PATH="$PATH:$GEM_HOME/bin"
+          export GEM_HOME='$(ruby -e 'puts Gem.user_dir')'
+          export PATH='$PATH:$GEM_HOME/bin'
           gem install fpm --user-install
           cd packaging
           ./build_fpm.sh
@@ -116,7 +100,7 @@ jobs:
           path: dist/naturtag.dmg
 
       - name: Upload FPM workflow artifacts (Linux)
-        if : startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v6
         with:
           name: naturtag-fpm
@@ -144,32 +128,3 @@ jobs:
             See changelog for release details: https://github.com/pyinat/naturtag/blob/main/HISTORY.md
             See docs for installation instructions: https://naturtag.readthedocs.io/en/stable/installation.html
           draft: true
-
-  # Publish python package to PyPI
-  release-pypi-package:
-    if: |
-      github.event.inputs.publish != 'false'
-      && (startsWith(github.ref, 'refs/tags/v') || github.event.inputs.pre-release-suffix)
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v7
-      - run: uv python install ${{ env.LATEST_PY_VERSION }}
-
-      - name: Set pre-release version
-        if: github.event.inputs.pre-release-suffix
-        env:
-          pre-release-suffix: ${{ github.event.inputs.pre-release-suffix }}
-          pre-release-version: ${{ github.event.inputs.pre-release-version || github.run_number }}
-        run: |
-          CURRENT_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          NEW_VERSION="${CURRENT_VERSION}.${{ env.pre-release-suffix }}${{ env.pre-release-version }}"
-          sed -i "s/version = '${CURRENT_VERSION}'/version = '${NEW_VERSION}'/" pyproject.toml
-          echo "Updated version to ${NEW_VERSION}"
-
-      - name: Build package distributions
-        run: uv build
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
