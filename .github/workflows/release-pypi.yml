@@ -1,9 +1,15 @@
-# Publish python package to PyPI
+# Publish python package to PyPI:
+# * Stable releases trigger on tags
+# * Pre-releases are manual trigger only
 name: Release-PyPI
 
 on:
     push:
-        tags: ['v*']
+        tags:
+            - 'v*'
+            - '!v*a*'
+            - '!v*b*'
+            - '!v*rc*'
     workflow_dispatch:
         inputs:
             pre-release-suffix:

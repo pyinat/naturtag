@@ -34,7 +34,7 @@ jobs:
       - name: Install python + dependencies
         run: |
           uv python install ${{ env.PYTHON_VERSION }}
-          uv sync  --no-dev
+          uv sync --no-dev
 
       - name: Build pyinstaller package
         run: uv run pyinstaller -y packaging/naturtag.spec
