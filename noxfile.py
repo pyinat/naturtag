@@ -22,7 +22,7 @@ DEFAULT_COVERAGE_FORMATS = ['html', 'term']
 DOC_BUILD_DIR = join('docs', '_build', 'html')
 
 
-@nox.session(python=['3.14'])
+@nox.session(python=['3.14', '3.13'])
 def test(session):
     """Run tests for a specific python version"""
     test_paths = session.posargs or ['test']

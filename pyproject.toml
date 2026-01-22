@@ -5,7 +5,7 @@ description = 'Tag your nature photos with iNat taxonomy and observation metadat
 authors = [{name = 'Jordan Cook'}]
 license = {text = 'MIT'}
 readme = 'README.md'
-requires-python = '>=3.14,<3.15'
+requires-python = '>=3.13,<3.15'
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',
@@ -15,6 +15,9 @@ classifiers = [
     'Operating System :: MacOS',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
     'Intended Audience :: Developers',
     'Intended Audience :: End Users/Desktop',
     'Intended Audience :: Science/Research',

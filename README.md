@@ -4,7 +4,7 @@
 [![Documentation status](https://readthedocs.org/projects/naturtag/badge/?version=stable)](https://naturtag.readthedocs.io/en/stable/)
 [![GitHub issues](https://img.shields.io/github/issues/pyinat/naturtag)](https://github.com/pyinat/naturtag/issues)
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
+[![PyPI - Python Versions](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
 
 
 <!-- RTD-IGNORE -->
