@@ -29,26 +29,14 @@ dependencies = [
     'click-help-colors>=0.9',
     'pillow>=10.0',
     'pyexiv2>=2.10',
-    'pyinaturalist>=0.20',
-    'pyinaturalist-convert>=0.7.1',
+    'pyinaturalist>=0.21',
+    'pyinaturalist-convert>=0.7.5',
     'pyside6==6.10.1',
     'pyqtdarktheme-fork~=2.3.4',
     'pyyaml>=6.0',
     'qtawesome~=1.4.0',
     'sqlalchemy~=2.0.45',
     'tablib~=3.9',
-]
-
-[project.optional-dependencies]
-docs = [
-    'furo~=2025.12.19',
-    'linkify-it-py>=2.0',
-    'myst-parser~=4.0',
-    'sphinx~=8.2',
-    'sphinx-autodoc-typehints~=3.5',
-    'sphinx-copybutton>=0.5',
-    'sphinx-design>=0.2',
-    'sphinxcontrib-apidoc>=0.6',
 ]
 
 [project.scripts]
@@ -64,14 +52,29 @@ Documentation = 'https://naturtag.readthedocs.io'
 [dependency-groups]
 dev = [
     'babel>=2.0',
+    'ipython>=9.0',
     'nox>=2025.11',
+    'pandas>=2.0',
     'prek>=0.2',
     'prettyprinter>=0.18',
+    'pyarrow>=23.0',
     'pyinstaller==6.17.0',
     'pytest>=9.0',
     'pytest-cov>=7.0',
     'pytest-xdist>=3.8',
 ]
+
+docs = [
+    'furo~=2025.12',
+    'linkify-it-py>=2.0',
+    'myst-parser~=4.0',
+    'sphinx~=8.2',
+    'sphinx-autodoc-typehints~=3.5',
+    'sphinx-copybutton>=0.5',
+    'sphinx-design>=0.2',
+    'sphinxcontrib-apidoc>=0.6',
+]
+
 
 [build-system]
 requires = ['hatchling']
