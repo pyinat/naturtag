@@ -4,7 +4,6 @@ from logging import getLogger
 from threading import RLock
 from typing import Callable, Optional
 
-from pyinaturalist import Paginator
 from PySide6.QtCore import (
     QEasingCurve,
     QObject,
@@ -53,26 +52,14 @@ class ThreadPool(QThreadPool):
         callback: Callable,
         priority: QThread.Priority = QThread.NormalPriority,
         total_results: Optional[int] = None,
-        increment_length: bool = False,
         **kwargs,
     ) -> 'WorkerSignals':
         """Schedule a task to be run by the next available worker thread"""
         self.progress.add(total_results or 1)
-        worker = PaginatedWorker(callback, increment_length=increment_length, **kwargs)
+        worker = PaginatedWorker(callback, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
         self.start(worker, priority.value)
         return worker.signals
-
-    # def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
-    #     """Schedule multiple tasks to be run by the next available worker thread"""
-    #     self.progress.add(len(callbacks))
-    #     all_signals = []
-    #     for callback in callbacks:
-    #         worker = Worker(callback, **kwargs)
-    #         worker.signals.on_progress.connect(self.progress.advance)
-    #         self.start(worker)
-    #         all_signals.append(worker.signals)
-    #     return all_signals
 
     def cancel(self):
         """Cancel all queued tasks and reset progress bar. Currently running tasks will be allowed
@@ -108,25 +95,19 @@ class Worker(QRunnable):
         self.signals.on_progress.emit(increment)
 
 
-# TODO/WIP: not used yet. Need to prepare an appropriate callable that returns paginator that:
-#   * fetches next page
-#   * saves results to db
+# TODO/WIP: not used yet
 class PaginatedWorker(QRunnable):
     """A worker thread that specifically handles paginated requests via iNatClient/iNatDbClient"""
 
-    def __init__(self, callback: Callable[..., Paginator], **kwargs):
+    def __init__(self, callback: Callable, **kwargs):
         super().__init__()
         self.callback = callback
         self.kwargs = kwargs
         self.signals = WorkerSignals()
 
     def run(self):
-        paginator = self.callback(**self.kwargs)
-
         try:
-            paginator.count()
-            while not paginator.exhausted:
-                next_page = self.callback(**self.kwargs)
+            for next_page in self.callback(**self.kwargs):
                 self.signals.on_result.emit(next_page)
                 self.signals.on_progress.emit(len(next_page))
         except Exception as e:

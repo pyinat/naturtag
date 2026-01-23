@@ -101,7 +101,22 @@ class ObservationDbController(ObservationController):
         """Get the total number of observations matching the specified criteria"""
         return super().search(user_login=username, refresh=True, **params).count()
 
-    def get_user_observations(
+    def search(self, **params) -> WrapperPaginator[Observation]:
+        """Search observations, and save results to the database (for future reference by ID)"""
+        results = []
+        for obs_page in self._search_paginated(**params):
+            results += obs_page
+        return WrapperPaginator(results)
+
+    def _search_paginated(self, **params) -> Iterator[list[Observation]]:
+        """Search observations, saving and yielding results one page at a time"""
+        query = super().search(**params)
+        while not query.exhausted:
+            obs_page = self.query.next_page()
+            self.save(obs_page)
+            yield obs_page
+
+    def search_user(
         self,
         username: str,
         updated_since: Optional[datetime] = None,
@@ -119,10 +134,7 @@ class ObservationDbController(ObservationController):
                 refresh=True,
                 limit=limit,
             ).all()
-        if new_observations:
-            logger.info(f'{len(new_observations)} new observations found since {updated_since}')
-        else:
-            logger.info(f'No new observations found since {updated_since}')
+        logger.info(f'{len(new_observations)} new observations found since {updated_since}')
 
         if not limit:
             return []
@@ -147,7 +159,7 @@ class ObservationDbController(ObservationController):
         return list(obs)
 
     # TODO/WIP: paginated version of get_user_observations
-    def refresh_user_observations(
+    def search_user_paginated(
         self,
         username: str,
         updated_since: Optional[datetime] = None,
@@ -165,26 +177,6 @@ class ObservationDbController(ObservationController):
             yield page
             total += len(page)
         logger.debug(f'{total} new observations found')
-
-    def search(self, **params) -> WrapperPaginator[Observation]:
-        """Search observations, and save results to the database (for future reference by ID)"""
-        results = []
-        # query = super().search(**params)
-        # while not query.exhausted:
-        #     obs_page = self.query.next_page()
-        #     self.save(obs_page)
-        #     results += obs_page
-        for obs_page in self._search_paginated(**params):
-            results += obs_page
-        return WrapperPaginator(results)
-
-    def _search_paginated(self, **params) -> Iterator[list[Observation]]:
-        """Search observations, saving and yielding results one page at a time"""
-        query = super().search(**params)
-        while not query.exhausted:
-            obs_page = self.query.next_page()
-            self.save(obs_page)
-            yield obs_page
 
     def save(self, observations: list[Observation]):
         """Save observations to the database (full records + text search index)"""
