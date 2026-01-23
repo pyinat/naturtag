@@ -1,3 +1,4 @@
+import math
 from logging import getLogger
 from typing import Iterable
 
@@ -108,13 +109,6 @@ class ObservationController(BaseController):
         )
         future.on_result.connect(self.display_user_observations)
 
-    # TODO/WIP: paginated version
-    def load_all_user_observations(self):
-        """Fetch and save all new/updated user observations"""
-        logger.info('Fetching all new/udpated user observations')
-        future = self.threadpool.schedule(self.refresh_paginated, priority=QThread.LowPriority)
-        future.on_result.connect(self.update_pagination_buttons)
-
     def next_page(self):
         if self.page < self.total_pages:
             self.page += 1
@@ -174,13 +168,9 @@ class ObservationController(BaseController):
         # Maybe do that except on initial observation load?
         self.total_results = self.app.client.observations.count(username=self.app.settings.username)
         self.total_pages = (self.total_results // DEFAULT_PAGE_SIZE) + 1
-        logger.debug(
-            'Total user observations: %s (%s pages)',
-            self.total_results,
-            self.total_pages,
-        )
+        logger.debug('Total user observations: %s (%s pages)', self.total_results, self.total_pages)
 
-        observations = self.app.client.observations.get_user_observations(
+        observations = self.app.client.observations.search_user(
             username=self.app.settings.username,
             updated_since=self.app.state.last_obs_check,
             limit=DEFAULT_PAGE_SIZE,
@@ -189,17 +179,41 @@ class ObservationController(BaseController):
         self.app.state.set_obs_checkpoint()
         return observations
 
-    # TODO/WIP: paginated version of get_user_observations
+    # TODO/WIP: paginated version of load_user_observations
+    def load_user_observations_paginated(self):
+        """Fetch and save all new/updated user observations"""
+        if not self.app.settings.username:
+            logger.warning('Username not entered; skipping observation load')
+        logger.info('Fetching all new/udpated user observations')
+
+        new_count = self.app.client.observations.count(
+            username=self.app.settings.username, updated_since=self.app.settings.last_obs_check
+        )
+        new_pages = math.ceil(new_count / DEFAULT_PAGE_SIZE)
+        logger.debug('New user observations to fetch: %s (%s pages)', new_count, new_pages)
+
+        future = self.threadpool.schedule_paginator(
+            self.refresh_paginated,
+            priority=QThread.LowPriority,
+            total_results=new_count,
+        )
+        # future.on_result.connect(self.update_pagination_buttons)
+        future.on_result.connect(self.update_with_new_page)
+
     def refresh_paginated(self):
-        """Refresh user observations, starting from the last checkpoint.
-        Update progress bar with each page. When done, enable the 'next page' button.
-        """
-        self.page = 1
-        for _page in self.app.client.observations.refresh_user_observations(
+        self.total_results = self.app.client.observations.count(username=self.app.settings.username)
+        self.total_pages = math.ceil(self.total_results / DEFAULT_PAGE_SIZE)
+        logger.debug('Total user observations: %s (%s pages)', self.total_results, self.total_pages)
+
+        for next_page in self.app.client.observations.search_user_paginated(
             username=self.app.settings.username,
             updated_since=self.app.settings.last_obs_check,
         ):
-            pass
+            yield next_page
 
         # Save updated checkpoint once all pages are loaded
         self.app.state.set_obs_checkpoint()
+
+    # TODO
+    def update_with_new_page(self):
+        pass
