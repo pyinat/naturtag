@@ -164,7 +164,7 @@ class TaxonTabs(QTabWidget):
         return taxon_list
 
     def load_user_taxa(self):
-        self.info('Fetching user-observed taxa')
+        logger.info('Fetching user-observed taxa')
         app = get_app()
         client = app.client
         display_ids = self.user_taxa.display_ids

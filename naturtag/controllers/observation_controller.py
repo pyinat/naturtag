@@ -103,8 +103,17 @@ class ObservationController(BaseController):
             return
 
         logger.info(f'Fetching user observations page {self.page}')
-        future = self.threadpool.schedule(self.get_user_observations, priority=QThread.LowPriority)
+        future = self.app.threadpool.schedule(
+            self.get_user_observations, priority=QThread.LowPriority
+        )
         future.on_result.connect(self.display_user_observations)
+
+    # TODO/WIP: paginated version
+    def load_all_user_observations(self):
+        """Fetch and save all new/updated user observations"""
+        logger.info('Fetching all new/udpated user observations')
+        future = self.threadpool.schedule(self.refresh_paginated, priority=QThread.LowPriority)
+        future.on_result.connect(self.update_pagination_buttons)
 
     def next_page(self):
         if self.page < self.total_pages:
@@ -158,10 +167,8 @@ class ObservationController(BaseController):
     # TODO: Store a Paginator object instead of page number?
     def get_user_observations(self) -> list[Observation]:
         """Fetch a single page of user observations"""
-        if not self.settings.username:
+        if not self.app.settings.username:
             return []
-
-        # self.settings.set_obs_checkpoint()
 
         # TODO: Depending on order of operations, this could be counted from the db instead of API.
         # Maybe do that except on initial observation load?
@@ -182,25 +189,17 @@ class ObservationController(BaseController):
         self.app.state.set_obs_checkpoint()
         return observations
 
-    def load_all_user_observations(self):
-        """Fetch and save all new/updated user observations"""
-        logger.info('Fetching all new/udpated user observations')
-        future = self.threadpool.schedule(self.refresh_paginated, priority=QThread.LowPriority)
-        future.on_result.connect(self.update_pagination_buttons)
-
+    # TODO/WIP: paginated version of get_user_observations
     def refresh_paginated(self):
-        """refresh user observations, starting from the last checkpoint.
+        """Refresh user observations, starting from the last checkpoint.
         Update progress bar with each page. When done, enable the 'next page' button.
         """
-        updated_since = self.settings.last_obs_check
-        self.settings.set_obs_checkpoint()
-
         self.page = 1
-        for _page in INAT_CLIENT.observations.refresh_user_observations(
-            username=self.settings.username,
-            updated_since=updated_since,
+        for _page in self.app.client.observations.refresh_user_observations(
+            username=self.app.settings.username,
+            updated_since=self.app.settings.last_obs_check,
         ):
             pass
+
         # Save updated checkpoint once all pages are loaded
-        self.settings.write()
-        # self.load_user_observations()
+        self.app.state.set_obs_checkpoint()
