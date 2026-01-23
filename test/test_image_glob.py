@@ -54,7 +54,7 @@ def test_get_valid_image_paths__glob():
 
 
 def test_get_valid_image_paths__recursive():
-    assert len(get_valid_image_paths([ASSETS_DIR], recursive=True)) == 29
+    assert len(get_valid_image_paths([ASSETS_DIR], recursive=True)) == 30
 
 
 def test_get_valid_image_paths__uri():
