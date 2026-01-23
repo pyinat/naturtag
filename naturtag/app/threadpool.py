@@ -58,9 +58,9 @@ class ThreadPool(QThreadPool):
     ) -> 'WorkerSignals':
         """Schedule a task to be run by the next available worker thread"""
         self.progress.add(total_results or 1)
-        worker = Worker(callback, increment_length=increment_length, **kwargs)
+        worker = PaginatedWorker(callback, increment_length=increment_length, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
-        self.PaginatedWorker(worker, priority.value)
+        self.start(worker, priority.value)
         return worker.signals
 
     # def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
@@ -108,6 +108,9 @@ class Worker(QRunnable):
         self.signals.on_progress.emit(increment)
 
 
+# TODO/WIP: not used yet. Need to prepare an appropriate callable that returns paginator that:
+#   * fetches next page
+#   * saves results to db
 class PaginatedWorker(QRunnable):
     """A worker thread that specifically handles paginated requests via iNatClient/iNatDbClient"""
 
@@ -121,8 +124,7 @@ class PaginatedWorker(QRunnable):
         paginator = self.callback(**self.kwargs)
 
         try:
-            total_results = paginator.count()
-
+            paginator.count()
             while not paginator.exhausted:
                 next_page = self.callback(**self.kwargs)
                 self.signals.on_result.emit(next_page)
