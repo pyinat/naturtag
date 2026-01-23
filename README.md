@@ -88,9 +88,11 @@ Naturtag is primarily a desktop application. It includes an interface for select
 
 ![Screenshot](assets/screenshots/image-selector.png)
 
-And tools to search and browse species to tag your images with:
+And tools to search and browse species and observations to tag your images with:
 
 ![Screenshot](assets/screenshots/taxon-search.png)
+
+![Screenshot](assets/screenshots/observation-browser.png)
 
 See [Application Guide](https://naturtag.readthedocs.io/en/stable/app.html) for more details.
 

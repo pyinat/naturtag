@@ -74,6 +74,8 @@ The **Taxonomy** tab contains tools to search and browse species to tag your ima
 This can be used to search for any taxonomic rank (genus, family, etc.), not just species.
 Elsewhere in the docs these will be referred to as **taxa** (singular: **taxon**).
 
+Once you've found the taxon you want, press the **Select** button to select it as a metadata source.
+
 ### Basic Search
 You can start by searching by name, with autocompletion:
 
@@ -107,14 +109,18 @@ The additional tabs next to search results contain:
 
 ![Screenshot](../assets/screenshots/taxon-tabs.png)
 
-<!-- TODO -->
 (obs-browser)=
 ## Observation Browser
 The **Observations** tab displays your recent observations that you can to tag your images with:
 
-```{note}
-WIP; details coming soon!
-```
+![Screenshot](../assets/screenshots/observation-browser.png)
+
+The list of observations will update every time you launch Naturtag. To manually refresh, press **F5** or click the **Refresh** icon in the toolbar.
+
+Once you've found the observation you want, press the **Select** button to select it as a metadata source.
+
+### Photo Viewer
+You can click any of the observation photos to open the photo viewer in a fullscreen window. You can use the **Left and Right** arrow keys to navigate, and the **Escape** key to exit.
 
 (app-settings)=
 ## Settings

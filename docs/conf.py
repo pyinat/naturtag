@@ -7,7 +7,7 @@ STATIC_DIR = Path('_static')
 
 # Basic config
 project = 'Naturtag'
-copyright = '2024, Jordan Cook'
+copyright = '2026, Jordan Cook'
 author = 'Jordan Cook'
 html_static_path = ['_static']
 templates_path = ['_templates']
