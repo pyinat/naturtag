@@ -7,7 +7,11 @@ on:
   workflow_dispatch:
 
 env:
-  PYTHON_VERSION: '3.13'
+  PYTHON_VERSION: '3.14'
+
+# Required for creating a new GitHub release
+permissions:
+    contents: write
 
 jobs:
   build-app-packages:
@@ -71,19 +75,17 @@ jobs:
       - name: Build Linux packages with FPM
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          export GEM_HOME='$(ruby -e 'puts Gem.user_dir')'
-          export PATH='$PATH:$GEM_HOME/bin'
+          export GEM_HOME="$(ruby -e 'puts Gem.user_dir')"
+          export PATH="$PATH:$GEM_HOME/bin"
           gem install fpm --user-install
-          cd packaging
-          ./build_fpm.sh
+          ./packaging/build_fpm.sh
 
       # Build dmg package
       - name: Build disk image (macOS)
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install create-dmg
-          cd packaging
-          ./build_dmg.sh
+          ./packaging/build_dmg.sh
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
