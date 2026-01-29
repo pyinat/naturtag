@@ -71,8 +71,8 @@ jobs:
       - name: Build Linux packages with FPM
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          export GEM_HOME='$(ruby -e 'puts Gem.user_dir')'
-          export PATH='$PATH:$GEM_HOME/bin'
+          export GEM_HOME="$(ruby -e 'puts Gem.user_dir')"
+          export PATH="$PATH:$GEM_HOME/bin"
           gem install fpm --user-install
           cd packaging
           ./build_fpm.sh
