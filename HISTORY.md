@@ -2,6 +2,7 @@
 
 ## Unreleased
 * Fix issue with first-time installation on Windows
+* Fix macOS DMG image
 * Add menu item to open app data/config dir
 * Include locale data in PyInstaller packages
 * Upgrade to Qt 6.10
