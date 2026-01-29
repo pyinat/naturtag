@@ -2,7 +2,7 @@
 -s dir
 --verbose
 --name "naturtag"
---description "Tagger for iNaturalist observation photos"
+--description "Tag your nature photos with iNat taxonomy and observation metadata"
 --license "MIT"
---maintainer "Jordan Cook <jordan.cook@pioneer.com>"
+--maintainer "Jordan Cook <jordan.cook.git@proton.me>"
 --url "https://naturtag.readthedocs.io"
