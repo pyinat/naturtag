@@ -9,6 +9,10 @@ on:
 env:
   PYTHON_VERSION: '3.14'
 
+# Required for creating a new GitHub release
+permissions:
+    contents: write
+
 jobs:
   build-app-packages:
     strategy:
