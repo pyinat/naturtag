@@ -97,7 +97,10 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ['naturtag']
+include = [
+    'naturtag',
+    'assets',
+]
 exclude = [
     'assets/demo_images/*',
     'assets/screenshots/*',

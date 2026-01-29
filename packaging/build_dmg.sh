@@ -17,3 +17,6 @@ create-dmg \
 --hide-extension "naturtag.app" \
 "$DMG_PATH" \
 "$PKG_DIR"
+
+hdiutil verify "$DMG_PATH"
+hdiutil imageinfo "$DMG_PATH"
