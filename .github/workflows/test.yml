@@ -31,7 +31,7 @@ jobs:
           uv python install ${{ matrix.python-version }}
           uv sync
       - name: Install Qt dependencies
-        run: sudo apt-get install -y libegl1
+        run: sudo apt-get update && sudo apt-get install -y libegl1
 
       # TODO: Need an alternate location for SQLite db
       # - name: Run CLI smoke test
