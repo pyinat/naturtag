@@ -7,6 +7,13 @@ ICONS_DIR=$ROOT_DIR/assets/icons
 PKG_DIR=$DIST_DIR/dmg
 DMG_PATH=$DIST_DIR/naturtag.dmg
 
+# Ad-hoc sign all bundled libraries, then the app itself
+find "$DIST_DIR/naturtag.app" -name '*.dylib' -o -name '*.so' | while read lib; do
+    codesign --force --sign - "$lib"
+done
+codesign --force --deep --sign - "$DIST_DIR/naturtag.app"
+codesign --verify --verbose=2 "$DIST_DIR/naturtag.app"
+
 mkdir $PKG_DIR
 mv $DIST_DIR/naturtag.app $PKG_DIR/
 

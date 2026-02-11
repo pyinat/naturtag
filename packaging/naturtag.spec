@@ -99,5 +99,5 @@ app = BUNDLE(
     coll,
     name=f'{PROJECT_NAME}.app',
     icon=str(ICONS_DIR / 'logo.icns'),
-    bundle_identifier=None,
+    bundle_identifier='org.pyinat.naturtag',
 )

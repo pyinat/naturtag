@@ -80,6 +80,15 @@ jobs:
           gem install fpm --user-install
           ./packaging/build_fpm.sh
 
+      # Inspect app bundle before signing
+      - name: Inspect app bundle (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          ls -la dist/naturtag.app/Contents/
+          cat dist/naturtag.app/Contents/Info.plist
+          codesign --verify --verbose=4 dist/naturtag.app 2>&1 || true
+          codesign -dvvv dist/naturtag.app 2>&1 || true
+
       # Build dmg package
       - name: Build disk image (macOS)
         if: startsWith(matrix.os, 'macos')
