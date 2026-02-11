@@ -27,7 +27,9 @@ jobs:
       # Install binary dependencies
       - name: Install system packages
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
 
       # Install dependencies, with caching
       - uses: actions/checkout@v6
@@ -79,6 +81,15 @@ jobs:
           export PATH="$PATH:$GEM_HOME/bin"
           gem install fpm --user-install
           ./packaging/build_fpm.sh
+
+      # Inspect app bundle before signing
+      - name: Inspect app bundle (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          ls -la dist/naturtag.app/Contents/
+          cat dist/naturtag.app/Contents/Info.plist
+          codesign --verify --verbose=4 dist/naturtag.app 2>&1 || true
+          codesign -dvvv dist/naturtag.app 2>&1 || true
 
       # Build dmg package
       - name: Build disk image (macOS)
