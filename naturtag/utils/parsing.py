@@ -28,7 +28,7 @@ def strip_url(value: str) -> Optional[int]:
     try:
         path = urlparse(value).path
         return int(path.split('/')[-1].split('-')[0])
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 

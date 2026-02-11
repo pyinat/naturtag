@@ -121,7 +121,7 @@ class AppState:
         try:
             with get_session(db_path) as session:
                 state_json = session.execute(select(DbAppState)).first()[0].content
-        except (TypeError, OperationalError):
+        except TypeError, OperationalError:
             new_state = AppState()
             new_state.db_path = db_path
             return new_state

@@ -19,7 +19,7 @@ def convert_exif_coords(metadata: dict) -> Optional[Coordinates]:
                 metadata.get('Exif.GPSInfo.GPSLongitudeRef', 'W'),
             ),
         )
-    except (IndexError, KeyError, ValueError):
+    except IndexError, KeyError, ValueError:
         return None
 
 
@@ -30,7 +30,7 @@ def convert_xmp_coords(metadata: dict) -> Optional[Coordinates]:
             _get_xmp_coord(metadata['Xmp.exif.GPSLatitude']),
             _get_xmp_coord(metadata['Xmp.exif.GPSLongitude']),
         )
-    except (IndexError, KeyError, ValueError):
+    except IndexError, KeyError, ValueError:
         return None
 
 
@@ -41,7 +41,7 @@ def convert_dwc_coords(metadata: dict) -> Optional[Coordinates]:
             float(metadata['Xmp.dwc.decimalLatitude']),
             float(metadata['Xmp.dwc.decimalLongitude']),
         )
-    except (KeyError, ValueError):
+    except KeyError, ValueError:
         return None
 
 
