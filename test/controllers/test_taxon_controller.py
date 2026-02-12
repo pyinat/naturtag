@@ -8,7 +8,7 @@ from PySide6.QtCore import QSize
 from PySide6.QtGui import QResizeEvent
 
 from naturtag.controllers.taxon_controller import TaxonController, TaxonTabs
-from test.controllers.conftest import _make_taxon
+from test.conftest import _make_taxon
 
 
 @pytest.fixture

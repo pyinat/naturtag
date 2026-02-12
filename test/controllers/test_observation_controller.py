@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from naturtag.controllers.observation_controller import ObservationController
-from test.controllers.conftest import _make_obs
+from test.conftest import _make_obs
 
 
 @pytest.fixture

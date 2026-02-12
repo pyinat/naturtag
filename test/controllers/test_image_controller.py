@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from naturtag.controllers.image_controller import ImageController
-from test.controllers.conftest import _make_obs, _make_taxon
+from test.conftest import _make_obs, _make_taxon
 
 
 @pytest.fixture
