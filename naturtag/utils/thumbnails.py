@@ -41,9 +41,9 @@ def generate_thumbnail(
         # Note: copy() is important; otherwise the QImage can become dangling if the PIL Image is GC'd
         return ImageQt(image).copy()
 
-    # If we're unable to generate a thumbnail, just return the original image source
-    except RuntimeError:
-        logger.warning('Thumbnails: Failed to generate thumbnail')
+    # Unable to generate a thumbnail; use a placeholder instead
+    except Exception:
+        logger.warning(f'Thumbnails: Failed to generate thumbnail for {path}')
         return None
 
 
