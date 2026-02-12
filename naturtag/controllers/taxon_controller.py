@@ -79,10 +79,11 @@ class TaxonController(BaseController):
         self.info(f'Loading taxon {taxon_id}')
         client = self.app.client
         if self.tabs._init_complete:
-            self.app.threadpool.cancel()
+            self.app.threadpool.cancel(group='taxonomy')
         future = self.app.threadpool.schedule(
             lambda: client.taxa(taxon_id, locale=self.app.settings.locale),
             priority=QThread.HighPriority,
+            group='taxonomy',
         )
         future.on_result.connect(self.display_taxon)
 
@@ -175,10 +176,14 @@ class TaxonTabs(QTabWidget):
                 display_ids, locale=app.settings.locale, accept_partial=True
             ).all()
 
-        future = app.threadpool.schedule(get_recent_taxa, priority=QThread.LowPriority)
+        future = app.threadpool.schedule(
+            get_recent_taxa, priority=QThread.LowPriority, group='taxonomy'
+        )
         future.on_result.connect(self.display_recent)
 
-        future = app.threadpool.schedule(self.get_user_observed_taxa, priority=QThread.LowPriority)
+        future = app.threadpool.schedule(
+            self.get_user_observed_taxa, priority=QThread.LowPriority, group='taxonomy'
+        )
         future.on_result.connect(self.display_observed)
         self._init_complete = True
 

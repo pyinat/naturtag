@@ -1,5 +1,6 @@
 """Adapted from examples in Python & Qt6 by Martin Fitzpatrick"""
 
+from collections import defaultdict
 from logging import getLogger
 from threading import RLock
 from typing import Callable, Optional
@@ -29,6 +30,8 @@ class ThreadPool(QThreadPool):
     def __init__(self, n_worker_threads: int = 0, **kwargs):
         super().__init__(**kwargs)
         self.progress = ProgressBar()
+        self._group_workers: dict[str, list[QRunnable]] = defaultdict(list)
+        self._group_lock = RLock()
         if n_worker_threads:
             self.setMaxThreadCount(n_worker_threads)
 
@@ -38,12 +41,19 @@ class ThreadPool(QThreadPool):
         priority: QThread.Priority = QThread.NormalPriority,
         total_results: Optional[int] = None,
         increment_length: bool = False,
+        group: str | None = None,
         **kwargs,
     ) -> 'WorkerSignals':
         """Schedule a task to be run by the next available worker thread"""
         self.progress.add(total_results or 1)
         worker = Worker(callback, increment_length=increment_length, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
+        if group is not None:
+            with self._group_lock:
+                self._group_workers[group].append(worker)
+            worker.signals.on_progress.connect(
+                lambda _amt, g=group, w=worker: self._remove_worker(g, w)
+            )
         self.start(worker, priority.value)
         return worker.signals
 
@@ -52,23 +62,51 @@ class ThreadPool(QThreadPool):
         callback: Callable,
         priority: QThread.Priority = QThread.NormalPriority,
         total_results: Optional[int] = None,
+        group: str | None = None,
         **kwargs,
     ) -> 'WorkerSignals':
         """Schedule a task to be run by the next available worker thread"""
         self.progress.add(total_results or 1)
         worker = PaginatedWorker(callback, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
+        if group is not None:
+            with self._group_lock:
+                self._group_workers[group].append(worker)
+            worker.signals.on_complete.connect(lambda g=group, w=worker: self._remove_worker(g, w))
         self.start(worker, priority.value)
         return worker.signals
 
-    def cancel(self):
-        """Cancel all queued tasks and reset progress bar. Currently running tasks will be allowed
-        to complete.
+    def _remove_worker(self, group: str, worker: QRunnable):
+        """Remove a completed worker from group tracking. No-op if already removed by cancel()."""
+        with self._group_lock:
+            try:
+                self._group_workers[group].remove(worker)
+            except ValueError:
+                pass
+
+    def cancel(self, group: str | None = None):
+        """Cancel queued tasks and adjust the progress bar. Currently running tasks will be
+        allowed to complete.
+
+        Args:
+            group: If provided, only cancel tasks in this group. Otherwise cancel all tasks.
         """
-        if active_threads := self.activeThreadCount() > 0:
+        if group is not None:
+            self._cancel_group(group)
+            return
+        if (active_threads := self.activeThreadCount()) > 0:
             logger.debug(f'Cancelling {active_threads} active threads')
         self.clear()
         self.progress.reset()
+
+    def _cancel_group(self, group: str):
+        """Cancel only queued tasks belonging to a specific group."""
+        with self._group_lock:
+            workers = self._group_workers.pop(group, [])
+        cancelled = sum(1 for w in workers if self.tryTake(w))
+        if cancelled:
+            logger.debug(f'Cancelled {cancelled}/{len(workers)} queued tasks in group {group!r}')
+            self.progress.remove(cancelled)
 
 
 class Worker(QRunnable):
@@ -89,10 +127,11 @@ class Worker(QRunnable):
         except Exception as e:
             logger.warning('Worker error:', exc_info=True)
             self.signals.on_error.emit(e)
+            self.signals.on_progress.emit(1)
         else:
             self.signals.on_result.emit(result)
-        increment = len(result) if self.increment_length and isinstance(result, list) else 1
-        self.signals.on_progress.emit(increment)
+            increment = len(result) if self.increment_length and isinstance(result, list) else 1
+            self.signals.on_progress.emit(increment)
 
 
 class PaginatedWorker(QRunnable):
@@ -157,6 +196,14 @@ class ProgressBar(QProgressBar):
             new_value = min(self.value() + amount, self.maximum())
             self.setValue(new_value)
             if new_value == self.maximum():
+                self.schedule_reset()
+
+    def remove(self, amount: int):
+        """Decrease maximum by ``amount`` to account for cancelled tasks."""
+        with self.lock:
+            new_max = max(self.maximum() - amount, self.value())
+            self.setMaximum(new_max)
+            if self.value() == new_max:
                 self.schedule_reset()
 
     def schedule_reset(self):
