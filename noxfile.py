@@ -1,9 +1,10 @@
 """Notes:
 * 'test' command: nox will use uv.lock to determine dependency versions
-* 'lint' command: tools and environments are managed by pre-commit
+* 'lint' command: tools and environments are managed by prek (pre-commit)
 * All other commands: the current environment will be used instead of creating new ones
 """
 
+from os import getenv
 from os.path import join
 from shutil import rmtree
 
@@ -48,7 +49,10 @@ def coverage(session):
     # Add coverage formats
     cov_formats = session.posargs or DEFAULT_COVERAGE_FORMATS
     cmd += [f'--cov-report={f}' for f in cov_formats]
-    session.run(*cmd, 'test', *XDIST_ARGS)
+    # Add verbose flag, if set by environment
+    if getenv('PYTEST_VERBOSE'):
+        cmd += ['--verbose']
+    session.run(*cmd, 'test')
 
 
 @nox.session(python=False)
@@ -59,5 +63,5 @@ def docs(session):
 
 @nox.session(python=False)
 def lint(session):
-    """Run linters and code formatters via pre-commit"""
+    """Run linters and code formatters via prek/pre-commit"""
     session.run('prek', 'run', '--all-files')

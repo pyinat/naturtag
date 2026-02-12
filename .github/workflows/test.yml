@@ -10,7 +10,8 @@ on:
 
 env:
   LATEST_PY_VERSION: '3.14'
-  COVERAGE_ARGS: '--cov --cov-report=term --cov-report=xml'
+  COV_FORMATS: 'term html'
+  PYTEST_VERBOSE: 'true'
 
 jobs:
   test:
@@ -41,7 +42,7 @@ jobs:
       #     naturtag -cdo 45524803
       #     naturtag -cdt 48978
       - name: Run unit tests
-        run: uv run pytest ${{ env.COVERAGE_ARGS }} test
+        run: uv run nox -e cov -- ${{ env.COV_FORMATS }}
 
       # Upload coverage report to codecov
       - name: 'Upload coverage report to Codecov'
