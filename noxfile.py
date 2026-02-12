@@ -20,6 +20,8 @@ CLEAN_DIRS = [
 ]
 DEFAULT_COVERAGE_FORMATS = ['html', 'term']
 DOC_BUILD_DIR = join('docs', '_build', 'html')
+# Run tests in parallel, grouped by test module
+XDIST_ARGS = ['--numprocesses=auto', '--dist=loadfile']
 
 
 @nox.session(python=['3.14', '3.13'])
@@ -27,7 +29,7 @@ def test(session):
     """Run tests for a specific python version"""
     test_paths = session.posargs or ['test']
     session.run('uv', 'sync', '--frozen', external=True)
-    session.run('uv', 'run', 'pytest', '-n', 'auto', *test_paths, external=True)
+    session.run('uv', 'run', 'pytest', *XDIST_ARGS, *test_paths, external=True)
 
 
 @nox.session(python=False)
@@ -46,7 +48,7 @@ def coverage(session):
     # Add coverage formats
     cov_formats = session.posargs or DEFAULT_COVERAGE_FORMATS
     cmd += [f'--cov-report={f}' for f in cov_formats]
-    session.run(*cmd, 'test')
+    session.run(*cmd, 'test', *XDIST_ARGS)
 
 
 @nox.session(python=False)
