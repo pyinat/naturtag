@@ -6,6 +6,8 @@
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)
 [![PyPI - Python Versions](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
 
+<!-- TODO -->
+<!-- [![Codecov](https://codecov.io/gh/pyinat/naturtag/branch/main/graph/badge.svg?token=TODO)](https://codecov.io/gh/pyinat/naturtag) -->
 
 <!-- RTD-IGNORE -->
 <br />
