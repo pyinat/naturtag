@@ -1,5 +1,6 @@
+import math
 from logging import getLogger
-from typing import Iterable
+from typing import Iterable, Iterator
 
 from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
@@ -33,6 +34,7 @@ class ObservationController(BaseController):
         self.page = 1
         self.total_pages = 0
         self.total_results = 0
+        self.loaded_pages = 0
         # TODO: Cache pages while navigating back and forth?
         # self.pages: dict[int, list[ObservationInfoCard]] = {}
 
@@ -76,8 +78,17 @@ class ObservationController(BaseController):
         self.add_shortcut('Ctrl+Left', self.prev_page)
         self.add_shortcut('Ctrl+Right', self.next_page)
 
-        # Add a delay before loading user observations on startup
-        QTimer.singleShot(1, self.load_user_observations)
+        # On startup: display from DB first, then sync in background
+        self._is_cold_start = False
+        QTimer.singleShot(1, self._startup)
+
+    def _startup(self):
+        """Two-phase startup: display cached DB data, then sync from API"""
+        if not self.app.settings.username:
+            logger.info('Unknown user; skipping observation load')
+            return
+        self.load_observations_from_db()
+        self.start_background_sync()
 
     # Actions triggered directly by UI
     # ----------------------------------------
@@ -95,31 +106,36 @@ class ObservationController(BaseController):
         )
         future.on_result.connect(self.display_observation)
 
-    def load_user_observations(self):
-        """Fetch and display a single page of user observations"""
-        if not self.app.settings.username:
-            logger.info('Unknown user; skipping observation load')
-            return
-
-        self.info('Fetching user observations')
-        future = self.app.threadpool.schedule(
-            self.get_user_observations, priority=QThread.LowPriority
-        )
+    def load_observations_from_db(self):
+        """Read the current page of observations from the local DB and display them"""
+        logger.info(f'Loading observations from DB (page {self.page})')
+        future = self.app.threadpool.schedule(self._get_db_page, priority=QThread.NormalPriority)
         future.on_result.connect(self.display_user_observations)
 
+    def start_background_sync(self):
+        """Kick off a background worker to fetch all new/updated observations from the API"""
+        logger.info('Starting background observation sync')
+        future = self.app.threadpool.schedule_paginator(
+            self._sync_observations,
+            priority=QThread.LowPriority,
+        )
+        future.on_result.connect(self.on_sync_page_received)
+        future.on_complete.connect(self.on_sync_complete)
+
     def next_page(self):
-        if self.page < self.total_pages:
+        if self.page < min(self.total_pages, self.loaded_pages):
             self.page += 1
-            self.load_user_observations()
+            self.load_observations_from_db()
 
     def prev_page(self):
         if self.page > 1:
             self.page -= 1
-            self.load_user_observations()
+            self.load_observations_from_db()
 
     def refresh(self):
         self.page = 1
-        self.load_user_observations()
+        self.load_observations_from_db()
+        self.start_background_sync()
 
     # UI helper functions (slots triggered after worker threads complete)
     # ----------------------------------------
@@ -141,39 +157,67 @@ class ObservationController(BaseController):
             self.user_obs_group_box.set_title(f'My Observations ({self.total_results})')
         self.info('')
 
+    @Slot(object)
+    def on_sync_page_received(self, observations: list[Observation]):
+        """Called each time the background sync saves a page to the DB"""
+        self.loaded_pages += 1
+        logger.debug(f'Sync page {self.loaded_pages} received ({len(observations)} observations)')
+        self.update_pagination_buttons()
+
+        # On cold start, auto-display page 1 once the first sync page arrives
+        if self._is_cold_start and self.loaded_pages == 1:
+            self._update_db_counts()
+            self.load_observations_from_db()
+
+    @Slot()
+    def on_sync_complete(self):
+        """Called when the background sync finishes"""
+        logger.info('Background observation sync complete')
+        self.app.state.set_obs_checkpoint()
+        self._update_db_counts()
+        self.update_pagination_buttons()
+
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
         for obs_card in obs_cards:
             obs_card.on_click.connect(self.display_observation_by_id)
 
     def update_pagination_buttons(self):
-        """Update pagination buttons based on current page"""
+        """Update pagination buttons, gating 'next' on pages that have been loaded"""
         self.prev_button.setEnabled(self.page > 1)
-        self.next_button.setEnabled(self.page < self.total_pages)
+        self.next_button.setEnabled(self.page < min(self.total_pages, self.loaded_pages))
         self.page_label.setText(f'Page {self.page} / {self.total_pages}')
 
     # I/O bound functions run from worker threads
     # ----------------------------------------
 
     # TODO: Handle casual_observations setting?
-    # TODO: Store a Paginator object instead of page number?
-    def get_user_observations(self) -> list[Observation]:
-        """Fetch a single page of user observations"""
-        # TODO: Depending on order of operations, this could be counted from the db instead of API.
-        # Maybe do that except on initial observation load?
-        self.total_results = self.app.client.observations.count(username=self.app.settings.username)
-        self.total_pages = (self.total_results // DEFAULT_PAGE_SIZE) + 1
-        logger.debug(
-            'Total user observations: %s (%s pages)',
-            self.total_results,
-            self.total_pages,
-        )
+    def _get_db_page(self) -> list[Observation]:
+        """Read a single page of observations from the local DB"""
+        self._update_db_counts()
 
-        observations = self.app.client.observations.get_user_observations(
+        if self.total_results == 0:
+            self._is_cold_start = True
+            self.user_obs_group_box.set_title('My Observations (loading...)')
+            return []
+
+        self._is_cold_start = False
+        self.loaded_pages = self.total_pages
+        return self.app.client.observations.search_user_db(
             username=self.app.settings.username,
-            updated_since=self.app.state.last_obs_check,
-            limit=DEFAULT_PAGE_SIZE,
             page=self.page,
         )
-        self.app.state.set_obs_checkpoint()
-        return observations
+
+    def _update_db_counts(self):
+        """Update total_results and total_pages from the DB"""
+        self.total_results = self.app.client.observations.count_db()
+        self.total_pages = (
+            math.ceil(self.total_results / DEFAULT_PAGE_SIZE) if self.total_results else 0
+        )
+
+    def _sync_observations(self) -> Iterator[list[Observation]]:
+        """Fetch all new/updated observations from the API, yielding one page at a time"""
+        yield from self.app.client.observations.search_user_paginated(
+            username=self.app.settings.username,
+            updated_since=self.app.state.last_obs_check,
+        )

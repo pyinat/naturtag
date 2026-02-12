@@ -2,9 +2,11 @@
 
 ## Unreleased
 * Fix issue with first-time installation on Windows
+* Fix issue with canceling other background tasks when canceling taxonomy load
 * Fix macOS DMG image
 * Add menu item to open app data/config dir
 * Include locale data in PyInstaller packages
+* Improve performance of first-time observation load
 * Upgrade to Qt 6.10
 
 ## 0.8.0 (2024-10-10)
