@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 
 from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal
-from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
+from PySide6.QtGui import QBrush, QColor, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 from shiboken6 import isValid
 
@@ -505,8 +505,27 @@ class ImageWindow(StylableWidget):
         self.select_image_idx(self.wrap_idx(-1))
 
     def set_pixmap_path(self, path: PathOrStr):
-        self.image.setPixmap(QPixmap(str(path)))
+        pixmap = QPixmap(str(path))
+        if pixmap.isNull():
+            pixmap = self._make_placeholder(self.size())
+        self.image.setPixmap(pixmap)
         self.image.description = str(path)
+
+    @staticmethod
+    def _make_placeholder(size: QSize) -> QPixmap:
+        """Create a placeholder pixmap for images that can't be loaded (e.g., RAW files)"""
+        pixmap = QPixmap(size)
+        pixmap.fill(QColor(60, 60, 60))
+        icon_size = min(size.width(), size.height()) // 4
+        icon_pixmap = fa_icon('ph.camera-slash').pixmap(icon_size, icon_size)
+        painter = QPainter(pixmap)
+        painter.drawPixmap(
+            (size.width() - icon_size) // 2,
+            (size.height() - icon_size) // 2,
+            icon_pixmap,
+        )
+        painter.end()
+        return pixmap
 
     def remove_image(self):
         """Remove the current image from the list"""
