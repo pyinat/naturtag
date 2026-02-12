@@ -18,7 +18,8 @@ SAMPLE_DATA_DIR = Path(__file__).parent / 'sample_data'
 def progress_bar(qtbot):
     bar = ProgressBar()
     qtbot.addWidget(bar)
-    return bar
+    yield bar
+    bar.reset_timer.stop()
 
 
 @pytest.fixture
@@ -27,3 +28,4 @@ def thread_pool(qtbot):
     qtbot.addWidget(pool.progress)
     yield pool
     pool.waitForDone(5000)
+    pool.progress.reset_timer.stop()
