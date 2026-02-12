@@ -17,6 +17,7 @@ from PySide6.QtCore import (
     Slot,
 )
 from PySide6.QtWidgets import QGraphicsOpacityEffect, QProgressBar
+from shiboken6 import isValid
 
 logger = getLogger(__name__)
 
@@ -186,12 +187,16 @@ class ProgressBar(QProgressBar):
 
     @Slot(int)
     def add(self, amount: int = 1):
+        if not isValid(self):
+            return
         self.fadein()
         with self.lock:
             self.setMaximum(self.maximum() + amount)
 
     @Slot(int)
     def advance(self, amount: int = 1):
+        if not isValid(self):
+            return
         with self.lock:
             new_value = min(self.value() + amount, self.maximum())
             self.setValue(new_value)
@@ -213,6 +218,8 @@ class ProgressBar(QProgressBar):
             self.fadeout()
 
     def reset(self):
+        if not isValid(self):
+            return
         logger.debug(f'{self.value()}/{self.maximum()} tasks complete')
         self.reset_timer.stop()
         self.setValue(0)
