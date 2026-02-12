@@ -106,6 +106,7 @@ def _tag_images_iter(
         recursive=recursive,
         include_sidecars=include_sidecars,
         create_sidecars=settings.sidecar,
+        include_raw=True,
     ):
         yield _tag_image(image_path)
 
@@ -145,7 +146,7 @@ def _refresh_tags_iter(
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
     for image_path in get_valid_image_paths(
-        image_paths, recursive, create_sidecars=settings.sidecar
+        image_paths, recursive, create_sidecars=settings.sidecar, include_raw=True
     ):
         yield _refresh_tags(MetaMetadata(image_path), client, settings)
 

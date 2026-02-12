@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from naturtag.constants import APP_LOGO, ASSETS_DIR, ICONS_DIR
-from naturtag.utils.image_glob import get_valid_image_paths, uri_to_path
+from naturtag.utils.image_glob import get_valid_image_paths, is_raw_path, uri_to_path
 from test.conftest import SAMPLE_DATA_DIR
 
 
@@ -117,3 +117,42 @@ def test_get_valid_image_paths__nonexistent():
 
 def test_get_valid_image_paths__unsupported_type():
     assert len(get_valid_image_paths([ASSETS_DIR / 'style.qss'])) == 0
+
+
+@pytest.mark.parametrize(
+    'filename, expected',
+    [
+        ('photo.ORF', True),
+        ('photo.orf', True),
+        ('photo.cr2', True),
+        ('photo.jpg', False),
+        ('photo.png', False),
+        ('photo.xmp', False),
+    ],
+)
+def test_is_raw_path(filename, expected):
+    assert is_raw_path(Path(filename)) == expected
+
+
+def test_get_valid_image_paths__include_raw_file():
+    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
+    assert len(get_valid_image_paths([raw_path])) == 0
+    results = get_valid_image_paths([raw_path], include_raw=True)
+    assert raw_path in results
+
+
+def test_get_valid_image_paths__include_raw_dir():
+    results_without = get_valid_image_paths([SAMPLE_DATA_DIR], include_raw=False)
+    results_with = get_valid_image_paths([SAMPLE_DATA_DIR], include_raw=True)
+    assert len(results_with) > len(results_without)
+
+    raw_paths = results_with - results_without
+    assert all(is_raw_path(p) for p in raw_paths)
+
+
+def test_get_valid_image_paths__include_raw_without_sidecar():
+    """RAW files without sidecars are accepted directly when include_raw=True"""
+    raw_path = SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF'
+    assert len(get_valid_image_paths([raw_path])) == 0
+    results = get_valid_image_paths([raw_path], include_raw=True)
+    assert raw_path in results
