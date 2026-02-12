@@ -20,6 +20,7 @@ CLEAN_DIRS = [
 ]
 DEFAULT_COVERAGE_FORMATS = ['html', 'term']
 DOC_BUILD_DIR = join('docs', '_build', 'html')
+ENVARS = {'QT_QPA_PLATFORM': 'offscreen'}
 
 
 @nox.session(python=['3.14', '3.13'])
@@ -27,7 +28,16 @@ def test(session):
     """Run tests for a specific python version"""
     test_paths = session.posargs or ['test']
     session.run('uv', 'sync', '--frozen', external=True)
-    session.run('uv', 'run', 'pytest', '-n', 'auto', *test_paths, external=True)
+    session.run(
+        'uv',
+        'run',
+        'pytest',
+        '-n',
+        'auto',
+        *test_paths,
+        external=True,
+        env=ENVARS,
+    )
 
 
 @nox.session(python=False)
@@ -46,7 +56,7 @@ def coverage(session):
     # Add coverage formats
     cov_formats = session.posargs or DEFAULT_COVERAGE_FORMATS
     cmd += [f'--cov-report={f}' for f in cov_formats]
-    session.run(*cmd, 'test')
+    session.run(*cmd, 'test', env=ENVARS)
 
 
 @nox.session(python=False)

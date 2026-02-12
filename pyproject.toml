@@ -62,6 +62,7 @@ dev = [
     'pyinstaller==6.17.0',
     'pytest>=9.0',
     'pytest-cov>=7.0',
+    'pytest-qt>=4.4',
     'pytest-xdist>=3.8',
 ]
 
@@ -109,6 +110,9 @@ exclude = [
     'assets/icons/*.bmp',
     'assets/icons/*.xcf',
 ]
+
+[tool.pytest.ini_options]
+qt_api = 'pyside6'
 
 [tool.coverage.html]
 directory = 'test-reports'
