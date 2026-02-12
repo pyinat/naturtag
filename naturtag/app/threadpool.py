@@ -47,16 +47,19 @@ class ThreadPool(QThreadPool):
         self.start(worker, priority.value)
         return worker.signals
 
-    # def schedule_all(self, callbacks: list[Callable], **kwargs) -> list['WorkerSignals']:
-    #     """Schedule multiple tasks to be run by the next available worker thread"""
-    #     self.progress.add(len(callbacks))
-    #     all_signals = []
-    #     for callback in callbacks:
-    #         worker = Worker(callback, **kwargs)
-    #         worker.signals.on_progress.connect(self.progress.advance)
-    #         self.start(worker)
-    #         all_signals.append(worker.signals)
-    #     return all_signals
+    def schedule_paginator(
+        self,
+        callback: Callable,
+        priority: QThread.Priority = QThread.NormalPriority,
+        total_results: Optional[int] = None,
+        **kwargs,
+    ) -> 'WorkerSignals':
+        """Schedule a task to be run by the next available worker thread"""
+        self.progress.add(total_results or 1)
+        worker = PaginatedWorker(callback, **kwargs)
+        worker.signals.on_progress.connect(self.progress.advance)
+        self.start(worker, priority.value)
+        return worker.signals
 
     def cancel(self):
         """Cancel all queued tasks and reset progress bar. Currently running tasks will be allowed
@@ -92,12 +95,38 @@ class Worker(QRunnable):
         self.signals.on_progress.emit(increment)
 
 
+class PaginatedWorker(QRunnable):
+    """A worker thread that specifically handles paginated requests via iNatClient/iNatDbClient"""
+
+    def __init__(self, callback: Callable, **kwargs):
+        super().__init__()
+        self.callback = callback
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+    def run(self):
+        try:
+            for next_page in self.callback(**self.kwargs):
+                self.signals.on_result.emit(next_page)
+                self.signals.on_progress.emit(len(next_page))
+        except Exception as e:
+            logger.warning('Worker error:', exc_info=True)
+            self.signals.on_error.emit(e)
+        finally:
+            # Always consume the reserved progress slot. If pages were yielded, their
+            # advances already exceeded the reservation, so this extra 1 just caps at max.
+            self.signals.on_progress.emit(1)
+            self.signals.on_complete.emit()
+
+
 class WorkerSignals(QObject):
     """Signals used by a worker thread (can't be set directly on a QRunnable)"""
 
     on_error = Signal(Exception)  #: Return exception info on error
+    on_result_total = Signal(int)  #: Return total results
     on_result = Signal(object)  #: Return result on completion
     on_progress = Signal(int)  #: Increment progress bar
+    on_complete = Signal()  #: Emitted when the worker has finished all work
 
 
 class ProgressBar(QProgressBar):
@@ -116,6 +145,7 @@ class ProgressBar(QProgressBar):
         self.anim = QPropertyAnimation(self.op_effect, b'opacity')
         self.anim.setEasingCurve(QEasingCurve.InOutCubic)
 
+    @Slot(int)
     def add(self, amount: int = 1):
         self.fadein()
         with self.lock:

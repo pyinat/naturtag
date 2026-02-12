@@ -838,7 +838,7 @@ requires-dist = [
     { name = "click-help-colors", specifier = ">=0.9" },
     { name = "pillow", specifier = ">=10.0" },
     { name = "pyexiv2", specifier = ">=2.10" },
-    { name = "pyinaturalist", specifier = ">=0.21" },
+    { name = "pyinaturalist", specifier = "==0.21.1.dev1" },
     { name = "pyinaturalist-convert", specifier = ">=0.7.5" },
     { name = "pyqtdarktheme-fork", specifier = "~=2.3.4" },
     { name = "pyside6", specifier = "==6.10.1" },
@@ -1253,7 +1253,7 @@ wheels = [
 
 [[package]]
 name = "pyinaturalist"
-version = "0.21.0"
+version = "0.21.1.dev1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -1265,9 +1265,9 @@ dependencies = [
     { name = "requests-ratelimiter" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a4/e8/c1f5027d7828e5cec74d8073aca3ee6e31502d9628cc24a41f06facf3cd3/pyinaturalist-0.21.0.tar.gz", hash = "sha256:f15c08703746e3aa61bbbe35fe1c79901693c9d737c1d74a449a003d4a8bb8e1", size = 101576, upload-time = "2026-01-21T22:36:01.412Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/67/b4/410ff0c2bae873c0983db885c9d1d4c7c455cf2e70acbb01f44c8fc431d7/pyinaturalist-0.21.1.dev1.tar.gz", hash = "sha256:17be4330869ded9a187fecf9e09e9e65765e9c51a9502d78b390520cea3911ed", size = 102796, upload-time = "2026-02-11T19:24:51.763Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d4/72/50d898b2ce7149a2216bb7672a72cb7dfad87f1c4367e5878e6225c17342/pyinaturalist-0.21.0-py3-none-any.whl", hash = "sha256:ce1ae1a20e3be9cb541469e2ad76e54909b4ddc44765aa89bb93b89a37048391", size = 139772, upload-time = "2026-01-21T22:35:59.8Z" },
+    { url = "https://files.pythonhosted.org/packages/68/ae/fd17077ecf21653f9de2ad89a90360b89d889802989ac1a9583839e27f93/pyinaturalist-0.21.1.dev1-py3-none-any.whl", hash = "sha256:f97a2c7c6fbe8a66ce1354bb8cbeb09d0d147b1d3fce4a893e7f9c9a1593b536", size = 140980, upload-time = "2026-02-11T19:24:50.477Z" },
 ]
 
 [[package]]

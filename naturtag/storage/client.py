@@ -3,14 +3,22 @@ from itertools import chain
 from logging import getLogger
 from pathlib import Path
 from time import time
-from typing import Optional
+from typing import Iterator, Optional
 
 from pyinaturalist import Observation, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.constants import MultiInt
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import ensure_list
 from pyinaturalist_convert import index_observation_text
-from pyinaturalist_convert.db import get_db_observations, get_db_taxa, save_observations, save_taxa
+from pyinaturalist_convert._models import DbObservation
+from pyinaturalist_convert.db import (
+    get_db_observations,
+    get_db_taxa,
+    get_session,
+    save_observations,
+    save_taxa,
+)
+from sqlalchemy import func, select
 
 from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, ROOT_TAXON_ID
 
@@ -58,7 +66,7 @@ class iNatDbClient(iNatClient):
         return observation
 
 
-# TODO: Expiration?
+# TODO: cache expiration?
 class ObservationDbController(ObservationController):
     def __init__(self, *args, taxon_controller: 'TaxonDbController', **kwargs):
         """Need a reference to taxon controller to get full taxon ancestry"""
@@ -98,18 +106,31 @@ class ObservationDbController(ObservationController):
         return WrapperPaginator(observations)
 
     def count(self, username: str, **params) -> int:
-        """Get the total number of observations matching the specified criteria"""
+        """Get the total number of observations matching the specified criteria from the API"""
         return super().search(user_login=username, refresh=True, **params).count()
 
-    # TODO: Save one page at a time
+    def count_db(self) -> int:
+        """Get the total number of observations in the local database"""
+        stmt = select(func.count()).select_from(DbObservation)
+        with get_session(self.client.db_path) as session:
+            return session.execute(stmt).scalar() or 0
+
     def search(self, **params) -> WrapperPaginator[Observation]:
         """Search observations, and save results to the database (for future reference by ID)"""
-        results = super().search(**params).all()
-        if results:
-            self.save(results)
+        results = []
+        for obs_page in self._search_paginated(**params):
+            results += obs_page
         return WrapperPaginator(results)
 
-    def get_user_observations(
+    def _search_paginated(self, **params) -> Iterator[list[Observation]]:
+        """Search observations, saving and yielding results one page at a time"""
+        query = super().search(**params)
+        while not query.exhausted:
+            obs_page = query.next_page()
+            self.save(obs_page)
+            yield obs_page
+
+    def search_user(
         self,
         username: str,
         updated_since: Optional[datetime] = None,
@@ -119,19 +140,16 @@ class ObservationDbController(ObservationController):
         """Fetch any new user observations from the API since last search, save them to the db,
         and then return up to ``limit`` most recent observations from the db
         """
-        # TODO: Initial load should be done in a separate thread
-        logger.debug(f'Fetching new user observations since {updated_since}')
         new_observations = []
         if page == 1:
             new_observations = self.search(
                 user_login=username,
                 updated_since=updated_since,
                 refresh=True,
+                limit=limit,
+                order='desc',
             ).all()
-        if new_observations:
-            logger.info(f'{len(new_observations)} new observations found since {updated_since}')
-        else:
-            logger.info(f'No new observations found since {updated_since}')
+        logger.info(f'{len(new_observations)} new observations found since {updated_since}')
 
         if not limit:
             return []
@@ -154,6 +172,40 @@ class ObservationDbController(ObservationController):
             order_by_created=True,
         )
         return list(obs)
+
+    def search_user_db(
+        self, username: str, limit: int = DEFAULT_PAGE_SIZE, page: int = 1
+    ) -> list[Observation]:
+        """Read a single page of observations from the local DB, ordered by creation date"""
+        return list(
+            get_db_observations(
+                self.client.db_path,
+                username=username,
+                limit=limit,
+                page=page,
+                order_by_created=True,
+            )
+        )
+
+    # TODO/WIP: paginated version of get_user_observations
+    def search_user_paginated(
+        self,
+        username: str,
+        updated_since: Optional[datetime] = None,
+    ) -> Iterator[list[Observation]]:
+        """Fetch any new observations from the API since last search, saving and yielding a single
+        page at a time.
+        """
+        logger.debug(f'Fetching new user observations updated since {updated_since}')
+        total = 0
+        for page in self._search_paginated(
+            user_login=username,
+            updated_since=updated_since,
+            refresh=True,
+        ):
+            yield page
+            total += len(page)
+        logger.debug(f'{total} new observations found')
 
     def save(self, observations: list[Observation]):
         """Save observations to the database (full records + text search index)"""

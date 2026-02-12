@@ -29,7 +29,7 @@ dependencies = [
     'click-help-colors>=0.9',
     'pillow>=10.0',
     'pyexiv2>=2.10',
-    'pyinaturalist>=0.21',
+    'pyinaturalist==0.21.1dev1',
     'pyinaturalist-convert>=0.7.5',
     'requests-ratelimiter>=0.6,<0.9',
     'pyside6==6.10.1',
