@@ -56,8 +56,6 @@ def get_valid_image_paths(
             image_paths.extend(
                 get_images_from_dir(path, recursive=recursive, include_raw=include_raw)
             )
-        elif '*' in str(path):
-            image_paths.extend(glob_paths([path]))
         elif is_image_path(path, include_sidecars=include_sidecars, include_raw=include_raw):
             image_paths.append(path)
         elif include_sidecars and sidecar_path.is_file():
