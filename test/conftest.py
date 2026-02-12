@@ -1,7 +1,10 @@
+import os
 from pathlib import Path
 
 import prettyprinter
 import pytest
+
+os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
 from naturtag.app.threadpool import ProgressBar, ThreadPool
 
