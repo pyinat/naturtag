@@ -125,6 +125,7 @@ def test_get_valid_image_paths__unsupported_type():
         ('photo.ORF', True),
         ('photo.orf', True),
         ('photo.cr2', True),
+        ('photo.nef', True),
         ('photo.jpg', False),
         ('photo.png', False),
         ('photo.xmp', False),
