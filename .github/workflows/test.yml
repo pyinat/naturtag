@@ -10,7 +10,8 @@ on:
 
 env:
   LATEST_PY_VERSION: '3.14'
-  COVERAGE_ARGS: '--cov --cov-report=term --cov-report=xml'
+  COV_FORMATS: 'term html'
+  PYTEST_VERBOSE: 'true'
 
 jobs:
   test:
@@ -18,6 +19,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.14', '3.13']
+      fail-fast: false
 
     steps:
       # Install dependencies, with caching
@@ -40,12 +42,12 @@ jobs:
       #     naturtag -cdo 45524803
       #     naturtag -cdt 48978
       - name: Run unit tests
-        run: uv run pytest ${{ env.COVERAGE_ARGS }} test
+        run: uv run nox -e cov -- ${{ env.COV_FORMATS }}
 
-      # TODO: Upload coverage report to codecov... once there's actual coverage to report
-      # - name: 'Upload coverage report to Codecov'
-      #   if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
-      #   uses: codecov/codecov-action@v3
+      # Upload coverage report to codecov
+      - name: 'Upload coverage report to Codecov'
+        if: ${{ matrix.python-version == env.LATEST_PY_VERSION }}
+        uses: codecov/codecov-action@v5
 
   # Run code analysis checks via pre-commit hooks
   analyze:

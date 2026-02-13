@@ -214,7 +214,7 @@ class MainWindow(QMainWindow):
         if ok:
             self.app.settings.username = username
             self.app.settings.write()
-            self.observation_controller.load_user_observations()
+            self.observation_controller.refresh()
 
     def closeEvent(self, _):
         """Save settings before closing the app"""
