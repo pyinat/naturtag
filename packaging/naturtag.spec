@@ -58,13 +58,10 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['**/__pycache__', PROJECT_DIR / 'coverage', PACKAGE_DIR / 'py.typed'],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=None,
+    excludes=['**/__pycache__', str(PROJECT_DIR / 'coverage'), str(PACKAGE_DIR / 'py.typed')],
     noarchive=False,
 )
-pyz = PYZ(a.pure, a.zipped_data, cipher=None)
+pyz = PYZ(a.pure, a.zipped_data)
 exe = EXE(
     pyz,
     a.scripts,
