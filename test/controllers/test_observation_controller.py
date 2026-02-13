@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from naturtag.controllers.observation_controller import ObservationController
+from naturtag.controllers.observation_controller import DbPageResult
 from test.conftest import _make_obs
 
 
@@ -167,14 +168,56 @@ def test_on_sync_complete(controller, mock_app):
 
 
 def test_refresh(controller, mock_app):
+    controller._page_cache[1] = [_make_obs(id=1)]
+    controller._page_cache[2] = [_make_obs(id=2)]
     controller.page = 3
     mock_app._futures.clear()
 
     controller.refresh()
 
     assert controller.page == 1
+    assert len(controller._page_cache) == 0
     assert mock_app.threadpool.schedule.called
     assert mock_app.threadpool.schedule_paginator.called
+
+
+def test_load_observations__cache_hit(controller, mock_app):
+    observations = [_make_obs(id=i) for i in range(3)]
+    controller._page_cache[1] = observations
+    controller.total_results = 10
+    mock_app._futures.clear()
+    mock_app.threadpool.schedule.reset_mock()
+
+    controller.load_observations_from_db()
+
+    mock_app.threadpool.schedule.assert_not_called()
+    assert len(list(controller.user_observations.cards)) == 3
+
+
+def test_page_cache__lru_eviction(controller, mock_app):
+    """Page cache evicts least-recently-used pages when exceeding max size."""
+    for p in range(1, 21):
+        controller.page = p
+        result = DbPageResult([_make_obs(id=p)], total_results=100, is_empty=False)
+        controller.on_db_page_loaded(result)
+
+    # Access page 1 to make it recently used
+    controller.page = 1
+    controller.load_observations_from_db()
+
+    # Add page 21 — should evict page 2
+    controller.page = 21
+    result = DbPageResult([_make_obs(id=21)], total_results=100, is_empty=False)
+    controller.on_db_page_loaded(result)
+
+    assert 2 not in controller._page_cache
+    assert set(controller._page_cache.keys()) == set(range(1, 22)) - {2}
+
+
+def test_on_sync_complete__clears_cache(controller, mock_app):
+    controller._page_cache[1] = [_make_obs(id=1)]
+    controller.on_sync_complete()
+    assert len(controller._page_cache) == 0
 
 
 def test_bind_selection(controller):

@@ -1,4 +1,5 @@
 import math
+from collections import OrderedDict
 from logging import getLogger
 from typing import Iterable, Iterator
 
@@ -7,7 +8,7 @@ from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from naturtag.constants import DEFAULT_PAGE_SIZE
+from naturtag.constants import DEFAULT_PAGE_SIZE, PAGE_CACHE_MAX
 from naturtag.controllers import BaseController, ObservationInfoSection
 from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList, VerticalLayout
 from naturtag.widgets.style import fa_icon
@@ -45,8 +46,7 @@ class ObservationController(BaseController):
         self.total_pages = 0
         self.total_results = 0
         self.loaded_pages = 0
-        # TODO: Cache pages while navigating back and forth?
-        # self.pages: dict[int, list[ObservationInfoCard]] = {}
+        self._page_cache: OrderedDict[int, list[Observation]] = OrderedDict()
 
         # User observations
         self.user_observations = ObservationList()
@@ -118,7 +118,12 @@ class ObservationController(BaseController):
 
     def load_observations_from_db(self):
         """Read the current page of observations from the local DB and display them"""
-        logger.info(f'Loading observations from DB (page {self.page})')
+        cached = self._page_cache.get(self.page)
+        if cached is not None:
+            self._page_cache.move_to_end(self.page)
+            self.display_user_observations(cached)
+            return
+        logger.debug(f'Loading observations from DB (page {self.page})')
         future = self.app.threadpool.schedule(self._get_db_page, priority=QThread.NormalPriority)
         future.on_result.connect(self.on_db_page_loaded)
 
@@ -144,10 +149,11 @@ class ObservationController(BaseController):
 
     def refresh(self):
         self.page = 1
+        self._page_cache.clear()
         self.load_observations_from_db()
         self.start_background_sync()
 
-    # UI helper functions (slots triggered after worker threads complete)
+    # UI helper functions (slots triggered in main thread after workers complete)
     # ----------------------------------------
 
     @Slot(Observation)
@@ -169,7 +175,10 @@ class ObservationController(BaseController):
 
     @Slot(object)
     def on_db_page_loaded(self, result: DbPageResult):
-        """Handle DB page result on the main thread — all state mutation and GUI updates here"""
+        """Handle DB page result on the main thread"""
+        self._page_cache[self.page] = result.observations
+        if len(self._page_cache) > PAGE_CACHE_MAX:
+            self._page_cache.popitem(last=False)
         self.total_results = result.total_results
         self.total_pages = (
             math.ceil(self.total_results / DEFAULT_PAGE_SIZE) if self.total_results else 0
@@ -200,6 +209,7 @@ class ObservationController(BaseController):
     def on_sync_complete(self):
         """Called when the background sync finishes"""
         logger.info('Background observation sync complete')
+        self._page_cache.clear()
         self.app.state.set_obs_checkpoint()
         self._update_db_counts()
         self.update_pagination_buttons()

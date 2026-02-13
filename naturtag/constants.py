@@ -42,8 +42,8 @@ SIZE_SM = (75, 75)
 SIZE_DEFAULT = (250, 250)
 SIZE_LG = (500, 500)
 
-# TODO: Make this user-configurable
 DEFAULT_PAGE_SIZE = 50
+PAGE_CACHE_MAX = 20
 
 # Relevant groups of image metadata tags
 EXIF_HIDE_PREFIXES = [
