@@ -1,6 +1,6 @@
 [project]
 name = 'naturtag'
-version = '0.8.2'
+version = '0.9.0'
 description = 'Tag your nature photos with iNat taxonomy and observation metadata'
 authors = [{name = 'Jordan Cook'}]
 license = {text = 'MIT'}
