@@ -1,3 +1,4 @@
+from functools import partial
 from logging import getLogger
 from typing import Optional
 
@@ -122,7 +123,7 @@ class ImageController(BaseController):
         self.info(f'Refreshing tags for {len(images)} images')
         for image in images:
             future = self.app.threadpool.schedule(
-                lambda: _refresh_tags(image.metadata, self.app.client, self.app.settings),
+                partial(_refresh_tags, image.metadata, self.app.client, self.app.settings),
             )
             future.on_result.connect(self.update_metadata)
 
