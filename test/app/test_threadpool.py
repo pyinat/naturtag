@@ -146,6 +146,49 @@ def test_paginated_worker_run__empty_iterator():
     on_progress.assert_called_once_with(1)
 
 
+def test_worker_run__on_finished_emitted():
+    worker = Worker(MagicMock(return_value='ok'))
+    on_finished = MagicMock()
+    worker.signals.on_finished.connect(on_finished)
+
+    worker.run()
+
+    on_finished.assert_called_once()
+
+
+def test_worker_run__on_finished_emitted_on_error():
+    worker = Worker(MagicMock(side_effect=ValueError('boom')))
+    on_finished = MagicMock()
+    worker.signals.on_finished.connect(on_finished)
+
+    worker.run()
+
+    on_finished.assert_called_once()
+
+
+def test_paginated_worker_run__on_finished_emitted():
+    worker = PaginatedWorker(_make_paginator([[1, 2]]))
+    on_finished = MagicMock()
+    worker.signals.on_finished.connect(on_finished)
+
+    worker.run()
+
+    on_finished.assert_called_once()
+
+
+def test_paginated_worker_run__on_finished_emitted_on_error():
+    def bad_callback():
+        raise RuntimeError('fail')
+
+    worker = PaginatedWorker(bad_callback)
+    on_finished = MagicMock()
+    worker.signals.on_finished.connect(on_finished)
+
+    worker.run()
+
+    on_finished.assert_called_once()
+
+
 def test_progress_bar_add(progress_bar):
     progress_bar.add(5)
     assert progress_bar.maximum() == 5
@@ -240,7 +283,7 @@ def test_schedule__group_tracks_worker(thread_pool):
 @pytest.mark.skip
 def test_schedule__group_worker_removed_on_completion(thread_pool, qtbot):
     signals = thread_pool.schedule(lambda: 1, group='g1')
-    qtbot.waitSignal(signals.on_progress, timeout=3000)
+    qtbot.waitSignal(signals.on_finished, timeout=3000)
     # The removal lambda is queued cross-thread; wait for it to execute
     qtbot.waitUntil(lambda: len(thread_pool._group_workers['g1']) == 0, timeout=3000)
 
@@ -266,7 +309,7 @@ def test_schedule_paginator__results_emitted(thread_pool, qtbot):
 @pytest.mark.skip
 def test_schedule_paginator__group_removed_on_complete(thread_pool, qtbot):
     signals = thread_pool.schedule_paginator(_pages, group='pg')
-    qtbot.waitSignal(signals.on_complete, timeout=3000)
+    qtbot.waitSignal(signals.on_finished, timeout=3000)
     qtbot.waitUntil(lambda: len(thread_pool._group_workers['pg']) == 0, timeout=3000)
 
 
