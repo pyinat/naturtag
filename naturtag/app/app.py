@@ -217,7 +217,9 @@ class MainWindow(QMainWindow):
             self.observation_controller.refresh()
 
     def closeEvent(self, _):
-        """Save settings before closing the app"""
+        """Stop background workers and save settings before closing the app"""
+        self.app.threadpool.clear()
+        self.app.threadpool.waitForDone(5000)
         self.app.settings.write()
         self.app.state.write()
 
