@@ -1,15 +1,22 @@
 # History
 
-## Unreleased
-* Fix issue with first-time installation on Windows
-* Fix issue with canceling other background tasks when canceling taxonomy load
-* Fix macOS DMG image
-* Fix several multithreading issues potentially leading to segfaults
+## 0.9.0
+**UI:**
 * Add menu item to open app data/config dir
-* Include locale data in PyInstaller packages
 * General performance and stability improvements
 * Improve performance of loading observations
+
+**Packaging:**
+* Fix issue with first-time installation on Windows
+* Fix issue with canceling other background tasks when canceling taxonomy load
+* Fix PyPI package with unresolvable constraints when installed with pip
+* Fix macOS DMG image
+* Include locale data in PyInstaller packages
+* Update packaged taxonomy db with iNaturalist data from February 2026
 * Upgrade to Qt 6.10
+
+**Other Bugfixes:**
+* Fix several multithreading issues potentially leading to segfaults
 
 ## 0.8.1 (2025-01-02)
 * Minor fixes for packaging and first-time setup

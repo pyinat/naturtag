@@ -33,6 +33,17 @@ sudo rpm -i naturtag.rpm
 ```
 :::
 
+:::{tab-item} Arch
+A pacman package is available for Arch Linux and derivatives. Download
+{{
+    '[naturtag.pkg.tar.zst](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.pkg.tar.zst)'.format(version)
+}}
+and run:
+```
+sudo pacman -U naturtag.pkg.tar.zst
+```
+:::
+
 :::{tab-item} Linux (Other)
 For other Linux distributions, a [Snap](https://snapcraft.io/docs/installing-snapd)
 package is available. Download
@@ -65,9 +76,18 @@ A Windows installer is available here:
 
 ## Python package
 You can also use naturtag as a {ref}`plain python library <library>`, if you prefer:
-* First, [install python 3.10](https://www.python.org/downloads/) if you don't have it yet.
+* First, [install python 3.13](https://www.python.org/downloads/) if you don't have it yet.
 * It's recommended to install into a [virtual environment](https://docs.python.org/3/library/venv.html).
 * Install with `pip`:
-```
-pip install naturtag
+    ```
+    pip install naturtag
+    ```
+* Or use [`uv`](https://docs.astral.sh/uv/) to install as a user-level CLI tool (no manual virtualenv required):
+    ```
+    uv tool install naturtag
+    ```
+
+```{warning}
+The PyPI package is suitable for using the library and CLI; for the desktop application, it is highly
+recommended to use one of the platform-specific builds above.
 ```
