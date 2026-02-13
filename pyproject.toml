@@ -5,7 +5,9 @@ description = 'Tag your nature photos with iNat taxonomy and observation metadat
 authors = [{name = 'Jordan Cook'}]
 license = {text = 'MIT'}
 readme = 'README.md'
-requires-python = '>=3.13,<3.15'
+# TODO: add python 3.14 once pyqtdarktheme supports it.
+# Otherwise, the package can be installed with uv, but not pip
+requires-python = '>=3.13,<3.14'
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',
@@ -17,7 +19,6 @@ classifiers = [
     'Operating System :: POSIX',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.13',
-    'Programming Language :: Python :: 3.14',
     'Intended Audience :: Developers',
     'Intended Audience :: End Users/Desktop',
     'Intended Audience :: Science/Research',

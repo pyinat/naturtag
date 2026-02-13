@@ -3,6 +3,7 @@
 ## Unreleased
 * Fix issue with first-time installation on Windows
 * Fix issue with canceling other background tasks when canceling taxonomy load
+* Fix PyPI package with unresolvable constraints when installed with pip
 * Fix macOS DMG image
 * Fix several multithreading issues potentially leading to segfaults
 * Add menu item to open app data/config dir
