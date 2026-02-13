@@ -284,6 +284,7 @@ def test_schedule__group_tracks_worker(thread_pool):
 def test_schedule__group_worker_removed_on_completion(thread_pool, qtbot):
     signals = thread_pool.schedule(lambda: 1, group='g1')
     qtbot.waitSignal(signals.on_finished, timeout=3000)
+    qtbot.wait(10)
     # The removal lambda is queued cross-thread; wait for it to execute
     qtbot.waitUntil(lambda: len(thread_pool._group_workers['g1']) == 0, timeout=3000)
 
@@ -310,6 +311,7 @@ def test_schedule_paginator__results_emitted(thread_pool, qtbot):
 def test_schedule_paginator__group_removed_on_complete(thread_pool, qtbot):
     signals = thread_pool.schedule_paginator(_pages, group='pg')
     qtbot.waitSignal(signals.on_finished, timeout=3000)
+    qtbot.wait(10)
     qtbot.waitUntil(lambda: len(thread_pool._group_workers['pg']) == 0, timeout=3000)
 
 
