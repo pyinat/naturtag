@@ -53,7 +53,7 @@ class ThreadPool(QThreadPool):
             with self._group_lock:
                 self._group_workers[group].append(worker)
             worker.signals.on_progress.connect(
-                lambda _amt, g=group, w=worker: self._remove_worker(g, w)
+                lambda _amt, g=group, w=worker: self._remove_worker(g, w) if isValid(self) else None
             )
         self.start(worker, priority.value)
         return worker.signals
@@ -73,7 +73,9 @@ class ThreadPool(QThreadPool):
         if group is not None:
             with self._group_lock:
                 self._group_workers[group].append(worker)
-            worker.signals.on_complete.connect(lambda g=group, w=worker: self._remove_worker(g, w))
+            worker.signals.on_complete.connect(
+                lambda g=group, w=worker: self._remove_worker(g, w) if isValid(self) else None
+            )
         self.start(worker, priority.value)
         return worker.signals
 
