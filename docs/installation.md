@@ -33,6 +33,17 @@ sudo rpm -i naturtag.rpm
 ```
 :::
 
+:::{tab-item} Arch
+A pacman package is available for Arch Linux and derivatives. Download
+{{
+    '[naturtag.pkg.tar.zst](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.pkg.tar.zst)'.format(version)
+}}
+and run:
+```
+sudo pacman -U naturtag.pkg.tar.zst
+```
+:::
+
 :::{tab-item} Linux (Other)
 For other Linux distributions, a [Snap](https://snapcraft.io/docs/installing-snapd)
 package is available. Download
