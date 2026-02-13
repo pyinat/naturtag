@@ -3,6 +3,7 @@ from logging import FileHandler, Formatter, LogRecord, getLogger
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QTextEdit
 from rich.logging import RichHandler
+from shiboken6 import isValid
 
 from naturtag.constants import PathOrStr
 
@@ -56,5 +57,5 @@ class QtRichHandler(RichHandler):
 
     def emit(self, record: LogRecord):
         super().emit(record)
-        if self.widget:
+        if self.widget and isValid(self.widget):
             self.widget.append(self.console.export_html())

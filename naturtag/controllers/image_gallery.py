@@ -14,7 +14,7 @@ from PySide6.QtCore import (
     Signal,
     Slot,
 )
-from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QPixmap
+from PySide6.QtGui import QAction, QDesktopServices, QDropEvent, QImage, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QWidget,
 )
+from shiboken6 import isValid
 
 from naturtag.constants import IMAGE_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
 from naturtag.controllers import BaseController
@@ -215,8 +216,8 @@ class ThumbnailCard(StylableWidget):
 
     def load_image(self):
         """Load thumbnail + metadata in the main thread"""
-        pixmap, metadata = self.image.get_pixmap_meta()
-        self.image.setPixmap(pixmap)
+        image, metadata = self.image.get_pixmap_meta()
+        self.image.setPixmap(QPixmap.fromImage(image) if image else QPixmap())
         self.set_metadata(metadata)
 
     def load_image_async(self, threadpool: 'ThreadPool'):
@@ -260,6 +261,12 @@ class ThumbnailCard(StylableWidget):
 
     def pulse(self):
         """Show a highlight animation to indicate the image has been updated"""
+        if (
+            hasattr(self, 'anim_group')
+            and self.anim_group.state() == QParallelAnimationGroup.Running
+        ):
+            self.anim_group.stop()
+
         # Color pulse
         self.color_effect = QGraphicsColorizeEffect()
         self.color_effect.setColor(self.palette().highlight().color())
@@ -311,9 +318,9 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         self.thumbnail_size = size
         self.setFixedSize(*size)
 
-    def get_pixmap_meta(self, path: PathOrStr) -> tuple[QPixmap, MetaMetadata]:
+    def get_pixmap_meta(self, path: PathOrStr) -> tuple[QImage | None, MetaMetadata]:
         """All I/O for loading an image preview (reading metadata, generating thumbnail),
-        to be run from a separate thread
+        to be run from a separate thread. Returns QImage (thread-safe) instead of QPixmap.
         """
         return generate_thumbnail(path, self.thumbnail_size), MetaMetadata(path)
 
@@ -324,9 +331,11 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         future = threadpool.schedule(self.get_pixmap_meta, path=path)
         future.on_result.connect(self.set_pixmap_meta)
 
-    def set_pixmap_meta(self, pixmap_meta: tuple[QPixmap, MetaMetadata]):
-        pixmap, metadata = pixmap_meta
-        self.setPixmap(pixmap)
+    def set_pixmap_meta(self, image_meta: tuple[QImage | None, MetaMetadata]):
+        if not isValid(self):
+            return
+        image, metadata = image_meta
+        self.setPixmap(QPixmap.fromImage(image) if image else QPixmap())
         self.on_load_metadata.emit(metadata)
 
 

@@ -2,6 +2,7 @@ import math
 from logging import getLogger
 from typing import Iterable, Iterator
 
+from attr import define
 from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLabel, QPushButton
@@ -12,6 +13,15 @@ from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationL
 from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
+
+
+@define
+class DbPageResult:
+    """Container to pass results from a worker thread to UI thread"""
+
+    observations: list[Observation]
+    total_results: int
+    is_empty: bool
 
 
 class ObservationController(BaseController):
@@ -110,7 +120,7 @@ class ObservationController(BaseController):
         """Read the current page of observations from the local DB and display them"""
         logger.info(f'Loading observations from DB (page {self.page})')
         future = self.app.threadpool.schedule(self._get_db_page, priority=QThread.NormalPriority)
-        future.on_result.connect(self.display_user_observations)
+        future.on_result.connect(self.on_db_page_loaded)
 
     def start_background_sync(self):
         """Kick off a background worker to fetch all new/updated observations from the API"""
@@ -158,6 +168,23 @@ class ObservationController(BaseController):
         self.info('')
 
     @Slot(object)
+    def on_db_page_loaded(self, result: DbPageResult):
+        """Handle DB page result on the main thread — all state mutation and GUI updates here"""
+        self.total_results = result.total_results
+        self.total_pages = (
+            math.ceil(self.total_results / DEFAULT_PAGE_SIZE) if self.total_results else 0
+        )
+
+        if result.is_empty:
+            self._is_cold_start = True
+            self.user_obs_group_box.set_title('My Observations (loading...)')
+        else:
+            self._is_cold_start = False
+            self.loaded_pages = self.total_pages
+
+        self.display_user_observations(result.observations)
+
+    @Slot(object)
     def on_sync_page_received(self, observations: list[Observation]):
         """Called each time the background sync saves a page to the DB"""
         self.loaded_pages += 1
@@ -192,21 +219,16 @@ class ObservationController(BaseController):
     # ----------------------------------------
 
     # TODO: Handle casual_observations setting?
-    def _get_db_page(self) -> list[Observation]:
+    def _get_db_page(self) -> DbPageResult:
         """Read a single page of observations from the local DB"""
-        self._update_db_counts()
-
-        if self.total_results == 0:
-            self._is_cold_start = True
-            self.user_obs_group_box.set_title('My Observations (loading...)')
-            return []
-
-        self._is_cold_start = False
-        self.loaded_pages = self.total_pages
-        return self.app.client.observations.search_user_db(
+        total_results = self.app.client.observations.count_db()
+        if total_results == 0:
+            return DbPageResult([], total_results=0, is_empty=True)
+        obs = self.app.client.observations.search_user_db(
             username=self.app.settings.username,
             page=self.page,
         )
+        return DbPageResult(obs, total_results=total_results, is_empty=False)
 
     def _update_db_counts(self):
         """Update total_results and total_pages from the DB"""

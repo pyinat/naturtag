@@ -164,4 +164,5 @@ def thread_pool(qtbot):
     qtbot.addWidget(pool.progress)
     yield pool
     pool.waitForDone(5000)
+    qtbot.wait(10)  # Flush queued signals while pool is still alive
     pool.progress.reset_timer.stop()

@@ -93,12 +93,6 @@ class StyleMixin:
 class LayoutMixin(GroupMixin, ShortcutMixin, MIXIN_BASE):
     """Layout mixin with some extra convenience methods"""
 
-    def __del__(self):
-        try:
-            self.clear()
-        except RuntimeError:
-            pass
-
     def clear(self):
         for i in reversed(range(self.count())):
             child = self.takeAt(i)

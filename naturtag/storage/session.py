@@ -10,7 +10,7 @@ from requests_cache import SQLiteDict
 from naturtag.constants import IMAGE_CACHE, PathOrStr
 
 if TYPE_CHECKING:
-    from PySide6.QtGui import QPixmap
+    from PySide6.QtGui import QImage, QPixmap
 
 logger = getLogger(__name__)
 
@@ -39,6 +39,25 @@ class ImageSession(ClientSession):
         self.image_cache[image_hash] = data
         return data
 
+    def get_qimage(
+        self,
+        path: Optional[PathOrStr] = None,
+        photo: Optional[Photo] = None,
+        url: Optional[str] = None,
+        size: Optional[str] = None,
+    ) -> 'QImage':
+        """Fetch a QImage from either a local path or remote URL (thread-safe)"""
+        from PySide6.QtGui import QImage
+
+        if path:
+            return QImage(str(path))
+
+        if url and not photo:
+            photo = Photo(url=url)
+        image = QImage()
+        image.loadFromData(self.get_image(photo, url, size), format=photo.ext)  # type: ignore
+        return image
+
     def get_pixmap(
         self,
         path: Optional[PathOrStr] = None,
@@ -47,18 +66,11 @@ class ImageSession(ClientSession):
         size: Optional[str] = None,
     ) -> 'QPixmap':
         """Fetch a pixmap from either a local path or remote URL.
-        This does not render the image, so it is safe to run from any thread.
+        Must be called from the GUI thread since QPixmap is a paint device.
         """
         from PySide6.QtGui import QPixmap
 
-        if path:
-            return QPixmap(str(path))
-
-        if url and not photo:
-            photo = Photo(url=url)
-        pixmap = QPixmap()
-        pixmap.loadFromData(self.get_image(photo, url, size), format=photo.ext)  # type: ignore
-        return pixmap
+        return QPixmap.fromImage(self.get_qimage(path, photo, url, size))
 
     def cache_size(self) -> str:
         """Get the total cache size in bytes, and the number of cached files"""

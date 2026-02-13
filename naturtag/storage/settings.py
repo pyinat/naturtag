@@ -89,8 +89,10 @@ class Settings:
     favorite_image_dirs: list[Path] = field(factory=list)
 
     # Internal
-    debug: bool = field(default=False)
-    n_worker_threads: int = field(default=1)
+    debug: bool = doc_field(default=False, doc='Enable debug mode')
+    num_workers: int = doc_field(
+        default=0, doc='Number of worker threads for background tasks; 0 for auto-detect'
+    )
 
     # Shortcuts for application files within the user data dir
     @property

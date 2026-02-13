@@ -28,13 +28,15 @@ class ThreadPool(QThreadPool):
     bar.
     """
 
-    def __init__(self, n_worker_threads: int = 0, **kwargs):
+    def __init__(self, num_workers: int = 0, **kwargs):
         super().__init__(**kwargs)
         self.progress = ProgressBar()
         self._group_workers: dict[str, list[QRunnable]] = defaultdict(list)
         self._group_lock = RLock()
-        if n_worker_threads:
-            self.setMaxThreadCount(n_worker_threads)
+        # Keep worker references to prevent premature python GC while queued signals are still live
+        self._live_workers: set[BaseWorker] = set()
+        if num_workers:
+            self.setMaxThreadCount(num_workers)
 
     def schedule(
         self,
@@ -49,12 +51,7 @@ class ThreadPool(QThreadPool):
         self.progress.add(total_results or 1)
         worker = Worker(callback, increment_length=increment_length, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
-        if group is not None:
-            with self._group_lock:
-                self._group_workers[group].append(worker)
-            worker.signals.on_progress.connect(
-                lambda _amt, g=group, w=worker: self._remove_worker(g, w)
-            )
+        self._register_worker(worker, group)
         self.start(worker, priority.value)
         return worker.signals
 
@@ -70,12 +67,22 @@ class ThreadPool(QThreadPool):
         self.progress.add(total_results or 1)
         worker = PaginatedWorker(callback, **kwargs)
         worker.signals.on_progress.connect(self.progress.advance)
+        self._register_worker(worker, group)
+        self.start(worker, priority.value)
+        return worker.signals
+
+    def _register_worker(self, worker: 'BaseWorker', group: str | None):
+        """Pin worker to prevent GC, and track group membership."""
+        self._live_workers.add(worker)
+        worker.signals.on_finished.connect(
+            lambda w=worker: self._live_workers.discard(w) if isValid(self) else None
+        )
         if group is not None:
             with self._group_lock:
                 self._group_workers[group].append(worker)
-            worker.signals.on_complete.connect(lambda g=group, w=worker: self._remove_worker(g, w))
-        self.start(worker, priority.value)
-        return worker.signals
+            worker.signals.on_finished.connect(
+                lambda g=group, w=worker: self._remove_worker(g, w) if isValid(self) else None
+            )
 
     def _remove_worker(self, group: str, worker: QRunnable):
         """Remove a completed worker from group tracking. No-op if already removed by cancel()."""
@@ -98,6 +105,7 @@ class ThreadPool(QThreadPool):
         if (active_threads := self.activeThreadCount()) > 0:
             logger.debug(f'Cancelling {active_threads} active threads')
         self.clear()
+        self._live_workers.clear()
         self.progress.reset()
 
     def _cancel_group(self, group: str):
@@ -110,16 +118,26 @@ class ThreadPool(QThreadPool):
             self.progress.remove(cancelled)
 
 
-class Worker(QRunnable):
+class BaseWorker(QRunnable):
+    """Base for all worker types. Subclasses must emit ``on_finished`` as their
+    very last signal emission in ``run()``.
+    """
+
+    def __init__(self, callback: Callable, **kwargs):
+        super().__init__()
+        self.setAutoDelete(False)
+        self.callback = callback
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+
+class Worker(BaseWorker):
     """A worker thread that takes a callback (and optional args/kwargs), and updates progress when
     done.
     """
 
     def __init__(self, callback: Callable, increment_length: bool = False, **kwargs):
-        super().__init__()
-        self.callback = callback
-        self.kwargs = kwargs
-        self.signals = WorkerSignals()
+        super().__init__(callback, **kwargs)
         self.increment_length = increment_length
 
     def run(self):
@@ -133,16 +151,12 @@ class Worker(QRunnable):
             self.signals.on_result.emit(result)
             increment = len(result) if self.increment_length and isinstance(result, list) else 1
             self.signals.on_progress.emit(increment)
+        finally:
+            self.signals.on_finished.emit()
 
 
-class PaginatedWorker(QRunnable):
+class PaginatedWorker(BaseWorker):
     """A worker thread that specifically handles paginated requests via iNatClient/iNatDbClient"""
-
-    def __init__(self, callback: Callable, **kwargs):
-        super().__init__()
-        self.callback = callback
-        self.kwargs = kwargs
-        self.signals = WorkerSignals()
 
     def run(self):
         try:
@@ -157,6 +171,7 @@ class PaginatedWorker(QRunnable):
             # advances already exceeded the reservation, so this extra 1 just caps at max.
             self.signals.on_progress.emit(1)
             self.signals.on_complete.emit()
+            self.signals.on_finished.emit()
 
 
 class WorkerSignals(QObject):
@@ -167,6 +182,7 @@ class WorkerSignals(QObject):
     on_result = Signal(object)  #: Return result on completion
     on_progress = Signal(int)  #: Increment progress bar
     on_complete = Signal()  #: Emitted when the worker has finished all work
+    on_finished = Signal()  #: Always the last signal emitted; used for lifecycle cleanup
 
 
 class ProgressBar(QProgressBar):

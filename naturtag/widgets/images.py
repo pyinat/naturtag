@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 from PySide6.QtCore import QSize, Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
+from shiboken6 import isValid
 
 from naturtag.constants import SIZE_ICON, SIZE_ICON_SM, SIZE_SM, IconDimensions, IntOrStr, PathOrStr
 from naturtag.widgets import StylableWidget, VerticalLayout
@@ -32,8 +33,18 @@ def set_pixmap_async(
     from naturtag.controllers import get_app
 
     app = get_app()
-    future = app.threadpool.schedule(app.img_session.get_pixmap, priority=priority, **kwargs)
-    future.on_result.connect(pixmap_label.setPixmap)
+    future = app.threadpool.schedule(
+        app.img_session.get_qimage,
+        priority=priority,
+        group='images',
+        **kwargs,
+    )
+
+    def _set_pixmap(image):
+        if isValid(pixmap_label):
+            pixmap_label.setPixmap(QPixmap.fromImage(image))
+
+    future.on_result.connect(_set_pixmap)
 
 
 def set_pixmap(pixmap_label: QLabel, *args, **kwargs):
