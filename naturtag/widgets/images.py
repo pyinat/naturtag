@@ -33,7 +33,12 @@ def set_pixmap_async(
     from naturtag.controllers import get_app
 
     app = get_app()
-    future = app.threadpool.schedule(app.img_session.get_qimage, priority=priority, **kwargs)
+    future = app.threadpool.schedule(
+        app.img_session.get_qimage,
+        priority=priority,
+        group='images',
+        **kwargs,
+    )
 
     def _set_pixmap(image):
         if isValid(pixmap_label):

@@ -33,6 +33,7 @@ class ThreadPool(QThreadPool):
         self.progress = ProgressBar()
         self._group_workers: dict[str, list[QRunnable]] = defaultdict(list)
         self._group_lock = RLock()
+        self._live_signals: set[WorkerSignals] = set()
         if n_worker_threads:
             self.setMaxThreadCount(n_worker_threads)
 
@@ -55,6 +56,10 @@ class ThreadPool(QThreadPool):
             worker.signals.on_progress.connect(
                 lambda _amt, g=group, w=worker: self._remove_worker(g, w) if isValid(self) else None
             )
+        self._live_signals.add(worker.signals)
+        worker.signals.on_progress.connect(
+            lambda _amt, s=worker.signals: self._live_signals.discard(s) if isValid(self) else None
+        )
         self.start(worker, priority.value)
         return worker.signals
 
@@ -76,6 +81,10 @@ class ThreadPool(QThreadPool):
             worker.signals.on_complete.connect(
                 lambda g=group, w=worker: self._remove_worker(g, w) if isValid(self) else None
             )
+        self._live_signals.add(worker.signals)
+        worker.signals.on_complete.connect(
+            lambda s=worker.signals: self._live_signals.discard(s) if isValid(self) else None
+        )
         self.start(worker, priority.value)
         return worker.signals
 
@@ -100,6 +109,7 @@ class ThreadPool(QThreadPool):
         if (active_threads := self.activeThreadCount()) > 0:
             logger.debug(f'Cancelling {active_threads} active threads')
         self.clear()
+        self._live_signals.clear()
         self.progress.reset()
 
     def _cancel_group(self, group: str):
