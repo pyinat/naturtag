@@ -1,9 +1,9 @@
+import sys
 from pathlib import Path
 
 from PyInstaller.compat import is_darwin, is_linux, is_win
 from PyInstaller.utils.hooks import copy_metadata
 
-BUILD_PY_VERSION = '3.14'
 PROJECT_NAME = 'naturtag'
 PROJECT_DIR = Path('.').absolute()
 ASSETS_DIR = PROJECT_DIR / 'assets'
@@ -11,12 +11,11 @@ ICONS_DIR = ASSETS_DIR / 'icons'
 ASSETS_DATA_DIR = ASSETS_DIR / 'data'
 PACKAGE_DIR = PROJECT_DIR / 'naturtag'
 
-LOCAL_VENV_DIR = Path('~/.virtualenvs/naturtag').expanduser().absolute()
-CI_VENV_DIR = PROJECT_DIR / '.venv'
-VENV_DIR = CI_VENV_DIR if CI_VENV_DIR.is_dir() else LOCAL_VENV_DIR
+# Detect the active Python environment's site-packages for pyexiv2 binaries
+VENV_DIR = Path(sys.prefix)
 
 LIB_DIR_WIN = VENV_DIR / 'Lib' / 'site-packages' / 'pyexiv2' / 'lib'
-LIB_DIR_NIX = VENV_DIR / 'lib' / f'python{BUILD_PY_VERSION}' / 'site-packages' / 'pyexiv2' / 'lib'
+LIB_DIR_NIX = VENV_DIR / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages' / 'pyexiv2' / 'lib'
 
 binaries = []
 datas = [
