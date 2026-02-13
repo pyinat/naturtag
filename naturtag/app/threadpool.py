@@ -33,8 +33,8 @@ class ThreadPool(QThreadPool):
         self.progress = ProgressBar()
         self._group_workers: dict[str, list[QRunnable]] = defaultdict(list)
         self._group_lock = RLock()
-        # Keep references to live signals, to prevent GC before queued signals are delivered
-        self._live_signals: set[WorkerSignals] = set()
+        # Keep worker references to prevent premature python GC while queued signals are still live
+        self._live_workers: set[BaseWorker] = set()
         if num_workers:
             self.setMaxThreadCount(num_workers)
 
@@ -72,10 +72,10 @@ class ThreadPool(QThreadPool):
         return worker.signals
 
     def _register_worker(self, worker: 'BaseWorker', group: str | None):
-        """Pin worker signals to prevent GC, and track group membership."""
-        self._live_signals.add(worker.signals)
+        """Pin worker to prevent GC, and track group membership."""
+        self._live_workers.add(worker)
         worker.signals.on_finished.connect(
-            lambda s=worker.signals: self._live_signals.discard(s) if isValid(self) else None
+            lambda w=worker: self._live_workers.discard(w) if isValid(self) else None
         )
         if group is not None:
             with self._group_lock:
@@ -105,7 +105,7 @@ class ThreadPool(QThreadPool):
         if (active_threads := self.activeThreadCount()) > 0:
             logger.debug(f'Cancelling {active_threads} active threads')
         self.clear()
-        self._live_signals.clear()
+        self._live_workers.clear()
         self.progress.reset()
 
     def _cancel_group(self, group: str):
@@ -125,6 +125,7 @@ class BaseWorker(QRunnable):
 
     def __init__(self, callback: Callable, **kwargs):
         super().__init__()
+        self.setAutoDelete(False)
         self.callback = callback
         self.kwargs = kwargs
         self.signals = WorkerSignals()
