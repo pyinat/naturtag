@@ -61,7 +61,7 @@ class NaturtagApp(QApplication):
         # Globally available application objects
         self.client = iNatDbClient(self.settings.db_path)
         self.img_session = ImageSession(self.settings.image_cache_path)
-        self.threadpool = ThreadPool(n_worker_threads=self.settings.n_worker_threads)
+        self.threadpool = ThreadPool(num_workers=self.settings.num_workers)
         self.user_dirs = UserDirs(self.settings)
 
 

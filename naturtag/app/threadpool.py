@@ -28,14 +28,14 @@ class ThreadPool(QThreadPool):
     bar.
     """
 
-    def __init__(self, n_worker_threads: int = 0, **kwargs):
+    def __init__(self, num_workers: int = 0, **kwargs):
         super().__init__(**kwargs)
         self.progress = ProgressBar()
         self._group_workers: dict[str, list[QRunnable]] = defaultdict(list)
         self._group_lock = RLock()
         self._live_signals: set[WorkerSignals] = set()
-        if n_worker_threads:
-            self.setMaxThreadCount(n_worker_threads)
+        if num_workers:
+            self.setMaxThreadCount(num_workers)
 
     def schedule(
         self,
