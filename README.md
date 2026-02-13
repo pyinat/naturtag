@@ -74,14 +74,9 @@ platform with a more specific focus, such as **eBird**, **BugGuide**, or **Mushr
 For that use case, this tool supports [Simple Darwin Core](https://dwc.tdwg.org/simple).
 
 ## Installation
-See [GitHub Releases](https://github.com/pyinat/naturtag/releases) for downloads and
+See [GitHub Releases](https://github.com/pyinat/naturtag/releases) for downloads, and
 [Installation](https://naturtag.readthedocs.io/en/stable/installation.html)
-for platform-specific instructions.
-
-To just install naturtag as a python package, run:
-```bash
-pip install naturtag
-```
+for platform-specific package instructions.
 
 ## Usage
 
