@@ -216,7 +216,7 @@ class ThumbnailCard(StylableWidget):
 
     def load_image(self):
         """Load thumbnail + metadata in the main thread"""
-        image, metadata = self.image.get_pixmap_meta()
+        image, metadata = self.image.get_pixmap_meta(self.image_path)
         self.image.setPixmap(QPixmap.fromImage(image) if image else QPixmap())
         self.set_metadata(metadata)
 

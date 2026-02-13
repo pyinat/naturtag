@@ -4,8 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from naturtag.controllers.observation_controller import ObservationController
-from naturtag.controllers.observation_controller import DbPageResult
+from naturtag.controllers.observation_controller import DbPageResult, ObservationController
 from test.conftest import _make_obs
 
 

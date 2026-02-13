@@ -25,7 +25,7 @@ from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
-from naturtag.storage import ImageSession, Settings, iNatDbClient, setup
+from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
 from naturtag.widgets import VerticalLayout, fa_icon, init_handler, set_theme
 
 # Provide an application group so Windows doesn't use the default 'python' icon
@@ -60,7 +60,7 @@ class NaturtagApp(QApplication):
 
         # Globally available application objects
         self.client = iNatDbClient(self.settings.db_path)
-        self.img_session = ImageSession(self.settings.image_cache_path)
+        self.img_fetcher = ImageFetcher(cache_path=self.settings.image_cache_path)
         self.threadpool = ThreadPool(num_workers=self.settings.num_workers)
         self.user_dirs = UserDirs(self.settings)
 

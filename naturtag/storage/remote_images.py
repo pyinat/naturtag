@@ -15,10 +15,13 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 
 
-# TODO: Set expiration on 'original' and 'large' size images using URL patterns
-class ImageSession(ClientSession):
-    def __init__(self, *args, cache_path: Path = IMAGE_CACHE, **kwargs):
-        super().__init__(*args, per_second=5, per_minute=400, **kwargs)
+class ImageFetcher:
+    """Fetches and caches remote images (mainly taxon and observation thumbnails)"""
+
+    def __init__(self, cache_path: Path = IMAGE_CACHE):
+        self.session = ClientSession(per_second=5, per_minute=400)
+        # Use manual image cache instead of HTTP cache
+        self.session.settings.disabled = True
         self.image_cache = SQLiteDict(cache_path, 'images', serializer=None)
 
     def get_image(
@@ -35,7 +38,7 @@ class ImageSession(ClientSession):
         except KeyError:
             pass
 
-        data = self.get(url).content
+        data = self.session.get(url).content
         self.image_cache[image_hash] = data
         return data
 

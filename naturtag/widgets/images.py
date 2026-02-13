@@ -34,7 +34,7 @@ def set_pixmap_async(
 
     app = get_app()
     future = app.threadpool.schedule(
-        app.img_session.get_qimage,
+        app.img_fetcher.get_qimage,
         priority=priority,
         group='images',
         **kwargs,
@@ -52,7 +52,7 @@ def set_pixmap(pixmap_label: QLabel, *args, **kwargs):
     from naturtag.controllers import get_app
 
     app = get_app()
-    pixmap = app.img_session.get_pixmap(*args, **kwargs)
+    pixmap = app.img_fetcher.get_pixmap(*args, **kwargs)
     pixmap_label.setPixmap(pixmap)
 
 
