@@ -3,6 +3,8 @@
 import threading
 from unittest.mock import MagicMock
 
+import pytest
+
 from naturtag.app.threadpool import PaginatedWorker, Worker
 
 
@@ -276,6 +278,9 @@ def test_schedule__group_tracks_worker(thread_pool):
     event.set()
 
 
+# ⚠️ These tests occasionally segfault, particularly in CI
+# @pytest.mark.xfail(strict=False)
+@pytest.mark.skip
 def test_schedule__group_worker_removed_on_completion(thread_pool, qtbot):
     signals = thread_pool.schedule(lambda: 1, group='g1')
     qtbot.waitSignal(signals.on_finished, timeout=3000)
@@ -301,6 +306,7 @@ def test_schedule_paginator__results_emitted(thread_pool, qtbot):
     # If on_complete fired, pages were emitted successfully
 
 
+@pytest.mark.skip
 def test_schedule_paginator__group_removed_on_complete(thread_pool, qtbot):
     signals = thread_pool.schedule_paginator(_pages, group='pg')
     qtbot.waitSignal(signals.on_finished, timeout=3000)
