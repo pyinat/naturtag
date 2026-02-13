@@ -6,7 +6,7 @@ from logging import getLogger
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 
-from PySide6.QtCore import QSize, Qt, QThread, Signal
+from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 from shiboken6 import isValid
@@ -34,7 +34,7 @@ def set_pixmap_async(
 
     app = get_app()
     future = app.threadpool.schedule(
-        app.img_session.get_qimage,
+        app.img_fetcher.get_qimage,
         priority=priority,
         group='images',
         **kwargs,
@@ -52,7 +52,7 @@ def set_pixmap(pixmap_label: QLabel, *args, **kwargs):
     from naturtag.controllers import get_app
 
     app = get_app()
-    pixmap = app.img_session.get_pixmap(*args, **kwargs)
+    pixmap = app.img_fetcher.get_pixmap(*args, **kwargs)
     pixmap_label.setPixmap(pixmap)
 
 
@@ -161,6 +161,10 @@ class PixmapLabel(QLabel):
         self.rounded = rounded
         self.scale = scale
         self.xform = Qt.SmoothTransformation if resample else Qt.FastTransformation
+        self._smooth_resize_timer = QTimer()
+        self._smooth_resize_timer.setSingleShot(True)
+        self._smooth_resize_timer.setInterval(50)
+        self._smooth_resize_timer.timeout.connect(self._apply_smooth_scale)
         self.setPixmap(pixmap)
         if path or url:
             set_pixmap(self, path=path, url=url)
@@ -221,6 +225,14 @@ class PixmapLabel(QLabel):
         painter.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, self.description)
 
     def resizeEvent(self, _):
+        if self._pixmap:
+            # Use fast scaling during active resize; schedule smooth scaling after resize stops
+            super().setPixmap(
+                self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.FastTransformation)
+            )
+            self._smooth_resize_timer.start()
+
+    def _apply_smooth_scale(self):
         if self._pixmap:
             super().setPixmap(self.scaledPixmap())
 

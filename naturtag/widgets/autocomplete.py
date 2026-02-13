@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from pyinaturalist_convert import TaxonAutocompleter
-from PySide6.QtCore import QEvent, QStringListModel, Qt, Signal, Slot
+from PySide6.QtCore import QEvent, QStringListModel, Qt, QTimer, Signal, Slot
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.widgets.style import fa_icon
@@ -33,7 +33,11 @@ class TaxonAutocomplete(QLineEdit):
 
         # Results are fetched from FTS5, and passed to the completer via an intermediate model
         self.taxon_completer = TaxonAutocompleter(get_app().settings.db_path)
-        self.textChanged.connect(self.search)
+        self._search_timer = QTimer()
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(150)
+        self._search_timer.timeout.connect(self._do_search)
+        self.textChanged.connect(self._schedule_search)
         self.model = QStringListModel()
         completer.activated.connect(self.select_taxon)
         completer.setModel(self.model)
@@ -50,11 +54,17 @@ class TaxonAutocomplete(QLineEdit):
         if not completer.setCurrentRow(completer.currentRow() + 1):
             completer.setCurrentRow(0)
 
-    # TODO: Input delay
-    def search(self, q: str):
-        from naturtag.controllers import get_app
+    def _schedule_search(self, q: str):
+        """Debounce search: restart the timer on each keystroke"""
+        self._pending_query = q
+        self._search_timer.start()
 
+    def _do_search(self):
+        """Execute the search after the debounce delay"""
+        q = self._pending_query
         if len(q) > 1 and q not in self.taxa:
+            from naturtag.controllers import get_app
+
             app = get_app()
             language = app.settings.locale if app.settings.search_locale else None
             results = self.taxon_completer.search(q, language=language)

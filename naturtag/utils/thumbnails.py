@@ -1,4 +1,4 @@
-"""Utilities for generating and retrieving image thumbnails"""
+"""Utilities for generating image thumbnails"""
 
 from io import IOBase
 from logging import getLogger
