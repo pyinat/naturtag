@@ -111,8 +111,13 @@ def test_cold_start(controller, mock_app):
 
     result = controller._get_db_page()
 
+    assert result.is_empty is True
+    assert result.observations == []
+    assert result.total_results == 0
+
+    # State mutation happens in on_db_page_loaded (main thread)
+    controller.on_db_page_loaded(result)
     assert controller._is_cold_start is True
-    assert result == []
     assert 'loading...' in controller.user_obs_group_box.box.title()
 
 
@@ -123,11 +128,16 @@ def test_warm_start(controller, mock_app):
 
     result = controller._get_db_page()
 
+    assert result.is_empty is False
+    assert result.total_results == 75
+    assert len(result.observations) == 50
+
+    # State mutation happens in on_db_page_loaded (main thread)
+    controller.on_db_page_loaded(result)
     assert controller._is_cold_start is False
     assert controller.total_results == 75
     assert controller.total_pages == 2  # ceil(75/50)
     assert controller.loaded_pages == controller.total_pages
-    assert len(result) == 50
 
 
 def test_on_sync_page_received(controller):
