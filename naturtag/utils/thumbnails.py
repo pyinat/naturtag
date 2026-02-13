@@ -6,7 +6,7 @@ from logging import getLogger
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
 from PIL.ImageQt import ImageQt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QImage
 
 from naturtag.constants import EXIF_ORIENTATION_ID, SIZE_DEFAULT, Dimensions, PathOrStr
 
@@ -17,15 +17,15 @@ def generate_thumbnail(
     path: PathOrStr,
     target_size: Dimensions = SIZE_DEFAULT,
     default_flip: bool = True,
-) -> QPixmap:
-    """Generate a thumbnail from the source image
+) -> QImage | None:
+    """Generate a thumbnail from the source image (thread-safe)
 
     Args:
         path: Image file path
         target_size: Max dimensions for thumbnail
 
     Returns:
-        Thumbnail data as a pixmap
+        Thumbnail data as a QImage
     """
     logger.debug(f'Thumbnails: Generating {target_size} thumbnail for {path}')
 
@@ -38,7 +38,8 @@ def generate_thumbnail(
         else:
             logger.debug(f'Thumbnails: Image is already thumbnail size: ({image.size})')
 
-        return QPixmap.fromImage(ImageQt(image))
+        # Note: copy() is important; otherwise the QImage can become dangling if the PIL Image is GC'd
+        return ImageQt(image).copy()
 
     # If we're unable to generate a thumbnail, just return the original image source
     except RuntimeError:
