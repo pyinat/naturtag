@@ -64,12 +64,12 @@ def set_theme_2(dark_mode: bool = True):
     dark_palette = {
         'highlight': PALEBLUE,
         'link': YELLOWGREEN,  # Secondary highlight
-        'link-visited': (46, 70, 94, 85),  # Hover highlight
+        'link-visited': (46, 70, 94, 120),  # Hover/selection highlight
     }
     light_palette = {
         'highlight': PALEBLUE_DARK,
         'link': YELLOWGREEN,
-        'link-visited': (181, 202, 244, 85),
+        'link-visited': (181, 202, 244, 120),  # Hover/selection highlight
     }
 
     with open(QSS_PATH) as f:
@@ -94,7 +94,7 @@ def mod_dark_palette(palette: QPalette) -> QPalette:
         # QPalette.HighlightedText: (180, 180, 180),
         # QPalette.Light: (180, 180, 180),
         QPalette.Link: YELLOWGREEN,  # Secondary highlight
-        QPalette.LinkVisited: (46, 70, 94, 85),  # Hover highlight
+        QPalette.LinkVisited: (46, 70, 94, 120),  # Hover/selection highlight
         # QPalette.Midlight: (90, 90, 90),
         # QPalette.Shadow: (20, 20, 20),
         # QPalette.Text: (180, 180, 180),
@@ -118,8 +118,8 @@ def mod_light_palette(palette) -> QPalette:
         QPalette.Highlight: PALEBLUE_DARK,
         # QPalette.HighlightedText: (0, 0, 0),
         # QPalette.Light: (180, 180, 180),
-        QPalette.Link: YELLOWGREEN,
-        QPalette.LinkVisited: (181, 202, 244, 85),
+        QPalette.Link: YELLOWGREEN,  # Secondary highlight
+        QPalette.LinkVisited: (181, 202, 244, 120),  # Hover/selection highlight
         # QPalette.Midlight: (200, 200, 200),
         # QPalette.Shadow: (20, 20, 20),
         # QPalette.Text: (0, 0, 0),

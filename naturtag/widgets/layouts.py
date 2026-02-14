@@ -252,7 +252,7 @@ class StylableWidget(WidgetMixin, QWidget):
     pass
 
 
-TOGGLE_WIDTH = 24
+TOGGLE_BAR_WIDTH = 14
 
 
 class CollapsiblePanel(WidgetMixin, QWidget):
@@ -269,7 +269,7 @@ class CollapsiblePanel(WidgetMixin, QWidget):
         # Root layout: content panel + toggle strip
         root = QHBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
-        root.setSpacing(0)
+        root.setSpacing(4)
 
         # Content panel
         self.content = QWidget()
@@ -281,7 +281,7 @@ class CollapsiblePanel(WidgetMixin, QWidget):
 
         # Toggle button strip
         self.toggle_btn = QPushButton()
-        self.toggle_btn.setFixedWidth(TOGGLE_WIDTH)
+        self.toggle_btn.setFixedWidth(TOGGLE_BAR_WIDTH)
         self.toggle_btn.setSizePolicy(
             self.toggle_btn.sizePolicy().horizontalPolicy(),
             QSizePolicy.Expanding,
@@ -305,8 +305,8 @@ class CollapsiblePanel(WidgetMixin, QWidget):
         if self._expanded:
             self.toggle_btn.setIcon(fa_icon('fa5s.chevron-left'))
             self.toggle_btn.setToolTip('Collapse panel')
-            self.setFixedWidth(self._content_width + TOGGLE_WIDTH)
+            self.setFixedWidth(self._content_width + TOGGLE_BAR_WIDTH + 4)
         else:
             self.toggle_btn.setIcon(fa_icon('fa5s.chevron-right'))
             self.toggle_btn.setToolTip('Expand panel')
-            self.setFixedWidth(TOGGLE_WIDTH)
+            self.setFixedWidth(TOGGLE_BAR_WIDTH)

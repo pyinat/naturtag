@@ -345,7 +345,7 @@ class InfoCard(StylableWidget):
         # Details
         self.title = QLabel()
         self.title.setTextFormat(Qt.RichText)
-        self.title.setObjectName('h2')
+        self.title.setObjectName('h3')
         # Don't let text steal mouse focus; pass click events to the card
         self.title.mouseReleaseEvent = self.mouseReleaseEvent
 
