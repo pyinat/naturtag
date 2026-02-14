@@ -151,6 +151,7 @@ class ObservationController(BaseController):
         self.page = 1
         self.loaded_pages = 0
         self._page_cache.clear()
+        self.app.state.sync_resume_id = None
         self.load_observations_from_db()
         self.start_background_sync()
 
@@ -199,6 +200,10 @@ class ObservationController(BaseController):
         """Called each time the background sync saves a page to the DB"""
         self.loaded_pages += 1
         logger.debug(f'Sync page {self.loaded_pages} received ({len(observations)} observations)')
+        if observations:
+            max_id = max(obs.id for obs in observations)
+            self.app.state.sync_resume_id = max_id
+            self.app.state.write()
         self.update_pagination_buttons()
 
         # On cold start, auto-display page 1 once the first sync page arrives
@@ -211,6 +216,7 @@ class ObservationController(BaseController):
         """Called when the background sync finishes"""
         logger.info('Background observation sync complete')
         self._page_cache.clear()
+        self.app.state.sync_resume_id = None
         self.app.state.set_obs_checkpoint()
         self._update_db_counts()
         self.update_pagination_buttons()
@@ -254,4 +260,5 @@ class ObservationController(BaseController):
         yield from self.app.client.observations.search_user_paginated(
             username=self.app.settings.username,
             updated_since=self.app.state.last_obs_check,
+            id_above=self.app.state.sync_resume_id,
         )

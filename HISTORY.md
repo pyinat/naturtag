@@ -6,6 +6,7 @@
 * Some layout/scaling improvements to accommodate smaller screens
 * General performance and stability improvements
 * Improve performance of loading observations
+* Resume previously interrupted observation downloads
 
 **CLI:**
 * Add progress bars for `tag` and `refresh` commands

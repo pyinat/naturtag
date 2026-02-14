@@ -42,6 +42,7 @@ class AppState:
     # Misc state info
     setup_complete: bool = field(default=False)
     last_obs_check: Optional[datetime] = field(default=None)
+    sync_resume_id: Optional[int] = field(default=None)
     last_version: str = field(default='N/A')
     window_size: tuple[int, int] = field(default=DEFAULT_WINDOW_SIZE)
 
@@ -132,7 +133,7 @@ class AppState:
 
     def write(self):
         """Write app state to SQLite database. Table will be created if it doesn't exist."""
-        logger.info(f'Writing app state to {self.db_path}')
+        logger.debug(f'Writing app state to {self.db_path}')
         create_table(DbAppState, self.db_path)
         state_json = JsonConverter.unstructure(self)
         with get_session(self.db_path) as session:
