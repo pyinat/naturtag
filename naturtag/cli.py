@@ -11,6 +11,7 @@ from shutil import copyfile
 from typing import Optional
 
 import click
+import pyexiv2
 from click.shell_completion import CompletionItem
 from click_help_colors import HelpColorsGroup
 from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
@@ -69,6 +70,9 @@ def main(ctx, verbose, version):
     ctx.meta['verbose'] = verbose
     if verbose == 0:
         enable_logging(level='WARNING', external_level='ERROR')
+    else:
+        pyexiv2.set_log_level(2)  # exiv2 C logger: errors + warnings
+
     if verbose == 1:
         enable_logging(level='INFO', external_level='WARNING')
     elif verbose == 2:
