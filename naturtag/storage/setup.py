@@ -38,6 +38,9 @@ def setup(
         overwrite: Overwrite an existing taxon database, if it already exists
         download: Download taxon data (full text search + basic taxon details)
     """
+    if db_path.is_file() and not overwrite:
+        logger.warning('Database already exists; attempting to update')
+
     # Check if setup is needed
     app_state = AppState.read(db_path)
     app_state.check_version_change()
@@ -55,8 +58,6 @@ def setup(
             conn.execute('DROP TABLE IF EXISTS taxon_fts')
             conn.execute('DROP TABLE IF EXISTS photo')
             conn.execute('DROP TABLE IF EXISTS user')
-    elif db_path.is_file():
-        logger.warning('Database already exists; attempting to update')
 
     # Create SQLite file with tables if they don't already exist
     create_tables(db_path)
