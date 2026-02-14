@@ -7,6 +7,10 @@
 * General performance and stability improvements
 * Improve performance of loading observations
 
+**CLI:**
+* Add progress bars for `tag` and `refresh` commands
+* Suppress exiv2 warnings about corrupt EXIF thumbnails (except in verbose mode)
+
 **Packaging:**
 * Build pacman package for Arch Linux
 * Include locale data in PyInstaller packages

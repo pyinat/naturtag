@@ -11,6 +11,7 @@ from shutil import copyfile
 from typing import Optional
 
 import click
+import pyexiv2
 from click.shell_completion import CompletionItem
 from click_help_colors import HelpColorsGroup
 from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
@@ -18,10 +19,12 @@ from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.logging import RichHandler
+from rich.progress import track
 from rich.table import Column, Table
 
 from naturtag.constants import CLI_COMPLETE_DIR
-from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, tag_images
+from naturtag.metadata import KeywordMetadata, MetaMetadata
+from naturtag.metadata.inat_metadata import _refresh_tags_iter, _tag_images_iter
 from naturtag.storage import Settings, setup
 from naturtag.utils import get_valid_image_paths, strip_url
 
@@ -67,6 +70,9 @@ def main(ctx, verbose, version):
     ctx.meta['verbose'] = verbose
     if verbose == 0:
         enable_logging(level='WARNING', external_level='ERROR')
+    else:
+        pyexiv2.set_log_level(2)  # exiv2 C logger: errors + warnings
+
     if verbose == 1:
         enable_logging(level='INFO', external_level='WARNING')
     elif verbose == 2:
@@ -167,11 +173,16 @@ def tag(
     # Run first-time setup if necessary
     setup()
 
-    metadata_objs = tag_images(
+    result_iter = _tag_images_iter(
         image_paths,
         observation_id=observation,
         taxon_id=taxon,
         include_sidecars=True,
+    )
+    metadata_objs = list(
+        track(
+            result_iter, description='Tagging images...', total=len(image_paths), show_speed=False
+        )
     )
     if not metadata_objs:
         click.secho('No search results found', fg='red')
@@ -206,7 +217,15 @@ def refresh(recursive, image_paths):
     # Run first-time setup if necessary
     setup()
 
-    metadata_objs = refresh_tags(image_paths, recursive=recursive)
+    result_iter = _refresh_tags_iter(image_paths, recursive=recursive)
+    metadata_objs = list(
+        track(
+            result_iter,
+            description='Refreshing tags...',
+            total=len(image_paths),
+            show_speed=False,
+        )
+    )
     click.echo(f'{len(metadata_objs)} Images refreshed')
 
 

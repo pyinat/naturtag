@@ -4,6 +4,7 @@
 # TODO: Get common names for specified locale (requires using different endpoints)
 # TODO: Handle observation with no taxon ID?
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
+from collections.abc import Iterator
 from logging import getLogger
 from typing import Iterable, Optional
 
@@ -55,12 +56,29 @@ def tag_images(
     Returns:
         Updated image metadata for each image
     """
+    return list(
+        tag_images(
+            image_paths, observation_id, taxon_id, recursive, include_sidecars, client, settings
+        )
+    )
+
+
+def _tag_images_iter(
+    image_paths: Iterable[PathOrStr],
+    observation_id: Optional[int] = None,
+    taxon_id: Optional[int] = None,
+    recursive: bool = False,
+    include_sidecars: bool = False,
+    client: Optional[iNatDbClient] = None,
+    settings: Optional[Settings] = None,
+) -> Iterator[MetaMetadata]:
+    """Same as :py:func:`tag_images`, but returns an iterator"""
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
 
     observation = client.from_id(observation_id, taxon_id)
     if not observation:
-        return []
+        return
 
     inat_metadata = observation_to_metadata(
         observation,
@@ -68,7 +86,8 @@ def tag_images(
         hierarchical=settings.hierarchical,
     )
     if not image_paths:
-        return [inat_metadata]
+        yield inat_metadata
+        return
 
     def _tag_image(
         image_path,
@@ -82,15 +101,13 @@ def tag_images(
         )
         return img_metadata
 
-    return [
-        _tag_image(image_path)
-        for image_path in get_valid_image_paths(
-            image_paths,
-            recursive=recursive,
-            include_sidecars=include_sidecars,
-            create_sidecars=settings.sidecar,
-        )
-    ]
+    for image_path in get_valid_image_paths(
+        image_paths,
+        recursive=recursive,
+        include_sidecars=include_sidecars,
+        create_sidecars=settings.sidecar,
+    ):
+        yield _tag_image(image_path)
 
 
 def refresh_tags(
@@ -113,17 +130,24 @@ def refresh_tags(
         settings: Settings for metadata types to generate
 
     Returns:
-        Updated metadata objects for updated images only
+        Updated metadata for each image that was successfully refreshed
     """
+    return [i for i in _refresh_tags_iter(image_paths, recursive, client, settings) if i]
+
+
+def _refresh_tags_iter(
+    image_paths: Iterable[PathOrStr],
+    recursive: bool = False,
+    client: Optional[iNatDbClient] = None,
+    settings: Optional[Settings] = None,
+) -> Iterator[MetaMetadata | None]:
+    """Same as :py:func:`refresh_tags`, but returns an iterator"""
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
-    metadata_objs = [
-        _refresh_tags(MetaMetadata(image_path), client, settings)
-        for image_path in get_valid_image_paths(
-            image_paths, recursive, create_sidecars=settings.sidecar
-        )
-    ]
-    return [m for m in metadata_objs if m]
+    for image_path in get_valid_image_paths(
+        image_paths, recursive, create_sidecars=settings.sidecar
+    ):
+        yield _refresh_tags(MetaMetadata(image_path), client, settings)
 
 
 def _refresh_tags(

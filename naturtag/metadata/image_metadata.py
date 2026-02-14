@@ -3,10 +3,14 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any
 
+import pyexiv2
 from pyexiv2 import Image
 
 from naturtag.constants import EXIF_HIDE_PREFIXES, PathOrStr
 from naturtag.utils.image_glob import get_sidecar_path
+
+# Suppress exiv2 thumbnail warnings (log level 3 = error)
+pyexiv2.set_log_level(3)
 
 # Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
 NEW_XMP_CONTENTS = """
