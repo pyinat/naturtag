@@ -149,6 +149,7 @@ class ObservationController(BaseController):
 
     def refresh(self):
         self.page = 1
+        self.loaded_pages = 0
         self._page_cache.clear()
         self.load_observations_from_db()
         self.start_background_sync()
@@ -213,6 +214,7 @@ class ObservationController(BaseController):
         self.app.state.set_obs_checkpoint()
         self._update_db_counts()
         self.update_pagination_buttons()
+        self.load_observations_from_db()
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
