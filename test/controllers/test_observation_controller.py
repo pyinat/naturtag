@@ -173,8 +173,10 @@ def test_on_sync_page_received__cold_start_trigger(controller, mock_app):
 
 def test_on_sync_complete(controller, mock_app):
     mock_app._futures.clear()
+    controller._sync_in_progress = True
     controller.on_sync_complete()
 
+    assert controller._sync_in_progress is False
     assert mock_app.state.sync_resume_id is None
     mock_app.state.set_obs_checkpoint.assert_called_once()
     assert len(mock_app._futures) >= 1  # load_observations_from_db was called
@@ -192,8 +194,24 @@ def test_refresh(controller, mock_app):
     assert controller.loaded_pages == 0
     assert len(controller._page_cache) == 0
     assert mock_app.state.sync_resume_id is None
+    assert controller._sync_in_progress is True
     assert mock_app.threadpool.schedule.called
     assert mock_app.threadpool.schedule_paginator.called
+
+
+def test_refresh__blocked_while_sync_in_progress(controller, mock_app):
+    """Refresh is a no-op (with status message) when a sync is already running."""
+    controller._sync_in_progress = True
+    controller.page = 3
+    mock_app._futures.clear()
+    mock_app.threadpool.schedule_paginator.reset_mock()
+
+    with patch.object(controller, 'info') as mock_info:
+        controller.refresh()
+
+    mock_info.assert_called_once_with('Refresh already in progress')
+    assert controller.page == 3  # unchanged
+    mock_app.threadpool.schedule_paginator.assert_not_called()
 
 
 def test_load_observations__cache_hit(controller, mock_app):

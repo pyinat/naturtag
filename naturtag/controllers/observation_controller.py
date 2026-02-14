@@ -47,6 +47,7 @@ class ObservationController(BaseController):
         self.total_results = 0
         self.loaded_pages = 0
         self._page_cache: OrderedDict[int, list[Observation]] = OrderedDict()
+        self._sync_in_progress: bool = False
 
         # User observations
         self.user_observations = ObservationList()
@@ -129,6 +130,7 @@ class ObservationController(BaseController):
 
     def start_background_sync(self):
         """Kick off a background worker to fetch all new/updated observations from the API"""
+        self._sync_in_progress = True
         logger.info('Starting background observation sync')
         future = self.app.threadpool.schedule_paginator(
             self._sync_observations,
@@ -148,6 +150,9 @@ class ObservationController(BaseController):
             self.load_observations_from_db()
 
     def refresh(self):
+        if self._sync_in_progress:
+            self.info('Refresh already in progress')
+            return
         self.page = 1
         self.loaded_pages = 0
         self._page_cache.clear()
@@ -215,6 +220,7 @@ class ObservationController(BaseController):
     def on_sync_complete(self):
         """Called when the background sync finishes"""
         logger.info('Background observation sync complete')
+        self._sync_in_progress = False
         self._page_cache.clear()
         self.app.state.sync_resume_id = None
         self.app.state.set_obs_checkpoint()
