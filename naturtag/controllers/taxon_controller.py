@@ -39,7 +39,7 @@ class TaxonController(BaseController):
         self.search.on_results.connect(self.set_search_results)
         self.search.iconic_taxon_filters.on_select.connect(self.display_taxon_by_id)
         self.on_select.connect(self.search.set_taxon)
-        self.root.addLayout(self.search)
+        self.root.addWidget(self.search)
 
         # Search results & user taxa
         self.tabs = TaxonTabs(self.user_taxa)

@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLayout,
+    QPushButton,
     QSizePolicy,
     QStyle,
     QStyleOption,
@@ -249,3 +250,63 @@ class VerticalLayout(LayoutMixin, QVBoxLayout):
 
 class StylableWidget(WidgetMixin, QWidget):
     pass
+
+
+TOGGLE_WIDTH = 24
+
+
+class CollapsiblePanel(WidgetMixin, QWidget):
+    """A widget with a content area and a narrow toggle strip that collapses/expands it.
+
+    Subclasses should add their UI to ``self.content_layout`` (a VerticalLayout).
+    """
+
+    def __init__(self, content_width: int = 400):
+        super().__init__()
+        self._expanded = True
+        self._content_width = content_width
+
+        # Root layout: content panel + toggle strip
+        root = QHBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
+
+        # Content panel
+        self.content = QWidget()
+        self.content.setFixedWidth(content_width)
+        self.content_layout = VerticalLayout(self.content)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setAlignment(Qt.AlignTop)
+        root.addWidget(self.content)
+
+        # Toggle button strip
+        self.toggle_btn = QPushButton()
+        self.toggle_btn.setFixedWidth(TOGGLE_WIDTH)
+        self.toggle_btn.setSizePolicy(
+            self.toggle_btn.sizePolicy().horizontalPolicy(),
+            QSizePolicy.Expanding,
+        )
+        self.toggle_btn.setToolTip('Collapse panel')
+        self.toggle_btn.clicked.connect(self.toggle)
+        root.addWidget(self.toggle_btn)
+
+        self._update_toggle()
+
+    def toggle(self):
+        """Toggle between expanded and collapsed states"""
+        self._expanded = not self._expanded
+        self.content.setVisible(self._expanded)
+        self._update_toggle()
+
+    def _update_toggle(self):
+        """Update the toggle button icon/tooltip and widget width for the current state"""
+        from naturtag.widgets.style import fa_icon
+
+        if self._expanded:
+            self.toggle_btn.setIcon(fa_icon('fa5s.chevron-left'))
+            self.toggle_btn.setToolTip('Collapse panel')
+            self.setFixedWidth(self._content_width + TOGGLE_WIDTH)
+        else:
+            self.toggle_btn.setIcon(fa_icon('fa5s.chevron-right'))
+            self.toggle_btn.setToolTip('Expand panel')
+            self.setFixedWidth(TOGGLE_WIDTH)

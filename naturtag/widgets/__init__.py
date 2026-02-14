@@ -1,6 +1,7 @@
 # ruff: noqa: F401
 # isort: skip_file
 from naturtag.widgets.layouts import (
+    CollapsiblePanel,
     FlowLayout,
     GridLayout,
     HorizontalLayout,
