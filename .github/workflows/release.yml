@@ -34,7 +34,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
+          sudo apt-get install -y '^libxcb.*-dev' libarchive-tools libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
 
       # Install dependencies, with caching
       - uses: actions/checkout@v6
@@ -100,35 +100,35 @@ jobs:
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag-${{ matrix.dist_name }}.tar.gz
           path: naturtag-${{ matrix.dist_name }}.tar.gz
 
       - name: Upload disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag.dmg
           path: dist/naturtag.dmg
 
       - name: Upload FPM workflow artifacts (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
 
       - name: Upload AppImage (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag.AppImage
           path: dist/naturtag.AppImage
 
       - name: Upload Windows installer
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
           name: naturtag-installer.exe
           path: dist/naturtag-installer.exe
