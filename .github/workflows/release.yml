@@ -34,7 +34,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install -y '^libxcb.*-dev' libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
+          sudo apt-get install -y '^libxcb.*-dev' libarchive-tools libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
 
       # Install dependencies, with caching
       - uses: actions/checkout@v6
