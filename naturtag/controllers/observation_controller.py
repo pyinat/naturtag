@@ -81,7 +81,7 @@ class ObservationController(BaseController):
         # Full observation info viewer
         self.obs_info = ObservationInfoSection()
         obs_layout = VerticalLayout()
-        obs_layout.addLayout(self.obs_info)
+        obs_layout.addWidget(self.obs_info)
         self.root.addLayout(obs_layout)
 
         # Navigation keyboard shortcuts

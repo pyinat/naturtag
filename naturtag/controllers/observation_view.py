@@ -8,15 +8,16 @@ from logging import getLogger
 
 from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton
+from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QWidget
 
 from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
-    GridLayout,
     HorizontalLayout,
     IconLabelList,
     ObservationImageWindow,
     ObservationPhoto,
+    ScrollableGridArea,
+    StylableWidget,
     VerticalLayout,
     set_pixmap_async,
 )
@@ -26,7 +27,7 @@ from naturtag.widgets.style import fa_icon
 logger = getLogger(__name__)
 
 
-class ObservationInfoSection(HorizontalLayout):
+class ObservationInfoSection(StylableWidget):
     """Section to display selected observation photos and info"""
 
     on_select = Signal(Observation)  #: An observation was selected for tagging
@@ -40,25 +41,27 @@ class ObservationInfoSection(HorizontalLayout):
         self.selected_observation: Observation = None
 
         self.group_box = QGroupBox('No observation selected')
-        self.setAlignment(Qt.AlignTop)
+        self.layout = HorizontalLayout(self)
+        self.layout.setAlignment(Qt.AlignTop)
         root = VerticalLayout(self.group_box)
         root.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-        images = HorizontalLayout()
+        images_container = QWidget()
+        images_container.setMaximumHeight(316)
+        images = HorizontalLayout(images_container)
+        images.setContentsMargins(0, 0, 0, 0)
         images.setAlignment(Qt.AlignTop)
-        root.addLayout(images)
-        self.addWidget(self.group_box)
+        root.addWidget(images_container)
+        self.layout.addWidget(self.group_box)
 
         # Medium default photo
         self.image = ObservationPhoto(hover_icon=True, hover_event=False)  # Disabled until 1st load
-        self.image.setMaximumHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
+        self.image.setMaximumWidth(316)
         images.addWidget(self.image)
 
         # Additional thumbnails
-        self.thumbnails = GridLayout(n_columns=2)
-        self.thumbnails.setSpacing(5)
-        self.thumbnails.setAlignment(Qt.AlignTop)
-        images.addLayout(self.thumbnails)
+        self.thumbnails = ScrollableGridArea(n_columns=2, item_width=SIZE_SM[0])
+        images.addWidget(self.thumbnails, alignment=Qt.AlignRight)
 
         # Selected observation details
         self.description = QLabel()

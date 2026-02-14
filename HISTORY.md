@@ -3,20 +3,22 @@
 ## 0.9.0
 **UI:**
 * Add menu item to open app data/config dir
+* Some layout/scaling improvements to accommodate smaller screens
 * General performance and stability improvements
 * Improve performance of loading observations
 
 **Packaging:**
-* Fix issue with first-time installation on Windows
-* Fix issue with canceling other background tasks when canceling taxonomy load
-* Fix PyPI package with unresolvable constraints when installed with pip
-* Fix macOS DMG image
+* Build pacman package for Arch Linux
 * Include locale data in PyInstaller packages
 * Update packaged taxonomy db with iNaturalist data from February 2026
 * Upgrade to Qt 6.10
+* Fix issue with first-time installation on Windows
+* Fix PyPI package with unresolvable constraints when installed with pip
+* Fix Gatekeeper-related issues with macOS DMG image
 
 **Other Bugfixes:**
 * Fix several multithreading issues potentially leading to segfaults
+* Fix issue with canceling other background tasks when canceling taxonomy load
 
 ## 0.8.1 (2025-01-02)
 * Minor fixes for packaging and first-time setup

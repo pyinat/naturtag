@@ -11,41 +11,42 @@ from PySide6.QtWidgets import QApplication, QComboBox, QLabel, QPushButton, QWid
 from naturtag.constants import COMMON_RANKS, RANKS, SELECTABLE_ICONIC_TAXA
 from naturtag.controllers import get_app
 from naturtag.widgets import (
+    CollapsiblePanel,
     GridLayout,
     HorizontalLayout,
     PixmapLabel,
     TaxonAutocomplete,
     ToggleSwitch,
-    VerticalLayout,
 )
 from naturtag.widgets.images import FAIcon
 from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 
+CONTENT_WIDTH = 400
 
-class TaxonSearch(VerticalLayout):
+
+class TaxonSearch(CollapsiblePanel):
     on_results = Signal(list)  #: New search results were loaded
     on_reset = Signal()  #: Input fields were reset
 
     def __init__(self):
-        super().__init__()
+        super().__init__(content_width=CONTENT_WIDTH)
         self.selected_taxon: Taxon = None
-        self.setAlignment(Qt.AlignTop)
 
         # Taxon name autocomplete
         self.autocomplete = TaxonAutocomplete()
-        search_group = self.add_group('Search', self, width=400)
+        search_group = self.add_group('Search', self.content_layout, width=CONTENT_WIDTH)
         search_group.addWidget(self.autocomplete)
         self.autocomplete.returnPressed.connect(self.search)
 
         # Category inputs
         self.iconic_taxon_filters = IconicTaxonFilters()
-        categories = self.add_group('Categories', self, width=400)
+        categories = self.add_group('Categories', self.content_layout, width=CONTENT_WIDTH)
         categories.addWidget(self.iconic_taxon_filters)
 
         # Rank inputs
-        self.ranks = self.add_group('Rank', self, width=400)
+        self.ranks = self.add_group('Rank', self.content_layout, width=CONTENT_WIDTH)
         self.reset_ranks()
 
         # Clear exact rank after selecting min or max, and vice versa
@@ -56,7 +57,7 @@ class TaxonSearch(VerticalLayout):
 
         # Button to search for children of selected taxon
         # TODO: If more than one toggle filter is added, consolidate with settings_menu.ToggleSetting
-        group_box = self.add_group('Parent', self, width=400)
+        group_box = self.add_group('Parent', self.content_layout, width=CONTENT_WIDTH)
         button_layout = HorizontalLayout()
         button_layout.setAlignment(Qt.AlignLeft)
         button_layout.addWidget(FAIcon('mdi.file-tree', size=20))
@@ -81,7 +82,7 @@ class TaxonSearch(VerticalLayout):
         reset_button.setIcon(fa_icon('mdi.backspace'))
         reset_button.clicked.connect(self.reset)
         button_layout.addWidget(reset_button)
-        self.addLayout(button_layout)
+        self.content_layout.addLayout(button_layout)
 
     def search(self):
         """Search for taxa with the currently selected filters"""

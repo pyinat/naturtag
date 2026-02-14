@@ -1,24 +1,29 @@
 QGroupBox {
-    font: bold 14pt;
-    border: 2px solid palette(midlight);
+    font: bold 12pt;
+    border: 1px solid palette(midlight);
+    background: palette(alternate-base);
     border-radius: 6px;
     margin-top: 10px;
-    padding:5px;
+    padding: 5px;
 }
-/* QGroupBox::title {
-    subcontrol-origin:  margin;
+QGroupBox::title {
+    subcontrol-origin: margin;
     subcontrol-position: top left;
     left: 7px;
     padding: 0px 5px 0px 5px;
-} */
+}
 QScrollArea {
-    background: palette(midlight);
+    background: palette(alternate-base);
 }
 QStatusBar {
     min-height: 25px;
 }
 QStatusBar > QLabel {
     font-size: 11pt;
+}
+
+BaseController {
+    border: none;
 }
 
 InfoCard {
@@ -28,16 +33,21 @@ InfoCard {
 InfoCard:hover {
     background: palette(link-visited);
 }
+InfoCard:focus {
+    border: 1px solid palette(highlight);
+}
 InfoCardList {
     background: palette(alternate-base);
 }
 
 ThumbnailCard > QLabel {
     background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
     font-size: 11pt;
 }
 ThumbnailCard > QLabel#metadata_icons {
     background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
     font-size: 11pt;
 }
 
@@ -55,15 +65,60 @@ QLabel#h1_italic {
     font: bold italic 16pt;
 }
 QLabel#h2 {
-    font: bold 13pt;
+    font: bold 14pt;
 }
 QLabel#h2_italic {
-    font: bold italic 13pt;
+    font: bold italic 14pt;
 }
 QLabel#h3 {
     font: bold 12pt;
 }
 
+
 QTextEdit#log_container {
     background-color: palette(base);
+}
+
+/* Scrollbar styling */
+QScrollBar:vertical {
+    width: 10px;
+    border: none;
+    background: transparent;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical {
+    background: palette(midlight);
+    border-radius: 5px;
+    min-height: 30px;
+}
+QScrollBar::handle:vertical:hover {
+    background: palette(dark);
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    height: 0px;
+    background: transparent;
+}
+QScrollBar:horizontal {
+    height: 10px;
+    border: none;
+    background: transparent;
+    border-radius: 5px;
+}
+QScrollBar::handle:horizontal {
+    background: palette(midlight);
+    border-radius: 5px;
+    min-width: 30px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: palette(dark);
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal,
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    width: 0px;
+    background: transparent;
 }

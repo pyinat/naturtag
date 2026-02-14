@@ -39,7 +39,7 @@ class TaxonController(BaseController):
         self.search.on_results.connect(self.set_search_results)
         self.search.iconic_taxon_filters.on_select.connect(self.display_taxon_by_id)
         self.on_select.connect(self.search.set_taxon)
-        self.root.addLayout(self.search)
+        self.root.addWidget(self.search)
 
         # Search results & user taxa
         self.tabs = TaxonTabs(self.user_taxa)
@@ -54,8 +54,8 @@ class TaxonController(BaseController):
         self.taxon_info.on_view_taxon.connect(self.display_taxon)
         self.taxonomy = TaxonomySection(self.user_taxa)
         taxon_layout = VerticalLayout()
-        taxon_layout.addLayout(self.taxon_info)
-        taxon_layout.addLayout(self.taxonomy)
+        taxon_layout.addWidget(self.taxon_info)
+        taxon_layout.addWidget(self.taxonomy)
         self.root.addLayout(taxon_layout)
 
         # Navigation keyboard shortcuts

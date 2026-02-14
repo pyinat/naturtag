@@ -3,13 +3,14 @@ from typing import Optional
 
 from attr import fields
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIntValidator, QValidator
+from PySide6.QtGui import QGuiApplication, QIntValidator, QValidator
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
     QLabel,
     QLineEdit,
     QPushButton,
+    QScrollArea,
     QSizePolicy,
     QWidget,
 )
@@ -27,7 +28,18 @@ class SettingsMenu(BaseController):
 
     def __init__(self):
         super().__init__()
-        self.settings_layout = VerticalLayout(self)
+
+        # Wrap settings content in a scroll area
+        self.scroll = QScrollArea(self)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.content = QWidget()
+        self.scroll.setWidget(self.content)
+        root = VerticalLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.addWidget(self.scroll)
+
+        self.settings_layout = VerticalLayout(self.content)
         # Dictionary of locale codes and display names
         self.locales = {k: f'{v} ({k})' for k, v in read_locales().items()}
 
@@ -180,6 +192,17 @@ class SettingsMenu(BaseController):
         group = super().add_group(*args, **kwargs)
         group.box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         return group
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        # QScrollArea doesn't propagate its content's sizeHint, so compute
+        # the ideal height from the content widget and cap to the screen.
+        content_height = self.content.sizeHint().height()
+        margins = self.contentsMargins()
+        ideal_height = content_height + margins.top() + margins.bottom()
+        screen = QGuiApplication.primaryScreen().availableGeometry()
+        max_height = int(screen.height() * 0.9)
+        self.resize(self.width(), min(ideal_height, max_height))
 
     def closeEvent(self, event):
         """Save settings when closing the window"""

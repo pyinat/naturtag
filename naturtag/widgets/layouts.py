@@ -13,6 +13,8 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLayout,
+    QPushButton,
+    QScrollArea,
     QSizePolicy,
     QStyle,
     QStyleOption,
@@ -220,6 +222,8 @@ class FlowLayout(LayoutMixin, QLayout):
 
 
 class GridLayout(LayoutMixin, QGridLayout):
+    """Simple layout with a grid of widgets"""
+
     def __init__(self, parent=None, n_columns: Optional[int] = None):
         super().__init__(parent)
         self._n_columns = n_columns
@@ -239,6 +243,39 @@ class GridLayout(LayoutMixin, QGridLayout):
         self._row = 0
 
 
+class ScrollableGridArea(QScrollArea):
+    """A scrollable area containing a GridLayout"""
+
+    def __init__(
+        self,
+        n_columns: int,
+        item_width: int,
+        spacing: int = 5,
+        parent: Optional[QWidget] = None,
+    ):
+        super().__init__(parent)
+        self.setWidgetResizable(True)
+        self.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setContentsMargins(0, 0, 0, 0)
+        content = QWidget()
+        self.setWidget(content)
+        self.grid = GridLayout(content, n_columns=n_columns)
+        self.grid.setSpacing(spacing)
+        self.grid.setContentsMargins(0, 0, 0, 0)
+        self.grid.setAlignment(Qt.AlignTop)
+        # Fixed width: columns * item_width + spacing + scrollbar
+        scrollbar_width = self.verticalScrollBar().sizeHint().width()
+        total_width = n_columns * item_width + (n_columns - 1) * spacing + scrollbar_width + 4
+        self.setFixedWidth(total_width)
+
+    def addWidget(self, widget: QWidget):
+        self.grid.addWidget(widget)
+
+    def clear(self):
+        self.grid.clear()
+
+
 class HorizontalLayout(LayoutMixin, QHBoxLayout):
     pass
 
@@ -249,3 +286,63 @@ class VerticalLayout(LayoutMixin, QVBoxLayout):
 
 class StylableWidget(WidgetMixin, QWidget):
     pass
+
+
+TOGGLE_BAR_WIDTH = 14
+
+
+class CollapsiblePanel(WidgetMixin, QWidget):
+    """A widget with a content area and a narrow toggle strip that collapses/expands it.
+
+    Subclasses should add their UI to ``self.content_layout`` (a VerticalLayout).
+    """
+
+    def __init__(self, content_width: int = 400):
+        super().__init__()
+        self._expanded = True
+        self._content_width = content_width
+
+        # Root layout: content panel + toggle strip
+        root = QHBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(4)
+
+        # Content panel
+        self.content = QWidget()
+        self.content.setFixedWidth(content_width)
+        self.content_layout = VerticalLayout(self.content)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setAlignment(Qt.AlignTop)
+        root.addWidget(self.content)
+
+        # Toggle button strip
+        self.toggle_btn = QPushButton()
+        self.toggle_btn.setFixedWidth(TOGGLE_BAR_WIDTH)
+        self.toggle_btn.setSizePolicy(
+            self.toggle_btn.sizePolicy().horizontalPolicy(),
+            QSizePolicy.Expanding,
+        )
+        self.toggle_btn.setToolTip('Collapse panel')
+        self.toggle_btn.clicked.connect(self.toggle)
+        root.addWidget(self.toggle_btn)
+
+        self._update_toggle()
+
+    def toggle(self):
+        """Toggle between expanded and collapsed states"""
+        self._expanded = not self._expanded
+        self.content.setVisible(self._expanded)
+        self._update_toggle()
+
+    def _update_toggle(self):
+        """Update the toggle button icon/tooltip and widget width for the current state"""
+        from naturtag.widgets.style import fa_icon
+
+        if self._expanded:
+            self.toggle_btn.setIcon(fa_icon('fa5s.chevron-left'))
+            self.toggle_btn.setToolTip('Collapse panel')
+            self.setFixedWidth(self._content_width + TOGGLE_BAR_WIDTH + 4)
+        else:
+            self.toggle_btn.setIcon(fa_icon('fa5s.chevron-right'))
+            self.toggle_btn.setToolTip('Expand panel')
+            self.setFixedWidth(TOGGLE_BAR_WIDTH)
