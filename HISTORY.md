@@ -15,6 +15,7 @@
 **Packaging:**
 * Build pacman package for Arch Linux
 * Build AppImage package for other Linux distros not covered by other formats (replaces snap package)
+* Automate Windows installer build with Inno Setup (replaces Actual Installer)
 * Include locale data in PyInstaller packages
 * Update packaged taxonomy db with iNaturalist data from February 2026
 * Upgrade to Qt 6.10
