@@ -5,7 +5,8 @@ This directory contains scripts and config for building Naturtag packages in the
 * DMG package (macOS)
 * DEB package (Linux, Debian and derivatives)
 * RPM package (Linux, Fedora and derivatives)
-* Snap package (Linux)
+* pacman package (Linux, Arch and derivatives)
+* AppImage package (Linux)
 * Taxonomy full text search database (optional download)
 
 # Release steps
