@@ -191,11 +191,11 @@ class ThumbnailCard(StylableWidget):
         super().__init__()
         self.image_path = image_path
         self.metadata: MetaMetadata = None  # type: ignore
-        layout = VerticalLayout(self)
+        self.layout = VerticalLayout(self)
 
         # Image
         self.image = MetaThumbnail(self, size=size)
-        layout.addWidget(self.image)
+        self.layout.addWidget(self.image)
 
         self.context_menu = ThumbnailContextMenu(self)
         self.icons = ThumbnailMetaIcons(self)
@@ -208,7 +208,7 @@ class ThumbnailCard(StylableWidget):
         self.label.setMinimumHeight(40)
         self.label.setAlignment(Qt.AlignLeft)
         self.label.setWordWrap(True)
-        layout.addWidget(self.label)
+        self.layout.addWidget(self.label)
 
         # Icon shown when an image is tagged or updated
         self.check = FAIcon('fa5s.check', self.image, secondary=True, size=SIZE_DEFAULT)

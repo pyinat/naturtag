@@ -14,6 +14,7 @@ from naturtag.storage import AppState
 from naturtag.widgets import (
     GridLayout,
     HorizontalLayout,
+    StylableWidget,
     TaxonImageWindow,
     TaxonInfoCard,
     TaxonList,
@@ -26,7 +27,7 @@ from naturtag.widgets.taxon_images import TaxonPhoto
 logger = getLogger(__name__)
 
 
-class TaxonInfoSection(HorizontalLayout):
+class TaxonInfoSection(StylableWidget):
     """Section to display selected taxon photo and basic info"""
 
     on_select = Signal(Taxon)  #: A taxon was selected for tagging
@@ -45,11 +46,12 @@ class TaxonInfoSection(HorizontalLayout):
         self.displayed_taxon: Taxon = None
 
         self.group_box = QGroupBox('No taxon selected')
+        self.layout = HorizontalLayout(self)
         root = VerticalLayout(self.group_box)
         images = HorizontalLayout()
         root.addLayout(images)
-        self.addWidget(self.group_box)
-        self.setAlignment(Qt.AlignTop)
+        self.layout.addWidget(self.group_box)
+        self.layout.setAlignment(Qt.AlignTop)
 
         # Medium taxon default photo
         self.image = TaxonPhoto(hover_icon=True, hover_event=False)  # Disabled until first load
@@ -187,24 +189,24 @@ class TaxonInfoSection(HorizontalLayout):
             self.displayed_taxon.parent.full_name if self.displayed_taxon.parent else None
         )
         self.select_button.setEnabled(True)
-        # self.view_observations_button.setEnabled(True)
         self.link_button.setEnabled(True)
         self.link_button.setToolTip(self.displayed_taxon.url)
 
 
-class TaxonomySection(HorizontalLayout):
+class TaxonomySection(StylableWidget):
     """Section to display ancestors and children of selected taxon"""
 
     def __init__(self, user_taxa: AppState):
         super().__init__()
+        self.layout = HorizontalLayout(self)
 
-        self.ancestors_group = self.add_group(
+        self.ancestors_group = self.layout.add_group(
             'Ancestors', min_width=400, max_width=500, policy_min_height=False
         )
         self.ancestors_list = TaxonList(user_taxa)
         self.ancestors_group.addWidget(self.ancestors_list.scroller)
 
-        self.children_group = self.add_group(
+        self.children_group = self.layout.add_group(
             'Children', min_width=400, max_width=500, policy_min_height=False
         )
         self.children_list = TaxonList(user_taxa)

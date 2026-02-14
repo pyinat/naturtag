@@ -54,8 +54,8 @@ class TaxonController(BaseController):
         self.taxon_info.on_view_taxon.connect(self.display_taxon)
         self.taxonomy = TaxonomySection(self.user_taxa)
         taxon_layout = VerticalLayout()
-        taxon_layout.addLayout(self.taxon_info)
-        taxon_layout.addLayout(self.taxonomy)
+        taxon_layout.addWidget(self.taxon_info)
+        taxon_layout.addWidget(self.taxonomy)
         self.root.addLayout(taxon_layout)
 
         # Navigation keyboard shortcuts

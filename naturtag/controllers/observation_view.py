@@ -17,6 +17,7 @@ from naturtag.widgets import (
     IconLabelList,
     ObservationImageWindow,
     ObservationPhoto,
+    StylableWidget,
     VerticalLayout,
     set_pixmap_async,
 )
@@ -26,7 +27,7 @@ from naturtag.widgets.style import fa_icon
 logger = getLogger(__name__)
 
 
-class ObservationInfoSection(HorizontalLayout):
+class ObservationInfoSection(StylableWidget):
     """Section to display selected observation photos and info"""
 
     on_select = Signal(Observation)  #: An observation was selected for tagging
@@ -40,13 +41,14 @@ class ObservationInfoSection(HorizontalLayout):
         self.selected_observation: Observation = None
 
         self.group_box = QGroupBox('No observation selected')
-        self.setAlignment(Qt.AlignTop)
+        self.layout = HorizontalLayout(self)
+        self.layout.setAlignment(Qt.AlignTop)
         root = VerticalLayout(self.group_box)
         root.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         images = HorizontalLayout()
         images.setAlignment(Qt.AlignTop)
         root.addLayout(images)
-        self.addWidget(self.group_box)
+        self.layout.addWidget(self.group_box)
 
         # Medium default photo
         self.image = ObservationPhoto(hover_icon=True, hover_event=False)  # Disabled until 1st load

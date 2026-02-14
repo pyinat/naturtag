@@ -66,12 +66,12 @@ class ObservationInfoCard(InfoCard):
         num_ids = obs.identifications_count or 0
         num_photos = len(obs.photos)
         icon_size = SIZE_ICON_SM[0]
-        layout = HorizontalLayout()
-        layout.setSpacing(0)
-        layout.setAlignment(Qt.AlignLeft)
-        layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=icon_size))
-        layout.addWidget(IconLabel('mdi.marker-check', num_ids, size=icon_size))
-        layout.addWidget(
+        self.layout = HorizontalLayout()
+        self.layout.setSpacing(0)
+        self.layout.setAlignment(Qt.AlignLeft)
+        self.layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=icon_size))
+        self.layout.addWidget(IconLabel('mdi.marker-check', num_ids, size=icon_size))
+        self.layout.addWidget(
             IconLabel(
                 'fa5.images' if num_photos > 1 else 'fa5.image',
                 num_photos,
@@ -79,21 +79,21 @@ class ObservationInfoCard(InfoCard):
             )
         )
         if obs.sounds:
-            layout.addWidget(
+            self.layout.addWidget(
                 IconLabel(
                     'ri.volume-up-fill',
                     len(obs.sounds),
                     size=icon_size,
                 )
             )
-        layout.addWidget(
+        self.layout.addWidget(
             IconLabel(
                 QUALITY_GRADE_ICONS.get(obs.quality_grade, 'mdi.chevron-up'),
                 obs.quality_grade.replace('_', ' ').title(),
                 size=icon_size,
             )
         )
-        self.add_row(layout)
+        self.add_row(self.layout)
         self.add_row(IconLabel('fa5s.map-marker', obs.place_guess or obs.location, size=icon_size))
 
         # Add more verbose details in tooltip
