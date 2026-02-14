@@ -17,7 +17,16 @@ jobs:
   build-app-packages:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            dist_name: linux
+            assets_path: dist/naturtag/_internal/assets/data
+          - os: macos-latest
+            dist_name: macos
+            assets_path: dist/naturtag.app/Contents/Resources/assets/data
+          - os: windows-latest
+            dist_name: windows
+            assets_path: dist/naturtag/_internal/assets/data
       fail-fast: false
     defaults:
       run:
@@ -46,32 +55,13 @@ jobs:
         run: uv run pyinstaller -y packaging/naturtag.spec
 
       # Include taxon FTS db, compress, and set platform name
-      - name: Finish pyinstaller package (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
+      - name: Finish pyinstaller package
         run: |
-          ASSETS=dist/naturtag/_internal/assets/data
+          ASSETS=${{ matrix.assets_path }}
           tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
           rm $ASSETS/taxonomy.tar.gz
-          tar -C dist/naturtag/ -czvf naturtag-linux.tar.gz .
-          echo 'DIST_NAME=linux' >> $GITHUB_ENV
-
-      - name: Finish pyinstaller package (macOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          ASSETS=dist/naturtag.app/Contents/Resources/assets/data
-          tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
-          rm $ASSETS/taxonomy.tar.gz
-          tar -C dist/naturtag/ -czvf naturtag-macos.tar.gz .
-          echo 'DIST_NAME=macos' >> $GITHUB_ENV
-
-      - name: Finish pyinstaller package (Windows)
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          ASSETS=dist/naturtag/_internal/assets/data
-          tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
-          rm $ASSETS/taxonomy.tar.gz
-          tar -C dist/naturtag/ -czvf naturtag-windows.tar.gz .
-          echo 'DIST_NAME=windows' >> $GITHUB_ENV
+          tar -C dist/naturtag/ -czvf naturtag-${{ matrix.dist_name }}.tar.gz .
+          echo 'DIST_NAME=${{ matrix.dist_name }}' >> $GITHUB_ENV
 
       # Build Windows installer with Inno Setup
       - name: Install Inno Setup
