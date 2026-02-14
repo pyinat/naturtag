@@ -73,12 +73,12 @@ def test_tag__validation_errors(runner, args, expected_message):
     ],
     ids=['taxon-id', 'taxon-url', 'observation-id', 'observation-url'],
 )
-@patch('naturtag.cli.tag_images')
+@patch('naturtag.cli._tag_images_iter')
 @patch('naturtag.cli.setup')
 def test_tag__with_id_or_url(
     mock_setup, mock_tag_images, runner, flag, value, expected_taxon_id, expected_observation_id
 ):
-    mock_tag_images.return_value = [MagicMock()]
+    mock_tag_images.return_value = iter([MagicMock()])
     result = runner.invoke(main, ['tag', flag, value, 'image.jpg'], catch_exceptions=False)
     assert result.exit_code == 0
     assert '1 images tagged' in result.output
@@ -91,18 +91,18 @@ def test_tag__with_id_or_url(
     mock_setup.assert_called_once()
 
 
-@patch('naturtag.cli.tag_images')
+@patch('naturtag.cli._tag_images_iter')
 @patch('naturtag.cli.setup')
 def test_tag__no_results(mock_setup, mock_tag_images, runner):
-    mock_tag_images.return_value = []
+    mock_tag_images.return_value = iter([])
     result = runner.invoke(main, ['tag', '-t', '48978', 'image.jpg'], catch_exceptions=False)
     assert 'No search results found' in result.output
 
 
-@patch('naturtag.cli.tag_images')
+@patch('naturtag.cli._tag_images_iter')
 @patch('naturtag.cli.setup')
 def test_tag__multiple_images(mock_setup, mock_tag_images, runner):
-    mock_tag_images.return_value = [MagicMock(), MagicMock(), MagicMock()]
+    mock_tag_images.return_value = iter([MagicMock(), MagicMock(), MagicMock()])
     result = runner.invoke(
         main, ['tag', '-t', '48978', 'a.jpg', 'b.jpg', 'c.jpg'], catch_exceptions=False
     )
@@ -137,11 +137,11 @@ def test_tag__taxon_name_no_match(mock_search, runner):
     mock_search.assert_called_once()
 
 
-@patch('naturtag.cli.tag_images')
+@patch('naturtag.cli._tag_images_iter')
 @patch('naturtag.cli.setup')
 @patch('naturtag.cli.search_taxa_by_name', return_value=12345)
 def test_tag__taxon_name_with_match(mock_search, mock_setup, mock_tag_images, runner):
-    mock_tag_images.return_value = [MagicMock()]
+    mock_tag_images.return_value = iter([MagicMock()])
     result = runner.invoke(
         main, ['tag', '-t', 'indigo bunting', 'image.jpg'], catch_exceptions=False
     )
@@ -166,10 +166,10 @@ def test_tag__taxon_name_with_match(mock_search, mock_setup, mock_tag_images, ru
     ],
     ids=['default', 'recursive'],
 )
-@patch('naturtag.cli.refresh_tags')
+@patch('naturtag.cli._refresh_tags_iter')
 @patch('naturtag.cli.setup')
 def test_refresh(mock_setup, mock_refresh_tags, runner, flags, images, expected_recursive):
-    mock_refresh_tags.return_value = [MagicMock()] * len(images)
+    mock_refresh_tags.return_value = iter([MagicMock()] * len(images))
     result = runner.invoke(main, ['refresh', *flags, *images], catch_exceptions=False)
     assert result.exit_code == 0
     assert f'{len(images)} Images refreshed' in result.output

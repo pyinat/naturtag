@@ -18,10 +18,12 @@ from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
 from rich.box import SIMPLE_HEAVY
 from rich.logging import RichHandler
+from rich.progress import track
 from rich.table import Column, Table
 
 from naturtag.constants import CLI_COMPLETE_DIR
-from naturtag.metadata import KeywordMetadata, MetaMetadata, refresh_tags, tag_images
+from naturtag.metadata import KeywordMetadata, MetaMetadata
+from naturtag.metadata.inat_metadata import _refresh_tags_iter, _tag_images_iter
 from naturtag.storage import Settings, setup
 from naturtag.utils import get_valid_image_paths, strip_url
 
@@ -167,11 +169,16 @@ def tag(
     # Run first-time setup if necessary
     setup()
 
-    metadata_objs = tag_images(
+    result_iter = _tag_images_iter(
         image_paths,
         observation_id=observation,
         taxon_id=taxon,
         include_sidecars=True,
+    )
+    metadata_objs = list(
+        track(
+            result_iter, description='Tagging images...', total=len(image_paths), show_speed=False
+        )
     )
     if not metadata_objs:
         click.secho('No search results found', fg='red')
@@ -206,7 +213,15 @@ def refresh(recursive, image_paths):
     # Run first-time setup if necessary
     setup()
 
-    metadata_objs = refresh_tags(image_paths, recursive=recursive)
+    result_iter = _refresh_tags_iter(image_paths, recursive=recursive)
+    metadata_objs = list(
+        track(
+            result_iter,
+            description='Refreshing tags...',
+            total=len(image_paths),
+            show_speed=False,
+        )
+    )
     click.echo(f'{len(metadata_objs)} Images refreshed')
 
 
