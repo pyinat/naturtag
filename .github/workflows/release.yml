@@ -73,6 +73,16 @@ jobs:
           tar -C dist/naturtag/ -czvf naturtag-windows.tar.gz .
           echo 'DIST_NAME=windows' >> $GITHUB_ENV
 
+      # Build Windows installer with Inno Setup
+      - name: Install Inno Setup
+        if: startsWith(matrix.os, 'windows')
+        run: choco install innosetup -y
+      - name: Build Windows installer
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          APP_VERSION=$(uv run python packaging/get_version.py)
+          iscc //DAppVersion=$APP_VERSION packaging/naturtag.iss
+
       # Build deb, rpm, and pacman packages
       - name: Build Linux packages with FPM
         if: startsWith(matrix.os, 'ubuntu')
@@ -130,6 +140,13 @@ jobs:
         with:
           name: naturtag.AppImage
           path: dist/naturtag.AppImage
+
+      - name: Upload Windows installer
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/upload-artifact@v6
+        with:
+          name: naturtag-installer.exe
+          path: dist/naturtag-installer.exe
 
   # Create a release with all workflow artifacts attached
   release-app-packages:

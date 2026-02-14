@@ -21,14 +21,8 @@ This directory contains scripts and config for building Naturtag packages in the
 * Export full db with `export_taxa_full.sh`
   * This will create a file `taxonomy-full.tar.gz` to upload later
 
-## Windows Installer
-* Update version in `pyproject.toml` and Actual Installer config (`naturtag.aip`)
-* On a Windows machine or VM, build the project locally and create an installer with Actual Installer.
-* See steps in `build_win.ps1` for details (not fully automated; requires GUI interaction)
-
 ## Release
 * Create and push new git tag. This will trigger jobs to build packages and create a new GitHub release.
 * Most release assets will be built by the CI job, except for the following, which must be uploaded manually:
   * Full taxonomy db (`taxonomy-full.tar.gz`)
-  * Windows installer (`naturtag-installer.exe`)
 * Publish the GitHub release (by default, it will be created in draft mode)

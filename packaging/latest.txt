@@ -1,2 +1,0 @@
-0.7.0
-https://github.com/pyinat/naturtag/releases/download/v0.7.0/naturtag-installer.exe

@@ -1,7 +1,5 @@
-# Build pyinstaller package prior to creating Windows installer
-
-# Create virtualenv (if needed)
-# python3.14 -m venv  $env:USERPROFILE\.virtualenvs\naturtag
+# Build pyinstaller package and Windows installer
+# (for local builds; not used by CI)
 
 # Install uv (if needed)
 # Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
@@ -10,8 +8,6 @@
 uv sync --no-dev
 uv run pyinstaller -y packaging\naturtag.spec
 
-# Launch Actual Installer, then:
-#  1. Run 'Build Project' (F9)
-#  2. Run installer
-#  3. Open Naturtag and test basic features
-Invoke-Item packaging\naturtag.aip
+# Build installer with Inno Setup
+$version = uv run python packaging\get_version.py
+iscc /DAppVersion=$version packaging\naturtag.iss
