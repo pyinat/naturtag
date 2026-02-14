@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLayout,
     QPushButton,
+    QScrollArea,
     QSizePolicy,
     QStyle,
     QStyleOption,
@@ -221,6 +222,8 @@ class FlowLayout(LayoutMixin, QLayout):
 
 
 class GridLayout(LayoutMixin, QGridLayout):
+    """Simple layout with a grid of widgets"""
+
     def __init__(self, parent=None, n_columns: Optional[int] = None):
         super().__init__(parent)
         self._n_columns = n_columns
@@ -238,6 +241,39 @@ class GridLayout(LayoutMixin, QGridLayout):
         super().clear()
         self._col = 0
         self._row = 0
+
+
+class ScrollableGridArea(QScrollArea):
+    """A scrollable area containing a GridLayout"""
+
+    def __init__(
+        self,
+        n_columns: int,
+        item_width: int,
+        spacing: int = 5,
+        parent: Optional[QWidget] = None,
+    ):
+        super().__init__(parent)
+        self.setWidgetResizable(True)
+        self.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setContentsMargins(0, 0, 0, 0)
+        content = QWidget()
+        self.setWidget(content)
+        self.grid = GridLayout(content, n_columns=n_columns)
+        self.grid.setSpacing(spacing)
+        self.grid.setContentsMargins(0, 0, 0, 0)
+        self.grid.setAlignment(Qt.AlignTop)
+        # Fixed width: columns * item_width + spacing + scrollbar
+        scrollbar_width = self.verticalScrollBar().sizeHint().width()
+        total_width = n_columns * item_width + (n_columns - 1) * spacing + scrollbar_width + 4
+        self.setFixedWidth(total_width)
+
+    def addWidget(self, widget: QWidget):
+        self.grid.addWidget(widget)
+
+    def clear(self):
+        self.grid.clear()
 
 
 class HorizontalLayout(LayoutMixin, QHBoxLayout):

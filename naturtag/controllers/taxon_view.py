@@ -7,13 +7,13 @@ from typing import Iterator
 
 from pyinaturalist import Taxon
 from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtWidgets import QGroupBox, QPushButton
+from PySide6.QtWidgets import QGroupBox, QPushButton, QWidget
 
 from naturtag.constants import SIZE_SM
 from naturtag.storage import AppState
 from naturtag.widgets import (
-    GridLayout,
     HorizontalLayout,
+    ScrollableGridArea,
     StylableWidget,
     TaxonImageWindow,
     TaxonInfoCard,
@@ -48,22 +48,23 @@ class TaxonInfoSection(StylableWidget):
         self.group_box = QGroupBox('No taxon selected')
         self.layout = HorizontalLayout(self)
         root = VerticalLayout(self.group_box)
-        images = HorizontalLayout()
-        root.addLayout(images)
+        images_container = QWidget()
+        images_container.setMaximumHeight(316)
+        images = HorizontalLayout(images_container)
+        images.setContentsMargins(0, 0, 0, 0)
+        root.addWidget(images_container)
         self.layout.addWidget(self.group_box)
         self.layout.setAlignment(Qt.AlignTop)
 
         # Medium taxon default photo
         self.image = TaxonPhoto(hover_icon=True, hover_event=False)  # Disabled until first load
-        self.image.setFixedHeight(395)  # Height of 5 thumbnails + spacing
         self.image.setAlignment(Qt.AlignTop)
+        self.image.setMaximumWidth(316)
         images.addWidget(self.image)
 
         # Additional taxon thumbnails
-        self.thumbnails = GridLayout(n_columns=2)
-        self.thumbnails.setSpacing(5)
-        self.thumbnails.setAlignment(Qt.AlignTop)
-        images.addLayout(self.thumbnails)
+        self.thumbnails = ScrollableGridArea(n_columns=2, item_width=SIZE_SM[0])
+        images.addWidget(self.thumbnails, alignment=Qt.AlignRight)
 
         # Button layout
         button_layout = VerticalLayout()

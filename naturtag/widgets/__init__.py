@@ -5,6 +5,7 @@ from naturtag.widgets.layouts import (
     FlowLayout,
     GridLayout,
     HorizontalLayout,
+    ScrollableGridArea,
     StylableWidget,
     VerticalLayout,
 )
