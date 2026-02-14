@@ -9,10 +9,6 @@ on:
 env:
   PYTHON_VERSION: '3.14'
 
-# Required for creating a new GitHub release
-permissions:
-    contents: write
-
 jobs:
   build-app-packages:
     strategy:
@@ -61,7 +57,6 @@ jobs:
           tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
           rm $ASSETS/taxonomy.tar.gz
           tar -C dist/naturtag/ -czvf naturtag-${{ matrix.dist_name }}.tar.gz .
-          echo 'DIST_NAME=${{ matrix.dist_name }}' >> $GITHUB_ENV
 
       # Build Windows installer with Inno Setup
       - name: Install Inno Setup
@@ -105,35 +100,35 @@ jobs:
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
-          name: naturtag-${{ env.DIST_NAME }}.tar.gz
-          path: naturtag-${{ env.DIST_NAME }}.tar.gz
+          name: naturtag-${{ matrix.dist_name }}.tar.gz
+          path: naturtag-${{ matrix.dist_name }}.tar.gz
 
       - name: Upload disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag.dmg
           path: dist/naturtag.dmg
 
       - name: Upload FPM workflow artifacts (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
 
       - name: Upload AppImage (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag.AppImage
           path: dist/naturtag.AppImage
 
       - name: Upload Windows installer
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag-installer.exe
           path: dist/naturtag-installer.exe
@@ -143,19 +138,20 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     needs: build-app-packages
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v7
-      - name: Collect artifacts from workflow subdirs
-        run: |
-          find . -type d -depth -name 'naturtag*' -exec mv {} {}_dir \;
-          find . -type f -mindepth 2 -exec mv -- {} . \;
-          rmdir *_dir
-          ls -ARl
+        with:
+          pattern: naturtag*
+          path: release-assets
+          merge-multiple: true
+      - run: ls -l release-assets/
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: 'naturtag*'
+          files: 'release-assets/naturtag*'
           body: |
             See changelog for release details: https://github.com/pyinat/naturtag/blob/main/HISTORY.md
             See docs for installation instructions: https://naturtag.readthedocs.io/en/stable/installation.html
