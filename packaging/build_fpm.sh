@@ -28,16 +28,12 @@ chmod +x $PKG_DIR/opt/naturtag/naturtag
 app_version=$(uv run python $SCRIPT_DIR/get_version.py)
 echo "Version: $app_version"
 
-# Build deb, snap, rpm, and pacman packages
+# Build deb, rpm, and pacman packages
 cd $SCRIPT_DIR
 fpm -C $PKG_DIR \
     --version $app_version \
     --output-type deb \
     --package $DIST_DIR/naturtag.deb
-fpm -C $PKG_DIR \
-    --version $app_version \
-    --output-type snap \
-    --package $DIST_DIR/naturtag.snap
 fpm -C $PKG_DIR \
     --version $app_version \
     --output-type rpm \

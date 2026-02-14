@@ -45,14 +45,14 @@ sudo pacman -U naturtag.pkg.tar.zst
 :::
 
 :::{tab-item} Linux (Other)
-For other Linux distributions, a [Snap](https://snapcraft.io/docs/installing-snapd)
-package is available. Download
+For other Linux distributions, a portable AppImage is available. Download
 {{
-    '[naturtag.snap](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.snap)'.format(version)
+    '[naturtag.AppImage](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.AppImage)'.format(version)
 }}
 and run:
 ```
-sudo snap install naturtag.snap
+chmod +x naturtag.AppImage
+./naturtag.AppImage
 ```
 :::
 

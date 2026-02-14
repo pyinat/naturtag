@@ -73,7 +73,7 @@ jobs:
           tar -C dist/naturtag/ -czvf naturtag-windows.tar.gz .
           echo 'DIST_NAME=windows' >> $GITHUB_ENV
 
-      # Build deb, snap, and rpm packages
+      # Build deb, rpm, and pacman packages
       - name: Build Linux packages with FPM
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -81,6 +81,11 @@ jobs:
           export PATH="$PATH:$GEM_HOME/bin"
           gem install fpm --user-install
           ./packaging/build_fpm.sh
+
+      # Build AppImage
+      - name: Build AppImage (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: ./packaging/build_appimage.sh
 
       # Inspect app bundle before signing
       - name: Inspect app bundle (macOS)
@@ -118,6 +123,13 @@ jobs:
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
+
+      - name: Upload AppImage (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v6
+        with:
+          name: naturtag.AppImage
+          path: dist/naturtag.AppImage
 
   # Create a release with all workflow artifacts attached
   release-app-packages:
