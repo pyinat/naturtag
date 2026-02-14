@@ -145,14 +145,17 @@ class Worker(BaseWorker):
             result = self.callback(**self.kwargs)
         except Exception as e:
             logger.warning('Worker error:', exc_info=True)
-            self.signals.on_error.emit(e)
-            self.signals.on_progress.emit(1)
+            if isValid(self.signals):
+                self.signals.on_error.emit(e)
+                self.signals.on_progress.emit(1)
         else:
-            self.signals.on_result.emit(result)
-            increment = len(result) if self.increment_length and isinstance(result, list) else 1
-            self.signals.on_progress.emit(increment)
+            if isValid(self.signals):
+                self.signals.on_result.emit(result)
+                increment = len(result) if self.increment_length and isinstance(result, list) else 1
+                self.signals.on_progress.emit(increment)
         finally:
-            self.signals.on_finished.emit()
+            if isValid(self.signals):
+                self.signals.on_finished.emit()
 
 
 class PaginatedWorker(BaseWorker):
@@ -161,17 +164,21 @@ class PaginatedWorker(BaseWorker):
     def run(self):
         try:
             for next_page in self.callback(**self.kwargs):
+                if not isValid(self.signals):
+                    return
                 self.signals.on_result.emit(next_page)
                 self.signals.on_progress.emit(len(next_page))
         except Exception as e:
             logger.warning('Worker error:', exc_info=True)
-            self.signals.on_error.emit(e)
+            if isValid(self.signals):
+                self.signals.on_error.emit(e)
+        # Always consume the reserved progress slot. If pages were yielded, their
+        # advances already exceeded the reservation, so this extra '1' just caps at max.
         finally:
-            # Always consume the reserved progress slot. If pages were yielded, their
-            # advances already exceeded the reservation, so this extra 1 just caps at max.
-            self.signals.on_progress.emit(1)
-            self.signals.on_complete.emit()
-            self.signals.on_finished.emit()
+            if isValid(self.signals):
+                self.signals.on_progress.emit(1)
+                self.signals.on_complete.emit()
+                self.signals.on_finished.emit()
 
 
 class WorkerSignals(QObject):

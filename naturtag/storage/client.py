@@ -122,9 +122,13 @@ class ObservationDbController(ObservationController):
             results += obs_page
         return WrapperPaginator(results)
 
-    def _search_paginated(self, **params) -> Iterator[list[Observation]]:
+    def _search_paginated(
+        self, id_above: Optional[int] = None, **params
+    ) -> Iterator[list[Observation]]:
         """Search observations, saving and yielding results one page at a time"""
         query = super().search(**params)
+        if id_above is not None:
+            query.last_id = id_above
         while not query.exhausted:
             obs_page = query.next_page()
             self.save(obs_page)
@@ -192,6 +196,7 @@ class ObservationDbController(ObservationController):
         self,
         username: str,
         updated_since: Optional[datetime] = None,
+        id_above: Optional[int] = None,
     ) -> Iterator[list[Observation]]:
         """Fetch any new observations from the API since last search, saving and yielding a single
         page at a time.
@@ -199,6 +204,7 @@ class ObservationDbController(ObservationController):
         logger.debug(f'Fetching new user observations updated since {updated_since}')
         total = 0
         for page in self._search_paginated(
+            id_above=id_above,
             user_login=username,
             updated_since=updated_since,
             refresh=True,

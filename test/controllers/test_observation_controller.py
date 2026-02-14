@@ -140,12 +140,23 @@ def test_warm_start(controller, mock_app):
     assert controller.loaded_pages == controller.total_pages
 
 
-def test_on_sync_page_received(controller):
+def test_on_sync_page_received(controller, mock_app):
     controller.loaded_pages = 0
 
     controller.on_sync_page_received([_make_obs(id=i) for i in range(10)])
 
     assert controller.loaded_pages == 1
+
+
+def test_on_sync_page_received__persists_resume_id(controller, mock_app):
+    """After receiving a sync page, sync_resume_id is set to the max observation ID."""
+    controller.loaded_pages = 0
+    observations = [_make_obs(id=5), _make_obs(id=20), _make_obs(id=12)]
+
+    controller.on_sync_page_received(observations)
+
+    assert mock_app.state.sync_resume_id == 20
+    mock_app.state.write.assert_called()
 
 
 def test_on_sync_page_received__cold_start_trigger(controller, mock_app):
@@ -161,9 +172,14 @@ def test_on_sync_page_received__cold_start_trigger(controller, mock_app):
 
 
 def test_on_sync_complete(controller, mock_app):
+    mock_app._futures.clear()
+    controller._sync_in_progress = True
     controller.on_sync_complete()
 
+    assert controller._sync_in_progress is False
+    assert mock_app.state.sync_resume_id is None
     mock_app.state.set_obs_checkpoint.assert_called_once()
+    assert len(mock_app._futures) >= 1  # load_observations_from_db was called
 
 
 def test_refresh(controller, mock_app):
@@ -175,9 +191,27 @@ def test_refresh(controller, mock_app):
     controller.refresh()
 
     assert controller.page == 1
+    assert controller.loaded_pages == 0
     assert len(controller._page_cache) == 0
+    assert mock_app.state.sync_resume_id is None
+    assert controller._sync_in_progress is True
     assert mock_app.threadpool.schedule.called
     assert mock_app.threadpool.schedule_paginator.called
+
+
+def test_refresh__blocked_while_sync_in_progress(controller, mock_app):
+    """Refresh is a no-op (with status message) when a sync is already running."""
+    controller._sync_in_progress = True
+    controller.page = 3
+    mock_app._futures.clear()
+    mock_app.threadpool.schedule_paginator.reset_mock()
+
+    with patch.object(controller, 'info') as mock_info:
+        controller.refresh()
+
+    mock_info.assert_called_once_with('Refresh already in progress')
+    assert controller.page == 3  # unchanged
+    mock_app.threadpool.schedule_paginator.assert_not_called()
 
 
 def test_load_observations__cache_hit(controller, mock_app):
@@ -230,3 +264,18 @@ def test_bind_selection(controller):
 
     cards[0].on_click.emit(cards[0].card_id)
     on_click.assert_called_once_with(cards[0].card_id)
+
+
+def test_sync_observations__passes_resume_id(controller, mock_app):
+    """_sync_observations passes sync_resume_id as id_above to the client."""
+    mock_app.state.last_obs_check = None
+    mock_app.state.sync_resume_id = 42
+    mock_app.client.observations.search_user_paginated.return_value = iter([])
+
+    list(controller._sync_observations())
+
+    mock_app.client.observations.search_user_paginated.assert_called_once_with(
+        username='testuser',
+        updated_since=None,
+        id_above=42,
+    )
