@@ -4,7 +4,6 @@
 import os
 import re
 from collections import defaultdict
-from importlib.metadata import version as pkg_version
 from logging import basicConfig, getLogger
 from pathlib import Path
 from shutil import copyfile
@@ -26,7 +25,7 @@ from naturtag.constants import CLI_COMPLETE_DIR
 from naturtag.metadata import KeywordMetadata, MetaMetadata
 from naturtag.metadata.inat_metadata import _refresh_tags_iter, _tag_images_iter
 from naturtag.storage import Settings, setup
-from naturtag.utils import get_valid_image_paths, strip_url
+from naturtag.utils import get_valid_image_paths, get_version, strip_url
 
 CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
 CODE_INLINE = re.compile(r'`([^`]+?)`')
@@ -81,8 +80,7 @@ def main(ctx, verbose, version):
         enable_logging(level='DEBUG', external_level='DEBUG')
 
     if version:
-        v = pkg_version('naturtag')
-        click.echo(f'naturtag v{v}')
+        click.echo(f'naturtag v{get_version()}')
         click.echo(f'User data directory: {Settings.read().data_dir}')
         ctx.exit()
     elif not ctx.invoked_subcommand:

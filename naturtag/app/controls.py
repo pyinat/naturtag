@@ -111,6 +111,12 @@ class Toolbar(QToolBar):
             shortcut='Ctrl+F1',
             visible=False,
         )
+        self.check_updates_button = self.add_button(
+            'Check for &Updates',
+            tooltip='Check for a newer version on GitHub',
+            icon='mdi.update',
+            visible=False,
+        )
 
         # Add action to toggle toolbar visibility
         self.show_toolbar_button = self.toggleViewAction()
@@ -165,6 +171,7 @@ class Toolbar(QToolBar):
         help_menu = menu.addMenu('&Help')
         help_menu.addAction(self.docs_button)
         help_menu.addAction(self.about_button)
+        help_menu.addAction(self.check_updates_button)
 
 
 class UserDirs(QObject):
