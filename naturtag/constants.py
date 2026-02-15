@@ -31,6 +31,7 @@ CONFIG_PATH = APP_DIR / 'settings.yml'
 # Project info
 DOCS_URL = 'https://naturtag.readthedocs.io/en/stable/app.html'
 REPO_URL = 'https://github.com/pyinat/naturtag'
+RELEASES_API_URL = 'https://api.github.com/repos/pyinat/naturtag/releases/latest'
 TAXON_DB_URL = 'https://github.com/pyinat/naturtag/raw/main/assets/data/taxonomy.tar.gz'
 
 # Thumnbnail settings

@@ -48,6 +48,7 @@ else:
 
 # Ensure package metadata is available for importlib.metadata
 datas += copy_metadata('naturtag')
+datas += copy_metadata('pyinaturalist')
 
 a = Analysis(
     [str(PACKAGE_DIR / 'app' / 'app.py')],

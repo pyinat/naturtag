@@ -3,7 +3,6 @@
 import sys
 import webbrowser
 from datetime import datetime
-from importlib.metadata import version as pkg_version
 from logging import getLogger
 
 from PySide6.QtCore import QSize, Qt, QUrl
@@ -26,6 +25,7 @@ from naturtag.app.threadpool import ThreadPool
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
+from naturtag.utils import check_for_update, get_version
 from naturtag.widgets import VerticalLayout, fa_icon, init_handler, set_theme
 
 # Provide an application group so Windows doesn't use the default 'python' icon
@@ -43,7 +43,7 @@ class NaturtagApp(QApplication):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setApplicationName('Naturtag')
-        self.setApplicationVersion(pkg_version('naturtag'))
+        self.setApplicationVersion(get_version())
         self.setOrganizationName('pyinat')
         self.setWindowIcon(QIcon(QPixmap(str(APP_ICON))))
 
@@ -179,6 +179,7 @@ class MainWindow(QMainWindow):
         self.toolbar.exit_button.triggered.connect(QApplication.instance().quit)
         self.toolbar.docs_button.triggered.connect(self.open_docs)
         self.toolbar.about_button.triggered.connect(self.open_about)
+        self.toolbar.check_updates_button.triggered.connect(self.check_for_updates)
 
         # Menu bar and status bar
         self.toolbar.populate_menu(self.menuBar())
@@ -244,13 +245,42 @@ class MainWindow(QMainWindow):
         """Open the documentation in a web browser"""
         webbrowser.open(DOCS_URL)
 
+    def check_for_updates(self):
+        """Check GitHub for a newer release and show the result in a dialog."""
+        dialog = QMessageBox(self)
+        dialog.setWindowTitle('Check for Updates')
+        dialog.setTextFormat(Qt.RichText)
+        dialog.setText('Checking for updates...')
+        dialog.setStandardButtons(QMessageBox.Cancel)
+        dialog.show()
+
+        signals = self.app.threadpool.schedule(check_for_update)
+
+        def on_result(result: tuple[str, str] | None):
+            if result is not None:
+                latest, url = result
+                dialog.setText(
+                    f'Naturtag <b>v{latest}</b> is available.'
+                    f'<br/><br/><a href="{url}">View release on GitHub</a>'
+                )
+            else:
+                dialog.setText(f"You're running the latest version (v{self.app.state.version}).")
+            dialog.setStandardButtons(QMessageBox.Ok)
+
+        def on_error(exc: Exception):
+            logger.warning('Update check failed:', exc_info=exc)
+            dialog.setText('Could not check for updates. Please check your internet connection.')
+            dialog.setStandardButtons(QMessageBox.Ok)
+
+        signals.on_result.connect(on_result)
+        signals.on_error.connect(on_error)
+
     def open_about(self):
         """Show an About dialog with basic app information"""
         about = QMessageBox()
         about.setIconPixmap(QPixmap(str(APP_ICON)))
         about.setTextFormat(Qt.RichText)
 
-        version = pkg_version('naturtag')
         repo_link = f"<a href='{REPO_URL}'>{REPO_URL}</a>"
         license_link = f"<a href='{REPO_URL}/LICENSE'>MIT License</a>"
         attribution = f'Ⓒ {datetime.now().year} Jordan Cook, {license_link}'
@@ -258,7 +288,7 @@ class MainWindow(QMainWindow):
         app_dir_link = f"<a href='file://{data_dir}'>{data_dir}</a>"
 
         about.setText(
-            f'<b>Naturtag v{version}</b><br/>'
+            f'<b>Naturtag v{self.app.state.version}</b><br/>'
             f'{attribution}'
             f'<br/>Source: {repo_link}'
             f'<br/>User data directory: {app_dir_link}'

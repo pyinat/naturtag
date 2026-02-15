@@ -32,6 +32,7 @@ class AppState:
     """
 
     db_path: Path = None  # type: ignore
+    _version: str | None = None
 
     # Taxonomy browser data
     history: list[int] = field(factory=list)
@@ -43,7 +44,7 @@ class AppState:
     setup_complete: bool = field(default=False)
     last_obs_check: Optional[datetime] = field(default=None)
     sync_resume_id: Optional[int] = field(default=None)
-    last_version: str = field(default='N/A')
+    prev_version: str = field(default='N/A')
     window_size: tuple[int, int] = field(default=DEFAULT_WINDOW_SIZE)
 
     def __attrs_post_init__(self):
@@ -72,12 +73,18 @@ class AppState:
         """Get the most commonly observed taxa"""
         return _top_unique_ids(self.observed.keys(), MAX_DISPLAY_OBSERVED)
 
+    @property
+    def version(self) -> str:
+        """Get the current app version from package metadata"""
+        if self._version is None:
+            self._version = pkg_version('naturtag')
+        return self._version
+
     def check_version_change(self):
         """Check if the app version has changed since the last run"""
-        current_version = pkg_version('naturtag')
-        if self.last_version != current_version:
-            logger.info(f'Updated from {self.last_version} to {current_version}')
-            self.last_version = current_version
+        if self.prev_version != self.version:
+            logger.info(f'Updated from {self.prev_version} to {self.version}')
+            self.prev_version = self.version
             self.setup_complete = False
 
     def frequent_idx(self, taxon_id: int) -> Optional[int]:

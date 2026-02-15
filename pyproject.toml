@@ -65,6 +65,7 @@ dev = [
     'pytest-cov>=7.0',
     'pytest-qt>=4.4',
     'pytest-xdist>=3.8',
+    'requests-mock>=1.12',
 ]
 
 docs = [
