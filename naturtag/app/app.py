@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
 
         # Tabs
         self.tabs = QTabWidget()
-        self.tabs.setIconSize(QSize(32, 32))
+        self.tabs.setIconSize(QSize(24, 24))
         idx = self.tabs.addTab(self.image_controller, fa_icon('fa6s.camera'), 'Photos')
         self.tabs.setTabToolTip(idx, 'Add and tag local photos')
         idx = self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Taxonomy')

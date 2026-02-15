@@ -236,4 +236,4 @@ def _format_location(obs: Observation) -> str:
     if not coords or len(coords) < 2:
         return 'N/A'
     geoprivacy = f' ({obs.geoprivacy})' if obs.geoprivacy else ''
-    return f'({coords[0]:.2f}, {coords[1]:.2f}{geoprivacy}'
+    return f'({coords[0]:.4f}, {coords[1]:.4f}){geoprivacy}'
