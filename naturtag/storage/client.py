@@ -21,6 +21,7 @@ from pyinaturalist_convert.db import (
 from sqlalchemy import func, select
 
 from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, ROOT_TAXON_ID
+from naturtag.utils import get_version
 
 logger = getLogger(__name__)
 
@@ -30,6 +31,7 @@ class iNatDbClient(iNatClient):
 
     def __init__(self, db_path: Path = DB_PATH, **kwargs):
         kwargs.setdefault('cache_control', False)
+        kwargs.setdefault('user_agent', f'naturtag/{get_version()}')
         super().__init__(**kwargs)
         self.db_path = db_path
         self.taxa = TaxonDbController(self)
