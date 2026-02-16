@@ -8,7 +8,7 @@ from logging import getLogger
 
 from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QWidget
+from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QScrollArea, QWidget
 
 from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
@@ -44,12 +44,23 @@ class ObservationInfoSection(StylableWidget):
         self.layout = HorizontalLayout(self)
         self.layout.setAlignment(Qt.AlignTop)
         root = VerticalLayout(self.group_box)
+
+        # Scrollable area wrapping images and details
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll_content = QWidget()
+        scroll_layout = VerticalLayout(scroll_content)
+        scroll_area.setWidget(scroll_content)
+        root.addWidget(scroll_area)
+
         images_container = QWidget()
         images_container.setMaximumHeight(316)
         images = HorizontalLayout(images_container)
         images.setContentsMargins(0, 0, 0, 0)
         images.setAlignment(Qt.AlignTop)
-        root.addWidget(images_container)
+        scroll_layout.addWidget(images_container)
         self.layout.addWidget(self.group_box)
 
         # Medium default photo
@@ -66,10 +77,14 @@ class ObservationInfoSection(StylableWidget):
         self.description.setWordWrap(True)
         self.description.setMaximumWidth(500)
         self.details = IconLabelList()
+        self.details_right = IconLabelList()
+        details_columns = HorizontalLayout()
+        details_columns.addWidget(self.details)
+        details_columns.addWidget(self.details_right)
         details_container = VerticalLayout()
         details_container.addWidget(self.description)
-        details_container.addWidget(self.details)
-        root.addLayout(details_container)
+        details_container.addLayout(details_columns)
+        scroll_layout.addLayout(details_container)
 
         # Back and Forward buttons: We already have the full Observation object
         button_layout = HorizontalLayout()
@@ -170,6 +185,7 @@ class ObservationInfoSection(StylableWidget):
         quality_str = obs.quality_grade.replace('_', ' ').title().replace('Id', 'ID')
         self.description.setText(obs.description)
 
+        # Left column: basic attributes
         self.details.clear()
         self.details.add_line('fa5.calendar-alt', f'<b>Observed on:</b> {observed_date_str}')
         self.details.add_line('fa5.calendar-alt', f'<b>Created on:</b> {created_date_str}')
@@ -194,6 +210,17 @@ class ObservationInfoSection(StylableWidget):
             'mdi.map-marker-radius',
             f'<b>Positional accuracy:</b> {obs.positional_accuracy or 0}m',
         )
+
+        # Right column: annotations, ofvs, and tags
+        self.details_right.clear()
+        for a in obs.annotations or []:
+            self.details_right.add_line('mdi.label', f'<b>{a.term}:</b> {a.value}')
+        for ofv in obs.ofvs or []:
+            self.details_right.add_line(
+                'mdi.format-list-bulleted', f'<b>{ofv.name}:</b> {str(ofv.value)}'
+            )
+        if obs.tags:
+            self.details_right.add_line('fa5s.tags', f'<b>Tags:</b> {", ".join(obs.tags)}')
 
     # def prev(self):
     #     if not self.hist_prev:
