@@ -44,7 +44,6 @@ class ObservationInfoSection(StylableWidget):
         self.layout = HorizontalLayout(self)
         self.layout.setAlignment(Qt.AlignTop)
         root = VerticalLayout(self.group_box)
-        root.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         images_container = QWidget()
         images_container.setMaximumHeight(316)
         images = HorizontalLayout(images_container)
@@ -56,7 +55,6 @@ class ObservationInfoSection(StylableWidget):
         # Medium default photo
         self.image = ObservationPhoto(hover_icon=True, hover_event=False)  # Disabled until 1st load
         self.image.setAlignment(Qt.AlignTop)
-        self.image.setMaximumWidth(316)
         images.addWidget(self.image)
 
         # Additional thumbnails
@@ -190,8 +188,7 @@ class ObservationInfoSection(StylableWidget):
         )
         self.details.add_line(
             GEOPRIVACY_ICONS.get(obs.geoprivacy, 'mdi.map-marker'),
-            f'<b>Coordinates:</b> {obs.private_location or obs.location} '
-            f'({obs.geoprivacy or "Unknown geoprivacy"})',
+            f'<b>Coordinates:</b> {_format_location(obs)}',
         )
         self.details.add_line(
             'mdi.map-marker-radius',
@@ -229,3 +226,13 @@ class ObservationInfoSection(StylableWidget):
             f'See details for {self.selected_observation.taxon.full_name}'
         )
         self.select_button.setEnabled(True)
+
+
+# TODO: move to pyinaturalist.Observation
+def _format_location(obs: Observation) -> str:
+    """Format the observation coordinates + geoprivacy, if available"""
+    coords = obs.private_location or obs.location
+    if not coords or len(coords) < 2:
+        return 'N/A'
+    geoprivacy = f' ({obs.geoprivacy})' if obs.geoprivacy else ''
+    return f'({coords[0]:.4f}, {coords[1]:.4f}){geoprivacy}'
