@@ -86,6 +86,8 @@ class ObservationInfoSection(StylableWidget):
         details_container.addLayout(details_columns)
         scroll_layout.addLayout(details_container)
 
+        activity_header = QLabel('<h3>Activity</h3>')
+        scroll_layout.addWidget(activity_header)
         self.id_comments_container = VerticalLayout()
         scroll_layout.addLayout(self.id_comments_container)
 

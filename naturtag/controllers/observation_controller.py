@@ -112,7 +112,7 @@ class ObservationController(BaseController):
 
         logger.info(f'Loading observation {observation_id}')
         future = self.app.threadpool.schedule(
-            lambda: self.app.client.observations(observation_id, taxonomy=True),
+            lambda: self.app.client.observations(observation_id, taxonomy=True, ident_taxa=True),
             priority=QThread.HighPriority,
         )
         future.on_result.connect(self.display_observation)
