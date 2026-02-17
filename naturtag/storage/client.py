@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 from typing import Iterator, Optional
 
-from pyinaturalist import Observation, Taxon, WrapperPaginator, iNatClient
+from pyinaturalist import Identification, Observation, Taxon, WrapperPaginator, iNatClient
 from pyinaturalist.constants import MultiInt
 from pyinaturalist.controllers import ObservationController, TaxonController
 from pyinaturalist.converters import ensure_list
@@ -79,6 +79,7 @@ class ObservationDbController(ObservationController):
         self,
         observation_ids: MultiInt,
         refresh: bool = False,
+        ident_taxa: bool = False,
         taxonomy: bool = False,
         **params,
     ) -> WrapperPaginator[Observation]:
@@ -103,6 +104,13 @@ class ObservationDbController(ObservationController):
         # Add full taxonomy to observations, if specified
         if taxonomy:
             self.taxon_controller._add_taxonomy([obs.taxon for obs in observations])
+
+        # Populate identification taxa
+        if ident_taxa:
+            all_idents = list(
+                chain.from_iterable(obs.identifications or [] for obs in observations)
+            )
+            self.taxon_controller._add_identification_taxa(all_idents)
 
         logger.debug(f'Finished in {time() - start:.2f} seconds')
         return WrapperPaginator(observations)
@@ -255,6 +263,22 @@ class TaxonDbController(TaxonController):
         if not accept_partial:
             db_results = self._add_taxonomy(db_results)
         return db_results
+
+    def _add_identification_taxa(
+        self, identifications: list[Identification]
+    ) -> list[Identification]:
+        """Add taxon information to a list of identifications."""
+        taxon_ids = {ident.taxon.id for ident in identifications if ident.taxon}
+        if not taxon_ids:
+            return identifications
+
+        logger.debug(f'Fetching taxa for {len(taxon_ids)} identifications')
+        taxa = self.from_ids(taxon_ids, accept_partial=True)
+        taxa_by_id = {taxon.id: taxon for taxon in taxa}
+        for ident in identifications:
+            if ident.taxon and (taxon := taxa_by_id.get(ident.taxon.id)):
+                ident.taxon = taxon
+        return identifications
 
     def _add_taxonomy(self, taxa: list[Taxon]) -> list[Taxon]:
         """Add ancestor and descendant records to all the specified taxa.

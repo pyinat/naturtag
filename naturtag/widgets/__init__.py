@@ -28,6 +28,8 @@ from naturtag.widgets.images import (
 from naturtag.widgets.inputs import IdInput
 from naturtag.widgets.logger import QtRichHandler, init_handler
 from naturtag.widgets.observation_images import (
+    GEOPRIVACY_ICONS,
+    QUALITY_GRADE_ICONS,
     ObservationImageWindow,
     ObservationInfoCard,
     ObservationList,

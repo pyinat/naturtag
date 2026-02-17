@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
 
         # Tabs
         self.tabs = QTabWidget()
-        self.tabs.setIconSize(QSize(32, 32))
+        self.tabs.setIconSize(QSize(24, 24))
         idx = self.tabs.addTab(self.image_controller, fa_icon('fa6s.camera'), 'Photos')
         self.tabs.setTabToolTip(idx, 'Add and tag local photos')
         idx = self.tabs.addTab(self.taxon_controller, fa_icon('fa5s.spider'), 'Taxonomy')
@@ -151,6 +151,10 @@ class MainWindow(QMainWindow):
             lambda taxon: self.taxon_controller.display_taxon(taxon, notify=False)
         )
         self.observation_controller.obs_info.on_view_taxon.connect(self.switch_tab_taxa)
+        self.observation_controller.obs_info.on_view_taxon_by_id.connect(
+            lambda taxon: self.taxon_controller.display_taxon_by_id(taxon)
+        )
+        self.observation_controller.obs_info.on_view_taxon_by_id.connect(self.switch_tab_taxa)
 
         # Observations tab: Select observation for tagging and switch to Photos tab
         self.observation_controller.obs_info.on_select.connect(

@@ -59,7 +59,6 @@ class TaxonInfoSection(StylableWidget):
         # Medium taxon default photo
         self.image = TaxonPhoto(hover_icon=True, hover_event=False)  # Disabled until first load
         self.image.setAlignment(Qt.AlignTop)
-        self.image.setMaximumWidth(316)
         images.addWidget(self.image)
 
         # Additional taxon thumbnails

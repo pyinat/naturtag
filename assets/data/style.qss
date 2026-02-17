@@ -75,6 +75,20 @@ QLabel#h3 {
 }
 
 
+IdentificationCard {
+    background: palette(base);
+    border-radius: 4px;
+    border-top: 1px solid palette(midlight);
+    border-right: 1px solid palette(midlight);
+    border-bottom: 1px solid palette(midlight);
+    border-left: 3px solid palette(highlight);
+}
+CommentCard {
+    background: palette(base);
+    border-radius: 4px;
+    border: 1px solid palette(midlight);
+}
+
 QTextEdit#log_container {
     background-color: palette(base);
 }
