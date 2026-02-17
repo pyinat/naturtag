@@ -6,7 +6,7 @@ import webbrowser
 from collections import deque
 from logging import getLogger
 
-from pyinaturalist import Observation, Taxon
+from pyinaturalist import Comment, Identification, Observation, Taxon
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QScrollArea, QWidget
 
@@ -85,6 +85,9 @@ class ObservationInfoSection(StylableWidget):
         details_container.addWidget(self.description)
         details_container.addLayout(details_columns)
         scroll_layout.addLayout(details_container)
+
+        self.id_comments_container = VerticalLayout()
+        scroll_layout.addLayout(self.id_comments_container)
 
         # Back and Forward buttons: We already have the full Observation object
         button_layout = HorizontalLayout()
@@ -222,6 +225,20 @@ class ObservationInfoSection(StylableWidget):
         if obs.tags:
             self.details_right.add_line('fa5s.tags', f'<b>Tags:</b> {", ".join(obs.tags)}')
 
+        # Identifications and comments
+        self.id_comments_container.clear()
+        for item in _sort_id_comments(obs):
+            date_str = item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else ''
+            lines = [f'<b>{item.username}</b> · {date_str}']
+            if isinstance(item, Identification):
+                lines.append(f'<i>{item.taxon.full_name}</i>')
+            if item.body:
+                lines.append(item.body)
+            label = QLabel('<br>'.join(lines))
+            label.setWordWrap(True)
+            label.setTextFormat(Qt.RichText)
+            self.id_comments_container.addWidget(label)
+
     # def prev(self):
     #     if not self.hist_prev:
     #         return
@@ -263,3 +280,11 @@ def _format_location(obs: Observation) -> str:
         return 'N/A'
     geoprivacy = f' ({obs.geoprivacy})' if obs.geoprivacy else ''
     return f'({coords[0]:.4f}, {coords[1]:.4f}){geoprivacy}'
+
+
+def _sort_id_comments(obs: Observation) -> list[Identification | Comment]:
+    """Sort identifications and comments chronologically, with identifications first if timestamps are equal"""
+    return sorted(
+        (obs.identifications or []) + (obs.comments or []),
+        key=lambda c: c.created_at,
+    )
