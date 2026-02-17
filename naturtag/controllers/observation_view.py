@@ -45,7 +45,7 @@ class ObservationInfoSection(StylableWidget):
 
         self.group_box = QGroupBox('No observation selected')
         self.layout = HorizontalLayout(self)
-        self.layout.setAlignment(Qt.AlignTop)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         root = VerticalLayout(self.group_box)
 
         # Scrollable area wrapping images and details

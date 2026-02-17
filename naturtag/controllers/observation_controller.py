@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QLabel, QPushButton
 
 from naturtag.constants import DEFAULT_PAGE_SIZE, PAGE_CACHE_MAX
 from naturtag.controllers import BaseController, ObservationInfoSection
-from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList, VerticalLayout
+from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList
 from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
@@ -31,7 +31,6 @@ class ObservationController(BaseController):
     def __init__(self):
         super().__init__()
         self.root = HorizontalLayout(self)
-        self.root.setAlignment(Qt.AlignLeft)
         self.displayed_observation: Observation = None
 
         # Search inputs
@@ -81,9 +80,7 @@ class ObservationController(BaseController):
 
         # Full observation info viewer
         self.obs_info = ObservationInfoSection()
-        obs_layout = VerticalLayout()
-        obs_layout.addWidget(self.obs_info)
-        self.root.addLayout(obs_layout)
+        self.root.addWidget(self.obs_info)
 
         # Navigation keyboard shortcuts
         self.add_shortcut('Ctrl+Left', self.prev_page)
