@@ -62,6 +62,7 @@ class FAIcon(QLabel):
     def __init__(
         self,
         icon_str: str,
+        align: Optional[Qt.AlignmentFlag] = None,
         parent: Optional[QWidget] = None,
         secondary: bool = False,
         size: IconDimensions = SIZE_ICON,
@@ -72,6 +73,8 @@ class FAIcon(QLabel):
         self.icon = fa_icon(icon_str, secondary=secondary)
         self.icon_size = QSize(x, y)
         self.setPixmap(self.icon.pixmap(x, y, mode=QIcon.Mode.Normal))
+        if align:
+            self.setAlignment(align)
 
     def set_enabled(self, enabled: bool = True):
         self.setPixmap(
@@ -259,7 +262,9 @@ class HoverMixin(MIXIN_BASE):
 
     def __init__(self, *args, hover_icon: bool = False, hover_event: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
-        self.overlay = FAIcon('mdi.open-in-new', self, size=64) if hover_icon else QLabel(self)
+        self.overlay = (
+            FAIcon('mdi.open-in-new', parent=self, size=64) if hover_icon else QLabel(self)
+        )
         self.overlay.setAlignment(Qt.AlignTop)
         self.overlay.setAutoFillBackground(True)
         self.overlay.setGeometry(self.geometry())
@@ -311,8 +316,8 @@ class NavButtonsMixin(MIXIN_BASE):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.left_arrow = HoverIcon('ph.caret-left', self, size=128)
-        self.right_arrow = HoverIcon('ph.caret-right', self, size=128)
+        self.left_arrow = HoverIcon('ph.caret-left', parent=self, size=128)
+        self.right_arrow = HoverIcon('ph.caret-right', parent=self, size=128)
 
     def resizeEvent(self, event):
         """Position nav buttons on left/right center"""

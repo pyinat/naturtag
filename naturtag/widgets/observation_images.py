@@ -64,6 +64,7 @@ class ObservationInfoCard(InfoCard):
         # Details: Date, place guess, number of ids and photos, quality grade
         date_str = obs.observed_on.strftime('%Y-%m-%d') if obs.observed_on else 'unknown date'
         num_ids = obs.identifications_count or 0
+        num_comments = len(obs.comments or [])
         num_photos = len(obs.photos)
         icon_size = SIZE_ICON_SM[0]
         self.layout = HorizontalLayout()
@@ -71,6 +72,7 @@ class ObservationInfoCard(InfoCard):
         self.layout.setAlignment(Qt.AlignLeft)
         self.layout.addWidget(IconLabel('fa5.calendar-alt', date_str, size=icon_size))
         self.layout.addWidget(IconLabel('mdi.marker-check', num_ids, size=icon_size))
+        self.layout.addWidget(IconLabel('fa5s.comment', num_comments, size=icon_size))
         self.layout.addWidget(
             IconLabel(
                 'fa5.images' if num_photos > 1 else 'fa5.image',

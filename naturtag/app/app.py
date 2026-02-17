@@ -151,6 +151,10 @@ class MainWindow(QMainWindow):
             lambda taxon: self.taxon_controller.display_taxon(taxon, notify=False)
         )
         self.observation_controller.obs_info.on_view_taxon.connect(self.switch_tab_taxa)
+        self.observation_controller.obs_info.on_view_taxon_by_id.connect(
+            lambda taxon: self.taxon_controller.display_taxon_by_id(taxon)
+        )
+        self.observation_controller.obs_info.on_view_taxon_by_id.connect(self.switch_tab_taxa)
 
         # Observations tab: Select observation for tagging and switch to Photos tab
         self.observation_controller.obs_info.on_select.connect(

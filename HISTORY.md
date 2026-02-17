@@ -2,6 +2,7 @@
 
 ## 0.9.0
 **UI:**
+* Add more details to observation page: identifications, comments, annotations, observation fields, and tags
 * Add menu item to open app data/config dir
 * Some layout/scaling improvements to accommodate smaller screens
 * General performance and stability improvements

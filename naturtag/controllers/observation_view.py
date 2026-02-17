@@ -12,6 +12,9 @@ from PySide6.QtWidgets import QGroupBox, QLabel, QPushButton, QScrollArea, QWidg
 
 from naturtag.constants import SIZE_SM
 from naturtag.widgets import (
+    GEOPRIVACY_ICONS,
+    QUALITY_GRADE_ICONS,
+    FAIcon,
     HorizontalLayout,
     IconLabelList,
     ObservationImageWindow,
@@ -19,10 +22,9 @@ from naturtag.widgets import (
     ScrollableGridArea,
     StylableWidget,
     VerticalLayout,
+    fa_icon,
     set_pixmap_async,
 )
-from naturtag.widgets.observation_images import GEOPRIVACY_ICONS, QUALITY_GRADE_ICONS
-from naturtag.widgets.style import fa_icon
 
 logger = getLogger(__name__)
 
@@ -31,7 +33,8 @@ class ObservationInfoSection(StylableWidget):
     """Section to display selected observation photos and info"""
 
     on_select = Signal(Observation)  #: An observation was selected for tagging
-    on_view_taxon = Signal(Taxon)  #: A taxon was selected for viewing
+    on_view_taxon = Signal(Taxon)  #: A taxon was selected for viewing (full object)
+    on_view_taxon_by_id = Signal(int)  #: A taxon ID was selected for viewing (partial object)
 
     def __init__(self):
         super().__init__()
@@ -89,6 +92,7 @@ class ObservationInfoSection(StylableWidget):
         activity_header = QLabel('<h3>Activity</h3>')
         scroll_layout.addWidget(activity_header)
         self.id_comments_container = VerticalLayout()
+        self.id_comments_container.setSpacing(6)
         scroll_layout.addLayout(self.id_comments_container)
 
         # Back and Forward buttons: We already have the full Observation object
@@ -194,10 +198,7 @@ class ObservationInfoSection(StylableWidget):
         self.details.clear()
         self.details.add_line('fa5.calendar-alt', f'<b>Observed on:</b> {observed_date_str}')
         self.details.add_line('fa5.calendar-alt', f'<b>Created on:</b> {created_date_str}')
-        self.details.add_line(
-            'mdi.marker-check',
-            f'<b>Identifications:</b> {num_ids} ({obs.num_identification_agreements or 0} agree)',
-        )
+        self.details.add_line('mdi.marker-check', f'<b>Identifications:</b> {num_ids}')
 
         self.details.add_line(
             QUALITY_GRADE_ICONS.get(obs.quality_grade, 'mdi.chevron-up'),
@@ -230,16 +231,12 @@ class ObservationInfoSection(StylableWidget):
         # Identifications and comments
         self.id_comments_container.clear()
         for item in _sort_id_comments(obs):
-            date_str = item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else ''
-            lines = [f'<b>{item.username}</b> · {date_str}']
             if isinstance(item, Identification):
-                lines.append(f'<i>{item.taxon.full_name}</i>')
-            if item.body:
-                lines.append(item.body)
-            label = QLabel('<br>'.join(lines))
-            label.setWordWrap(True)
-            label.setTextFormat(Qt.RichText)
-            self.id_comments_container.addWidget(label)
+                card = IdentificationCard(item)
+                card.on_view_taxon_by_id.connect(self.on_view_taxon_by_id.emit)
+            else:
+                card = CommentCard(item)
+            self.id_comments_container.addWidget(card)
 
     # def prev(self):
     #     if not self.hist_prev:
@@ -272,6 +269,62 @@ class ObservationInfoSection(StylableWidget):
             f'See details for {self.selected_observation.taxon.full_name}'
         )
         self.select_button.setEnabled(True)
+
+
+class ActivityCard(StylableWidget):
+    """Base card widget for activity items (identifications and comments)"""
+
+    on_view_taxon_by_id = Signal(int)
+
+    def __init__(self, item: Identification | Comment, icon_name: str):
+        super().__init__()
+        layout = HorizontalLayout(self)
+        layout.setContentsMargins(8, 6, 8, 6)
+        layout.setSpacing(8)
+        layout.setAlignment(Qt.AlignTop)
+
+        icon_label = FAIcon(icon_name, size=16, align=Qt.AlignTop)
+        layout.addWidget(icon_label)
+
+        self.content = VerticalLayout()
+        self.content.setContentsMargins(0, 0, 0, 0)
+        self.content.setSpacing(2)
+        layout.addLayout(self.content, stretch=1)
+
+        date_str = item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else ''
+        header = QLabel(f'<b>{item.username}</b> · {date_str}')
+        header.setTextFormat(Qt.RichText)
+        header.setAlignment(Qt.AlignLeft)
+        self.content.addWidget(header)
+
+        # Add taxon, if one exists
+        if taxon := getattr(item, 'taxon', None):
+            taxon_label = QLabel(f'<a href="#"><i>{taxon.full_name}</i></a>')
+            taxon_label.setTextFormat(Qt.RichText)
+            taxon_label.setAlignment(Qt.AlignLeft)
+            taxon_label.setOpenExternalLinks(False)
+            taxon_label.linkActivated.connect(lambda _: self.on_view_taxon_by_id.emit(taxon.id))
+            self.content.addWidget(taxon_label)
+
+        if item.body:
+            body = QLabel(item.body)
+            body.setWordWrap(True)
+            body.setAlignment(Qt.AlignLeft)
+            self.content.addWidget(body)
+
+
+class CommentCard(ActivityCard):
+    """Card widget for a single comment"""
+
+    def __init__(self, item: Comment):
+        super().__init__(item, 'fa5s.comment')
+
+
+class IdentificationCard(ActivityCard):
+    """Card widget for a single identification"""
+
+    def __init__(self, item: Identification):
+        super().__init__(item, 'mdi.marker-check')
 
 
 # TODO: move to pyinaturalist.Observation
