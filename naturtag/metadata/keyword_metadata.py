@@ -59,15 +59,9 @@ class KeywordMetadata:
         Also account for root nodes (single values that are the root of a hierarchical chain).
         """
         hier_keywords = [kw for kw in self.keywords if '|' in kw]
-        result = []
-        seen_roots: set[str] = set()
-        for kw in hier_keywords:
-            root = kw.split('|')[0]
-            if root not in seen_roots:
-                result.append(root)  # Insert root before the first entry of each chain
-                seen_roots.add(root)
-            result.append(kw)
-        return result
+        # Prepend each chain's root before its first entry; dict.fromkeys preserves order and deduplicates
+        entries = (item for kw in hier_keywords for item in (kw.split('|')[0], kw))
+        return list(dict.fromkeys(entries))
 
     def _get_normal_keywords(self) -> list[str]:
         """Get all single-value keywords that are neither a key-value pair nor hierarchical"""
