@@ -135,6 +135,13 @@ def test_observation_to_metadata__hierarchical():
     assert any('|' in k for k in keywords)
 
 
+def test_observation_to_metadata__hierarchical_and_common_names():
+    meta = observation_to_metadata(OBSERVATION, hierarchical=True, common_names=True)
+    hier_tags = meta.keyword_meta.hier_keywords
+    assert 'Animalia' in hier_tags
+    assert 'Animals' in hier_tags
+
+
 def test_observation_to_metadata__taxon_only():
     obs = Observation(taxon=SPECIES)
     meta = observation_to_metadata(obs)
