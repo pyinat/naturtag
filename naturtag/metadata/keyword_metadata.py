@@ -56,13 +56,12 @@ class KeywordMetadata:
 
     def _get_hierarchical_keywords(self) -> list[str]:
         """Get all hierarchical keywords as flat strings.
-        Also account for root node (single value without '|')
+        Also account for root nodes (single values that are the root of a hierarchical chain).
         """
         hier_keywords = [kw for kw in self.keywords if '|' in kw]
-        if len(hier_keywords) > 1:
-            root = hier_keywords[0].split('|')[0]
-            hier_keywords.insert(0, root)
-        return hier_keywords
+        # Prepend each chain's root before its first entry; dict.fromkeys preserves order and deduplicates
+        entries = (item for kw in hier_keywords for item in (kw.split('|')[0], kw))
+        return list(dict.fromkeys(entries))
 
     def _get_normal_keywords(self) -> list[str]:
         """Get all single-value keywords that are neither a key-value pair nor hierarchical"""

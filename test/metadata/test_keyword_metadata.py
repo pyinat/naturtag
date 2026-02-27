@@ -40,6 +40,19 @@ def test_hier_keywords():
     assert 'Animalia' in kw.hier_keywords  # root node
 
 
+def test_hier_keywords__multiple_chains():
+    kw = KeywordMetadata(
+        keywords=[
+            'Animalia|Chordata',
+            'Animalia|Chordata|Mammalia',
+            'Animals|Chordates',
+            'Animals|Chordates|Mammals',
+        ]
+    )
+    assert 'Animalia' in kw.hier_keywords
+    assert 'Animals' in kw.hier_keywords
+
+
 def test_normal_keywords():
     kw = KeywordMetadata(
         keywords=[

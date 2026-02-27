@@ -28,6 +28,7 @@
 **Other Bugfixes:**
 * Fix several multithreading issues potentially leading to segfaults
 * Fix issue with canceling other background tasks when canceling taxonomy load
+* Fix missing common name at root of hierarchical keywords
 
 ## 0.8.1 (2025-01-02)
 * Minor fixes for packaging and first-time setup
