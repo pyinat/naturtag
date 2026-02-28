@@ -10,9 +10,11 @@ from attr import define, field
 from cattrs.preconf import json
 from pyinaturalist import TaxonCounts
 from pyinaturalist_convert._models import Base
-from pyinaturalist_convert.db import create_table, get_session
-from sqlalchemy import Column, Integer, delete, select, types
+from pyinaturalist_convert.db import create_table
+from sqlalchemy import Column, Integer, create_engine, delete, select, types
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
 
 from naturtag.constants import (
     DB_PATH,
@@ -127,7 +129,7 @@ class AppState:
         logger.debug(f'Reading app state from {db_path}')
 
         try:
-            with get_session(db_path) as session:
+            with _get_session(db_path) as session:
                 state_json = session.execute(select(DbAppState)).first()[0].content
         except (TypeError, OperationalError):
             new_state = AppState()
@@ -143,7 +145,7 @@ class AppState:
         logger.debug(f'Writing app state to {self.db_path}')
         create_table(DbAppState, self.db_path)
         state_json = JsonConverter.unstructure(self)
-        with get_session(self.db_path) as session:
+        with _get_session(self.db_path) as session:
             session.execute(delete(DbAppState))
             session.add(DbAppState(content=state_json))
             session.commit()
@@ -157,6 +159,12 @@ class DbAppState:
 
     id = Column(Integer, default=0, primary_key=True)
     content = Column(types.JSON)
+
+
+def _get_session(db_path: Path) -> Session:
+    """Create a SQLAlchemy session with NullPoo, so connections are closed immediately"""
+    engine = create_engine(f'sqlite:///{db_path}', poolclass=NullPool)
+    return Session(engine)
 
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:

@@ -38,8 +38,8 @@ def setup(
         overwrite: Overwrite an existing taxon database, if it already exists
         download: Download taxon data (full text search + basic taxon details)
     """
-    if db_path.is_file() and not overwrite:
-        logger.warning('Database already exists; attempting to update')
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    db_exists = db_path.is_file()  # Check before file is touched by AppState
 
     # Check if setup is needed
     app_state = AppState.read(db_path)
@@ -58,6 +58,10 @@ def setup(
             conn.execute('DROP TABLE IF EXISTS taxon_fts')
             conn.execute('DROP TABLE IF EXISTS photo')
             conn.execute('DROP TABLE IF EXISTS user')
+    if db_exists:
+        logger.warning('Database already exists; attempting to update')
+    else:
+        logger.warning('Initializing database')
 
     # Create SQLite file with tables if they don't already exist
     create_tables(db_path)
@@ -77,9 +81,11 @@ def setup(
 # TODO: Option to download full taxon db (all languages)
 def _download_taxon_db():
     logger.info(f'Downloading {TAXON_DB_URL} to {PACKAGED_TAXON_DB}')
-    r = requests.get(TAXON_DB_URL, stream=True)
-    with open(PACKAGED_TAXON_DB, 'wb') as f:
-        f.write(r.content)
+    with requests.get(TAXON_DB_URL, stream=True, timeout=60) as r:
+        r.raise_for_status()
+        with open(PACKAGED_TAXON_DB, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=65536):
+                f.write(chunk)
 
 
 def _load_taxon_db(db_path: Path, download: bool = False):
