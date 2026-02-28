@@ -81,9 +81,11 @@ def setup(
 # TODO: Option to download full taxon db (all languages)
 def _download_taxon_db():
     logger.info(f'Downloading {TAXON_DB_URL} to {PACKAGED_TAXON_DB}')
-    r = requests.get(TAXON_DB_URL, stream=True)
-    with open(PACKAGED_TAXON_DB, 'wb') as f:
-        f.write(r.content)
+    with requests.get(TAXON_DB_URL, stream=True, timeout=60) as r:
+        r.raise_for_status()
+        with open(PACKAGED_TAXON_DB, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=65536):
+                f.write(chunk)
 
 
 def _load_taxon_db(db_path: Path, download: bool = False):
