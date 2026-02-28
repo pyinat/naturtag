@@ -32,6 +32,7 @@
 * Fix issue with canceling other background tasks when canceling taxonomy load
 * Fix missing common name at root of hierarchical keywords
 * Fix missing subspecies in hierarchical keywords
+* Fix handling malformed `file://` URIs where path is parsed as netloc
 
 ## 0.8.1 (2025-01-02)
 * Minor fixes for packaging and first-time setup
