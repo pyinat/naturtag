@@ -73,22 +73,16 @@ class MainWindow(QMainWindow):
         self.app = app
 
         # Controllers
-        self.settings_menu = SettingsMenu()
         self.image_controller = ImageController()
         self.taxon_controller = TaxonController()
         self.observation_controller = ObservationController()
+        self._init_settings_menu()
 
         # Connect controllers and their widgets to statusbar info
-        self.settings_menu.on_message.connect(self.info)
         self.image_controller.on_message.connect(self.info)
         self.image_controller.gallery.on_message.connect(self.info)
         self.taxon_controller.on_message.connect(self.info)
         self.observation_controller.on_message.connect(self.info)
-
-        # Settings that take effect immediately
-        self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
-        self.settings_menu.dark_mode.on_click.connect(set_theme)
-        self.settings_menu.show_logs.on_click.connect(self.toggle_log_tab)
 
         # Tabs
         self.tabs = QTabWidget()
@@ -309,8 +303,18 @@ class MainWindow(QMainWindow):
             setup(self.app.settings, overwrite=True)
             self.info('Database reset complete')
 
+    def _init_settings_menu(self):
+        """Create (or recreate) the settings menu and connect its signals."""
+        self.settings_menu = SettingsMenu()
+        self.settings_menu.on_message.connect(self.info)
+        self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
+        self.settings_menu.dark_mode.on_click.connect(set_theme)
+        self.settings_menu.show_logs.on_click.connect(self.toggle_log_tab)
+
     def show_settings(self):
-        """Show the settings menu"""
+        """Re-read settings from disk, rebuild the settings menu, and show it."""
+        self.app.settings = Settings.read(self.app.settings.path)
+        self._init_settings_menu()
         self.settings_menu.show()
 
     def switch_tab_observations(self):

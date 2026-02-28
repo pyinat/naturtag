@@ -9,6 +9,7 @@
 * General performance and stability improvements
 * Improve performance of loading observations (both background download and UI updates)
 * Resume previously interrupted observation downloads
+* Re-read `settings.yml` if manually changed on disk before opening settings menu
 
 **CLI:**
 * Add progress bars for `tag` and `refresh` commands
