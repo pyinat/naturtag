@@ -1,6 +1,7 @@
 """Tests for naturtag/storage/setup.py"""
 
 import sqlite3
+import tarfile
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
@@ -198,6 +199,23 @@ def test_load_taxon_db(db_path, mock_load_taxon_db_deps):
     mock_load_taxon_db_deps['conn'].execute.assert_any_call('DELETE FROM taxon')
     mock_load_taxon_db_deps['conn'].execute.assert_any_call('DELETE FROM taxon_fts')
     mock_vacuum.assert_called_once_with(['taxon', 'taxon_fts'], db_path)
+
+
+def test_load_taxon_db__corrupt_tar(db_path, mock_load_taxon_db_deps, tmp_path):
+    """A corrupt tar file is deleted so the next run with download=True can refetch it."""
+    corrupt_tar = tmp_path / 'taxonomy.tar.gz'
+    corrupt_tar.touch()
+
+    with (
+        patch('naturtag.storage.setup.PACKAGED_TAXON_DB', corrupt_tar),
+        patch('naturtag.storage.setup.TarFile') as mock_tarfile_cls,
+    ):
+        mock_tarfile_cls.open.return_value.__enter__.side_effect = tarfile.TarError('bad file')
+
+        with pytest.raises(tarfile.TarError):
+            _load_taxon_db(db_path, download=False)
+
+    assert not corrupt_tar.exists()
 
 
 def test_download_taxon_db(tmp_path, requests_mock):
