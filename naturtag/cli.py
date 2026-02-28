@@ -266,7 +266,6 @@ def db(download, force):
     nt -vv setup db -f -d
     ```
     """
-    click.echo('Initializing database...')
     setup(overwrite=force, download=download)
 
 

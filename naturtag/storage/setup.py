@@ -39,8 +39,7 @@ def setup(
         download: Download taxon data (full text search + basic taxon details)
     """
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    if db_path.is_file() and not overwrite:
-        logger.warning('Database already exists; attempting to update')
+    db_exists = db_path.is_file()  # Check before file is touched by AppState
 
     # Check if setup is needed
     app_state = AppState.read(db_path)
@@ -59,6 +58,10 @@ def setup(
             conn.execute('DROP TABLE IF EXISTS taxon_fts')
             conn.execute('DROP TABLE IF EXISTS photo')
             conn.execute('DROP TABLE IF EXISTS user')
+    if db_exists:
+        logger.warning('Database already exists; attempting to update')
+    else:
+        logger.warning('Initializing database')
 
     # Create SQLite file with tables if they don't already exist
     create_tables(db_path)

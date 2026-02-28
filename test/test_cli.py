@@ -191,7 +191,6 @@ def test_refresh(mock_setup, mock_refresh_tags, runner, flags, images, expected_
 def test_setup_db(mock_setup, runner, flags, expected_kwargs):
     result = runner.invoke(main, ['setup', 'db', *flags], catch_exceptions=False)
     assert result.exit_code == 0
-    assert 'Initializing database' in result.output
     mock_setup.assert_called_once_with(**expected_kwargs)
 
 
