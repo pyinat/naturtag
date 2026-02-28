@@ -100,35 +100,35 @@ jobs:
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag-${{ matrix.dist_name }}.tar.gz
           path: naturtag-${{ matrix.dist_name }}.tar.gz
 
       - name: Upload disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag.dmg
           path: dist/naturtag.dmg
 
       - name: Upload FPM workflow artifacts (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag-fpm
           path: dist/naturtag.*
 
       - name: Upload AppImage (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag.AppImage
           path: dist/naturtag.AppImage
 
       - name: Upload Windows installer
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: naturtag-installer.exe
           path: dist/naturtag-installer.exe
@@ -141,7 +141,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: naturtag*
           path: release-assets
