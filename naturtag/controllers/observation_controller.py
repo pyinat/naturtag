@@ -188,7 +188,10 @@ class ObservationController(BaseController):
         self._page_cache[self.page] = result.observations
         if len(self._page_cache) > PAGE_CACHE_MAX:
             self._page_cache.popitem(last=False)
-        self.total_results = result.total_results
+        # Use the DB count only if it's higher than previous count; the DB count grows during
+        # download and must not overwrite the API-fetched total.
+        if result.total_results > self.total_results:
+            self.total_results = result.total_results
         self.total_pages = (
             math.ceil(self.total_results / DEFAULT_DISPLAY_PAGE_SIZE) if self.total_results else 0
         )
