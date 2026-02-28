@@ -13,7 +13,7 @@
 * Add progress bars for `tag` and `refresh` commands
 * Suppress exiv2 warnings about corrupt EXIF thumbnails (except in verbose mode)
 
-**Packaging:**
+**Packaging/Setup:**
 * Include locale data in PyInstaller packages
 * Update packaged taxonomy db with iNaturalist data from February 2026
 * Upgrade to Qt 6.10
@@ -22,6 +22,7 @@
 * Build pacman package for Arch Linux
 * Build AppImage package for other Linux distros not covered by other formats (replaces snap package)
 * Automate Windows installer build with Inno Setup (replaces Actual Installer)
+* Fix an issue recovering from a failed db setup
 * Fix issue with first-time installation on Windows
 * Fix PyPI package with unresolvable constraints when installed with pip
 * Fix Gatekeeper-related issues with macOS DMG image
