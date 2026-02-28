@@ -14,13 +14,14 @@
 * Suppress exiv2 warnings about corrupt EXIF thumbnails (except in verbose mode)
 
 **Packaging/Setup:**
+* Add menu button to check for newer stable release (Help > Check for Updates)
 * Include locale data in PyInstaller packages
 * Update packaged taxonomy db with iNaturalist data from February 2026
 * Upgrade to Qt 6.10
 * Include database migrations for future SQLite db updates
-* Add menu button to check for newer stable release (Help > Check for Updates)
 * Build pacman package for Arch Linux
 * Build AppImage package for other Linux distros not covered by other formats (replaces snap package)
+* Include wheel in GitHub release artifacts (for pre-release testing)
 * Automate Windows installer build with Inno Setup (replaces Actual Installer)
 * Fix an issue recovering from a failed db setup
 * Fix issue with first-time installation on Windows
@@ -32,6 +33,7 @@
 * Fix issue with canceling other background tasks when canceling taxonomy load
 * Fix missing common name at root of hierarchical keywords
 * Fix missing subspecies in hierarchical keywords
+* Fix handling malformed `file://` URIs where path is parsed as netloc
 
 ## 0.8.1 (2025-01-02)
 * Minor fixes for packaging and first-time setup

@@ -133,7 +133,8 @@ def uri_to_path(path_or_uri) -> Path:
     if isinstance(path_or_uri, Path):
         path = path_or_uri
     elif str(path_or_uri).startswith('file://'):
-        path = Path(unquote_plus(urlparse(str(path_or_uri)).path))
+        parsed = urlparse(str(path_or_uri))
+        path = Path(unquote_plus(parsed.path or parsed.netloc))
     else:
         path = Path(path_or_uri)
 
