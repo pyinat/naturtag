@@ -38,6 +38,7 @@ def setup(
         overwrite: Overwrite an existing taxon database, if it already exists
         download: Download taxon data (full text search + basic taxon details)
     """
+    db_path.parent.mkdir(parents=True, exist_ok=True)
     if db_path.is_file() and not overwrite:
         logger.warning('Database already exists; attempting to update')
 

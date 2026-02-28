@@ -31,13 +31,13 @@ dependencies = [
     'pillow>=10.0',
     'pyexiv2>=2.10',
     'pyinaturalist>=0.21.1',
-    'pyinaturalist-convert>=0.7.5',
+    'pyinaturalist-convert[db]>=0.8.1',
     'requests-ratelimiter>=0.6,<0.9',
     'pyside6==6.10.1',
     'pyqtdarktheme-fork~=2.3.4',
     'pyyaml>=6.0',
     'qtawesome~=1.4.0',
-    'sqlalchemy~=2.0.45',
+    'sqlalchemy~=2.0.47',
     'tablib~=3.9',
 ]
 
