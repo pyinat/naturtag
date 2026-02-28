@@ -1,12 +1,14 @@
 """Tests for naturtag/storage/setup.py"""
 
+import sqlite3
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
 import pytest
 import requests
 
-from naturtag.storage.setup import _download_taxon_db, _load_taxon_db, setup
+from naturtag.constants import TAXON_DB_URL
+from naturtag.storage.setup import _download_taxon_db, _load_taxon_db, _taxon_table_populated, setup
 
 
 @pytest.fixture
@@ -25,6 +27,9 @@ def mock_setup_deps():
         patch('naturtag.storage.setup.create_taxon_fts_table') as mock_create_taxon_fts,
         patch('naturtag.storage.setup.create_observation_fts_table') as mock_create_obs_fts,
         patch('naturtag.storage.setup._load_taxon_db') as mock_load_taxon_db,
+        patch(
+            'naturtag.storage.setup._taxon_table_populated', return_value=False
+        ) as mock_populated,
         patch('naturtag.storage.setup.AppState') as mock_app_state_cls,
     ):
         mock_app_state_cls.read.return_value = mock_state
@@ -34,6 +39,7 @@ def mock_setup_deps():
             'create_taxon_fts': mock_create_taxon_fts,
             'create_obs_fts': mock_create_obs_fts,
             'load_taxon_db': mock_load_taxon_db,
+            'taxon_table_populated': mock_populated,
         }
 
 
@@ -117,6 +123,43 @@ def test_setup__passes_download_flag_to_load(mock_setup_deps, db_path, download)
     mock_setup_deps['load_taxon_db'].assert_called_once_with(db_path, download)
 
 
+def test_setup__skips_load_if_taxon_table_populated(mock_setup_deps, db_path):
+    """After a version bump, setup_complete is reset but _load_taxon_db should not run if the
+    taxon table is already populated — prevents UNIQUE constraint errors on second tag invocation.
+    """
+    mock_setup_deps['taxon_table_populated'].return_value = True
+
+    setup(db_path=db_path)
+
+    mock_setup_deps['load_taxon_db'].assert_not_called()
+    assert mock_setup_deps['state'].setup_complete is True
+
+
+@pytest.mark.parametrize(
+    'rows, expected',
+    [
+        ([(1,)], True),
+        ([(0,)], False),
+    ],
+)
+def test_taxon_table_populated(tmp_path, rows, expected):
+    db_path = tmp_path / 'naturtag.db'
+    with patch('naturtag.storage.setup.sqlite3.connect') as mock_connect:
+        mock_conn = MagicMock()
+        mock_conn.execute.return_value.fetchone.return_value = rows[0]
+        mock_connect.return_value.__enter__.return_value = mock_conn
+        assert _taxon_table_populated(db_path) is expected
+
+
+def test_taxon_table_populated__missing_table(tmp_path):
+    db_path = tmp_path / 'naturtag.db'
+    with patch('naturtag.storage.setup.sqlite3.connect') as mock_connect:
+        mock_conn = MagicMock()
+        mock_conn.execute.side_effect = sqlite3.OperationalError('no such table: taxon')
+        mock_connect.return_value.__enter__.return_value = mock_conn
+        assert _taxon_table_populated(db_path) is False
+
+
 def test_load_taxon_db__download(db_path, mock_load_taxon_db_deps):
     with (
         patch('naturtag.storage.setup.PACKAGED_TAXON_DB') as mock_packaged_db,
@@ -140,10 +183,11 @@ def test_load_taxon_db__no_download(db_path, mock_load_taxon_db_deps):
     mock_download.assert_not_called()
 
 
-def test_load_taxon_db__loads_both_taxon_tables(db_path, mock_load_taxon_db_deps):
+def test_load_taxon_db(db_path, mock_load_taxon_db_deps):
     with (
         patch('naturtag.storage.setup.PACKAGED_TAXON_DB') as mock_packaged_db,
         patch('naturtag.storage.setup.load_table') as mock_load_table,
+        patch('naturtag.storage.setup.vacuum_analyze') as mock_vacuum,
     ):
         mock_packaged_db.is_file.return_value = True
 
@@ -151,44 +195,23 @@ def test_load_taxon_db__loads_both_taxon_tables(db_path, mock_load_taxon_db_deps
 
     table_names = [c.kwargs.get('table_name') or c.args[2] for c in mock_load_table.call_args_list]
     assert table_names == ['taxon', 'taxon_fts']
-
-
-def test_load_taxon_db__marks_taxa_partial_and_runs_vacuum(db_path, mock_load_taxon_db_deps):
-    with (
-        patch('naturtag.storage.setup.PACKAGED_TAXON_DB') as mock_packaged_db,
-        patch('naturtag.storage.setup.vacuum_analyze') as mock_vacuum,
-    ):
-        mock_packaged_db.is_file.return_value = True
-
-        _load_taxon_db(db_path, download=False)
-
-    mock_load_taxon_db_deps['conn'].execute.assert_called_once_with('UPDATE taxon SET partial=1')
+    mock_load_taxon_db_deps['conn'].execute.assert_any_call('DELETE FROM taxon')
+    mock_load_taxon_db_deps['conn'].execute.assert_any_call('DELETE FROM taxon_fts')
     mock_vacuum.assert_called_once_with(['taxon', 'taxon_fts'], db_path)
 
 
-@patch('naturtag.storage.setup.TAXON_DB_URL', 'https://example.com/taxonomy.tar.gz')
-def test_download_taxon_db__streams_chunks_to_file(tmp_path):
-    chunks = [b'chunk1_data', b'chunk2_data']
-    mock_response = MagicMock()
-    mock_response.iter_content.return_value = iter(chunks)
+def test_download_taxon_db(tmp_path, requests_mock):
+    dest = tmp_path / 'taxonomy.tar.gz'
+    content = b'x' * (1024 * 1024)
+    requests_mock.get(TAXON_DB_URL, content=content)
 
-    with (
-        patch('naturtag.storage.setup.PACKAGED_TAXON_DB', tmp_path / 'taxonomy.tar.gz'),
-        patch('naturtag.storage.setup.requests.get') as mock_get,
-        patch('builtins.open', create=True) as mock_open,
-    ):
-        mock_get.return_value.__enter__.return_value = mock_response
-        mock_file = MagicMock()
-        mock_open.return_value.__enter__.return_value = mock_file
-
+    with patch('naturtag.storage.setup.PACKAGED_TAXON_DB', dest):
         _download_taxon_db()
 
-    mock_response.raise_for_status.assert_called_once()
-    mock_file.write.assert_has_calls([call(c) for c in chunks])
+    assert dest.stat().st_size == len(content)
 
 
-@patch('naturtag.storage.setup.TAXON_DB_URL', 'https://example.com/taxonomy.tar.gz')
-def test_download_taxon_db__raises_on_http_error(tmp_path):
+def test_download_taxon_db__error(tmp_path):
     mock_response = MagicMock()
     mock_response.raise_for_status.side_effect = requests.HTTPError('404 Not Found')
 

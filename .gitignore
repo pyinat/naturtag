@@ -12,6 +12,7 @@ __pycache__
 _build/
 build/
 pip-wheel-metadata/
+pytest-of-*/
 dist/
 docs/modules/
 docs/requirements.txt

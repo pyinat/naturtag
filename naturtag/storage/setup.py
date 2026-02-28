@@ -67,7 +67,10 @@ def setup(
     create_tables(db_path)
     create_taxon_fts_table(db_path)
     create_observation_fts_table(db_path)
-    _load_taxon_db(db_path, download)
+    if _taxon_table_populated(db_path) and not overwrite:
+        logger.debug('Taxon table already populated, skipping load')
+    else:
+        _load_taxon_db(db_path, download)
 
     app_state.setup_complete = True
     app_state.last_obs_check = None
@@ -76,9 +79,23 @@ def setup(
     return app_state
 
 
+def _taxon_table_populated(db_path: Path) -> bool:
+    """Test whether the taxon table exists and contains at least one row.
+    This guards against a case where taxonomy was loaded but setup otherwise didn't complete
+    successfully, so setup_complete=False
+    """
+    try:
+        with sqlite3.connect(db_path) as conn:
+            count = conn.execute('SELECT COUNT(*) FROM taxon LIMIT 1').fetchone()[0]
+            return count > 0
+    except sqlite3.OperationalError:
+        return False
+
+
 # TODO: Currently this isn't exposed through the UI; requires calling `setup(download=True)` or
-#  `nt setup db --download``. Not sure yet if this is a good idea to include.
-# TODO: Option to download full taxon db (all languages)
+#   `nt setup db --download``. Not sure yet if this is a good idea to include.
+# TODO: Option to download full taxon db (all languages);
+#   can fetch from latest GitHub release artifacts?
 def _download_taxon_db():
     logger.info(f'Downloading {TAXON_DB_URL} to {PACKAGED_TAXON_DB}')
     with requests.get(TAXON_DB_URL, stream=True, timeout=60) as r:
@@ -89,8 +106,9 @@ def _download_taxon_db():
 
 
 def _load_taxon_db(db_path: Path, download: bool = False):
-    """Load taxon tables from packaged data, if available"""
-    # Optionally download data if it doesn't exist locally
+    """Load taxon tables from packaged data, if available.
+    Optionally download data if it doesn't exist locally.
+    """
     if not PACKAGED_TAXON_DB.is_file():
         if download:
             _download_taxon_db()
@@ -100,6 +118,10 @@ def _load_taxon_db(db_path: Path, download: bool = False):
                 'taxon text search and autocomplete will not be available'
             )
             return
+
+    with sqlite3.connect(db_path) as conn:
+        conn.execute('DELETE FROM taxon')
+        conn.execute('DELETE FROM taxon_fts')
 
     with TemporaryDirectory() as tmp_dir_name:
         logger.info('Loading packaged taxon data and text search index')
