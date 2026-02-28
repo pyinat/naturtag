@@ -160,10 +160,6 @@ class WelcomeDialog(QDialog):
             self.username_input.setFocus()
             return
 
-        # Save the username immediately
-        self.app.settings.username = username
-        self.app.settings.write()
-
         self._start_count(username)
 
         # Fetch total count from API in a background thread
@@ -186,6 +182,12 @@ class WelcomeDialog(QDialog):
     def _on_count_received(self, total: int):
         """API returned the total observation count; start downloading."""
         logger.info(f'Total observations for user: {total}')
+
+        # Save username now that we've confirmed it's valid
+        username = self.username_input.text().strip()
+        self.app.settings.username = username
+        self.app.settings.write()
+
         self._start_download(total)
 
         # Connect to live download progress
@@ -217,7 +219,7 @@ class WelcomeDialog(QDialog):
         self.background_button.hide()
 
         self.error_label.setText(
-            f'Could not fetch observations for <b>{self.app.settings.username}</b>. '
+            f'Could not fetch observations for <b>{self.username_input.text().strip()}</b>. '
             'Please check the username and your internet connection.'
         )
         self.error_label.show()
