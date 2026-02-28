@@ -7,13 +7,14 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
     QProgressBar,
-    QPushButton,
-    QSizePolicy,
     QVBoxLayout,
 )
+
+from naturtag.widgets.layouts import GroupBoxLayout
 
 logger = getLogger(__name__)
 
@@ -39,58 +40,69 @@ class WelcomeDialog(QDialog):
         self.observation_controller = observation_controller
         self._phase = _PHASE_INPUT
 
-        self.setWindowTitle('Download iNaturalist Observations')
+        self.setWindowTitle('iNaturalist Setup')
         self.setMinimumWidth(420)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 
         layout = QVBoxLayout(self)
         layout.setSpacing(12)
+        layout.setContentsMargins(20, 16, 20, 16)
+
+        # Heading
+        title_label = QLabel('Download iNaturalist Observations')
+        title_label.setObjectName('h2')
+        layout.addWidget(title_label)
 
         # Part 1: username input
         self.intro_label = QLabel('Enter your iNaturalist username to download your observations.')
         self.intro_label.setWordWrap(True)
         layout.addWidget(self.intro_label)
 
+        username_row = QHBoxLayout()
+        self.username_label = QLabel('Username:')
+        username_row.addWidget(self.username_label)
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText('iNaturalist username')
         self.username_input.returnPressed.connect(self._on_ok)
-        layout.addWidget(self.username_input)
-
-        # Part 2: status label and progress bar (hidden initially)
-        self.status_label = QLabel()
-        self.status_label.setWordWrap(True)
-        self.status_label.hide()
-        layout.addWidget(self.status_label)
-
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(0)  # indeterminate until we know the total
-        self.progress_bar.hide()
-        layout.addWidget(self.progress_bar)
-
-        self.background_note = QLabel('You can use the app while downloading continues.')
-        self.background_note.setWordWrap(True)
-        self.background_note.hide()
-        layout.addWidget(self.background_note)
+        username_row.addWidget(self.username_input)
+        layout.addLayout(username_row)
 
         # Error label (hidden until needed)
         self.error_label = QLabel()
         self.error_label.setWordWrap(True)
-        self.error_label.setStyleSheet('color: red;')
+        self.error_label.setObjectName('error_label')
         self.error_label.hide()
         layout.addWidget(self.error_label)
 
-        # Button box: OK/Cancel in part 1; "Run in background" in part 2
+        # Part 2: progress group (hidden until count starts)
+        self.status_label = QLabel()
+        self.status_label.setWordWrap(True)
+        self.status_label.setMinimumHeight(40)
+
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(0)  # indeterminate until we know the total
+
+        self.background_note = QLabel('You can use the app while downloading continues.')
+        self.background_note.setWordWrap(True)
+
+        self.sync_group = GroupBoxLayout()
+        self.sync_group.addWidget(self.status_label)
+        self.sync_group.addWidget(self.progress_bar)
+        self.sync_group.addWidget(self.background_note)
+        layout.addWidget(self.sync_group.box)
+        self.sync_group.box.hide()
+
+        # Button box: OK/Cancel in part 1; "Run in background" added for part 2
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.button_box.accepted.connect(self._on_ok)
         self.button_box.rejected.connect(self._on_cancel)
-        layout.addWidget(self.button_box)
-
-        self.background_button = QPushButton('Run in background')
-        self.background_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.background_button = self.button_box.addButton(
+            'Run in background', QDialogButtonBox.AcceptRole
+        )
         self.background_button.clicked.connect(self.accept)
         self.background_button.hide()
-        layout.addWidget(self.background_button)
+        layout.addWidget(self.button_box)
 
     # Transitions
     # ----------------------------------------
@@ -100,14 +112,17 @@ class WelcomeDialog(QDialog):
         self._phase = 'counting'
 
         self.intro_label.hide()
+        self.username_label.hide()
         self.username_input.hide()
-        self.button_box.hide()
+        self.button_box.button(QDialogButtonBox.Ok).hide()
+        self.button_box.button(QDialogButtonBox.Cancel).hide()
         self.error_label.hide()
 
         self.status_label.setText(f'Checking observations for <b>{username}</b>…')
-        self.status_label.show()
         self.progress_bar.setMaximum(0)  # indeterminate
-        self.progress_bar.show()
+        self.background_note.hide()
+        self.sync_group.box.show()
+        self.adjustSize()
 
     def _start_download(self, total: int):
         """Switch to the determinate progress bar now that we know the total."""
@@ -121,12 +136,16 @@ class WelcomeDialog(QDialog):
         self.background_button.show()
 
     def _update_dl_label(self, loaded: int, total: int):
-        text = f'{loaded} / {total} observations downloaded'
+        self.progress_bar.setFormat(f'%p%  ({loaded:,}/{total:,})')
         if loaded > 0 and total > loaded:
             elapsed = monotonic() - self._sync_start_time
             remaining_secs = elapsed / loaded * (total - loaded)
-            text += f' — about {_format_duration(remaining_secs)} remaining'
-        self.status_label.setText(text)
+            self.status_label.setText(
+                '<b style="color: palette(highlight);">~'
+                f'{_format_duration(remaining_secs)} remaining</b>'
+            )
+        else:
+            self.status_label.clear()
 
     # Button handlers
     # ----------------------------------------
@@ -188,11 +207,14 @@ class WelcomeDialog(QDialog):
         logger.warning('Could not fetch observation count:', exc_info=exc)
         self._phase = _PHASE_INPUT
 
-        self.progress_bar.hide()
-        self.status_label.hide()
+        self.sync_group.box.hide()
+        self.adjustSize()
         self.intro_label.show()
+        self.username_label.show()
         self.username_input.show()
-        self.button_box.show()
+        self.button_box.button(QDialogButtonBox.Ok).show()
+        self.button_box.button(QDialogButtonBox.Cancel).show()
+        self.background_button.hide()
 
         self.error_label.setText(
             f'Could not fetch observations for <b>{self.app.settings.username}</b>. '
@@ -220,4 +242,4 @@ class WelcomeDialog(QDialog):
 
 def _format_duration(seconds: float) -> str:
     minutes, secs = divmod(int(seconds), 60)
-    return f'{minutes}:{secs}'
+    return f'{minutes}m {secs:02d}s'
