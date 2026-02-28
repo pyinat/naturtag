@@ -1,6 +1,7 @@
 """First-run dialog that collects the username and shows live observation download progress"""
 
 from logging import getLogger
+from time import monotonic
 
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
@@ -111,6 +112,7 @@ class WelcomeDialog(QDialog):
     def _start_download(self, total: int):
         """Switch to the determinate progress bar now that we know the total."""
         self._phase = _PHASE_SYNCING
+        self._sync_start_time = monotonic()
 
         self.progress_bar.setMaximum(total if total > 0 else 1)
         self.progress_bar.setValue(0)
@@ -119,7 +121,12 @@ class WelcomeDialog(QDialog):
         self.background_button.show()
 
     def _update_dl_label(self, loaded: int, total: int):
-        self.status_label.setText(f'{loaded} / {total} observations downloaded')
+        text = f'{loaded} / {total} observations downloaded'
+        if loaded > 0 and total > loaded:
+            elapsed = monotonic() - self._sync_start_time
+            remaining_secs = elapsed / loaded * (total - loaded)
+            text += f' — about {_format_duration(remaining_secs)} remaining'
+        self.status_label.setText(text)
 
     # Button handlers
     # ----------------------------------------
@@ -209,3 +216,8 @@ class WelcomeDialog(QDialog):
         """Auto-close when the download completes."""
         logger.info('Download finished; closing sync dialog')
         self.accept()
+
+
+def _format_duration(seconds: float) -> str:
+    minutes, secs = divmod(int(seconds), 60)
+    return f'{minutes}:{secs}'
