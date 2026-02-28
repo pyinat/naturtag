@@ -5,6 +5,7 @@ from time import monotonic
 
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (
+    QComboBox,
     QDialog,
     QDialogButtonBox,
     QHBoxLayout,
@@ -14,6 +15,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from naturtag.utils import read_display_locales
 from naturtag.widgets.layouts import GroupBoxLayout
 
 logger = getLogger(__name__)
@@ -67,6 +69,18 @@ class WelcomeDialog(QDialog):
         username_row.addWidget(self.username_input)
         layout.addLayout(username_row)
 
+        locales = read_display_locales()
+        self._locale_lookup = {v: k for k, v in locales.items()}
+        locale_row = QHBoxLayout()
+        self.locale_label = QLabel('Locale:')
+        locale_row.addWidget(self.locale_label)
+        self.locale_combo = QComboBox()
+        self.locale_combo.addItems(locales.values())
+        current_locale = locales.get(self.app.settings.locale, self.app.settings.locale)
+        self.locale_combo.setCurrentText(current_locale)
+        locale_row.addWidget(self.locale_combo)
+        layout.addLayout(locale_row)
+
         # Error label (hidden until needed)
         self.error_label = QLabel()
         self.error_label.setWordWrap(True)
@@ -114,6 +128,8 @@ class WelcomeDialog(QDialog):
         self.intro_label.hide()
         self.username_label.hide()
         self.username_input.hide()
+        self.locale_label.hide()
+        self.locale_combo.hide()
         self.button_box.button(QDialogButtonBox.Ok).hide()
         self.button_box.button(QDialogButtonBox.Cancel).hide()
         self.error_label.hide()
@@ -183,9 +199,12 @@ class WelcomeDialog(QDialog):
         """API returned the total observation count; start downloading."""
         logger.info(f'Total observations for user: {total}')
 
-        # Save username now that we've confirmed it's valid
+        # Save username and locale now that we've confirmed the username is valid
         username = self.username_input.text().strip()
         self.app.settings.username = username
+        self.app.settings.locale = self._locale_lookup.get(
+            self.locale_combo.currentText(), self.app.settings.locale
+        )
         self.app.settings.write()
 
         self._start_download(total)
@@ -214,6 +233,8 @@ class WelcomeDialog(QDialog):
         self.intro_label.show()
         self.username_label.show()
         self.username_input.show()
+        self.locale_label.show()
+        self.locale_combo.show()
         self.button_box.button(QDialogButtonBox.Ok).show()
         self.button_box.button(QDialogButtonBox.Cancel).show()
         self.background_button.hide()

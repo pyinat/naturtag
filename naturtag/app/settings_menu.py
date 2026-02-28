@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 
 from naturtag.controllers import BaseController
 from naturtag.storage import Settings
-from naturtag.utils import read_locales
+from naturtag.utils import read_display_locales
 from naturtag.widgets import FAIcon, HorizontalLayout, ToggleSwitch, VerticalLayout
 
 logger = getLogger(__name__)
@@ -41,7 +41,7 @@ class SettingsMenu(BaseController):
 
         self.settings_layout = VerticalLayout(self.content)
         # Dictionary of locale codes and display names
-        self.locales = {k: f'{v} ({k})' for k, v in read_locales().items()}
+        self.locales = read_display_locales()
 
         # iNaturalist settings
         inat = self.add_group('iNaturalist', self.settings_layout)

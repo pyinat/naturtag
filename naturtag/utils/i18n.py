@@ -41,3 +41,8 @@ def read_locales() -> dict[str, str]:
     except IOError as e:
         logger.warning(e)
         return {'en': 'English'}
+
+
+def read_display_locales() -> dict[str, str]:
+    """Get a mapping of locale code -> display string"""
+    return {k: f'{v} ({k})' for k, v in read_locales().items()}
