@@ -8,7 +8,7 @@ from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from naturtag.constants import DEFAULT_PAGE_SIZE, PAGE_CACHE_MAX
+from naturtag.constants import DEFAULT_DISPLAY_PAGE_SIZE, PAGE_CACHE_MAX
 from naturtag.controllers import BaseController, ObservationInfoSection
 from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList
 from naturtag.widgets.style import fa_icon
@@ -27,6 +27,8 @@ class DbPageResult:
 
 class ObservationController(BaseController):
     on_view_taxon = Signal(Taxon)  #: Request to switch to taxon tab
+    on_sync_progress = Signal(int, int)  #: (loaded_count, total_count) as pages arrive
+    on_sync_finished = Signal()  #: Emitted when the background sync completes
 
     def __init__(self):
         super().__init__()
@@ -45,6 +47,7 @@ class ObservationController(BaseController):
         self.total_pages = 0
         self.total_results = 0
         self.loaded_pages = 0
+        self.loaded_obs = 0  # running count of observations received from API during sync
         self._page_cache: OrderedDict[int, list[Observation]] = OrderedDict()
         self._sync_in_progress: bool = False
 
@@ -132,6 +135,7 @@ class ObservationController(BaseController):
         future = self.app.threadpool.schedule_paginator(
             self._sync_observations,
             priority=QThread.LowPriority,
+            total_results=self.total_results or None,
         )
         future.on_result.connect(self.on_sync_page_received)
         future.on_complete.connect(self.on_sync_complete)
@@ -152,6 +156,7 @@ class ObservationController(BaseController):
             return
         self.page = 1
         self.loaded_pages = 0
+        self.loaded_obs = 0
         self._page_cache.clear()
         self.app.state.sync_resume_id = None
         self.load_observations_from_db()
@@ -185,7 +190,7 @@ class ObservationController(BaseController):
             self._page_cache.popitem(last=False)
         self.total_results = result.total_results
         self.total_pages = (
-            math.ceil(self.total_results / DEFAULT_PAGE_SIZE) if self.total_results else 0
+            math.ceil(self.total_results / DEFAULT_DISPLAY_PAGE_SIZE) if self.total_results else 0
         )
 
         if result.is_empty:
@@ -206,11 +211,13 @@ class ObservationController(BaseController):
             max_id = max(obs.id for obs in observations)
             self.app.state.sync_resume_id = max_id
             self.app.state.write()
+        self.loaded_obs += len(observations)
         self.update_pagination_buttons()
+        self.on_sync_progress.emit(min(self.loaded_obs, self.total_results), self.total_results)
 
-        # On cold start, auto-display page 1 once the first sync page arrives
+        # On cold start, display page 1 once the first sync page arrives.
+        # Delay _update_db_counts() until after sync, since DB count is not yet accurate.
         if self._is_cold_start and self.loaded_pages == 1:
-            self._update_db_counts()
             self.load_observations_from_db()
 
     @Slot()
@@ -224,6 +231,7 @@ class ObservationController(BaseController):
         self._update_db_counts()
         self.update_pagination_buttons()
         self.load_observations_from_db()
+        self.on_sync_finished.emit()
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
@@ -255,7 +263,7 @@ class ObservationController(BaseController):
         """Update total_results and total_pages from the DB"""
         self.total_results = self.app.client.observations.count_db()
         self.total_pages = (
-            math.ceil(self.total_results / DEFAULT_PAGE_SIZE) if self.total_results else 0
+            math.ceil(self.total_results / DEFAULT_DISPLAY_PAGE_SIZE) if self.total_results else 0
         )
 
     def _sync_observations(self) -> Iterator[list[Observation]]:

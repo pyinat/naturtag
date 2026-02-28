@@ -2,11 +2,12 @@
 
 ## 0.9.0
 **UI:**
+* Add dialog for first launch to show observation download progress
 * Add more details to observation page: identifications, comments, annotations, observation fields, and tags
 * Add menu item to open app data/config dir
 * Some layout/scaling improvements to accommodate smaller screens
 * General performance and stability improvements
-* Improve performance of loading observations
+* Improve performance of loading observations (both background download and UI updates)
 * Resume previously interrupted observation downloads
 
 **CLI:**

@@ -9,7 +9,6 @@ from PySide6.QtCore import QSize, Qt, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
-    QInputDialog,
     QLineEdit,
     QMainWindow,
     QMessageBox,
@@ -22,6 +21,7 @@ from PySide6.QtWidgets import (
 from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
+from naturtag.app.welcome_dialog import WelcomeDialog
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
@@ -206,20 +206,13 @@ class MainWindow(QMainWindow):
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.observation_controller.display_observation_by_id(56830941)
 
-    def check_username(self):
-        """If username isn't saved, show popup dialog to prompt user to enter it"""
+    def check_first_run(self):
+        """If username isn't saved, show the first-run welcome/download dialog"""
         if self.app.settings.username:
             return
 
-        username, ok = QInputDialog.getText(
-            self,
-            'iNaturalist username',
-            'Enter your iNaturalist username to fetch your observations',
-        )
-        if ok:
-            self.app.settings.username = username
-            self.app.settings.write()
-            self.observation_controller.refresh()
+        dialog = WelcomeDialog(self, self.app, self.observation_controller)
+        dialog.exec()
 
     def closeEvent(self, _):
         """Stop background workers and save settings before closing the app"""
@@ -356,7 +349,7 @@ def main():
     window = MainWindow(app)
     window.show()
     splash.finish(window)
-    window.check_username()
+    window.check_first_run()
     sys.exit(app.exec())
 
 
