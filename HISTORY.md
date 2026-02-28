@@ -10,6 +10,7 @@
 * Improve performance of loading observations (both background download and UI updates)
 * Resume previously interrupted observation downloads
 * Re-read `settings.yml` if manually changed on disk before opening settings menu
+* Default to dark mode
 
 **CLI:**
 * Add progress bars for `tag` and `refresh` commands

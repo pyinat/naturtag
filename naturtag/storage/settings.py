@@ -43,7 +43,7 @@ def doc_field(doc: str = '', **kwargs):
 @define
 class Settings:
     # Display settings
-    dark_mode: bool = field(default=False)
+    dark_mode: bool = field(default=True)
 
     # Logging settings
     log_level: str = doc_field(default='INFO', doc='Logging level')
