@@ -196,8 +196,6 @@ def test_load_taxon_db(db_path, mock_load_taxon_db_deps):
 
     table_names = [c.kwargs.get('table_name') or c.args[2] for c in mock_load_table.call_args_list]
     assert table_names == ['taxon', 'taxon_fts']
-    mock_load_taxon_db_deps['conn'].execute.assert_any_call('DELETE FROM taxon')
-    mock_load_taxon_db_deps['conn'].execute.assert_any_call('DELETE FROM taxon_fts')
     mock_vacuum.assert_called_once_with(['taxon', 'taxon_fts'], db_path)
 
 

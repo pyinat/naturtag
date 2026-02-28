@@ -120,10 +120,6 @@ def _load_taxon_db(db_path: Path, download: bool = False):
             )
             return
 
-    with sqlite3.connect(db_path) as conn:
-        conn.execute('DELETE FROM taxon')
-        conn.execute('DELETE FROM taxon_fts')
-
     with TemporaryDirectory() as tmp_dir_name:
         logger.info('Loading packaged taxon data and text search index')
         tmp_dir = Path(tmp_dir_name)
@@ -135,8 +131,8 @@ def _load_taxon_db(db_path: Path, download: bool = False):
             PACKAGED_TAXON_DB.unlink(missing_ok=True)
             raise
 
-        load_table(tmp_dir / 'taxon.csv', db_path, table_name='taxon')
-        load_table(tmp_dir / 'taxon_fts.csv', db_path, table_name='taxon_fts')
+        load_table(tmp_dir / 'taxon.csv', db_path, table_name='taxon', clear=True)
+        load_table(tmp_dir / 'taxon_fts.csv', db_path, table_name='taxon_fts', clear=True)
 
     # Indicate some columns are missing and need to be filled in from the API (mainly photo URLs)
     with sqlite3.connect(db_path) as conn:

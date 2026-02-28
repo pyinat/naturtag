@@ -31,7 +31,7 @@ dependencies = [
     'pillow>=10.0',
     'pyexiv2>=2.10',
     'pyinaturalist>=0.21.1',
-    'pyinaturalist-convert[db]>=0.8.1',
+    'pyinaturalist-convert[db]>=0.8.2',
     'requests-ratelimiter>=0.6,<0.9',
     'pyside6==6.10.1',
     'pyqtdarktheme-fork~=2.3.4',
