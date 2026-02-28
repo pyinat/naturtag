@@ -31,6 +31,7 @@
 
 **Other Bugfixes:**
 * Fix several multithreading issues potentially leading to segfaults
+* Fix cancelling queued background tasks on app exit (observation/taxon/image downloads, etc.)
 * Fix issue with canceling other background tasks when canceling taxonomy load
 * Fix missing common name at root of hierarchical keywords
 * Fix missing subspecies in hierarchical keywords

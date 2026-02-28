@@ -93,8 +93,7 @@ class ThreadPool(QThreadPool):
                 pass
 
     def cancel(self, group: str | None = None):
-        """Cancel queued tasks and adjust the progress bar. Currently running tasks will be
-        allowed to complete.
+        """Cancel queued and running tasks, and adjust the progress bar.
 
         Args:
             group: If provided, only cancel tasks in this group. Otherwise cancel all tasks.
@@ -105,6 +104,8 @@ class ThreadPool(QThreadPool):
         if (active_threads := self.activeThreadCount()) > 0:
             logger.debug(f'Cancelling {active_threads} active threads')
         self.clear()
+        for worker in self._live_workers:
+            worker.cancel()
         self._live_workers.clear()
         self.progress.reset()
 
@@ -129,6 +130,11 @@ class BaseWorker(QRunnable):
         self.callback = callback
         self.kwargs = kwargs
         self.signals = WorkerSignals()
+        self._cancelled = False
+
+    def cancel(self):
+        """Request cancellation. A running PaginatedWorker will stop between pages."""
+        self._cancelled = True
 
 
 class Worker(BaseWorker):
@@ -164,7 +170,7 @@ class PaginatedWorker(BaseWorker):
     def run(self):
         try:
             for next_page in self.callback(**self.kwargs):
-                if not isValid(self.signals):
+                if self._cancelled or not isValid(self.signals):
                     return
                 self.signals.on_result.emit(next_page)
                 self.signals.on_progress.emit(len(next_page))

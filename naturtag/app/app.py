@@ -216,7 +216,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, _):
         """Stop background workers and save settings before closing the app"""
-        self.app.threadpool.clear()
+        self.app.threadpool.cancel()
         self.app.threadpool.waitForDone(5000)
         self.app.settings.write()
         self.app.state.write()
