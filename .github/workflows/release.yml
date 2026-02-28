@@ -126,7 +126,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: naturtag-fpm
-          path: dist/naturtag.*
+          path: |
+            dist/naturtag.*
+            !dist/naturtag.AppImage
 
       - name: Upload AppImage (Linux)
         if: startsWith(matrix.os, 'ubuntu')
