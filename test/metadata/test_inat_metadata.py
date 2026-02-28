@@ -7,6 +7,7 @@ from naturtag.metadata.inat_metadata import (
     _get_common_keywords,
     _get_hierarchical_keywords,
     _get_id_keywords,
+    _get_taxon_hierarchical_keywords,
     _get_taxonomy_keywords,
     observation_to_metadata,
 )
@@ -19,6 +20,20 @@ SPECIES = Taxon(
     rank='species',
     preferred_common_name='Ornate Snipe Fly',
     ancestors=[KINGDOM, FAMILY],
+)
+CANIDAE = Taxon(
+    id=4, name='Canidae', rank='family', preferred_common_name='Dogs, Wolves, and Foxes'
+)
+CANIS = Taxon(id=5, name='Canis', rank='genus', preferred_common_name='Wolves, Dogs')
+CANIS_FAMILIARIS = Taxon(
+    id=6, name='Canis familiaris', rank='species', preferred_common_name='Domestic Dog'
+)
+SUBSPECIES = Taxon(
+    id=924041,
+    name='Canis familiaris dingo',
+    rank='subspecies',
+    preferred_common_name='Dingo',
+    ancestors=[KINGDOM, CANIDAE, CANIS, CANIS_FAMILIARIS],
 )
 OBSERVATION = Observation(
     id=49459966,
@@ -147,3 +162,10 @@ def test_observation_to_metadata__taxon_only():
     meta = observation_to_metadata(obs)
     assert meta.taxon_id == 202860
     assert meta.observation_id is None
+
+
+def test_get_taxon_hierarchical_keywords__subspecies():
+    """Subspecies should appear as the leaf node in hierarchical keywords"""
+    keywords = _get_taxon_hierarchical_keywords(SUBSPECIES)
+    assert any('Canis familiaris dingo' in k for k in keywords)
+    assert keywords[-1] == 'Animalia|Canidae|Canis|Canis familiaris|Canis familiaris dingo'
