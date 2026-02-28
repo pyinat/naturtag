@@ -47,8 +47,10 @@ jobs:
           uv python install ${{ env.PYTHON_VERSION }}
           uv sync --no-dev
 
-      - name: Build pyinstaller package
-        run: uv run pyinstaller -y packaging/naturtag.spec
+      - name: Build wheel + pyinstaller package
+        run: |
+          uv build --wheel
+          uv run pyinstaller -y packaging/naturtag.spec
 
       # Include taxon FTS db, compress, and set platform name
       - name: Finish pyinstaller package
@@ -104,6 +106,13 @@ jobs:
         with:
           name: naturtag-${{ matrix.dist_name }}.tar.gz
           path: naturtag-${{ matrix.dist_name }}.tar.gz
+
+      - name: Upload wheel
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v7
+        with:
+          name: naturtag-python-packages
+          path: dist/naturtag-*.whl
 
       - name: Upload disk image (macOS)
         if: startsWith(matrix.os, 'macos')
