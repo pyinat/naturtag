@@ -99,6 +99,7 @@ SELECTABLE_ICONIC_TAXA = {k: v for k, v in ICONIC_TAXA.items() if v not in ['Ani
 COMMON_RANKS = [
     'form',
     'variety',
+    'subspecies',
     'species',
     'genus',
     'tribe',
