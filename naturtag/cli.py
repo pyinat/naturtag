@@ -177,15 +177,24 @@ def tag(
         taxon_id=taxon,
         include_sidecars=True,
     )
-    metadata_objs = list(
-        track(
-            result_iter, description='Tagging images...', total=len(image_paths), show_speed=False
+    if image_paths:
+        metadata_objs = list(
+            track(
+                result_iter,
+                description='Tagging images...',
+                total=len(image_paths),
+                show_speed=False,
+            )
         )
-    )
-    if not metadata_objs:
-        click.secho('No search results found', fg='red')
-        return
-    click.echo(f'{len(metadata_objs)} images tagged')
+        if not metadata_objs:
+            click.secho('No search results found', fg='red')
+            return
+        click.echo(f'{len(metadata_objs)} images tagged')
+    else:
+        metadata_objs = list(result_iter)
+        if not metadata_objs:
+            click.secho('No search results found', fg='red')
+            return
 
     # Print keywords if specified
     if not image_paths or ctx.meta['verbose'] or flickr:
