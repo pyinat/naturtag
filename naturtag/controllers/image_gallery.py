@@ -138,6 +138,7 @@ class ImageGallery(BaseController):
         logger.info(f'Loading {image_path}')
         thumbnail_card = ThumbnailCard(image_path)
         thumbnail_card.on_loaded.connect(self._bind_image_actions)
+        thumbnail_card.on_load_error.connect(self.on_message)
         if self._pending_signal is not None:
             thumbnail_card.set_pending(bool(self._current_pending))
             thumbnail_card.set_pending_icons(self._current_pending)
@@ -201,6 +202,7 @@ class ThumbnailCard(StylableWidget):
 
     on_loaded = Signal(object)  #: Image and metadata have been loaded
     on_copy = Signal(str)  #: Tags were copied to the clipboard
+    on_load_error = Signal(str)  #: Error message when image loading fails
     on_remove = Signal(Path)  #: Request for the image to be removed from the gallery
     on_select = Signal(Path)  #: The image was clicked
 
@@ -248,6 +250,7 @@ class ThumbnailCard(StylableWidget):
     def set_load_error(self, error: str):
         """Show error icon on thumbnail when image loading fails."""
         self.icons.set_error(error)
+        self.on_load_error.emit(error)
 
     def set_metadata(self, metadata: MetaMetadata):
         """Update UI based on new metadata"""
