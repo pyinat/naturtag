@@ -8,7 +8,7 @@ from pyinaturalist import Observation, Taxon
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, Slot
 from PySide6.QtWidgets import QLabel, QPushButton
 
-from naturtag.constants import DEFAULT_DISPLAY_PAGE_SIZE, PAGE_CACHE_MAX
+from naturtag.constants import DEFAULT_DISPLAY_PAGE_SIZE, N_DISPLAY_TAXON_THUMBNAILS, PAGE_CACHE_MAX
 from naturtag.controllers import BaseController, ObservationInfoSection
 from naturtag.widgets import HorizontalLayout, ObservationInfoCard, ObservationList
 from naturtag.widgets.style import fa_icon
@@ -50,6 +50,7 @@ class ObservationController(BaseController):
         self.loaded_obs = 0  # running count of observations received from API during sync
         self._page_cache: OrderedDict[int, list[Observation]] = OrderedDict()
         self._sync_in_progress: bool = False
+        self._preload_in_progress: bool = False
 
         # User observations
         self.user_observations = ObservationList()
@@ -162,6 +163,22 @@ class ObservationController(BaseController):
         self.load_observations_from_db()
         self.start_background_sync()
 
+    def _start_preload_thumbnails(self):
+        """Kick off background preloading of all observation thumbnails"""
+        if self._preload_in_progress:
+            logger.debug('Thumbnail preload already in progress; skipping')
+            return
+        self._preload_in_progress = True
+        total = self.total_results or self.app.client.observations.count_db()
+        logger.info(f'Starting thumbnail preload for {total} observations')
+        future = self.app.threadpool.schedule_paginator(
+            self._preload_thumbnails,
+            priority=QThread.LowPriority,
+            total_results=total or None,
+        )
+        future.on_result.connect(self._on_preload_page_complete)
+        future.on_finished.connect(self._on_preload_finished)
+
     # UI helper functions (slots triggered in main thread after workers complete)
     # ----------------------------------------
 
@@ -235,6 +252,19 @@ class ObservationController(BaseController):
         self.update_pagination_buttons()
         self.load_observations_from_db()
         self.on_sync_finished.emit()
+        if self.app.settings.preload_obs_thumbnails:
+            self._start_preload_thumbnails()
+
+    @Slot(object)
+    def _on_preload_page_complete(self, observations: list[Observation]):
+        """Handle completion of each preload page"""
+        logger.debug(f'Preloaded thumbnails for {len(observations)} observations on this page')
+
+    @Slot()
+    def _on_preload_finished(self):
+        """Handle completion of thumbnail preloading"""
+        self._preload_in_progress = False
+        logger.info('Thumbnail preload finished')
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
@@ -276,3 +306,30 @@ class ObservationController(BaseController):
             updated_since=self.app.state.last_obs_check,
             id_above=self.app.state.sync_resume_id,
         )
+
+    def _preload_thumbnails(self):
+        """Fetch and cache thumbnails for all observations in the DB. Yields after each page.
+
+        Yields the count of observations processed on each page. This allows the PaginatedWorker
+        to check for cancellation between pages, providing graceful shutdown during preload.
+        """
+        username = self.app.settings.username
+        page = 1
+        while True:
+            obs_page = self.app.client.observations.search_user_db(username=username, page=page)
+            if not obs_page:
+                break
+            for obs in obs_page:
+                if obs.default_photo:
+                    self.app.img_fetcher.get_image(obs.default_photo, size='square')
+                    self.app.img_fetcher.get_image(obs.default_photo, size='medium')
+                if obs.taxon:
+                    if obs.taxon.default_photo:
+                        self.app.img_fetcher.get_image(obs.taxon.default_photo, size='medium')
+                    for photo in (obs.taxon.taxon_photos or [])[: N_DISPLAY_TAXON_THUMBNAILS + 1]:
+                        self.app.img_fetcher.get_image(photo, size='square')
+                for photo in (obs.photos or [])[1:]:
+                    self.app.img_fetcher.get_image(photo, size='square')
+            # Yield after each page to allow cancellation checks in worker
+            yield obs_page
+            page += 1

@@ -108,7 +108,7 @@ def mock_app(qapp, tmp_path):
     qapp.log_handler = MagicMock()
     qapp.log_handler.widget = QWidget()
 
-    qapp.img_session = MagicMock()
+    qapp.img_fetcher = MagicMock()
 
     qapp.user_dirs = MagicMock()
     qapp.user_dirs.on_dir_open = MagicMock()
@@ -128,7 +128,7 @@ def mock_app(qapp, tmp_path):
         'state',
         'threadpool',
         'log_handler',
-        'img_session',
+        'img_fetcher',
         'user_dirs',
         '_futures',
     ):
