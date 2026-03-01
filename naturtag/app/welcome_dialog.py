@@ -1,5 +1,3 @@
-"""First-run dialog that collects the username and shows live observation download progress"""
-
 from logging import getLogger
 from time import monotonic
 
@@ -26,11 +24,11 @@ _STEP_SYNCING = 'syncing'
 
 
 class WelcomeDialog(QDialog):
-    """Dialog shown on first startup when no username is configured.
+    """Dialog shown on first app startup.
 
     Main steps:
-    * Input: user enters their iNaturalist username.
-    * Download: show progress bar tracking the background sync.
+    * Input: user enters their iNaturalist username and optionally locale
+    * Download: download observations in background and show progress bar
 
     Closing during step 1 cancels everything. Closing during step 2 just
     dismisses the dialog; the download continues in the background.
