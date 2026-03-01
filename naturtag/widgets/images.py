@@ -65,12 +65,13 @@ class FAIcon(QLabel):
         align: Optional[Qt.AlignmentFlag] = None,
         parent: Optional[QWidget] = None,
         secondary: bool = False,
+        tertiary: bool = False,
         size: IconDimensions = SIZE_ICON,
     ):
         super().__init__(parent)
         x = size if isinstance(size, int) else size[0]
         y = size if isinstance(size, int) else size[1]
-        self.icon = fa_icon(icon_str, secondary=secondary)
+        self.icon = fa_icon(icon_str, secondary=secondary, tertiary=tertiary)
         self.icon_size = QSize(x, y)
         self.setPixmap(self.icon.pixmap(x, y, mode=QIcon.Mode.Normal))
         if align:

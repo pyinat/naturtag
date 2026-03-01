@@ -10,28 +10,42 @@ from naturtag.constants import QSS_PATH
 
 CustomPalette = dict[QPalette.ColorRole, Union[str, tuple]]
 
-YELLOWGREEN = '#9acd32'
-YELLOWGREEN_DARK = '#82c32d'
 PALEBLUE = '#80cfee'
 PALEBLUE_DARK = '#62bee3'
+YELLOWGREEN = '#9acd32'
+YELLOWGREEN_DARK = '#82c32d'
+AMBER = '#f5c518'
+AMBER_DARK = '#b8900e'
 
-# GRAYBLUE = (63, 113, 172)
-# SILVER = (173, 168, 182)
-# PRPL = (200, 0, 200)
-# LAVENDER = (180, 180, 255)
-# UMBER = (95, 84, 73)
-# CERULEAN = (64, 89, 173)
-# VIOLET = (42, 30, 92)
+# SILVER = '#ada8b6'
+# GRANITE = '#8b9f95'
+# GRAYBLUE = '#3f71ac'
+# CERULEAN = '#4059ad'
+# UMBER = '#5f5449'
+# LAVENDER = '#b4b4ff'
+# VIOLET = '#2a1e5c'
+# PRPL = '#c800c8'
 
 logger = getLogger(__name__)
 
 
-def fa_icon(icon_name, secondary: bool = False, **kwargs):
-    """Get a FontAwesome icon, using either a primary or secondary color from the palette"""
+def fa_icon(icon_name, secondary: bool = False, tertiary: bool = False, **kwargs):
+    """Get a FontAwesome icon, using a primary, secondary, or tertiary color.
+
+    Primary (default): palette highlight color
+    Secondary: palette link color
+    Tertiary: fixed amber color for pending/warning indicators
+    """
     palette = QApplication.instance().palette()
+    if tertiary:
+        color = palette.placeholderText().color()
+    elif secondary:
+        color = palette.link().color()
+    else:
+        color = palette.highlight().color()
     return icon(
         icon_name,
-        color=palette.link().color() if secondary else palette.highlight().color(),
+        color=color,
         color_disabled='gray',
         **kwargs,
     )
@@ -95,6 +109,7 @@ def mod_dark_palette(palette: QPalette) -> QPalette:
         # QPalette.Light: (180, 180, 180),
         QPalette.Link: YELLOWGREEN,  # Secondary highlight
         QPalette.LinkVisited: (46, 70, 94, 120),  # Hover/selection highlight
+        QPalette.PlaceholderText: AMBER,  # Tertiary highlight
         # QPalette.Midlight: (90, 90, 90),
         # QPalette.Shadow: (20, 20, 20),
         # QPalette.Text: (180, 180, 180),
@@ -120,6 +135,7 @@ def mod_light_palette(palette) -> QPalette:
         # QPalette.Light: (180, 180, 180),
         QPalette.Link: YELLOWGREEN,  # Secondary highlight
         QPalette.LinkVisited: (181, 202, 244, 120),  # Hover/selection highlight
+        QPalette.PlaceholderText: AMBER_DARK,  # Tertiary highlight
         # QPalette.Midlight: (200, 200, 200),
         # QPalette.Shadow: (20, 20, 20),
         # QPalette.Text: (0, 0, 0),

@@ -475,7 +475,7 @@ class ThumbnailMetaIcons(QLabel):
         pending_layout.setContentsMargins(0, 0, 0, 0)
         self.pending_container.setGeometry(img_size[0] - 40, img_size[1] - 40, 40, 40)
         self.pending_container.setVisible(False)
-        self.pending_icon = FAIcon('fa6s.floppy-disk', secondary=True, size=40)
+        self.pending_icon = FAIcon('fa6s.floppy-disk', size=40)
         self.pending_icon.setToolTip('Pending tags: click Run (Ctrl+R) to apply')
         pending_layout.addWidget(self.pending_icon)
 
