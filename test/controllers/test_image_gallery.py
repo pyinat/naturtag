@@ -438,3 +438,47 @@ def test_thumbnail_card__update_metadata_resets_pending_icons(thumbnail_card, mo
         thumbnail_card.update_metadata(mock_metadata)
 
     assert icons.taxon_icon.pixmap().toImage() == before  # reset to secondary
+
+
+# --- Error handling ---
+
+
+@pytest.mark.parametrize(
+    'error, expected_hidden, expected_tooltip',
+    [
+        ('Something went wrong', False, 'Something went wrong'),
+        (None, True, ''),
+    ],
+    ids=['error', 'no_error'],
+)
+def test_thumbnail_meta_icons__set_error(thumbnail_card, error, expected_hidden, expected_tooltip):
+    """set_error() controls hidden state and tooltip of the error container."""
+    thumbnail_card.icons.set_error(error)
+    assert thumbnail_card.icons.error_container.isHidden() == expected_hidden
+    assert expected_tooltip in thumbnail_card.icons.error_icon.toolTip()
+
+
+def test_thumbnail_card__load_image__error(thumbnail_card, mock_metadata):
+    """load_image() shows error icon when thumbnail generation raises."""
+    with (
+        patch(
+            'naturtag.controllers.image_gallery.generate_thumbnail',
+            side_effect=OSError('bad file'),
+        ),
+        patch('naturtag.controllers.image_gallery.MetaMetadata', return_value=mock_metadata),
+    ):
+        thumbnail_card.load_image()
+
+    assert not thumbnail_card.icons.error_container.isHidden()
+    assert 'bad file' in thumbnail_card.icons.error_icon.toolTip()
+
+
+def test_thumbnail_card__load_image_async__error_signal(thumbnail_card):
+    """on_load_error signal from MetaThumbnail triggers the error icon after load_image_async."""
+    thumbnail_card.load_image_async(MagicMock())
+
+    # Simulate error signal firing from MetaThumbnail
+    thumbnail_card.image.on_load_error.emit('network timeout')
+
+    assert not thumbnail_card.icons.error_container.isHidden()
+    assert 'network timeout' in thumbnail_card.icons.error_icon.toolTip()
