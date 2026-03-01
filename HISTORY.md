@@ -32,7 +32,7 @@ This release adds significant improvements to packaging, setup, and performance.
 **Packaging/Setup:**
 * Data & dependencies:
   * Include locale data in PyInstaller packages
-  * Update packaged taxonomy db with iNaturalist data from February 2026
+  * Update packaged taxonomy db with iNaturalist data from March 2026
   * Include database migrations for future SQLite db updates
   * Upgrade to Qt 6.10
 * Artifacts:
