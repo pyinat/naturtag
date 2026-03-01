@@ -59,7 +59,7 @@ class WelcomeDialog(QDialog):
         self.intro_label = QLabel(
             'Welcome to Naturtag!\n\n'
             'I recommend downloading your iNaturalist observations for easier\n'
-            'browsing and tagging, but it\'s not required.\n\n'
+            "browsing and tagging, but it's not required.\n\n"
             'Enter your iNaturalist username to begin download:'
         )
         self.intro_label.setWordWrap(True)
@@ -190,8 +190,10 @@ class WelcomeDialog(QDialog):
         signals.on_error.connect(self._on_count_error)
 
     def _on_cancel(self):
-        """Cancel during part 1 — do not start a download."""
+        """Skip during step 1 — do not start a download, but suppress the dialog on future runs."""
         if self._step == _STEP_INPUT:
+            self.app.settings.disable_obs_sync = True
+            self.app.settings.write()
             self.reject()
         else:
             # Shouldn't normally be reachable (button is hidden), but be safe

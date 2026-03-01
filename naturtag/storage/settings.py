@@ -58,6 +58,7 @@ class Settings:
     casual_observations: bool = doc_field(
         default=True, doc='Include taxa from casual observations in user taxa list'
     )
+    disable_obs_sync: bool = doc_field(default=False, doc='Disable observation sync')
     locale: str = doc_field(default='en', doc='Locale preference for species common names')
     preferred_place_id: int = doc_field(
         default=1,

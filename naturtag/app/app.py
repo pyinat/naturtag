@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
 
     def check_first_run(self):
         """On the user's first run, show the welcome/download dialog"""
-        if self.app.settings.username:
+        if self.app.settings.username or self.app.settings.disable_obs_sync:
             return
 
         dialog = WelcomeDialog(self, self.app, self.observation_controller)
