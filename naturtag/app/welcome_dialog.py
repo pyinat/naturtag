@@ -20,19 +20,19 @@ from naturtag.widgets.layouts import GroupBoxLayout
 
 logger = getLogger(__name__)
 
-# Phases used to track which UI state the dialog is in
-_PHASE_INPUT = 'input'
-_PHASE_SYNCING = 'syncing'
+# steps used to track which UI state the dialog is in
+_STEP_INPUT = 'input'
+_STEP_SYNCING = 'syncing'
 
 
 class WelcomeDialog(QDialog):
     """Dialog shown on first startup when no username is configured.
 
+    Main steps:
     * Input: user enters their iNaturalist username.
-    * Count: spinner while the API returns the total observation count.
     * Download: show progress bar tracking the background sync.
 
-    Closing during phase 1 cancels everything. Closing during phases 2/3 just
+    Closing during step 1 cancels everything. Closing during step 2 just
     dismisses the dialog; the download continues in the background.
     """
 
@@ -40,7 +40,7 @@ class WelcomeDialog(QDialog):
         super().__init__(parent)
         self.app = app
         self.observation_controller = observation_controller
-        self._phase = _PHASE_INPUT
+        self._step = _STEP_INPUT
 
         self.setWindowTitle('iNaturalist Setup')
         self.setMinimumWidth(420)
@@ -55,8 +55,10 @@ class WelcomeDialog(QDialog):
         title_label.setObjectName('h2')
         layout.addWidget(title_label)
 
-        # Part 1: username input
-        self.intro_label = QLabel('Enter your iNaturalist username to download your observations.')
+        # Step 1: username input
+        self.intro_label = QLabel(
+            'Welcome to Naturtag!\nEnter your iNaturalist username to download your observations.'
+        )
         self.intro_label.setWordWrap(True)
         layout.addWidget(self.intro_label)
 
@@ -88,7 +90,7 @@ class WelcomeDialog(QDialog):
         self.error_label.hide()
         layout.addWidget(self.error_label)
 
-        # Part 2: progress group (hidden until count starts)
+        # Step 2: progress group (hidden until count starts)
         self.status_label = QLabel()
         self.status_label.setWordWrap(True)
         self.status_label.setMinimumHeight(40)
@@ -107,10 +109,11 @@ class WelcomeDialog(QDialog):
         layout.addWidget(self.sync_group.box)
         self.sync_group.box.hide()
 
-        # Button box: OK/Cancel in part 1; "Run in background" added for part 2
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        # Button box: OK/Skip in step 1; "Run in background" added for step 2
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok)
         self.button_box.accepted.connect(self._on_ok)
-        self.button_box.rejected.connect(self._on_cancel)
+        self.skip_button = self.button_box.addButton('Skip', QDialogButtonBox.RejectRole)
+        self.skip_button.clicked.connect(self._on_cancel)
         self.background_button = self.button_box.addButton(
             'Run in background', QDialogButtonBox.AcceptRole
         )
@@ -123,7 +126,7 @@ class WelcomeDialog(QDialog):
 
     def _start_count(self, username: str):
         """Switch to the indeterminate spinner while we fetch the total count."""
-        self._phase = 'counting'
+        self._step = 'counting'
 
         self.intro_label.hide()
         self.username_label.hide()
@@ -131,7 +134,7 @@ class WelcomeDialog(QDialog):
         self.locale_label.hide()
         self.locale_combo.hide()
         self.button_box.button(QDialogButtonBox.Ok).hide()
-        self.button_box.button(QDialogButtonBox.Cancel).hide()
+        self.skip_button.hide()
         self.error_label.hide()
 
         self.status_label.setText(f'Checking observations for <b>{username}</b>…')
@@ -142,7 +145,7 @@ class WelcomeDialog(QDialog):
 
     def _start_download(self, total: int):
         """Switch to the determinate progress bar now that we know the total."""
-        self._phase = _PHASE_SYNCING
+        self._step = _STEP_SYNCING
         self._sync_start_time = monotonic()
 
         self.progress_bar.setMaximum(total if total > 0 else 1)
@@ -167,8 +170,8 @@ class WelcomeDialog(QDialog):
     # ----------------------------------------
 
     def _on_ok(self):
-        """Handle OK / Enter in the username input phase."""
-        if self._phase != _PHASE_INPUT:
+        """Handle OK / Enter in the username input step."""
+        if self._step != _STEP_INPUT:
             return
 
         username = self.username_input.text().strip()
@@ -185,7 +188,7 @@ class WelcomeDialog(QDialog):
 
     def _on_cancel(self):
         """Cancel during part 1 — do not start a download."""
-        if self._phase == _PHASE_INPUT:
+        if self._step == _STEP_INPUT:
             self.reject()
         else:
             # Shouldn't normally be reachable (button is hidden), but be safe
@@ -226,7 +229,7 @@ class WelcomeDialog(QDialog):
     def _on_count_error(self, exc: Exception):
         """Show an error and let the user correct the username."""
         logger.warning('Could not fetch observation count:', exc_info=exc)
-        self._phase = _PHASE_INPUT
+        self._step = _STEP_INPUT
 
         self.sync_group.box.hide()
         self.adjustSize()
@@ -236,7 +239,7 @@ class WelcomeDialog(QDialog):
         self.locale_label.show()
         self.locale_combo.show()
         self.button_box.button(QDialogButtonBox.Ok).show()
-        self.button_box.button(QDialogButtonBox.Cancel).show()
+        self.skip_button.show()
         self.background_button.hide()
 
         self.error_label.setText(
@@ -249,7 +252,7 @@ class WelcomeDialog(QDialog):
     @Slot(int, int)
     def _on_sync_progress(self, loaded: int, total: int):
         """Update the progress bar as sync pages arrive."""
-        if self._phase != _PHASE_SYNCING:
+        if self._step != _STEP_SYNCING:
             return
         if total > 0 and self.progress_bar.maximum() != total:
             self.progress_bar.setMaximum(total)
