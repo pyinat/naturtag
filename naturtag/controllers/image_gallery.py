@@ -40,7 +40,7 @@ from naturtag.widgets import (
     VerticalLayout,
 )
 from naturtag.widgets.images import HoverMixin, PixmapLabel, SwappableIcon
-from naturtag.widgets.style import fa_icon
+from naturtag.widgets.style import RED, fa_icon
 
 if TYPE_CHECKING:
     from naturtag.app.threadpool import ThreadPool
@@ -495,22 +495,31 @@ class ThumbnailMetaIcons(QLabel):
         )
         self.pending_icon.setToolTip('Pending tags: click Run (Ctrl+R) to apply')
 
-        # Error indicator — parented to the image widget, positioned top-right
+        # Error indicator — centered in the thumbnail
+        icon_size = 128
+        x = (img_size[0] - icon_size) // 2
+        y = (img_size[1] - icon_size) // 2
         self.error_container, self.error_icon = self._create_icon_container(
-            parent.image, 'fa6s.triangle-exclamation', img_size[0] - 40, 0
+            parent.image, 'fa6s.triangle-exclamation', x, y, size=icon_size, color=RED
         )
 
     def _create_icon_container(
-        self, parent_image: QLabel, icon_name: str, x: int, y: int
+        self,
+        parent_image: QLabel,
+        icon_name: str,
+        x: int,
+        y: int,
+        size: int = 40,
+        color: str | None = None,
     ) -> tuple[QLabel, FAIcon]:
         container = QLabel(parent_image)
         container.setObjectName('metadata_icons')
         layout = HorizontalLayout(container)
-        layout.setAlignment(Qt.AlignRight)
+        layout.setAlignment(Qt.AlignCenter)
         layout.setContentsMargins(0, 0, 0, 0)
-        container.setGeometry(x, y, 40, 40)
+        container.setGeometry(x, y, size, size)
         container.setVisible(False)
-        icon = FAIcon(icon_name, size=40)
+        icon = FAIcon(icon_name, size=size, color=color)
         layout.addWidget(icon)
         return container, icon
 
