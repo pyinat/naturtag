@@ -50,7 +50,7 @@ This basically gives you a taxonomic tree for browsing and filtering your photos
 <details>
 <summary><b>Example in XnView</b></summary>
 
-![screenshot](assets/screenshots/xnview.png)
+![Hierarchical keyword taxonomy tree in XnView](assets/screenshots/xnview.png)
 </details>
 
 ### Photo hosting
@@ -63,7 +63,7 @@ Example search using these tags: https://www.flickr.com/photos/tags/taxonomy:cla
 <details>
 <summary><b>Example of taxonomy tags on Flickr</b></summary>
 
-![screenshot](assets/screenshots/flickr.png)
+![Taxonomy tags displayed on a Flickr photo](assets/screenshots/flickr.png)
 </details>
 
 ### Other biodiversity tools
@@ -82,13 +82,13 @@ for platform-specific package instructions.
 ### GUI
 Naturtag is primarily a desktop application. It includes an interface for selecting and tagging images:
 
-![Screenshot](assets/screenshots/image-selector.png)
+![Image selector interface showing file browser and tagged photos](assets/screenshots/image-selector.png)
 
 And tools to search and browse species and observations to tag your images with:
 
-![Screenshot](assets/screenshots/taxon-search.png)
+![Taxon search interface](assets/screenshots/taxon-search.png)
 
-![Screenshot](assets/screenshots/observation-browser.png)
+![Observation browser interface](assets/screenshots/observation-browser.png)
 
 See [Application Guide](https://naturtag.readthedocs.io/en/stable/app.html) for more details.
 
