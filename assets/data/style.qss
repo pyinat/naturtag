@@ -45,7 +45,8 @@ ThumbnailCard > QLabel {
     border-radius: 4px;
     font-size: 11pt;
 }
-ThumbnailCard > QLabel#metadata_icons {
+ThumbnailCard > QLabel#metadata_icons,
+ThumbnailCard QLabel#metadata_icons {
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 4px;
     font-size: 11pt;

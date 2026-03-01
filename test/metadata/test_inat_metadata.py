@@ -49,6 +49,7 @@ OBSERVATION = Observation(
 @pytest.mark.parametrize(
     'keywords, expected',
     [
+        ([], []),
         (['A', 'B', 'C'], ['A', 'A|B', 'A|B|C']),
         (['Animals'], ['Animals']),
         (['Animals', 'Insects'], ['Animals', 'Animals|Insects']),
