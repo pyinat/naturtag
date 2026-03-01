@@ -57,7 +57,10 @@ class WelcomeDialog(QDialog):
 
         # Step 1: username input
         self.intro_label = QLabel(
-            'Welcome to Naturtag!\nEnter your iNaturalist username to download your observations.'
+            'Welcome to Naturtag!\n\n'
+            'I recommend downloading your iNaturalist observations for easier\n'
+            'browsing and tagging, but it\'s not required.\n\n'
+            'Enter your iNaturalist username to begin download:'
         )
         self.intro_label.setWordWrap(True)
         layout.addWidget(self.intro_label)

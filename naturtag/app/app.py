@@ -201,7 +201,7 @@ class MainWindow(QMainWindow):
             self.observation_controller.display_observation_by_id(56830941)
 
     def check_first_run(self):
-        """If username isn't saved, show the first-run welcome/download dialog"""
+        """On the user's first run, show the welcome/download dialog"""
         if self.app.settings.username:
             return
 
