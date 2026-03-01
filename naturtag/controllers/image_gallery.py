@@ -150,8 +150,10 @@ class ImageGallery(BaseController):
         return thumbnail_card
 
     def _bind_image_actions(self, thumbnail: 'ThumbnailCard'):
-        """Bind actions to an image"""
+        """Bind actions to an image. If loading failed, only bind on_remove."""
         thumbnail.on_remove.connect(self.remove_image)
+        if thumbnail.load_error:
+            return
         thumbnail.on_select.connect(self.select_image)
         thumbnail.on_copy.connect(self.on_message)
         thumbnail.context_menu.on_view_taxon_id.connect(self.on_view_taxon_id)
@@ -210,6 +212,7 @@ class ThumbnailCard(StylableWidget):
         super().__init__()
         self.image_path = image_path
         self.metadata: MetaMetadata = None  # type: ignore
+        self.load_error: str | None = None
         self.layout = VerticalLayout(self)
 
         # Image
@@ -249,6 +252,7 @@ class ThumbnailCard(StylableWidget):
 
     def set_load_error(self, error: str):
         """Show error icon on thumbnail when image loading fails."""
+        self.load_error = error
         self.icons.set_error(error)
         self.on_load_error.emit(error)
 

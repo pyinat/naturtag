@@ -23,7 +23,15 @@ from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
 from naturtag.app.welcome_dialog import WelcomeDialog
-from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
+from naturtag.constants import (
+    APP_DIR,
+    APP_ICON,
+    APP_LOGO,
+    ASSETS_DIR,
+    BUG_REPORT_URL,
+    DOCS_URL,
+    REPO_URL,
+)
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
 from naturtag.utils import check_for_update, get_version
@@ -180,6 +188,7 @@ class MainWindow(QMainWindow):
         self.toolbar.docs_button.triggered.connect(self.open_docs)
         self.toolbar.about_button.triggered.connect(self.open_about)
         self.toolbar.check_updates_button.triggered.connect(self.check_for_updates)
+        self.toolbar.bug_report_button.triggered.connect(self.open_bug_report)
 
         # Menu bar and status bar
         self.toolbar.populate_menu(self.menuBar())
@@ -233,6 +242,10 @@ class MainWindow(QMainWindow):
         """Open the native file explorer to the app data/config dir"""
         url = QUrl.fromLocalFile(str(APP_DIR))
         QDesktopServices.openUrl(url)
+
+    def open_bug_report(self):
+        """Open the GitHub bug report template in a web browser"""
+        webbrowser.open(BUG_REPORT_URL)
 
     def open_docs(self):
         """Open the documentation in a web browser"""
