@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 from logging import getLogger
 
-from PySide6.QtCore import QSize, Qt, QUrl
+from PySide6.QtCore import QEventLoop, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -347,8 +347,15 @@ def main():
     app = NaturtagApp(sys.argv)
     splash = QSplashScreen(QPixmap(str(APP_LOGO)).scaledToHeight(512))
     splash.show()
-    app.post_init()
 
+    # Run the event loop until the splash window is actually exposed (visible on screen);
+    # Otherwise it is blocked until setup() finishes
+    loop = QEventLoop()
+    splash.windowHandle().exposeEvent = lambda _: loop.quit()
+    QTimer.singleShot(500, loop.quit)  # Fallback timeout
+    loop.exec()
+
+    app.post_init()
     set_theme(dark_mode=app.settings.dark_mode)
     window = MainWindow(app)
     window.show()
