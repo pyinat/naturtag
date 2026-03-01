@@ -5,11 +5,10 @@ import webbrowser
 from datetime import datetime
 from logging import getLogger
 
-from PySide6.QtCore import QSize, Qt, QUrl
+from PySide6.QtCore import QEventLoop, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
-    QInputDialog,
     QLineEdit,
     QMainWindow,
     QMessageBox,
@@ -22,6 +21,7 @@ from PySide6.QtWidgets import (
 from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
+from naturtag.app.welcome_dialog import WelcomeDialog
 from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
@@ -73,22 +73,16 @@ class MainWindow(QMainWindow):
         self.app = app
 
         # Controllers
-        self.settings_menu = SettingsMenu()
         self.image_controller = ImageController()
         self.taxon_controller = TaxonController()
         self.observation_controller = ObservationController()
+        self._init_settings_menu()
 
         # Connect controllers and their widgets to statusbar info
-        self.settings_menu.on_message.connect(self.info)
         self.image_controller.on_message.connect(self.info)
         self.image_controller.gallery.on_message.connect(self.info)
         self.taxon_controller.on_message.connect(self.info)
         self.observation_controller.on_message.connect(self.info)
-
-        # Settings that take effect immediately
-        self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
-        self.settings_menu.dark_mode.on_click.connect(set_theme)
-        self.settings_menu.show_logs.on_click.connect(self.toggle_log_tab)
 
         # Tabs
         self.tabs = QTabWidget()
@@ -206,24 +200,17 @@ class MainWindow(QMainWindow):
             self.image_controller.gallery.load_images(demo_images)  # type: ignore
             self.observation_controller.display_observation_by_id(56830941)
 
-    def check_username(self):
-        """If username isn't saved, show popup dialog to prompt user to enter it"""
-        if self.app.settings.username:
+    def check_first_run(self):
+        """On the user's first run, show the welcome/download dialog"""
+        if self.app.settings.username or self.app.settings.disable_obs_sync:
             return
 
-        username, ok = QInputDialog.getText(
-            self,
-            'iNaturalist username',
-            'Enter your iNaturalist username to fetch your observations',
-        )
-        if ok:
-            self.app.settings.username = username
-            self.app.settings.write()
-            self.observation_controller.refresh()
+        dialog = WelcomeDialog(self, self.app, self.observation_controller)
+        dialog.exec()
 
     def closeEvent(self, _):
         """Stop background workers and save settings before closing the app"""
-        self.app.threadpool.clear()
+        self.app.threadpool.cancel()
         self.app.threadpool.waitForDone(5000)
         self.app.settings.write()
         self.app.state.write()
@@ -316,8 +303,18 @@ class MainWindow(QMainWindow):
             setup(self.app.settings, overwrite=True)
             self.info('Database reset complete')
 
+    def _init_settings_menu(self):
+        """Create (or recreate) the settings menu and connect its signals."""
+        self.settings_menu = SettingsMenu()
+        self.settings_menu.on_message.connect(self.info)
+        self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
+        self.settings_menu.dark_mode.on_click.connect(set_theme)
+        self.settings_menu.show_logs.on_click.connect(self.toggle_log_tab)
+
     def show_settings(self):
-        """Show the settings menu"""
+        """Re-read settings from disk, rebuild the settings menu, and show it."""
+        self.app.settings = Settings.read(self.app.settings.path)
+        self._init_settings_menu()
         self.settings_menu.show()
 
     def switch_tab_observations(self):
@@ -350,13 +347,20 @@ def main():
     app = NaturtagApp(sys.argv)
     splash = QSplashScreen(QPixmap(str(APP_LOGO)).scaledToHeight(512))
     splash.show()
-    app.post_init()
 
+    # Run the event loop until the splash window is actually exposed (visible on screen);
+    # Otherwise it is blocked until setup() finishes
+    loop = QEventLoop()
+    splash.windowHandle().exposeEvent = lambda _: loop.quit()
+    QTimer.singleShot(500, loop.quit)  # Fallback timeout
+    loop.exec()
+
+    app.post_init()
     set_theme(dark_mode=app.settings.dark_mode)
     window = MainWindow(app)
     window.show()
     splash.finish(window)
-    window.check_username()
+    window.check_first_run()
     sys.exit(app.exec())
 
 

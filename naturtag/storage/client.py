@@ -20,7 +20,7 @@ from pyinaturalist_convert.db import (
 )
 from sqlalchemy import func, select
 
-from naturtag.constants import DB_PATH, DEFAULT_PAGE_SIZE, ROOT_TAXON_ID
+from naturtag.constants import DB_PATH, DEFAULT_DISPLAY_PAGE_SIZE, ROOT_TAXON_ID
 from naturtag.utils import get_version
 
 logger = getLogger(__name__)
@@ -148,7 +148,7 @@ class ObservationDbController(ObservationController):
         self,
         username: str,
         updated_since: Optional[datetime] = None,
-        limit: int = DEFAULT_PAGE_SIZE,
+        limit: int = DEFAULT_DISPLAY_PAGE_SIZE,
         page: int = 1,
     ) -> list[Observation]:
         """Fetch any new user observations from the API since last search, save them to the db,
@@ -188,7 +188,7 @@ class ObservationDbController(ObservationController):
         return list(obs)
 
     def search_user_db(
-        self, username: str, limit: int = DEFAULT_PAGE_SIZE, page: int = 1
+        self, username: str, limit: int = DEFAULT_DISPLAY_PAGE_SIZE, page: int = 1
     ) -> list[Observation]:
         """Read a single page of observations from the local DB, ordered by creation date"""
         return list(

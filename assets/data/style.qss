@@ -73,6 +73,9 @@ QLabel#h2_italic {
 QLabel#h3 {
     font: bold 12pt;
 }
+QLabel#error_label {
+    color: #d9534f;
+}
 
 
 IdentificationCard {

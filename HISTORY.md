@@ -1,20 +1,26 @@
 # History
 
 ## 0.9.0
+This release adds significant improvements to packaging, setup, and performance.
+
 **UI:**
+* Add welcome dialog for first launch to show observation download progress
+* Add (optional) locale selection to welcome dialog
 * Add more details to observation page: identifications, comments, annotations, observation fields, and tags
-* Add menu item to open app data/config dir
-* Some layout/scaling improvements to accommodate smaller screens
-* General performance and stability improvements
-* Improve performance of loading observations
+* Add menu item to open app data/config dir (Tools > Open App Directory)
+* Add menu item to check for newer stable release (Help > Check for Updates)
+* Update layout and scaling to accommodate smaller screens
+* Improve UI responsiveness and stability while background tasks are running
+* Improve performance of loading observations (both background download and UI updates)
 * Resume previously interrupted observation downloads
+* Re-read `settings.yml` if manually changed on disk before opening settings menu
+* Default to dark mode
 
 **CLI:**
 * Add progress bars for `tag` and `refresh` commands
 * Suppress exiv2 warnings about corrupt EXIF thumbnails (except in verbose mode)
 
 **Packaging/Setup:**
-* Add menu button to check for newer stable release (Help > Check for Updates)
 * Include locale data in PyInstaller packages
 * Update packaged taxonomy db with iNaturalist data from February 2026
 * Upgrade to Qt 6.10
@@ -30,6 +36,7 @@
 
 **Other Bugfixes:**
 * Fix several multithreading issues potentially leading to segfaults
+* Fix cancelling queued background tasks on app exit (observation/taxon/image downloads, etc.)
 * Fix issue with canceling other background tasks when canceling taxonomy load
 * Fix missing common name at root of hierarchical keywords
 * Fix missing subspecies in hierarchical keywords

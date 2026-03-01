@@ -74,6 +74,37 @@ def test_toggle_fullscreen(window):
     assert hasattr(window, '_flags')
 
 
+@pytest.mark.parametrize(
+    'username, disable_obs_sync',
+    [
+        ('testuser', False),
+        ('', True),
+    ],
+    ids=['username_set', 'disable_obs_sync'],
+)
+def test_check_first_run__skipped(window, mock_app, username, disable_obs_sync):
+    """No dialog shown when username is set or obs sync is disabled."""
+    mock_app.settings.username = username
+    mock_app.settings.disable_obs_sync = disable_obs_sync
+
+    with patch('naturtag.app.app.WelcomeDialog') as mock_dialog_cls:
+        window.check_first_run()
+
+    mock_dialog_cls.assert_not_called()
+
+
+def test_check_first_run__shows_dialog(window, mock_app):
+    """WelcomeDialog is shown when username is empty and obs sync is not disabled."""
+    mock_app.settings.username = ''
+    mock_app.settings.disable_obs_sync = False
+
+    with patch('naturtag.app.app.WelcomeDialog') as mock_dialog_cls:
+        window.check_first_run()
+
+    mock_dialog_cls.assert_called_once()
+    mock_dialog_cls.return_value.exec.assert_called_once()
+
+
 def test_close_event(window, mock_app):
     """closeEvent saves settings and state."""
     with patch.object(Settings, 'write') as mock_write:
@@ -81,36 +112,3 @@ def test_close_event(window, mock_app):
 
     mock_write.assert_called_once()
     mock_app.state.write.assert_called_once()
-
-
-def test_check_username__already_set(window, mock_app):
-    """No dialog shown when username is already configured."""
-    mock_app.settings.username = 'testuser'
-
-    with patch('naturtag.app.app.QInputDialog.getText') as mock_dialog:
-        window.check_username()
-
-    mock_dialog.assert_not_called()
-
-
-@pytest.mark.parametrize(
-    'dialog_return, expected_username, write_called',
-    [
-        (('newuser', True), 'newuser', True),
-        (('', False), '', False),
-    ],
-    ids=['confirmed', 'cancelled'],
-)
-def test_check_username__empty(window, mock_app, dialog_return, expected_username, write_called):
-    """Dialog is shown when username is empty; result depends on user action."""
-    mock_app.settings.username = ''
-
-    with (
-        patch('naturtag.app.app.QInputDialog.getText', return_value=dialog_return) as mock_dialog,
-        patch.object(Settings, 'write') as mock_write,
-    ):
-        window.check_username()
-
-    mock_dialog.assert_called_once()
-    assert mock_app.settings.username == expected_username
-    assert mock_write.called == write_called

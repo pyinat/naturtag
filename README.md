@@ -1,13 +1,12 @@
 # Naturtag
 
 [![Build status](https://github.com/pyinat/naturtag/actions/workflows/test.yml/badge.svg)](https://github.com/pyinat/naturtag/actions)
+[![Codecov](https://codecov.io/gh/pyinat/naturtag/graph/badge.svg?token=KB6A8LPMB1)](https://codecov.io/gh/pyinat/naturtag)
 [![Documentation status](https://readthedocs.org/projects/naturtag/badge/?version=stable)](https://naturtag.readthedocs.io/en/stable/)
 [![GitHub issues](https://img.shields.io/github/issues/pyinat/naturtag)](https://github.com/pyinat/naturtag/issues)
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)
 [![PyPI - Python Versions](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
 
-<!-- TODO -->
-<!-- [![Codecov](https://codecov.io/gh/pyinat/naturtag/branch/main/graph/badge.svg?token=TODO)](https://codecov.io/gh/pyinat/naturtag) -->
 
 <!-- RTD-IGNORE -->
 <br />
@@ -51,7 +50,7 @@ This basically gives you a taxonomic tree for browsing and filtering your photos
 <details>
 <summary><b>Example in XnView</b></summary>
 
-![screenshot](assets/screenshots/xnview.png)
+![Hierarchical keyword taxonomy tree in XnView](assets/screenshots/xnview.png)
 </details>
 
 ### Photo hosting
@@ -64,7 +63,7 @@ Example search using these tags: https://www.flickr.com/photos/tags/taxonomy:cla
 <details>
 <summary><b>Example of taxonomy tags on Flickr</b></summary>
 
-![screenshot](assets/screenshots/flickr.png)
+![Taxonomy tags displayed on a Flickr photo](assets/screenshots/flickr.png)
 </details>
 
 ### Other biodiversity tools
@@ -83,13 +82,13 @@ for platform-specific package instructions.
 ### GUI
 Naturtag is primarily a desktop application. It includes an interface for selecting and tagging images:
 
-![Screenshot](assets/screenshots/image-selector.png)
+![Image selector interface showing file browser and tagged photos](assets/screenshots/image-selector.png)
 
 And tools to search and browse species and observations to tag your images with:
 
-![Screenshot](assets/screenshots/taxon-search.png)
+![Taxon search interface](assets/screenshots/taxon-search.png)
 
-![Screenshot](assets/screenshots/observation-browser.png)
+![Observation browser interface](assets/screenshots/observation-browser.png)
 
 See [Application Guide](https://naturtag.readthedocs.io/en/stable/app.html) for more details.
 
@@ -129,9 +128,10 @@ See [API Reference](https://naturtag.readthedocs.io/en/stable/reference.html) fo
 * See [Issues](https://github.com/pyinat/naturtag/issues) for planned features and current progress.
 * If you have any problems, suggestions, or questions about naturtag, you can:
   * [Create an issue](https://github.com/pyinat/naturtag/issues/new/choose)
-  * [Create a discussion](https://github.com/orgs/pyinat/discussions)
+  * [Create a discussion](https://github.com/orgs/pyinat/discussions) (for more open-ended questions)
   * Ping me (**@jcook**) on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
-* When I'm not working on this, I'm often working on other libraries that naturtag benefits from, including
-  [pyinaturalist](https://pyinaturalist.readthedocs.io),
-  [pyinaturalist-convert](https://github.com/pyinat/pyinaturalist-convert), and
-  [requests-cache](https://requests-cache.readthedocs.io).
+* Many features of naturtag have been added upstream to other libraries I maintain. You can follow development of those projects here:
+  * [pyinaturalist](https://github.com/pyinat/pyinaturalist)
+  * [pyinaturalist-convert](https://github.com/pyinat/pyinaturalist-convert)
+  * [requests-cache](https://github.com/requests-cache/requests-cache)
+  * [requests-ratelimiter](https://github.com/JWCook/requests-ratelimiter)
