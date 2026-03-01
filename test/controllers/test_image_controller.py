@@ -58,6 +58,29 @@ def test_run__schedules_tagging(controller, mock_app, taxon_id, obs_id):
     mock_app.threadpool.schedule.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    'taxon_id, obs_id',
+    [(42, None), (None, 99)],
+    ids=['with_taxon', 'with_observation'],
+)
+def test_run__calls_tag_images(controller, mock_app, taxon_id, obs_id):
+    controller.gallery.images = {'/tmp/img.jpg': MagicMock()}
+    controller.selected_taxon_id = taxon_id
+    controller.selected_observation_id = obs_id
+    mock_app._futures.clear()
+    mock_app.threadpool.schedule.reset_mock()
+
+    with patch(
+        'naturtag.controllers.image_controller.tag_images', return_value=[MagicMock()]
+    ) as mock_tag:
+        controller.run()
+        # Extract and invoke the callable that was scheduled
+        scheduled_fn = mock_app.threadpool.schedule.call_args[0][0]
+        scheduled_fn(image_path='/tmp/img.jpg')
+
+    mock_tag.assert_called_once()
+
+
 def test_select_taxon(controller):
     controller.select_taxon(_make_taxon(id=42))
 

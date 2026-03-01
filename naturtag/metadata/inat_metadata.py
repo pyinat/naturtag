@@ -57,7 +57,7 @@ def tag_images(
         Updated image metadata for each image
     """
     return list(
-        tag_images(
+        _tag_images_iter(
             image_paths, observation_id, taxon_id, recursive, include_sidecars, client, settings
         )
     )

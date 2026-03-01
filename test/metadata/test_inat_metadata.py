@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest.mock import patch
 
 import pytest
 from pyinaturalist import Observation, Taxon
@@ -10,6 +11,7 @@ from naturtag.metadata.inat_metadata import (
     _get_taxon_hierarchical_keywords,
     _get_taxonomy_keywords,
     observation_to_metadata,
+    tag_images,
 )
 
 KINGDOM = Taxon(id=1, name='Animalia', rank='kingdom', preferred_common_name='Animals')
@@ -169,3 +171,12 @@ def test_get_taxon_hierarchical_keywords__subspecies():
     keywords = _get_taxon_hierarchical_keywords(SUBSPECIES)
     assert any('Canis familiaris dingo' in k for k in keywords)
     assert keywords[-1] == 'Animalia|Canidae|Canis|Canis familiaris|Canis familiaris dingo'
+
+
+def test_tag_images__delegates_to_iter():
+    with patch(
+        'naturtag.metadata.inat_metadata._tag_images_iter', return_value=iter([])
+    ) as mock_iter:
+        tag_images([], taxon_id=1)
+
+    mock_iter.assert_called_once()
