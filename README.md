@@ -128,9 +128,10 @@ See [API Reference](https://naturtag.readthedocs.io/en/stable/reference.html) fo
 * See [Issues](https://github.com/pyinat/naturtag/issues) for planned features and current progress.
 * If you have any problems, suggestions, or questions about naturtag, you can:
   * [Create an issue](https://github.com/pyinat/naturtag/issues/new/choose)
-  * [Create a discussion](https://github.com/orgs/pyinat/discussions)
+  * [Create a discussion](https://github.com/orgs/pyinat/discussions) (for more open-ended questions)
   * Ping me (**@jcook**) on the [iNaturalist Community Forum](https://forum.inaturalist.org/c/general/14).
-* When I'm not working on this, I'm often working on other libraries that naturtag benefits from, including
-  [pyinaturalist](https://pyinaturalist.readthedocs.io),
-  [pyinaturalist-convert](https://github.com/pyinat/pyinaturalist-convert), and
-  [requests-cache](https://requests-cache.readthedocs.io).
+* Many features of naturtag have been added upstream to other libraries I maintain. You can follow development of those projects here:
+  * [pyinaturalist](https://github.com/pyinat/pyinaturalist)
+  * [pyinaturalist-convert](https://github.com/pyinat/pyinaturalist-convert)
+  * [requests-cache](https://github.com/requests-cache/requests-cache)
+  * [requests-ratelimiter](https://github.com/JWCook/requests-ratelimiter)
