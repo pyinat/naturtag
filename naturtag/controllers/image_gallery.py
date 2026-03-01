@@ -40,7 +40,7 @@ from naturtag.widgets import (
     VerticalLayout,
 )
 from naturtag.widgets.images import HoverMixin, PixmapLabel, SwappableIcon
-from naturtag.widgets.style import fa_icon
+from naturtag.widgets.style import RED, fa_icon
 
 if TYPE_CHECKING:
     from naturtag.app.threadpool import ThreadPool
@@ -138,6 +138,7 @@ class ImageGallery(BaseController):
         logger.info(f'Loading {image_path}')
         thumbnail_card = ThumbnailCard(image_path)
         thumbnail_card.on_loaded.connect(self._bind_image_actions)
+        thumbnail_card.on_load_error.connect(self.on_message)
         if self._pending_signal is not None:
             thumbnail_card.set_pending(bool(self._current_pending))
             thumbnail_card.set_pending_icons(self._current_pending)
@@ -149,8 +150,10 @@ class ImageGallery(BaseController):
         return thumbnail_card
 
     def _bind_image_actions(self, thumbnail: 'ThumbnailCard'):
-        """Bind actions to an image"""
+        """Bind actions to an image. If loading failed, only bind on_remove."""
         thumbnail.on_remove.connect(self.remove_image)
+        if thumbnail.load_error:
+            return
         thumbnail.on_select.connect(self.select_image)
         thumbnail.on_copy.connect(self.on_message)
         thumbnail.context_menu.on_view_taxon_id.connect(self.on_view_taxon_id)
@@ -201,6 +204,7 @@ class ThumbnailCard(StylableWidget):
 
     on_loaded = Signal(object)  #: Image and metadata have been loaded
     on_copy = Signal(str)  #: Tags were copied to the clipboard
+    on_load_error = Signal(str)  #: Error message when image loading fails
     on_remove = Signal(Path)  #: Request for the image to be removed from the gallery
     on_select = Signal(Path)  #: The image was clicked
 
@@ -208,6 +212,7 @@ class ThumbnailCard(StylableWidget):
         super().__init__()
         self.image_path = image_path
         self.metadata: MetaMetadata = None  # type: ignore
+        self.load_error: str | None = None
         self.layout = VerticalLayout(self)
 
         # Image
@@ -233,14 +238,23 @@ class ThumbnailCard(StylableWidget):
 
     def load_image(self):
         """Load thumbnail + metadata in the main thread"""
-        image, metadata = self.image.get_pixmap_meta(self.image_path)
+        image, metadata, error = self.image.get_pixmap_meta(self.image_path)
         self.image.setPixmap(QPixmap.fromImage(image) if image else QPixmap())
+        if error:
+            self.set_load_error(error)
         self.set_metadata(metadata)
 
     def load_image_async(self, threadpool: 'ThreadPool'):
         """Load thumbnail + metadata in a separate thread"""
         self.image.set_pixmap_meta_async(threadpool, self.image_path)
         self.image.on_load_metadata.connect(self.set_metadata)
+        self.image.on_load_error.connect(self.set_load_error)
+
+    def set_load_error(self, error: str):
+        """Show error icon on thumbnail when image loading fails."""
+        self.load_error = error
+        self.icons.set_error(error)
+        self.on_load_error.emit(error)
 
     def set_metadata(self, metadata: MetaMetadata):
         """Update UI based on new metadata"""
@@ -337,6 +351,7 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
     """Thumbnail for a local image plus metadata"""
 
     on_load_metadata = Signal(MetaMetadata)  #: Finished reading image metadata
+    on_load_error = Signal(str)  #: Error message when image loading fails
 
     def __init__(self, parent: QWidget, size: Dimensions = SIZE_DEFAULT):
         # We will generate a thumbnail of final size; no scaling needed
@@ -344,11 +359,18 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         self.thumbnail_size = size
         self.setFixedSize(*size)
 
-    def get_pixmap_meta(self, path: PathOrStr) -> tuple[QImage | None, MetaMetadata]:
+    def get_pixmap_meta(self, path: PathOrStr) -> tuple[QImage | None, MetaMetadata, str | None]:
         """All I/O for loading an image preview (reading metadata, generating thumbnail),
         to be run from a separate thread. Returns QImage (thread-safe) instead of QPixmap.
         """
-        return generate_thumbnail(path, self.thumbnail_size), MetaMetadata(path)
+        error = None
+        try:
+            image = generate_thumbnail(path, self.thumbnail_size)
+        except Exception as e:
+            logger.warning(f'Error generating thumbnail for {path}:', exc_info=True)
+            image = None
+            error = str(e)
+        return image, MetaMetadata(path), error
 
     def set_pixmap_meta_async(self, threadpool: 'ThreadPool', path: Optional[PathOrStr] = None):
         """Generate a photo thumbnail and read its metadata from a separate thread, and render it
@@ -357,11 +379,13 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         future = threadpool.schedule(self.get_pixmap_meta, path=path)
         future.on_result.connect(self.set_pixmap_meta)
 
-    def set_pixmap_meta(self, image_meta: tuple[QImage | None, MetaMetadata]):
+    def set_pixmap_meta(self, image_meta: tuple[QImage | None, MetaMetadata, str | None]):
         if not isValid(self):
             return
-        image, metadata = image_meta
+        image, metadata, error = image_meta
         self.setPixmap(QPixmap.fromImage(image) if image else QPixmap())
+        if error:
+            self.on_load_error.emit(error)
         self.on_load_metadata.emit(metadata)
 
 
@@ -473,16 +497,43 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.addWidget(self.sidecar_icon)
 
         # Pending tags indicator — parented to the image widget so coordinates are image-relative
-        self.pending_container = QLabel(parent.image)
-        self.pending_container.setObjectName('metadata_icons')
-        pending_layout = HorizontalLayout(self.pending_container)
-        pending_layout.setAlignment(Qt.AlignRight)
-        pending_layout.setContentsMargins(0, 0, 0, 0)
-        self.pending_container.setGeometry(img_size[0] - 40, img_size[1] - 40, 40, 40)
-        self.pending_container.setVisible(False)
-        self.pending_icon = FAIcon('fa6s.floppy-disk', size=40)
+        self.pending_container, self.pending_icon = self._create_icon_container(
+            parent.image, 'fa6s.floppy-disk', img_size[0] - 40, img_size[1] - 40
+        )
         self.pending_icon.setToolTip('Pending tags: click Run (Ctrl+R) to apply')
-        pending_layout.addWidget(self.pending_icon)
+
+        # Error indicator — centered in the thumbnail
+        icon_size = 128
+        x = (img_size[0] - icon_size) // 2
+        y = (img_size[1] - icon_size) // 2
+        self.error_container, self.error_icon = self._create_icon_container(
+            parent.image, 'fa6s.triangle-exclamation', x, y, size=icon_size, color=RED
+        )
+
+    def _create_icon_container(
+        self,
+        parent_image: QLabel,
+        icon_name: str,
+        x: int,
+        y: int,
+        size: int = 40,
+        color: str | None = None,
+    ) -> tuple[QLabel, FAIcon]:
+        container = QLabel(parent_image)
+        container.setObjectName('metadata_icons')
+        layout = HorizontalLayout(container)
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        container.setGeometry(x, y, size, size)
+        container.setVisible(False)
+        icon = FAIcon(icon_name, size=size, color=color)
+        layout.addWidget(icon)
+        return container, icon
+
+    def set_error(self, error: str | None):
+        """Show or hide the error icon, with error message as tooltip."""
+        self.error_container.setVisible(bool(error))
+        self.error_icon.setToolTip(f'Error loading image: {error}' if error else '')
 
     def set_pending(self, pending: bool):
         """Show or hide the pending tags indicator."""

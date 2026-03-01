@@ -1,6 +1,7 @@
 """Main Qt app window and entry point"""
 
 import sys
+import traceback
 import webbrowser
 from datetime import datetime
 from logging import getLogger
@@ -22,7 +23,15 @@ from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
 from naturtag.app.welcome_dialog import WelcomeDialog
-from naturtag.constants import APP_DIR, APP_ICON, APP_LOGO, ASSETS_DIR, DOCS_URL, REPO_URL
+from naturtag.constants import (
+    APP_DIR,
+    APP_ICON,
+    APP_LOGO,
+    ASSETS_DIR,
+    BUG_REPORT_URL,
+    DOCS_URL,
+    REPO_URL,
+)
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
 from naturtag.utils import check_for_update, get_version
@@ -63,6 +72,7 @@ class NaturtagApp(QApplication):
         self.img_fetcher = ImageFetcher(cache_path=self.settings.image_cache_path)
         self.threadpool = ThreadPool(num_workers=self.settings.num_workers)
         self.user_dirs = UserDirs(self.settings)
+        install_excepthook()
 
 
 class MainWindow(QMainWindow):
@@ -178,6 +188,7 @@ class MainWindow(QMainWindow):
         self.toolbar.docs_button.triggered.connect(self.open_docs)
         self.toolbar.about_button.triggered.connect(self.open_about)
         self.toolbar.check_updates_button.triggered.connect(self.check_for_updates)
+        self.toolbar.bug_report_button.triggered.connect(self.open_bug_report)
 
         # Menu bar and status bar
         self.toolbar.populate_menu(self.menuBar())
@@ -231,6 +242,10 @@ class MainWindow(QMainWindow):
         """Open the native file explorer to the app data/config dir"""
         url = QUrl.fromLocalFile(str(APP_DIR))
         QDesktopServices.openUrl(url)
+
+    def open_bug_report(self):
+        """Open the GitHub bug report template in a web browser"""
+        webbrowser.open(BUG_REPORT_URL)
 
     def open_docs(self):
         """Open the documentation in a web browser"""
@@ -341,6 +356,26 @@ class MainWindow(QMainWindow):
 
     def toggle_log_tab(self, checked: bool = True):
         self.tabs.setTabVisible(self.log_tab_idx, checked)
+
+
+def install_excepthook():
+    """Install a custom sys.excepthook that logs unhandled exceptions and shows a dialog."""
+    _default_hook = sys.excepthook
+
+    def excepthook(exc_type, exc_value, exc_tb):
+        if issubclass(exc_type, (KeyboardInterrupt, SystemExit)):
+            _default_hook(exc_type, exc_value, exc_tb)
+            return
+        logger.critical('Unhandled exception', exc_info=(exc_type, exc_value, exc_tb))
+        msg = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        dialog = QMessageBox()
+        dialog.setIcon(QMessageBox.Critical)
+        dialog.setWindowTitle('Unexpected Error')
+        dialog.setText(f'An unexpected error occurred:\n\n{exc_value}')
+        dialog.setDetailedText(msg)
+        dialog.exec()
+
+    sys.excepthook = excepthook
 
 
 def main():

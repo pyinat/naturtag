@@ -32,7 +32,8 @@ CONFIG_PATH = APP_DIR / 'settings.yml'
 DOCS_URL = 'https://naturtag.readthedocs.io/en/stable/app.html'
 REPO_URL = 'https://github.com/pyinat/naturtag'
 RELEASES_API_URL = 'https://api.github.com/repos/pyinat/naturtag/releases/latest'
-TAXON_DB_URL = 'https://github.com/pyinat/naturtag/raw/main/assets/data/taxonomy.tar.gz'
+TAXON_DB_URL = f'{REPO_URL}/raw/main/assets/data/taxonomy.tar.gz'
+BUG_REPORT_URL = f'{REPO_URL}/issues/new?template=bug_report.md'
 
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']

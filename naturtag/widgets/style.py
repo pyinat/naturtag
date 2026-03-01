@@ -16,6 +16,7 @@ YELLOWGREEN = '#9acd32'
 YELLOWGREEN_DARK = '#82c32d'
 AMBER = '#f5c518'
 AMBER_DARK = '#b8900e'
+RED = '#e53935'
 
 # SILVER = '#ada8b6'
 # GRANITE = '#8b9f95'
@@ -29,20 +30,16 @@ AMBER_DARK = '#b8900e'
 logger = getLogger(__name__)
 
 
-def fa_icon(icon_name, secondary: bool = False, tertiary: bool = False, **kwargs):
-    """Get a FontAwesome icon, using a primary, secondary, or tertiary color.
+def fa_icon(icon_name, secondary: bool = False, color=None, **kwargs):
+    """Get a FontAwesome icon, using a primary, secondary, or arbitrary color.
 
     Primary (default): palette highlight color
     Secondary: palette link color
-    Tertiary: fixed amber color for pending/warning indicators
+    color: explicit color; skips palette lookup
     """
-    palette = QApplication.instance().palette()
-    if tertiary:
-        color = palette.placeholderText().color()
-    elif secondary:
-        color = palette.link().color()
-    else:
-        color = palette.highlight().color()
+    if color is None:
+        palette = QApplication.instance().palette()
+        color = palette.link().color() if secondary else palette.highlight().color()
     return icon(
         icon_name,
         color=color,

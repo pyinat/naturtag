@@ -104,6 +104,12 @@ class Toolbar(QToolBar):
             shortcut='F1',
             visible=False,
         )
+        self.bug_report_button = self.add_button(
+            '&Bug Report',
+            tooltip='Report a bug on GitHub',
+            icon='fa5s.bug',
+            visible=False,
+        )
         self.about_button = self.add_button(
             '&About',
             tooltip='Application information',
@@ -170,6 +176,7 @@ class Toolbar(QToolBar):
 
         help_menu = menu.addMenu('&Help')
         help_menu.addAction(self.docs_button)
+        help_menu.addAction(self.bug_report_button)
         help_menu.addAction(self.about_button)
         help_menu.addAction(self.check_updates_button)
 

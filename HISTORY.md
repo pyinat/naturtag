@@ -4,37 +4,47 @@
 This release adds significant improvements to packaging, setup, and performance.
 
 **UI:**
-* Add welcome dialog for first launch to show observation download progress
-* Add (optional) locale selection to welcome dialog
-* Add more details to observation page: identifications, comments, annotations, observation fields, and tags
-* Add menu item to open app data/config dir (Tools > Open App Directory)
-* Add menu item to check for newer stable release (Help > Check for Updates)
-* Add icon on thumbnails to indicate pending/unwritten tags available
-* Add colored indicators on thumbnail metadata icons to show specific types of pending metadata changes
-* Update layout and scaling to accommodate smaller screens
-* Improve UI responsiveness and stability while background tasks are running
-* Improve performance of loading observations (both background download and UI updates)
-* Resume previously interrupted observation downloads
-* Re-read `settings.yml` if manually changed on disk before opening settings menu
-* Default to dark mode
+* Add details to observation page: identifications, comments, annotations, observation fields, and tags
+* Startup:
+  * Add welcome dialog for first launch to show observation download progress
+  * Add (optional) locale selection to welcome dialog
+  * Improve UI responsiveness and stability while background tasks are running
+  * Improve performance of loading observations (both background download and UI updates)
+  * Resume previously interrupted observation downloads
+* Menus:
+  * Add menu item to open app data/config dir (Tools > Open App Directory)
+  * Add menu item to check for newer stable release (Help > Check for Updates)
+  * Add menu item to submit a bug report (Help > Bug Report)
+* QoL:
+  * Re-read `settings.yml` if manually changed on disk before opening settings menu
+  * Add icon on thumbnails to indicate pending/unwritten tags available
+  * Add colored indicators on thumbnail metadata icons to show specific types of pending metadata changes (taxonomy/observation/geo/embedded tags/sidecar)
+  * Update layout and scaling to accommodate smaller screens
+  * Default to dark mode
+* Error handling:
+  * Add icon and error text tooltip for images + metadata that failed to load (typically corrupt files)
+  * Add global error handler hook to show dialog for unhandled exceptions
 
 **CLI:**
 * Add progress bars for `tag` and `refresh` commands
 * Suppress exiv2 warnings about corrupt EXIF thumbnails (except in verbose mode)
 
 **Packaging/Setup:**
-* Include locale data in PyInstaller packages
-* Update packaged taxonomy db with iNaturalist data from February 2026
-* Upgrade to Qt 6.10
-* Include database migrations for future SQLite db updates
-* Build pacman package for Arch Linux
-* Build AppImage package for other Linux distros not covered by other formats (replaces snap package)
-* Include wheel in GitHub release artifacts (for pre-release testing)
-* Automate Windows installer build with Inno Setup (replaces Actual Installer)
-* Fix an issue recovering from a failed db setup
-* Fix issue with first-time installation on Windows
-* Fix PyPI package with unresolvable constraints when installed with pip
-* Fix Gatekeeper-related issues with macOS DMG image
+* Data & dependencies:
+  * Include locale data in PyInstaller packages
+  * Update packaged taxonomy db with iNaturalist data from February 2026
+  * Include database migrations for future SQLite db updates
+  * Upgrade to Qt 6.10
+* Artifacts:
+  * Build pacman package for Arch Linux
+  * Build AppImage package for other Linux distros not covered by other formats (replaces snap package)
+  * Include wheel in GitHub release artifacts (for pre-release testing)
+  * Automate Windows installer build with Inno Setup (replaces Actual Installer)
+* Packaging bugfixes:
+  * Fix an issue recovering from a failed db setup
+  * Fix issue with first-time installation on Windows
+  * Fix PyPI package with unresolvable constraints when installed with pip
+  * Fix Gatekeeper-related issues with macOS DMG image
 
 **Other Bugfixes:**
 * Fix several multithreading issues potentially leading to segfaults
