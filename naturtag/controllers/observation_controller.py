@@ -1,5 +1,6 @@
 import math
 from collections import OrderedDict
+from contextlib import suppress
 from logging import getLogger
 from typing import Iterable, Iterator
 
@@ -235,6 +236,45 @@ class ObservationController(BaseController):
         self.update_pagination_buttons()
         self.load_observations_from_db()
         self.on_sync_finished.emit()
+        if self.app.settings.preload_obs_thumbnails:
+            self._start_thumbnail_preload()
+
+    def _start_thumbnail_preload(self):
+        """Kick off background preloading of all observation thumbnails"""
+        logger.info('Starting thumbnail preload')
+        future = self.app.threadpool.schedule(
+            self._preload_all_thumbnails,
+            priority=QThread.LowPriority,
+        )
+        future.on_result.connect(
+            lambda n: logger.info(f'Preloaded thumbnails for {n} observations')
+        )
+
+    def _preload_all_thumbnails(self) -> int:
+        """Fetch and cache thumbnails for all observations in the DB. Runs in worker thread."""
+        username = self.app.settings.username
+        total = 0
+        page = 1
+        while True:
+            obs_page = self.app.client.observations.search_user_db(username=username, page=page)
+            if not obs_page:
+                break
+            for obs in obs_page:
+                if obs.default_photo:
+                    self._cache_photo(obs.default_photo, 'square')
+                    self._cache_photo(obs.default_photo, 'medium')
+                if obs.taxon and obs.taxon.default_photo:
+                    self._cache_photo(obs.taxon.default_photo, 'square')
+                for photo in (obs.photos or [])[1:]:
+                    self._cache_photo(photo, 'square')
+                total += 1
+            page += 1
+        return total
+
+    def _cache_photo(self, photo, size: str):
+        """Fetch a single photo into the image cache, ignoring errors. Runs in worker thread."""
+        with suppress(Exception):
+            self.app.img_fetcher.get_image(photo, size=size)
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""

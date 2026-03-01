@@ -87,6 +87,13 @@ class SettingsMenu(BaseController):
             setting_attr='all_ranks',
         )
         inat.addLayout(self.all_ranks)
+        inat.addLayout(
+            ToggleSetting(
+                self.app.settings,
+                icon_str='fa6s.images',
+                setting_attr='preload_obs_thumbnails',
+            )
+        )
 
         # Metadata settings
         metadata = self.add_group('Metadata', self.settings_layout)

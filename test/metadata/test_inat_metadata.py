@@ -174,10 +174,11 @@ def test_get_taxon_hierarchical_keywords__subspecies():
     assert keywords[-1] == 'Animalia|Canidae|Canis|Canis familiaris|Canis familiaris dingo'
 
 
-def test_tag_images__delegates_to_iter():
-    with patch(
-        'naturtag.metadata.inat_metadata._tag_images_iter', return_value=iter([])
-    ) as mock_iter:
-        tag_images([], taxon_id=1)
+def test_tag_images__returns_list():
+    """tag_images() materialises the iterator from _tag_images_iter into a list."""
+    sentinel = object()
+    with patch('naturtag.metadata.inat_metadata._tag_images_iter', return_value=iter([sentinel])):
+        result = tag_images([], taxon_id=1)
 
-    mock_iter.assert_called_once()
+    assert isinstance(result, list)
+    assert result == [sentinel]

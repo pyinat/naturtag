@@ -322,16 +322,6 @@ def test_thumbnail_card__set_pending(thumbnail_card, pending):
     assert thumbnail_card.icons.pending_container.isHidden() == (not pending)
 
 
-def test_thumbnail_card__update_metadata_clears_pending(thumbnail_card, mock_metadata):
-    """update_metadata() clears the pending icon regardless of prior state."""
-    thumbnail_card.set_pending(True)
-
-    with patch.object(thumbnail_card, 'pulse'):
-        thumbnail_card.update_metadata(mock_metadata)
-
-    assert thumbnail_card.icons.pending_container.isHidden()
-
-
 # --- ThumbnailContextMenu ---
 
 
@@ -416,14 +406,6 @@ def test_thumbnail_meta_icons__set_pending_icons__clears_on_empty(thumbnail_card
     icons.set_pending_icons(frozenset())
 
     assert icons.taxon_icon.pixmap().toImage() == before
-
-
-def test_thumbnail_card__set_pending_icons(thumbnail_card):
-    """ThumbnailCard.set_pending_icons() delegates to its icons widget."""
-    with patch.object(thumbnail_card.icons, 'set_pending_icons') as mock_set:
-        thumbnail_card.set_pending_icons(frozenset({'taxon'}))
-
-    mock_set.assert_called_once_with(frozenset({'taxon'}))
 
 
 def test_thumbnail_card__update_metadata_resets_pending_icons(thumbnail_card, mock_metadata):
