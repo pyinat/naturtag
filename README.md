@@ -1,13 +1,12 @@
 # Naturtag
 
 [![Build status](https://github.com/pyinat/naturtag/actions/workflows/test.yml/badge.svg)](https://github.com/pyinat/naturtag/actions)
+[![Codecov](https://codecov.io/gh/pyinat/naturtag/graph/badge.svg?token=KB6A8LPMB1)](https://codecov.io/gh/pyinat/naturtag)
 [![Documentation status](https://readthedocs.org/projects/naturtag/badge/?version=stable)](https://naturtag.readthedocs.io/en/stable/)
 [![GitHub issues](https://img.shields.io/github/issues/pyinat/naturtag)](https://github.com/pyinat/naturtag/issues)
 [![PyPI](https://img.shields.io/pypi/v/naturtag?color=blue)](https://pypi.org/project/naturtag)
 [![PyPI - Python Versions](https://img.shields.io/pypi/pyversions/naturtag)](https://pypi.org/project/naturtag)
 
-<!-- TODO -->
-<!-- [![Codecov](https://codecov.io/gh/pyinat/naturtag/branch/main/graph/badge.svg?token=TODO)](https://codecov.io/gh/pyinat/naturtag) -->
 
 <!-- RTD-IGNORE -->
 <br />
