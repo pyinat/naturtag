@@ -265,6 +265,8 @@ def _get_taxon_hierarchical_keywords(taxon: Taxon) -> list[str]:
 
 def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
     """Translate a sorted list of flat keywords into pipe-delimited hierarchical keywords"""
+    if not keywords:
+        return []
     hier_keywords = [keywords[0]]
     for k in keywords[1:]:
         hier_keywords.append(f'{hier_keywords[-1]}|{k}')

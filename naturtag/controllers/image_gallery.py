@@ -59,6 +59,8 @@ class ImageGallery(BaseController):
         super().__init__()
         self.setAcceptDrops(True)
         self.images: dict[Path, ThumbnailCard] = {}
+        self._pending_signal = None
+        self._current_pending = False
         self.image_window = ImageWindow()
         self.image_window.on_remove.connect(self.remove_image)
         root = VerticalLayout(self)
@@ -136,6 +138,8 @@ class ImageGallery(BaseController):
         logger.info(f'Loading {image_path}')
         thumbnail_card = ThumbnailCard(image_path)
         thumbnail_card.on_loaded.connect(self._bind_image_actions)
+        if self._pending_signal is not None:
+            thumbnail_card.set_pending(self._current_pending)
         self.flow_layout.addWidget(thumbnail_card)
         self.images[thumbnail_card.image_path] = thumbnail_card
 
@@ -150,6 +154,18 @@ class ImageGallery(BaseController):
         thumbnail.on_copy.connect(self.on_message)
         thumbnail.context_menu.on_view_taxon_id.connect(self.on_view_taxon_id)
         thumbnail.context_menu.on_view_observation_id.connect(self.on_view_observation_id)
+        if self._pending_signal is not None:
+            self._pending_signal.connect(thumbnail.set_pending, Qt.UniqueConnection)
+
+    def connect_pending_signal(self, signal: Signal):
+        """Connect a signal for pending tag state updates to all current and future thumbnails."""
+        self._pending_signal = signal
+        signal.connect(self._update_pending_state)
+
+    def _update_pending_state(self, pending: bool):
+        self._current_pending = pending
+        for card in self.images.values():
+            card.set_pending(pending)
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -301,8 +317,13 @@ class ThumbnailCard(StylableWidget):
         logger.debug(f'Selecting image {self.image_path}')
         self.on_select.emit(self.image_path)
 
+    def set_pending(self, pending: bool):
+        """Show or hide the pending tags icon."""
+        self.icons.set_pending(pending)
+
     def update_metadata(self, metadata: MetaMetadata):
         """Update UI based on new metadata, and show a highlight animation"""
+        self.icons.set_pending(False)
         self.pulse()
         self.set_metadata(metadata)
 
@@ -434,6 +455,7 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
         self.setGeometry(9, img_size[0] - 11, 130, 20)
 
+        # Main metadata icons
         self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
         self.observation_icon = FAIcon('fa6s.binoculars', secondary=True, size=20)
         self.geo_icon = FAIcon('mdi.map-marker', secondary=True, size=20)
@@ -444,6 +466,22 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout.addWidget(self.geo_icon)
         self.icon_layout.addWidget(self.tag_icon)
         self.icon_layout.addWidget(self.sidecar_icon)
+
+        # Pending tags indicator — parented to the image widget so coordinates are image-relative
+        self.pending_container = QLabel(parent.image)
+        self.pending_container.setObjectName('metadata_icons')
+        pending_layout = HorizontalLayout(self.pending_container)
+        pending_layout.setAlignment(Qt.AlignRight)
+        pending_layout.setContentsMargins(0, 0, 0, 0)
+        self.pending_container.setGeometry(img_size[0] - 40, img_size[1] - 40, 40, 40)
+        self.pending_container.setVisible(False)
+        self.pending_icon = FAIcon('fa6s.floppy-disk', secondary=True, size=40)
+        self.pending_icon.setToolTip('Pending tags: click Run (Ctrl+R) to apply')
+        pending_layout.addWidget(self.pending_icon)
+
+    def set_pending(self, pending: bool):
+        """Show or hide the pending tags indicator."""
+        self.pending_container.setVisible(pending)
 
     def refresh_icons(self, metadata: MetaMetadata):
         """Update icons based on the available metadata"""

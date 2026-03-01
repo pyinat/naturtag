@@ -26,6 +26,9 @@ class ImageController(BaseController):
     """Controller for selecting and tagging local image files"""
 
     on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
+    on_selection_changed = Signal(
+        bool
+    )  #: A taxon/observation was selected (True) or cleared (False)
     on_view_taxon_id = Signal(int)  #: Request to switch to taxon tab
     on_view_observation_id = Signal(int)  #: Request to switch to observation tab
 
@@ -76,6 +79,7 @@ class ImageController(BaseController):
 
         # Image gallery
         self.gallery = ImageGallery()
+        self.gallery.connect_pending_signal(self.on_selection_changed)
         photo_layout.addWidget(self.gallery)
 
     def run(self):
@@ -131,6 +135,7 @@ class ImageController(BaseController):
         """Clear all images and input"""
         self.selected_taxon_id = None
         self.selected_observation_id = None
+        self.on_selection_changed.emit(False)
         self.gallery.clear()
         self.input_obs_id.clear()
         self.input_taxon_id.clear()
@@ -180,6 +185,10 @@ class ImageController(BaseController):
         )
         future.on_result.connect(self.select_observation)
 
+    @property
+    def has_selection(self) -> bool:
+        return bool(self.selected_taxon_id or self.selected_observation_id)
+
     @Slot(Taxon)
     def select_taxon(self, taxon: Taxon):
         """Update metadata info from a taxon object"""
@@ -195,6 +204,7 @@ class ImageController(BaseController):
         card = TaxonInfoCard(taxon=taxon, delayed_load=False)
         card.on_click.connect(self.on_view_taxon_id)
         self.data_source_card.addWidget(card)
+        self.on_selection_changed.emit(True)
 
     @Slot(Observation)
     def select_observation(self, observation: Observation):
@@ -211,3 +221,4 @@ class ImageController(BaseController):
         card = ObservationInfoCard(obs=observation, delayed_load=False)
         card.on_click.connect(self.on_view_observation_id)
         self.data_source_card.addWidget(card)
+        self.on_selection_changed.emit(True)

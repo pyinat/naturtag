@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QObject, Qt, Signal
 
 from naturtag.controllers.image_gallery import (
     ImageGallery,
@@ -180,6 +180,38 @@ def test_drop_event(gallery, image_files):
     assert len(gallery.images) == 3
 
 
+class _PendingSignalEmitter(QObject):
+    """Minimal helper to emit a boolean signal in tests."""
+
+    signal = Signal(bool)
+
+
+@pytest.mark.parametrize('pending', [True, False], ids=['show', 'hide'])
+def test_image_gallery__connect_pending_signal(gallery, image_files, pending):
+    """When the pending signal fires, all loaded cards reflect the new state."""
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images(image_files)
+
+    emitter = _PendingSignalEmitter()
+    gallery.connect_pending_signal(emitter.signal)
+
+    emitter.signal.emit(pending)
+
+    for card in gallery.images.values():
+        assert card.icons.pending_container.isHidden() == (not pending)
+
+
+def test_image_gallery__new_card_inherits_pending_state(gallery, image_files):
+    """A card loaded after connect_pending_signal() inherits the current pending state."""
+    emitter = _PendingSignalEmitter()
+    gallery.connect_pending_signal(emitter.signal)
+    emitter.signal.emit(True)
+
+    card = gallery.load_image(image_files[0], delayed_load=True)
+
+    assert not card.icons.pending_container.isHidden()
+
+
 # --- ThumbnailCard ---
 
 
@@ -257,6 +289,23 @@ def test_thumbnail_card__update_metadata(thumbnail_card, mock_metadata):
     mock_pulse.assert_called_once()
 
 
+@pytest.mark.parametrize('pending', [True, False], ids=['show', 'hide'])
+def test_thumbnail_card__set_pending(thumbnail_card, pending):
+    """set_pending() on ThumbnailCard delegates to its icons."""
+    thumbnail_card.set_pending(pending)
+    assert thumbnail_card.icons.pending_container.isHidden() == (not pending)
+
+
+def test_thumbnail_card__update_metadata_clears_pending(thumbnail_card, mock_metadata):
+    """update_metadata() clears the pending icon regardless of prior state."""
+    thumbnail_card.set_pending(True)
+
+    with patch.object(thumbnail_card, 'pulse'):
+        thumbnail_card.update_metadata(mock_metadata)
+
+    assert thumbnail_card.icons.pending_container.isHidden()
+
+
 # --- ThumbnailContextMenu ---
 
 
@@ -284,3 +333,13 @@ def test_context_menu__actions_enabled(
     assert len(actions) == 7  # Always 7 actions total
     enabled = [a for a in actions if a.isEnabled()]
     assert len(enabled) == expected_enabled_count
+
+
+# --- ThumbnailMetaIcons ---
+
+
+@pytest.mark.parametrize('pending', [True, False], ids=['show', 'hide'])
+def test_thumbnail_meta_icons__set_pending(thumbnail_card, pending):
+    """set_pending() controls hidden state of the pending container."""
+    thumbnail_card.icons.set_pending(pending)
+    assert thumbnail_card.icons.pending_container.isHidden() == (not pending)

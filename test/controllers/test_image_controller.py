@@ -196,3 +196,31 @@ def test_refresh__no_images(controller):
     controller.refresh()
 
     on_message.assert_any_call('Select images to tag')
+
+
+@pytest.mark.parametrize(
+    'method, arg',
+    [
+        ('select_taxon', _make_taxon(id=42)),
+        ('select_observation', _make_obs(id=99)),
+    ],
+    ids=['select_taxon', 'select_observation'],
+)
+def test_selection_changed_signal__emits_true(controller, method, arg):
+    """select_taxon and select_observation emit on_selection_changed(True)."""
+    handler = MagicMock()
+    controller.on_selection_changed.connect(handler)
+
+    getattr(controller, method)(arg)
+
+    handler.assert_called_once_with(True)
+
+
+def test_selection_changed_signal__clear_emits_false(controller):
+    """clear() emits on_selection_changed(False)."""
+    handler = MagicMock()
+    controller.on_selection_changed.connect(handler)
+
+    controller.clear()
+
+    handler.assert_called_once_with(False)
