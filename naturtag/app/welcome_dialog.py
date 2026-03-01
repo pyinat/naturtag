@@ -1,7 +1,7 @@
 from logging import getLogger
 from time import monotonic
 
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, QTimer, Slot
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -76,9 +76,11 @@ class WelcomeDialog(QDialog):
         self._locale_lookup = {v: k for k, v in locales.items()}
         locale_row = QHBoxLayout()
         self.locale_label = QLabel('Locale:')
+        self.locale_label.setToolTip('Affects common names shown for species')
         locale_row.addWidget(self.locale_label)
         self.locale_combo = QComboBox()
         self.locale_combo.addItems(locales.values())
+        self.locale_combo.setToolTip('Affects common names shown for species')
         current_locale = locales.get(self.app.settings.locale, self.app.settings.locale)
         self.locale_combo.setCurrentText(current_locale)
         locale_row.addWidget(self.locale_combo)
@@ -112,7 +114,9 @@ class WelcomeDialog(QDialog):
 
         # Button box: OK/Skip in step 1; "Run in background" added for step 2
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        self.button_box.button(QDialogButtonBox.Ok).setEnabled(False)
         self.button_box.accepted.connect(self._on_ok)
+        self.username_input.textChanged.connect(self._on_username_changed)
         self.skip_button = self.button_box.addButton('Skip', QDialogButtonBox.RejectRole)
         self.skip_button.clicked.connect(self._on_cancel)
         self.background_button = self.button_box.addButton(
@@ -121,6 +125,14 @@ class WelcomeDialog(QDialog):
         self.background_button.clicked.connect(self.accept)
         self.background_button.hide()
         layout.addWidget(self.button_box)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.username_input.setFocus()
+
+    @Slot(str)
+    def _on_username_changed(self, text: str):
+        self.button_box.button(QDialogButtonBox.Ok).setEnabled(bool(text.strip()))
 
     # Transitions
     # ----------------------------------------
@@ -165,7 +177,10 @@ class WelcomeDialog(QDialog):
                 f'{_format_duration(remaining_secs)} remaining</b>'
             )
         else:
-            self.status_label.clear()
+            if total > 0:
+                self.status_label.setText('Downloading\u2026')
+            else:
+                self.status_label.clear()
 
     # Button handlers
     # ----------------------------------------
@@ -251,6 +266,7 @@ class WelcomeDialog(QDialog):
         )
         self.error_label.show()
         self.username_input.setFocus()
+        self.username_input.selectAll()
 
     @Slot(int, int)
     def _on_sync_progress(self, loaded: int, total: int):
@@ -266,7 +282,8 @@ class WelcomeDialog(QDialog):
     def _on_sync_finished(self):
         """Auto-close when the download completes."""
         logger.info('Download finished; closing sync dialog')
-        self.accept()
+        self.status_label.setText('<b>Download complete!</b>')
+        QTimer.singleShot(1000, self.accept)
 
 
 def _format_duration(seconds: float) -> str:
