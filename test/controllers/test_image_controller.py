@@ -19,6 +19,7 @@ def controller(qtbot, mock_app):
 def test_init(controller):
     assert controller.selected_taxon_id is None
     assert controller.selected_observation_id is None
+    assert controller.selected_observation is None
 
 
 def test_run__no_images(controller):
@@ -86,6 +87,16 @@ def test_select_taxon(controller):
 
     assert controller.selected_taxon_id == 42
     assert controller.selected_observation_id is None
+    assert controller.selected_observation is None
+
+
+def test_select_taxon__clears_selected_observation(controller):
+    """Selecting a taxon clears a previously stored observation object."""
+    controller.selected_observation = _make_obs(id=99)
+
+    controller.select_taxon(_make_taxon(id=42))
+
+    assert controller.selected_observation is None
 
 
 def test_select_taxon__same_id_skipped(controller):
@@ -152,11 +163,13 @@ def test_select_by_id__same_id_skipped(controller, mock_app, method, id_attr, va
 def test_clear(controller):
     controller.selected_taxon_id = 42
     controller.selected_observation_id = 99
+    controller.selected_observation = _make_obs(id=99)
 
     controller.clear()
 
     assert controller.selected_taxon_id is None
     assert controller.selected_observation_id is None
+    assert controller.selected_observation is None
 
 
 @pytest.mark.parametrize(
@@ -199,28 +212,56 @@ def test_refresh__no_images(controller):
 
 
 @pytest.mark.parametrize(
-    'method, arg',
+    'method, arg, expected_pending',
     [
-        ('select_taxon', _make_taxon(id=42)),
-        ('select_observation', _make_obs(id=99)),
+        ('select_taxon', _make_taxon(id=42), frozenset({'taxon', 'tags', 'sidecar'})),
+        (
+            'select_observation',
+            _make_obs(id=99, location=(45.5, -122.6)),
+            frozenset({'taxon', 'observation', 'tags', 'geo', 'sidecar'}),
+        ),
+        (
+            'select_observation',
+            _make_obs(id=99, location=None),
+            frozenset({'taxon', 'observation', 'tags', 'sidecar'}),
+        ),
     ],
-    ids=['select_taxon', 'select_observation'],
+    ids=['taxon', 'observation_with_geo', 'observation_without_geo'],
 )
-def test_selection_changed_signal__emits_true(controller, method, arg):
-    """select_taxon and select_observation emit on_selection_changed(True)."""
+def test_selection_changed_signal__emits_pending_frozenset(
+    controller, method, arg, expected_pending
+):
+    """select_taxon and select_observation emit the correct frozenset of pending icon keys.
+
+    settings.sidecar defaults to True in tests, so 'sidecar' is always included.
+    """
     handler = MagicMock()
     controller.on_selection_changed.connect(handler)
 
     getattr(controller, method)(arg)
 
-    handler.assert_called_once_with(True)
+    handler.assert_called_once()
+    assert handler.call_args[0][0] == expected_pending
 
 
-def test_selection_changed_signal__clear_emits_false(controller):
-    """clear() emits on_selection_changed(False)."""
+def test_selection_changed_signal__no_sidecar_when_disabled(controller):
+    """'sidecar' is excluded from the pending set when settings.sidecar is False."""
+    controller.app.settings.sidecar = False
+    handler = MagicMock()
+    controller.on_selection_changed.connect(handler)
+
+    controller.select_taxon(_make_taxon(id=42))
+
+    emitted = handler.call_args[0][0]
+    assert 'sidecar' not in emitted
+
+
+def test_selection_changed_signal__clear_emits_empty_frozenset(controller):
+    """clear() emits on_selection_changed with an empty frozenset."""
     handler = MagicMock()
     controller.on_selection_changed.connect(handler)
 
     controller.clear()
 
-    handler.assert_called_once_with(False)
+    handler.assert_called_once()
+    assert handler.call_args[0][0] == frozenset()

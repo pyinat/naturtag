@@ -9,7 +9,8 @@ This release adds significant improvements to packaging, setup, and performance.
 * Add more details to observation page: identifications, comments, annotations, observation fields, and tags
 * Add menu item to open app data/config dir (Tools > Open App Directory)
 * Add menu item to check for newer stable release (Help > Check for Updates)
-* Add icon below thumbnails to indicate pending/unwritten tags available
+* Add icon on thumbnails to indicate pending/unwritten tags available
+* Add colored indicators on thumbnail metadata icons to show specific types of pending metadata changes
 * Update layout and scaling to accommodate smaller screens
 * Improve UI responsiveness and stability while background tasks are running
 * Improve performance of loading observations (both background download and UI updates)

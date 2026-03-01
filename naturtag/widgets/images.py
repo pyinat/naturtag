@@ -86,6 +86,19 @@ class FAIcon(QLabel):
         )
 
 
+class SwappableIcon(FAIcon):
+    """An FAIcon that can switch between secondary (written) and primary (pending) colors."""
+
+    def __init__(self, icon_str: str, **kwargs):
+        super().__init__(icon_str, **kwargs)
+        self._primary_icon = fa_icon(icon_str)
+
+    def set_primary(self, primary: bool):
+        """Swap between primary (highlight) and secondary (link) color."""
+        target = self._primary_icon if primary else self.icon
+        self.setPixmap(target.pixmap(self.icon_size, mode=QIcon.Mode.Normal))
+
+
 class IconLabel(QWidget):
     def __init__(
         self,

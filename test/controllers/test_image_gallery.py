@@ -181,13 +181,22 @@ def test_drop_event(gallery, image_files):
 
 
 class _PendingSignalEmitter(QObject):
-    """Minimal helper to emit a boolean signal in tests."""
+    """Minimal helper to emit a frozenset signal in tests."""
 
-    signal = Signal(bool)
+    signal = Signal(object)
 
 
-@pytest.mark.parametrize('pending', [True, False], ids=['show', 'hide'])
-def test_image_gallery__connect_pending_signal(gallery, image_files, pending):
+_PENDING_TAXON = frozenset({'taxon', 'tags'})
+_PENDING_ALL = frozenset({'taxon', 'observation', 'tags', 'geo', 'sidecar'})
+_PENDING_EMPTY: frozenset[str] = frozenset()
+
+
+@pytest.mark.parametrize(
+    'pending, expected_visible',
+    [(_PENDING_TAXON, True), (_PENDING_EMPTY, False)],
+    ids=['show', 'hide'],
+)
+def test_image_gallery__connect_pending_signal(gallery, image_files, pending, expected_visible):
     """When the pending signal fires, all loaded cards reflect the new state."""
     with patch.object(ThumbnailCard, 'load_image_async'):
         gallery.load_images(image_files)
@@ -198,18 +207,35 @@ def test_image_gallery__connect_pending_signal(gallery, image_files, pending):
     emitter.signal.emit(pending)
 
     for card in gallery.images.values():
-        assert card.icons.pending_container.isHidden() == (not pending)
+        assert card.icons.pending_container.isHidden() == (not expected_visible)
 
 
 def test_image_gallery__new_card_inherits_pending_state(gallery, image_files):
     """A card loaded after connect_pending_signal() inherits the current pending state."""
     emitter = _PendingSignalEmitter()
     gallery.connect_pending_signal(emitter.signal)
-    emitter.signal.emit(True)
+    emitter.signal.emit(_PENDING_TAXON)
 
     card = gallery.load_image(image_files[0], delayed_load=True)
 
     assert not card.icons.pending_container.isHidden()
+
+
+def test_image_gallery__pending_icons_propagate(gallery, image_files):
+    """Pending signal switches per-icon colors on all loaded cards."""
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images(image_files)
+
+    # Capture pre-signal pixmaps for one card
+    card = next(iter(gallery.images.values()))
+    before = card.icons.taxon_icon.pixmap().toImage()
+
+    emitter = _PendingSignalEmitter()
+    gallery.connect_pending_signal(emitter.signal)
+    emitter.signal.emit(_PENDING_ALL)
+
+    after = card.icons.taxon_icon.pixmap().toImage()
+    assert before != after  # taxon icon swapped to primary color
 
 
 # --- ThumbnailCard ---
@@ -343,3 +369,72 @@ def test_thumbnail_meta_icons__set_pending(thumbnail_card, pending):
     """set_pending() controls hidden state of the pending container."""
     thumbnail_card.icons.set_pending(pending)
     assert thumbnail_card.icons.pending_container.isHidden() == (not pending)
+
+
+@pytest.mark.parametrize(
+    'pending, pending_icons, non_pending_icons',
+    [
+        (
+            frozenset({'taxon', 'tags'}),
+            ['taxon_icon', 'tag_icon'],
+            ['observation_icon', 'geo_icon', 'sidecar_icon'],
+        ),
+        (
+            frozenset({'taxon', 'observation', 'geo', 'tags', 'sidecar'}),
+            ['taxon_icon', 'observation_icon', 'geo_icon', 'tag_icon', 'sidecar_icon'],
+            [],
+        ),
+    ],
+    ids=['taxon_only', 'all'],
+)
+def test_thumbnail_meta_icons__set_pending_icons(
+    thumbnail_card, pending, pending_icons, non_pending_icons
+):
+    """set_pending_icons() switches only the matching icons to primary color."""
+    icons = thumbnail_card.icons
+    # Capture secondary pixmaps before any pending state
+    before = {
+        name: getattr(icons, name).pixmap().toImage() for name in pending_icons + non_pending_icons
+    }
+
+    icons.set_pending_icons(pending)
+
+    for name in pending_icons:
+        assert getattr(icons, name).pixmap().toImage() != before[name], f'{name} should be primary'
+    for name in non_pending_icons:
+        assert getattr(icons, name).pixmap().toImage() == before[name], (
+            f'{name} should stay secondary'
+        )
+
+
+def test_thumbnail_meta_icons__set_pending_icons__clears_on_empty(thumbnail_card):
+    """set_pending_icons(frozenset()) restores icons to their original secondary pixmaps."""
+    icons = thumbnail_card.icons
+    before = icons.taxon_icon.pixmap().toImage()
+
+    icons.set_pending_icons(frozenset({'taxon', 'tags'}))
+    icons.set_pending_icons(frozenset())
+
+    assert icons.taxon_icon.pixmap().toImage() == before
+
+
+def test_thumbnail_card__set_pending_icons(thumbnail_card):
+    """ThumbnailCard.set_pending_icons() delegates to its icons widget."""
+    with patch.object(thumbnail_card.icons, 'set_pending_icons') as mock_set:
+        thumbnail_card.set_pending_icons(frozenset({'taxon'}))
+
+    mock_set.assert_called_once_with(frozenset({'taxon'}))
+
+
+def test_thumbnail_card__update_metadata_resets_pending_icons(thumbnail_card, mock_metadata):
+    """update_metadata() resets pending icon highlighting back to secondary color."""
+    icons = thumbnail_card.icons
+    before = icons.taxon_icon.pixmap().toImage()
+
+    icons.set_pending_icons(frozenset({'taxon', 'tags'}))
+    assert icons.taxon_icon.pixmap().toImage() != before  # confirm it changed
+
+    with patch.object(thumbnail_card, 'pulse'):
+        thumbnail_card.update_metadata(mock_metadata)
+
+    assert icons.taxon_icon.pixmap().toImage() == before  # reset to secondary

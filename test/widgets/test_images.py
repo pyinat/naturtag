@@ -5,7 +5,13 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
-from naturtag.widgets.images import InfoCard, InfoCardList, PixmapLabel, format_int
+from naturtag.widgets.images import (
+    InfoCard,
+    InfoCardList,
+    PixmapLabel,
+    SwappableIcon,
+    format_int,
+)
 
 
 @pytest.fixture
@@ -51,6 +57,30 @@ def info_card_list(qtbot):
 )
 def test_format_int(value, expected):
     assert format_int(value) == expected
+
+
+# --- SwappableIcon ---
+
+
+@pytest.fixture
+def swappable_icon(qtbot, mock_app):
+    icon = SwappableIcon('mdi.bird', secondary=True, size=20)
+    qtbot.addWidget(icon)
+    return icon
+
+
+def test_swappable_fa_icon__set_primary__changes_pixmap(swappable_icon):
+    """set_primary() swaps between primary and secondary pixmaps."""
+    secondary_pixmap = swappable_icon.pixmap().toImage()
+
+    swappable_icon.set_primary(True)
+    primary_pixmap = swappable_icon.pixmap().toImage()
+
+    swappable_icon.set_primary(False)
+    restored_pixmap = swappable_icon.pixmap().toImage()
+
+    assert primary_pixmap != secondary_pixmap
+    assert restored_pixmap == secondary_pixmap
 
 
 # --- PixmapLabel ---

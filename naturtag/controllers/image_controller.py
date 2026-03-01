@@ -27,8 +27,8 @@ class ImageController(BaseController):
 
     on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
     on_selection_changed = Signal(
-        bool
-    )  #: A taxon/observation was selected (True) or cleared (False)
+        object
+    )  #: frozenset of pending icon keys when selected, or empty frozenset when cleared
     on_view_taxon_id = Signal(int)  #: Request to switch to taxon tab
     on_view_observation_id = Signal(int)  #: Request to switch to observation tab
 
@@ -41,6 +41,7 @@ class ImageController(BaseController):
         self.on_new_metadata.connect(self.update_metadata)
         self.selected_taxon_id: Optional[int] = None
         self.selected_observation_id: Optional[int] = None
+        self.selected_observation: Optional[Observation] = None
 
         # Selected taxon/observation info
         group_box = QGroupBox('Metadata source')
@@ -135,7 +136,8 @@ class ImageController(BaseController):
         """Clear all images and input"""
         self.selected_taxon_id = None
         self.selected_observation_id = None
-        self.on_selection_changed.emit(False)
+        self.selected_observation = None
+        self.on_selection_changed.emit(frozenset())
         self.gallery.clear()
         self.input_obs_id.clear()
         self.input_taxon_id.clear()
@@ -197,6 +199,7 @@ class ImageController(BaseController):
 
         self.selected_taxon_id = taxon.id
         self.selected_observation_id = None
+        self.selected_observation = None
         self.input_obs_id.clear()
         self.input_taxon_id.clear()
         self.data_source_card.clear()
@@ -204,7 +207,10 @@ class ImageController(BaseController):
         card = TaxonInfoCard(taxon=taxon, delayed_load=False)
         card.on_click.connect(self.on_view_taxon_id)
         self.data_source_card.addWidget(card)
-        self.on_selection_changed.emit(True)
+        pending = {'taxon', 'tags'}
+        if self.app.settings.sidecar:
+            pending.add('sidecar')
+        self.on_selection_changed.emit(frozenset(pending))
 
     @Slot(Observation)
     def select_observation(self, observation: Observation):
@@ -214,6 +220,7 @@ class ImageController(BaseController):
 
         self.selected_taxon_id = None
         self.selected_observation_id = observation.id
+        self.selected_observation = observation
         self.input_obs_id.clear()
         self.input_taxon_id.clear()
         self.data_source_card.clear()
@@ -221,4 +228,9 @@ class ImageController(BaseController):
         card = ObservationInfoCard(obs=observation, delayed_load=False)
         card.on_click.connect(self.on_view_observation_id)
         self.data_source_card.addWidget(card)
-        self.on_selection_changed.emit(True)
+        pending = {'taxon', 'observation', 'tags'}
+        if observation.location:
+            pending.add('geo')
+        if self.app.settings.sidecar:
+            pending.add('sidecar')
+        self.on_selection_changed.emit(frozenset(pending))

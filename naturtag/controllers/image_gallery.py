@@ -39,7 +39,7 @@ from naturtag.widgets import (
     StylableWidget,
     VerticalLayout,
 )
-from naturtag.widgets.images import HoverMixin, PixmapLabel
+from naturtag.widgets.images import HoverMixin, PixmapLabel, SwappableIcon
 from naturtag.widgets.style import fa_icon
 
 if TYPE_CHECKING:
@@ -60,7 +60,7 @@ class ImageGallery(BaseController):
         self.setAcceptDrops(True)
         self.images: dict[Path, ThumbnailCard] = {}
         self._pending_signal = None
-        self._current_pending = False
+        self._current_pending: frozenset[str] = frozenset()
         self.image_window = ImageWindow()
         self.image_window.on_remove.connect(self.remove_image)
         root = VerticalLayout(self)
@@ -139,7 +139,8 @@ class ImageGallery(BaseController):
         thumbnail_card = ThumbnailCard(image_path)
         thumbnail_card.on_loaded.connect(self._bind_image_actions)
         if self._pending_signal is not None:
-            thumbnail_card.set_pending(self._current_pending)
+            thumbnail_card.set_pending(bool(self._current_pending))
+            thumbnail_card.set_pending_icons(self._current_pending)
         self.flow_layout.addWidget(thumbnail_card)
         self.images[thumbnail_card.image_path] = thumbnail_card
 
@@ -154,18 +155,18 @@ class ImageGallery(BaseController):
         thumbnail.on_copy.connect(self.on_message)
         thumbnail.context_menu.on_view_taxon_id.connect(self.on_view_taxon_id)
         thumbnail.context_menu.on_view_observation_id.connect(self.on_view_observation_id)
-        if self._pending_signal is not None:
-            self._pending_signal.connect(thumbnail.set_pending, Qt.UniqueConnection)
+        # Note: pending state is sent to all cards via _update_pending_state; no signal needed here
 
     def connect_pending_signal(self, signal: Signal):
         """Connect a signal for pending tag state updates to all current and future thumbnails."""
         self._pending_signal = signal
         signal.connect(self._update_pending_state)
 
-    def _update_pending_state(self, pending: bool):
+    def _update_pending_state(self, pending: frozenset[str]):
         self._current_pending = pending
         for card in self.images.values():
-            card.set_pending(pending)
+            card.set_pending(bool(pending))
+            card.set_pending_icons(pending)
 
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -321,6 +322,10 @@ class ThumbnailCard(StylableWidget):
         """Show or hide the pending tags icon."""
         self.icons.set_pending(pending)
 
+    def set_pending_icons(self, pending: frozenset[str]):
+        """Switch metadata icons to primary color for each pending type."""
+        self.icons.set_pending_icons(pending)
+
     def update_metadata(self, metadata: MetaMetadata):
         """Update UI based on new metadata, and show a highlight animation"""
         self.icons.set_pending(False)
@@ -456,11 +461,11 @@ class ThumbnailMetaIcons(QLabel):
         self.setGeometry(9, img_size[0] - 11, 130, 20)
 
         # Main metadata icons
-        self.taxon_icon = FAIcon('mdi.bird', secondary=True, size=20)
-        self.observation_icon = FAIcon('fa6s.binoculars', secondary=True, size=20)
-        self.geo_icon = FAIcon('mdi.map-marker', secondary=True, size=20)
-        self.tag_icon = FAIcon('fa6s.tags', secondary=True, size=20)
-        self.sidecar_icon = FAIcon('mdi.xml', secondary=True, size=20)
+        self.taxon_icon = SwappableIcon('mdi.bird', secondary=True, size=20)
+        self.observation_icon = SwappableIcon('fa6s.binoculars', secondary=True, size=20)
+        self.geo_icon = SwappableIcon('mdi.map-marker', secondary=True, size=20)
+        self.tag_icon = SwappableIcon('fa6s.tags', secondary=True, size=20)
+        self.sidecar_icon = SwappableIcon('mdi.xml', secondary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)
         self.icon_layout.addWidget(self.observation_icon)
         self.icon_layout.addWidget(self.geo_icon)
@@ -483,8 +488,18 @@ class ThumbnailMetaIcons(QLabel):
         """Show or hide the pending tags indicator."""
         self.pending_container.setVisible(pending)
 
+    def set_pending_icons(self, pending: frozenset[str]):
+        """Switch icons to primary color for each pending metadata type."""
+        self.taxon_icon.set_primary('taxon' in pending)
+        self.observation_icon.set_primary('observation' in pending)
+        self.geo_icon.set_primary('geo' in pending)
+        self.tag_icon.set_primary('tags' in pending)
+        self.sidecar_icon.set_primary('sidecar' in pending)
+
     def refresh_icons(self, metadata: MetaMetadata):
         """Update icons based on the available metadata"""
+        # Reset any pending primary highlighting first
+        self.set_pending_icons(frozenset())
         self.taxon_icon.set_enabled(metadata.has_taxon)
         self.observation_icon.set_enabled(metadata.has_observation)
         self.geo_icon.set_enabled(metadata.has_coordinates)
