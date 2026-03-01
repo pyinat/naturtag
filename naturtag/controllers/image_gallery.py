@@ -351,11 +351,21 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         return generate_thumbnail(path, self.thumbnail_size), MetaMetadata(path)
 
     def set_pixmap_meta_async(self, threadpool: 'ThreadPool', path: Optional[PathOrStr] = None):
-        """Generate a photo thumbnail and read its metadata from a separate thread, and render it
-        in the main thread when complete
+        """Generate a photo thumbnail and read its metadata from separate threads, and render each
+        in the main thread when complete. Thumbnail and metadata tasks run independently so metadata
+        icons can appear before the thumbnail finishes loading.
         """
-        future = threadpool.schedule(self.get_pixmap_meta, path=path)
-        future.on_result.connect(self.set_pixmap_meta)
+        thumb_future = threadpool.schedule(
+            generate_thumbnail, path=path, target_size=self.thumbnail_size
+        )
+        thumb_future.on_result.connect(self.set_pixmap)
+
+        meta_future = threadpool.schedule(lambda: MetaMetadata(path))
+        meta_future.on_result.connect(self.on_load_metadata)
+
+    def set_pixmap(self, image: QImage | None):
+        if isValid(self):
+            self.setPixmap(QPixmap.fromImage(image) if image else QPixmap())
 
     def set_pixmap_meta(self, image_meta: tuple[QImage | None, MetaMetadata]):
         if not isValid(self):

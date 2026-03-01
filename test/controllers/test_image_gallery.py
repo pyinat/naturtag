@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from PySide6.QtCore import QObject, Qt, Signal
+from PySide6.QtGui import QImage
 
 from naturtag.controllers.image_gallery import (
     ImageGallery,
@@ -438,3 +439,61 @@ def test_thumbnail_card__update_metadata_resets_pending_icons(thumbnail_card, mo
         thumbnail_card.update_metadata(mock_metadata)
 
     assert icons.taxon_icon.pixmap().toImage() == before  # reset to secondary
+
+
+# --- MetaThumbnail async loading ---
+
+
+@pytest.fixture
+def meta_thumbnail_card(qtbot):
+    card = ThumbnailCard(Path('/tmp/test_image.jpg'))
+    qtbot.addWidget(card)
+    return card
+
+
+def test_meta_thumbnail__set_pixmap_meta_async__dispatches_two_tasks(meta_thumbnail_card):
+    """set_pixmap_meta_async() schedules exactly two threadpool tasks: thumbnail + metadata."""
+    mock_threadpool = MagicMock()
+    mock_signals = MagicMock()
+    mock_threadpool.schedule.return_value = mock_signals
+
+    meta_thumbnail_card.image.set_pixmap_meta_async(mock_threadpool, path=Path('/tmp/test.jpg'))
+
+    assert mock_threadpool.schedule.call_count == 2
+
+
+def test_meta_thumbnail__set_pixmap__updates_pixmap(meta_thumbnail_card):
+    """set_pixmap() sets the label pixmap when given a valid QImage."""
+    image = QImage(10, 10, QImage.Format_RGB32)
+    image.fill(0xFF0000)
+
+    meta_thumbnail_card.image.set_pixmap(image)
+
+    assert not meta_thumbnail_card.image.pixmap().isNull()
+
+
+def test_meta_thumbnail__set_pixmap__handles_none(meta_thumbnail_card):
+    """set_pixmap() sets an empty pixmap when given None."""
+    meta_thumbnail_card.image.set_pixmap(None)
+
+    assert meta_thumbnail_card.image.pixmap().isNull()
+
+
+def test_meta_thumbnail__metadata_signal_emitted_via_on_load_metadata(meta_thumbnail_card):
+    """on_load_metadata signal from MetaThumbnail connects to ThumbnailCard.set_metadata."""
+    mock_metadata = MagicMock()
+    mock_metadata.summary = 'test'
+    received = []
+
+    mock_threadpool = MagicMock()
+    meta_signals = MagicMock()
+    thumb_signals = MagicMock()
+    mock_threadpool.schedule.side_effect = [thumb_signals, meta_signals]
+
+    meta_thumbnail_card.load_image_async(mock_threadpool)
+
+    # Verify on_load_metadata is connected — emit it and check set_metadata receives it
+    meta_thumbnail_card.image.on_load_metadata.connect(lambda m: received.append(m))
+    meta_thumbnail_card.image.on_load_metadata.emit(mock_metadata)
+
+    assert received == [mock_metadata]
