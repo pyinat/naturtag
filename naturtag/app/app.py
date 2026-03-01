@@ -1,6 +1,7 @@
 """Main Qt app window and entry point"""
 
 import sys
+import traceback
 import webbrowser
 from datetime import datetime
 from logging import getLogger
@@ -63,6 +64,7 @@ class NaturtagApp(QApplication):
         self.img_fetcher = ImageFetcher(cache_path=self.settings.image_cache_path)
         self.threadpool = ThreadPool(num_workers=self.settings.num_workers)
         self.user_dirs = UserDirs(self.settings)
+        install_excepthook()
 
 
 class MainWindow(QMainWindow):
@@ -341,6 +343,26 @@ class MainWindow(QMainWindow):
 
     def toggle_log_tab(self, checked: bool = True):
         self.tabs.setTabVisible(self.log_tab_idx, checked)
+
+
+def install_excepthook():
+    """Install a custom sys.excepthook that logs unhandled exceptions and shows a dialog."""
+    _default_hook = sys.excepthook
+
+    def excepthook(exc_type, exc_value, exc_tb):
+        if issubclass(exc_type, (KeyboardInterrupt, SystemExit)):
+            _default_hook(exc_type, exc_value, exc_tb)
+            return
+        logger.critical('Unhandled exception', exc_info=(exc_type, exc_value, exc_tb))
+        msg = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        dialog = QMessageBox()
+        dialog.setIcon(QMessageBox.Critical)
+        dialog.setWindowTitle('Unexpected Error')
+        dialog.setText(f'An unexpected error occurred:\n\n{exc_value}')
+        dialog.setDetailedText(msg)
+        dialog.exec()
+
+    sys.excepthook = excepthook
 
 
 def main():

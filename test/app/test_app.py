@@ -1,10 +1,11 @@
 """Tests for MainWindow."""
 
-from unittest.mock import patch
+import sys
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from naturtag.app.app import MainWindow
+from naturtag.app.app import MainWindow, install_excepthook
 from naturtag.storage import Settings
 
 
@@ -112,3 +113,42 @@ def test_close_event(window, mock_app):
 
     mock_write.assert_called_once()
     mock_app.state.write.assert_called_once()
+
+
+def test_post_init__installs_excepthook(mock_app):
+    """post_init() replaces sys.excepthook with a custom handler."""
+    assert sys.excepthook is not sys.__excepthook__
+
+
+def test_excepthook__logs_and_shows_dialog():
+    """Custom excepthook logs critical and shows a QMessageBox for unhandled exceptions."""
+    install_excepthook()
+    hook = sys.excepthook
+
+    with (
+        patch('naturtag.app.app.logger') as mock_logger,
+        patch('naturtag.app.app.QMessageBox') as mock_msgbox,
+    ):
+        try:
+            raise RuntimeError('boom')
+        except RuntimeError:
+            hook(*sys.exc_info())
+
+    args, kwargs = mock_logger.critical.call_args
+    assert args == ('Unhandled exception',)
+    assert kwargs['exc_info'][0] is RuntimeError
+    mock_msgbox.return_value.exec.assert_called_once()
+    assert 'boom' in mock_msgbox.return_value.setText.call_args[0][0]
+
+
+def test_excepthook__passthrough_for_keyboard_interrupt():
+    """KeyboardInterrupt is forwarded to the default hook, not shown as a dialog."""
+    mock_default = MagicMock()
+    with patch.object(sys, 'excepthook', mock_default):
+        install_excepthook()
+        hook = sys.excepthook
+
+    exc = KeyboardInterrupt()
+    hook(KeyboardInterrupt, exc, None)
+
+    mock_default.assert_called_once_with(KeyboardInterrupt, exc, None)
