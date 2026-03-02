@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from PyInstaller.compat import is_darwin, is_linux, is_win
-from PyInstaller.utils.hooks import copy_metadata
+from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 
 PROJECT_NAME = 'naturtag'
 PROJECT_DIR = Path('.').absolute()
@@ -49,6 +49,7 @@ else:
 # Ensure package metadata is available for importlib.metadata
 datas += copy_metadata('naturtag')
 datas += copy_metadata('pyinaturalist')
+datas += collect_data_files('pyinaturalist_convert')
 
 a = Analysis(
     [str(PACKAGE_DIR / 'app' / 'app.py')],
