@@ -62,6 +62,12 @@ Download
     '[naturtag.dmg](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.dmg),'.format(version)
 }}
 double-click the file, and drag to Applications to install.
+
+If you see a Gatekeeper message _"naturtag is damaged and can't be opened"_, run the following command to remove the quarantine flag:
+```sh
+xattr -dr com.apple.quarantine /Applications/naturtag.app
+```
+This is required because the app is not signed with a ($100/yr) Apple Developer ID certificate.
 :::
 
 :::{tab-item} Windows
@@ -69,6 +75,9 @@ A Windows installer is available here:
 {{
     '[naturtag-installer.exe](https://github.com/pyinat/naturtag/releases/download/{}/naturtag-installer.exe)'.format(version)
 }}
+
+If you see a Microsoft Defender message _"SmartScreen prevented an unrecognized app from starting...",
+click **More info > Run anyway**. This is required because the app is not signed with a (paid) code signing certificate.
 :::
 
 ::::

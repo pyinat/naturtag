@@ -100,6 +100,11 @@ jobs:
           brew install create-dmg
           ./packaging/build_dmg.sh
 
+      # Validate DMG structure and code signatures after build
+      - name: Validate DMG and app bundle (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: ./packaging/validate_dmg.sh
+
       # Upload workflow artifacts
       - name: Upload pyinstaller package
         uses: actions/upload-artifact@v7
@@ -166,4 +171,10 @@ jobs:
           body: |
             See changelog for release details: https://github.com/pyinat/naturtag/blob/main/HISTORY.md
             See docs for installation instructions: https://naturtag.readthedocs.io/en/stable/installation.html
+
+            **macOS users:** If you see "_naturtag is damaged and can't be opened_" after downloading the DMG, run the following command to remove the quarantine flag:
+            ```sh
+            xattr -dr com.apple.quarantine /Applications/naturtag.app
+            ```
+            This is required because the app is not signed with an Apple Developer ID certificate.
           draft: true
