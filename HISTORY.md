@@ -1,6 +1,6 @@
 # History
 
-## 0.9.0
+## 0.9.0 (2026-03-01)
 This release adds significant improvements to packaging, setup, and performance.
 
 **UI:**
