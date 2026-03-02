@@ -44,7 +44,7 @@ This release adds significant improvements to packaging, setup, and performance.
   * Fix an issue recovering from a failed db setup
   * Fix issue with first-time installation on Windows
   * Fix PyPI package with unresolvable constraints when installed with pip
-  * Fix Gatekeeper-related issues with macOS DMG image
+  * Fix Gatekeeper-related issues with macOS DMG image (but may still require manual un-quarantining; see [installation guide](https://naturtag.readthedocs.io/en/stable/installation.html))
 
 **Other Bugfixes:**
 * Fix several multithreading issues potentially leading to segfaults
