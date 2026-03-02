@@ -14,9 +14,9 @@ from naturtag.widgets import (
     HorizontalLayout,
     HoverPhoto,
     IconLabel,
-    ImageWindow,
     InfoCard,
     InfoCardList,
+    RemoteImageWindow,
     set_pixmap,
 )
 
@@ -97,7 +97,7 @@ class TaxonList(InfoCardList):
                 self.add_taxon(taxon)
 
 
-class TaxonImageWindow(ImageWindow):
+class TaxonImageWindow(RemoteImageWindow):
     """Display taxon images in fullscreen as a separate window.
     Uses URLs instead of local file paths.
     """
@@ -105,13 +105,6 @@ class TaxonImageWindow(ImageWindow):
     def __init__(self):
         super().__init__()
         self.taxon: Taxon = None
-        self.photos: list[Photo] = None
-        self.selected_photo: Photo = None
-
-    @property
-    def idx(self) -> int:
-        """The index of the currently selected image"""
-        return self.photos.index(self.selected_photo)
 
     def display_taxon_fullscreen(self, taxon_photo: TaxonPhoto):
         """Open window to a selected taxon image, and save other image URLs for navigation"""
@@ -127,11 +120,6 @@ class TaxonImageWindow(ImageWindow):
         self.set_photo(self.selected_photo)
         self.showFullScreen()
 
-    def select_image_idx(self, idx: int):
-        """Select an image by index"""
-        self.selected_photo = self.photos[idx]
-        self.set_photo(self.selected_photo)
-
     def set_photo(self, photo: Photo):
         set_pixmap(self.image, url=photo.original_url)
         attribution = (
@@ -140,6 +128,3 @@ class TaxonImageWindow(ImageWindow):
             .replace('CC ', 'CC-')
         )
         self.image.description = f'{self.taxon.full_name}\n{attribution}'
-
-    def remove_image(self):
-        pass

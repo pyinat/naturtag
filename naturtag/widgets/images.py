@@ -2,10 +2,12 @@
 Includes plain images, cards, scrollable lists, and fullscreen image views.
 """
 
+from abc import abstractmethod
 from logging import getLogger
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 
+from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
@@ -526,6 +528,32 @@ class ImageWindow(StylableWidget):
         elif idx >= len(self.image_paths):
             idx = 0
         return idx
+
+
+class RemoteImageWindow(ImageWindow):
+    """Base for fullscreen windows displaying remote photos"""
+
+    def __init__(self):
+        super().__init__()
+        self.photos: list[Photo] = []
+        self.selected_photo: Photo = None
+
+    @property
+    def idx(self) -> int:
+        """The index of the currently selected image"""
+        return self.photos.index(self.selected_photo)
+
+    def select_image_idx(self, idx: int):
+        """Select an image by index"""
+        self.selected_photo = self.photos[idx]
+        self.set_photo(self.selected_photo)
+
+    def remove_image(self):
+        pass
+
+    @abstractmethod
+    def set_photo(self, photo: Photo):
+        pass
 
 
 def format_int(value: int) -> str:
