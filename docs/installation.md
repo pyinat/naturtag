@@ -76,7 +76,7 @@ A Windows installer is available here:
     '[naturtag-installer.exe](https://github.com/pyinat/naturtag/releases/download/{}/naturtag-installer.exe)'.format(version)
 }}
 
-If you see a Microsoft Defender message _"SmartScreen prevented an unrecognized app from starting...",
+If you see a Microsoft Defender message _"SmartScreen prevented an unrecognized app from starting..."_,
 click **More info > Run anyway**. This is required because the app is not signed with a (paid) code signing certificate.
 :::
 
