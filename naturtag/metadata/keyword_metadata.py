@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Any, Optional
 
 from naturtag.constants import HIER_KEYWORD_TAGS, KEYWORD_TAGS, RANKS
+from naturtag.utils.parsing import quote
 
 # All tags that support regular and hierarchical keyword lists
 
@@ -71,7 +72,7 @@ class KeywordMetadata:
     def flickr_tags(self):
         """Get all taxonomy and normal keywords as quoted, space-separated tags compatible with
         Flickr"""
-        tags = [_quote(kw) for kw in self.kv_keyword_list + self.normal_keywords]
+        tags = [quote(kw) for kw in self.kv_keyword_list + self.normal_keywords]
         return ' '.join(tags)
 
     @property
@@ -129,8 +130,3 @@ def sort_taxonomy_keywords(keywords: list[str]) -> list[str]:
         return RANKS.index(rank) if rank in RANKS else 0
 
     return sorted(keywords, key=get_rank_idx, reverse=True)
-
-
-def _quote(s: str) -> str:
-    """Surround keyword in quotes if it contains whitespace"""
-    return f'"{s}"' if ' ' in s else s
