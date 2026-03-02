@@ -29,7 +29,7 @@ extensions = [
 ]
 
 # MyST extensions
-myst_enable_extensions = ['colon_fence', 'html_image', 'linkify', 'substitution']
+myst_enable_extensions = ['colon_fence', 'html_image', 'linkify']
 
 # Ignore a subset of auto-generated pages
 exclude_patterns = [
@@ -37,9 +37,6 @@ exclude_patterns = [
     'modules/naturtag.rst',
     'modules/naturtag.constants.rst',
 ]
-
-# Replace '{{version}}' in md files with current version
-myst_substitutions = {'version': f'v{version}'}
 
 # Enable automatic links to other projects' Sphinx docs
 intersphinx_mapping = {

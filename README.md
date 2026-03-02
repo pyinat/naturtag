@@ -29,9 +29,10 @@ Naturtag is a tool for nature photographers that adds useful metadata to describ
 your photos. It includes a **desktop application**, a **command-line interface**, and can also be
 used as a **python library**. It is mainly intended for use with [iNaturalist](https://www.inaturalist.org), but can also be used independently.
 
-Naturtag gathers complete observation metadata (for iNaturalist observation photos), or just taxonomy metadata (for everything else). It then embeds this information in your local photo collection using
-[XMP](https://en.wikipedia.org/wiki/Extensible_Metadata_Platform) and
-[EXIF](https://en.wikipedia.org/wiki/Exif) metadata.
+Naturtag gathers observation metadata (for iNaturalist observation photos), or just taxonomy metadata (for everything else). It then embeds this information in your local photo collection using
+[EXIF](https://en.wikipedia.org/wiki/Exif),
+[XMP](https://en.wikipedia.org/wiki/Extensible_Metadata_Platform), and
+[Simple Darwin Core](https://dwc.tdwg.org/simple) metadata.
 
 ## Use Cases
 This image metadata has a variety of uses, including:
@@ -66,16 +67,15 @@ Example search using these tags: https://www.flickr.com/photos/tags/taxonomy:cla
 ![Taxonomy tags displayed on a Flickr photo](assets/screenshots/flickr.png)
 </details>
 
-### Other biodiversity tools
-Finally, naturtag can improve interoperability with other tools and systems that interact with biodiversity
-data. For example, in addition to iNaturalist you might submit some observations to another
-platform with a more specific focus, such as **eBird**, **BugGuide**, or **Mushroom Observer**.
-For that use case, this tool supports [Simple Darwin Core](https://dwc.tdwg.org/simple).
-
 ## Installation
-See [GitHub Releases](https://github.com/pyinat/naturtag/releases) for downloads, and
-[Installation](https://naturtag.readthedocs.io/en/stable/installation.html)
-for platform-specific package instructions.
+Packages are available on [GitHub Releases](https://github.com/pyinat/naturtag/releases) for
+Windows, macOS, and most major Linux distributions. See
+[Installation](https://naturtag.readthedocs.io/en/stable/installation.html) for instructions.
+
+It can also be installed from PyPI. Example with [`uv`](https://docs.astral.sh/uv):
+```sh
+uv tool install naturtag
+```
 
 ## Usage
 
@@ -90,7 +90,22 @@ And tools to search and browse species and observations to tag your images with:
 
 ![Observation browser interface](assets/screenshots/observation-browser.png)
 
+The general workflow currently looks like:
+* Upload an observation to iNaturalist
+* Load your local photos in Naturtag
+* Select your observation in Naturtag and tag images
+
+After initial tagging, future updates are simpler:
+* Load local photos in Naturtag (optionally for multiple observations/taxa)
+* Click 'Refresh tags' to fetch any updates from iNaturalist and apply to your local photos
+
+Alternatively, without iNaturalist:
+* Load your local photos in Naturtag
+* Select a taxon in Naturtag and tag images
+
 See [Application Guide](https://naturtag.readthedocs.io/en/stable/app.html) for more details.
+
+Bulk tagging features (for handling multiple observations/taxa at a time) are planned for a future release.
 
 ### CLI
 Naturtag also includes a command-line interface. It takes an observation or species, plus some image
