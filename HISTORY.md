@@ -1,5 +1,9 @@
 # History
 
+## Unreleased
+
+* Fix bug resulting in incorrect XMP coordinates for Eastern hemisphere
+
 ## 0.9.0 (2026-03-01)
 **UI:**
 * Add details to observation page: identifications, comments, annotations, observation fields, and tags

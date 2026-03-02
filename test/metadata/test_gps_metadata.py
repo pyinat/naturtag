@@ -76,6 +76,6 @@ def test_to_exif_coords():
 def test_to_xmp_coords():
     assert to_xmp_coords(DECIMAL_DEGREES, 50) == {
         'Xmp.exif.GPSLatitude': '37,46.16339999999991N',
-        'Xmp.exif.GPSLongitude': '122,29.171399999999267W',
+        'Xmp.exif.GPSLongitude': '122,29.171399999999267E',
         'Xmp.exif.GPSHPositioningError': '50',
     }

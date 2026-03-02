@@ -73,7 +73,7 @@ def to_xmp_coords(coords: Coordinates, accuracy: Optional[int] = None) -> dict[s
     metadata['Xmp.exif.GPSLatitude'] = f'{degrees},{minutes}{direction}'
 
     degrees, minutes = _decimal_to_ddm(coords[1])
-    direction = 'W' if coords[1] < 0 else 'W'
+    direction = 'W' if coords[1] < 0 else 'E'
     metadata['Xmp.exif.GPSLongitude'] = f'{degrees},{minutes}{direction}'
 
     if accuracy is not None:
