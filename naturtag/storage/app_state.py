@@ -1,4 +1,4 @@
-from collections import Counter, OrderedDict
+from collections import Counter
 from datetime import datetime, timezone
 from importlib.metadata import version as pkg_version
 from itertools import chain
@@ -169,4 +169,4 @@ def _get_session(db_path: Path) -> Session:
 
 def _top_unique_ids(ids: Iterable[int], n: int = MAX_DISPLAY_HISTORY) -> list[int]:
     """Get the top unique IDs from a list, preserving order"""
-    return list(OrderedDict.fromkeys(ids))[:n]
+    return list(dict.fromkeys(ids))[:n]

@@ -81,8 +81,8 @@ def get_images_from_dir(path: Path, recursive: bool = False) -> list[Path]:
     Returns:
         Paths of supported image files in the directory
     """
-    patterns = {f'**/{ext}' for ext in IMAGE_FILETYPES} if recursive else IMAGE_FILETYPES
-    paths = glob_paths([path / pattern for pattern in patterns])
+    prefix = '**/' if recursive else ''
+    paths = [p for ext in IMAGE_FILETYPES for p in path.glob(f'{prefix}{ext}')]
     logger.debug(f'{len(paths)} images found in directory: {path}')
     return paths
 
@@ -122,9 +122,7 @@ def get_sidecar_path(path: Path) -> Path:
 
 def is_image_path(path: Path, include_sidecars: bool = False) -> bool:
     """Determine if a path points to a valid image of a supported type"""
-    valid_exts = IMAGE_FILETYPES
-    if include_sidecars:
-        valid_exts.append('*.xmp')
+    valid_exts = IMAGE_FILETYPES + (['*.xmp'] if include_sidecars else [])
     return path.is_file() and any(fnmatch(path.suffix.lower(), ext) for ext in valid_exts)
 
 
