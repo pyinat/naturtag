@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Fix bug resulting in incorrect XMP coordinates for Eastern hemisphere
+* Fix shell autocomplete setup (`nt setup shell`) for non-Linux platforms
 
 ## 0.9.0 (2026-03-01)
 **UI:**

@@ -1,7 +1,6 @@
 # TODO: Show all matched taxon names if more than one match per taxon ID
 # TODO: Bash doesn't support completion help text, so currently only shows IDs
 # TODO: Use table formatting from pyinaturalist if format_taxa
-import os
 import re
 from collections import defaultdict
 from logging import basicConfig, getLogger
@@ -13,6 +12,7 @@ import click
 import pyexiv2
 from click.shell_completion import CompletionItem
 from click_help_colors import HelpColorsGroup
+from platformdirs import user_config_dir
 from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
 from pyinaturalist_convert.fts import TaxonAutocompleter
 from rich import print as rprint
@@ -418,8 +418,7 @@ def install_shell_completion(shell: str):
 
 def _install_fish_completion():
     """Copy packaged completion scripts for fish shell"""
-    config_dir = Path(os.environ.get('XDG_CONFIG_HOME', '~/.config')).expanduser()
-    completion_dir = config_dir / 'fish' / 'completions'
+    completion_dir = Path(user_config_dir('fish')) / 'completions'
     completion_dir.mkdir(exist_ok=True, parents=True)
 
     for script in CLI_COMPLETE_DIR.glob('*.fish'):
@@ -429,8 +428,7 @@ def _install_fish_completion():
 
 def _install_bash_completion():
     """Copy packaged completion scripts for bash"""
-    config_dir = Path(os.environ.get('XDG_CONFIG_HOME', '~/.config')).expanduser()
-    completion_dir = config_dir / 'bash' / 'completions'
+    completion_dir = Path(user_config_dir('bash')) / 'completions'
     completion_dir.mkdir(exist_ok=True, parents=True)
 
     for script in CLI_COMPLETE_DIR.glob('*.bash'):
