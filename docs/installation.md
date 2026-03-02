@@ -13,9 +13,7 @@ Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if y
 
 :::{tab-item} Debian
 A DEB package is available for Debian, Ubuntu, and derivatives. Download
-{{
-    '[naturtag.deb](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.deb)'.format(version)
-}}
+[naturtag.deb](https://github.com/pyinat/naturtag/releases/latest/download/naturtag.deb)
 and run:
 ```
 sudo dpkg -i naturtag.deb
@@ -24,9 +22,7 @@ sudo dpkg -i naturtag.deb
 
 :::{tab-item} Fedora
 An RPM package is available for Fedora, RHEL, and derivatives. Download
-{{
-    '[naturtag.rpm](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.rpm)'.format(version)
-}}
+[naturtag.rpm](https://github.com/pyinat/naturtag/releases/latest/download/naturtag.rpm)
 and run:
 ```
 sudo rpm -i naturtag.rpm
@@ -35,9 +31,7 @@ sudo rpm -i naturtag.rpm
 
 :::{tab-item} Arch
 A pacman package is available for Arch Linux and derivatives. Download
-{{
-    '[naturtag.pkg.tar.zst](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.pkg.tar.zst)'.format(version)
-}}
+[naturtag.pkg.tar.zst](https://github.com/pyinat/naturtag/releases/latest/download/naturtag.pkg.tar.zst)
 and run:
 ```
 sudo pacman -U naturtag.pkg.tar.zst
@@ -46,9 +40,7 @@ sudo pacman -U naturtag.pkg.tar.zst
 
 :::{tab-item} Linux (Other)
 For other Linux distributions, a portable AppImage is available. Download
-{{
-    '[naturtag.AppImage](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.AppImage)'.format(version)
-}}
+[naturtag.AppImage](https://github.com/pyinat/naturtag/releases/latest/download/naturtag.AppImage)
 and run:
 ```
 chmod +x naturtag.AppImage
@@ -58,9 +50,7 @@ chmod +x naturtag.AppImage
 
 :::{tab-item} macOS
 Download
-{{
-    '[naturtag.dmg](https://github.com/pyinat/naturtag/releases/download/{}/naturtag.dmg),'.format(version)
-}}
+[naturtag.dmg](https://github.com/pyinat/naturtag/releases/latest/download/naturtag.dmg),
 double-click the file, and drag to Applications to install.
 
 If you see a Gatekeeper message _"naturtag is damaged and can't be opened"_, run the following command to remove the quarantine flag:
@@ -72,11 +62,9 @@ This is required because the app is not signed with a ($100/yr) Apple Developer 
 
 :::{tab-item} Windows
 A Windows installer is available here:
-{{
-    '[naturtag-installer.exe](https://github.com/pyinat/naturtag/releases/download/{}/naturtag-installer.exe)'.format(version)
-}}
+[naturtag-installer.exe](https://github.com/pyinat/naturtag/releases/latest/download/naturtag-installer.exe)
 
-If you see a Microsoft Defender message _"SmartScreen prevented an unrecognized app from starting...",
+If you see a Microsoft Defender message _"SmartScreen prevented an unrecognized app from starting..."_,
 click **More info > Run anyway**. This is required because the app is not signed with a (paid) code signing certificate.
 :::
 
@@ -91,7 +79,7 @@ You can also use naturtag as a {ref}`plain python library <library>`, if you pre
     ```
     pip install naturtag
     ```
-* Or use [`uv`](https://docs.astral.sh/uv/) to install as a user-level CLI tool (no manual virtualenv required):
+* Or use [`uv`](https://docs.astral.sh/uv/) to install as a CLI tool (no manual python installation or virtualenv setup required):
     ```
     uv tool install naturtag
     ```
