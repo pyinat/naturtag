@@ -60,7 +60,7 @@ dev = [
     'prek>=0.2',
     'prettyprinter>=0.18',
     'pyarrow>=23.0',
-    'pyinstaller==6.17.0',
+    'pyinstaller~=6.19.0',
     'pytest>=9.0',
     'pytest-cov>=7.0',
     'pytest-qt>=4.4',

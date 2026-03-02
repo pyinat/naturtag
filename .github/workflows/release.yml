@@ -101,7 +101,7 @@ jobs:
           ./packaging/build_dmg.sh
 
       # Validate DMG structure and code signatures after build
-      - name: Validate DMG and app bundle (macOS)
+      - name: Validate disk image and app bundle (macOS)
         if: startsWith(matrix.os, 'macos')
         run: ./packaging/validate_dmg.sh
 
