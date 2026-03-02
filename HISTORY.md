@@ -1,8 +1,6 @@
 # History
 
 ## 0.9.0 (2026-03-01)
-This release adds significant improvements to packaging, setup, and performance.
-
 **UI:**
 * Add details to observation page: identifications, comments, annotations, observation fields, and tags
 * Startup:
@@ -16,11 +14,12 @@ This release adds significant improvements to packaging, setup, and performance.
   * Add menu item to check for newer stable release (Help > Check for Updates)
   * Add menu item to submit a bug report (Help > Bug Report)
 * QoL:
-  * Re-read `settings.yml` if manually changed on disk before opening settings menu
+  * Add collapsible side panel for taxonomy search
   * Add icon on thumbnails to indicate pending/unwritten tags available
   * Add colored indicators on thumbnail metadata icons to show specific types of pending metadata changes (taxonomy/observation/geo/embedded tags/sidecar)
   * Update layout and scaling to accommodate smaller screens
   * Default to dark mode
+  * Re-read `settings.yml` if manually changed on disk before opening settings menu
 * Error handling:
   * Add icon and error text tooltip for images + metadata that failed to load (typically corrupt files)
   * Add global error handler hook to show dialog for unhandled exceptions
