@@ -49,7 +49,7 @@ else:
 # Ensure package metadata is available for importlib.metadata
 datas += copy_metadata('naturtag')
 datas += copy_metadata('pyinaturalist')
-datas += collect_data_files('pyinaturalist_convert')
+datas += collect_data_files('pyinaturalist_convert', include_py_files=True)
 
 a = Analysis(
     [str(PACKAGE_DIR / 'app' / 'app.py')],
@@ -60,7 +60,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['**/__pycache__', str(PROJECT_DIR / 'coverage'), str(PACKAGE_DIR / 'py.typed')],
+    excludes=[],
     noarchive=False,
 )
 pyz = PYZ(a.pure, a.zipped_data)
@@ -84,7 +84,6 @@ exe = EXE(
 )
 coll = COLLECT(
     exe,
-    Tree(f'{PROJECT_NAME}/'),
     a.binaries,
     a.zipfiles,
     a.datas,

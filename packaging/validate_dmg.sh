@@ -4,15 +4,22 @@
 #
 # Note: spctl --assess will fail for ad-hoc signed apps (expected for open-source distribution
 # without a paid Apple Developer ID). The output confirms what Gatekeeper would reject and why.
-
-hdiutil verify "$DMG_PATH"
-hdiutil imageinfo "$DMG_PATH"
-
 ROOT_DIR=$(dirname $(dirname "$(realpath $0)"))
 DMG_PATH=$ROOT_DIR/dist/naturtag.dmg
 MOUNT_POINT=/Volumes/naturtag
 
-hdiutil attach "$DMG_PATH" -mountpoint "$MOUNT_POINT"
+# Pre-flight check
+if [[ ! -f "$DMG_PATH" ]]; then
+    echo "Error: $DMG_PATH not found. Run build_dmg.sh first." >&2
+    exit 1
+fi
+
+hdiutil verify "$DMG_PATH"
+hdiutil imageinfo "$DMG_PATH"
+
+hdiutil attach "$DMG_PATH" -mountpoint "$MOUNT_POINT" -nobrowse
+trap "hdiutil detach '$MOUNT_POINT' 2>/dev/null || true" EXIT
+
 ls -la "$MOUNT_POINT/"
 
 codesign --verify --verbose=4 "$MOUNT_POINT/naturtag.app"
@@ -25,6 +32,4 @@ xattr -l "$MOUNT_POINT/naturtag.app" || true
 
 # Verify dylibs and shared libraries are signed
 find "$MOUNT_POINT/naturtag.app" -name '*.dylib' -o -name '*.so' | \
-    while read lib; do codesign --verify --verbose=2 "$lib" || true; done
-
-hdiutil detach "$MOUNT_POINT"
+    while IFS= read -r lib; do codesign --verify --verbose=2 "$lib" || true; done
