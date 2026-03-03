@@ -10,24 +10,18 @@ from PySide6.QtCore import QEventLoop, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
-    QDialog,
-    QDialogButtonBox,
-    QLabel,
     QLineEdit,
     QMainWindow,
     QMessageBox,
-    QProgressBar,
     QSplashScreen,
     QStatusBar,
     QTabWidget,
-    QVBoxLayout,
     QWidget,
 )
 
 from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
-from naturtag.app.welcome_dialog import WelcomeDialog
 from naturtag.constants import (
     APP_DIR,
     APP_ICON,
@@ -40,7 +34,14 @@ from naturtag.constants import (
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
 from naturtag.utils import check_for_update, get_version
-from naturtag.widgets import VerticalLayout, fa_icon, init_handler, set_theme
+from naturtag.widgets import (
+    ResetDbDialog,
+    VerticalLayout,
+    WelcomeDialog,
+    fa_icon,
+    init_handler,
+    set_theme,
+)
 
 # Provide an application group so Windows doesn't use the default 'python' icon
 try:
@@ -388,44 +389,6 @@ def install_excepthook():
         dialog.exec()
 
     sys.excepthook = excepthook
-
-
-class ResetDbDialog(QDialog):
-    """Progress dialog shown while the database is being reset."""
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.setWindowTitle('Reset database')
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setMinimumWidth(300)
-
-        layout = QVBoxLayout(self)
-        layout.setSpacing(12)
-        layout.setContentsMargins(20, 16, 20, 16)
-
-        self.status_label = QLabel('Resetting database...')
-        layout.addWidget(self.status_label)
-
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(0)  # indeterminate
-        layout.addWidget(self.progress_bar)
-
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok)
-        self.button_box.accepted.connect(self.accept)
-        self.button_box.setVisible(False)
-        layout.addWidget(self.button_box)
-
-    def on_result(self, _):
-        self.status_label.setText('Database reset complete.')
-        self.progress_bar.setVisible(False)
-        self.button_box.setVisible(True)
-
-    def on_error(self, exc: Exception):
-        logger.warning('Database reset failed:', exc_info=exc)
-        self.status_label.setText(f'Database reset failed: {exc}')
-        self.progress_bar.setVisible(False)
-        self.button_box.setVisible(True)
 
 
 def main():

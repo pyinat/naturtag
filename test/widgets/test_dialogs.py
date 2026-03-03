@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from naturtag.app.welcome_dialog import WelcomeDialog
 from naturtag.storage import Settings
+from naturtag.widgets.dialogs import WelcomeDialog
 
 LOCALES = {'en': 'English (en)', 'fr': 'French (fr)'}
 
@@ -14,7 +14,7 @@ LOCALES = {'en': 'English (en)', 'fr': 'French (fr)'}
 def dialog(qtbot, mock_app):
     mock_app.settings.username = ''  # mock_app fixture defaults to 'testuser'
 
-    with patch('naturtag.app.welcome_dialog.read_display_locales', return_value=LOCALES):
+    with patch('naturtag.widgets.dialogs.read_display_locales', return_value=LOCALES):
         dlg = WelcomeDialog(None, mock_app, MagicMock())
     qtbot.addWidget(dlg)
     return dlg
