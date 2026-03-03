@@ -27,17 +27,16 @@ datas = [
     (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
 ]
 
-
 # Define platform-specific dependencies
 if is_win:
     binaries = [
-        (str(LIB_DIR_WIN / 'exiv2.dll'), '.'),
-        (str(LIB_DIR_WIN / 'exiv2api.pyd'), '.'),
+        (str(LIB_DIR_WIN / 'exiv2.dll'), 'pyexiv2/lib'),
+        (str(LIB_DIR_WIN / 'exiv2api.pyd'), 'pyexiv2/lib'),
     ]
 elif is_darwin:
     binaries = [
-        (str(LIB_DIR_NIX / 'libexiv2.dylib'), '.'),
-        (str(LIB_DIR_NIX / 'exiv2api.so'), '.'),
+        (str(LIB_DIR_NIX / 'libexiv2.dylib'), 'pyexiv2/lib'),
+        (str(LIB_DIR_NIX / 'exiv2api.so'), 'pyexiv2/lib'),
     ]
 elif is_linux:
     # pyexiv2/lib/__init__.py loads libexiv2.so by path (via ctypes.CDLL), then imports
