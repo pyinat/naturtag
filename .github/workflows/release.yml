@@ -35,6 +35,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y '^libxcb.*-dev' libarchive-tools libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
+      - name: Install system packages (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: brew install inih
 
       # Install dependencies, with caching
       - uses: actions/checkout@v6
