@@ -2,10 +2,12 @@
 Includes plain images, cards, scrollable lists, and fullscreen image views.
 """
 
+from abc import abstractmethod
 from logging import getLogger
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, Optional, TypeAlias, Union
 
+from pyinaturalist import Photo
 from PySide6.QtCore import QSize, Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QBrush, QFont, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
@@ -22,6 +24,21 @@ else:
     MIXIN_BASE = object
 
 logger = getLogger(__name__)
+
+
+class ClickableMixin(MIXIN_BASE):
+    """Mixin for widgets that emit an on_click signal when left-clicked.
+
+    Subclasses must define: on_click = Signal(...)
+    """
+
+    def mousePressEvent(self, _):
+        """Placeholder to accept mouse press events"""
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.on_click.emit(self)
+        super().mouseReleaseEvent(event)
 
 
 def set_pixmap_async(
@@ -149,7 +166,7 @@ class IconLabelList(QWidget):
         self.grid.clear()
 
 
-class PixmapLabel(QLabel):
+class PixmapLabel(ClickableMixin, QLabel):
     """A QLabel containing a pixmap that preserves its aspect ratio when resizing, with optional
     description text
     """
@@ -198,14 +215,6 @@ class PixmapLabel(QLabel):
             return (self._pixmap.height() * width) / self._pixmap.width()
         else:
             return self.height()
-
-    def mousePressEvent(self, _):
-        """Placeholder to accept mouse press events"""
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.on_click.emit(self)
-        super().mouseReleaseEvent(event)
 
     def paintEvent(self, event):
         """Optionally draw rounded corners and/or image description text"""
@@ -305,7 +314,7 @@ class HoverPhoto(HoverMixin, PixmapLabel):
     """PixmapLabel with a hover effect"""
 
 
-class HoverIcon(FAIcon):
+class HoverIcon(ClickableMixin, FAIcon):
     """IconLabel with a hover effect and click event"""
 
     on_click = Signal(object)
@@ -315,14 +324,6 @@ class HoverIcon(FAIcon):
         self.set_enabled(False)
         self.enterEvent = lambda *x: self.set_enabled(True)
         self.leaveEvent = lambda *x: self.set_enabled(False)
-
-    def mousePressEvent(self, _):
-        """Placeholder to accept mouse press events"""
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.on_click.emit(self)
-        super().mouseReleaseEvent(event)
 
 
 class NavButtonsMixin(MIXIN_BASE):
@@ -527,6 +528,32 @@ class ImageWindow(StylableWidget):
         elif idx >= len(self.image_paths):
             idx = 0
         return idx
+
+
+class RemoteImageWindow(ImageWindow):
+    """Base for fullscreen windows displaying remote photos"""
+
+    def __init__(self):
+        super().__init__()
+        self.photos: list[Photo] = []
+        self.selected_photo: Photo = None
+
+    @property
+    def idx(self) -> int:
+        """The index of the currently selected image"""
+        return self.photos.index(self.selected_photo)
+
+    def select_image_idx(self, idx: int):
+        """Select an image by index"""
+        self.selected_photo = self.photos[idx]
+        self.set_photo(self.selected_photo)
+
+    def remove_image(self):
+        pass
+
+    @abstractmethod
+    def set_photo(self, photo: Photo):
+        pass
 
 
 def format_int(value: int) -> str:

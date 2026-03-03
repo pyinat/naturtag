@@ -5,6 +5,7 @@
 # TODO: Handle observation with no taxon ID?
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
 from collections.abc import Iterator
+from itertools import accumulate
 from logging import getLogger
 from typing import Iterable, Optional
 
@@ -219,7 +220,7 @@ def observation_to_metadata(
     # Convert and add DwC metadata
     tag_observations = [observation] if observation.id else None
     dwc = to_dwc(observations=tag_observations, taxa=[observation.taxon])[0]
-    dwc_xmp = {_format_key(k): v for k, v in dwc.items() if _format_key(k)}
+    dwc_xmp = {fk: v for k, v in dwc.items() if (fk := _format_key(k))}
     metadata.update(dwc_xmp)
 
     return metadata
@@ -265,9 +266,4 @@ def _get_taxon_hierarchical_keywords(taxon: Taxon) -> list[str]:
 
 def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
     """Translate a sorted list of flat keywords into pipe-delimited hierarchical keywords"""
-    if not keywords:
-        return []
-    hier_keywords = [keywords[0]]
-    for k in keywords[1:]:
-        hier_keywords.append(f'{hier_keywords[-1]}|{k}')
-    return hier_keywords
+    return list(accumulate(keywords, lambda a, b: f'{a}|{b}'))

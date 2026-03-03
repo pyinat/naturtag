@@ -21,6 +21,7 @@ from naturtag.widgets.images import (
     InfoCard,
     InfoCardList,
     ImageWindow,
+    RemoteImageWindow,
     PixmapLabel,
     set_pixmap,
     set_pixmap_async,

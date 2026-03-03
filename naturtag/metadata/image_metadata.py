@@ -160,7 +160,7 @@ class ImageMetadata:
         for k, v in self.xmp.items():
             # Flatten dict values, like {'lang="x-default"': value} -> value
             if isinstance(v, dict):
-                self.xmp[k] = list(v.values())[0]
+                self.xmp[k] = next(iter(v.values()), None)
 
             # exiv2 can't modify XMP Media Management History (or even write existing values??)
             if k.startswith('Xmp.xmpMM.History'):

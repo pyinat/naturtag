@@ -11,9 +11,9 @@ from naturtag.constants import SIZE_ICON_SM
 from naturtag.widgets.images import (
     HoverPhoto,
     IconLabel,
-    ImageWindow,
     InfoCard,
     InfoCardList,
+    RemoteImageWindow,
     set_pixmap,
 )
 from naturtag.widgets.layouts import HorizontalLayout
@@ -146,7 +146,7 @@ class ObservationList(InfoCardList):
                 self.add_observation(observation)
 
 
-class ObservationImageWindow(ImageWindow):
+class ObservationImageWindow(RemoteImageWindow):
     """Display observation images in fullscreen as a separate window.
     Uses URLs instead of local file paths.
     """
@@ -154,13 +154,6 @@ class ObservationImageWindow(ImageWindow):
     def __init__(self):
         super().__init__()
         self.observation: Observation = None
-        self.photos: list[Photo] = None
-        self.selected_photo: Photo = None
-
-    @property
-    def idx(self) -> int:
-        """The index of the currently selected image"""
-        return self.photos.index(self.selected_photo)
 
     def display_observation_fullscreen(self, observation_photo: ObservationPhoto):
         """Open window to a selected observation image, and save other image URLs for navigation"""
@@ -176,13 +169,5 @@ class ObservationImageWindow(ImageWindow):
         self.set_photo(self.selected_photo)
         self.showFullScreen()
 
-    def select_image_idx(self, idx: int):
-        """Select an image by index"""
-        self.selected_photo = self.photos[idx]
-        self.set_photo(self.selected_photo)
-
     def set_photo(self, photo: Photo):
         set_pixmap(self.image, url=photo.original_url)
-
-    def remove_image(self):
-        pass
