@@ -5,8 +5,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from naturtag.app.app import MainWindow, install_excepthook
+from naturtag.app.app import MainWindow, install_excepthook, main
 from naturtag.storage import Settings
+
+
+def test_main__version(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        with patch('sys.argv', ['naturtag', '--version']):
+            main()
+    assert exc_info.value.code == 0
+    assert 'naturtag v' in capsys.readouterr().out
 
 
 @pytest.fixture

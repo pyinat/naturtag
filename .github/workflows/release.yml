@@ -47,10 +47,17 @@ jobs:
           uv python install ${{ env.PYTHON_VERSION }}
           uv sync --no-dev
 
+      # Build and test base packages
       - name: Build wheel + pyinstaller package
         run: |
           uv build --wheel
           uv run pyinstaller -y packaging/naturtag.spec
+      - name: Test pyinstaller package
+        run: |
+          # Smoke test; any incorrect shared library paths should raise errors here
+          BIN=dist/naturtag.app/Contents/MacOS
+          if ! test -d "$BIN"; then BIN=dist/naturtag; fi
+          QT_QPA_PLATFORM=offscreen $BIN/naturtag --version | grep -q 'naturtag v'
 
       # Include taxon FTS db, compress, and set platform name
       - name: Finish pyinstaller package (Linux/Windows)
