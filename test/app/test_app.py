@@ -4,8 +4,10 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
+from PySide6.QtWidgets import QMessageBox
 
 from naturtag.app.app import MainWindow, install_excepthook, main
+from naturtag.controllers import ObservationController
 from naturtag.storage import Settings
 
 
@@ -112,6 +114,30 @@ def test_check_first_run__shows_dialog(window, mock_app):
 
     mock_dialog_cls.assert_called_once()
     mock_dialog_cls.return_value.exec.assert_called_once()
+
+
+@patch('naturtag.app.app.ResetDbDialog')
+@patch('naturtag.app.app.QMessageBox.question', return_value=QMessageBox.Yes)
+@patch.object(ObservationController, 'refresh')
+def test_reset_db(mock_refresh, _mock_question, _mock_dialog, window, mock_app):
+    """Confirming schedules setup() and calls observation_controller.refresh() on success."""
+    mock_app.threadpool.schedule.reset_mock()
+    window.reset_db()
+
+    mock_app.threadpool.schedule.assert_called_once()
+
+    # Emitting on_result should trigger observation_controller.refresh()
+    mock_app._futures[-1].on_result.emit(None)
+    mock_refresh.assert_called_once()
+
+
+@patch('naturtag.app.app.QMessageBox.question', return_value=QMessageBox.No)
+def test_reset_db__cancelled(_mock_question, window, mock_app):
+    """Declining the confirmation dialog does not schedule any work."""
+    mock_app.threadpool.schedule.reset_mock()
+    window.reset_db()
+
+    mock_app.threadpool.schedule.assert_not_called()
 
 
 def test_close_event(window, mock_app):
