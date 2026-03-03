@@ -315,7 +315,7 @@ class MainWindow(QMainWindow):
         )
         if response == QMessageBox.Yes:
             self.info('Resetting database...')
-            setup(self.app.settings, overwrite=True)
+            setup(self.app.settings.db_path, overwrite=True)
             self.info('Database reset complete')
 
     def _init_settings_menu(self):
