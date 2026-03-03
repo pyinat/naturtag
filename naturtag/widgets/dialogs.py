@@ -1,3 +1,5 @@
+"""QDialogs shown by NaturtagApp"""
+
 from logging import getLogger
 from time import monotonic
 
@@ -21,6 +23,44 @@ logger = getLogger(__name__)
 # steps used to track which UI state the dialog is in
 _STEP_INPUT = 'input'
 _STEP_SYNCING = 'syncing'
+
+
+class ResetDbDialog(QDialog):
+    """Progress dialog shown while the database is being reset."""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setWindowTitle('Reset database')
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setMinimumWidth(300)
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(12)
+        layout.setContentsMargins(20, 16, 20, 16)
+
+        self.status_label = QLabel('Resetting database...')
+        layout.addWidget(self.status_label)
+
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(0)  # indeterminate
+        layout.addWidget(self.progress_bar)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.setVisible(False)
+        layout.addWidget(self.button_box)
+
+    def on_result(self, _):
+        self.status_label.setText('Database reset complete.')
+        self.progress_bar.setVisible(False)
+        self.button_box.setVisible(True)
+
+    def on_error(self, exc: Exception):
+        logger.warning('Database reset failed:', exc_info=exc)
+        self.status_label.setText(f'Database reset failed: {exc}')
+        self.progress_bar.setVisible(False)
+        self.button_box.setVisible(True)
 
 
 class WelcomeDialog(QDialog):

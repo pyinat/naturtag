@@ -22,7 +22,6 @@ from PySide6.QtWidgets import (
 from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
 from naturtag.app.threadpool import ThreadPool
-from naturtag.app.welcome_dialog import WelcomeDialog
 from naturtag.constants import (
     APP_DIR,
     APP_ICON,
@@ -35,7 +34,14 @@ from naturtag.constants import (
 from naturtag.controllers import ImageController, ObservationController, TaxonController
 from naturtag.storage import ImageFetcher, Settings, iNatDbClient, setup
 from naturtag.utils import check_for_update, get_version
-from naturtag.widgets import VerticalLayout, fa_icon, init_handler, set_theme
+from naturtag.widgets import (
+    ResetDbDialog,
+    VerticalLayout,
+    WelcomeDialog,
+    fa_icon,
+    init_handler,
+    set_theme,
+)
 
 # Provide an application group so Windows doesn't use the default 'python' icon
 try:
@@ -305,7 +311,6 @@ class MainWindow(QMainWindow):
         """Reload Qt stylesheet"""
         set_theme(dark_mode=self.app.settings.dark_mode)
 
-    # TODO: progress spinner
     def reset_db(self):
         """Reset the database"""
         response = QMessageBox.question(
@@ -313,10 +318,18 @@ class MainWindow(QMainWindow):
             'Reset database?',
             'This will delete all observation and taxonomy data saved in the local database. Continue?',
         )
-        if response == QMessageBox.Yes:
-            self.info('Resetting database...')
-            setup(self.app.settings, overwrite=True)
-            self.info('Database reset complete')
+        if response != QMessageBox.Yes:
+            return
+
+        dialog = ResetDbDialog(self)
+        dialog.show()
+
+        signals = self.app.threadpool.schedule(
+            setup, db_path=self.app.settings.db_path, overwrite=True
+        )
+        signals.on_result.connect(dialog.on_result)
+        signals.on_result.connect(lambda _: self.observation_controller.refresh())
+        signals.on_error.connect(dialog.on_error)
 
     def _init_settings_menu(self):
         """Create (or recreate) the settings menu and connect its signals."""
