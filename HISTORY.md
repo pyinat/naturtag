@@ -1,10 +1,11 @@
 # History
 
-## Unreleased
+## 0.9.1 (Unreleased)
 
 * Fix shared library paths in macOS pyinstaller package + DMG
 * Fix bug resulting in incorrect XMP coordinates for Eastern hemisphere
 * Fix shell autocomplete setup (`nt setup shell`) for non-Linux platforms
+* Fix Tools > Reset database and add progress spinner
 
 ## 0.9.0 (2026-03-01)
 **UI:**
