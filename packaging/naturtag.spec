@@ -19,12 +19,16 @@ LIB_DIR_WIN = VENV_DIR / 'Lib' / 'site-packages' / 'pyexiv2' / 'lib'
 LIB_DIR_NIX = VENV_DIR / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages' / 'pyexiv2' / 'lib'
 
 binaries = []
-datas = [
+# Data files shared by both the GUI and CLI
+datas_shared = [
+    (str(ASSETS_DATA_DIR / '*.json'), 'assets/data'),
+    (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
+]
+# Additional data files needed only by the GUI
+datas_gui = datas_shared + [
     (str(ICONS_DIR / '*.ico'), 'assets/icons'),
     (str(ICONS_DIR / '*.png'), 'assets/icons'),
-    (str(ASSETS_DATA_DIR / '*.json'), 'assets/data'),
     (str(ASSETS_DATA_DIR / '*.qss'), 'assets/data'),
-    (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
 ]
 
 # Define platform-specific dependencies
@@ -53,26 +57,42 @@ else:
     raise NotImplementedError
 
 # Ensure package metadata is available for importlib.metadata
-datas += copy_metadata('naturtag')
-datas += copy_metadata('pyinaturalist')
-datas += collect_data_files('pyinaturalist_convert', include_py_files=True)
+metadata = copy_metadata('naturtag') + copy_metadata('pyinaturalist') + collect_data_files('pyinaturalist_convert', include_py_files=True)
+datas_shared += metadata
+datas_gui += metadata
 
-a = Analysis(
+a_gui = Analysis(
     [str(PACKAGE_DIR / 'app' / 'app.py')],
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
-    datas=datas,
-    hiddenimports = [],
+    datas=datas_gui,
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
 )
-pyz = PYZ(a.pure, a.zipped_data)
-exe = EXE(
-    pyz,
-    a.scripts,
+a_cli = Analysis(
+    [str(PACKAGE_DIR / 'cli.py')],
+    pathex=[str(PROJECT_DIR)],
+    binaries=binaries,
+    datas=datas_shared,
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=['PySide6', 'PyQt5', 'PyQt6', 'qtawesome', 'pyqtdarktheme'],
+    noarchive=False,
+)
+
+# Merge shared dependencies to avoid duplication in the output directory
+MERGE((a_gui, PROJECT_NAME, PROJECT_NAME), (a_cli, 'nt', 'nt'))
+
+pyz_gui = PYZ(a_gui.pure, a_gui.zipped_data)
+exe_gui = EXE(
+    pyz_gui,
+    a_gui.scripts,
     [],
     icon=str(ICONS_DIR / 'logo.ico'),
     exclude_binaries=True,
@@ -88,11 +108,36 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
+pyz_cli = PYZ(a_cli.pure, a_cli.zipped_data)
+exe_cli = EXE(
+    pyz_cli,
+    a_cli.scripts,
+    [],
+    icon=str(ICONS_DIR / 'logo.ico'),
+    exclude_binaries=True,
+    name='nt',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=True,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+
 coll = COLLECT(
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
+    exe_gui,
+    a_gui.binaries,
+    a_gui.zipfiles,
+    a_gui.datas,
+    exe_cli,
+    a_cli.binaries,
+    a_cli.zipfiles,
+    a_cli.datas,
     name=PROJECT_NAME,
     strip=False,
     upx=True,
