@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Fix shared library paths in macOS pyinstaller package + DMG
 * Fix bug resulting in incorrect XMP coordinates for Eastern hemisphere
 * Fix shell autocomplete setup (`nt setup shell`) for non-Linux platforms
 
