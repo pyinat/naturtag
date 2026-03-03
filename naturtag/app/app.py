@@ -379,6 +379,10 @@ def install_excepthook():
 
 
 def main():
+    if '--version' in sys.argv:
+        print(f'naturtag v{get_version()}')
+        sys.exit(0)
+
     app = NaturtagApp(sys.argv)
     splash = QSplashScreen(QPixmap(str(APP_LOGO)).scaledToHeight(512))
     splash.show()

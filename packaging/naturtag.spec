@@ -1,3 +1,4 @@
+import shutil
 import sys
 from pathlib import Path
 
@@ -26,22 +27,27 @@ datas = [
     (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
 ]
 
-
 # Define platform-specific dependencies
 if is_win:
     binaries = [
-        (str(LIB_DIR_WIN / 'exiv2.dll'), '.'),
-        (str(LIB_DIR_WIN / 'exiv2api.pyd'), '.'),
+        (str(LIB_DIR_WIN / 'exiv2.dll'), 'pyexiv2/lib'),
+        (str(LIB_DIR_WIN / 'exiv2api.pyd'), 'pyexiv2/lib'),
     ]
 elif is_darwin:
     binaries = [
-        (str(LIB_DIR_NIX / 'libexiv2.dylib'), '.'),
-        (str(LIB_DIR_NIX / 'exiv2api.so'), '.'),
+        (str(LIB_DIR_NIX / 'libexiv2.dylib'), 'pyexiv2/lib'),
+        (str(LIB_DIR_NIX / 'exiv2api.so'), 'pyexiv2/lib'),
     ]
 elif is_linux:
+    # pyexiv2/lib/__init__.py loads libexiv2.so by path (via ctypes.CDLL), then imports
+    # exiv2api.so which has a dynamic dependency on libexiv2.so.28 (its SONAME). Both
+    # names must exist in the same directory so the dynamic linker resolves the SONAME.
+    _libexiv2_soname = LIB_DIR_NIX / 'libexiv2.so.28'
+    shutil.copy2(str(LIB_DIR_NIX / 'libexiv2.so'), str(_libexiv2_soname))
     binaries = [
-        (str(LIB_DIR_NIX / 'libexiv2.so'), '.'),
-        (str(LIB_DIR_NIX / 'exiv2api.so'), '.'),
+        (str(LIB_DIR_NIX / 'libexiv2.so'), 'pyexiv2/lib'),
+        (str(_libexiv2_soname), 'pyexiv2/lib'),
+        (str(LIB_DIR_NIX / 'exiv2api.so'), 'pyexiv2/lib'),
     ]
 else:
     raise NotImplementedError
