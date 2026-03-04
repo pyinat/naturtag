@@ -7,6 +7,7 @@ on:
     push:
         tags:
             - 'v*'
+            - '!v*dev*'
             - '!v*a*'
             - '!v*b*'
             - '!v*rc*'
