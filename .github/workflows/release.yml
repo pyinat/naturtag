@@ -143,6 +143,7 @@ jobs:
         with:
           files: 'release-assets/naturtag*'
           body: |
-            See changelog for release details: https://github.com/pyinat/naturtag/blob/main/HISTORY.md
-            See docs for installation instructions: https://naturtag.readthedocs.io/en/stable/installation.html
+            See [installation docs](https://naturtag.readthedocs.io/en/stable/installation.html) for details on the packages below
+            See [changelog](https://github.com/pyinat/naturtag/blob/main/HISTORY.md) for release details
+            See [milestones](https://github.com/pyinat/naturtag/milestones?state=closed) for completed issues & PRs in this release
           draft: true
