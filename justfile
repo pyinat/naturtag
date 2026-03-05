@@ -50,3 +50,7 @@ lint:
 # Clean up temporary build + documentation files
 clean:
     rm -rf dist build docs/_build docs/modules
+
+build-pyinstaller:
+    uv run pyinstaller -y packaging/naturtag.spec
+    ./packaging/bundle_taxonomy.sh
