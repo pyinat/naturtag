@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Download, convert, and aggregate taxonomy data from iNat DwC-A export
 from pyinaturalist_convert import (
     aggregate_taxon_db,
     enable_logging,

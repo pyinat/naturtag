@@ -55,20 +55,29 @@ lint:
 clean:
     rm -rf dist build docs/_build docs/modules
 
+
 # Build scripts
 # ----------------------------------------
 
+# Export taxonomy data
+export-taxa:
+    ./packaging/export_taxa.sh
+
+# Build pyinstaller package and bundle taxonomy data
 build-pyinstaller:
     uv run pyinstaller -y packaging/naturtag.spec
     ./packaging/bundle_taxonomy.sh
 
+# Build all Linux packages
 build-linux-pkgs:
     ./packaging/build_fpm.sh
     ./packaging/build_appimage.sh
 
+# Build Windows installer
 build-win-installer:
     iscc //DAppVersion=`just version` packaging/naturtag.iss
 
+# Build and validate macOS DMG
 build-dmg:
     ./packaging/build_dmg.sh
     ./packaging/validate_dmg.sh
