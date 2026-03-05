@@ -8,7 +8,11 @@ live_docs_watch := 'pyinaturalist examples'
 live_docs_ignore := '*.csv *.ipynb *.pyc *.tmp **/modules/* **/jupyter_execute/*'
 
 # Run linters and generate coverage report (default)
-default: lint test
+default: lint cov
+
+
+# Local development
+# ----------------------------------------
 
 # Run tests; optionally specify path(s)
 test *paths='test':
@@ -51,6 +55,24 @@ lint:
 clean:
     rm -rf dist build docs/_build docs/modules
 
+# Build scripts
+# ----------------------------------------
+
 build-pyinstaller:
     uv run pyinstaller -y packaging/naturtag.spec
     ./packaging/bundle_taxonomy.sh
+
+build-linux-pkgs:
+    ./packaging/build_fpm.sh
+    ./packaging/build_appimage.sh
+
+build-win-installer:
+    iscc //DAppVersion=`just version` packaging/naturtag.iss
+
+build-dmg:
+    ./packaging/build_dmg.sh
+    ./packaging/validate_dmg.sh
+
+# Get current application version
+version:
+    @uv run python packaging/get_version.py

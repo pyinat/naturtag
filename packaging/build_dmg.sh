@@ -18,6 +18,9 @@ if ! command -v create-dmg &>/dev/null; then
     exit 1
 fi
 
+cat "$DIST_DIR/naturtag.app/Contents/Info.plist"
+codesign -dvvv "$DIST_DIR/naturtag.app" 2>&1 || true
+
 # Ad-hoc sign all bundled libraries, then the app itself
 find "$DIST_DIR/naturtag.app" -name '*.dylib' -o -name '*.so' | while IFS= read -r lib; do
     codesign --force --sign - "$lib"
