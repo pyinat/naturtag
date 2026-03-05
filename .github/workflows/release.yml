@@ -16,31 +16,33 @@ jobs:
         include:
           - os: ubuntu-latest
             dist_name: linux
-            assets_path: dist/naturtag/_internal/assets/data
           - os: macos-latest
             dist_name: macos
-            assets_path: dist/naturtag.app/Contents/Resources/assets/data
           - os: windows-latest
             dist_name: windows
-            assets_path: dist/naturtag/_internal/assets/data
       fail-fast: false
     defaults:
       run:
         shell: bash
     runs-on: ${{ matrix.os }}
     steps:
-      # Install binary dependencies
-      - name: Install system packages
+      # Install system dependencies
+      - name: Install system packages (Linux)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y '^libxcb.*-dev' libarchive-tools libegl-dev libwebp-dev libpng16-16 libx11-xcb-dev rpm
+          sudo gem install fpm --bindir /usr/local/bin
+      - name: Install system packages (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: choco install innosetup -y
       - name: Install system packages (macOS)
         if: startsWith(matrix.os, 'macos')
-        run: brew install inih
+        run: brew install create-dmg inih
 
       # Install dependencies, with caching
       - uses: actions/checkout@v6
+      - uses: extractions/setup-just@v3
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
@@ -50,11 +52,11 @@ jobs:
           uv python install ${{ env.PYTHON_VERSION }}
           uv sync --no-dev
 
-      # Build and test base packages
-      - name: Build wheel + pyinstaller package
+      # Build and test wheel + pyinstaller package
+      - name: Build pyinstaller package
         run: |
           uv build --wheel
-          uv run pyinstaller -y packaging/naturtag.spec
+          just build-pyinstaller
       - name: Test pyinstaller package
         run: |
           # Smoke test; any incorrect shared library paths should raise errors here
@@ -62,69 +64,20 @@ jobs:
           if ! test -d "$BIN"; then BIN=dist/naturtag; fi
           QT_QPA_PLATFORM=offscreen $BIN/naturtag --version | grep -q 'naturtag v'
 
-      # Include taxon FTS db, compress, and set platform name
-      - name: Finish pyinstaller package (Linux/Windows)
-        if: "!startsWith(matrix.os, 'macos')"
-        run: |
-          ASSETS=${{ matrix.assets_path }}
-          tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
-          rm $ASSETS/taxonomy.tar.gz
-          tar -C dist/naturtag/ -czvf naturtag-${{ matrix.dist_name }}.tar.gz .
-
-      # Archive the .app bundle so the Python shared library symlink/framework is preserved
-      - name: Finish pyinstaller package (macOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          ASSETS=${{ matrix.assets_path }}
-          tar -xvzf $ASSETS/taxonomy.tar.gz --directory $ASSETS/
-          rm $ASSETS/taxonomy.tar.gz
-          ls -laR dist/naturtag.app/
-          tar -C dist/ -czvf naturtag-${{ matrix.dist_name }}.tar.gz naturtag.app
+      # Build deb, rpm, pacman, and appimage packages
+      - name: Build Linux packages
+        if: startsWith(matrix.os, 'ubuntu')
+        run: just build-linux-pkgs
 
       # Build Windows installer with Inno Setup
-      - name: Install Inno Setup
-        if: startsWith(matrix.os, 'windows')
-        run: choco install innosetup -y
       - name: Build Windows installer
         if: startsWith(matrix.os, 'windows')
-        run: |
-          APP_VERSION=$(uv run python packaging/get_version.py)
-          iscc //DAppVersion=$APP_VERSION packaging/naturtag.iss
+        run: just build-win-installer
 
-      # Build deb, rpm, and pacman packages
-      - name: Build Linux packages with FPM
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          export GEM_HOME="$(ruby -e 'puts Gem.user_dir')"
-          export PATH="$PATH:$GEM_HOME/bin"
-          gem install fpm --user-install
-          ./packaging/build_fpm.sh
-
-      # Build AppImage
-      - name: Build AppImage (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: ./packaging/build_appimage.sh
-
-      # Inspect app bundle before signing
-      - name: Inspect app bundle (macOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          ls -la dist/naturtag.app/Contents/
-          cat dist/naturtag.app/Contents/Info.plist
-          codesign --verify --verbose=4 dist/naturtag.app 2>&1 || true
-          codesign -dvvv dist/naturtag.app 2>&1 || true
-
-      # Build dmg package
+      # Build and validate DMG package
       - name: Build disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        run: |
-          brew install create-dmg
-          ./packaging/build_dmg.sh
-
-      # Validate DMG structure and code signatures after build
-      - name: Validate disk image and app bundle (macOS)
-        if: startsWith(matrix.os, 'macos')
-        run: ./packaging/validate_dmg.sh
+        run: just build-dmg
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
@@ -190,6 +143,7 @@ jobs:
         with:
           files: 'release-assets/naturtag*'
           body: |
-            See changelog for release details: https://github.com/pyinat/naturtag/blob/main/HISTORY.md
-            See docs for installation instructions: https://naturtag.readthedocs.io/en/stable/installation.html
+            See [installation docs](https://naturtag.readthedocs.io/en/stable/installation.html) for details on the packages below
+            See [changelog](https://github.com/pyinat/naturtag/blob/main/HISTORY.md) for release details
+            See [milestones](https://github.com/pyinat/naturtag/milestones?state=closed) for completed issues & PRs in this release
           draft: true

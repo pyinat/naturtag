@@ -24,6 +24,7 @@ jobs:
     steps:
       # Install dependencies, with caching
       - uses: actions/checkout@v6
+      - uses: extractions/setup-just@v3
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
@@ -36,7 +37,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libegl1
 
       - name: Run unit tests
-        run: uv run nox -e cov -- ${{ env.COV_FORMATS }}
+        run: just cov xml
 
       # Upload coverage report to codecov
       - name: 'Upload coverage report to Codecov'

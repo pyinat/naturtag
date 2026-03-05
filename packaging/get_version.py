@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Get app version from pyproject.toml"""
+"""Parse app version from pyproject.toml"""
 
 import tomllib
 from pathlib import Path
