@@ -1,3 +1,4 @@
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -6,7 +7,7 @@ from PyInstaller.compat import is_darwin, is_linux, is_win
 from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 
 PROJECT_NAME = 'naturtag'
-PROJECT_DIR = Path('.').absolute()
+PROJECT_DIR = Path(os.path.dirname(os.path.abspath(SPEC))).parent
 ASSETS_DIR = PROJECT_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
 ASSETS_DATA_DIR = ASSETS_DIR / 'data'
@@ -19,16 +20,12 @@ LIB_DIR_WIN = VENV_DIR / 'Lib' / 'site-packages' / 'pyexiv2' / 'lib'
 LIB_DIR_NIX = VENV_DIR / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages' / 'pyexiv2' / 'lib'
 
 binaries = []
-# Data files shared by both the GUI and CLI
-datas_shared = [
-    (str(ASSETS_DATA_DIR / '*.json'), 'assets/data'),
-    (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
-]
-# Additional data files needed only by the GUI
-datas_gui = datas_shared + [
+datas = [
     (str(ICONS_DIR / '*.ico'), 'assets/icons'),
     (str(ICONS_DIR / '*.png'), 'assets/icons'),
+    (str(ASSETS_DATA_DIR / '*.json'), 'assets/data'),
     (str(ASSETS_DATA_DIR / '*.qss'), 'assets/data'),
+    (str(ASSETS_DATA_DIR / '*.tar.gz'), 'assets/data'),
 ]
 
 # Define platform-specific dependencies
@@ -57,15 +54,15 @@ else:
     raise NotImplementedError
 
 # Ensure package metadata is available for importlib.metadata
-metadata = copy_metadata('naturtag') + copy_metadata('pyinaturalist') + collect_data_files('pyinaturalist_convert', include_py_files=True)
-datas_shared += metadata
-datas_gui += metadata
+datas += copy_metadata('naturtag')
+datas += copy_metadata('pyinaturalist')
+datas += collect_data_files('pyinaturalist_convert', include_py_files=True)
 
-a_gui = Analysis(
-    [str(PACKAGE_DIR / 'app' / 'app.py')],
+a = Analysis(
+    [str(PACKAGE_DIR / 'main.py')],
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
-    datas=datas_gui,
+    datas=datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -73,50 +70,15 @@ a_gui = Analysis(
     excludes=[],
     noarchive=False,
 )
-a_cli = Analysis(
-    [str(PACKAGE_DIR / 'cli.py')],
-    pathex=[str(PROJECT_DIR)],
-    binaries=binaries,
-    datas=datas_shared,
-    hiddenimports=[],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=['PySide6', 'PyQt5', 'PyQt6', 'qtawesome', 'pyqtdarktheme'],
-    noarchive=False,
-)
 
-# Merge shared dependencies to avoid duplication in the output directory
-MERGE((a_gui, PROJECT_NAME, PROJECT_NAME), (a_cli, 'nt', 'nt'))
-
-pyz_gui = PYZ(a_gui.pure, a_gui.zipped_data)
-exe_gui = EXE(
-    pyz_gui,
-    a_gui.scripts,
+pyz = PYZ(a.pure, a.zipped_data)
+exe = EXE(
+    pyz,
+    a.scripts,
     [],
     icon=str(ICONS_DIR / 'logo.ico'),
     exclude_binaries=True,
     name=PROJECT_NAME,
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-)
-
-pyz_cli = PYZ(a_cli.pure, a_cli.zipped_data)
-exe_cli = EXE(
-    pyz_cli,
-    a_cli.scripts,
-    [],
-    icon=str(ICONS_DIR / 'logo.ico'),
-    exclude_binaries=True,
-    name='nt',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -130,14 +92,10 @@ exe_cli = EXE(
 )
 
 coll = COLLECT(
-    exe_gui,
-    a_gui.binaries,
-    a_gui.zipfiles,
-    a_gui.datas,
-    exe_cli,
-    a_cli.binaries,
-    a_cli.zipfiles,
-    a_cli.datas,
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
     name=PROJECT_NAME,
     strip=False,
     upx=True,
