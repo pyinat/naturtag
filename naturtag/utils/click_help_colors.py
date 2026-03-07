@@ -1,4 +1,4 @@
-"""Copied/modified from https://github.com/click-contrib/click-help-colors
+"""Copied/modified from https://github.com/click-contrib/click-help-colors. Original license:
 
 MIT License
 
@@ -29,6 +29,11 @@ from click.termui import _ansi_colors, _ansi_reset_all
 
 CommandType = TypeVar('CommandType', bound=click.Command)
 GroupType = TypeVar('GroupType', bound=click.Group)
+
+# Regex patterns for colorizing help text
+_CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
+_CODE_INLINE = re.compile(r'`([^`]+?)`')
+_HEADER = re.compile(r'^\s*#+\s*(.*)$', re.MULTILINE)
 
 
 class HelpColorsFormatter(click.HelpFormatter):
@@ -105,7 +110,9 @@ class HelpColorsMixin:
             options_custom_colors=self.help_options_custom_colors,
         )
         self.format_help(ctx, formatter)
-        return formatter.getvalue().rstrip('\n')
+        help_str = formatter.getvalue().rstrip('\n')
+        # Colorize code blocks and headers in the help text
+        return colorize_help_text(help_str)
 
     format_help: Callable[[click.Context, click.HelpFormatter], None]
 
@@ -199,3 +206,22 @@ def _colorize(text: str, color: str | None = None, suffix: str | None = None) ->
         return '\033[%dm' % (_ansi_colors[color]) + text + _ansi_reset_all + (suffix or '')
     except KeyError as err:
         raise KeyError(f'Unknown color {color!r}') from err
+
+
+def colorize_help_text(text: str) -> str:
+    """Colorize code blocks and headers in CLI help text.
+
+    Applies color to:
+    - Headers (markdown style: # ## ###) -> blue and bold
+    - Code blocks (triple backticks) -> cyan
+    - Inline code (single backticks) -> cyan
+    - Removes leading whitespace from indented lines
+    """
+    if not text:
+        return text
+
+    text = re.sub(r'^    ', '', text, flags=re.MULTILINE)
+    text = _HEADER.sub(click.style(r'\1:', 'blue', bold=True), text)
+    text = _CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
+    text = _CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
+    return text
