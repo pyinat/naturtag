@@ -351,7 +351,7 @@ class MainWindow(QMainWindow):
     def _on_preload_thumbnails_toggle(self, checked: bool):
         """Trigger thumbnail preload when user enables the setting."""
         if checked:
-            self.observation_controller._start_preload_thumbnails()
+            self.observation_controller._start_preload_all_thumbnails()
 
     def switch_tab_observations(self):
         self.tabs.setCurrentWidget(self.observation_controller)

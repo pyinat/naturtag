@@ -163,8 +163,20 @@ class ObservationController(BaseController):
         self.load_observations_from_db()
         self.start_background_sync()
 
-    def _start_preload_thumbnails(self):
-        """Kick off background preloading of all observation thumbnails"""
+    def _start_preload_thumbnails(self, observations: list[Observation]):
+        """Schedule thumbnail preloading for a single sync page as a low-priority worker."""
+        urls = [url for obs in observations for url in self._get_obs_image_urls(obs)]
+        if urls:
+            self.app.threadpool.schedule(
+                lambda: self.app.img_fetcher.precache_image(urls),
+                priority=QThread.LowPriority,
+            )
+
+    def _start_preload_all_thumbnails(self):
+        """Start background preloading of all observation thumbnails.
+        Used to backfill previously downloaded observations, after selecting the option for the
+        first time.
+        """
         if self._preload_in_progress:
             logger.debug('Thumbnail preload already in progress; skipping')
             return
@@ -234,6 +246,8 @@ class ObservationController(BaseController):
         self.loaded_obs += len(observations)
         self.update_pagination_buttons()
         self.on_sync_progress.emit(min(self.loaded_obs, self.total_results), self.total_results)
+        if observations and self.app.settings.preload_obs_thumbnails:
+            self._start_preload_thumbnails(observations)
 
         # On cold start, display page 1 once the first sync page arrives.
         # Delay _update_db_counts() until after sync, since DB count is not yet accurate.
@@ -252,8 +266,6 @@ class ObservationController(BaseController):
         self.update_pagination_buttons()
         self.load_observations_from_db()
         self.on_sync_finished.emit()
-        if self.app.settings.preload_obs_thumbnails:
-            self._start_preload_thumbnails()
 
     @Slot(object)
     def _on_preload_page_complete(self, observations: list[Observation]):
@@ -307,6 +319,23 @@ class ObservationController(BaseController):
             id_above=self.app.state.sync_resume_id,
         )
 
+    def _get_obs_image_urls(self, obs: Observation) -> list[str]:
+        """Return all thumbnail URLs to precache for a single observation.
+
+        Includes the observation default photo at medium size, all observation photos at square
+        size, the taxon default photo at medium size, and taxon grid photos at square size.
+        """
+        urls = []
+        if obs.photos:
+            urls.append(obs.default_photo.url_size('medium'))
+            for photo in obs.photos:
+                urls.append(photo.url_size('square'))
+        if obs.taxon and obs.taxon.taxon_photos:
+            urls.append(obs.taxon.default_photo.url_size('medium'))
+            for photo in obs.taxon.taxon_photos[: N_DISPLAY_TAXON_THUMBNAILS + 1]:
+                urls.append(photo.url_size('square'))
+        return urls
+
     def _preload_thumbnails(self):
         """Fetch and cache thumbnails for all observations in the DB. Yields after each page.
 
@@ -314,22 +343,8 @@ class ObservationController(BaseController):
         to check for cancellation between pages, providing graceful shutdown during preload.
         """
         username = self.app.settings.username
-        page = 1
-        while True:
-            obs_page = self.app.client.observations.search_user_db(username=username, page=page)
-            if not obs_page:
-                break
-            for obs in obs_page:
-                if obs.default_photo:
-                    self.app.img_fetcher.get_image(obs.default_photo, size='square')
-                    self.app.img_fetcher.get_image(obs.default_photo, size='medium')
-                if obs.taxon:
-                    if obs.taxon.default_photo:
-                        self.app.img_fetcher.get_image(obs.taxon.default_photo, size='medium')
-                    for photo in (obs.taxon.taxon_photos or [])[: N_DISPLAY_TAXON_THUMBNAILS + 1]:
-                        self.app.img_fetcher.get_image(photo, size='square')
-                for photo in (obs.photos or [])[1:]:
-                    self.app.img_fetcher.get_image(photo, size='square')
+        for obs_page in self.app.client.observations.search_user_db_paginated(username=username):
+            urls = [url for obs in obs_page for url in self._get_obs_image_urls(obs)]
+            self.app.img_fetcher.precache_image(urls)
             # Yield after each page to allow cancellation checks in worker
             yield obs_page
-            page += 1

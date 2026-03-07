@@ -42,6 +42,18 @@ class ImageFetcher:
         self.image_cache[image_hash] = data
         return data
 
+    def precache_image(self, urls: list[str]):
+        """Fetch and cache images at the given URLs, suppressing any errors.
+
+        Intended for background preloading where individual failures should not
+        interrupt the overall process.
+        """
+        for url in urls:
+            try:
+                self.get_image(Photo(url=url), url=url)
+            except Exception:
+                logger.warning(f'Failed to cache image: {url}')
+
     def get_qimage(
         self,
         path: Optional[PathOrStr] = None,

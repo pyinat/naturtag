@@ -286,121 +286,100 @@ def test_sync_observations__passes_resume_id(controller, mock_app):
 # ----------------------------------------
 
 
-@pytest.mark.parametrize('size', ['square', 'medium', 'small'])
-def test_cache_photo(controller, mock_app, size):
-    """_cache_photo calls img_fetcher.get_image with photo and size."""
-    photo = Photo(id=10, url=THUMB_URL)
-    controller._cache_photo(photo, size)
-
-    mock_app.img_fetcher.get_image.assert_called_once_with(photo, size=size)
-
-
-def test_cache_photo__suppresses_errors(controller, mock_app):
-    """_cache_photo suppresses exceptions from img_fetcher.get_image (no exception raised)."""
-    photo = Photo(id=10, url=THUMB_URL)
-    mock_app.img_fetcher.get_image.side_effect = Exception('Network error')
-
-    controller._cache_photo(photo, 'square')
-    # Verify that the call was attempted despite the error
-    mock_app.img_fetcher.get_image.assert_called_once()
-
-
-def test_preload_thumbnails__obs(controller, mock_app):
-    """_preload_thumbnails caches observation default photos (square and medium)."""
-    obs = _make_obs(id=1)
-    mock_app.client.observations.search_user_db.side_effect = [[obs], []]
-
-    # Consume the generator
-    list(controller._preload_thumbnails())
-
-    # Should cache both square and medium for obs default photo
-    calls = mock_app.img_fetcher.get_image.call_args_list
-    sizes = [call[1]['size'] for call in calls]
-    assert 'square' in sizes
-    assert 'medium' in sizes
-
-
-def test_preload_thumbnails__obs_thumbs(controller, mock_app):
-    """_preload_thumbnails caches extra observation photos at square size only."""
+def test_get_obs_image_urls__obs_photos(controller):
+    """Returns medium URL for default photo and square URLs for all obs photos."""
     photo1 = Photo(id=10, url=THUMB_URL)
     photo2 = Photo(id=20, url='https://static.inaturalist.org/photos/20/square.jpg')
-    photo3 = Photo(id=30, url='https://static.inaturalist.org/photos/30/square.jpg')
-    obs = _make_obs(photos=[photo1, photo2, photo3])
-    mock_app.client.observations.search_user_db.side_effect = [[obs], []]
+    obs = _make_obs(photos=[photo1, photo2])
 
-    # Consume the generator
-    list(controller._preload_thumbnails())
+    urls = controller._get_obs_image_urls(obs)
 
-    # Extra photos (photo2 and photo3) should be cached at square size only
-    calls = mock_app.img_fetcher.get_image.call_args_list
-    extra_photo_calls = [call for call in calls if call[0][0].id in (20, 30)]
-    assert len(extra_photo_calls) == 2
-    assert all(call[1]['size'] == 'square' for call in extra_photo_calls)
+    assert photo1.url_size('medium') in urls
+    assert photo1.url_size('square') in urls
+    assert photo2.url_size('square') in urls
 
 
-def test_preload_thumbnails__taxon_default(controller, mock_app):
-    taxon = _make_taxon()  # Has default_photo by default
-    obs = _make_obs(taxon=taxon)
-    mock_app.client.observations.search_user_db.side_effect = [[obs], []]
-
-    # Consume the generator
-    list(controller._preload_thumbnails())
-
-    # Should cache obs photos at square and medium, taxon default photo at medium only
-    calls = mock_app.img_fetcher.get_image.call_args_list
-    assert len(calls) == 3  # obs(square + medium) + taxon(medium only)
-    sizes = [call[1]['size'] for call in calls]
-    assert sizes.count('square') == 1  # obs only
-    assert sizes.count('medium') == 2  # obs + taxon
-
-
-def test_preload_thumbnails__taxon_thumbs(controller, mock_app):
-    """_preload_thumbnails caches taxon grid photos at square size only."""
+def test_get_obs_image_urls__taxon_photos(controller):
+    """Returns medium URL for taxon default photo and square URLs for taxon grid photos."""
     taxon_photo1 = Photo(id=101, url='https://static.inaturalist.org/photos/101/square.jpg')
     taxon_photo2 = Photo(id=102, url='https://static.inaturalist.org/photos/102/square.jpg')
-    taxon_photo3 = Photo(id=103, url='https://static.inaturalist.org/photos/103/square.jpg')
-    taxon = _make_taxon(taxon_photos=[taxon_photo1, taxon_photo2, taxon_photo3])
+    taxon = _make_taxon(taxon_photos=[taxon_photo1, taxon_photo2])
     obs = _make_obs(taxon=taxon)
-    mock_app.client.observations.search_user_db.side_effect = [[obs], []]
 
-    # Consume the generator
+    urls = controller._get_obs_image_urls(obs)
+
+    assert obs.taxon.default_photo.url_size('medium') in urls
+    assert taxon_photo1.url_size('square') in urls
+    assert taxon_photo2.url_size('square') in urls
+
+
+def test_get_obs_image_urls__no_photos(controller):
+    """Returns empty list when observation has no photos."""
+    obs = _make_obs(photos=[])
+
+    assert controller._get_obs_image_urls(obs) == []
+
+
+def test_preload_thumbnails__calls_precache_with_urls(controller, mock_app):
+    """_preload_thumbnails (DB path) collects URLs and calls precache_image once per page."""
+    obs = _make_obs(id=1)
+    mock_app.client.observations.search_user_db_paginated.return_value = [[obs]]
+
     list(controller._preload_thumbnails())
 
-    # Taxon extra photos (photo2 and photo3, excluding the first) should be cached at square size
-    calls = mock_app.img_fetcher.get_image.call_args_list
-    taxon_extra_calls = [call for call in calls if call[0][0].id in (102, 103)]
-    assert len(taxon_extra_calls) == 2
-    assert all(call[1]['size'] == 'square' for call in taxon_extra_calls)
+    mock_app.img_fetcher.precache_image.assert_called_once()
+    urls = mock_app.img_fetcher.precache_image.call_args[0][0]
+    assert isinstance(urls, list)
+    assert all(isinstance(u, str) for u in urls)
 
 
 def test_preload_thumbnails__pagination(controller, mock_app):
-    """_preload_thumbnails paginates through pages until empty."""
+    """_preload_thumbnails (DB path) yields one page at a time until exhausted."""
     obs_page1 = [_make_obs(id=i) for i in range(1, 4)]
     obs_page2 = [_make_obs(id=i) for i in range(4, 7)]
-    mock_app.client.observations.search_user_db.side_effect = [obs_page1, obs_page2, []]
+    mock_app.client.observations.search_user_db_paginated.return_value = [obs_page1, obs_page2]
 
-    # Consume the generator and collect pages
     pages = list(controller._preload_thumbnails())
 
-    assert sum(len(p) for p in pages) == 6  # Total observations across all pages
-    # Should have been called 3 times (page 1, page 2, page 3 empty)
-    assert mock_app.client.observations.search_user_db.call_count == 3
+    assert sum(len(p) for p in pages) == 6  # Total observations across both pages
+    assert mock_app.img_fetcher.precache_image.call_count == 2  # Once per page
 
 
-@pytest.mark.parametrize('enabled, should_call', [(True, True), (False, False)])
-def test_on_sync_complete__settings(controller, mock_app, enabled, should_call):
-    """on_sync_complete triggers preload only when setting is enabled."""
-    controller._sync_in_progress = True
+def test_start_preload_thumbnails__schedules_worker(controller, mock_app):
+    """_start_preload_thumbnails schedules a low-priority worker when there are URLs."""
+    observations = [_make_obs(id=i) for i in range(3)]
+    mock_app.threadpool.schedule.reset_mock()
+
+    controller._start_preload_thumbnails(observations)
+
+    mock_app.threadpool.schedule.assert_called_once_with(
+        mock_app.threadpool.schedule.call_args[0][0],
+        priority=QThread.LowPriority,
+    )
+
+
+def test_start_preload_thumbnails__skips_when_no_urls(controller, mock_app):
+    """_start_preload_thumbnails skips scheduling when observations have no photos."""
+    mock_app.threadpool.schedule.reset_mock()
+
+    controller._start_preload_thumbnails([_make_obs(photos=[], id=1)])
+
+    mock_app.threadpool.schedule.assert_not_called()
+
+
+@pytest.mark.parametrize('enabled, should_schedule', [(True, True), (False, False)])
+def test_on_sync_page_received__preload_setting(controller, mock_app, enabled, should_schedule):
+    """on_sync_page_received schedules per-page preload only when setting is enabled."""
     mock_app.settings.preload_obs_thumbnails = enabled
-    mock_app._futures.clear()
+    mock_app.threadpool.schedule.reset_mock()
+    observations = [_make_obs(id=i) for i in range(3)]
 
-    with patch.object(controller, '_start_preload_thumbnails') as mock_preload:
-        controller.on_sync_complete()
+    controller.on_sync_page_received(observations)
 
-    if should_call:
-        mock_preload.assert_called_once()
+    if should_schedule:
+        mock_app.threadpool.schedule.assert_called()
     else:
-        mock_preload.assert_not_called()
+        mock_app.threadpool.schedule.assert_not_called()
 
 
 def test_preload_thumbnails__in_progress(controller, mock_app):
@@ -408,40 +387,8 @@ def test_preload_thumbnails__in_progress(controller, mock_app):
     controller._preload_in_progress = True
     mock_app.threadpool.schedule_paginator.reset_mock()
 
-    controller._start_preload_thumbnails()
+    controller._start_preload_all_thumbnails()
     mock_app.threadpool.schedule_paginator.assert_not_called()
 
     controller._on_preload_finished()
     assert controller._preload_in_progress is False
-
-
-def test_start_preload_thumbnails__uses_total_results(controller, mock_app):
-    """When total_results is set, schedule_paginator uses it and count_db is not called."""
-    controller.total_results = 42
-    mock_app.threadpool.schedule_paginator.reset_mock()
-    mock_app.client.observations.count_db.reset_mock()
-
-    controller._start_preload_thumbnails()
-
-    mock_app.client.observations.count_db.assert_not_called()
-    mock_app.threadpool.schedule_paginator.assert_called_once_with(
-        controller._preload_thumbnails,
-        priority=QThread.LowPriority,
-        total_results=42,
-    )
-
-
-def test_start_preload_thumbnails__falls_back_to_count_db(controller, mock_app):
-    """When total_results is 0, count_db() result is passed as total_results."""
-    controller.total_results = 0
-    mock_app.client.observations.count_db.return_value = 99
-    mock_app.threadpool.schedule_paginator.reset_mock()
-
-    controller._start_preload_thumbnails()
-
-    mock_app.client.observations.count_db.assert_called_once()
-    mock_app.threadpool.schedule_paginator.assert_called_once_with(
-        controller._preload_thumbnails,
-        priority=QThread.LowPriority,
-        total_results=99,
-    )
