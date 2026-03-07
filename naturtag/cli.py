@@ -1,7 +1,6 @@
 # TODO: Show all matched taxon names if more than one match per taxon ID
 # TODO: Bash doesn't support completion help text, so currently only shows IDs
 # TODO: Use table formatting from pyinaturalist if format_taxa
-import re
 from collections import defaultdict
 from logging import basicConfig, getLogger
 from pathlib import Path
@@ -11,7 +10,6 @@ from typing import Optional
 import click
 import pyexiv2
 from click.shell_completion import CompletionItem
-from click_help_colors import HelpColorsGroup
 from platformdirs import user_config_dir
 from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
 from pyinaturalist_convert.fts import TaxonAutocompleter
@@ -25,11 +23,7 @@ from naturtag.constants import CLI_COMPLETE_DIR
 from naturtag.metadata import KeywordMetadata, MetaMetadata
 from naturtag.metadata.inat_metadata import _refresh_tags_iter, _tag_images_iter
 from naturtag.storage import Settings, setup
-from naturtag.utils import get_valid_image_paths, get_version, strip_url
-
-CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
-CODE_INLINE = re.compile(r'`([^`]+?)`')
-HEADER = re.compile(r'^\s*#+\s*(.*)$', re.MULTILINE)
+from naturtag.utils import HelpColorsGroup, get_valid_image_paths, get_version, strip_url
 
 
 class TaxonParam(click.ParamType):
@@ -399,15 +393,6 @@ def format_taxa(results, verbose: bool = False) -> Table:
     return table
 
 
-def colorize_help_text(text):
-    """Colorize code blocks and headers in CLI help text"""
-    text = re.sub(r'^    ', '', text, flags=re.MULTILINE)
-    text = HEADER.sub(click.style(r'\1:', 'blue', bold=True), text)
-    text = CODE_BLOCK.sub(click.style(r'\1', 'cyan'), text)
-    text = CODE_INLINE.sub(click.style(r'\1', 'cyan'), text)
-    return text
-
-
 def install_shell_completion(shell: str):
     """Copy packaged completion scripts for the specified shell(s)"""
     if shell in ['all', 'bash']:
@@ -436,7 +421,3 @@ def _install_bash_completion():
     print('Installed bash completion scripts.')
     print('Add the following to your ~/.bashrc, and restart your shell:')
     print(f'source {completion_dir}/*.bash\n')
-
-
-for cmd in [tag, refresh, db, shell]:
-    cmd.help = colorize_help_text(cmd.help)

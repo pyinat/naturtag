@@ -6,6 +6,7 @@
 * Fix bug resulting in incorrect XMP coordinates for Eastern hemisphere
 * Fix shell autocomplete setup (`nt setup shell`) for non-Linux platforms
 * Fix Tools > Reset database and add progress spinner
+* Add support for python 3.14 with pip (previously only with uv)
 
 ## 0.9.0 (2026-03-01)
 **UI:**
@@ -41,6 +42,7 @@
   * Update packaged taxonomy db with iNaturalist data from March 2026
   * Include database migrations for future SQLite db updates
   * Upgrade to Qt 6.10
+  * Upgrade to python 3.13 (+ partial support for 3.14)
 * Artifacts:
   * Build pacman package for Arch Linux
   * Build AppImage package for other Linux distros not covered by other formats (replaces snap package)
