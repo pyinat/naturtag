@@ -11,7 +11,6 @@ from typing import Optional
 import click
 import pyexiv2
 from click.shell_completion import CompletionItem
-from click_help_colors import HelpColorsGroup
 from platformdirs import user_config_dir
 from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
 from pyinaturalist_convert.fts import TaxonAutocompleter
@@ -25,7 +24,7 @@ from naturtag.constants import CLI_COMPLETE_DIR
 from naturtag.metadata import KeywordMetadata, MetaMetadata
 from naturtag.metadata.inat_metadata import _refresh_tags_iter, _tag_images_iter
 from naturtag.storage import Settings, setup
-from naturtag.utils import get_valid_image_paths, get_version, strip_url
+from naturtag.utils import HelpColorsGroup, get_valid_image_paths, get_version, strip_url
 
 CODE_BLOCK = re.compile(r'```\n\s*(.+?)```\n', re.DOTALL)
 CODE_INLINE = re.compile(r'`([^`]+?)`')

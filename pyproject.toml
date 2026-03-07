@@ -26,7 +26,6 @@ classifiers = [
 dependencies = [
     'attrs>=21.2',
     'click>=8.0',
-    'click-help-colors>=0.9',
     'pillow>=10.0',
     'pyexiv2>=2.10',
     'pyinaturalist>=0.21.1',
@@ -37,7 +36,6 @@ dependencies = [
     'pyyaml>=6.0',
     'qtawesome~=1.4.0',
     'sqlalchemy~=2.0.47',
-    'tablib~=3.9',
 ]
 
 [project.scripts]
@@ -127,6 +125,7 @@ source = ['naturtag']
 
 [tool.coverage.report]
 exclude_lines = ['pragma: no cover', 'if TYPE_CHECKING:']
+omit = ['naturtag/utils/click_help_colors.py']
 
 [tool.mypy]
 ignore_missing_imports = true
