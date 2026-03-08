@@ -140,6 +140,7 @@ class ObservationController(BaseController):
         )
         future.on_result.connect(self.on_sync_page_received)
         future.on_complete.connect(self.on_sync_complete)
+        future.on_error.connect(self.on_sync_error_received)
 
     def next_page(self):
         if self.page < min(self.total_pages, self.loaded_pages):
@@ -263,6 +264,15 @@ class ObservationController(BaseController):
         # Delay _update_db_counts() until after sync, since DB count is not yet accurate.
         if self._is_cold_start and self.loaded_pages == 1:
             self.load_observations_from_db()
+
+    @Slot(Exception)
+    def on_sync_error_received(self, exc: Exception):
+        """Called when the background sync fails"""
+        logger.warning('Background observation sync failed:', exc_info=exc)
+        self._sync_in_progress = False
+        if self._is_cold_start:
+            self.user_obs_group_box.set_title('My Observations')
+        self.info(f'Observation sync failed: {exc}')
 
     @Slot()
     def on_sync_complete(self):

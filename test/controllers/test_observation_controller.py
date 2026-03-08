@@ -172,6 +172,39 @@ def test_on_sync_page_received__cold_start_trigger(controller, mock_app):
     assert len(mock_app._futures) >= 1
 
 
+def test_on_sync_error_received(controller, mock_app):
+    """on_sync_error_received resets state and shows the error in the status bar."""
+    controller._sync_in_progress = True
+
+    with patch.object(controller, 'info') as mock_info:
+        controller.on_sync_error_received(RuntimeError('connection refused'))
+
+    assert controller._sync_in_progress is False
+    mock_info.assert_called_once()
+    assert 'connection refused' in mock_info.call_args[0][0]
+
+
+def test_on_sync_error_received__cold_start_clears_title(controller, mock_app):
+    """on_sync_error_received resets title when no observations were loaded yet."""
+    controller._is_cold_start = True
+    controller.user_obs_group_box.set_title('My Observations (loading...)')
+
+    controller.on_sync_error_received(RuntimeError('timeout'))
+
+    assert 'loading...' not in controller.user_obs_group_box.box.title()
+    assert 'My Observations' in controller.user_obs_group_box.box.title()
+
+
+def test_on_sync_error_received__warm_start_keeps_title(controller, mock_app):
+    """on_sync_error_received does not overwrite title when observations were already loaded."""
+    controller._is_cold_start = False
+    controller.user_obs_group_box.set_title('My Observations (42)')
+
+    controller.on_sync_error_received(RuntimeError('timeout'))
+
+    assert '42' in controller.user_obs_group_box.box.title()
+
+
 def test_on_sync_complete(controller, mock_app):
     mock_app._futures.clear()
     controller._sync_in_progress = True
