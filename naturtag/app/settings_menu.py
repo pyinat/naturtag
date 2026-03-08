@@ -138,6 +138,13 @@ class SettingsMenu(BaseController):
 
         # User data settings
         user_data = self.add_group('User Data', self.settings_layout)
+        self.precache_thumbnails = ToggleSetting(
+            self.app.settings,
+            icon_str='fa6s.images',
+            setting_attr='precache_thumbnails',
+        )
+        # TODO: enable after more testing
+        # user_data.addLayout(self.precache_thumbnails)
         use_last_dir = ToggleSetting(
             self.app.settings,
             icon_str='mdi.folder-clock-outline',

@@ -3,9 +3,11 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pyinaturalist import Photo
+from PySide6.QtCore import QThread
 
 from naturtag.controllers.observation_controller import DbPageResult, ObservationController
-from test.conftest import _make_obs
+from test.conftest import THUMB_URL, _make_obs, _make_taxon
 
 
 @pytest.fixture
@@ -30,14 +32,13 @@ def test_display_observation_by_id(controller, mock_app):
     assert len(mock_app._futures) >= 1
 
 
-def test_display_observation_by_id__same_id_skipped(controller, mock_app):
+def test_display_observation_by_id__same_id(controller, mock_app):
     """No work scheduled when the same observation is already displayed."""
     controller.displayed_observation = _make_obs(id=42)
     mock_app._futures.clear()
     mock_app.threadpool.schedule.reset_mock()
 
     controller.display_observation_by_id(42)
-
     mock_app.threadpool.schedule.assert_not_called()
 
 
@@ -279,3 +280,142 @@ def test_sync_observations__passes_resume_id(controller, mock_app):
         updated_since=None,
         id_above=42,
     )
+
+
+# Tests for thumbnail precacheing feature
+# ----------------------------------------
+
+
+def test_get_obs_image_urls__obs_photos(controller):
+    """Returns medium URL for default photo and square URLs for all obs photos."""
+    photo1 = Photo(id=10, url=THUMB_URL)
+    photo2 = Photo(id=20, url='https://static.inaturalist.org/photos/20/square.jpg')
+    obs = _make_obs(photos=[photo1, photo2])
+
+    urls = controller._get_obs_image_urls(obs)
+
+    assert photo1.url_size('medium') in urls
+    assert photo1.url_size('square') in urls
+    assert photo2.url_size('square') in urls
+
+
+def test_get_obs_image_urls__taxon_photos(controller):
+    """Returns medium URL for taxon default photo and square URLs for taxon grid photos."""
+    taxon_photo1 = Photo(id=101, url='https://static.inaturalist.org/photos/101/square.jpg')
+    taxon_photo2 = Photo(id=102, url='https://static.inaturalist.org/photos/102/square.jpg')
+    taxon = _make_taxon(taxon_photos=[taxon_photo1, taxon_photo2])
+    obs = _make_obs(taxon=taxon)
+
+    urls = controller._get_obs_image_urls(obs)
+
+    assert obs.taxon.default_photo.url_size('medium') in urls
+    assert taxon_photo1.url_size('square') in urls
+    assert taxon_photo2.url_size('square') in urls
+
+
+def test_get_obs_image_urls__no_photos(controller):
+    """Returns empty list when observation has no photos."""
+    obs = _make_obs(photos=[])
+
+    assert controller._get_obs_image_urls(obs) == []
+
+
+def test_precache_thumbnails__calls_precache_with_urls(controller, mock_app):
+    """_precache_thumbnails (DB path) collects URLs and calls precache_image once per page."""
+    obs = _make_obs(id=1)
+    mock_app.client.observations.search_user_db_paginated.return_value = [[obs]]
+
+    list(controller._precache_thumbnails())
+
+    mock_app.img_fetcher.precache_image.assert_called_once()
+    urls = mock_app.img_fetcher.precache_image.call_args[0][0]
+    assert isinstance(urls, list)
+    assert all(isinstance(u, str) for u in urls)
+
+
+def test_precache_thumbnails__pagination(controller, mock_app):
+    """_precache_thumbnails (DB path) yields one page at a time until exhausted."""
+    obs_page1 = [_make_obs(id=i) for i in range(1, 4)]
+    obs_page2 = [_make_obs(id=i) for i in range(4, 7)]
+    mock_app.client.observations.search_user_db_paginated.return_value = [obs_page1, obs_page2]
+
+    pages = list(controller._precache_thumbnails())
+
+    assert sum(len(p) for p in pages) == 6  # Total observations across both pages
+    assert mock_app.img_fetcher.precache_image.call_count == 2  # Once per page
+
+
+def test_start_precache_thumbnails__schedules_worker(controller, mock_app):
+    """_start_precache_thumbnails schedules a low-priority worker when there are URLs."""
+    observations = [_make_obs(id=i) for i in range(3)]
+    mock_app.threadpool.schedule.reset_mock()
+
+    controller._start_precache_thumbnails(observations)
+
+    mock_app.threadpool.schedule.assert_called_once_with(
+        mock_app.threadpool.schedule.call_args[0][0],
+        priority=QThread.LowPriority,
+    )
+
+
+def test_start_precache_thumbnails__skips_when_no_urls(controller, mock_app):
+    """_start_precache_thumbnails skips scheduling when observations have no photos."""
+    mock_app.threadpool.schedule.reset_mock()
+
+    controller._start_precache_thumbnails([_make_obs(photos=[], id=1)])
+
+    mock_app.threadpool.schedule.assert_not_called()
+
+
+@pytest.mark.parametrize('enabled, should_schedule', [(True, True), (False, False)])
+def test_on_sync_page_received__precache_setting(controller, mock_app, enabled, should_schedule):
+    """on_sync_page_received schedules per-page precache only when setting is enabled."""
+    mock_app.settings.precache_thumbnails = enabled
+    mock_app.threadpool.schedule.reset_mock()
+    observations = [_make_obs(id=i) for i in range(3)]
+
+    controller.on_sync_page_received(observations)
+
+    if should_schedule:
+        mock_app.threadpool.schedule.assert_called()
+    else:
+        mock_app.threadpool.schedule.assert_not_called()
+
+
+def test_precache_thumbnails__in_progress(controller, mock_app):
+    """_start_precache_thumbnails skips if precache is already in progress."""
+    controller._precache_in_progress = True
+    mock_app.threadpool.schedule_paginator.reset_mock()
+
+    controller._start_precache_all_thumbnails()
+    mock_app.threadpool.schedule_paginator.assert_not_called()
+
+    controller._on_precache_finished()
+    assert controller._precache_in_progress is False
+
+
+def test_start_precache_when_ready__no_sync(controller, mock_app):
+    """When no sync is in progress, calls _start_precache_all_thumbnails immediately."""
+    controller._sync_in_progress = False
+    mock_app.threadpool.schedule_paginator.reset_mock()
+
+    controller.start_precache_when_ready()
+
+    mock_app.threadpool.schedule_paginator.assert_called_once()
+
+
+def test_start_precache_when_ready__during_sync(controller, mock_app):
+    """When sync is in progress, defers precache until on_sync_finished is emitted."""
+    controller._sync_in_progress = True
+    mock_app.threadpool.schedule_paginator.reset_mock()
+
+    controller.start_precache_when_ready()
+
+    # Not called yet — sync still in progress
+    mock_app.threadpool.schedule_paginator.assert_not_called()
+
+    # Simulate sync completing
+    controller._sync_in_progress = False
+    controller.on_sync_finished.emit()
+
+    mock_app.threadpool.schedule_paginator.assert_called_once()

@@ -201,6 +201,18 @@ class ObservationDbController(ObservationController):
             )
         )
 
+    def search_user_db_paginated(
+        self, username: str, limit: int = DEFAULT_DISPLAY_PAGE_SIZE
+    ) -> Iterator[list[Observation]]:
+        """Yield pages of observations from the local DB until exhausted"""
+        page = 1
+        while True:
+            obs_page = self.search_user_db(username=username, limit=limit, page=page)
+            if not obs_page:
+                break
+            yield obs_page
+            page += 1
+
     # TODO/WIP: paginated version of get_user_observations
     def search_user_paginated(
         self,
