@@ -10,7 +10,7 @@ from urllib.parse import unquote_plus, urlparse
 
 from pyinaturalist import Iterable
 
-from naturtag.constants import IMAGE_FILETYPES, PathOrStr
+from naturtag.constants import ALL_IMAGE_FILETYPES, IMAGE_FILETYPES, RAW_FILETYPES, PathOrStr
 
 logger = getLogger().getChild(__name__)
 
@@ -20,6 +20,7 @@ def get_valid_image_paths(
     recursive: bool = False,
     include_sidecars: bool = False,
     create_sidecars: bool = False,
+    include_raw: bool = False,
 ) -> set[Path]:
     """
     Get all images of supported filetypes from one or more dirs and/or image paths, including URIs.
@@ -52,10 +53,10 @@ def get_valid_image_paths(
         path = uri_to_path(path)
         sidecar_path = get_sidecar_path(path)
         if path.is_dir():
-            image_paths.extend(get_images_from_dir(path, recursive=recursive))
-        elif '*' in str(path):
-            image_paths.extend(glob_paths([path]))
-        elif is_image_path(path, include_sidecars=include_sidecars):
+            image_paths.extend(
+                get_images_from_dir(path, recursive=recursive, include_raw=include_raw)
+            )
+        elif is_image_path(path, include_sidecars=include_sidecars, include_raw=include_raw):
             image_paths.append(path)
         elif include_sidecars and sidecar_path.is_file():
             logger.debug(f'{path} is not writable; using existing sidecar: {sidecar_path}')
@@ -70,19 +71,23 @@ def get_valid_image_paths(
     return set(image_paths)
 
 
-def get_images_from_dir(path: Path, recursive: bool = False) -> list[Path]:
+def get_images_from_dir(
+    path: Path, recursive: bool = False, include_raw: bool = False
+) -> list[Path]:
     """
     Get all images of supported filetypes from the selected directory.
 
     Args:
         dir: Path to image directory
         recursive: Recursively get images from subdirectories
+        include_raw: Include RAW image files
 
     Returns:
         Paths of supported image files in the directory
     """
-    prefix = '**/' if recursive else ''
-    paths = [p for ext in IMAGE_FILETYPES for p in path.glob(f'{prefix}{ext}')]
+    filetypes = ALL_IMAGE_FILETYPES if include_raw else IMAGE_FILETYPES
+    patterns = [f'**/{ext}' for ext in filetypes] if recursive else filetypes
+    paths = [p for pattern in patterns for p in path.glob(pattern, case_sensitive=False)]
     logger.debug(f'{len(paths)} images found in directory: {path}')
     return paths
 
@@ -120,10 +125,17 @@ def get_sidecar_path(path: Path) -> Path:
     return alt_path if alt_path.is_file() else default_path
 
 
-def is_image_path(path: Path, include_sidecars: bool = False) -> bool:
+def is_image_path(path: Path, include_sidecars: bool = False, include_raw: bool = False) -> bool:
     """Determine if a path points to a valid image of a supported type"""
-    valid_exts = IMAGE_FILETYPES + (['*.xmp'] if include_sidecars else [])
+    valid_exts = list(ALL_IMAGE_FILETYPES if include_raw else IMAGE_FILETYPES)
+    if include_sidecars:
+        valid_exts.append('*.xmp')
     return path.is_file() and any(fnmatch(path.suffix.lower(), ext) for ext in valid_exts)
+
+
+def is_raw_path(path: Path) -> bool:
+    """Determine if a path points to a RAW image file"""
+    return any(fnmatch(path.suffix.lower(), ext) for ext in RAW_FILETYPES)
 
 
 def uri_to_path(path_or_uri) -> Path:

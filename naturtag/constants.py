@@ -37,6 +37,8 @@ BUG_REPORT_URL = f'{REPO_URL}/issues/new?template=bug_report.md'
 
 # Thumnbnail settings
 IMAGE_FILETYPES = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.webp']
+RAW_FILETYPES = ['*.orf', '*.cr2', '*.nrw', '*.nrf', '*.dng', '*.raw', '*.srf', '*.sr2']
+ALL_IMAGE_FILETYPES = IMAGE_FILETYPES + RAW_FILETYPES
 PHOTO_SIZES = ['square', 'small', 'medium', 'large', 'original']
 SIZE_ICON_SM = (22, 22)
 SIZE_ICON = (32, 32)
