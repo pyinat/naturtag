@@ -349,7 +349,7 @@ class MainWindow(QMainWindow):
     def _on_precache_thumbnails_toggle(self, checked: bool):
         """Trigger thumbnail pre-cache when user enables the setting."""
         if checked:
-            self.observation_controller._start_precache_all_thumbnails()
+            self.observation_controller.start_precache_when_ready()
 
     def switch_tab_observations(self):
         self.tabs.setCurrentWidget(self.observation_controller)

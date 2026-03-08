@@ -190,6 +190,17 @@ class ObservationController(BaseController):
         )
         future.on_finished.connect(self._on_precache_finished)
 
+    def start_precache_when_ready(self):
+        """Start thumbnail pre-caching, or defer until sync completes if one is in progress."""
+        if self._sync_in_progress:
+            logger.debug('Sync in progress; deferring thumbnail pre-cache until sync completes')
+            self.on_sync_finished.connect(
+                self._start_precache_all_thumbnails,
+                Qt.SingleShotConnection,
+            )
+        else:
+            self._start_precache_all_thumbnails()
+
     # UI helper functions (slots triggered in main thread after workers complete)
     # ----------------------------------------
 

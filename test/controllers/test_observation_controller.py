@@ -392,3 +392,30 @@ def test_precache_thumbnails__in_progress(controller, mock_app):
 
     controller._on_precache_finished()
     assert controller._precache_in_progress is False
+
+
+def test_start_precache_when_ready__no_sync(controller, mock_app):
+    """When no sync is in progress, calls _start_precache_all_thumbnails immediately."""
+    controller._sync_in_progress = False
+    mock_app.threadpool.schedule_paginator.reset_mock()
+
+    controller.start_precache_when_ready()
+
+    mock_app.threadpool.schedule_paginator.assert_called_once()
+
+
+def test_start_precache_when_ready__during_sync(controller, mock_app):
+    """When sync is in progress, defers precache until on_sync_finished is emitted."""
+    controller._sync_in_progress = True
+    mock_app.threadpool.schedule_paginator.reset_mock()
+
+    controller.start_precache_when_ready()
+
+    # Not called yet — sync still in progress
+    mock_app.threadpool.schedule_paginator.assert_not_called()
+
+    # Simulate sync completing
+    controller._sync_in_progress = False
+    controller.on_sync_finished.emit()
+
+    mock_app.threadpool.schedule_paginator.assert_called_once()
