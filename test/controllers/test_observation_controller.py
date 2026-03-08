@@ -205,6 +205,18 @@ def test_on_sync_error_received__warm_start_keeps_title(controller, mock_app):
     assert '42' in controller.user_obs_group_box.box.title()
 
 
+def test_on_sync_error_received__cleans_up_progress_bar(controller, mock_app):
+    """on_sync_error_received removes unaccounted progress bar units."""
+    controller._sync_in_progress = True
+    controller.total_results = 100
+    controller.loaded_obs = 10  # 10 obs + 1 reserved slot = 11 advanced; 89 unaccounted
+    mock_app.threadpool.progress = MagicMock()
+
+    controller.on_sync_error_received(RuntimeError('timeout'))
+
+    mock_app.threadpool.progress.remove.assert_called_once_with(89)
+
+
 def test_on_sync_complete(controller, mock_app):
     mock_app._futures.clear()
     controller._sync_in_progress = True

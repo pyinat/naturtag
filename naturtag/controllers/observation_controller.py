@@ -273,6 +273,10 @@ class ObservationController(BaseController):
         if self._is_cold_start:
             self.user_obs_group_box.set_title('My Observations')
         self.info(f'Observation sync failed: {exc}')
+        # Remove unfinished progress bar units
+        unfinished = max(0, (self.total_results or 1) - self.loaded_obs - 1)
+        if unfinished > 0:
+            self.app.threadpool.progress.remove(unfinished)
 
     @Slot()
     def on_sync_complete(self):
