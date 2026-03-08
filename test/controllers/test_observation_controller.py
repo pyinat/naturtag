@@ -282,7 +282,7 @@ def test_sync_observations__passes_resume_id(controller, mock_app):
     )
 
 
-# Tests for thumbnail preloading feature
+# Tests for thumbnail precacheing feature
 # ----------------------------------------
 
 
@@ -320,12 +320,12 @@ def test_get_obs_image_urls__no_photos(controller):
     assert controller._get_obs_image_urls(obs) == []
 
 
-def test_preload_thumbnails__calls_precache_with_urls(controller, mock_app):
-    """_preload_thumbnails (DB path) collects URLs and calls precache_image once per page."""
+def test_precache_thumbnails__calls_precache_with_urls(controller, mock_app):
+    """_precache_thumbnails (DB path) collects URLs and calls precache_image once per page."""
     obs = _make_obs(id=1)
     mock_app.client.observations.search_user_db_paginated.return_value = [[obs]]
 
-    list(controller._preload_thumbnails())
+    list(controller._precache_thumbnails())
 
     mock_app.img_fetcher.precache_image.assert_called_once()
     urls = mock_app.img_fetcher.precache_image.call_args[0][0]
@@ -333,24 +333,24 @@ def test_preload_thumbnails__calls_precache_with_urls(controller, mock_app):
     assert all(isinstance(u, str) for u in urls)
 
 
-def test_preload_thumbnails__pagination(controller, mock_app):
-    """_preload_thumbnails (DB path) yields one page at a time until exhausted."""
+def test_precache_thumbnails__pagination(controller, mock_app):
+    """_precache_thumbnails (DB path) yields one page at a time until exhausted."""
     obs_page1 = [_make_obs(id=i) for i in range(1, 4)]
     obs_page2 = [_make_obs(id=i) for i in range(4, 7)]
     mock_app.client.observations.search_user_db_paginated.return_value = [obs_page1, obs_page2]
 
-    pages = list(controller._preload_thumbnails())
+    pages = list(controller._precache_thumbnails())
 
     assert sum(len(p) for p in pages) == 6  # Total observations across both pages
     assert mock_app.img_fetcher.precache_image.call_count == 2  # Once per page
 
 
-def test_start_preload_thumbnails__schedules_worker(controller, mock_app):
-    """_start_preload_thumbnails schedules a low-priority worker when there are URLs."""
+def test_start_precache_thumbnails__schedules_worker(controller, mock_app):
+    """_start_precache_thumbnails schedules a low-priority worker when there are URLs."""
     observations = [_make_obs(id=i) for i in range(3)]
     mock_app.threadpool.schedule.reset_mock()
 
-    controller._start_preload_thumbnails(observations)
+    controller._start_precache_thumbnails(observations)
 
     mock_app.threadpool.schedule.assert_called_once_with(
         mock_app.threadpool.schedule.call_args[0][0],
@@ -358,19 +358,19 @@ def test_start_preload_thumbnails__schedules_worker(controller, mock_app):
     )
 
 
-def test_start_preload_thumbnails__skips_when_no_urls(controller, mock_app):
-    """_start_preload_thumbnails skips scheduling when observations have no photos."""
+def test_start_precache_thumbnails__skips_when_no_urls(controller, mock_app):
+    """_start_precache_thumbnails skips scheduling when observations have no photos."""
     mock_app.threadpool.schedule.reset_mock()
 
-    controller._start_preload_thumbnails([_make_obs(photos=[], id=1)])
+    controller._start_precache_thumbnails([_make_obs(photos=[], id=1)])
 
     mock_app.threadpool.schedule.assert_not_called()
 
 
 @pytest.mark.parametrize('enabled, should_schedule', [(True, True), (False, False)])
-def test_on_sync_page_received__preload_setting(controller, mock_app, enabled, should_schedule):
-    """on_sync_page_received schedules per-page preload only when setting is enabled."""
-    mock_app.settings.preload_obs_thumbnails = enabled
+def test_on_sync_page_received__precache_setting(controller, mock_app, enabled, should_schedule):
+    """on_sync_page_received schedules per-page precache only when setting is enabled."""
+    mock_app.settings.precache_thumbnails = enabled
     mock_app.threadpool.schedule.reset_mock()
     observations = [_make_obs(id=i) for i in range(3)]
 
@@ -382,13 +382,13 @@ def test_on_sync_page_received__preload_setting(controller, mock_app, enabled, s
         mock_app.threadpool.schedule.assert_not_called()
 
 
-def test_preload_thumbnails__in_progress(controller, mock_app):
-    """_start_preload_thumbnails skips if preload is already in progress."""
-    controller._preload_in_progress = True
+def test_precache_thumbnails__in_progress(controller, mock_app):
+    """_start_precache_thumbnails skips if precache is already in progress."""
+    controller._precache_in_progress = True
     mock_app.threadpool.schedule_paginator.reset_mock()
 
-    controller._start_preload_all_thumbnails()
+    controller._start_precache_all_thumbnails()
     mock_app.threadpool.schedule_paginator.assert_not_called()
 
-    controller._on_preload_finished()
-    assert controller._preload_in_progress is False
+    controller._on_precache_finished()
+    assert controller._precache_in_progress is False

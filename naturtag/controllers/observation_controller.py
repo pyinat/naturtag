@@ -50,7 +50,7 @@ class ObservationController(BaseController):
         self.loaded_obs = 0  # running count of observations received from API during sync
         self._page_cache: OrderedDict[int, list[Observation]] = OrderedDict()
         self._sync_in_progress: bool = False
-        self._preload_in_progress: bool = False
+        self._precache_in_progress: bool = False
 
         # User observations
         self.user_observations = ObservationList()
@@ -163,8 +163,8 @@ class ObservationController(BaseController):
         self.load_observations_from_db()
         self.start_background_sync()
 
-    def _start_preload_thumbnails(self, observations: list[Observation]):
-        """Schedule thumbnail preloading for a single sync page as a low-priority worker."""
+    def _start_precache_thumbnails(self, observations: list[Observation]):
+        """Schedule thumbnail pre-caching for a single sync page as a low-priority worker."""
         urls = [url for obs in observations for url in self._get_obs_image_urls(obs)]
         if urls:
             self.app.threadpool.schedule(
@@ -172,24 +172,23 @@ class ObservationController(BaseController):
                 priority=QThread.LowPriority,
             )
 
-    def _start_preload_all_thumbnails(self):
-        """Start background preloading of all observation thumbnails.
+    def _start_precache_all_thumbnails(self):
+        """Start background pre-caching of all observation thumbnails.
         Used to backfill previously downloaded observations, after selecting the option for the
         first time.
         """
-        if self._preload_in_progress:
-            logger.debug('Thumbnail preload already in progress; skipping')
+        if self._precache_in_progress:
+            logger.debug('Thumbnail pre-cache already in progress; skipping')
             return
-        self._preload_in_progress = True
+        self._precache_in_progress = True
         total = self.total_results or self.app.client.observations.count_db()
-        logger.info(f'Starting thumbnail preload for {total} observations')
+        logger.info(f'Starting thumbnail pre-cache for {total} observations')
         future = self.app.threadpool.schedule_paginator(
-            self._preload_thumbnails,
+            self._precache_thumbnails,
             priority=QThread.LowPriority,
             total_results=total or None,
         )
-        future.on_result.connect(self._on_preload_page_complete)
-        future.on_finished.connect(self._on_preload_finished)
+        future.on_finished.connect(self._on_precache_finished)
 
     # UI helper functions (slots triggered in main thread after workers complete)
     # ----------------------------------------
@@ -246,8 +245,8 @@ class ObservationController(BaseController):
         self.loaded_obs += len(observations)
         self.update_pagination_buttons()
         self.on_sync_progress.emit(min(self.loaded_obs, self.total_results), self.total_results)
-        if observations and self.app.settings.preload_obs_thumbnails:
-            self._start_preload_thumbnails(observations)
+        if observations and self.app.settings.precache_thumbnails:
+            self._start_precache_thumbnails(observations)
 
         # On cold start, display page 1 once the first sync page arrives.
         # Delay _update_db_counts() until after sync, since DB count is not yet accurate.
@@ -267,16 +266,11 @@ class ObservationController(BaseController):
         self.load_observations_from_db()
         self.on_sync_finished.emit()
 
-    @Slot(object)
-    def _on_preload_page_complete(self, observations: list[Observation]):
-        """Handle completion of each preload page"""
-        logger.debug(f'Preloaded thumbnails for {len(observations)} observations on this page')
-
     @Slot()
-    def _on_preload_finished(self):
-        """Handle completion of thumbnail preloading"""
-        self._preload_in_progress = False
-        logger.info('Thumbnail preload finished')
+    def _on_precache_finished(self):
+        """Handle completion of thumbnail pre-caching"""
+        self._precache_in_progress = False
+        logger.info('Thumbnail pre-cache complete')
 
     def bind_selection(self, obs_cards: Iterable[ObservationInfoCard]):
         """Connect click signal from each observation card"""
@@ -336,11 +330,11 @@ class ObservationController(BaseController):
                 urls.append(photo.url_size('square'))
         return urls
 
-    def _preload_thumbnails(self):
+    def _precache_thumbnails(self):
         """Fetch and cache thumbnails for all observations in the DB. Yields after each page.
 
         Yields the count of observations processed on each page. This allows the PaginatedWorker
-        to check for cancellation between pages, providing graceful shutdown during preload.
+        to check for cancellation between pages, providing graceful shutdown during pre-cache.
         """
         username = self.app.settings.username
         for obs_page in self.app.client.observations.search_user_db_paginated(username=username):

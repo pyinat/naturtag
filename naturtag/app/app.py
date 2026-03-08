@@ -338,9 +338,7 @@ class MainWindow(QMainWindow):
         self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)
         self.settings_menu.dark_mode.on_click.connect(set_theme)
         self.settings_menu.show_logs.on_click.connect(self.toggle_log_tab)
-        self.settings_menu.preload_obs_thumbnails.on_click.connect(
-            self._on_preload_thumbnails_toggle
-        )
+        self.settings_menu.precache_thumbnails.on_click.connect(self._on_precache_thumbnails_toggle)
 
     def show_settings(self):
         """Re-read settings from disk, rebuild the settings menu, and show it."""
@@ -348,10 +346,10 @@ class MainWindow(QMainWindow):
         self._init_settings_menu()
         self.settings_menu.show()
 
-    def _on_preload_thumbnails_toggle(self, checked: bool):
-        """Trigger thumbnail preload when user enables the setting."""
+    def _on_precache_thumbnails_toggle(self, checked: bool):
+        """Trigger thumbnail pre-cache when user enables the setting."""
         if checked:
-            self.observation_controller._start_preload_all_thumbnails()
+            self.observation_controller._start_precache_all_thumbnails()
 
     def switch_tab_observations(self):
         self.tabs.setCurrentWidget(self.observation_controller)
