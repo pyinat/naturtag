@@ -39,9 +39,9 @@ dependencies = [
 ]
 
 [project.scripts]
-nt = 'naturtag.cli:main'
-naturtag = 'naturtag.cli:main'
+naturtag = 'naturtag.main:main'
 naturtag-ui = 'naturtag.app.app:main'
+nt = 'naturtag.cli:main'
 
 [project.urls]
 Homepage = 'https://github.com/pyinat/naturtag'

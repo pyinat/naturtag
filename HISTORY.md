@@ -1,5 +1,9 @@
 # History
 
+## Unreleased
+
+* Bundle `nt` CLI with all packages
+
 ## 0.9.1 (2026-03-07)
 
 * Fix shared library paths in macOS pyinstaller package + DMG

@@ -2,13 +2,15 @@
 
 from io import IOBase
 from logging import getLogger
+from typing import TYPE_CHECKING, Optional
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
-from PIL.ImageQt import ImageQt
-from PySide6.QtGui import QImage
 
 from naturtag.constants import EXIF_ORIENTATION_ID, SIZE_DEFAULT, Dimensions, PathOrStr
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QImage  # noqa: F401
 
 logger = getLogger().getChild(__name__)
 
@@ -17,7 +19,7 @@ def generate_thumbnail(
     path: PathOrStr,
     target_size: Dimensions = SIZE_DEFAULT,
     default_flip: bool = True,
-) -> QImage | None:
+) -> Optional['QImage']:
     """Generate a thumbnail from the source image (thread-safe)
 
     Args:
@@ -37,6 +39,8 @@ def generate_thumbnail(
             image.thumbnail(target_size)
         else:
             logger.debug(f'Thumbnails: Image is already thumbnail size: ({image.size})')
+
+        from PIL.ImageQt import ImageQt
 
         # Note: copy() is important; otherwise the QImage can become dangling if the PIL Image is GC'd
         return ImageQt(image).copy()
