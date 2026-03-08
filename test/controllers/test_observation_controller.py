@@ -172,6 +172,51 @@ def test_on_sync_page_received__cold_start_trigger(controller, mock_app):
     assert len(mock_app._futures) >= 1
 
 
+def test_on_sync_error_received(controller, mock_app):
+    """on_sync_error_received resets state and shows the error in the status bar."""
+    controller._sync_in_progress = True
+
+    with patch.object(controller, 'info') as mock_info:
+        controller.on_sync_error_received(RuntimeError('connection refused'))
+
+    assert controller._sync_in_progress is False
+    mock_info.assert_called_once()
+    assert 'connection refused' in mock_info.call_args[0][0]
+
+
+def test_on_sync_error_received__cold_start_clears_title(controller, mock_app):
+    """on_sync_error_received resets title when no observations were loaded yet."""
+    controller._is_cold_start = True
+    controller.user_obs_group_box.set_title('My Observations (loading...)')
+
+    controller.on_sync_error_received(RuntimeError('timeout'))
+
+    assert 'loading...' not in controller.user_obs_group_box.box.title()
+    assert 'My Observations' in controller.user_obs_group_box.box.title()
+
+
+def test_on_sync_error_received__warm_start_keeps_title(controller, mock_app):
+    """on_sync_error_received does not overwrite title when observations were already loaded."""
+    controller._is_cold_start = False
+    controller.user_obs_group_box.set_title('My Observations (42)')
+
+    controller.on_sync_error_received(RuntimeError('timeout'))
+
+    assert '42' in controller.user_obs_group_box.box.title()
+
+
+def test_on_sync_error_received__cleans_up_progress_bar(controller, mock_app):
+    """on_sync_error_received removes unaccounted progress bar units."""
+    controller._sync_in_progress = True
+    controller.total_results = 100
+    controller.loaded_obs = 10  # 10 obs + 1 reserved slot = 11 advanced; 89 unaccounted
+    mock_app.threadpool.progress = MagicMock()
+
+    controller.on_sync_error_received(RuntimeError('timeout'))
+
+    mock_app.threadpool.progress.remove.assert_called_once_with(89)
+
+
 def test_on_sync_complete(controller, mock_app):
     mock_app._futures.clear()
     controller._sync_in_progress = True
@@ -181,6 +226,39 @@ def test_on_sync_complete(controller, mock_app):
     assert mock_app.state.sync_resume_id is None
     mock_app.state.set_obs_checkpoint.assert_called_once()
     assert len(mock_app._futures) >= 1  # load_observations_from_db was called
+
+
+def test_on_sync_complete__error_path_runs_common_finalization_only(controller, mock_app):
+    """on_sync_complete_common handles shared finalization without success-only side effects."""
+    controller._sync_in_progress = True
+    controller._page_cache[1] = [_make_obs(id=1)]
+    mock_app.state.sync_resume_id = 99
+    mock_app._futures.clear()
+
+    controller.on_sync_complete_common()
+
+    assert controller._sync_in_progress is False
+    assert mock_app.state.sync_resume_id == 99
+    assert len(controller._page_cache) == 0
+    mock_app.state.set_obs_checkpoint.assert_not_called()
+    assert len(mock_app._futures) == 0
+
+
+def test_sync_error_then_finished__does_not_finalize_success_state(controller, mock_app):
+    """Error path should run common finalization only; success finalization must not run."""
+    mock_app._futures.clear()
+    finished = MagicMock()
+    controller.on_sync_finished.connect(finished)
+    controller.start_background_sync()
+    signals = mock_app._futures[-1]
+    mock_app.state.sync_resume_id = 42
+
+    signals.on_error.emit(RuntimeError('timeout'))
+    signals.on_finished.emit()
+
+    assert mock_app.state.sync_resume_id == 42
+    mock_app.state.set_obs_checkpoint.assert_not_called()
+    finished.assert_not_called()
 
 
 def test_refresh(controller, mock_app):

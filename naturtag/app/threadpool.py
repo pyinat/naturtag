@@ -178,12 +178,14 @@ class PaginatedWorker(BaseWorker):
             logger.warning('Worker error:', exc_info=True)
             if isValid(self.signals):
                 self.signals.on_error.emit(e)
-        # Always consume the reserved progress slot. If pages were yielded, their
-        # advances already exceeded the reservation, so this extra '1' just caps at max.
+        else:
+            if isValid(self.signals):
+                self.signals.on_complete.emit()
+        # Always consume the reserved progress slot. If pages were yielded, their advances may
+        # already have exceeded the reservation, so this extra '1' just caps at max.
         finally:
             if isValid(self.signals):
                 self.signals.on_progress.emit(1)
-                self.signals.on_complete.emit()
                 self.signals.on_finished.emit()
 
 
@@ -194,7 +196,7 @@ class WorkerSignals(QObject):
     on_result_total = Signal(int)  #: Return total results
     on_result = Signal(object)  #: Return result on completion
     on_progress = Signal(int)  #: Increment progress bar
-    on_complete = Signal()  #: Emitted when the worker has finished all work
+    on_complete = Signal()  #: Emitted when the worker has finished successfully
     on_finished = Signal()  #: Always the last signal emitted; used for lifecycle cleanup
 
 

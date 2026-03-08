@@ -105,7 +105,7 @@ def test_paginated_worker_run__on_progress_per_page():
     assert calls == [2, 1, 1]
 
 
-def test_paginated_worker_run__on_complete_always_emitted():
+def test_paginated_worker_run__on_complete_not_emitted_on_error():
     def bad_callback():
         raise RuntimeError('fail')
 
@@ -115,7 +115,7 @@ def test_paginated_worker_run__on_complete_always_emitted():
 
     worker.run()
 
-    on_complete.assert_called_once()
+    on_complete.assert_not_called()
 
 
 def test_paginated_worker_run__exception():
@@ -301,9 +301,15 @@ def test_schedule_paginator(thread_pool):
 
 
 def test_schedule_paginator__results_emitted(thread_pool, qtbot):
-    signals = thread_pool.schedule_paginator(_pages)
+    gate = threading.Event()
+
+    def callback():
+        gate.wait(timeout=5)
+        yield from _pages()
+
+    signals = thread_pool.schedule_paginator(callback)
     with qtbot.waitSignal(signals.on_complete, timeout=3000):
-        pass
+        gate.set()
     # If on_complete fired, pages were emitted successfully
 
 
