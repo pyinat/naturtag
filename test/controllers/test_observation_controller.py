@@ -228,6 +228,39 @@ def test_on_sync_complete(controller, mock_app):
     assert len(mock_app._futures) >= 1  # load_observations_from_db was called
 
 
+def test_on_sync_complete__error_path_runs_common_finalization_only(controller, mock_app):
+    """on_sync_complete_common handles shared finalization without success-only side effects."""
+    controller._sync_in_progress = True
+    controller._page_cache[1] = [_make_obs(id=1)]
+    mock_app.state.sync_resume_id = 99
+    mock_app._futures.clear()
+
+    controller.on_sync_complete_common()
+
+    assert controller._sync_in_progress is False
+    assert mock_app.state.sync_resume_id == 99
+    assert len(controller._page_cache) == 0
+    mock_app.state.set_obs_checkpoint.assert_not_called()
+    assert len(mock_app._futures) == 0
+
+
+def test_sync_error_then_finished__does_not_finalize_success_state(controller, mock_app):
+    """Error path should run common finalization only; success finalization must not run."""
+    mock_app._futures.clear()
+    finished = MagicMock()
+    controller.on_sync_finished.connect(finished)
+    controller.start_background_sync()
+    signals = mock_app._futures[-1]
+    mock_app.state.sync_resume_id = 42
+
+    signals.on_error.emit(RuntimeError('timeout'))
+    signals.on_finished.emit()
+
+    assert mock_app.state.sync_resume_id == 42
+    mock_app.state.set_obs_checkpoint.assert_not_called()
+    finished.assert_not_called()
+
+
 def test_refresh(controller, mock_app):
     controller._page_cache[1] = [_make_obs(id=1)]
     controller._page_cache[2] = [_make_obs(id=2)]

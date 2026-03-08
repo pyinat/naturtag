@@ -139,7 +139,8 @@ class ObservationController(BaseController):
             total_results=self.total_results or None,
         )
         future.on_result.connect(self.on_sync_page_received)
-        future.on_complete.connect(self.on_sync_complete)
+        future.on_finished.connect(self.on_sync_complete_common)
+        future.on_complete.connect(self.on_sync_complete_success)
         future.on_error.connect(self.on_sync_error_received)
 
     def next_page(self):
@@ -279,17 +280,27 @@ class ObservationController(BaseController):
             self.app.threadpool.progress.remove(unfinished)
 
     @Slot()
-    def on_sync_complete(self):
-        """Called when the background sync finishes"""
+    def on_sync_complete_common(self):
+        """Called when the background sync finishes (always-run finalization)."""
         logger.info('Background observation sync complete')
         self._sync_in_progress = False
         self._page_cache.clear()
+
+    @Slot()
+    def on_sync_complete_success(self):
+        """Called when the background sync finishes without prior sync errors."""
         self.app.state.sync_resume_id = None
         self.app.state.set_obs_checkpoint()
         self._update_db_counts()
         self.update_pagination_buttons()
         self.load_observations_from_db()
         self.on_sync_finished.emit()
+
+    @Slot()
+    def on_sync_complete(self):
+        """Backward-compatible combined completion handler."""
+        self.on_sync_complete_common()
+        self.on_sync_complete_success()
 
     @Slot()
     def _on_precache_finished(self):
