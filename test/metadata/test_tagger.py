@@ -4,15 +4,14 @@ from unittest.mock import patch
 import pytest
 from pyinaturalist import Observation, Taxon
 
-from naturtag.metadata.tagger import (
+from naturtag.metadata.derived import (
     _get_common_keywords,
     _get_hierarchical_keywords,
     _get_id_keywords,
     _get_taxon_hierarchical_keywords,
     _get_taxonomy_keywords,
-    observation_to_metadata,
-    tag_images,
 )
+from naturtag.metadata.tagger import observation_to_metadata, tag_images
 
 KINGDOM = Taxon(id=1, name='Animalia', rank='kingdom', preferred_common_name='Animals')
 FAMILY = Taxon(id=3, name='Rhagionidae', rank='family', preferred_common_name='Snipe Flies')
