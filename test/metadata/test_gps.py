@@ -1,4 +1,6 @@
-from naturtag.metadata.gps_metadata import (
+import pytest
+
+from naturtag.metadata.gps import (
     convert_dwc_coords,
     convert_exif_coords,
     convert_xmp_coords,
@@ -27,34 +29,43 @@ def test_convert_exif_coords():
     assert _approx_equals(convert_exif_coords(metadata), DECIMAL_DEGREES)
 
 
-def test_convert_exif_coords__negative():
-    metadata = {
-        'Exif.GPSInfo.GPSLatitude': '37/1 46/1 98399/10000',
-        'Exif.GPSInfo.GPSLatitudeRef': 'S',
-        'Exif.GPSInfo.GPSLongitude': '122/1 29/1 103199/10000',
-        'Exif.GPSInfo.GPSLongitudeRef': 'E',
-    }
-    assert _approx_equals(convert_exif_coords(metadata), (-37.76939, -122.48619))
-
-
 def _approx_equals(coords_1, coords_2, epsilon=0.00001):
     return abs(coords_1[0] - coords_2[0]) < epsilon and abs(coords_1[1] - coords_2[1]) < epsilon
 
 
-def test_convert_xmp_coords():
-    metadata = {
-        'Xmp.exif.GPSLatitude': '37,46.1639999N',
-        'Xmp.exif.GPSLongitude': '122,29.1719999W',
-    }
-    assert _approx_equals(convert_xmp_coords(metadata), DECIMAL_DEGREES)
-
-
-def test_convert_xmp_coords__negative():
-    metadata = {
-        'Xmp.exif.GPSLatitude': '37,46.1639999S',
-        'Xmp.exif.GPSLongitude': '122,29.1719999E',
-    }
-    assert _approx_equals(convert_xmp_coords(metadata), (-37.76939, -122.48619))
+@pytest.mark.parametrize(
+    'convert_func, metadata, expected',
+    [
+        (
+            convert_exif_coords,
+            {
+                'Exif.GPSInfo.GPSLatitude': '37/1 46/1 98399/10000',
+                'Exif.GPSInfo.GPSLatitudeRef': 'S',
+                'Exif.GPSInfo.GPSLongitude': '122/1 29/1 103199/10000',
+                'Exif.GPSInfo.GPSLongitudeRef': 'E',
+            },
+            (-37.76939, -122.48619),
+        ),
+        (
+            convert_xmp_coords,
+            {
+                'Xmp.exif.GPSLatitude': '37,46.1639999N',
+                'Xmp.exif.GPSLongitude': '122,29.1719999W',
+            },
+            DECIMAL_DEGREES,
+        ),
+        (
+            convert_xmp_coords,
+            {
+                'Xmp.exif.GPSLatitude': '37,46.1639999S',
+                'Xmp.exif.GPSLongitude': '122,29.1719999E',
+            },
+            (-37.76939, -122.48619),
+        ),
+    ],
+)
+def test_convert_coords__directions(convert_func, metadata, expected):
+    assert _approx_equals(convert_func(metadata), expected)
 
 
 def test_convert_coords__invalid():

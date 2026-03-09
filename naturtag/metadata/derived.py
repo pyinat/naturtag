@@ -1,10 +1,13 @@
+from itertools import accumulate
 from logging import getLogger
 from typing import Any, Optional
 
-from pyinaturalist import INAT_BASE_URL, RANKS, Coordinates, Observation
-from pyinaturalist_convert import dwc_record_to_observation
+from pyinaturalist import INAT_BASE_URL, RANKS, Coordinates, Observation, Taxon
+from pyinaturalist_convert import dwc_record_to_observation, to_dwc
 
 from naturtag.constants import (
+    COMMON_NAME_IGNORE_TERMS,
+    COMMON_RANKS,
     DATE_TAGS,
     HIER_KEYWORD_TAGS,
     KEYWORD_TAGS,
@@ -14,7 +17,7 @@ from naturtag.constants import (
     StrTuple,
 )
 from naturtag.metadata import (
-    ImageMetadata,
+    BaseMetadata,
     KeywordMetadata,
     convert_dwc_coords,
     convert_exif_coords,
@@ -22,20 +25,21 @@ from naturtag.metadata import (
     to_exif_coords,
     to_xmp_coords,
 )
+from naturtag.utils import quote
 
 NULL_COORDS = (0, 0)
+DWC_NAMESPACES = ['dcterms', 'dwc']
 logger = getLogger().getChild(__name__)
 
 
-# TODO: Refactor derived properties; many of these don't need to be lazy-loaded
 # TODO: If there's no taxon ID but a `rank=name` tag, look up taxon based on that
-class MetaMetadata(ImageMetadata):
+class DerivedMetadata(BaseMetadata):
     """Parses observation info and other higher-level details derived from raw image metadata
 
     Example:
 
-        >>> from naturtag import MetaMetadata
-        >>> meta = MetaMetadata('/path/to/image.jpg')
+        >>> from naturtag import DerivedMetadata
+        >>> meta = DerivedMetadata('/path/to/image.jpg')
         >>> print(meta.summary)
         >>> print(meta.to_observation())
     """
@@ -44,32 +48,34 @@ class MetaMetadata(ImageMetadata):
         super().__init__(*args, **kwargs)
         # Define lazy-loaded properties
         self._coordinates = None
-        self._inaturalist_ids = None
+        self.inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
         self._summary = None
         self._observation: Observation = None
-        self.keyword_meta = None
+        self._keyword_meta = None
         self._update_derived_properties()
 
     def _update_derived_properties(self):
         """Reset/ update all secondary properties derived from base metadata formats"""
         self._coordinates = None
-        self._inaturalist_ids = None
+        self.inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
         self._summary = None
         self._observation = None
-        self.keyword_meta = KeywordMetadata(self.combined)
-        self.inaturalist_ids  # for side effect  # noqa
+        self._keyword_meta = None
+        self.inaturalist_ids = get_inaturalist_ids(self.simplified)
 
     @property
     def combined(self) -> dict[str, Any]:
         return {**self.exif, **self.iptc, **self.xmp}
 
     @property
-    def filtered_combined(self) -> dict[str, Any]:
-        return {**self.filtered_exif, **self.iptc, **self.xmp}
+    def keyword_meta(self) -> KeywordMetadata:
+        if self._keyword_meta is None:
+            self._keyword_meta = KeywordMetadata(self.combined)
+        return self._keyword_meta
 
     @property
     def coordinates(self) -> Optional[Coordinates]:
@@ -105,13 +111,6 @@ class MetaMetadata(ImageMetadata):
         return bool(self.taxon_id)
 
     @property
-    def inaturalist_ids(self) -> IntTuple:
-        """Get taxon and/or observation IDs from metadata if available"""
-        if self._inaturalist_ids is None:
-            self._inaturalist_ids = get_inaturalist_ids(self.simplified)
-        return self._inaturalist_ids
-
-    @property
     def observation_id(self) -> Optional[int]:
         return self.inaturalist_ids[1]
 
@@ -139,7 +138,8 @@ class MetaMetadata(ImageMetadata):
                 if name := self.simplified.get(rank):
                     self._min_rank = (rank, name)
                     break
-            self._min_rank = ()
+            else:
+                self._min_rank = ()
         return self._min_rank or None
 
     @property
@@ -174,7 +174,7 @@ class MetaMetadata(ImageMetadata):
             self._summary = '\n'.join([f'{k}: {v}' for k, v in summary_info.items()])
         return self._summary
 
-    def merge(self, other: 'MetaMetadata') -> 'MetaMetadata':
+    def merge(self, other: 'DerivedMetadata') -> 'DerivedMetadata':
         """Update metadata from another instance"""
         self.exif.update(other.exif)
         self.xmp.update(other.xmp)
@@ -194,16 +194,59 @@ class MetaMetadata(ImageMetadata):
             self._coordinates = NULL_COORDS
             return
 
-        self._coordinates = coordinates
         self.exif.update(to_exif_coords(coordinates, accuracy))
         self.xmp.update(to_xmp_coords(coordinates, accuracy))
+        self._update_derived_properties()
+        self._coordinates = coordinates
 
     def update_keywords(self, keywords):
         """
         Update only keyword metadata.
         Keywords will be written to appropriate tags for each metadata format.
         """
-        self.update(KeywordMetadata(keywords=keywords).tags)
+        keyword_meta = KeywordMetadata(keywords=keywords)
+        self.update(keyword_meta.tags)
+        self._keyword_meta = keyword_meta
+
+    def from_observation(
+        self,
+        observation: Observation,
+        common_names: bool = False,
+        hierarchical: bool = False,
+    ) -> 'DerivedMetadata':
+        """Update metadata from an iNaturalist Observation"""
+        # Get all specified keyword categories
+        keywords = _get_taxonomy_keywords(observation.taxon)
+        if hierarchical:
+            keywords.extend(_get_taxon_hierarchical_keywords(observation.taxon))
+        if common_names:
+            common_keywords = _get_common_keywords(observation.taxon)
+            keywords.extend(common_keywords)
+            if hierarchical:
+                keywords.extend(_get_hierarchical_keywords(common_keywords))
+        keywords.extend(_get_id_keywords(observation.id, observation.taxon.id))
+
+        logger.debug(f'{len(keywords)} total keywords generated')
+        self.update_keywords(keywords)
+
+        # Convert and add coordinates
+        # TODO: Add other metadata like title, description, tags, etc.
+        self.update_coordinates(observation.location, observation.positional_accuracy)
+
+        def _format_key(k):
+            """Get DwC terms as XMP tags.
+            Note: exiv2 will automatically add recognized XML namespace URLs when adding properties
+            """
+            namespace, term = k.split(':')
+            return f'Xmp.{namespace}.{term}' if namespace in DWC_NAMESPACES else None
+
+        # Convert and add DwC metadata
+        tag_observations = [observation] if observation.id else None
+        dwc = to_dwc(observations=tag_observations, taxa=[observation.taxon])[0]
+        dwc_xmp = {fk: v for k, v in dwc.items() if (fk := _format_key(k))}
+        self.update(dwc_xmp)
+
+        return self
 
     def to_observation(self) -> Observation:
         """Convert DwC metadata to an observation object, if possible"""
@@ -238,6 +281,49 @@ def simplify_keys(mapping: dict[str, str]) -> dict[str, str]:
         dict with simplified/deduplicated keys
     """
     return {k.lower().replace('_', '').split(':')[-1]: v for k, v in mapping.items()}
+
+
+def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
+    """Format a list of taxa into rank keywords"""
+    return [quote(f'taxonomy:{t.rank}={t.name}') for t in taxon.ancestors + [taxon]]
+
+
+def _get_id_keywords(
+    observation_id: Optional[int] = None, taxon_id: Optional[int] = None
+) -> list[str]:
+    keywords = []
+    if taxon_id:
+        keywords.append(f'inat:taxon_id={taxon_id}')
+        keywords.append(f'dwc:taxonID={taxon_id}')
+    if observation_id:
+        keywords.append(f'inat:observation_id={observation_id}')
+        keywords.append(f'dwc:catalogNumber={observation_id}')
+    return keywords
+
+
+def _get_common_keywords(taxon: Taxon) -> list[str]:
+    """Format a list of taxa into common name keywords.
+    Filters out terms that aren't useful to keep as tags.
+    """
+    keywords = [
+        t.preferred_common_name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS
+    ]
+
+    def is_ignored(kw):
+        return any(ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS)
+
+    return [quote(kw) for kw in keywords if kw and not is_ignored(kw)]
+
+
+def _get_taxon_hierarchical_keywords(taxon: Taxon) -> list[str]:
+    """Get hierarchical keywords for a taxon"""
+    keywords = [t.name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS]
+    return _get_hierarchical_keywords(keywords)
+
+
+def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
+    """Translate a sorted list of flat keywords into pipe-delimited hierarchical keywords"""
+    return list(accumulate(keywords, lambda a, b: f'{a}|{b}'))
 
 
 def _first_match(d: dict, tags: list[str]) -> Optional[str]:

@@ -1,23 +1,20 @@
-"""Tools to translate iNaturalist observations and taxa into image metadata"""
+"""Tools to translate + write iNaturalist observation and taxonomy data into image metadata"""
 
 # TODO: Get separate keywords for species, binomial, and trinomial
 # TODO: Get common names for specified locale (requires using different endpoints)
 # TODO: Handle observation with no taxon ID?
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
 from collections.abc import Iterator
-from itertools import accumulate
 from logging import getLogger
 from typing import Iterable, Optional
 
-from pyinaturalist import Observation, Taxon
-from pyinaturalist_convert import to_dwc
+from pyinaturalist import Observation
 
-from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, PathOrStr
-from naturtag.metadata import MetaMetadata
+from naturtag.constants import PathOrStr
+from naturtag.metadata import DerivedMetadata
 from naturtag.storage import Settings, iNatDbClient
-from naturtag.utils import get_valid_image_paths, quote
+from naturtag.utils import get_valid_image_paths
 
-DWC_NAMESPACES = ['dcterms', 'dwc']
 logger = getLogger().getChild(__name__)
 
 
@@ -29,7 +26,7 @@ def tag_images(
     include_sidecars: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> list[MetaMetadata]:
+) -> list[DerivedMetadata]:
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
     metadata.
@@ -72,7 +69,7 @@ def _tag_images_iter(
     include_sidecars: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> Iterator[MetaMetadata]:
+) -> Iterator[DerivedMetadata]:
     """Same as :py:func:`tag_images`, but returns an iterator"""
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
@@ -81,7 +78,7 @@ def _tag_images_iter(
     if not observation:
         return
 
-    inat_metadata = observation_to_metadata(
+    inat_metadata = DerivedMetadata().from_observation(
         observation,
         common_names=settings.common_names,
         hierarchical=settings.hierarchical,
@@ -93,7 +90,7 @@ def _tag_images_iter(
     def _tag_image(
         image_path,
     ):
-        img_metadata = MetaMetadata(image_path).merge(inat_metadata)
+        img_metadata = DerivedMetadata(image_path).merge(inat_metadata)
         img_metadata.write(
             write_exif=settings.exif,
             write_iptc=settings.iptc,
@@ -107,6 +104,7 @@ def _tag_images_iter(
         recursive=recursive,
         include_sidecars=include_sidecars,
         create_sidecars=settings.sidecar,
+        include_raw=True,
     ):
         yield _tag_image(image_path)
 
@@ -116,7 +114,7 @@ def refresh_tags(
     recursive: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> list[MetaMetadata]:
+) -> list[DerivedMetadata]:
     """Refresh metadata for previously tagged images with latest observation and/or taxon data.
 
     Example:
@@ -141,19 +139,19 @@ def _refresh_tags_iter(
     recursive: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> Iterator[MetaMetadata | None]:
+) -> Iterator[DerivedMetadata | None]:
     """Same as :py:func:`refresh_tags`, but returns an iterator"""
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
     for image_path in get_valid_image_paths(
-        image_paths, recursive, create_sidecars=settings.sidecar
+        image_paths, recursive, create_sidecars=settings.sidecar, include_raw=True
     ):
-        yield _refresh_tags(MetaMetadata(image_path), client, settings)
+        yield _refresh_tags(DerivedMetadata(image_path), client, settings)
 
 
 def _refresh_tags(
-    metadata: MetaMetadata, client: iNatDbClient, settings: Settings
-) -> Optional[MetaMetadata]:
+    metadata: DerivedMetadata, client: iNatDbClient, settings: Settings
+) -> Optional[DerivedMetadata]:
     """Refresh existing metadata for a single image
 
     Returns:
@@ -166,11 +164,10 @@ def _refresh_tags(
     logger.debug(f'Refreshing tags for {metadata.image_path}')
     settings = settings or Settings.read()
     observation = client.from_id(metadata.observation_id, metadata.taxon_id)
-    metadata = observation_to_metadata(
+    metadata.from_observation(
         observation,
         common_names=settings.common_names,
         hierarchical=settings.hierarchical,
-        metadata=metadata,
     )
 
     metadata.write(
@@ -184,86 +181,12 @@ def _refresh_tags(
 
 def observation_to_metadata(
     observation: Observation,
-    metadata: Optional[MetaMetadata] = None,
+    metadata: Optional[DerivedMetadata] = None,
     common_names: bool = False,
     hierarchical: bool = False,
-) -> MetaMetadata:
+) -> DerivedMetadata:
     """Get image metadata from an Observation object"""
-    metadata = metadata or MetaMetadata()
-
-    # Get all specified keyword categories
-    keywords = _get_taxonomy_keywords(observation.taxon)
-    if hierarchical:
-        keywords.extend(_get_taxon_hierarchical_keywords(observation.taxon))
-    if common_names:
-        common_keywords = _get_common_keywords(observation.taxon)
-        keywords.extend(common_keywords)
-        if hierarchical:
-            keywords.extend(_get_hierarchical_keywords(common_keywords))
-    keywords.extend(_get_id_keywords(observation.id, observation.taxon.id))
-
-    logger.debug(f'{len(keywords)} total keywords generated')
-    metadata.update_keywords(keywords)
-
-    # Convert and add coordinates
-    # TODO: Add other metadata like title, description, tags, etc.
-    if observation:
-        metadata.update_coordinates(observation.location, observation.positional_accuracy)
-
-    def _format_key(k):
-        """Get DwC terms as XMP tags.
-        Note: exiv2 will automatically add recognized XML namespace URLs when adding properties
-        """
-        namespace, term = k.split(':')
-        return f'Xmp.{namespace}.{term}' if namespace in DWC_NAMESPACES else None
-
-    # Convert and add DwC metadata
-    tag_observations = [observation] if observation.id else None
-    dwc = to_dwc(observations=tag_observations, taxa=[observation.taxon])[0]
-    dwc_xmp = {fk: v for k, v in dwc.items() if (fk := _format_key(k))}
-    metadata.update(dwc_xmp)
-
-    return metadata
-
-
-def _get_taxonomy_keywords(taxon: Taxon) -> list[str]:
-    """Format a list of taxa into rank keywords"""
-    return [quote(f'taxonomy:{t.rank}={t.name}') for t in taxon.ancestors + [taxon]]
-
-
-def _get_id_keywords(
-    observation_id: Optional[int] = None, taxon_id: Optional[int] = None
-) -> list[str]:
-    keywords = []
-    if taxon_id:
-        keywords.append(f'inat:taxon_id={taxon_id}')
-        keywords.append(f'dwc:taxonID={taxon_id}')
-    if observation_id:
-        keywords.append(f'inat:observation_id={observation_id}')
-        keywords.append(f'dwc:catalogNumber={observation_id}')
-    return keywords
-
-
-def _get_common_keywords(taxon: Taxon) -> list[str]:
-    """Format a list of taxa into common name keywords.
-    Filters out terms that aren't useful to keep as tags.
-    """
-    keywords = [
-        t.preferred_common_name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS
-    ]
-
-    def is_ignored(kw):
-        return any(ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS)
-
-    return [quote(kw) for kw in keywords if kw and not is_ignored(kw)]
-
-
-def _get_taxon_hierarchical_keywords(taxon: Taxon) -> list[str]:
-    """Get hierarchical keywords for a taxon"""
-    keywords = [t.name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS]
-    return _get_hierarchical_keywords(keywords)
-
-
-def _get_hierarchical_keywords(keywords: list[str]) -> list[str]:
-    """Translate a sorted list of flat keywords into pipe-delimited hierarchical keywords"""
-    return list(accumulate(keywords, lambda a, b: f'{a}|{b}'))
+    metadata = metadata or DerivedMetadata()
+    return metadata.from_observation(
+        observation, common_names=common_names, hierarchical=hierarchical
+    )

@@ -1,5 +1,9 @@
 # History
 
+## Unreleased
+
+* Add provisional support for loading and tagging raw image formats (no preview thumbnails)
+
 ## 0.9.1 (2026-03-07)
 
 * Fix shared library paths in macOS pyinstaller package + DMG

@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, QThread, Signal, Slot
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QSizePolicy
 
 from naturtag.controllers import BaseController, ImageGallery, get_app
-from naturtag.metadata import MetaMetadata, _refresh_tags, tag_images
+from naturtag.metadata import DerivedMetadata, _refresh_tags, tag_images
 from naturtag.utils import get_ids_from_url
 from naturtag.widgets import (
     HorizontalLayout,
@@ -25,7 +25,7 @@ logger = getLogger(__name__)
 class ImageController(BaseController):
     """Controller for selecting and tagging local image files"""
 
-    on_new_metadata = Signal(MetaMetadata)  #: Metadata for an image was updated
+    on_new_metadata = Signal(DerivedMetadata)  #: Metadata for an image was updated
     on_selection_changed = Signal(
         object
     )  #: frozenset of pending icon keys when selected, or empty frozenset when cleared
@@ -112,8 +112,8 @@ class ImageController(BaseController):
             future.on_result.connect(self.update_metadata)
         self.info(f'{len(image_paths)} images tagged with metadata for {selected_id}')
 
-    @Slot(MetaMetadata)
-    def update_metadata(self, metadata: Optional[MetaMetadata]):
+    @Slot(DerivedMetadata)
+    def update_metadata(self, metadata: Optional[DerivedMetadata]):
         if metadata and metadata.image_path:
             image = self.gallery.images[metadata.image_path]
             image.update_metadata(metadata)

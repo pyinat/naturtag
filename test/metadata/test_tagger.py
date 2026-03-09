@@ -4,15 +4,14 @@ from unittest.mock import patch
 import pytest
 from pyinaturalist import Observation, Taxon
 
-from naturtag.metadata.inat_metadata import (
+from naturtag.metadata.derived import (
     _get_common_keywords,
     _get_hierarchical_keywords,
     _get_id_keywords,
     _get_taxon_hierarchical_keywords,
     _get_taxonomy_keywords,
-    observation_to_metadata,
-    tag_images,
 )
+from naturtag.metadata.tagger import observation_to_metadata, tag_images
 
 KINGDOM = Taxon(id=1, name='Animalia', rank='kingdom', preferred_common_name='Animals')
 FAMILY = Taxon(id=3, name='Rhagionidae', rank='family', preferred_common_name='Snipe Flies')
@@ -168,16 +167,14 @@ def test_observation_to_metadata__taxon_only():
 
 
 def test_get_taxon_hierarchical_keywords__subspecies():
-    """Subspecies should appear as the leaf node in hierarchical keywords"""
     keywords = _get_taxon_hierarchical_keywords(SUBSPECIES)
     assert any('Canis familiaris dingo' in k for k in keywords)
     assert keywords[-1] == 'Animalia|Canidae|Canis|Canis familiaris|Canis familiaris dingo'
 
 
 def test_tag_images__returns_list():
-    """tag_images() materialises the iterator from _tag_images_iter into a list."""
     sentinel = object()
-    with patch('naturtag.metadata.inat_metadata._tag_images_iter', return_value=iter([sentinel])):
+    with patch('naturtag.metadata.tagger._tag_images_iter', return_value=iter([sentinel])):
         result = tag_images([], taxon_id=1)
 
     assert isinstance(result, list)
