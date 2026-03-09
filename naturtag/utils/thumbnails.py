@@ -17,7 +17,7 @@ def generate_thumbnail(
     path: PathOrStr,
     target_size: Dimensions = SIZE_DEFAULT,
     default_flip: bool = True,
-) -> QImage | None:
+) -> QImage:
     """Generate a thumbnail from the source image (thread-safe)
 
     Args:
@@ -26,25 +26,22 @@ def generate_thumbnail(
 
     Returns:
         Thumbnail data as a QImage
+
+    Raises:
+        Exception: If the thumbnail cannot be generated
     """
     logger.debug(f'Thumbnails: Generating {target_size} thumbnail for {path}')
 
     # Resize if necessary, or just copy the image to the cache if it's already thumbnail size
-    try:
-        image = _get_orientated_image(path, default_flip=default_flip)
-        image = _crop_square(image)
-        if image.size[0] > target_size[0] or image.size[1] > target_size[1]:
-            image.thumbnail(target_size)
-        else:
-            logger.debug(f'Thumbnails: Image is already thumbnail size: ({image.size})')
+    image = _get_orientated_image(path, default_flip=default_flip)
+    image = _crop_square(image)
+    if image.size[0] > target_size[0] or image.size[1] > target_size[1]:
+        image.thumbnail(target_size)
+    else:
+        logger.debug(f'Thumbnails: Image is already thumbnail size: ({image.size})')
 
-        # Note: copy() is important; otherwise the QImage can become dangling if the PIL Image is GC'd
-        return ImageQt(image).copy()
-
-    # Unable to generate a thumbnail; use a placeholder instead
-    except Exception:
-        logger.warning(f'Thumbnails: Failed to generate thumbnail for {path}')
-        return None
+    # Note: copy() is important; otherwise the QImage can become dangling if the PIL Image is GC'd
+    return ImageQt(image).copy()
 
 
 def _get_orientated_image(source, default_flip: bool = True) -> Image:
