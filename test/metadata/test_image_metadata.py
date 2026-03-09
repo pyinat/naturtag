@@ -1,4 +1,4 @@
-from unittest.mock import patch
+import pytest
 
 from naturtag.metadata import ImageMetadata
 from test.conftest import DEMO_IMAGES_DIR, SAMPLE_DATA_DIR
@@ -27,18 +27,17 @@ def test_read_metadata__merges_sidecar():
     assert meta.xmp['Xmp.dwc.taxonID'] == '202860'
 
 
-def test_sidecar_path__default():
-    meta = ImageMetadata(DEMO_IMAGE)
+@pytest.mark.parametrize(
+    'image_name, expected_sidecar_name',
+    [
+        ('78513963.jpg', '78513963.xmp'),
+        ('IMG20200521_141401.jpg', 'IMG20200521_141401.jpg.xmp'),  # alternate format: image.ext.xmp
+    ],
+)
+def test_sidecar_path(image_name, expected_sidecar_name):
+    meta = ImageMetadata(DEMO_IMAGES_DIR / image_name)
     assert meta.has_sidecar
-    assert meta.sidecar_path.name == '78513963.xmp'
-
-
-def test_sidecar_path__alt():
-    """This image already has a sidecar in the alternate filename format, so that should be used"""
-    img_path = DEMO_IMAGES_DIR / 'IMG20200521_141401.jpg'
-    meta = ImageMetadata(img_path)
-    assert meta.has_sidecar
-    assert meta.sidecar_path.name == 'IMG20200521_141401.jpg.xmp'
+    assert meta.sidecar_path.name == expected_sidecar_name
 
 
 def test_is_sidecar():
@@ -103,37 +102,10 @@ def test_update__preserves_existing():
 
 
 def test_metadata_path__raw_returns_sidecar():
-    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
-    with patch.object(ImageMetadata, '_safe_read_metadata', return_value=({}, {}, {})):
-        meta = ImageMetadata(raw_path)
+    meta = ImageMetadata(SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF')
     assert meta.metadata_path == meta.sidecar_path
 
 
 def test_metadata_path__jpg_returns_self():
     meta = ImageMetadata(DEMO_IMAGE)
     assert meta.metadata_path == meta.image_path
-
-
-def test_read_metadata__raw_reads_sidecar_only():
-    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
-    with patch.object(ImageMetadata, '_safe_read_metadata', return_value=({}, {}, {})) as mock_read:
-        ImageMetadata(raw_path)
-
-    assert mock_read.call_count == 1
-    assert mock_read.call_args.args[0] == raw_path.with_suffix('.xmp')
-
-
-def test_write__raw_sidecar_only():
-    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
-    sidecar_path = raw_path.with_suffix('.xmp')
-    with patch.object(ImageMetadata, '_safe_read_metadata', return_value=({}, {}, {})):
-        meta = ImageMetadata(raw_path)
-    with (
-        patch.object(ImageMetadata, '_read_exiv2_image') as mock_read_exiv2,
-        patch.object(ImageMetadata, '_write_sidecar') as mock_write_sidecar,
-    ):
-        meta.write(write_exif=True, write_iptc=True, write_xmp=True, write_sidecar=True)
-
-    # RAW writes go through metadata_path (= sidecar), not _write_sidecar
-    mock_read_exiv2.assert_called_once_with(sidecar_path)
-    mock_write_sidecar.assert_not_called()

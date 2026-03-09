@@ -208,8 +208,7 @@ def observation_to_metadata(
 
     # Convert and add coordinates
     # TODO: Add other metadata like title, description, tags, etc.
-    if observation:
-        metadata.update_coordinates(observation.location, observation.positional_accuracy)
+    metadata.update_coordinates(observation.location, observation.positional_accuracy)
 
     def _format_key(k):
         """Get DwC terms as XMP tags.

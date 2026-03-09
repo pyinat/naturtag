@@ -27,7 +27,6 @@ NULL_COORDS = (0, 0)
 logger = getLogger().getChild(__name__)
 
 
-# TODO: Refactor derived properties; many of these don't need to be lazy-loaded
 # TODO: If there's no taxon ID but a `rank=name` tag, look up taxon based on that
 class MetaMetadata(ImageMetadata):
     """Parses observation info and other higher-level details derived from raw image metadata
@@ -44,32 +43,34 @@ class MetaMetadata(ImageMetadata):
         super().__init__(*args, **kwargs)
         # Define lazy-loaded properties
         self._coordinates = None
-        self._inaturalist_ids = None
+        self.inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
         self._summary = None
         self._observation: Observation = None
-        self.keyword_meta = None
+        self._keyword_meta = None
         self._update_derived_properties()
 
     def _update_derived_properties(self):
         """Reset/ update all secondary properties derived from base metadata formats"""
         self._coordinates = None
-        self._inaturalist_ids = None
+        self.inaturalist_ids = None
         self._min_rank = None
         self._simplified = None
         self._summary = None
         self._observation = None
-        self.keyword_meta = KeywordMetadata(self.combined)
-        self.inaturalist_ids  # for side effect  # noqa
+        self._keyword_meta = None
+        self.inaturalist_ids = get_inaturalist_ids(self.simplified)
 
     @property
     def combined(self) -> dict[str, Any]:
         return {**self.exif, **self.iptc, **self.xmp}
 
     @property
-    def filtered_combined(self) -> dict[str, Any]:
-        return {**self.filtered_exif, **self.iptc, **self.xmp}
+    def keyword_meta(self) -> KeywordMetadata:
+        if self._keyword_meta is None:
+            self._keyword_meta = KeywordMetadata(self.combined)
+        return self._keyword_meta
 
     @property
     def coordinates(self) -> Optional[Coordinates]:
@@ -105,13 +106,6 @@ class MetaMetadata(ImageMetadata):
         return bool(self.taxon_id)
 
     @property
-    def inaturalist_ids(self) -> IntTuple:
-        """Get taxon and/or observation IDs from metadata if available"""
-        if self._inaturalist_ids is None:
-            self._inaturalist_ids = get_inaturalist_ids(self.simplified)
-        return self._inaturalist_ids
-
-    @property
     def observation_id(self) -> Optional[int]:
         return self.inaturalist_ids[1]
 
@@ -139,7 +133,8 @@ class MetaMetadata(ImageMetadata):
                 if name := self.simplified.get(rank):
                     self._min_rank = (rank, name)
                     break
-            self._min_rank = ()
+            else:
+                self._min_rank = ()
         return self._min_rank or None
 
     @property
@@ -194,16 +189,19 @@ class MetaMetadata(ImageMetadata):
             self._coordinates = NULL_COORDS
             return
 
-        self._coordinates = coordinates
         self.exif.update(to_exif_coords(coordinates, accuracy))
         self.xmp.update(to_xmp_coords(coordinates, accuracy))
+        self._update_derived_properties()
+        self._coordinates = coordinates
 
     def update_keywords(self, keywords):
         """
         Update only keyword metadata.
         Keywords will be written to appropriate tags for each metadata format.
         """
-        self.update(KeywordMetadata(keywords=keywords).tags)
+        keyword_meta = KeywordMetadata(keywords=keywords)
+        self.update(keyword_meta.tags)
+        self._keyword_meta = keyword_meta
 
     def to_observation(self) -> Observation:
         """Convert DwC metadata to an observation object, if possible"""

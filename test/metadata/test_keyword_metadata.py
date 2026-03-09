@@ -26,31 +26,32 @@ def test_kv_keywords__ignores_empty_value():
     assert kw.kv_keywords == {'valid': 'value'}
 
 
-def test_hier_keywords():
-    kw = KeywordMetadata(
-        keywords=[
-            'Animalia|Arthropoda|Insecta',
-            'Animalia|Arthropoda',
-            'Animals',
-        ]
-    )
-    # Should include hierarchical keywords plus the inferred root node
-    assert 'Animalia|Arthropoda|Insecta' in kw.hier_keywords
-    assert 'Animalia|Arthropoda' in kw.hier_keywords
-    assert 'Animalia' in kw.hier_keywords  # root node
-
-
-def test_hier_keywords__multiple_chains():
-    kw = KeywordMetadata(
-        keywords=[
-            'Animalia|Chordata',
-            'Animalia|Chordata|Mammalia',
-            'Animals|Chordates',
-            'Animals|Chordates|Mammals',
-        ]
-    )
-    assert 'Animalia' in kw.hier_keywords
-    assert 'Animals' in kw.hier_keywords
+@pytest.mark.parametrize(
+    'keywords, expected_in_hier',
+    [
+        (
+            ['Animalia|Arthropoda|Insecta', 'Animalia|Arthropoda', 'Animals'],
+            [
+                'Animalia|Arthropoda|Insecta',
+                'Animalia|Arthropoda',
+                'Animalia',
+            ],  # includes inferred root
+        ),
+        (
+            [
+                'Animalia|Chordata',
+                'Animalia|Chordata|Mammalia',
+                'Animals|Chordates',
+                'Animals|Chordates|Mammals',
+            ],
+            ['Animalia', 'Animals'],  # roots inferred for both chains
+        ),
+    ],
+)
+def test_hier_keywords(keywords, expected_in_hier):
+    kw = KeywordMetadata(keywords=keywords)
+    for expected in expected_in_hier:
+        assert expected in kw.hier_keywords
 
 
 def test_normal_keywords():
