@@ -161,7 +161,7 @@ class ObservationInfoSection(StylableWidget):
         # Set title and main photo
         self.history_taxon = None
         self.selected_observation = obs
-        self.group_box.setTitle(obs.taxon.full_name)
+        self.group_box.setTitle(obs.taxon.full_name if obs.taxon else 'unknown taxon')
         self.image.hover_event = True
         self.image.observation = obs
         set_pixmap_async(
@@ -264,10 +264,13 @@ class ObservationInfoSection(StylableWidget):
         # )
         self.link_button.setEnabled(True)
         self.link_button.setToolTip(self.selected_observation.uri)
-        self.view_taxon_button.setEnabled(True)
-        self.view_taxon_button.setToolTip(
-            f'See details for {self.selected_observation.taxon.full_name}'
-        )
+        if self.selected_observation.taxon:
+            self.view_taxon_button.setEnabled(True)
+            self.view_taxon_button.setToolTip(
+                f'See details for {self.selected_observation.taxon.full_name}'
+            )
+        else:
+            self.view_taxon_button.setEnabled(False)
         self.select_button.setEnabled(True)
 
 

@@ -7,6 +7,8 @@
 ## 0.9.2 (Unreleased)
 
 * Fix fullscreen mode on macOS
+* Fix error when observation has no taxon
+* Fix error when observation has no `place_guess`
 
 ## 0.9.1 (2026-03-07)
 

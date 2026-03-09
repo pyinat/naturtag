@@ -1,4 +1,5 @@
 import pytest
+from pyinaturalist import Observation
 
 from naturtag.metadata.derived import DerivedMetadata, get_inaturalist_ids, simplify_keys
 from test.conftest import DEMO_IMAGES_DIR
@@ -102,3 +103,46 @@ def test_update_coordinates():
 
     meta.update_coordinates(None)
     assert meta.has_coordinates is False
+
+
+def test_summary():
+    """Test summary contains all expected fields and formats them correctly."""
+    meta = DerivedMetadata(DEMO_IMAGE)
+
+    assert meta.has_taxon
+    lines = meta.summary.split('\n')
+    assert len(lines) == 5
+    summary_dict = {}
+    for line in lines:
+        if ': ' in line:
+            field, value = line.split(': ', 1)
+            summary_dict[field] = value
+
+    assert str(DEMO_IMAGE) in summary_dict['Path']
+    assert '2020-06-06' in summary_dict['Date']
+
+    # Taxon
+    assert 'Chrysopilus ornatus' in summary_dict['Taxon']
+    assert 'Ornate Snipe Fly' in summary_dict['Taxon']
+    assert 'unknown taxon' not in summary_dict['Taxon']
+
+    # Location
+    assert 'Rolling Thunder Prairie' in summary_dict['Location']
+    assert 'Iowa' in summary_dict['Location']
+    assert '41.199' in summary_dict['Location']
+    assert '-93.657' in summary_dict['Location']
+
+    # Metadata types
+    metadata_types = summary_dict['Metadata types'].split(', ')
+    assert 'EXIF' in metadata_types
+    assert 'IPTC' in metadata_types
+    assert 'XMP' in metadata_types
+    assert 'Sidecar' in metadata_types
+
+
+def test_summary__no_taxon():
+    meta = DerivedMetadata(DEMO_IMAGE)
+    meta._observation = Observation(id=999, taxon=None)
+    meta._summary = None
+    assert 'unknown taxon' in meta.summary
+    assert 'Chrysopilus ornatus' not in meta.summary

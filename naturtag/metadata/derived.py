@@ -167,7 +167,7 @@ class DerivedMetadata(BaseMetadata):
             summary_info = {
                 'Path': self.image_path,
                 'Date': self.date,
-                'Taxon': obs.taxon.full_name,
+                'Taxon': obs.taxon.full_name if obs.taxon else 'unknown taxon',
                 'Location': f'{obs.place_guess} {obs.location}',
                 'Metadata types': ', '.join([k for k, v in meta_types.items() if v]),
             }

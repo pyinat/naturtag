@@ -96,15 +96,18 @@ class ObservationInfoCard(InfoCard):
             )
         )
         self.add_row(self.layout)
-        self.add_row(IconLabel('fa5s.map-marker', obs.place_guess or obs.location, size=icon_size))
+        location_str = obs.place_guess or (
+            str(obs.location) if obs.location else 'Unknown Location'
+        )
+        self.add_row(IconLabel('fa5s.map-marker', location_str, size=icon_size))
 
         # Add more verbose details in tooltip
         tooltip_lines = [
             f'Observed on: {obs.observed_on}',
             f'Submitted on: {obs.created_at}',
-            f'Taxon: {obs.taxon.full_name}',
+            f'Taxon: {obs.taxon.full_name if obs.taxon else "unknown taxon"}',
             f'Location: {obs.place_guess}',
-            f'Coordinates: {obs.location}',
+            f'Coordinates: {obs.location if obs.location else "None"}',
             f'Positional accuracy: {obs.positional_accuracy or 0}m',
             f'Identifications: {num_ids} ({obs.num_identification_agreements or 0} agree)',
             f'Photos: {num_photos}',
