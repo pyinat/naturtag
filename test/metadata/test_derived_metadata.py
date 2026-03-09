@@ -1,6 +1,6 @@
 import pytest
 
-from naturtag.metadata.meta_metadata import MetaMetadata, get_inaturalist_ids, simplify_keys
+from naturtag.metadata.derived import DerivedMetadata, get_inaturalist_ids, simplify_keys
 from test.conftest import DEMO_IMAGES_DIR
 
 DEMO_IMAGE = DEMO_IMAGES_DIR / '78513963.jpg'
@@ -38,7 +38,7 @@ def test_get_inaturalist_ids(metadata, expected_taxon, expected_obs):
 
 
 def test_attrs():
-    meta = MetaMetadata(DEMO_IMAGE)
+    meta = DerivedMetadata(DEMO_IMAGE)
 
     assert meta.taxon_id == 202860
     assert meta.observation_id == 49459966
@@ -65,14 +65,14 @@ def test_attrs():
 
 
 def test_to_observation():
-    meta = MetaMetadata(DEMO_IMAGE)
+    meta = DerivedMetadata(DEMO_IMAGE)
     obs = meta.to_observation()
     assert obs.taxon.id == 202860
     assert obs.id == 49459966
 
 
 def test_empty_metadata():
-    meta = MetaMetadata()
+    meta = DerivedMetadata()
     assert meta.taxon_id is None
     assert meta.observation_id is None
     assert meta.has_taxon is False
@@ -81,21 +81,21 @@ def test_empty_metadata():
 
 
 def test_update__refreshes_derived_properties():
-    meta = MetaMetadata(DEMO_IMAGE)
+    meta = DerivedMetadata(DEMO_IMAGE)
     assert meta.taxon_id == 202860
     meta.update({'Xmp.dwc.taxonID': '999999'})
     assert meta.combined['Xmp.dwc.taxonID'] == '999999'
 
 
 def test_update__empty_is_noop():
-    meta = MetaMetadata(DEMO_IMAGE)
+    meta = DerivedMetadata(DEMO_IMAGE)
     original_taxon_id = meta.taxon_id
     meta.update({})
     assert meta.taxon_id == original_taxon_id
 
 
 def test_update_coordinates():
-    meta = MetaMetadata(DEMO_IMAGE)
+    meta = DerivedMetadata(DEMO_IMAGE)
     new_coords = (51.5074, -0.1278)
     meta.update_coordinates(new_coords)
     assert meta.coordinates == new_coords

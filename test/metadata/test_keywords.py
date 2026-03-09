@@ -1,6 +1,6 @@
 import pytest
 
-from naturtag.metadata.keyword_metadata import KeywordMetadata, sort_taxonomy_keywords
+from naturtag.metadata.keywords import KeywordMetadata, sort_taxonomy_keywords
 
 
 def test_kv_keywords():

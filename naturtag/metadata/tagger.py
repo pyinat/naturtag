@@ -1,4 +1,4 @@
-"""Tools to translate iNaturalist observations and taxa into image metadata"""
+"""Tools to translate + write iNaturalist observation and taxonomy data into image metadata"""
 
 # TODO: Get separate keywords for species, binomial, and trinomial
 # TODO: Get common names for specified locale (requires using different endpoints)
@@ -13,7 +13,7 @@ from pyinaturalist import Observation, Taxon
 from pyinaturalist_convert import to_dwc
 
 from naturtag.constants import COMMON_NAME_IGNORE_TERMS, COMMON_RANKS, PathOrStr
-from naturtag.metadata import MetaMetadata
+from naturtag.metadata import DerivedMetadata
 from naturtag.storage import Settings, iNatDbClient
 from naturtag.utils import get_valid_image_paths, quote
 
@@ -29,7 +29,7 @@ def tag_images(
     include_sidecars: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> list[MetaMetadata]:
+) -> list[DerivedMetadata]:
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
     metadata.
@@ -72,7 +72,7 @@ def _tag_images_iter(
     include_sidecars: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> Iterator[MetaMetadata]:
+) -> Iterator[DerivedMetadata]:
     """Same as :py:func:`tag_images`, but returns an iterator"""
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
@@ -93,7 +93,7 @@ def _tag_images_iter(
     def _tag_image(
         image_path,
     ):
-        img_metadata = MetaMetadata(image_path).merge(inat_metadata)
+        img_metadata = DerivedMetadata(image_path).merge(inat_metadata)
         img_metadata.write(
             write_exif=settings.exif,
             write_iptc=settings.iptc,
@@ -117,7 +117,7 @@ def refresh_tags(
     recursive: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> list[MetaMetadata]:
+) -> list[DerivedMetadata]:
     """Refresh metadata for previously tagged images with latest observation and/or taxon data.
 
     Example:
@@ -142,19 +142,19 @@ def _refresh_tags_iter(
     recursive: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
-) -> Iterator[MetaMetadata | None]:
+) -> Iterator[DerivedMetadata | None]:
     """Same as :py:func:`refresh_tags`, but returns an iterator"""
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
     for image_path in get_valid_image_paths(
         image_paths, recursive, create_sidecars=settings.sidecar, include_raw=True
     ):
-        yield _refresh_tags(MetaMetadata(image_path), client, settings)
+        yield _refresh_tags(DerivedMetadata(image_path), client, settings)
 
 
 def _refresh_tags(
-    metadata: MetaMetadata, client: iNatDbClient, settings: Settings
-) -> Optional[MetaMetadata]:
+    metadata: DerivedMetadata, client: iNatDbClient, settings: Settings
+) -> Optional[DerivedMetadata]:
     """Refresh existing metadata for a single image
 
     Returns:
@@ -185,12 +185,12 @@ def _refresh_tags(
 
 def observation_to_metadata(
     observation: Observation,
-    metadata: Optional[MetaMetadata] = None,
+    metadata: Optional[DerivedMetadata] = None,
     common_names: bool = False,
     hierarchical: bool = False,
-) -> MetaMetadata:
+) -> DerivedMetadata:
     """Get image metadata from an Observation object"""
-    metadata = metadata or MetaMetadata()
+    metadata = metadata or DerivedMetadata()
 
     # Get all specified keyword categories
     keywords = _get_taxonomy_keywords(observation.taxon)

@@ -29,7 +29,7 @@ from shiboken6 import isValid
 
 from naturtag.constants import IMAGE_FILETYPES, RAW_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
 from naturtag.controllers import BaseController
-from naturtag.metadata import MetaMetadata
+from naturtag.metadata import DerivedMetadata
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
 from naturtag.widgets import (
     FAIcon,
@@ -211,7 +211,7 @@ class ThumbnailCard(StylableWidget):
     def __init__(self, image_path: Path, size: Dimensions = SIZE_DEFAULT):
         super().__init__()
         self.image_path = image_path
-        self.metadata: MetaMetadata = None  # type: ignore
+        self.metadata: DerivedMetadata = None  # type: ignore
         self.load_error: str | None = None
         self.layout = VerticalLayout(self)
 
@@ -256,7 +256,7 @@ class ThumbnailCard(StylableWidget):
         self.icons.set_error(error)
         self.on_load_error.emit(error)
 
-    def set_metadata(self, metadata: MetaMetadata):
+    def set_metadata(self, metadata: DerivedMetadata):
         """Update UI based on new metadata"""
         logger.debug(f'New metadata: {metadata}')
         self.metadata = metadata
@@ -340,7 +340,7 @@ class ThumbnailCard(StylableWidget):
         """Switch metadata icons to primary color for each pending type."""
         self.icons.set_pending_icons(pending)
 
-    def update_metadata(self, metadata: MetaMetadata):
+    def update_metadata(self, metadata: DerivedMetadata):
         """Update UI based on new metadata, and show a highlight animation"""
         self.icons.set_pending(False)
         self.pulse()
@@ -350,7 +350,7 @@ class ThumbnailCard(StylableWidget):
 class MetaThumbnail(HoverMixin, PixmapLabel):
     """Thumbnail for a local image plus metadata"""
 
-    on_load_metadata = Signal(MetaMetadata)  #: Finished reading image metadata
+    on_load_metadata = Signal(DerivedMetadata)  #: Finished reading image metadata
     on_load_error = Signal(str)  #: Error message when image loading fails
     _placeholder_cache: Optional[QImage] = None
 
@@ -360,7 +360,7 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         self.thumbnail_size = size
         self.setFixedSize(*size)
 
-    def get_pixmap_meta(self, path: PathOrStr) -> tuple[QImage | None, MetaMetadata, str | None]:
+    def get_pixmap_meta(self, path: PathOrStr) -> tuple[QImage | None, DerivedMetadata, str | None]:
         """All I/O for loading an image preview (reading metadata, generating thumbnail),
         to be run from a separate thread. Returns QImage (thread-safe) instead of QPixmap.
         """
@@ -371,7 +371,7 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
             logger.warning(f'Error generating thumbnail for {path}:', exc_info=True)
             image = None
             error = str(e)
-        return image, MetaMetadata(path), error
+        return image, DerivedMetadata(path), error
 
     def set_pixmap_meta_async(self, threadpool: 'ThreadPool', path: Optional[PathOrStr] = None):
         """Generate a photo thumbnail and read its metadata from a separate thread, and render it
@@ -380,7 +380,7 @@ class MetaThumbnail(HoverMixin, PixmapLabel):
         future = threadpool.schedule(self.get_pixmap_meta, path=path)
         future.on_result.connect(self.set_pixmap_meta)
 
-    def set_pixmap_meta(self, image_meta: tuple[QImage | None, MetaMetadata, str | None]):
+    def set_pixmap_meta(self, image_meta: tuple[QImage | None, DerivedMetadata, str | None]):
         if not isValid(self):
             return
         image, metadata, error = image_meta
@@ -563,7 +563,7 @@ class ThumbnailMetaIcons(QLabel):
         self.tag_icon.set_primary('tags' in pending)
         self.sidecar_icon.set_primary('sidecar' in pending)
 
-    def refresh_icons(self, metadata: MetaMetadata):
+    def refresh_icons(self, metadata: DerivedMetadata):
         """Update icons based on the available metadata"""
         # Reset any pending primary highlighting first
         self.set_pending_icons(frozenset())

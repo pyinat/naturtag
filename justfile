@@ -53,7 +53,7 @@ lint:
 
 # Clean up temporary build + documentation files
 clean:
-    rm -rf dist build docs/_build docs/modules
+    rm -rf dist build docs/_build docs/modules test-reports
 
 
 # Build scripts

@@ -8,7 +8,7 @@ To use the core tagging features in your own code, the following functions and c
 entry points:
 
 ```{eval-rst}
-.. currentmodule:: naturtag.metadata.inat_metadata
+.. currentmodule:: naturtag.metadata.tagger
 .. autosummary::
     :nosignatures:
 
@@ -16,11 +16,11 @@ entry points:
     refresh_tags
 ```
 ```{eval-rst}
-.. currentmodule:: naturtag.metadata.meta_metadata
+.. currentmodule:: naturtag.metadata.derived
 .. autosummary::
     :nosignatures:
 
-    MetaMetadata
+    DerivedMetadata
 ```
 
 ### Examples

@@ -14,7 +14,7 @@ from naturtag.constants import (
     StrTuple,
 )
 from naturtag.metadata import (
-    ImageMetadata,
+    BaseMetadata,
     KeywordMetadata,
     convert_dwc_coords,
     convert_exif_coords,
@@ -28,13 +28,13 @@ logger = getLogger().getChild(__name__)
 
 
 # TODO: If there's no taxon ID but a `rank=name` tag, look up taxon based on that
-class MetaMetadata(ImageMetadata):
+class DerivedMetadata(BaseMetadata):
     """Parses observation info and other higher-level details derived from raw image metadata
 
     Example:
 
-        >>> from naturtag import MetaMetadata
-        >>> meta = MetaMetadata('/path/to/image.jpg')
+        >>> from naturtag import DerivedMetadata
+        >>> meta = DerivedMetadata('/path/to/image.jpg')
         >>> print(meta.summary)
         >>> print(meta.to_observation())
     """
@@ -169,7 +169,7 @@ class MetaMetadata(ImageMetadata):
             self._summary = '\n'.join([f'{k}: {v}' for k, v in summary_info.items()])
         return self._summary
 
-    def merge(self, other: 'MetaMetadata') -> 'MetaMetadata':
+    def merge(self, other: 'DerivedMetadata') -> 'DerivedMetadata':
         """Update metadata from another instance"""
         self.exif.update(other.exif)
         self.xmp.update(other.xmp)

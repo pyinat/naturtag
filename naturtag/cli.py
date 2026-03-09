@@ -20,8 +20,8 @@ from rich.progress import track
 from rich.table import Column, Table
 
 from naturtag.constants import CLI_COMPLETE_DIR
-from naturtag.metadata import KeywordMetadata, MetaMetadata
-from naturtag.metadata.inat_metadata import _refresh_tags_iter, _tag_images_iter
+from naturtag.metadata import DerivedMetadata, KeywordMetadata
+from naturtag.metadata.tagger import _refresh_tags_iter, _tag_images_iter
 from naturtag.storage import Settings, setup
 from naturtag.utils import HelpColorsGroup, get_valid_image_paths, get_version, strip_url
 
@@ -320,7 +320,7 @@ def print_all_metadata(
 ):
     """Print keyword metadata for all specified files"""
     for image_path in get_valid_image_paths(image_paths):
-        metadata = MetaMetadata(image_path)
+        metadata = DerivedMetadata(image_path)
         click.secho(f'\n{image_path}', fg='white')
         print_metadata(metadata.keyword_meta, flickr, hierarchical)
 

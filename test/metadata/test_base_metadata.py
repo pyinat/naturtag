@@ -1,20 +1,20 @@
 import pytest
 
-from naturtag.metadata import ImageMetadata
+from naturtag.metadata import BaseMetadata
 from test.conftest import DEMO_IMAGES_DIR, SAMPLE_DATA_DIR
 
 DEMO_IMAGE = DEMO_IMAGES_DIR / '78513963.jpg'
 
 
 def test_read_metadata():
-    meta = ImageMetadata(DEMO_IMAGE)
+    meta = BaseMetadata(DEMO_IMAGE)
     assert meta.exif['Exif.GPSInfo.GPSLatitudeRef'] == 'N'
     assert meta.xmp['Xmp.dwc.institutionCode'] == 'iNaturalist'
     assert 'taxonomy:class=Insecta' in meta.iptc['Iptc.Application2.Subject']
 
 
 def test_read_metadata__nonexistent_file():
-    meta = ImageMetadata('/nonexistent/path/image.jpg')
+    meta = BaseMetadata('/nonexistent/path/image.jpg')
     assert meta.exif == {}
     assert meta.iptc == {}
     assert meta.xmp == {}
@@ -22,7 +22,7 @@ def test_read_metadata__nonexistent_file():
 
 def test_read_metadata__merges_sidecar():
     """XMP sidecar data should be merged into the image's metadata"""
-    meta = ImageMetadata(DEMO_IMAGE)
+    meta = BaseMetadata(DEMO_IMAGE)
     assert 'Xmp.dwc.taxonID' in meta.xmp
     assert meta.xmp['Xmp.dwc.taxonID'] == '202860'
 
@@ -35,28 +35,28 @@ def test_read_metadata__merges_sidecar():
     ],
 )
 def test_sidecar_path(image_name, expected_sidecar_name):
-    meta = ImageMetadata(DEMO_IMAGES_DIR / image_name)
+    meta = BaseMetadata(DEMO_IMAGES_DIR / image_name)
     assert meta.has_sidecar
     assert meta.sidecar_path.name == expected_sidecar_name
 
 
 def test_is_sidecar():
-    xmp_meta = ImageMetadata(DEMO_IMAGES_DIR / 'example_45524803.xmp')
+    xmp_meta = BaseMetadata(DEMO_IMAGES_DIR / 'example_45524803.xmp')
     assert xmp_meta.is_sidecar is True
 
-    jpg_meta = ImageMetadata(DEMO_IMAGE)
+    jpg_meta = BaseMetadata(DEMO_IMAGE)
     assert jpg_meta.is_sidecar is False
 
 
 def test_has_sidecar__false_for_xmp_file():
     """An XMP file itself should not report having a sidecar"""
-    meta = ImageMetadata(DEMO_IMAGES_DIR / 'example_45524803.xmp')
+    meta = BaseMetadata(DEMO_IMAGES_DIR / 'example_45524803.xmp')
     assert meta.has_sidecar is False
 
 
 def test_filtered_exif():
     """filtered_exif should exclude verbose manufacturer tags"""
-    meta = ImageMetadata(DEMO_IMAGE)
+    meta = BaseMetadata(DEMO_IMAGE)
     meta.exif['Exif.MakerNote.Something'] = 'hidden'
     meta.exif['Exif.Photo.MakerNote'] = 'also hidden'
     meta.exif['Exif.Image.PrintImageMatching'] = 'also hidden'
@@ -70,7 +70,7 @@ def test_filtered_exif():
 
 def test_simple_exif():
     """simple_exif should join list values into comma-separated strings"""
-    meta = ImageMetadata(DEMO_IMAGE)
+    meta = BaseMetadata(DEMO_IMAGE)
     meta.exif['Exif.Test.ListTag'] = ['a', 'b', 'c']
     meta.exif['Exif.Test.StringTag'] = 'single'
 
@@ -80,7 +80,7 @@ def test_simple_exif():
 
 
 def test_update():
-    meta = ImageMetadata(DEMO_IMAGE)
+    meta = BaseMetadata(DEMO_IMAGE)
     meta.update(
         {
             'Exif.Photo.NewTag': 'exif_value',
@@ -95,17 +95,17 @@ def test_update():
 
 def test_update__preserves_existing():
     """update() should not remove existing metadata"""
-    meta = ImageMetadata(DEMO_IMAGE)
+    meta = BaseMetadata(DEMO_IMAGE)
     original_lat_ref = meta.exif['Exif.GPSInfo.GPSLatitudeRef']
     meta.update({'Exif.Photo.NewTag': 'new_value'})
     assert meta.exif['Exif.GPSInfo.GPSLatitudeRef'] == original_lat_ref
 
 
 def test_metadata_path__raw_returns_sidecar():
-    meta = ImageMetadata(SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF')
+    meta = BaseMetadata(SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF')
     assert meta.metadata_path == meta.sidecar_path
 
 
 def test_metadata_path__jpg_returns_self():
-    meta = ImageMetadata(DEMO_IMAGE)
+    meta = BaseMetadata(DEMO_IMAGE)
     assert meta.metadata_path == meta.image_path

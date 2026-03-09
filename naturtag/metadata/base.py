@@ -24,7 +24,7 @@ ARRAY_IDX_PATTERN = re.compile(r'\[\d+\]')
 logger = getLogger().getChild(__name__)
 
 
-class ImageMetadata:
+class BaseMetadata:
     """Wrapper class for reading & writing basic image metadata with exiv2"""
 
     def __init__(self, image_path: PathOrStr = ''):

@@ -1,6 +1,6 @@
 import pytest
 
-from naturtag.metadata.gps_metadata import (
+from naturtag.metadata.gps import (
     convert_dwc_coords,
     convert_exif_coords,
     convert_xmp_coords,

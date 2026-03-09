@@ -447,7 +447,7 @@ def test_thumbnail_card__load_image__error(thumbnail_card, mock_metadata):
             'naturtag.controllers.image_gallery.generate_thumbnail',
             side_effect=OSError('bad file'),
         ),
-        patch('naturtag.controllers.image_gallery.MetaMetadata', return_value=mock_metadata),
+        patch('naturtag.controllers.image_gallery.DerivedMetadata', return_value=mock_metadata),
     ):
         thumbnail_card.load_image()
 
