@@ -1,5 +1,7 @@
+from unittest.mock import patch
+
 from naturtag.metadata import ImageMetadata
-from test.conftest import DEMO_IMAGES_DIR
+from test.conftest import DEMO_IMAGES_DIR, SAMPLE_DATA_DIR
 
 DEMO_IMAGE = DEMO_IMAGES_DIR / '78513963.jpg'
 
@@ -98,3 +100,40 @@ def test_update__preserves_existing():
     original_lat_ref = meta.exif['Exif.GPSInfo.GPSLatitudeRef']
     meta.update({'Exif.Photo.NewTag': 'new_value'})
     assert meta.exif['Exif.GPSInfo.GPSLatitudeRef'] == original_lat_ref
+
+
+def test_metadata_path__raw_returns_sidecar():
+    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
+    with patch.object(ImageMetadata, '_safe_read_metadata', return_value=({}, {}, {})):
+        meta = ImageMetadata(raw_path)
+    assert meta.metadata_path == meta.sidecar_path
+
+
+def test_metadata_path__jpg_returns_self():
+    meta = ImageMetadata(DEMO_IMAGE)
+    assert meta.metadata_path == meta.image_path
+
+
+def test_read_metadata__raw_reads_sidecar_only():
+    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
+    with patch.object(ImageMetadata, '_safe_read_metadata', return_value=({}, {}, {})) as mock_read:
+        ImageMetadata(raw_path)
+
+    assert mock_read.call_count == 1
+    assert mock_read.call_args.args[0] == raw_path.with_suffix('.xmp')
+
+
+def test_write__raw_sidecar_only():
+    raw_path = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
+    sidecar_path = raw_path.with_suffix('.xmp')
+    with patch.object(ImageMetadata, '_safe_read_metadata', return_value=({}, {}, {})):
+        meta = ImageMetadata(raw_path)
+    with (
+        patch.object(ImageMetadata, '_read_exiv2_image') as mock_read_exiv2,
+        patch.object(ImageMetadata, '_write_sidecar') as mock_write_sidecar,
+    ):
+        meta.write(write_exif=True, write_iptc=True, write_xmp=True, write_sidecar=True)
+
+    # RAW writes go through metadata_path (= sidecar), not _write_sidecar
+    mock_read_exiv2.assert_called_once_with(sidecar_path)
+    mock_write_sidecar.assert_not_called()

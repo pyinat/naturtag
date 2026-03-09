@@ -7,7 +7,7 @@ import pyexiv2
 from pyexiv2 import Image
 
 from naturtag.constants import EXIF_HIDE_PREFIXES, PathOrStr
-from naturtag.utils.image_glob import get_sidecar_path
+from naturtag.utils.image_glob import get_sidecar_path, is_raw_path
 
 # Suppress exiv2 thumbnail warnings (log level 3 = error)
 pyexiv2.set_log_level(3)
@@ -35,8 +35,11 @@ class ImageMetadata:
         """Read all formats of metadata from image + sidecar file"""
         if not self.image_path.is_file():
             return {}, {}, {}
-        exif, iptc, xmp = self._safe_read_metadata(self.image_path)
-        if self.has_sidecar:
+
+        exif, iptc, xmp = self._safe_read_metadata(self.metadata_path)
+
+        # For non-RAW files, also merge sidecar data on top of embedded metadata.
+        if not self.is_raw and self.has_sidecar:
             s_exif, s_iptc, s_xmp = self._safe_read_metadata(self.sidecar_path)
             exif.update(s_exif)
             iptc.update(s_iptc)
@@ -88,12 +91,23 @@ class ImageMetadata:
         return get_sidecar_path(self.image_path)
 
     @property
+    def metadata_path(self) -> Path:
+        """Path used for reading/writing metadata.
+        JPG/PNG: use embedded metadata. RAW: use sidecar only.
+        """
+        return self.sidecar_path if self.is_raw else self.image_path
+
+    @property
     def has_sidecar(self) -> bool:
         return not self.is_sidecar and self.sidecar_path.is_file()
 
     @property
     def is_sidecar(self) -> bool:
         return self.image_path.suffix.lower() == '.xmp'
+
+    @property
+    def is_raw(self) -> bool:
+        return is_raw_path(self.image_path)
 
     @property
     def filtered_exif(self) -> dict[str, Any]:
@@ -133,19 +147,20 @@ class ImageMetadata:
         if self.is_sidecar:
             _create_sidecar_stub(self.image_path)
 
-        # Write embedded metadata
+        # Write to metadata_path (sidecar for RAW, image file for JPEG/PNG)
         if any([write_exif, write_iptc, write_xmp]):
-            logger.info(f'Writing metadata to {self.image_path}')
-            img = self._read_exiv2_image(self.image_path)
-        if write_exif:
-            img.modify_exif(self.simple_exif)
-        if write_iptc:
-            img.modify_iptc(self.iptc)
-        if write_xmp:
-            img.modify_xmp(fixed_xmp)
-        if any([write_exif, write_iptc, write_xmp]):
+            logger.info(f'Writing metadata to {self.metadata_path}')
+            img = self._read_exiv2_image(self.metadata_path)
+            if write_exif:
+                img.modify_exif(self.simple_exif)
+            if write_iptc:
+                img.modify_iptc(self.iptc)
+            if write_xmp:
+                img.modify_xmp(fixed_xmp)
             img.close()
-        if write_sidecar and not self.is_sidecar:
+
+        # Write sidecar for non-RAW files (RAW already wrote to sidecar via metadata_path)
+        if write_sidecar and not self.is_sidecar and not self.is_raw:
             self._write_sidecar(fixed_xmp)
 
     def _write_sidecar(self, fixed_xmp: dict):
