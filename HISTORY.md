@@ -1,8 +1,12 @@
 # History
 
-## Unreleased
+## 0.10.0 (Unreleased)
 
 * Add provisional support for loading and tagging raw image formats (no preview thumbnails)
+
+## 0.9.2 (Unreleased)
+
+* Fix fullscreen mode on macOS
 
 ## 0.9.1 (2026-03-07)
 
