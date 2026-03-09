@@ -54,9 +54,10 @@ class ObservationInfoCard(InfoCard):
         # Title: Taxon name
         if obs.taxon:
             t = obs.taxon
-            common_name = (
-                f' ({capwords(t.preferred_common_name)})' if t.preferred_common_name else ''
-            )
+            if t.preferred_common_name:
+                common_name = f' ({capwords(str(t.preferred_common_name))})'
+            else:
+                common_name = ''
             self.title.setText(f'{t.rank.title()}: <i>{t.name}</i>{common_name}')
         else:
             self.title.setText('Unknown Taxon')

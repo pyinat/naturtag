@@ -9,6 +9,7 @@
 * Fix fullscreen mode on macOS
 * Fix error when observation has no taxon
 * Fix error when observation has no `place_guess`
+* Fix error on multiple `preferred_common_name` values
 
 ## 0.9.1 (2026-03-07)
 

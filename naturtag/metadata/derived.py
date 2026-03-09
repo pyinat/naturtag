@@ -305,9 +305,17 @@ def _get_common_keywords(taxon: Taxon) -> list[str]:
     """Format a list of taxa into common name keywords.
     Filters out terms that aren't useful to keep as tags.
     """
-    keywords = [
-        t.preferred_common_name for t in taxon.ancestors + [taxon] if t.rank in COMMON_RANKS
-    ]
+    keywords = []
+    for t in taxon.ancestors + [taxon]:
+        if t.rank in COMMON_RANKS:
+            # TODO: handle these checks in Taxon model
+            if not isinstance(t.preferred_common_name, str):
+                logger.warning(
+                    f'Taxon {taxon.id} malformed common name: "{t.preferred_common_name}"'
+                )
+                logger.warning(str(taxon.to_dict()))
+            elif t.preferred_common_name:
+                keywords.append(t.preferred_common_name)
 
     def is_ignored(kw):
         return any(ignore_term in kw.lower() for ignore_term in COMMON_NAME_IGNORE_TERMS)
