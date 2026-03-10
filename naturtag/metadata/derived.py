@@ -158,6 +158,15 @@ class DerivedMetadata(BaseMetadata):
         """Get a condensed summary of available metadata"""
         if self._summary is None:
             obs = self.to_observation()
+            try:
+                taxon_name = obs.taxon.full_name if obs.taxon else 'unknown taxon'
+            except (AttributeError, TypeError):
+                logger.warning(
+                    f'Malformed common name in Image {self.image_path}, Taxon {obs.taxon.taxon.id}: '
+                    f'"{obs.taxon.preferred_common_name}"'
+                )
+                taxon_name = str(obs.taxon.preferred_common_name)
+
             meta_types = {
                 'EXIF': bool(self.exif),
                 'IPTC': bool(self.iptc),
@@ -167,7 +176,7 @@ class DerivedMetadata(BaseMetadata):
             summary_info = {
                 'Path': self.image_path,
                 'Date': self.date,
-                'Taxon': obs.taxon.full_name if obs.taxon else 'unknown taxon',
+                'Taxon': taxon_name,
                 'Location': f'{obs.place_guess} {obs.location}',
                 'Metadata types': ', '.join([k for k, v in meta_types.items() if v]),
             }
@@ -308,13 +317,7 @@ def _get_common_keywords(taxon: Taxon) -> list[str]:
     keywords = []
     for t in taxon.ancestors + [taxon]:
         if t.rank in COMMON_RANKS:
-            # TODO: handle these checks in Taxon model
-            if not isinstance(t.preferred_common_name, str):
-                logger.warning(
-                    f'Taxon {taxon.id} malformed common name: "{t.preferred_common_name}"'
-                )
-                logger.warning(str(taxon.to_dict()))
-            elif t.preferred_common_name:
+            if t.preferred_common_name and isinstance(t.preferred_common_name, str):
                 keywords.append(t.preferred_common_name)
 
     def is_ignored(kw):
