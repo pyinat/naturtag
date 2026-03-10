@@ -1,8 +1,15 @@
 # History
 
-## Unreleased
+## 0.10.0 (Unreleased)
 
 * Add provisional support for loading and tagging raw image formats (no preview thumbnails)
+
+## 0.9.2 (Unreleased)
+
+* Fix fullscreen mode on macOS
+* Fix error when observation has no taxon
+* Fix error when observation has no `place_guess`
+* Fix error on multiple `preferred_common_name` values
 
 ## 0.9.1 (2026-03-07)
 

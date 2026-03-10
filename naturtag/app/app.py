@@ -363,8 +363,9 @@ class MainWindow(QMainWindow):
     def toggle_fullscreen(self) -> bool:
         """Toggle fullscreen, and change icon for toolbar fullscreen button"""
         if not self.isFullScreen():
+            # Preserve all original flags instead of replacing them
             self._flags = self.windowFlags()
-            self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowType_Mask)
+            self.setWindowFlags(self._flags | Qt.WindowType_Mask)
             self.showFullScreen()
             self.toolbar.fullscreen_button.setIcon(fa_icon('mdi.fullscreen-exit'))
         else:

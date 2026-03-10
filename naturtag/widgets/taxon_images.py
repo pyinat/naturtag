@@ -48,7 +48,8 @@ class TaxonInfoCard(InfoCard):
 
         # Details
         self.title.setText(f'{taxon.rank.title()}: <i>{taxon.name}</i>')
-        self.add_row(QLabel(capwords(taxon.preferred_common_name or '')))
+        common_name = str(taxon.preferred_common_name) if taxon.preferred_common_name else ''
+        self.add_row(QLabel(capwords(common_name)))
         self.layout = HorizontalLayout()
         self.layout.setSpacing(0)
         self.layout.setAlignment(Qt.AlignLeft)

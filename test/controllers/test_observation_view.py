@@ -184,3 +184,20 @@ def test_obs_info_on_view_taxon_by_id(qtbot, obs_info):
         taxon_label.linkActivated.emit('#')
 
     assert blocker.args == [200]
+
+
+def test_obs_info_load__title(obs_info):
+    """Test that observations with taxon show the taxon's full name in title."""
+    taxon = Taxon(id=200, name='Danaus plexippus', rank='species')
+    obs = _make_obs(taxon=taxon)
+    obs_info.load(obs)
+    assert obs_info.group_box.title() == 'Danaus plexippus'
+    assert obs_info.view_taxon_button.isEnabled() is True
+    assert taxon.name in obs_info.view_taxon_button.toolTip()
+
+
+def test_obs_info_load__no_taxon(obs_info):
+    obs = _make_obs(taxon=None)
+    obs_info.load(obs)
+    assert obs_info.group_box.title() == 'unknown taxon'
+    assert obs_info.view_taxon_button.isEnabled() is False
