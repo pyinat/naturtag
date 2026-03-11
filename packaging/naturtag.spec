@@ -1,3 +1,4 @@
+import glob
 import shutil
 import sys
 from pathlib import Path
@@ -18,6 +19,46 @@ VENV_DIR = Path(sys.prefix)
 LIB_DIR_WIN = VENV_DIR / 'Lib' / 'site-packages' / 'pyexiv2' / 'lib'
 LIB_DIR_NIX = VENV_DIR / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages' / 'pyexiv2' / 'lib'
 
+# Directory for rawpy bundled libraries (sibling to rawpy package)
+RAWPY_LIBS_DIR_WIN = VENV_DIR / 'Lib' / 'site-packages' / 'rawpy.libs'
+RAWPY_LIBS_DIR_NIX = VENV_DIR / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages' / 'rawpy.libs'
+
+
+def collect_rawpy_libs(lib_dir: Path, file_extension: str) -> list:
+    """Collect rawpy bundled libraries using glob patterns
+
+    PyInstaller doesn't expand shell wildcards in binary specs, so we need to
+    use glob.glob to find matching files and return them as individual entries.
+
+    Note: Versioned libraries use patterns like 'libraw_r*.so.*' to match
+    files with version suffixes (e.g., libraw_r.so.24.0.0)
+    """
+    if not lib_dir.exists():
+        return []
+
+    # Collect libraries matching the required patterns
+    # Use .* pattern to match version suffixes like .24.0.0
+    patterns = [
+        f'libraw_r*.{file_extension}.*',  # Main LibRaw library
+        f'liblcms2*.{file_extension}.*',  # Color management
+        f'libjpeg*.{file_extension}.*',  # JPEG support
+        f'libjasper*.{file_extension}.*',  # JPEG-2000 support
+        f'libgomp*.{file_extension}.*',  # GCC OpenMP runtime
+    ]
+
+    collected = []
+    for pattern in patterns:
+        matched_files = glob.glob(str(lib_dir / pattern))
+        for matched_file in matched_files:
+            collected.append((matched_file, 'rawpy.libs'))
+
+    if not collected:
+        print(f'WARNING: No rawpy libraries found in {lib_dir}')
+        print('RAW image support will not work in packaged executable')
+
+    return collected
+
+
 binaries = []
 datas = [
     (str(ICONS_DIR / '*.ico'), 'assets/icons'),
@@ -33,11 +74,15 @@ if is_win:
         (str(LIB_DIR_WIN / 'exiv2.dll'), 'pyexiv2/lib'),
         (str(LIB_DIR_WIN / 'exiv2api.pyd'), 'pyexiv2/lib'),
     ]
+    # Bundle rawpy's bundled LibRaw libraries
+    binaries += collect_rawpy_libs(RAWPY_LIBS_DIR_WIN, 'dll')
 elif is_darwin:
     binaries = [
         (str(LIB_DIR_NIX / 'libexiv2.dylib'), 'pyexiv2/lib'),
         (str(LIB_DIR_NIX / 'exiv2api.so'), 'pyexiv2/lib'),
     ]
+    # Bundle rawpy's bundled LibRaw libraries
+    binaries += collect_rawpy_libs(RAWPY_LIBS_DIR_NIX, 'dylib')
 elif is_linux:
     # pyexiv2/lib/__init__.py loads libexiv2.so by path (via ctypes.CDLL), then imports
     # exiv2api.so which has a dynamic dependency on libexiv2.so.28 (its SONAME). Both
@@ -49,6 +94,8 @@ elif is_linux:
         (str(_libexiv2_soname), 'pyexiv2/lib'),
         (str(LIB_DIR_NIX / 'exiv2api.so'), 'pyexiv2/lib'),
     ]
+    # Bundle rawpy's bundled LibRaw libraries
+    binaries += collect_rawpy_libs(RAWPY_LIBS_DIR_NIX, 'so')
 else:
     raise NotImplementedError
 
