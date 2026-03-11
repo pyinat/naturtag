@@ -1,7 +1,8 @@
 """Utilities for generating image thumbnails"""
 
-from io import IOBase
+from io import BytesIO, IOBase
 from logging import getLogger
+from pathlib import Path
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
@@ -9,6 +10,7 @@ from PIL.ImageQt import ImageQt
 from PySide6.QtGui import QImage
 
 from naturtag.constants import EXIF_ORIENTATION_ID, SIZE_DEFAULT, Dimensions, PathOrStr
+from naturtag.utils.image_glob import is_raw_path
 
 logger = getLogger().getChild(__name__)
 
@@ -18,7 +20,7 @@ def generate_thumbnail(
     target_size: Dimensions = SIZE_DEFAULT,
     default_flip: bool = True,
 ) -> QImage:
-    """Generate a thumbnail from the source image (thread-safe)
+    """Generate a thumbnail from source image (thread-safe)
 
     Args:
         path: Image file path
@@ -44,12 +46,15 @@ def generate_thumbnail(
     return ImageQt(image).copy()
 
 
-def _get_orientated_image(source, default_flip: bool = True) -> Image:
+def _get_orientated_image(source, default_flip: bool = True) -> Image.Image:
+    """Load and rotate/transpose image according to EXIF orientation, if any.
+    If missing orientation and the image was fetched from iNat, it will be vertically mirrored.
     """
-    Load and rotate/transpose image according to EXIF orientation, if any. If missing orientation
-    and the image was fetched from iNat, it will be vertically mirrored. (?)
-    """
-    image = Image.open(source)
+    if isinstance(source, Path) and is_raw_path(source):
+        image = _open_raw_image(source)
+    else:
+        image = Image.open(source)
+
     exif = image.getexif()
 
     if exif.get(EXIF_ORIENTATION_ID):
@@ -61,7 +66,24 @@ def _get_orientated_image(source, default_flip: bool = True) -> Image:
     return image
 
 
-def _crop_square(image: Image) -> Image:
+def _open_raw_image(path: Path) -> Image.Image:
+    """Extract embedded thumbnail from a RAW file using rawpy"""
+    # Lazy import to avoid loading C extension at module level
+    import rawpy
+
+    with rawpy.imread(str(path)) as raw:
+        thumb = raw.extract_thumb()
+
+    if thumb.format == rawpy.ThumbFormat.JPEG:
+        return Image.open(BytesIO(thumb.data))
+    # bitmap data is a numpy array (height, width, 3)
+    elif thumb.format == rawpy.ThumbFormat.BITMAP:
+        return Image.fromarray(thumb.data)
+    else:
+        raise ValueError(f'Unsupported thumbnail format: {thumb.format}')
+
+
+def _crop_square(image: Image.Image) -> Image.Image:
     """Crop an image into a square (retaining dimension of short edge)"""
     width, height = image.size
     short_edge = min(width, height)
