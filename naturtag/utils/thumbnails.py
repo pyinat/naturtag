@@ -72,7 +72,10 @@ def _open_raw_image(path: Path) -> Image.Image:
     import rawpy
 
     with rawpy.imread(str(path)) as raw:
-        thumb = raw.extract_thumb()
+        try:
+            thumb = raw.extract_thumb()
+        except rawpy.LibRawNoThumbnailError as e:
+            raise ValueError('No embedded thumbnail found in RAW file') from e
 
     if thumb.format == rawpy.ThumbFormat.JPEG:
         return Image.open(BytesIO(thumb.data))
