@@ -17,6 +17,7 @@ from naturtag.widgets.images import (
     HoverIcon,
     HoverPhoto,
     FAIcon,
+    HoverMixin,
     IconLabel,
     IconLabelList,
     InfoCard,
@@ -24,6 +25,7 @@ from naturtag.widgets.images import (
     ImageWindow,
     RemoteImageWindow,
     PixmapLabel,
+    SwappableIcon,
     set_pixmap,
     set_pixmap_async,
 )

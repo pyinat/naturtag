@@ -35,11 +35,13 @@ from naturtag.widgets import (
     FAIcon,
     FlowLayout,
     HorizontalLayout,
+    HoverMixin,
     ImageWindow,
+    PixmapLabel,
     StylableWidget,
+    SwappableIcon,
     VerticalLayout,
 )
-from naturtag.widgets.images import HoverMixin, PixmapLabel, SwappableIcon
 from naturtag.widgets.style import RED, fa_icon
 
 if TYPE_CHECKING:
