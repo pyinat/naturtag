@@ -46,9 +46,9 @@ def mock_rawpy():
     mock.ThumbFormat = MockThumbFormat
     sys.modules['rawpy'] = mock
     yield mock
-    # Clean up
-    if 'rawpy' in sys.modules:
-        del sys.modules['rawpy']
+    # Remove all rawpy submodules so real rawpy can re-import cleanly in later tests
+    for key in [k for k in sys.modules if k == 'rawpy' or k.startswith('rawpy.')]:
+        del sys.modules[key]
 
 
 def _setup_rawpy_mock(mock_rawpy, thumb_data, thumb_format_enum):
@@ -122,6 +122,25 @@ def test_open_raw_image_imread_error(mock_rawpy):
         _open_raw_image(Path('test.ORF'))
 
 
+def test_open_raw_image_no_thumbnail(mock_rawpy):
+    """Test that LibRawNoThumbnailError is converted to a friendly ValueError"""
+
+    # Define a real exception class so it can be raised as a side_effect
+    class FakeLibRawNoThumbnailError(Exception):
+        pass
+
+    mock_rawpy.LibRawNoThumbnailError = FakeLibRawNoThumbnailError
+
+    mock_raw = MagicMock()
+    mock_raw.__enter__ = MagicMock(return_value=mock_raw)
+    mock_raw.__exit__ = MagicMock(return_value=False)
+    mock_raw.extract_thumb.side_effect = FakeLibRawNoThumbnailError
+    mock_rawpy.imread.return_value = mock_raw
+
+    with pytest.raises(ValueError, match='No embedded thumbnail found in RAW file'):
+        _open_raw_image(Path('test.ORF'))
+
+
 def test_open_raw_image_unsupported_format(mock_rawpy):
     """Test that an unsupported ThumbFormat enum value raises ValueError"""
     _setup_rawpy_mock(mock_rawpy, b'', mock_rawpy.ThumbFormat.UNKNOWN)
@@ -158,7 +177,6 @@ def test_generate_thumbnail__mock_raw(sample_image, mock_rawpy):
     mock_rawpy.imread.assert_called_once_with(str(raw_path))
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize('raw_path', SAMPLE_RAW_FILES)
 def test_generate_thumbnail__real_raw(raw_path):
     """RAW file -> rawpy extraction -> PIL -> Qt QImage"""
