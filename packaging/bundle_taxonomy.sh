@@ -26,7 +26,4 @@ else
   tar_target=.
 fi
 
-# Extract taxonomy archive and create distributable tarball
-tar -xvzf "${ASSETS}/taxonomy.tar.gz" --directory "${ASSETS}/"
-rm "${ASSETS}/taxonomy.tar.gz"
 tar -C "$tar_dir" -czvf "${ROOT_DIR}/naturtag-${dist_name}.tar.gz" "$tar_target"
