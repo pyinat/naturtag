@@ -108,6 +108,15 @@ jobs:
         with:
           subject-path: dist/naturtag.dmg
 
+      # Generate SBOM from pyinstaller package
+      - name: Generate SBOM
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: anchore/sbom-action@v0
+        with:
+          path: dist/naturtag
+          artifact-name: naturtag-sbom.json
+          output-file: naturtag-sbom.json
+          format: cyclonedx-json
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
@@ -170,10 +179,23 @@ jobs:
           merge-multiple: true
       - run: ls -l release-assets/
 
+      - name: Generate checksums
+        run: |
+          cd release-assets
+          sha256sum naturtag* > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Attest release checksums
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: release-assets/SHA256SUMS
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: 'release-assets/naturtag*'
+          files: |
+            release-assets/naturtag*
+            release-assets/SHA256SUMS
           body: |
             See [installation docs](https://naturtag.readthedocs.io/en/stable/installation.html) for details on the packages below
             See [changelog](https://github.com/pyinat/naturtag/blob/main/HISTORY.md) for release details
