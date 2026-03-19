@@ -339,5 +339,5 @@ class TaxonDbController(TaxonController):
     def search(self, **params) -> WrapperPaginator[Taxon]:
         """Search taxa, and save results to the database (for future reference by ID)"""
         results = super().search(**params).all()
-        save_taxa(results)
+        save_taxa(results, self.client.db_path)
         return WrapperPaginator(results)
