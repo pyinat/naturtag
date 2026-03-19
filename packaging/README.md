@@ -9,6 +9,7 @@ Artifacts:
 * RPM package (Linux: Fedora and derivatives)
 * pacman package (Linux: Arch and derivatives)
 * AppImage package (Linux: Distro-agnostic)
+* Flatpack bundle (Linux: Distro-agnostic)
 * Taxonomy full text search database (optional download)
 
 # Release steps
