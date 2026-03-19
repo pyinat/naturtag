@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.pyinat.naturtag</id>
+  <name>Naturtag</name>
+  <summary>Tag your nature photos with iNat taxonomy and observation metadata</summary>
+  <description>
+    <p>
+      Naturtag is a desktop application for tagging nature photos with metadata from
+      iNaturalist. It reads observation and taxonomy data from iNaturalist and writes
+      standard EXIF/XMP/IPTC tags to your local image files, making them browsable/searchable
+      by taxonomy.
+    </p>
+    <ul>
+      <li>Tag photos with iNaturalist observation and/or taxonomy data</li>
+      <li>Browse and search observations and taxonomy</li>
+      <li>Supports JPEG, PNG, and RAW formats, plus sidecars</li>
+    </ul>
+  </description>
+
+  <url type="homepage">https://github.com/pyinat/naturtag</url>
+  <url type="bugtracker">https://github.com/pyinat/naturtag/issues</url>
+  <url type="help">https://naturtag.readthedocs.io</url>
+  <launchable type="desktop-id">org.pyinat.naturtag.desktop</launchable>
+  <icon type="stock">org.pyinat.naturtag</icon>
+  <developer><name>Jordan Cook</name></developer>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <content_rating type="oars-1.1"/>
+
+  <categories>
+    <category>Science</category>
+    <category>Photography</category>
+    <category>Utility</category>
+  </categories>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Photo tagger: select and tag observation photos</caption>
+      <image>https://raw.githubusercontent.com/pyinat/naturtag/main/assets/screenshots/image-selector.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Taxon search: browse and search the taxonomy tree</caption>
+      <image>https://raw.githubusercontent.com/pyinat/naturtag/main/assets/screenshots/taxon-search.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Observation browser: browse synced iNaturalist observations</caption>
+      <image>https://raw.githubusercontent.com/pyinat/naturtag/main/assets/screenshots/observation-browser.png</image>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="@VERSION@" date="@DATE@">
+      <description><p>See the changelog for details.</p></description>
+      <url>https://github.com/pyinat/naturtag/blob/main/HISTORY.md</url>
+    </release>
+  </releases>
+</component>

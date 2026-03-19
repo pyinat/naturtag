@@ -1,0 +1,35 @@
+app-id: org.pyinat.naturtag
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: naturtag
+
+finish-args:
+  - --share=ipc           # MIT-SHM for X11 performance
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri          # GPU acceleration
+  - --share=network       # iNaturalist API calls
+  - --filesystem=home     # Read/write user photo files
+
+modules:
+  - name: naturtag
+    buildsystem: simple
+    build-commands:
+      # Unpack the pre-built PyInstaller bundle (tarball contains flat contents, no top-level dir)
+      - install -d /app/bin
+      - tar -xf naturtag-linux.tar.gz -C /app/bin
+      # Desktop integration: adjust Exec= and Path= for Flatpak environment
+      - sed 's|^Exec=.*|Exec=naturtag|; s|^Path=.*||' naturtag.desktop > naturtag-flatpak.desktop
+      - install -Dm644 naturtag-flatpak.desktop /app/share/applications/org.pyinat.naturtag.desktop
+      - install -Dm644 logo.svg /app/share/icons/hicolor/scalable/apps/org.pyinat.naturtag.svg
+      - install -Dm644 org.pyinat.naturtag.metainfo.xml /app/share/metainfo/org.pyinat.naturtag.metainfo.xml
+    sources:
+      - type: file
+        path: ../naturtag-linux.tar.gz
+      - type: file
+        path: naturtag.desktop
+      - type: file
+        path: ../assets/icons/logo.svg
+      - type: file
+        path: ../dist/org.pyinat.naturtag.metainfo.xml

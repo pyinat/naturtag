@@ -73,6 +73,10 @@ build-linux-pkgs:
     ./packaging/build_fpm.sh
     ./packaging/build_appimage.sh
 
+# Build Flatpak bundle (requires naturtag-linux.tar.gz from build-pyinstaller)
+build-flatpak:
+    ./packaging/build_flatpak.sh
+
 # Build Windows installer
 build-win-installer:
     iscc //DAppVersion=`just version` packaging/naturtag.iss
