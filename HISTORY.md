@@ -10,7 +10,9 @@
 * Fix error when observation has no taxon
 * Fix error when observation has no `place_guess`
 * Fix error when searching taxa by name
-* Fix error on multiple `preferred_common_name` values
+* Fix error when multiple `Taxon.preferred_common_name` values are present
+* Fix error when entering special characters in taxon autocomplete search
+* Fix empty results for some search sequences in taxon autocomplete search
 
 ## 0.9.1 (2026-03-07)
 
