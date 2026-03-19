@@ -57,6 +57,9 @@ jobs:
         run: |
           uv build --wheel
           just build-pyinstaller
+      - name: Rename wheel (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: mv dist/naturtag-*.whl dist/naturtag.whl
       - name: Test pyinstaller package
         run: |
           # Smoke test; any incorrect shared library paths should raise errors here
@@ -91,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: naturtag-python-packages
-          path: dist/naturtag-*.whl
+          path: dist/naturtag.whl
 
       - name: Upload disk image (macOS)
         if: startsWith(matrix.os, 'macos')
