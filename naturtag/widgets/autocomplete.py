@@ -27,6 +27,7 @@ class TaxonAutocomplete(QLineEdit):
         self.setClearButtonEnabled(True)
         self.findChild(QToolButton).setIcon(fa_icon('mdi.backspace'))
         self.taxa: dict[str, int] = {}
+        self._last_query: str = ''
 
         completer = QCompleter()
         completer.setCaseSensitivity(Qt.CaseInsensitive)
@@ -64,13 +65,14 @@ class TaxonAutocomplete(QLineEdit):
 
     def _do_search(self):
         """Execute the search after the debounce delay"""
-        if len(q) > 1 and q not in self.taxa:
         q = INVALID_FTS5_CHARS.sub('', self._pending_query).strip()
+        if len(q) > 1 and q != self._last_query:
             from naturtag.controllers import get_app
 
             app = get_app()
             language = app.settings.locale if app.settings.search_locale else None
             results = self.taxon_completer.search(q, language=language)
+            self._last_query = q
             self.taxa = {t.name: t.id for t in results}
             self.model.setStringList(self.taxa.keys())
 
