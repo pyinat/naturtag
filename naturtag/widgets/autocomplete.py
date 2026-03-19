@@ -1,3 +1,4 @@
+import re
 from logging import getLogger
 
 from pyinaturalist_convert import TaxonAutocompleter
@@ -5,6 +6,8 @@ from PySide6.QtCore import QEvent, QStringListModel, Qt, QTimer, Signal, Slot
 from PySide6.QtWidgets import QCompleter, QLineEdit, QToolButton
 
 from naturtag.widgets.style import fa_icon
+
+INVALID_FTS5_CHARS = re.compile(r'[^\w\s\-\'\.]')
 
 logger = getLogger(__name__)
 
@@ -61,8 +64,8 @@ class TaxonAutocomplete(QLineEdit):
 
     def _do_search(self):
         """Execute the search after the debounce delay"""
-        q = self._pending_query
         if len(q) > 1 and q not in self.taxa:
+        q = INVALID_FTS5_CHARS.sub('', self._pending_query).strip()
             from naturtag.controllers import get_app
 
             app = get_app()
