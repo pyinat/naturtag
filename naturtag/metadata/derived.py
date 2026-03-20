@@ -162,7 +162,7 @@ class DerivedMetadata(BaseMetadata):
                 taxon_name = obs.taxon.full_name if obs.taxon else 'unknown taxon'
             except (AttributeError, TypeError):
                 logger.warning(
-                    f'Malformed common name in Image {self.image_path}, Taxon {obs.taxon.taxon.id}: '
+                    f'Malformed common name in Image {self.image_path}, Taxon {obs.taxon.id}: '
                     f'"{obs.taxon.preferred_common_name}"'
                 )
                 taxon_name = str(obs.taxon.preferred_common_name)
