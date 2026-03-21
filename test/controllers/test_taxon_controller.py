@@ -75,6 +75,23 @@ def test_display_taxon(controller, notify, expected_signal_count):
     assert on_select.call_count == expected_signal_count
 
 
+def test_search_children(controller, mock_app):
+    taxon = _make_taxon(id=99)
+    controller.search.selected_taxon = taxon
+    controller.search.search_children_switch.setChecked(True)
+    controller.search.search()
+
+    call_kwargs = mock_app.client.taxa.search.call_args.kwargs
+    assert 99 in call_kwargs['taxon_id']
+
+
+def test_search_children__no_taxon_selected(controller, mock_app):
+    """Searching with 'search children' checked but no taxon selected should not raise."""
+    assert controller.search.selected_taxon is None
+    controller.search.search_children_switch.setChecked(True)
+    controller.search.search()
+
+
 def test_set_search_results(controller):
     taxa = [_make_taxon(id=i) for i in range(3)]
 
