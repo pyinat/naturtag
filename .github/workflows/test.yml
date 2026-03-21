@@ -62,7 +62,7 @@ jobs:
           uv python install ${{ env.LATEST_PY_VERSION }}
           uv sync --no-dev
       - name: Run style checks & linting
-        uses: j178/prek-action@v1
+        uses: j178/prek-action@v2
 
       # Note: pip-audit currently fails in check for  GHSA-rp8m-h266-53jh with:
       #   packaging.version.InvalidVersion: Invalid version: '0.8.3ubuntu7.5'
