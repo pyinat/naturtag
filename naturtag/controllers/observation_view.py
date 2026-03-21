@@ -159,7 +159,7 @@ class ObservationInfoSection(StylableWidget):
         # )
 
         # Set title and main photo
-        self.history_taxon = None
+        self.history_observation = None
         self.selected_observation = obs
         self.group_box.setTitle(obs.taxon.full_name if obs.taxon else 'unknown taxon')
         self.image.hover_event = True

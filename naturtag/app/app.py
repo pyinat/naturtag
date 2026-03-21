@@ -333,6 +333,8 @@ class MainWindow(QMainWindow):
 
     def _init_settings_menu(self):
         """Create (or recreate) the settings menu and connect its signals."""
+        if hasattr(self, 'settings_menu'):
+            self.settings_menu.deleteLater()
         self.settings_menu = SettingsMenu()
         self.settings_menu.on_message.connect(self.info)
         self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)

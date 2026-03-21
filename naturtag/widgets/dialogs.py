@@ -308,6 +308,14 @@ class WelcomeDialog(QDialog):
         self.username_input.setFocus()
         self.username_input.selectAll()
 
+    def done(self, result: int):
+        try:
+            self.observation_controller.on_sync_progress.disconnect(self._on_sync_progress)
+            self.observation_controller.on_sync_finished.disconnect(self._on_sync_finished)
+        except RuntimeError:
+            pass  # already disconnected
+        super().done(result)
+
     @Slot(int, int)
     def _on_sync_progress(self, loaded: int, total: int):
         """Update the progress bar as sync pages arrive."""
