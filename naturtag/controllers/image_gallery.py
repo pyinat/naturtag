@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
 )
 from shiboken6 import isValid
 
-from naturtag.constants import IMAGE_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
+from naturtag.constants import IMAGE_FILETYPES, RAW_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
 from naturtag.controllers import BaseController
 from naturtag.metadata import DerivedMetadata
 from naturtag.utils import generate_thumbnail, get_valid_image_paths
@@ -103,13 +103,13 @@ class ImageGallery(BaseController):
             self,
             caption='Open image files:',
             dir=str(start_dir or self.app.settings.start_image_dir),
-            filter=f'Image files ({" ".join(IMAGE_FILETYPES)});;All files (*)',
+            filter=f'Image files ({" ".join(IMAGE_FILETYPES)});;RAW files ({" ".join(RAW_FILETYPES)});;All files (*)',
         )
         self.load_images(image_paths)
 
     def load_images(self, image_paths: Iterable[PathOrStr]):
         """Load multiple images, and ignore any duplicates"""
-        images = get_valid_image_paths(image_paths, recursive=True)
+        images = get_valid_image_paths(image_paths, recursive=True, include_raw=True)
         new_images = sorted(images - set(self.images.keys()))
         if not new_images:
             return
