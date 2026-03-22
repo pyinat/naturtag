@@ -1,5 +1,9 @@
 # History
 
+## Unreleased
+
+* Bundle `nt` CLI with all packages
+
 ## 0.10.0 (Unreleased)
 
 * Add provisional support for loading and tagging raw image formats (no preview thumbnails)
