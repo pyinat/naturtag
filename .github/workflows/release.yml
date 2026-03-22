@@ -21,6 +21,9 @@ jobs:
           - os: windows-latest
             dist_name: windows
       fail-fast: false
+    permissions:
+      id-token: write
+      attestations: write
     defaults:
       run:
         shell: bash
@@ -66,21 +69,61 @@ jobs:
           BIN=dist/naturtag.app/Contents/MacOS
           if ! test -d "$BIN"; then BIN=dist/naturtag; fi
           QT_QPA_PLATFORM=offscreen $BIN/naturtag --version | grep -q 'naturtag v'
+      - name: Attest pyinstaller package
+        uses: actions/attest@v2
+        with:
+          subject-path: naturtag-${{ matrix.dist_name }}.tar.gz
 
       # Build deb, rpm, pacman, and appimage packages
       - name: Build Linux packages
         if: startsWith(matrix.os, 'ubuntu')
         run: just build-linux-pkgs
+      - name: Attest Linux packages
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/attest@v2
+        with:
+          subject-path: |
+            dist/naturtag.deb
+            dist/naturtag.rpm
+            dist/naturtag.pkg.tar.zst
+            dist/naturtag.AppImage
 
       # Build Windows installer with Inno Setup
       - name: Build Windows installer
         if: startsWith(matrix.os, 'windows')
         run: just build-win-installer
+      - name: Attest Windows installer
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/attest@v2
+        with:
+          subject-path: dist/naturtag-installer.exe
 
       # Build and validate DMG package
       - name: Build disk image (macOS)
         if: startsWith(matrix.os, 'macos')
         run: just build-dmg
+      - name: Attest disk image (macOS)
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/attest@v2
+        with:
+          subject-path: dist/naturtag.dmg
+
+      # Generate SBOM from pyinstaller package
+      - name: Generate SBOM
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: anchore/sbom-action@v0
+        with:
+          path: dist/naturtag
+          artifact-name: naturtag-sbom.json
+          output-file: naturtag-sbom.json
+          format: cyclonedx-json
+      - name: Attest SBOM
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/attest@v2
+        with:
+          subject-path: naturtag-linux.tar.gz
+          predicate-type: https://cyclonedx.org/bom
+          predicate-path: naturtag-sbom.json
 
       # Upload workflow artifacts
       - name: Upload pyinstaller package
@@ -133,6 +176,8 @@ jobs:
     needs: build-app-packages
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -141,10 +186,23 @@ jobs:
           merge-multiple: true
       - run: ls -l release-assets/
 
+      - name: Generate checksums
+        run: |
+          cd release-assets
+          sha256sum naturtag* > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Attest release checksums
+        uses: actions/attest@v2
+        with:
+          subject-path: release-assets/SHA256SUMS
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: 'release-assets/naturtag*'
+          files: |
+            release-assets/naturtag*
+            release-assets/SHA256SUMS
           body: |
             See [installation docs](https://naturtag.readthedocs.io/en/stable/installation.html) for details on the packages below
             See [changelog](https://github.com/pyinat/naturtag/blob/main/HISTORY.md) for release details
