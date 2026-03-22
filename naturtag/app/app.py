@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QTabWidget,
     QWidget,
 )
+from shiboken6 import isValid
 
 from naturtag.app.controls import Toolbar, UserDirs
 from naturtag.app.settings_menu import SettingsMenu
@@ -269,6 +270,8 @@ class MainWindow(QMainWindow):
         signals = self.app.threadpool.schedule(check_for_update)
 
         def on_result(result: tuple[str, str] | None):
+            if not isValid(dialog):
+                return
             if result is not None:
                 latest, url = result
                 dialog.setText(
@@ -280,6 +283,8 @@ class MainWindow(QMainWindow):
             dialog.setStandardButtons(QMessageBox.Ok)
 
         def on_error(exc: Exception):
+            if not isValid(dialog):
+                return
             logger.warning('Update check failed:', exc_info=exc)
             dialog.setText('Could not check for updates. Please check your internet connection.')
             dialog.setStandardButtons(QMessageBox.Ok)
@@ -333,6 +338,8 @@ class MainWindow(QMainWindow):
 
     def _init_settings_menu(self):
         """Create (or recreate) the settings menu and connect its signals."""
+        if hasattr(self, 'settings_menu'):
+            self.settings_menu.deleteLater()
         self.settings_menu = SettingsMenu()
         self.settings_menu.on_message.connect(self.info)
         self.settings_menu.all_ranks.on_click.connect(self.taxon_controller.search.reset_ranks)

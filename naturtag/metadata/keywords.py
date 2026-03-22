@@ -35,7 +35,7 @@ class KeywordMetadata:
             if isinstance(keywords, list):
                 return keywords
             elif ',' in keywords:
-                return [kw.strip() for kw in ','.split(keywords)]
+                return [kw.strip() for kw in keywords.split(',')]
             else:
                 return [keywords.strip()] if keywords.strip() else []
 

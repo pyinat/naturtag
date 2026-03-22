@@ -8,13 +8,13 @@ from naturtag.metadata.gps import (
     to_xmp_coords,
 )
 
-DECIMAL_DEGREES = (37.76939, 122.48619)
+DECIMAL_DEGREES = (37.76939, -122.48619)
 
 
 def test_convert_dwc_coords():
     metadata = {
         'Xmp.dwc.decimalLatitude': '37.76939',
-        'Xmp.dwc.decimalLongitude': '122.48619',
+        'Xmp.dwc.decimalLongitude': '-122.48619',
     }
     assert convert_dwc_coords(metadata) == DECIMAL_DEGREES
 
@@ -44,7 +44,7 @@ def _approx_equals(coords_1, coords_2, epsilon=0.00001):
                 'Exif.GPSInfo.GPSLongitude': '122/1 29/1 103199/10000',
                 'Exif.GPSInfo.GPSLongitudeRef': 'E',
             },
-            (-37.76939, -122.48619),
+            (-37.76939, 122.48619),
         ),
         (
             convert_xmp_coords,
@@ -60,7 +60,7 @@ def _approx_equals(coords_1, coords_2, epsilon=0.00001):
                 'Xmp.exif.GPSLatitude': '37,46.1639999S',
                 'Xmp.exif.GPSLongitude': '122,29.1719999E',
             },
-            (-37.76939, -122.48619),
+            (-37.76939, 122.48619),
         ),
     ],
 )
@@ -79,7 +79,7 @@ def test_to_exif_coords():
         'Exif.GPSInfo.GPSLatitude': '37/1 46/1 98039/10000',
         'Exif.GPSInfo.GPSLatitudeRef': 'N',
         'Exif.GPSInfo.GPSLongitude': '122/1 29/1 102839/10000',
-        'Exif.GPSInfo.GPSLongitudeRef': 'W',
+        'Exif.GPSInfo.GPSLongitudeRef': 'W',  # negative longitude = West
         'Exif.GPSInfo.GPSHPositioningError': '50',
     }
 
@@ -87,6 +87,6 @@ def test_to_exif_coords():
 def test_to_xmp_coords():
     assert to_xmp_coords(DECIMAL_DEGREES, 50) == {
         'Xmp.exif.GPSLatitude': '37,46.16339999999991N',
-        'Xmp.exif.GPSLongitude': '122,29.171399999999267E',
+        'Xmp.exif.GPSLongitude': '122,29.171399999999267W',  # negative longitude = West
         'Xmp.exif.GPSHPositioningError': '50',
     }

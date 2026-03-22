@@ -51,7 +51,7 @@ def setup(
 
     logger.info('Running database setup')
     if overwrite:
-        logger.info('Overwriting exiting tables')
+        logger.info('Overwriting existing tables')
         with sqlite3.connect(db_path) as conn:
             conn.execute('DROP TABLE IF EXISTS observation')
             conn.execute('DROP TABLE IF EXISTS observation_fts')

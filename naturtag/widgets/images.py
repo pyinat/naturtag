@@ -211,7 +211,7 @@ class PixmapLabel(ClickableMixin, QLabel):
         self.setPixmap(QPixmap())
 
     def heightForWidth(self, width: int) -> int:
-        if self._pixmap:
+        if self._pixmap and self._pixmap.width() > 0:
             return (self._pixmap.height() * width) / self._pixmap.width()
         else:
             return self.height()
@@ -225,6 +225,8 @@ class PixmapLabel(ClickableMixin, QLabel):
             self._draw_description_text()
 
     def _draw_rounded_corners(self):
+        if not self._pixmap or self._pixmap.isNull():
+            return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing, True)
         brush = QBrush(self._pixmap)
@@ -322,8 +324,14 @@ class HoverIcon(ClickableMixin, FAIcon):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_enabled(False)
-        self.enterEvent = lambda *x: self.set_enabled(True)
-        self.leaveEvent = lambda *x: self.set_enabled(False)
+
+    def enterEvent(self, event):
+        self.set_enabled(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.set_enabled(False)
+        super().leaveEvent(event)
 
 
 class NavButtonsMixin(MIXIN_BASE):

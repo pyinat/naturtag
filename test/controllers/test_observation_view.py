@@ -201,3 +201,14 @@ def test_obs_info_load__no_taxon(obs_info):
     obs_info.load(obs)
     assert obs_info.group_box.title() == 'unknown taxon'
     assert obs_info.view_taxon_button.isEnabled() is False
+
+
+def test_obs_info_load__resets_history_observation(obs_info):
+    """load() resets history_observation (not the nonexistent history_taxon)."""
+    obs1 = _make_obs(id=1)
+    obs2 = _make_obs(id=2)
+    obs_info.load(obs1)
+    obs_info.load(obs2)
+
+    assert obs_info.history_observation is None
+    assert not hasattr(obs_info, 'history_taxon')

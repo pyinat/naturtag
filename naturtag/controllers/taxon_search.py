@@ -88,7 +88,7 @@ class TaxonSearch(CollapsiblePanel):
         """Search for taxa with the currently selected filters"""
         client = QApplication.instance().client
         taxon_ids = self.iconic_taxon_filters.selected_iconic_taxa
-        if self.search_children_switch.isChecked():
+        if self.search_children_switch.isChecked() and self.selected_taxon:
             taxon_ids.append(self.selected_taxon.id)
 
         settings = get_app().settings

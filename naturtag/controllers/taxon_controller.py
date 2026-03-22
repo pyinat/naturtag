@@ -130,6 +130,7 @@ class TaxonTabs(QTabWidget):
         self.setMaximumWidth(510)
         self.user_taxa = user_taxa
         self._init_complete = False
+        self._init_pending: set[str] = set()
 
         self.results = self.add_tab(
             TaxonList(user_taxa),
@@ -169,6 +170,8 @@ class TaxonTabs(QTabWidget):
         app = get_app()
         client = app.client
         display_ids = self.user_taxa.display_ids
+        self._init_complete = False
+        self._init_pending = {'recent', 'observed'}
 
         def get_recent_taxa():
             logger.info(f'Loading {len(display_ids)} user taxa')
@@ -180,12 +183,21 @@ class TaxonTabs(QTabWidget):
             get_recent_taxa, priority=QThread.LowPriority, group='taxonomy'
         )
         future.on_result.connect(self.display_recent)
+        future.on_finished.connect(lambda: self._on_init_task_finished('recent'))
 
         future = app.threadpool.schedule(
             self.get_user_observed_taxa, priority=QThread.LowPriority, group='taxonomy'
         )
         future.on_result.connect(self.display_observed)
-        self._init_complete = True
+        future.on_finished.connect(lambda: self._on_init_task_finished('observed'))
+
+    @Slot(str)
+    def _on_init_task_finished(self, task_name: str):
+        """Mark initial user taxa load complete after all startup tasks finish."""
+        if task_name in self._init_pending:
+            self._init_pending.discard(task_name)
+        if not self._init_pending:
+            self._init_complete = True
 
     def get_user_observed_taxa(self) -> TaxonCounts:
         """Get counts of taxa observed by the user, ordered by number of observations descending"""

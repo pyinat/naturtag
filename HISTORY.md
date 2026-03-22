@@ -3,9 +3,16 @@
 ## 0.10.0 (Unreleased)
 
 * Add provisional support for loading and tagging raw image formats (no preview thumbnails)
+* Fix parsing existing comma-separated keyword metadata
+* Fix incorrect EXIF coordinates for Eastern hemisphere
+* Fix potential resource leak when an exception occurs while writing image metadata
+* Fix bug when "Search within children" is enabled but no taxon is selected
+* Fix bug when closing the "Check for Updates" dialog before the request completes
+* Fix signal cleanup for settings menu and welcome dialog
 
 ## 0.9.2 (Unreleased)
 
+* Fix `AttributeError` when writing metadata to a corrupted image file (missing None check)
 * Fix fullscreen mode on macOS
 * Fix error when observation has no taxon
 * Fix error when observation has no `place_guess`
@@ -17,7 +24,7 @@
 ## 0.9.1 (2026-03-07)
 
 * Fix shared library paths in macOS pyinstaller package + DMG
-* Fix bug resulting in incorrect XMP coordinates for Eastern hemisphere
+* Fix incorrect XMP coordinates for Eastern hemisphere
 * Fix shell autocomplete setup (`nt setup shell`) for non-Linux platforms
 * Fix Tools > Reset database and add progress spinner
 * Fix silently ignored errors during background observation sync

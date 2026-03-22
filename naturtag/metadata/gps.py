@@ -56,7 +56,7 @@ def to_exif_coords(coords: Coordinates, accuracy: Optional[int] = None) -> dict[
 
     degrees, minutes, seconds = _decimal_to_dms(coords[1])
     seconds = int(seconds * 10000)
-    metadata['Exif.GPSInfo.GPSLongitudeRef'] = 'E' if coords[1] < 0 else 'W'
+    metadata['Exif.GPSInfo.GPSLongitudeRef'] = 'W' if coords[1] < 0 else 'E'
     metadata['Exif.GPSInfo.GPSLongitude'] = f'{degrees}/1 {minutes}/1 {seconds}/10000'
 
     if accuracy is not None:
@@ -97,13 +97,13 @@ def _decimal_to_dms(dd: float) -> tuple[int, int, float]:
 def _dms_to_decimal(degrees: float, minutes: float, seconds: float, direction: str) -> float:
     """Convert (degrees, minutes, seconds) to decimal degrees"""
     dd = degrees + (minutes / 60) + (seconds / 3600)
-    return dd * (-1 if direction in ['S', 'E'] else 1)
+    return dd * (-1 if direction in ['S', 'W'] else 1)
 
 
 def _ddm_to_decimal(degrees: float, minutes: float, direction: str) -> float:
     """Convert (degrees, decimal minutes) to decimal degrees"""
     dd = degrees + (minutes / 60)
-    return dd * (-1 if direction in ['S', 'E'] else 1)
+    return dd * (-1 if direction in ['S', 'W'] else 1)
 
 
 def _get_exif_coord(value: str, direction: str) -> Optional[float]:

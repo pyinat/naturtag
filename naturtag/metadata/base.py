@@ -151,13 +151,17 @@ class BaseMetadata:
         if any([write_exif, write_iptc, write_xmp]):
             logger.info(f'Writing metadata to {self.metadata_path}')
             img = self._read_exiv2_image(self.metadata_path)
-            if write_exif:
-                img.modify_exif(self.simple_exif)
-            if write_iptc:
-                img.modify_iptc(self.iptc)
-            if write_xmp:
-                img.modify_xmp(fixed_xmp)
-            img.close()
+            if img is None:
+                return
+            try:
+                if write_exif:
+                    img.modify_exif(self.simple_exif)
+                if write_iptc:
+                    img.modify_iptc(self.iptc)
+                if write_xmp:
+                    img.modify_xmp(fixed_xmp)
+            finally:
+                img.close()
 
         # Write sidecar for non-RAW files (RAW already wrote to sidecar via metadata_path)
         if write_sidecar and not self.is_sidecar and not self.is_raw:
@@ -167,8 +171,12 @@ class BaseMetadata:
         logger.info(f'Writing metadata to {self.sidecar_path}')
         _create_sidecar_stub(self.sidecar_path)
         sidecar_img = self._read_exiv2_image(self.sidecar_path)
-        sidecar_img.modify_xmp(fixed_xmp)
-        sidecar_img.close()
+        if sidecar_img is None:
+            return
+        try:
+            sidecar_img.modify_xmp(fixed_xmp)
+        finally:
+            sidecar_img.close()
 
     def _fix_xmp(self):
         """Fix some invalid/incompatible XMP tags"""
