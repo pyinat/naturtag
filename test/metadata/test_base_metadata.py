@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 
 from naturtag.metadata import BaseMetadata
@@ -109,3 +111,29 @@ def test_metadata_path__raw_returns_sidecar():
 def test_metadata_path__jpg_returns_self():
     meta = BaseMetadata(DEMO_IMAGE)
     assert meta.metadata_path == meta.image_path
+
+
+def test_write__lr_hierarchical_subject_uses_rdf_bag(tmp_path):
+    """lr:hierarchicalSubject should be written as rdf:Bag, not rdf:Seq"""
+    img_copy = tmp_path / DEMO_IMAGE.name
+    shutil.copy(DEMO_IMAGE, img_copy)
+
+    meta = BaseMetadata(img_copy)
+    meta.xmp['Xmp.lr.hierarchicalSubject'] = ['Animalia', 'Animalia|Arthropoda']
+    meta.write(write_exif=False, write_iptc=False, write_xmp=True, write_sidecar=False)
+
+    import pyexiv2
+
+    img = pyexiv2.Image(str(img_copy))
+    try:
+        raw = img.read_raw_xmp()
+    finally:
+        img.close()
+
+    assert '<rdf:Bag>' in raw
+    # Ensure no rdf:Seq wraps lr:hierarchicalSubject specifically
+    lr_start = raw.index('lr:hierarchicalSubject')
+    lr_end = raw.index('/lr:hierarchicalSubject')
+    lr_block = raw[lr_start:lr_end]
+    assert '<rdf:Bag>' in lr_block
+    assert '<rdf:Seq>' not in lr_block
