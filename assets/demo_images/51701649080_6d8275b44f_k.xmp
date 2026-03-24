@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:catalogNumber="101789550"
    dwc:verbatimEventDate="2021-10-18 15:05:00-05:00"
    dwc:verbatimLocality="Brown's Woods, West Des Moines, Iowa"
@@ -24,9 +26,8 @@
    dwc:occurrenceID="https://www.inaturalist.org/observations/101789550"
    dwc:inaturalistLogin="jkcook"
    dwc:recordedBy="Jordan Cook"
-   dwc:dateIdentified="2021-11-23T17:15:48-06:00"
-   dwc:identificationID="222465811"
-   dwc:identifiedBy="Jordan Cook"
+   dwc:dateIdentified="2021-11-23 23:49:09-06:00"
+   dwc:identificationID="222519098"
    dwc:basisOfRecord="HumanObservation"
    dwc:collectionCode="Observations"
    dwc:institutionCode="iNaturalist"
@@ -39,6 +40,9 @@
    dwc:eventTime="15:05-0500"
    dwc:vernacularName="Arabesque Orbweaver"
    dwc:subfamily="Araneinae"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   exif:GPSHPositioningError="200"
    exif:GPSLatitude="41,32.5935567N"
    exif:GPSLongitude="93,42.4993600E">
    <lr:hierarchicalSubject>
@@ -50,6 +54,7 @@
      <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae</rdf:li>
      <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae|Neoscona</rdf:li>
      <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae|Neoscona|Neoscona arabesca</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Arachnids</rdf:li>
      <rdf:li>Animals|Arthropods|Arachnids|Spiders</rdf:li>
@@ -78,6 +83,24 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Araneidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Araneidae/Neoscona</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Araneidae/Neoscona/Neoscona arabesca</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders/Orbweavers</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders/Orbweavers/"Spotted Orbweavers"</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders/Orbweavers/"Spotted Orbweavers"/"Arabesque Orbweaver"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Arabesque Orbweaver"</rdf:li>

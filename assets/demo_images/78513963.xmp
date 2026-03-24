@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:occurrenceID="https://www.inaturalist.org/observations/49459966"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -14,7 +16,6 @@
    dwc:datasetName="iNaturalist research-grade observations"
    dwc:catalogNumber="49459966"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2020-06-06T15:40:00-05:00"
    dwc:eventTime="15:40-0500"
@@ -27,7 +28,7 @@
    dwc:countryCode="US"
    dwc:stateProvince="Iowa"
    dwc:identificationID="109946898"
-   dwc:dateIdentified="2020-06-13T16:57:18+00:00"
+   dwc:dateIdentified="2020-06-13 16:57:18+00:00"
    dwc:taxonID="202860"
    dwc:scientificName="Chrysopilus ornatus"
    dwc:taxonRank="species"
@@ -44,6 +45,9 @@
    dwc:establishmentMeans="wild"
    dwc:vernacularName="Ornate Snipe Fly"
    dwc:subfamily="Chrysopilinae"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   exif:GPSHPositioningError="10"
    exif:GPSLatitude="41,11.9415933N"
    exif:GPSLongitude="93,39.4352117E">
    <dcterms:modified>
@@ -75,6 +79,7 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae|Chrysopilus</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Diptera|Rhagionidae|Chrysopilus|Chrysopilus ornatus</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
      <rdf:li>Animals|Arthropods|Insects|Flies</rdf:li>
@@ -82,6 +87,23 @@
      <rdf:li>Animals|Arthropods|Insects|Flies|"Snipe Flies"|"Ornate Snipe Fly"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Diptera</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Diptera/Rhagionidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Diptera/Rhagionidae/Chrysopilus</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Diptera/Rhagionidae/Chrysopilus/Chrysopilus ornatus</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Flies</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Flies/"Snipe Flies"</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Flies/"Snipe Flies"/"Ornate Snipe Fly"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Ornate Snipe Fly"</rdf:li>
@@ -99,11 +121,11 @@
      <rdf:li>taxonomy:order=Diptera</rdf:li>
      <rdf:li>taxonomy:suborder=Brachycera</rdf:li>
      <rdf:li>taxonomy:infraorder=Orthorrhapha</rdf:li>
+     <rdf:li>taxonomy:parvorder=Tabanomorpha</rdf:li>
      <rdf:li>taxonomy:family=Rhagionidae</rdf:li>
      <rdf:li>taxonomy:subfamily=Chrysopilinae</rdf:li>
      <rdf:li>taxonomy:genus=Chrysopilus</rdf:li>
      <rdf:li>"taxonomy:species=Chrysopilus ornatus"</rdf:li>
-     <rdf:li>taxonomy:parvorder=Tabanomorpha</rdf:li>
      <rdf:li>inat:taxon_id=202860</rdf:li>
      <rdf:li>dwc:taxonID=202860</rdf:li>
      <rdf:li>inat:observation_id=49459966</rdf:li>

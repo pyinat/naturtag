@@ -119,6 +119,7 @@ class KeywordMetadata:
         flat_keywords = self.normal_keywords + self.kv_keyword_list
         metadata = {tag: flat_keywords for tag in KEYWORD_TAGS}
         metadata.update({tag: self.hier_keywords for tag in HIER_KEYWORD_TAGS})
+        metadata['Xmp.digiKam.TagsList'] = [kw.replace('|', '/') for kw in self.hier_keywords]
         return metadata
 
 

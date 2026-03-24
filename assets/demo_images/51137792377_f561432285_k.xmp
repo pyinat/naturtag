@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:occurrenceRemarks=""
    dwc:catalogNumber="75237015"
    dwc:verbatimEventDate="2021-04-13 12:49:00-05:00"
@@ -24,10 +26,9 @@
    dwc:occurrenceID="https://www.inaturalist.org/observations/75237015"
    dwc:inaturalistLogin="jkcook"
    dwc:recordedBy="Jordan Cook"
-   dwc:dateIdentified="2021-04-25T16:43:14-05:00"
+   dwc:dateIdentified="2021-04-25 16:43:14-05:00"
    dwc:identificationID="168066436"
    dwc:identificationRemarks=""
-   dwc:identifiedBy="Jordan Cook"
    dwc:basisOfRecord="HumanObservation"
    dwc:collectionCode="Observations"
    dwc:institutionCode="iNaturalist"
@@ -40,6 +41,8 @@
    dwc:eventTime="12:49-0500"
    dwc:vernacularName="Nomad Bees"
    dwc:subfamily="Nomadinae"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   exif:GPSHPositioningError="20"
    exif:GPSLatitude="41,37.3401183N"
    exif:GPSLongitude="93,43.9188967E">
    <lr:hierarchicalSubject>
@@ -51,9 +54,11 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Nomadini</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Nomadini|Nomada</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Insects|"Nomad Bees"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans|"Nomad Bees"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:license>
@@ -76,12 +81,29 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Apidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Apidae/Nomadini</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Apidae/Nomadini/Nomada</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans/"Nomad Bees"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Nomad Bees"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Hymenopterans</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
