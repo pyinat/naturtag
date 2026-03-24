@@ -160,6 +160,7 @@ class BaseMetadata:
                     img.modify_iptc(self.iptc)
                 if write_xmp:
                     img.modify_xmp(fixed_xmp)
+                    _fix_xmp_bag_types(img)
             finally:
                 img.close()
 
@@ -175,6 +176,7 @@ class BaseMetadata:
             return
         try:
             sidecar_img.modify_xmp(fixed_xmp)
+            _fix_xmp_bag_types(sidecar_img)
         finally:
             sidecar_img.close()
 
@@ -206,3 +208,26 @@ def _create_sidecar_stub(path: Path):
     if not path.is_file():
         with open(path, 'w') as f:
             f.write(NEW_XMP_CONTENTS.strip())
+
+
+def _fix_xmp_bag_types(img) -> None:
+    """Fix lr:hierarchicalSubject to use rdf:Bag instead of rdf:Seq.
+
+    pyexiv2 writes all XMP arrays as rdf:Seq, but lr:hierarchicalSubject is defined
+    as an unordered bag in the LR namespace spec and expected as rdf:Bag by Digikam.
+    """
+    raw = img.read_raw_xmp()
+    if not raw or 'lr:hierarchicalSubject' not in raw:
+        return
+    fixed = re.sub(
+        r'(<lr:hierarchicalSubject>\s*)<rdf:Seq>',
+        r'\1<rdf:Bag>',
+        raw,
+    )
+    fixed = re.sub(
+        r'</rdf:Seq>(\s*</lr:hierarchicalSubject>)',
+        r'</rdf:Bag>\1',
+        fixed,
+    )
+    if fixed != raw:
+        img.modify_raw_xmp(fixed)
