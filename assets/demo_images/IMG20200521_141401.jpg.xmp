@@ -2,24 +2,21 @@
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 4.4.0-Exiv2">
  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about=""
+    xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:dcterms="http://purl.org/dc/terms/"
-    xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:exifEX="http://cipa.jp/exif/1.0/"
     xmlns:GIMP="http://www.gimp.org/xmp/"
     xmlns:MicrosoftPhoto="http://ns.microsoft.com/photo/1.0/"
     xmlns:xmp="http://ns.adobe.com/xap/1.0/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:tiff="http://ns.adobe.com/tiff/1.0/"
     xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
     xmlns:Iptc4xmpCore="http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/"
-   xmpMM:DocumentID="gimp:docid:gimp:6872ee36-f7aa-4f2b-8004-f923d216fce2"
-   xmpMM:InstanceID="xmp.iid:bf3f8b08-28d1-48f5-96e7-b775d21fe535"
-   xmpMM:OriginalDocumentID="xmp.did:ee56f2d5-27ac-4a93-a835-f89669400b81"
-   dc:Format="image/jpeg"
-   dcterms:rights="© Jordan Cook some rights reserved"
+   dwc:identifiedBy="Jordan Cook"
    dwc:basisOfRecord="HumanObservation"
    dwc:catalogNumber="64006049"
    dwc:class="Agaricomycetes"
@@ -27,7 +24,7 @@
    dwc:coordinateUncertaintyInMeters="10"
    dwc:countryCode="US"
    dwc:datasetName="iNaturalist research-grade observations"
-   dwc:dateIdentified="2020-11-01T18:55:26-06:00"
+   dwc:dateIdentified="2020-11-01 18:55:26-06:00"
    dwc:decimalLatitude="41.6183449713"
    dwc:decimalLongitude="-93.7300017265"
    dwc:establishmentMeans="wild"
@@ -50,11 +47,18 @@
    dwc:verbatimEventDate="2020-05-21 14:14:00-05:00"
    dwc:verbatimLocality="Urbandale, Iowa"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jordan Cook"
    dwc:geodeticDatum="EPSG:4326"
    dwc:vernacularName="Golden Oyster Mushroom"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   xmpMM:DocumentID="gimp:docid:gimp:6872ee36-f7aa-4f2b-8004-f923d216fce2"
+   xmpMM:InstanceID="xmp.iid:bf3f8b08-28d1-48f5-96e7-b775d21fe535"
+   xmpMM:OriginalDocumentID="xmp.did:ee56f2d5-27ac-4a93-a835-f89669400b81"
+   dc:Format="image/jpeg"
+   dcterms:rights="© Jordan Cook some rights reserved"
    exif:DateTimeDigitized="2020-05-21T14:14:01-05:00"
    exif:DateTimeOriginal="2020-05-21T14:14:01-05:00"
+   exif:GPSHPositioningError="10"
    exif:ExifVersion="0230"
    exif:FlashpixVersion="0100"
    exif:ColorSpace="1"
@@ -120,7 +124,7 @@
    Iptc4xmpCore:CountryCode="USA">
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"Basidiomycete Fungi"</rdf:li>
+     <rdf:li>"Club Fungi"</rdf:li>
      <rdf:li>"Fungi Including Lichens"</rdf:li>
      <rdf:li>"Golden Oyster Mushroom"</rdf:li>
      <rdf:li>"Oyster Mushrooms"</rdf:li>
@@ -204,11 +208,27 @@
      <rdf:li>Fungi|Basidiomycota|Agaricomycetes|Agaricales|Pleurotaceae</rdf:li>
      <rdf:li>Fungi|Basidiomycota|Agaricomycetes|Agaricales|Pleurotaceae|Pleurotus</rdf:li>
      <rdf:li>Fungi|Basidiomycota|Agaricomycetes|Agaricales|Pleurotaceae|Pleurotus|Pleurotus citrinopileatus</rdf:li>
-     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"</rdf:li>
-     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"|"Oyster Mushrooms"</rdf:li>
-     <rdf:li>"Fungi Including Lichens"|"Basidiomycete Fungi"|"Oyster Mushrooms"|"Golden Oyster Mushroom"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"|"Club Fungi"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"|"Club Fungi"|"Oyster Mushrooms"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"|"Club Fungi"|"Oyster Mushrooms"|"Golden Oyster Mushroom"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Fungi</rdf:li>
+     <rdf:li>Fungi/Basidiomycota</rdf:li>
+     <rdf:li>Fungi/Basidiomycota/Agaricomycetes</rdf:li>
+     <rdf:li>Fungi/Basidiomycota/Agaricomycetes/Agaricales</rdf:li>
+     <rdf:li>Fungi/Basidiomycota/Agaricomycetes/Agaricales/Pleurotaceae</rdf:li>
+     <rdf:li>Fungi/Basidiomycota/Agaricomycetes/Agaricales/Pleurotaceae/Pleurotus</rdf:li>
+     <rdf:li>Fungi/Basidiomycota/Agaricomycetes/Agaricales/Pleurotaceae/Pleurotus/Pleurotus citrinopileatus</rdf:li>
+     <rdf:li>"Fungi Including Lichens"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"/"Club Fungi"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"/"Club Fungi"/"Oyster Mushrooms"</rdf:li>
+     <rdf:li>"Fungi Including Lichens"/"Club Fungi"/"Oyster Mushrooms"/"Golden Oyster Mushroom"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>

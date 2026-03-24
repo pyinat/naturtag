@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:catalogNumber="49664891"
    dwc:verbatimEventDate="2020-06-11 20:00:00-05:00"
    dwc:verbatimLocality="Urbandale, IA, USA"
@@ -24,9 +26,8 @@
    dwc:occurrenceID="https://www.inaturalist.org/observations/49664891"
    dwc:inaturalistLogin="jkcook"
    dwc:recordedBy="Jordan Cook"
-   dwc:dateIdentified="2020-06-14T20:43:47-04:00"
-   dwc:identificationID="110327000"
-   dwc:identifiedBy="Jordan Cook"
+   dwc:dateIdentified="2020-09-13 13:58:16-04:00"
+   dwc:identificationID="130040574"
    dwc:basisOfRecord="HumanObservation"
    dwc:collectionCode="Observations"
    dwc:institutionCode="iNaturalist"
@@ -39,6 +40,9 @@
    dwc:eventTime="20:00-0500"
    dwc:vernacularName="Elm Borer"
    dwc:subfamily="Lamiinae"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   exif:GPSHPositioningError="15"
    exif:GPSLatitude="41,37.1084350N"
    exif:GPSLongitude="93,43.7966533E">
    <lr:hierarchicalSubject>
@@ -51,6 +55,7 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Cerambycidae|Saperdini</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Cerambycidae|Saperdini|Saperda</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Cerambycidae|Saperdini|Saperda|Saperda tridentata</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
      <rdf:li>Animals|Arthropods|Insects|Beetles</rdf:li>
@@ -78,6 +83,24 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Cerambycidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Cerambycidae/Saperdini</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Cerambycidae/Saperdini/Saperda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Cerambycidae/Saperdini/Saperda/Saperda tridentata</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Beetles</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Beetles/"Longhorn Beetles"</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Beetles/"Longhorn Beetles"/"Elm Borer"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Elm Borer"</rdf:li>
