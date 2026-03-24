@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:occurrenceID="https://www.inaturalist.org/observations/52060342"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -14,7 +16,6 @@
    dwc:datasetName="iNaturalist research-grade observations"
    dwc:catalogNumber="52060342"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2020-07-05T11:55:00-05:00"
    dwc:eventTime="11:55-0500"
@@ -26,7 +27,7 @@
    dwc:countryCode="US"
    dwc:stateProvince="Iowa"
    dwc:identificationID="115097873"
-   dwc:dateIdentified="2020-07-05T15:36:43-04:00"
+   dwc:dateIdentified="2020-07-05 13:36:43-06:00"
    dwc:taxonID="81839"
    dwc:scientificName="Platycryptus undatus"
    dwc:taxonRank="species"
@@ -44,11 +45,14 @@
    dwc:vernacularName="Tan Jumping Spider"
    dwc:subfamily="Salticinae"
    dwc:informationWithheld="Coordinate uncertainty increased to 100at the request of the observer"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   exif:GPSHPositioningError="100"
    exif:GPSLatitude="41,40.5525567N"
    exif:GPSLongitude="93,39.0660050E">
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2021-02-15 22:28:49-06:00</rdf:li>
+     <rdf:li>2025-01-14 22:36:44-06:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
@@ -76,6 +80,7 @@
      <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini</rdf:li>
      <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini|Platycryptus</rdf:li>
      <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Salticidae|Dendryphantini|Platycryptus|Platycryptus undatus</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Arachnids</rdf:li>
      <rdf:li>Animals|Arthropods|Arachnids|Spiders</rdf:li>
@@ -83,6 +88,24 @@
      <rdf:li>Animals|Arthropods|Arachnids|Spiders|"Jumping Spiders"|"Tan Jumping Spider"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Salticidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Salticidae/Dendryphantini</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Salticidae/Dendryphantini/Platycryptus</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Salticidae/Dendryphantini/Platycryptus/Platycryptus undatus</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders/"Jumping Spiders"</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders/"Jumping Spiders"/"Tan Jumping Spider"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Jumping Spiders"</rdf:li>

@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:catalogNumber="34667377"
    dwc:verbatimEventDate="2019-10-20 18:15:00-05:00"
    dwc:verbatimLocality="Urbandale, IA, USA"
@@ -25,9 +27,8 @@
    dwc:occurrenceID="https://www.inaturalist.org/observations/34667377"
    dwc:inaturalistLogin="jkcook"
    dwc:recordedBy="Jordan Cook"
-   dwc:dateIdentified="2019-10-21T01:16:45+00:00"
+   dwc:dateIdentified="2019-10-21 01:16:45+00:00"
    dwc:identificationID="75181382"
-   dwc:identifiedBy="Jordan Cook"
    dwc:basisOfRecord="HumanObservation"
    dwc:collectionCode="Observations"
    dwc:institutionCode="iNaturalist"
@@ -38,6 +39,8 @@
    dwc:datasetName="iNaturalist research-grade observations"
    dwc:eventDate="2019-10-20T18:15:00-05:00"
    dwc:eventTime="18:15-0500"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
    exif:GPSLatitude="41,37.1443833N"
    exif:GPSLongitude="93,43.8220367E">
    <lr:hierarchicalSubject>
@@ -50,6 +53,7 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Tenebrionidae|Cnodalonini</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Tenebrionidae|Cnodalonini|Alobates</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Coleoptera|Tenebrionidae|Cnodalonini|Alobates|Alobates pensylvanicus</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
      <rdf:li>Animals|Arthropods|Insects|Beetles</rdf:li>
@@ -64,7 +68,7 @@
    </dcterms:license>
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2019-12-13 18:09:15-06:00</rdf:li>
+     <rdf:li>2022-08-25 17:59:50-05:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
@@ -77,6 +81,24 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Tenebrionidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Tenebrionidae/Cnodalonini</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Tenebrionidae/Cnodalonini/Alobates</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Coleoptera/Tenebrionidae/Cnodalonini/Alobates/Alobates pensylvanicus</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Beetles</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Beetles/"Darkling Beetles"</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Beetles/"Darkling Beetles"/"false mealworm beetle"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Darkling Beetles"</rdf:li>
