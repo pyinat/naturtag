@@ -51,6 +51,7 @@ class QtRichHandler(RichHandler):
         self.widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.widget.setAttribute(Qt.WA_StyledBackground, True)
         self.widget.setObjectName('log_container')
+        self.widget.document().setMaximumBlockCount(500)
 
         self.console.record = True
         self.console.width = 120
@@ -58,4 +59,4 @@ class QtRichHandler(RichHandler):
     def emit(self, record: LogRecord):
         super().emit(record)
         if self.widget and isValid(self.widget):
-            self.widget.append(self.console.export_html())
+            self.widget.append(self.console.export_html(clear=True))
