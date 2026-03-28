@@ -45,7 +45,9 @@ jobs:
 
       # Install dependencies, with caching
       - uses: actions/checkout@v6
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-crate@4993624604c307fbca528d28a3c8b60fa5ecc859 # v1.4.0
+        with:
+          repo: casey/just
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
@@ -70,7 +72,7 @@ jobs:
           if ! test -d "$BIN"; then BIN=dist/naturtag; fi
           QT_QPA_PLATFORM=offscreen $BIN/naturtag --version | grep -q 'naturtag v'
       - name: Attest pyinstaller package
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: naturtag-${{ matrix.dist_name }}.tar.gz
 
@@ -80,7 +82,7 @@ jobs:
         run: just build-linux-pkgs
       - name: Attest Linux packages
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: |
             dist/naturtag.deb
@@ -94,7 +96,7 @@ jobs:
         run: just build-win-installer
       - name: Attest Windows installer
         if: startsWith(matrix.os, 'windows')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: dist/naturtag-installer.exe
 
@@ -104,14 +106,14 @@ jobs:
         run: just build-dmg
       - name: Attest disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: dist/naturtag.dmg
 
       # Generate SBOM from pyinstaller package
       - name: Generate SBOM
         if: startsWith(matrix.os, 'ubuntu')
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
           path: dist/naturtag
           artifact-name: naturtag-sbom.json
@@ -119,7 +121,7 @@ jobs:
           format: cyclonedx-json
       - name: Attest SBOM
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: naturtag-linux.tar.gz
           predicate-type: https://cyclonedx.org/bom
@@ -193,12 +195,12 @@ jobs:
           cat SHA256SUMS
 
       - name: Attest release checksums
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: release-assets/SHA256SUMS
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           files: |
             release-assets/naturtag*
