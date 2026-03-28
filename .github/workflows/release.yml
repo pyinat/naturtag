@@ -70,7 +70,7 @@ jobs:
           if ! test -d "$BIN"; then BIN=dist/naturtag; fi
           QT_QPA_PLATFORM=offscreen $BIN/naturtag --version | grep -q 'naturtag v'
       - name: Attest pyinstaller package
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: naturtag-${{ matrix.dist_name }}.tar.gz
 
@@ -80,7 +80,7 @@ jobs:
         run: just build-linux-pkgs
       - name: Attest Linux packages
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: |
             dist/naturtag.deb
@@ -94,7 +94,7 @@ jobs:
         run: just build-win-installer
       - name: Attest Windows installer
         if: startsWith(matrix.os, 'windows')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: dist/naturtag-installer.exe
 
@@ -104,7 +104,7 @@ jobs:
         run: just build-dmg
       - name: Attest disk image (macOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: dist/naturtag.dmg
 
@@ -119,7 +119,7 @@ jobs:
           format: cyclonedx-json
       - name: Attest SBOM
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: naturtag-linux.tar.gz
           predicate-type: https://cyclonedx.org/bom
@@ -193,7 +193,7 @@ jobs:
           cat SHA256SUMS
 
       - name: Attest release checksums
-        uses: actions/attest@v2
+        uses: actions/attest@v4
         with:
           subject-path: release-assets/SHA256SUMS
 
