@@ -421,3 +421,7 @@ def _install_bash_completion():
     print('Installed bash completion scripts.')
     print('Add the following to your ~/.bashrc, and restart your shell:')
     print(f'source {completion_dir}/*.bash\n')
+
+
+if __name__ == '__main__':
+    main()
