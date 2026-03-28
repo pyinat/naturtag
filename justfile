@@ -18,6 +18,12 @@ default: lint cov
 test *paths='test':
     uv run pytest {{paths}}
 
+# Run pip-audit with OSV
+audit:
+    uv run --with pip-audit pip-audit \
+        --vulnerability-service osv \
+        --ignore-vuln CVE-2026-4539  # very minor bug in pygments; no fix yet available
+
 # Run tests and generate coverage report; optionally specify coverage formats (default: html term)
 cov *cov_formats='html term':
     #!/usr/bin/env sh
