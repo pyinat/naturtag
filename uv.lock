@@ -830,6 +830,7 @@ dependencies = [
     { name = "pyside6" },
     { name = "pyyaml" },
     { name = "qtawesome" },
+    { name = "rawpy" },
     { name = "requests-ratelimiter" },
     { name = "sqlalchemy" },
 ]
@@ -873,6 +874,7 @@ requires-dist = [
     { name = "pyside6", specifier = "==6.11.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "qtawesome", specifier = "~=1.4.0" },
+    { name = "rawpy", specifier = ">=0.26.1" },
     { name = "requests-ratelimiter", specifier = ">=0.6,<0.9" },
     { name = "sqlalchemy", specifier = "~=2.0.47" },
 ]
@@ -1060,7 +1062,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ptyprocess" },
+    { name = "ptyprocess", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
@@ -1580,6 +1582,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/70/01/392eba83c8e47b946b929d7c46e0f04b35e9671f8bb6fc36b6f7945b4de8/qtpy-2.4.3.tar.gz", hash = "sha256:db744f7832e6d3da90568ba6ccbca3ee2b3b4a890c3d6fbbc63142f6e4cdf5bb", size = 66982, upload-time = "2025-02-11T15:09:25.759Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/69/76/37c0ccd5ab968a6a438f9c623aeecc84c202ab2fabc6a8fd927580c15b5a/QtPy-2.4.3-py3-none-any.whl", hash = "sha256:72095afe13673e017946cc258b8d5da43314197b741ed2890e563cf384b51aa1", size = 95045, upload-time = "2025-02-11T15:09:24.162Z" },
+]
+
+[[package]]
+name = "rawpy"
+version = "0.26.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8a/fd/5df77631386343102a0845e4e3d8e19bbbc65eff269975501a4d0c495339/rawpy-0.26.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:6b9ce24a5446098b0cb93dea3cba102959bde20df39a10c3bcedf1226295e54b", size = 1121251, upload-time = "2026-02-09T21:58:00.866Z" },
+    { url = "https://files.pythonhosted.org/packages/df/b1/4fac43de665eb677ddc0571c498caca01b4ec143479912c2c43a5a10b5d3/rawpy-0.26.1-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8d1d0a26e79297e95a183a769e0bca3404830797224e168980b04463532084be", size = 1877995, upload-time = "2026-02-09T21:58:02.687Z" },
+    { url = "https://files.pythonhosted.org/packages/59/01/29708de814211c8c0beea8bf9586cfb5b194660780b42edee2314ec94453/rawpy-0.26.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:cd7529caf7722f6b89b3c0ab505313bd4638dd3136af0275906209114ce74d73", size = 1847274, upload-time = "2026-02-09T21:58:04.544Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/31/a4baa978f33fdd34c10d2a8cb29b10b92c41a163f8fa36d036adb817bf32/rawpy-0.26.1-cp313-cp313-win_amd64.whl", hash = "sha256:a730ed88843141224518724e0926f6b71d5c1883c3ca839865bac6b450337332", size = 884627, upload-time = "2026-02-09T21:58:05.897Z" },
+    { url = "https://files.pythonhosted.org/packages/95/57/921db08ad430ec9881b4539d574d29cdcd2ca3a78915148f122adc4dd036/rawpy-0.26.1-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:b28e1185244c26a17b699282a50e99259ace6db75efc8b1b96c5bdd68eedc372", size = 1120787, upload-time = "2026-02-09T21:58:07.474Z" },
+    { url = "https://files.pythonhosted.org/packages/9c/d2/2968cc71aaa369ff720d2c175fe1deed261e6be0e95c75c13a805f18eda4/rawpy-0.26.1-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ab56fb9e8c202e442ede63ccd3c49f9d8069a2c7a17768d2478698eb12c44548", size = 1878877, upload-time = "2026-02-09T21:58:09.443Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/c7/32209a59deda0e0449cbbc69fa395dad8f984a61c83ea39a27b12a669fc2/rawpy-0.26.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c5400d5fdcbca0c72012093c907885475b77a20656d26a2729f140c43ccfcd70", size = 1847122, upload-time = "2026-02-09T21:58:11.844Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/62/4e1c3907ef74c5951e6c74c1bf39adaa6cc4e2c380c8f4e4e106e210c5a0/rawpy-0.26.1-cp314-cp314-win_amd64.whl", hash = "sha256:dcbbc16f8de1c08df828fde3fb5097301c77872baee3ca0e8427ca03c7eb459b", size = 912318, upload-time = "2026-02-09T21:58:13.139Z" },
 ]
 
 [[package]]
