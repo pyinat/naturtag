@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:occurrenceID="https://www.inaturalist.org/observations/32989972"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -14,7 +16,6 @@
    dwc:datasetName="iNaturalist research-grade observations"
    dwc:catalogNumber="32989972"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2019-09-18T15:56:00-05:00"
    dwc:eventTime="15:56-0500"
@@ -26,7 +27,7 @@
    dwc:countryCode="US"
    dwc:stateProvince="Iowa"
    dwc:identificationID="71443247"
-   dwc:dateIdentified="2019-09-19T02:33:54+00:00"
+   dwc:dateIdentified="2019-09-19 02:33:54+00:00"
    dwc:taxonID="120183"
    dwc:scientificName="Araneus marmoreus"
    dwc:taxonRank="species"
@@ -39,39 +40,33 @@
    dwc:inaturalistLogin="jkcook"
    dwc:occurrenceDetails="https://www.inaturalist.org/observations/32989972"
    dwc:establishmentMeans="wild"
-   dwc:vernacularName="Marbled Orbweaver"
+   dwc:vernacularName="Marbled Orb Weaver"
    dwc:subfamily="Araneinae"
+   dwc:occurrenceRemarks="This is one of my favorites so far. I almost didn't notice it until was just about to plow my face through its web. It soon started to scuttle away, and I had just enough time to get it in focus before it escaped. I wasn't so lucky with most of the other spiders I tried photographing that day. I'd like to go back to that area again to find more of these guys."
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
    exif:GPSLatitude="41,47.2578783N"
    exif:GPSLongitude="93,47.4125900E">
    <lr:hierarchicalSubject>
     <rdf:Seq>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animalia|Arthropoda</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae|Araneus</rdf:li>
-     <rdf:li>Animalia|Arthropoda|Chelicerata|Arachnida|Araneae|Araneomorphae|Entelegynae|Araneoidea|Araneidae|Araneinae|Araneus|Araneus marmoreus"</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae|Araneus</rdf:li>
+     <rdf:li>Animalia|Arthropoda|Arachnida|Araneae|Araneidae|Araneus|Araneus marmoreus</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers|"Typical Orbweavers"</rdf:li>
-     <rdf:li>Animals|Arthropods|Chelicerates|Arachnids|Spiders|"Typical Spiders"|"Entelegyne Spiders"|"Araneoid Spiders"|Orbweavers|"Typical Orbweavers"|"Marbled Orbweaver"</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|Orbweavers</rdf:li>
+     <rdf:li>Animals|Arthropods|Arachnids|Spiders|Orbweavers|"Marbled Orb Weaver"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2019-09-23 19:36:34-05:00</rdf:li>
+     <rdf:li>2024-12-19 14:17:15-06:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
@@ -89,18 +84,30 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Araneidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Araneidae/Araneus</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Arachnida/Araneae/Araneidae/Araneus/Araneus marmoreus</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders/Orbweavers</rdf:li>
+     <rdf:li>Animals/Arthropods/Arachnids/Spiders/Orbweavers/"Marbled Orb Weaver"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
-     <rdf:li>"Araneoid Spiders"</rdf:li>
-     <rdf:li>"Entelegyne Spiders"</rdf:li>
-     <rdf:li>"Marbled Orbweaver"</rdf:li>
-     <rdf:li>"Typical Orbweavers"</rdf:li>
-     <rdf:li>"Typical Spiders"</rdf:li>
+     <rdf:li>"Marbled Orb Weaver"</rdf:li>
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arachnids</rdf:li>
      <rdf:li>Arthropods</rdf:li>
-     <rdf:li>Chelicerates</rdf:li>
      <rdf:li>Orbweavers</rdf:li>
      <rdf:li>Spiders</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>

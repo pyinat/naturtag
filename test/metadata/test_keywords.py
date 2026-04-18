@@ -144,6 +144,21 @@ def test_tags():
     # Hierarchical keywords go to HIER_KEYWORD_TAGS
     assert 'Animalia|Arthropoda' in tags['Xmp.lr.hierarchicalSubject']
     assert 'Animalia|Arthropoda' in tags['Iptc.Application2.Keywords']
+    # Digikam native field uses slash-separated paths
+    assert 'Xmp.digiKam.TagsList' in tags
+    assert 'Animalia/Arthropoda' in tags['Xmp.digiKam.TagsList']
+
+
+def test_digikam_tags():
+    """Xmp.digiKam.TagsList should be slash-separated equivalents of hier_keywords"""
+    kw = KeywordMetadata(keywords=['Animalia|Arthropoda|Insecta', 'Animalia|Arthropoda'])
+    digikam = kw.tags['Xmp.digiKam.TagsList']
+    # Root node is inferred and prepended
+    assert 'Animalia' in digikam
+    assert 'Animalia/Arthropoda' in digikam
+    assert 'Animalia/Arthropoda/Insecta' in digikam
+    # Pipe form should not appear
+    assert not any('|' in entry for entry in digikam)
 
 
 @pytest.mark.parametrize(

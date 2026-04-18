@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:occurrenceID="https://www.inaturalist.org/observations/36370373"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -14,7 +16,6 @@
    dwc:datasetName="iNaturalist research-grade observations"
    dwc:catalogNumber="36370373"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2019-11-28T15:15:00-06:00"
    dwc:eventTime="15:15-0600"
@@ -27,7 +28,7 @@
    dwc:countryCode="US"
    dwc:stateProvince="Missouri"
    dwc:identificationID="79731760"
-   dwc:dateIdentified="2019-12-04T23:37:38-06:00"
+   dwc:dateIdentified="2019-12-04 23:37:38-06:00"
    dwc:taxonID="370906"
    dwc:scientificName="Polistes rubiginosus"
    dwc:taxonRank="species"
@@ -45,11 +46,14 @@
    dwc:vernacularName="Coarse-backed Red Paper Wasp"
    dwc:subfamily="Polistinae"
    dwc:subgenus="Fuscopolistes"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   exif:GPSHPositioningError="200"
    exif:GPSLatitude="36,33.4697500N"
    exif:GPSLongitude="93,28.0766900E">
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2019-12-06 17:48:22-06:00</rdf:li>
+     <rdf:li>2022-08-30 22:22:20-05:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
@@ -77,12 +81,32 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini|Polistes</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Vespidae|Polistini|Polistes|Polistes rubiginosus</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Insects|"Umbrella Paper Wasps"</rdf:li>
-     <rdf:li>Animals|Arthropods|Insects|"Umbrella Paper Wasps"|"Coarse-backed Red Paper Wasp"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans|"Umbrella Paper Wasps"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans|"Umbrella Paper Wasps"|"Coarse-backed Red Paper Wasp"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Vespidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Vespidae/Polistini</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Vespidae/Polistini/Polistes</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Vespidae/Polistini/Polistes/Polistes rubiginosus</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans/"Umbrella Paper Wasps"</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans/"Umbrella Paper Wasps"/"Coarse-backed Red Paper Wasp"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Coarse-backed Red Paper Wasp"</rdf:li>
@@ -90,6 +114,7 @@
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Hymenopterans</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>
