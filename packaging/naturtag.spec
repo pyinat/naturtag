@@ -1,3 +1,4 @@
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -6,7 +7,7 @@ from PyInstaller.compat import is_darwin, is_linux, is_win
 from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 
 PROJECT_NAME = 'naturtag'
-PROJECT_DIR = Path('.').absolute()
+PROJECT_DIR = Path(os.path.dirname(os.path.abspath(SPEC))).parent
 ASSETS_DIR = PROJECT_DIR / 'assets'
 ICONS_DIR = ASSETS_DIR / 'icons'
 ASSETS_DATA_DIR = ASSETS_DIR / 'data'
@@ -58,17 +59,18 @@ datas += copy_metadata('pyinaturalist')
 datas += collect_data_files('pyinaturalist_convert', include_py_files=True)
 
 a = Analysis(
-    [str(PACKAGE_DIR / 'app' / 'app.py')],
+    [str(PACKAGE_DIR / 'main.py')],
     pathex=[str(PROJECT_DIR)],
     binaries=binaries,
     datas=datas,
-    hiddenimports = [],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
 )
+
 pyz = PYZ(a.pure, a.zipped_data)
 exe = EXE(
     pyz,
@@ -81,13 +83,14 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
