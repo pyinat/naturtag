@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:occurrenceRemarks="Sadly this one appeared to be injured, but it was still moving. I found it struggling to climb out of the creek (4th picture), with damaged wings and abdomen."
    dwc:catalogNumber="85007060"
    dwc:verbatimEventDate="2021-06-21 15:21:00-05:00"
@@ -24,9 +26,8 @@
    dwc:occurrenceID="https://www.inaturalist.org/observations/85007060"
    dwc:inaturalistLogin="jkcook"
    dwc:recordedBy="Jordan Cook"
-   dwc:dateIdentified="2021-06-29T19:13:29+00:00"
+   dwc:dateIdentified="2021-06-29 19:13:29+00:00"
    dwc:identificationID="187061340"
-   dwc:identifiedBy="Jordan Cook"
    dwc:basisOfRecord="HumanObservation"
    dwc:collectionCode="Observations"
    dwc:institutionCode="iNaturalist"
@@ -38,6 +39,9 @@
    dwc:eventDate="2021-06-21T15:21:00-05:00"
    dwc:eventTime="15:21-0500"
    dwc:vernacularName="Dancers"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   exif:GPSHPositioningError="30"
    exif:GPSLatitude="41,37.3570283N"
    exif:GPSLongitude="93,44.0741533E">
    <lr:hierarchicalSubject>
@@ -48,6 +52,7 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Odonata</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Odonata|Coenagrionidae</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Odonata|Coenagrionidae|Argia</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
      <rdf:li>Animals|Arthropods|Insects|"Narrow-winged Damselflies"</rdf:li>
@@ -74,6 +79,21 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Odonata</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Odonata/Coenagrionidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Odonata/Coenagrionidae/Argia</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/"Narrow-winged Damselflies"</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/"Narrow-winged Damselflies"/Dancers</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Narrow-winged Damselflies"</rdf:li>

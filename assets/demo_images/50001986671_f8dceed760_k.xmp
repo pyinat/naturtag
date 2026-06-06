@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:occurrenceID="https://www.inaturalist.org/observations/49454455"
    dwc:basisOfRecord="HumanObservation"
    dwc:institutionCode="iNaturalist"
@@ -15,11 +17,10 @@
    dwc:catalogNumber="49454455"
    dwc:occurrenceRemarks="🐝💛🧡"
    dwc:recordedBy="Jordan Cook"
-   dwc:identifiedBy="Jordan Cook"
    dwc:captive="wild"
    dwc:eventDate="2020-06-06T15:52:00-05:00"
    dwc:eventTime="15:52-0500"
-   dwc:verbatimEventDate="2020-06-06 15:52:00-06:00"
+   dwc:verbatimEventDate="2020-06-06 15:52:00-05:00"
    dwc:verbatimLocality=" Rolling Thunder Prairie, Warren County, Iowa "
    dwc:decimalLatitude="41.1989907799"
    dwc:decimalLongitude="-93.6572785001"
@@ -27,8 +28,8 @@
    dwc:geodeticDatum="EPSG:4326"
    dwc:countryCode="US"
    dwc:stateProvince="Iowa"
-   dwc:identificationID="109938326"
-   dwc:dateIdentified="2020-06-13T11:18:04-05:00"
+   dwc:identificationID="110128326"
+   dwc:dateIdentified="2020-06-14 04:43:08-05:00"
    dwc:taxonID="47219"
    dwc:scientificName="Apis mellifera"
    dwc:taxonRank="species"
@@ -44,7 +45,10 @@
    dwc:vernacularName="Western Honey Bee"
    dwc:subfamily="Apinae"
    dwc:subgenus="Apis"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
    dcterms:description="🐝💛🧡"
+   exif:GPSHPositioningError="10"
    exif:GPSLatitude="41,11.9394467N"
    exif:GPSLongitude="93,39.4367100E">
    <dcterms:modified>
@@ -77,13 +81,34 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini|Apis</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Hymenoptera|Apidae|Apini|Apis|Apis mellifera</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
-     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"</rdf:li>
-     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"|"Honey Bees"</rdf:li>
-     <rdf:li>Animals|Arthropods|Insects|"Honey Bees"|"Honey Bees"|"Western Honey Bee"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans|Honeybees</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans|Honeybees|"Honey Bees"</rdf:li>
+     <rdf:li>Animals|Arthropods|Insects|Hymenopterans|Honeybees|"Honey Bees"|"Western Honey Bee"</rdf:li>
     </rdf:Seq>
    </lr:hierarchicalSubject>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Apidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Apidae/Apini</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Apidae/Apini/Apis</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Hymenoptera/Apidae/Apini/Apis/Apis mellifera</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans/Honeybees</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans/Honeybees/"Honey Bees"</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Hymenopterans/Honeybees/"Honey Bees"/"Western Honey Bee"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Honey Bees"</rdf:li>
@@ -91,6 +116,8 @@
      <rdf:li>Animalia</rdf:li>
      <rdf:li>Animals</rdf:li>
      <rdf:li>Arthropods</rdf:li>
+     <rdf:li>Honeybees</rdf:li>
+     <rdf:li>Hymenopterans</rdf:li>
      <rdf:li>Insects</rdf:li>
      <rdf:li>taxonomy:kingdom=Animalia</rdf:li>
      <rdf:li>taxonomy:phylum=Arthropoda</rdf:li>

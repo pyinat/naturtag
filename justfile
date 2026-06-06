@@ -7,8 +7,12 @@ live_docs_port := '8181'
 live_docs_watch := 'pyinaturalist examples'
 live_docs_ignore := '*.csv *.ipynb *.pyc *.tmp **/modules/* **/jupyter_execute/*'
 
-# Run linters and generate coverage report (default)
-default: lint cov
+default:
+    @just --list
+
+# Run linters and generate coverage report
+all:
+    lint cov
 
 
 # Local development
@@ -22,7 +26,7 @@ test *paths='test':
 audit:
     uv run --with pip-audit pip-audit \
         --vulnerability-service osv \
-        --ignore-vuln CVE-2026-4539  # very minor bug in pygments; no fix yet available
+        .
 
 # Run tests and generate coverage report; optionally specify coverage formats (default: html term)
 cov *cov_formats='html term':

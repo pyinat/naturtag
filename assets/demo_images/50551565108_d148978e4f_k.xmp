@@ -5,8 +5,10 @@
     xmlns:dwc="http://rs.tdwg.org/dwc/index.htm/"
     xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:digiKam="http://www.digikam.org/ns/1.0/"
     xmlns:exif="http://ns.adobe.com/exif/1.0/"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+   dwc:identifiedBy="Jordan Cook"
    dwc:catalogNumber="63913621"
    dwc:verbatimEventDate="2020-09-17 14:29:00-05:00"
    dwc:verbatimLocality="Urbandale, IA, USA"
@@ -24,9 +26,8 @@
    dwc:occurrenceID="https://www.inaturalist.org/observations/63913621"
    dwc:inaturalistLogin="jkcook"
    dwc:recordedBy="Jordan Cook"
-   dwc:dateIdentified="2020-10-31T21:07:03+00:00"
+   dwc:dateIdentified="2020-10-31 16:07:03-05:00"
    dwc:identificationID="139458390"
-   dwc:identifiedBy="Jordan Cook"
    dwc:basisOfRecord="HumanObservation"
    dwc:collectionCode="Observations"
    dwc:institutionCode="iNaturalist"
@@ -34,11 +35,14 @@
    dwc:decimalLatitude="41.6248269293"
    dwc:decimalLongitude="-93.7307266769"
    dwc:establishmentMeans="wild"
-   dwc:datasetName="iNaturalist unconfirmed observations"
+   dwc:datasetName="iNaturalist research-grade observations"
    dwc:eventDate="2020-09-17T14:29:00-05:00"
    dwc:eventTime="14:29-0500"
    dwc:vernacularName="Chinese Mantis"
    dwc:subfamily="Tenoderinae"
+   dwc:recordedByID="https://orcid.org/0009-0007-1850-2681"
+   dwc:identificationRemarks=""
+   exif:GPSHPositioningError="330"
    exif:GPSLatitude="41,37.4896150N"
    exif:GPSLongitude="93,43.8436000E">
    <lr:hierarchicalSubject>
@@ -51,6 +55,7 @@
      <rdf:li>Animalia|Arthropoda|Insecta|Mantodea|Mantidae|Tenoderini</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Mantodea|Mantidae|Tenoderini|Tenodera</rdf:li>
      <rdf:li>Animalia|Arthropoda|Insecta|Mantodea|Mantidae|Tenoderini|Tenodera|Tenodera sinensis</rdf:li>
+     <rdf:li>Animals</rdf:li>
      <rdf:li>Animals|Arthropods</rdf:li>
      <rdf:li>Animals|Arthropods|Insects</rdf:li>
      <rdf:li>Animals|Arthropods|Insects|Mantises</rdf:li>
@@ -65,7 +70,7 @@
    </dcterms:license>
    <dcterms:modified>
     <rdf:Seq>
-     <rdf:li>2020-10-31 16:07:04-05:00</rdf:li>
+     <rdf:li>2026-03-21 13:55:48-05:00</rdf:li>
     </rdf:Seq>
    </dcterms:modified>
    <dcterms:references>
@@ -78,6 +83,24 @@
      <rdf:li>Jordan Cook</rdf:li>
     </rdf:Seq>
    </dcterms:rightsHolder>
+   <digiKam:TagsList>
+    <rdf:Seq>
+     <rdf:li>Animalia</rdf:li>
+     <rdf:li>Animalia/Arthropoda</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Mantodea</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Mantodea/Mantidae</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Mantodea/Mantidae/Tenoderini</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Mantodea/Mantidae/Tenoderini/Tenodera</rdf:li>
+     <rdf:li>Animalia/Arthropoda/Insecta/Mantodea/Mantidae/Tenoderini/Tenodera/Tenodera sinensis</rdf:li>
+     <rdf:li>Animals</rdf:li>
+     <rdf:li>Animals/Arthropods</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Mantises</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Mantises/Mantids</rdf:li>
+     <rdf:li>Animals/Arthropods/Insects/Mantises/Mantids/"Chinese Mantis"</rdf:li>
+    </rdf:Seq>
+   </digiKam:TagsList>
    <dc:subject>
     <rdf:Seq>
      <rdf:li>"Chinese Mantis"</rdf:li>
