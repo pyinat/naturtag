@@ -8,6 +8,7 @@ from PySide6.QtCore import QObject, Qt, Signal
 
 from naturtag.controllers.image_gallery import (
     ImageGallery,
+    MetaThumbnail,
     ThumbnailCard,
 )
 
@@ -420,6 +421,35 @@ def test_thumbnail_card__update_metadata_resets_pending_icons(thumbnail_card, mo
         thumbnail_card.update_metadata(mock_metadata)
 
     assert icons.taxon_icon.pixmap().toImage() == before  # reset to secondary
+
+
+# --- MetaThumbnail ---
+
+
+def test_meta_thumbnail__get_pixmap_meta__returns_placeholder_on_error(qtbot):
+    """get_pixmap_meta returns (None, metadata, error_str) when thumbnail generation fails,
+    so the caller can show a placeholder image instead of crashing.
+    """
+    from PySide6.QtWidgets import QWidget
+
+    parent = QWidget()
+    qtbot.addWidget(parent)
+    thumbnail = MetaThumbnail(parent)
+    qtbot.addWidget(thumbnail)
+
+    with (
+        patch(
+            'naturtag.controllers.image_gallery.generate_thumbnail',
+            side_effect=ValueError('No embedded thumbnail found in RAW file'),
+        ),
+        patch('naturtag.controllers.image_gallery.DerivedMetadata') as mock_meta_cls,
+    ):
+        mock_meta_cls.return_value = MagicMock()
+        image, metadata, error = thumbnail.get_pixmap_meta(Path('/test/photo.ORF'))
+
+    assert image is None
+    assert 'No embedded thumbnail found in RAW file' in error
+    assert metadata is mock_meta_cls.return_value
 
 
 # --- Error handling ---
