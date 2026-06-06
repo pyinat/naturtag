@@ -220,14 +220,10 @@ def _fix_xmp_bag_types(img) -> None:
     if not raw or 'lr:hierarchicalSubject' not in raw:
         return
     fixed = re.sub(
-        r'(<lr:hierarchicalSubject>\s*)<rdf:Seq>',
-        r'\1<rdf:Bag>',
+        r'(<lr:hierarchicalSubject>\s*)<rdf:Seq>(.*?)</rdf:Seq>(\s*</lr:hierarchicalSubject>)',
+        r'\1<rdf:Bag>\2</rdf:Bag>\3',
         raw,
-    )
-    fixed = re.sub(
-        r'</rdf:Seq>(\s*</lr:hierarchicalSubject>)',
-        r'</rdf:Bag>\1',
-        fixed,
+        flags=re.DOTALL,
     )
     if fixed != raw:
         img.modify_raw_xmp(fixed)
