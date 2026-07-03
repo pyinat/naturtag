@@ -79,7 +79,10 @@ class BaseMetadata:
         try:
             return Image(str(path))
         except RuntimeError:
-            logger.exception(f'Failed to read corrupted metadata from {path}')
+            if not Path(path).is_file():
+                logger.warning(f'Metadata file does not exist: {path}')
+            else:
+                logger.exception(f'Failed to read corrupted metadata from {path}')
             return None
 
     @property
@@ -144,8 +147,8 @@ class BaseMetadata:
     ):
         """Write current metadata to image and sidecar"""
         fixed_xmp = self._fix_xmp()
-        if self.is_sidecar:
-            _create_sidecar_stub(self.image_path)
+        if self.is_sidecar or self.is_raw:
+            _create_sidecar_stub(self.metadata_path)
 
         # Write to metadata_path (sidecar for RAW, image file for JPEG/PNG)
         if any([write_exif, write_iptc, write_xmp]):

@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QLabel, QLayout, QScrollArea, QSizePolicy, QWidget
 from shiboken6 import isValid
 
 from naturtag.constants import SIZE_ICON, SIZE_ICON_SM, SIZE_SM, IconDimensions, IntOrStr, PathOrStr
+from naturtag.utils import generate_preview, is_raw_path
 from naturtag.widgets import StylableWidget, VerticalLayout
 from naturtag.widgets.layouts import GridLayout, HorizontalLayout
 from naturtag.widgets.style import fa_icon
@@ -514,11 +515,39 @@ class ImageWindow(StylableWidget):
         self.select_image_idx(self.wrap_idx(-1))
 
     def set_pixmap_path(self, path: PathOrStr):
-        pixmap = QPixmap(str(path))
-        if pixmap.isNull():
-            pixmap = self._make_placeholder(self.size())
-        self.image.setPixmap(pixmap)
+        path = Path(path)
         self.image.description = str(path)
+        if is_raw_path(path):
+            self.image.setPixmap(self._make_placeholder(self.size()))
+            self._load_raw_preview_async(path)
+        else:
+            pixmap = QPixmap(str(path))
+            if pixmap.isNull():
+                pixmap = self._make_placeholder(self.size())
+            self.image.setPixmap(pixmap)
+
+    def _load_raw_preview_async(self, path: Path):
+        """Load a RAW preview image in a background thread, and apply it if still selected"""
+        from naturtag.controllers import get_app
+
+        app = get_app()
+        future = app.threadpool.schedule(self._get_raw_preview, path=path)
+
+        def _apply(pixmap: QPixmap):
+            if isValid(self.image) and self.selected_path == path:
+                if pixmap.isNull():
+                    pixmap = self._make_placeholder(self.size())
+                self.image.setPixmap(pixmap)
+
+        future.on_result.connect(_apply)
+
+    @staticmethod
+    def _get_raw_preview(path: Path) -> QPixmap:
+        try:
+            return QPixmap.fromImage(generate_preview(path))
+        except Exception:
+            logger.warning(f'Failed to load RAW preview: {path}', exc_info=True)
+            return QPixmap()
 
     @staticmethod
     def _make_placeholder(size: QSize) -> QPixmap:

@@ -136,3 +136,24 @@ def test_write__lr_hierarchical_subject_uses_rdf_bag(tmp_path):
     lr_block = raw[lr_start:lr_end]
     assert '<rdf:Bag>' in lr_block
     assert '<rdf:Seq>' not in lr_block
+
+
+def test_write__raw_without_sidecar_creates_sidecar(tmp_path):
+    """Writing metadata to a RAW file with no existing sidecar should create one
+    (regression test for silent no-op when the sidecar didn't exist yet)"""
+    raw_copy = tmp_path / 'raw_without_sidecar.ORF'
+    shutil.copy(SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF', raw_copy)
+
+    meta = BaseMetadata(raw_copy)
+    meta.update({'Xmp.dc.subject': ['Animalia']})
+    meta.write()
+
+    sidecar_path = raw_copy.with_suffix('.xmp')
+    assert sidecar_path.is_file()
+
+    img = pyexiv2.Image(str(sidecar_path))
+    try:
+        xmp = img.read_xmp()
+    finally:
+        img.close()
+    assert 'Xmp.dc.subject' in xmp

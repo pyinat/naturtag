@@ -3,8 +3,13 @@ from unittest.mock import patch
 
 import pytest
 
-from naturtag.constants import APP_LOGO, ASSETS_DIR, ICONS_DIR
-from naturtag.utils.image_glob import get_valid_image_paths, is_raw_path, uri_to_path
+from naturtag.constants import APP_LOGO, ASSETS_DIR, ICONS_DIR, RAW_FILETYPES
+from naturtag.utils.image_glob import (
+    get_valid_image_paths,
+    is_image_path,
+    is_raw_path,
+    uri_to_path,
+)
 from test.conftest import SAMPLE_DATA_DIR
 
 
@@ -157,3 +162,15 @@ def test_get_valid_image_paths__include_raw_without_sidecar():
     assert len(get_valid_image_paths([raw_path])) == 0
     results = get_valid_image_paths([raw_path], include_raw=True)
     assert raw_path in results
+
+
+@pytest.mark.parametrize('ext', RAW_FILETYPES)
+def test_raw_filetypes_recognized(ext, tmp_path):
+    """Every extension in RAW_FILETYPES should be recognized by is_raw_path, and by
+    is_image_path only when include_raw=True"""
+    path = tmp_path / f'photo{ext.lstrip("*")}'
+    path.touch()
+
+    assert is_raw_path(path) is True
+    assert is_image_path(path, include_raw=True) is True
+    assert is_image_path(path, include_raw=False) is False

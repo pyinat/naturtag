@@ -46,6 +46,12 @@ def generate_thumbnail(
     return ImageQt(image).copy()
 
 
+def generate_preview(path: PathOrStr) -> QImage:
+    """Load a full-size, orientation-corrected preview image (RAW-aware, uncropped)"""
+    image = _get_orientated_image(Path(path))
+    return ImageQt(image).copy()
+
+
 def _get_orientated_image(source, default_flip: bool = True) -> Image.Image:
     """Load and rotate/transpose image according to EXIF orientation, if any.
     If missing orientation and the image was fetched from iNat, it will be vertically mirrored.

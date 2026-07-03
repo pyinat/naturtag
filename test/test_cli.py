@@ -5,6 +5,7 @@ from click.testing import CliRunner
 
 from naturtag.cli import (
     main,
+    print_all_metadata,
     search_taxa_by_name,
 )
 
@@ -125,6 +126,14 @@ def test_tag__print(mock_print_all, runner, extra_flags, expected_flickr):
     )
     assert result.exit_code == 0
     mock_print_all.assert_called_once_with(('image.jpg',), expected_flickr)
+
+
+@patch('naturtag.cli.get_valid_image_paths')
+def test_print_all_metadata__includes_raw_files(mock_get_valid_image_paths):
+    """RAW files should not be silently dropped when printing existing metadata"""
+    mock_get_valid_image_paths.return_value = []
+    print_all_metadata(['image.cr2'])
+    mock_get_valid_image_paths.assert_called_once_with(['image.cr2'], include_raw=True)
 
 
 # -- tag command: taxon name search --

@@ -2,7 +2,7 @@
 
 ## 0.10.0 (Unreleased)
 
-* Add provisional support for loading and tagging raw image formats (no preview thumbnails)
+* Add support for RAW image formats: tagging, viewing, and preview thumbnails
 * Add SBOM, checksums, and signed build provenance attestations for release packages
 * Fix parsing existing comma-separated keyword metadata
 * Fix incorrect EXIF coordinates for Eastern hemisphere
