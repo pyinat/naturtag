@@ -5,6 +5,7 @@ import pytest
 
 from naturtag.constants import APP_LOGO, ASSETS_DIR, ICONS_DIR, RAW_FILETYPES
 from naturtag.utils.image_glob import (
+    find_raw_pairs,
     get_valid_image_paths,
     is_image_path,
     is_raw_path,
@@ -162,6 +163,41 @@ def test_get_valid_image_paths__include_raw_without_sidecar():
     assert len(get_valid_image_paths([raw_path])) == 0
     results = get_valid_image_paths([raw_path], include_raw=True)
     assert raw_path in results
+
+
+def test_find_raw_pairs__basic_pair():
+    jpg = SAMPLE_DATA_DIR / 'raw_with_sidecar.jpg'
+    raw = SAMPLE_DATA_DIR / 'raw_with_sidecar.ORF'
+    assert find_raw_pairs([jpg, raw]) == {jpg: raw}
+
+
+@pytest.mark.parametrize(
+    'filenames, expected_pairs',
+    [
+        (['photo1.jpg', 'photo2.CR2'], {}),
+        (['dir1/photo.jpg', 'dir2/photo.CR2'], {}),
+        (['img.jpg', 'img.CR2', 'img.NEF'], {}),
+        (['img.jpg', 'img.png', 'img.CR2'], {}),
+        (['img.CR2', 'img.gif'], {}),
+        (['IMG_0001.jpg', 'img_0001.CR2'], {'IMG_0001.jpg': 'img_0001.CR2'}),
+        ([], {}),
+        (['a.jpg', 'a.CR2', 'b.png', 'b.NEF'], {'a.jpg': 'a.CR2', 'b.png': 'b.NEF'}),
+    ],
+    ids=[
+        'no_pair_different_stems',
+        'no_pair_different_directories',
+        'ambiguous_two_raw_one_jpg',
+        'ambiguous_one_raw_two_non_raw',
+        'ignores_non_pairable_extensions',
+        'case_insensitive_stem',
+        'empty_input',
+        'multiple_independent_pairs',
+    ],
+)
+def test_find_raw_pairs(tmp_path, filenames, expected_pairs):
+    paths = [tmp_path / name for name in filenames]
+    expected = {tmp_path / primary: tmp_path / raw for primary, raw in expected_pairs.items()}
+    assert find_raw_pairs(paths) == expected
 
 
 @pytest.mark.parametrize('ext', RAW_FILETYPES)

@@ -32,8 +32,8 @@ def _scan_file(data: bytes) -> tuple[str, dict]:
     """Parse RAW file bytes and return (endian, results).
 
     results has keys:
-      'jpegs'      — list of dicts with offset/length/length_tag_entry_offset
-      'raw_regions' — list of dicts with offset/length for raw sensor data
+        jpegs: list of dicts with offset/length/length_tag_entry_offset
+        raw_regions: list of dicts with offset/length for raw sensor data
     """
     endian, ifd0_offset = parse_tiff_header(data)
 

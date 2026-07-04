@@ -1,5 +1,6 @@
 """Utilities for finding and resolving image paths from directories, URIs, and/or glob patterns"""
 
+from collections import defaultdict
 from fnmatch import fnmatch
 from glob import glob
 from itertools import chain
@@ -13,6 +14,10 @@ from pyinaturalist import Iterable
 from naturtag.constants import ALL_IMAGE_FILETYPES, IMAGE_FILETYPES, RAW_FILETYPES, PathOrStr
 
 logger = getLogger().getChild(__name__)
+
+# Non-raw extensions that may be paired with a RAW file sharing the same basename.
+# Narrower than IMAGE_FILETYPES since gif/webp pairing isn't a real camera workflow.
+_PAIRABLE_EXTS = ('*.jpg', '*.jpeg', '*.png')
 
 
 def get_valid_image_paths(
@@ -136,6 +141,32 @@ def is_image_path(path: Path, include_sidecars: bool = False, include_raw: bool 
 def is_raw_path(path: Path) -> bool:
     """Determine if a path points to a RAW image file"""
     return any(fnmatch(path.suffix.lower(), ext) for ext in RAW_FILETYPES)
+
+
+def find_raw_pairs(paths: Iterable[Path]) -> dict[Path, Path]:
+    """Find RAW+JPG/PNG pairs sharing a directory and basename (stem, case-insensitive).
+
+    A stem-group is only paired when it contains exactly one RAW file and exactly one
+    jpg/jpeg/png; any other combination (2 raw + 1 jpg, 1 raw + 2 jpg, raw + gif, etc.) is left
+    ungrouped, since there's no unambiguous partner to pick.
+
+    Returns:
+        ``{primary_path: raw_path}``, one entry per confirmed pair, where ``primary_path`` is the
+        jpg/png file.
+    """
+    groups: dict[tuple[Path, str], list[Path]] = defaultdict(list)
+    for path in paths:
+        groups[(path.parent, path.stem.lower())].append(path)
+
+    pairs = {}
+    for group in groups.values():
+        raw_paths = [p for p in group if is_raw_path(p)]
+        primary_paths = [
+            p for p in group if any(fnmatch(p.suffix.lower(), ext) for ext in _PAIRABLE_EXTS)
+        ]
+        if len(raw_paths) == 1 and len(primary_paths) == 1:
+            pairs[primary_paths[0]] = raw_paths[0]
+    return pairs
 
 
 def uri_to_path(path_or_uri) -> Path:

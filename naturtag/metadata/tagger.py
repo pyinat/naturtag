@@ -13,7 +13,7 @@ from pyinaturalist import Observation
 from naturtag.constants import PathOrStr
 from naturtag.metadata import DerivedMetadata
 from naturtag.storage import Settings, iNatDbClient
-from naturtag.utils import get_valid_image_paths
+from naturtag.utils import get_sidecar_path, get_valid_image_paths, is_raw_path
 
 logger = getLogger().getChild(__name__)
 
@@ -87,26 +87,37 @@ def _tag_images_iter(
         yield inat_metadata
         return
 
-    def _tag_image(
-        image_path,
-    ):
-        img_metadata = DerivedMetadata(image_path).merge(inat_metadata)
-        img_metadata.write(
-            write_exif=settings.exif,
-            write_iptc=settings.iptc,
-            write_xmp=settings.xmp,
-            write_sidecar=settings.sidecar,
-        )
-        return img_metadata
-
-    for image_path in get_valid_image_paths(
+    paths = get_valid_image_paths(
         image_paths,
         recursive=recursive,
         include_sidecars=include_sidecars,
         create_sidecars=settings.sidecar,
         include_raw=True,
+    )
+    # Deduplicate sidecar write for a non-RAW file paired with a RAW file in this batch
+    raw_sidecar_targets = {get_sidecar_path(p) for p in paths if is_raw_path(p)}
+
+    def _tag_image(
+        image_path,
     ):
-        yield _tag_image(image_path)
+        img_metadata = DerivedMetadata(image_path).merge(inat_metadata)
+        write_sidecar = settings.sidecar and img_metadata.sidecar_path not in raw_sidecar_targets
+        img_metadata.write(
+            write_exif=settings.exif,
+            write_iptc=settings.iptc,
+            write_xmp=settings.xmp,
+            write_sidecar=write_sidecar,
+        )
+        return img_metadata
+
+    for image_path in paths:
+        try:
+            yield _tag_image(image_path)
+        except (RuntimeError, OSError):
+            # RuntimeError: exiv2 write failure (locked/corrupted file)
+            # OSError: sidecar-stub file I/O failure (permissions, disk full)
+            # Ensure one file's failure doesn't discard results already produced for other files
+            logger.exception(f'Failed to tag {image_path}')
 
 
 def refresh_tags(

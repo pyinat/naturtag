@@ -32,6 +32,18 @@ def image_files(tmp_path):
 
 
 @pytest.fixture
+def paired_image_files(tmp_path):
+    """Create a RAW+JPG pair sharing a basename, plus an unrelated lone jpg."""
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(b'\xff\xd8\xff\xe0')
+    raw = tmp_path / 'photo1.CR2'
+    raw.write_bytes(b'RAW')
+    lone = tmp_path / 'photo2.jpg'
+    lone.write_bytes(b'\xff\xd8\xff\xe0')
+    return jpg, raw, lone
+
+
+@pytest.fixture
 def thumbnail_card(qtbot):
     card = ThumbnailCard(Path('/tmp/test_image.jpg'))
     qtbot.addWidget(card)
@@ -96,6 +108,62 @@ def test_load_images__deduplicates(gallery, image_files):
     assert len(gallery.images) == 3
 
 
+def test_load_images__creates_paired_card(gallery, paired_image_files):
+    """A RAW+JPG pair sharing a basename collapses into a single card."""
+    jpg, raw, _lone = paired_image_files
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([jpg, raw])
+
+    assert len(gallery.images) == 2
+    assert gallery.images[jpg] is gallery.images[raw]
+    assert gallery.images[jpg].image_path == jpg
+    assert gallery.images[jpg].raw_path == raw
+
+
+@pytest.mark.parametrize('load_jpg_first', [True, False], ids=['jpg_then_raw', 'raw_then_jpg'])
+def test_load_images__pairs_across_separate_calls(gallery, paired_image_files, load_jpg_first):
+    """A file loaded standalone, then its pair loaded in a later call, merges into one card"""
+    jpg, raw, _lone = paired_image_files
+    first, second = (jpg, raw) if load_jpg_first else (raw, jpg)
+
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([first])
+        assert gallery.images[first].raw_path is None  # standalone card so far
+
+        gallery.load_images([second])
+
+    assert len(gallery.images) == 2
+    assert gallery.images[jpg] is gallery.images[raw]
+    assert gallery.images[jpg].raw_path == raw
+
+
+def test_cards__deduplicates_paired_card(gallery, paired_image_files):
+    """cards returns one entry per unique card, even when a pair is stored under two keys."""
+    jpg, raw, lone = paired_image_files
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([jpg, raw, lone])
+
+    assert len(gallery.cards) == 2
+    assert gallery.images[jpg] in gallery.cards
+
+
+def test_load_images__ambiguous_pair_stays_ungrouped(gallery, tmp_path):
+    """A stem shared by 2 raw files + 1 jpg has no unambiguous partner, so stays ungrouped."""
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(b'\xff\xd8\xff\xe0')
+    raw1 = tmp_path / 'photo1.CR2'
+    raw1.write_bytes(b'RAW')
+    raw2 = tmp_path / 'photo1.NEF'
+    raw2.write_bytes(b'RAW')
+
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([jpg, raw1, raw2])
+
+    assert len(gallery.images) == 3
+    assert len(set(gallery.images.values())) == 3
+    assert all(card.raw_path is None for card in gallery.images.values())
+
+
 def test_load_images__empty(gallery):
     """Loading empty list is a no-op."""
     on_load = MagicMock()
@@ -123,6 +191,16 @@ def test_load_image__creates_card(gallery, image_files):
 
     assert isinstance(result, ThumbnailCard)
     assert image_files[0] in gallery.images
+
+
+def test_load_image__raw_path_param(gallery, paired_image_files):
+    """Passing raw_path registers the card under both the primary and raw paths."""
+    jpg, raw, _lone = paired_image_files
+    card = gallery.load_image(jpg, delayed_load=True, raw_path=raw)
+
+    assert card.raw_path == raw
+    assert gallery.images[jpg] is card
+    assert gallery.images[raw] is card
 
 
 def test_load_image__clears_help_text(gallery, image_files):
@@ -155,6 +233,30 @@ def test_select_image(gallery, image_files):
         gallery.select_image(image_files[0])
 
     mock_display.assert_called_once_with(image_files[0], list(gallery.images.keys()))
+
+
+def test_remove_image__removes_paired_raw_too(gallery, paired_image_files):
+    """Removing a paired card's primary path also removes its raw path."""
+    jpg, raw, _lone = paired_image_files
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([jpg, raw])
+
+    gallery.remove_image(jpg)
+
+    assert jpg not in gallery.images
+    assert raw not in gallery.images
+
+
+def test_select_image__nav_list_deduplicated(gallery, paired_image_files):
+    """The fullscreen nav list only includes primary paths, not paired raw paths."""
+    jpg, raw, lone = paired_image_files
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([jpg, raw, lone])
+
+    with patch.object(gallery.image_window, 'display_image_fullscreen') as mock_display:
+        gallery.select_image(jpg)
+
+    mock_display.assert_called_once_with(jpg, [jpg, lone])
 
 
 @pytest.mark.parametrize(
@@ -245,8 +347,16 @@ def test_image_gallery__pending_icons_propagate(gallery, image_files):
 def test_thumbnail_card__init(thumbnail_card):
     assert thumbnail_card.image_path == Path('/tmp/test_image.jpg')
     assert thumbnail_card.metadata is None
+    assert thumbnail_card.raw_path is None
     assert 'test' in thumbnail_card.label.text()
     assert 'image' in thumbnail_card.label.text()
+
+
+def test_thumbnail_card__init_with_raw_path(qtbot):
+    raw_path = Path('/tmp/photo1.CR2')
+    card = ThumbnailCard(Path('/tmp/photo1.jpg'), raw_path=raw_path)
+    qtbot.addWidget(card)
+    assert card.raw_path == raw_path
 
 
 def test_thumbnail_card__set_metadata(thumbnail_card, mock_metadata):
@@ -352,6 +462,23 @@ def test_context_menu__actions_enabled(
     assert len(enabled) == expected_enabled_count
 
 
+@pytest.mark.parametrize(
+    'raw_path, expect_raw_mentioned',
+    [(None, False), (Path('/tmp/photo1.CR2'), True)],
+    ids=['unpaired', 'paired'],
+)
+def test_context_menu__remove_tooltip(qtbot, mock_metadata, raw_path, expect_raw_mentioned):
+    """The 'Remove image' tooltip mentions the paired RAW file, if any."""
+    card = ThumbnailCard(Path('/tmp/photo1.jpg'), raw_path=raw_path)
+    qtbot.addWidget(card)
+    card.metadata = mock_metadata
+
+    card.context_menu.refresh_actions(card)
+
+    remove_action = next(a for a in card.context_menu.actions() if a.text() == 'Remove image')
+    assert ('photo1.CR2' in remove_action.statusTip()) == expect_raw_mentioned
+
+
 # --- ThumbnailMetaIcons ---
 
 
@@ -396,6 +523,20 @@ def test_thumbnail_meta_icons__set_pending_icons(
         assert getattr(icons, name).pixmap().toImage() == before[name], (
             f'{name} should stay secondary'
         )
+
+
+def test_thumbnail_card__pair_icon_reflects_raw_path(qtbot):
+    """The pair icon is enabled (and tooltipped) only when a RAW file is paired."""
+    paired = ThumbnailCard(Path('/tmp/photo1.jpg'), raw_path=Path('/tmp/photo1.CR2'))
+    unpaired = ThumbnailCard(Path('/tmp/photo1.jpg'))
+    qtbot.addWidget(paired)
+    qtbot.addWidget(unpaired)
+
+    paired_pixmap = paired.icons.pair_icon.pixmap().toImage()
+    unpaired_pixmap = unpaired.icons.pair_icon.pixmap().toImage()
+    assert paired_pixmap != unpaired_pixmap
+    assert 'photo1.CR2' in paired.icons.pair_icon.toolTip()
+    assert unpaired.icons.pair_icon.toolTip() == ''
 
 
 def test_thumbnail_meta_icons__set_pending_icons__clears_on_empty(thumbnail_card):

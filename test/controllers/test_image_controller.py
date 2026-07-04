@@ -42,28 +42,78 @@ def test_run__no_selection(controller):
     on_message.assert_any_call('Select either an observation or an organism to tag images with')
 
 
+def _run_and_invoke_scheduled_task(controller, mock_app, result_metadata):
+    """Call controller.run(), then extract and invoke the scheduled per-card callable."""
+    with patch(
+        'naturtag.controllers.image_controller.tag_images', return_value=[result_metadata]
+    ) as mock_tag:
+        controller.run()
+        scheduled_fn = mock_app.threadpool.schedule.call_args[0][0]
+        scheduled_card = mock_app.threadpool.schedule.call_args[1]['card']
+        result = scheduled_fn(scheduled_card)
+    return result, mock_tag
+
+
 @pytest.mark.parametrize(
     'taxon_id, obs_id',
     [(42, None), (None, 99)],
     ids=['with_taxon', 'with_observation'],
 )
 def test_run__schedules_tagging(controller, mock_app, taxon_id, obs_id):
-    controller.gallery.images = {'/tmp/img.jpg': MagicMock()}
+    card = MagicMock(image_path='/tmp/img.jpg', raw_path=None)
+    controller.gallery.images = {'/tmp/img.jpg': card}
     controller.selected_taxon_id = taxon_id
     controller.selected_observation_id = obs_id
     mock_app._futures.clear()
     mock_app.threadpool.schedule.reset_mock()
 
-    with patch(
-        'naturtag.controllers.image_controller.tag_images', return_value=[MagicMock()]
-    ) as mock_tag:
-        controller.run()
-        # Extract and invoke the scheduled per-image callable
-        scheduled_fn = mock_app.threadpool.schedule.call_args[0][0]
-        scheduled_fn('/tmp/img.jpg')
+    result_metadata = MagicMock(image_path='/tmp/img.jpg')
+    result, mock_tag = _run_and_invoke_scheduled_task(controller, mock_app, result_metadata)
 
     mock_app.threadpool.schedule.assert_called_once()
     mock_tag.assert_called_once()
+    assert result is result_metadata
+
+
+def test_run__batches_paired_paths_into_one_task(controller, mock_app):
+    """A RAW+JPG pair (same card under two dict keys) is tagged in a single threadpool task,
+    not two, to avoid two threads racing to write the same shared sidecar file."""
+    card = MagicMock(image_path='/tmp/photo.jpg', raw_path='/tmp/photo.CR2')
+    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+    controller.selected_taxon_id = 42
+    mock_app._futures.clear()
+    mock_app.threadpool.schedule.reset_mock()
+
+    result_metadata = MagicMock(image_path='/tmp/photo.jpg')
+    result, mock_tag = _run_and_invoke_scheduled_task(controller, mock_app, result_metadata)
+
+    mock_app.threadpool.schedule.assert_called_once()
+    assert mock_tag.call_args[0][0] == ['/tmp/photo.jpg', '/tmp/photo.CR2']
+    assert result is result_metadata
+
+
+def test_update_metadata__skips_visual_update_for_non_primary_path(controller):
+    """update_metadata only applies the visual update when metadata is for the card's primary
+    path, so a paired RAW file's tagging result doesn't double-pulse the card."""
+    card = MagicMock(image_path='/tmp/photo.jpg')
+    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+
+    controller.update_metadata(MagicMock(image_path='/tmp/photo.CR2'))
+    card.update_metadata.assert_not_called()
+
+    controller.update_metadata(MagicMock(image_path='/tmp/photo.jpg'))
+    card.update_metadata.assert_called_once()
+
+
+def test_update_metadata__no_raise_when_card_already_removed(controller):
+    """A tagging result arriving after its card was removed mid-flight is silently
+    ignored instead of raising KeyError, and doesn't touch unrelated loaded cards."""
+    other_card = MagicMock(image_path='/tmp/other.jpg')
+    controller.gallery.images = {'/tmp/other.jpg': other_card}
+
+    controller.update_metadata(MagicMock(image_path='/tmp/removed.jpg'))
+
+    other_card.update_metadata.assert_not_called()
 
 
 def test_select_taxon(controller):
@@ -193,6 +243,17 @@ def test_refresh__no_images(controller):
     controller.refresh()
 
     on_message.assert_any_call('Select images to tag')
+
+
+def test_refresh__deduplicates_paired_cards(controller, mock_app):
+    """refresh() schedules exactly one task per unique card, even with two dict keys."""
+    card = MagicMock()
+    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+    mock_app.threadpool.schedule.reset_mock()
+
+    controller.refresh()
+
+    mock_app.threadpool.schedule.assert_called_once()
 
 
 @pytest.mark.parametrize(
