@@ -319,7 +319,7 @@ def print_all_metadata(
     hierarchical: bool = False,
 ):
     """Print keyword metadata for all specified files"""
-    for image_path in get_valid_image_paths(image_paths):
+    for image_path in get_valid_image_paths(image_paths, include_raw=True):
         metadata = DerivedMetadata(image_path)
         click.secho(f'\n{image_path}', fg='white')
         print_metadata(metadata.keyword_meta, flickr, hierarchical)

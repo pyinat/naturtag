@@ -1,17 +1,20 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from PIL import Image
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
 from naturtag.widgets.images import (
+    ImageWindow,
     InfoCard,
     InfoCardList,
     PixmapLabel,
     SwappableIcon,
     format_int,
 )
+from test.conftest import SAMPLE_DATA_DIR
 
 
 @pytest.fixture
@@ -32,6 +35,13 @@ def info_card(qtbot):
     card = InfoCard(card_id=42)
     qtbot.addWidget(card)
     return card
+
+
+@pytest.fixture
+def image_window(qtbot, mock_app):
+    window = ImageWindow()
+    qtbot.addWidget(window)
+    return window
 
 
 @pytest.fixture
@@ -183,6 +193,77 @@ def test_pixmap_label__on_click(pixmap_label, qtbot, button, expect_called):
     pixmap_label.on_click.connect(on_click)
     qtbot.mouseClick(pixmap_label, button)
     assert on_click.called == expect_called
+
+
+# --- ImageWindow ---
+
+
+def test_image_window__display_image_fullscreen__non_raw(image_window, tmp_path):
+    img_path = tmp_path / 'test.jpg'
+    Image.new('RGB', (50, 50), color='red').save(img_path)
+
+    image_window.display_image_fullscreen(img_path, [img_path])
+
+    assert image_window.image._pixmap.size() == QSize(50, 50)
+    assert image_window.image.description == str(img_path)
+
+
+def test_image_window__display_image_fullscreen__raw_shows_placeholder_and_schedules(
+    image_window, mock_app
+):
+    """A RAW file should show a placeholder immediately and decode in the background,
+    rather than blocking the GUI thread"""
+    raw_path = SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF'
+
+    image_window.display_image_fullscreen(raw_path, [raw_path])
+
+    # Real decode is scheduled rather than run synchronously, so the only pixmap that could be
+    # showing at this point is the immediate placeholder
+    assert not image_window.image._pixmap.isNull()
+    assert len(mock_app._futures) == 1
+
+
+def test_image_window__display_image_fullscreen__raw_applies_result_on_completion(
+    image_window, mock_app
+):
+    raw_path = SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF'
+    image_window.display_image_fullscreen(raw_path, [raw_path])
+
+    mock_app._futures[-1].on_result.emit(QPixmap(30, 20))
+
+    assert image_window.image._pixmap.size() == QSize(30, 20)
+
+
+def test_image_window__display_image_fullscreen__raw_decode_failure_shows_placeholder(
+    image_window, mock_app
+):
+    """A null pixmap result (e.g. RAW decode failure) should fall back to a newly-generated
+    placeholder, not just leave the initial pre-decode placeholder in place"""
+    raw_path = SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF'
+    image_window.display_image_fullscreen(raw_path, [raw_path])
+    initial_placeholder = image_window.image._pixmap
+
+    mock_app._futures[-1].on_result.emit(QPixmap())
+
+    assert image_window.image._pixmap is not initial_placeholder
+    assert not image_window.image._pixmap.isNull()
+
+
+def test_image_window__select_image_idx__stale_raw_result_ignored(image_window, mock_app):
+    """A late-arriving decode for a since-navigated-away-from image should be ignored"""
+    raw_path_1 = SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF'
+    raw_path_2 = SAMPLE_DATA_DIR / 'IMG20210310_120958.ORF'
+
+    image_window.display_image_fullscreen(raw_path_1, [raw_path_1, raw_path_2])
+    stale_future = mock_app._futures[-1]
+
+    image_window.select_image_idx(1)
+    assert image_window.selected_path == raw_path_2
+    pixmap_before_stale_result = image_window.image._pixmap
+
+    stale_future.on_result.emit(QPixmap(30, 20))
+
+    assert image_window.image._pixmap is pixmap_before_stale_result
 
 
 # --- InfoCard ---

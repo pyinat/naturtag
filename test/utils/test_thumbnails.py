@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from naturtag.utils.thumbnails import _open_raw_image, generate_thumbnail
+from naturtag.utils.thumbnails import _open_raw_image, generate_preview, generate_thumbnail
 from test.conftest import SAMPLE_DATA_DIR
 
 SAMPLE_RAW_FILES = [SAMPLE_DATA_DIR / 'IMG20210310_120958.ORF', SAMPLE_DATA_DIR / 'DSC05627.ARW']
@@ -185,3 +185,32 @@ def test_generate_thumbnail__real_raw(raw_path):
     assert result is not None
     assert result.width() > 0
     assert result.height() > 0
+
+
+def test_generate_preview_regular_file_unchanged(sample_image):
+    """Unlike generate_thumbnail, generate_preview should not crop to a square"""
+    result = generate_preview(sample_image)
+    assert result.width() == 300
+    assert result.height() == 200
+
+
+@pytest.mark.parametrize('raw_path', SAMPLE_RAW_FILES)
+def test_generate_preview__real_raw(raw_path):
+    """generate_preview should return the full (uncropped) embedded RAW preview"""
+    result = generate_preview(raw_path)
+
+    assert result is not None
+    assert result.width() > 0
+    assert result.height() > 0
+
+
+def test_generate_preview__preserves_aspect_ratio():
+    """generate_preview should keep the source aspect ratio, unlike generate_thumbnail
+    which crops to a square"""
+    raw_path = SAMPLE_DATA_DIR / 'IMG20210310_120958.ORF'
+
+    preview = generate_preview(raw_path)
+    thumbnail = generate_thumbnail(raw_path)
+
+    assert preview.width() != preview.height()
+    assert thumbnail.width() == thumbnail.height()
