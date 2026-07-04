@@ -2,7 +2,7 @@
 
 ## 0.10.0 (Unreleased)
 
-* Add support for RAW image formats: tagging, viewing, and preview thumbnails
+* Add support for RAW image formats: tagging, viewing, preview thumbnails, and RAW+JPG pairs
 * Add compatibility with digiKam TagsList
 * Add SBOM, checksums, and signed build provenance attestations for release packages
 * Fix parsing existing comma-separated keyword metadata

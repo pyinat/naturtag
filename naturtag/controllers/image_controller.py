@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, QThread, Signal, Slot
 from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QSizePolicy
 
 from naturtag.controllers import BaseController, ImageGallery, get_app
+from naturtag.controllers.image_gallery import ThumbnailCard
 from naturtag.metadata import DerivedMetadata, _refresh_tags, tag_images
 from naturtag.utils import get_ids_from_url
 from naturtag.widgets import (
@@ -85,8 +86,8 @@ class ImageController(BaseController):
 
     def run(self):
         """Run image tagging for selected images and input"""
-        image_paths = list(self.gallery.images.keys())
-        if not image_paths:
+        cards = self.gallery.cards
+        if not cards:
             self.info('Select images to tag')
             return
 
@@ -96,31 +97,36 @@ class ImageController(BaseController):
             return
 
         selected_id = f'Observation ID: {obs_id}' if obs_id else f'Taxon ID: {taxon_id}'
-        logger.info(f'Tagging {len(image_paths)} images with metadata for {selected_id}')
+        logger.info(f'Tagging {len(cards)} images with metadata for {selected_id}')
 
-        def tag_image(image_path):
-            return tag_images(
-                [image_path],
+        def tag_card(card: ThumbnailCard) -> Optional[DerivedMetadata]:
+            # Tag paired paths (e.g. RAW+JPG) together in one call, so writes to their shared
+            # sidecar happen sequentially in this thread instead of racing across worker threads.
+            paths = [card.image_path, *([card.raw_path] if card.raw_path else [])]
+            results = tag_images(
+                paths,
                 obs_id,
                 taxon_id,
                 client=self.app.client,
                 settings=self.app.settings,
-            )[0]
+            )
+            return next((m for m in results if m.image_path == card.image_path), None)
 
-        for image_path in image_paths:
-            future = self.app.threadpool.schedule(tag_image, image_path=image_path)
+        for card in cards:
+            future = self.app.threadpool.schedule(tag_card, card=card)
             future.on_result.connect(self.update_metadata)
-        self.info(f'{len(image_paths)} images tagged with metadata for {selected_id}')
+        self.info(f'{len(cards)} images tagged with metadata for {selected_id}')
 
     @Slot(DerivedMetadata)
     def update_metadata(self, metadata: Optional[DerivedMetadata]):
         if metadata and metadata.image_path:
-            image = self.gallery.images[metadata.image_path]
-            image.update_metadata(metadata)
+            image = self.gallery.images.get(metadata.image_path)
+            if image is not None and metadata.image_path == image.image_path:
+                image.update_metadata(metadata)
 
     def refresh(self):
         """Refresh metadata for any previously tagged images"""
-        images = list(self.gallery.images.values())
+        images = self.gallery.cards
         if not images:
             self.info('Select images to tag')
             return

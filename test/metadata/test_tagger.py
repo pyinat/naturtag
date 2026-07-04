@@ -1,10 +1,12 @@
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from pyinaturalist import Observation, Taxon
 
+from naturtag.metadata.base import BaseMetadata, _create_sidecar_stub
 from naturtag.metadata.derived import (
+    DerivedMetadata,
     _get_common_keywords,
     _get_hierarchical_keywords,
     _get_id_keywords,
@@ -12,6 +14,10 @@ from naturtag.metadata.derived import (
     _get_taxonomy_keywords,
 )
 from naturtag.metadata.tagger import observation_to_metadata, tag_images
+from naturtag.storage import Settings
+from test.conftest import DEMO_IMAGES_DIR, SAMPLE_DATA_DIR
+
+DEMO_IMAGE = DEMO_IMAGES_DIR / '78513963.jpg'
 
 KINGDOM = Taxon(id=1, name='Animalia', rank='kingdom', preferred_common_name='Animals')
 FAMILY = Taxon(id=3, name='Rhagionidae', rank='family', preferred_common_name='Snipe Flies')
@@ -179,3 +185,116 @@ def test_tag_images__returns_list():
 
     assert isinstance(result, list)
     assert result == [sentinel]
+
+
+@pytest.fixture
+def mock_client():
+    """A client mock that returns a fixed OBSERVATION for any from_id() lookup."""
+    client = MagicMock()
+    client.from_id.return_value = OBSERVATION
+    return client
+
+
+@pytest.fixture
+def settings(tmp_path):
+    return Settings(path=tmp_path / 'settings.yml')
+
+
+def _tag_raw_jpg_pair(tmp_path, mock_client, settings):
+    """Copy a RAW+JPG pair sharing a basename into tmp_path and tag both."""
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(DEMO_IMAGE.read_bytes())
+    raw = tmp_path / 'photo1.ORF'
+    raw.write_bytes((SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF').read_bytes())
+
+    results = tag_images([jpg, raw], taxon_id=SPECIES.id, client=mock_client, settings=settings)
+    return jpg, raw, results
+
+
+def test_tag_images__raw_and_jpg_pair_share_sidecar(tmp_path, mock_client, settings):
+    """Tagging a RAW+JPG pair (same stem, same dir) writes to a single shared XMP sidecar."""
+    jpg, raw, results = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    shared_sidecar = tmp_path / 'photo1.xmp'
+    assert shared_sidecar.is_file()
+    assert {m.image_path for m in results} == {jpg, raw}
+    assert all(m.sidecar_path == shared_sidecar for m in results)
+
+
+def test_tag_images__raw_pre_existing_alt_sidecar_not_shared_with_jpg(
+    tmp_path, mock_client, settings
+):
+    """Documents a known limitation: if the RAW file already has a sidecar under the alternate
+    ``{ext}.xmp`` naming (used to disambiguate multiple raw formats sharing a stem), a
+    newly-paired jpg doesn't discover it and writes its own separate default-named sidecar
+    instead of sharing it.
+    """
+    alt_sidecar = tmp_path / 'photo1.ORF.xmp'
+    _create_sidecar_stub(alt_sidecar)
+
+    jpg, raw, results = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    default_sidecar = tmp_path / 'photo1.xmp'
+    assert alt_sidecar.is_file()
+    assert default_sidecar.is_file()
+    by_path = {m.image_path: m for m in results}
+    assert by_path[raw].sidecar_path == alt_sidecar
+    assert by_path[jpg].sidecar_path == default_sidecar
+
+
+def test_tag_images__raw_and_jpg_pair_writes_sidecar_once(tmp_path, mock_client, settings):
+    """Tagging a RAW+JPG pair only writes their shared sidecar"""
+    with patch.object(BaseMetadata, '_write_sidecar') as mock_write_sidecar:
+        _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    mock_write_sidecar.assert_not_called()
+
+
+def test_tag_images__one_path_failure_does_not_drop_other_results(tmp_path, mock_client, settings):
+    """A write failure on one path (e.g. a locked/corrupted file) doesn't discard
+    results already produced for other paths in the same batch."""
+    jpg = tmp_path / 'a.jpg'
+    jpg.write_bytes(DEMO_IMAGE.read_bytes())
+    other = tmp_path / 'b.jpg'
+    other.write_bytes(DEMO_IMAGE.read_bytes())
+
+    original_write = BaseMetadata.write
+
+    def flaky_write(self, *args, **kwargs):
+        if self.image_path == jpg:
+            raise RuntimeError('simulated corrupt file')
+        return original_write(self, *args, **kwargs)
+
+    with patch.object(DerivedMetadata, 'write', flaky_write):
+        results = tag_images(
+            [jpg, other], taxon_id=SPECIES.id, client=mock_client, settings=settings
+        )
+
+    assert {m.image_path for m in results} == {other}
+
+
+def test_tag_images__jpg_embedded_only_xmp_not_copied_to_shared_sidecar(
+    tmp_path, mock_client, settings
+):
+    """Documents a known limitation: if a jpg has XMP tags embedded directly in the file
+    that were never copied into any sidecar, tagging it together with a paired RAW file no
+    longer propagates those jpg-embedded-only tags into the shared sidecar, since the jpg's
+    own sidecar write (which used to copy them there) is now skipped as redundant.
+    """
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(DEMO_IMAGE.read_bytes())
+    raw = tmp_path / 'photo1.ORF'
+    raw.write_bytes((SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF').read_bytes())
+
+    pre_existing = DerivedMetadata(jpg)
+    pre_existing.update({'Xmp.dc.identifier': 'pre-existing embedded tag'})
+    pre_existing.write(write_exif=False, write_iptc=False, write_xmp=True, write_sidecar=False)
+
+    tag_images([jpg, raw], taxon_id=SPECIES.id, client=mock_client, settings=settings)
+
+    shared_sidecar = tmp_path / 'photo1.xmp'
+    sidecar_meta = DerivedMetadata(shared_sidecar)
+    assert 'Xmp.dc.identifier' not in sidecar_meta.xmp
+
+    jpg_meta = DerivedMetadata(jpg)
+    assert jpg_meta.xmp.get('Xmp.dc.identifier') == 'pre-existing embedded tag'
