@@ -9,6 +9,7 @@ from naturtag.constants import (
     COMMON_NAME_IGNORE_TERMS,
     COMMON_RANKS,
     DATE_TAGS,
+    DIGIKAM_LIST_TAG,
     HIER_KEYWORD_TAGS,
     KEYWORD_TAGS,
     OBSERVATION_KEYS,
@@ -149,7 +150,7 @@ class DerivedMetadata(BaseMetadata):
         """
         if self._simplified is None:
             self._simplified = simplify_keys({**self.combined, **self.keyword_meta.kv_keywords})
-            for k in KEYWORD_TAGS + HIER_KEYWORD_TAGS:
+            for k in KEYWORD_TAGS + HIER_KEYWORD_TAGS + [DIGIKAM_LIST_TAG]:
                 self._simplified.pop(k, None)
         return self._simplified
 

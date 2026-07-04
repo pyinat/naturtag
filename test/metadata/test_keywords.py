@@ -78,6 +78,21 @@ def test_from_metadata():
     assert 'Animalia|Arthropoda' in kw.hier_keywords
 
 
+@pytest.mark.parametrize(
+    'tags_list, expected_hier_keywords',
+    [
+        (['Animalia/Chordata/Aves'], ['Animalia', 'Animalia|Chordata|Aves']),
+        (['/Animalia/Chordata'], ['Animalia', 'Animalia|Chordata']),
+    ],
+    ids=['no_leading_slash', 'leading_slash'],
+)
+def test_from_metadata__digikam_tags_list(tags_list, expected_hier_keywords):
+    """Xmp.digiKam.TagsList (slash-separated) should be read back as hierarchical keywords;
+    a leading slash (digiKam's alternate tag path format) should not produce an empty root"""
+    kw = KeywordMetadata(metadata={'Xmp.digiKam.TagsList': tags_list})
+    assert kw.hier_keywords == expected_hier_keywords
+
+
 def test_from_metadata__strips_quotes():
     """Quoted keywords in metadata should have quotes removed"""
     kw = KeywordMetadata(
