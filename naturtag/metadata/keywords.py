@@ -2,7 +2,7 @@ from itertools import chain
 from logging import getLogger
 from typing import Any, Optional
 
-from naturtag.constants import HIER_KEYWORD_TAGS, KEYWORD_TAGS, RANKS
+from naturtag.constants import DIGIKAM_LIST_TAG, HIER_KEYWORD_TAGS, KEYWORD_TAGS, RANKS
 from naturtag.utils.parsing import quote
 
 # All tags that support regular and hierarchical keyword lists
@@ -41,6 +41,13 @@ class KeywordMetadata:
 
         # Combine and re-sort all keywords, to account for invalid tags created by other apps
         keywords = [get_keyword_list(tag) for tag in KEYWORD_TAGS + HIER_KEYWORD_TAGS]
+
+        # digiKam's native hierarchical tag field uses '/' instead of '|' as a separator
+        digikam_tags = [
+            kw.lstrip('/').replace('/', '|') for kw in get_keyword_list(DIGIKAM_LIST_TAG)
+        ]
+        keywords.append(digikam_tags)
+
         unique_keywords = [
             k.replace('"', '') for k in set(chain.from_iterable(keywords)) if k != ','
         ]
@@ -119,7 +126,7 @@ class KeywordMetadata:
         flat_keywords = self.normal_keywords + self.kv_keyword_list
         metadata = {tag: flat_keywords for tag in KEYWORD_TAGS}
         metadata.update({tag: self.hier_keywords for tag in HIER_KEYWORD_TAGS})
-        metadata['Xmp.digiKam.TagsList'] = [kw.replace('|', '/') for kw in self.hier_keywords]
+        metadata[DIGIKAM_LIST_TAG] = [kw.replace('|', '/') for kw in self.hier_keywords]
         return metadata
 
 

@@ -99,6 +99,7 @@ HIER_KEYWORD_TAGS = [
     'Iptc.Application2.Keywords',
     'Xmp.lr.hierarchicalSubject',
 ]
+DIGIKAM_LIST_TAG = 'Xmp.digiKam.TagsList'
 
 # Theme/window/display settings
 DEFAULT_WINDOW_SIZE = (1500, 1024)
