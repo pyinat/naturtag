@@ -17,7 +17,7 @@ logger = getLogger().getChild(__name__)
 
 # Non-raw extensions that may be paired with a RAW file sharing the same basename.
 # Narrower than IMAGE_FILETYPES since gif/webp pairing isn't a real camera workflow.
-_PAIRABLE_EXTS = ('*.jpg', '*.jpeg', '*.png')
+_PAIRABLE_EXTS = frozenset(('.jpg', '.jpeg', '.png'))
 
 
 def get_valid_image_paths(
@@ -151,8 +151,8 @@ def find_raw_pairs(paths: Iterable[Path]) -> dict[Path, Path]:
     ungrouped, since there's no unambiguous partner to pick.
 
     Returns:
-        ``{primary_path: raw_path}``, one entry per confirmed pair, where ``primary_path`` is the
-        jpg/png file.
+        ``{companion_path: raw_path}``, one entry per confirmed pair, where ``companion_path`` is
+        the jpg/png file.
     """
     groups: dict[tuple[Path, str], list[Path]] = defaultdict(list)
     for path in paths:
@@ -161,11 +161,9 @@ def find_raw_pairs(paths: Iterable[Path]) -> dict[Path, Path]:
     pairs = {}
     for group in groups.values():
         raw_paths = [p for p in group if is_raw_path(p)]
-        primary_paths = [
-            p for p in group if any(fnmatch(p.suffix.lower(), ext) for ext in _PAIRABLE_EXTS)
-        ]
-        if len(raw_paths) == 1 and len(primary_paths) == 1:
-            pairs[primary_paths[0]] = raw_paths[0]
+        companion_paths = [p for p in group if p.suffix.lower() in _PAIRABLE_EXTS]
+        if len(raw_paths) == 1 and len(companion_paths) == 1:
+            pairs[companion_paths[0]] = raw_paths[0]
     return pairs
 
 

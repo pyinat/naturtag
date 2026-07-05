@@ -60,7 +60,7 @@ class ImageGallery(BaseController):
     def __init__(self):
         super().__init__()
         self.setAcceptDrops(True)
-        self.images: dict[Path, ThumbnailCard] = {}
+        self._cards: list['ThumbnailCard'] = []
         self._pending_signal = None
         self._current_pending: frozenset[str] = frozenset()
         self.image_window = ImageWindow()
@@ -94,18 +94,32 @@ class ImageGallery(BaseController):
 
     def clear(self):
         """Clear all images from the viewer"""
-        self.images = {}
+        self._cards = []
         self.flow_layout.clear()
 
     @property
     def cards(self) -> list['ThumbnailCard']:
-        """Unique thumbnail cards currently loaded"""
-        return list(dict.fromkeys(self.images.values()))
+        """Thumbnail cards currently loaded, one entry per card"""
+        return list(self._cards)
 
     @property
-    def primary_paths(self) -> list[Path]:
-        """Paths that are a card's primary (displayed) path, excluding paired RAW alias keys."""
-        return [p for p, card in self.images.items() if card.image_path == p]
+    def images(self) -> dict[Path, 'ThumbnailCard']:
+        """Path -> card lookup. A paired card is reachable by either its companion or its RAW path."""
+        lookup: dict[Path, ThumbnailCard] = {}
+        for card in self._cards:
+            lookup[card.image_path] = card
+            if card.raw_path is not None:
+                lookup[card.raw_path] = card
+        return lookup
+
+    @property
+    def companion_paths(self) -> list[Path]:
+        """Paths that are a card's companion (displayed) path, excluding paired RAW alias keys."""
+        return [card.image_path for card in self._cards]
+
+    def get_card(self, path: Path) -> Optional['ThumbnailCard']:
+        """Find the card for a given image or RAW path, or None if not loaded."""
+        return next((c for c in self._cards if path in (c.image_path, c.raw_path)), None)
 
     def load_file_dialog(self, start_dir: Optional[PathOrStr] = None):
         """Show a file chooser dialog"""
@@ -120,28 +134,29 @@ class ImageGallery(BaseController):
     def load_images(self, image_paths: Iterable[PathOrStr]):
         """Load multiple images, and ignore any duplicates"""
         images = get_valid_image_paths(image_paths, recursive=True, include_raw=True)
-        new_images = sorted(images - set(self.images.keys()))
+        loaded_images = self.images
+        new_images = sorted(images - set(loaded_images.keys()))
         if not new_images:
             return
 
         # Collapse RAW+JPG/PNG pairs sharing a basename into a single card.
         # Also re-pair with any standalone card loaded in a previous call.
-        unpaired_loaded = {p for p, card in self.images.items() if card.raw_path is None}
+        unpaired_loaded = {p for p, card in loaded_images.items() if card.raw_path is None}
         pairs = find_raw_pairs(set(new_images) | unpaired_loaded)
         paired_paths = set(pairs.keys()) | set(pairs.values())
 
         cards = []
-        for primary, raw in pairs.items():
-            for stale in (primary, raw):
+        for companion, raw in pairs.items():
+            for stale in (companion, raw):
                 if stale in unpaired_loaded:
                     self.remove_image(stale)
-            cards.append(self.load_image(primary, delayed_load=True, raw_path=raw))
+            cards.append(self.load_image(companion, delayed_load=True, raw_path=raw))
 
-        primary_images = [p for p in new_images if p not in paired_paths]
+        companion_images = [p for p in new_images if p not in paired_paths]
 
         # Load blank placeholder cards first
         logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
-        cards += [self.load_image(image_path, delayed_load=True) for image_path in primary_images]
+        cards += [self.load_image(image_path, delayed_load=True) for image_path in companion_images]
 
         # Then load actual images
         for thumbnail_card in filter(None, cards):
@@ -159,15 +174,15 @@ class ImageGallery(BaseController):
         if not image_path.is_file():
             logger.debug(f'File does not exist: {image_path}')
             return None
-        elif image_path in self.images:
+        elif self.get_card(image_path) is not None:
             logger.debug(f'Image already loaded: {image_path}')
             return None
-        elif raw_path is not None and raw_path in self.images:
+        elif raw_path is not None and self.get_card(raw_path) is not None:
             logger.debug(f'Paired RAW file already loaded: {raw_path}')
             raw_path = None
 
         # Clear initial help text if still present
-        if not self.images:
+        if not self._cards:
             self.flow_layout.clear()
 
         logger.info(f'Loading {image_path}' + (f' (paired with {raw_path})' if raw_path else ''))
@@ -178,9 +193,7 @@ class ImageGallery(BaseController):
             thumbnail_card.set_pending(bool(self._current_pending))
             thumbnail_card.set_pending_icons(self._current_pending)
         self.flow_layout.addWidget(thumbnail_card)
-        self.images[thumbnail_card.image_path] = thumbnail_card
-        if raw_path is not None:
-            self.images[raw_path] = thumbnail_card
+        self._cards.append(thumbnail_card)
 
         if not delayed_load:
             thumbnail_card.load_image()
@@ -204,7 +217,7 @@ class ImageGallery(BaseController):
 
     def _update_pending_state(self, pending: frozenset[str]):
         self._current_pending = pending
-        for card in self.cards:
+        for card in self._cards:
             card.set_pending(bool(pending))
             card.set_pending_icons(pending)
 
@@ -221,15 +234,16 @@ class ImageGallery(BaseController):
     @Slot(str)
     def remove_image(self, image_path: Path):
         logger.debug(f'Removing image {image_path}')
-        thumbnail = self.images.pop(image_path)
-        if thumbnail.raw_path is not None:
-            self.images.pop(thumbnail.raw_path, None)
+        thumbnail = next((c for c in self._cards if image_path in (c.image_path, c.raw_path)), None)
+        if thumbnail is None:
+            raise KeyError(image_path)
+        self._cards.remove(thumbnail)
         thumbnail.setParent(None)
         thumbnail.deleteLater()
 
     @Slot(str)
     def select_image(self, image_path: Path):
-        self.image_window.display_image_fullscreen(image_path, self.primary_paths)
+        self.image_window.display_image_fullscreen(image_path, self.companion_paths)
 
 
 class ThumbnailCard(StylableWidget):

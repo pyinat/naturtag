@@ -196,7 +196,7 @@ def test_find_raw_pairs__basic_pair():
 )
 def test_find_raw_pairs(tmp_path, filenames, expected_pairs):
     paths = [tmp_path / name for name in filenames]
-    expected = {tmp_path / primary: tmp_path / raw for primary, raw in expected_pairs.items()}
+    expected = {tmp_path / companion: tmp_path / raw for companion, raw in expected_pairs.items()}
     assert find_raw_pairs(paths) == expected
 
 
