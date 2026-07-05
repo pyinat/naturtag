@@ -152,6 +152,25 @@ def test_load_images__pairs_across_separate_calls(gallery, paired_image_files, l
     assert gallery.images[jpg].raw_path == raw
 
 
+def test_load_images__attaches_raw_in_place_without_reload(gallery, paired_image_files):
+    """When the companion (JPG) is already loaded standalone and its RAW partner is loaded in a
+    later call, the existing card is reused in place (no destroy/recreate, no re-triggered
+    thumbnail/metadata reload) since the displayed file doesn't change."""
+    jpg, raw, _lone = paired_image_files
+
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([jpg])
+        original_card = gallery.images[jpg]
+
+        with patch.object(ThumbnailCard, 'load_image_async') as mock_load_async:
+            gallery.load_images([raw])
+            mock_load_async.assert_not_called()
+
+    assert gallery.images[jpg] is original_card
+    assert gallery.images[raw] is original_card
+    assert original_card.raw_path == raw
+
+
 def test_cards__deduplicates_paired_card(gallery, paired_image_files):
     """cards returns one entry per unique card, even when a pair is stored under two keys."""
     jpg, raw, lone = paired_image_files

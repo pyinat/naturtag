@@ -1,12 +1,13 @@
 """Utilities for finding and resolving image paths from directories, URIs, and/or glob patterns"""
 
 from collections import defaultdict
+from dataclasses import dataclass
 from fnmatch import fnmatch
 from glob import glob
 from itertools import chain
 from logging import getLogger
 from pathlib import Path, PosixPath, PureWindowsPath
-from typing import Iterator
+from typing import Iterator, Optional
 from urllib.parse import unquote_plus, urlparse
 
 from pyinaturalist import Iterable
@@ -18,6 +19,34 @@ logger = getLogger().getChild(__name__)
 # Non-raw extensions that may be paired with a RAW file sharing the same basename.
 # Narrower than IMAGE_FILETYPES since gif/webp pairing isn't a real camera workflow.
 _PAIRABLE_EXTS = frozenset(('.jpg', '.jpeg', '.png'))
+
+
+@dataclass(frozen=True)
+class ImagePair:
+    """A logical image unit: a displayable image file optionally paired with a RAW file sharing
+    the same basename. ``image_path`` may itself be a standalone RAW when there is no companion.
+    """
+
+    image_path: Path
+    raw_path: Optional[Path] = None
+
+    @property
+    def all_paths(self) -> list[Path]:
+        return [p for p in (self.image_path, self.raw_path) if p is not None]
+
+
+def get_image_pairs(paths: Iterable[Path]) -> list['ImagePair']:
+    """Convert a flat list of image paths into logical :class:`ImagePair` units.
+
+    Paths sharing a basename that form an unambiguous RAW+JPG/PNG pair are grouped into a single
+    :class:`ImagePair`. All other paths become standalone pairs with ``raw_path=None``.
+    """
+    paths = list(paths)
+    pairs_dict = find_raw_pairs(paths)
+    paired = pairs_dict.keys() | pairs_dict.values()
+    result = [ImagePair(companion, raw) for companion, raw in pairs_dict.items()]
+    result += [ImagePair(p) for p in paths if p not in paired]
+    return result
 
 
 def get_valid_image_paths(

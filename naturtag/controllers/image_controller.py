@@ -103,7 +103,7 @@ class ImageController(BaseController):
         def tag_card(card: ThumbnailCard) -> Optional[DerivedMetadata]:
             # Tag paired paths (e.g. RAW+JPG) together in one call, so writes to their shared
             # sidecar happen sequentially in this thread instead of racing across worker threads.
-            paths = [card.image_path, *([card.raw_path] if card.raw_path else [])]
+            paths = [p for p in (card.image_path, card.raw_path) if p is not None]
             failed_paths: list[Path] = []
             results = tag_images(
                 paths,
