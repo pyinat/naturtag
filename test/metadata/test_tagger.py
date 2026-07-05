@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,7 +14,12 @@ from naturtag.metadata.derived import (
     _get_taxon_hierarchical_keywords,
     _get_taxonomy_keywords,
 )
-from naturtag.metadata.tagger import _refresh_tags, observation_to_metadata, tag_images
+from naturtag.metadata.tagger import (
+    _refresh_tags,
+    _refresh_tags_iter,
+    observation_to_metadata,
+    tag_images,
+)
 from naturtag.storage import Settings
 from test.conftest import DEMO_IMAGES_DIR, SAMPLE_DATA_DIR
 
@@ -284,6 +290,38 @@ def test_tag_images__one_path_failure_does_not_drop_other_results(
         assert failed_paths == [jpg]
 
 
+def test_tag_images__raw_write_failure_excludes_raw_from_results_and_failed_paths(
+    tmp_path, mock_client, settings
+):
+    """A write failure on the paired RAW file doesn't discard the companion's already-successful
+    tag result, but the RAW file itself isn't reported as tagged and is recorded in
+    failed_paths."""
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(DEMO_IMAGE.read_bytes())
+    raw = tmp_path / 'photo1.ORF'
+    raw.write_bytes((SAMPLE_DATA_DIR / 'raw_without_sidecar.ORF').read_bytes())
+
+    original_write = BaseMetadata.write
+
+    def flaky_write(self, *args, **kwargs):
+        if self.image_path == raw:
+            raise RuntimeError('simulated corrupt RAW file')
+        return original_write(self, *args, **kwargs)
+
+    failed_paths: list[Path] = []
+    with patch.object(DerivedMetadata, 'write', flaky_write):
+        results = tag_images(
+            [jpg, raw],
+            taxon_id=SPECIES.id,
+            client=mock_client,
+            settings=settings,
+            failed_paths=failed_paths,
+        )
+
+    assert {m.image_path for m in results} == {jpg}
+    assert failed_paths == [raw]
+
+
 def test_tag_images__jpg_embedded_only_xmp_not_copied_to_shared_sidecar(
     tmp_path, mock_client, settings
 ):
@@ -405,3 +443,33 @@ def test_refresh_tags__raw_write_failure_does_not_discard_companion_result(
 
     assert result is not None
     assert result.image_path == jpg
+
+
+def test_refresh_tags_iter__yields_both_companion_and_raw_for_pair(tmp_path, mock_client, settings):
+    """_refresh_tags_iter yields a result for each file in a RAW+JPG pair, not just the
+    companion, so callers (e.g. the CLI's refresh command) count both refreshed files."""
+    jpg, raw, _ = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    results = list(_refresh_tags_iter([jpg, raw], client=mock_client, settings=settings))
+
+    assert {m.image_path for m in results if m} == {jpg, raw}
+
+
+def test_refresh_tags_iter__raw_write_failure_excludes_raw_from_results(
+    tmp_path, mock_client, settings
+):
+    """_refresh_tags_iter doesn't yield a result for a paired RAW file whose write fails, even
+    though the companion's refresh still succeeds."""
+    jpg, raw, _ = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    original_write = BaseMetadata.write
+
+    def flaky_write(self, *args, **kwargs):
+        if self.image_path == raw:
+            raise RuntimeError('simulated corrupt RAW file')
+        return original_write(self, *args, **kwargs)
+
+    with patch.object(DerivedMetadata, 'write', flaky_write):
+        results = list(_refresh_tags_iter([jpg, raw], client=mock_client, settings=settings))
+
+    assert {m.image_path for m in results if m} == {jpg}

@@ -224,6 +224,17 @@ def test_refresh(mock_setup, mock_refresh_tags, runner, flags, images, expected_
     mock_refresh_tags.assert_called_once_with(tuple(images), recursive=expected_recursive)
 
 
+@patch('naturtag.cli._refresh_tags_iter')
+@patch('naturtag.cli.setup')
+def test_refresh__counts_both_files_in_a_pair(mock_setup, mock_refresh_tags, runner):
+    """A RAW+JPG pair refreshes 2 files from 2 given paths; the reported count reflects both
+    files, not just one item per pair."""
+    mock_refresh_tags.return_value = iter([MagicMock(), MagicMock()])
+    result = runner.invoke(main, ['refresh', 'photo1.jpg', 'photo1.CR2'], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert '2 Images refreshed' in result.output
+
+
 # -- setup db command --
 
 
