@@ -250,9 +250,13 @@ def test_tag_images__raw_and_jpg_pair_writes_sidecar_once(tmp_path, mock_client,
     mock_write_sidecar.assert_not_called()
 
 
-def test_tag_images__one_path_failure_does_not_drop_other_results(tmp_path, mock_client, settings):
-    """A write failure on one path (e.g. a locked/corrupted file) doesn't discard
-    results already produced for other paths in the same batch."""
+@pytest.mark.parametrize('pass_failed_paths', [False, True], ids=['no_out_param', 'with_out_param'])
+def test_tag_images__one_path_failure_does_not_drop_other_results(
+    tmp_path, mock_client, settings, pass_failed_paths
+):
+    """A write failure on one path (e.g. a locked/corrupted file) doesn't discard results already
+    produced for other paths in the same batch. When the optional failed_paths out-param is
+    provided, it also collects the failed path."""
     jpg = tmp_path / 'a.jpg'
     jpg.write_bytes(DEMO_IMAGE.read_bytes())
     other = tmp_path / 'b.jpg'
@@ -265,12 +269,19 @@ def test_tag_images__one_path_failure_does_not_drop_other_results(tmp_path, mock
             raise RuntimeError('simulated corrupt file')
         return original_write(self, *args, **kwargs)
 
+    failed_paths = [] if pass_failed_paths else None
     with patch.object(DerivedMetadata, 'write', flaky_write):
         results = tag_images(
-            [jpg, other], taxon_id=SPECIES.id, client=mock_client, settings=settings
+            [jpg, other],
+            taxon_id=SPECIES.id,
+            client=mock_client,
+            settings=settings,
+            failed_paths=failed_paths,
         )
 
     assert {m.image_path for m in results} == {other}
+    if pass_failed_paths:
+        assert failed_paths == [jpg]
 
 
 def test_tag_images__jpg_embedded_only_xmp_not_copied_to_shared_sidecar(

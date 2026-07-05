@@ -44,6 +44,21 @@ def paired_image_files(tmp_path):
 
 
 @pytest.fixture
+def ambiguous_raw_group_files(tmp_path):
+    """Create a stem shared by 2 raw files + 1 jpg (no unambiguous pairing), plus an unrelated
+    lone jpg."""
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(b'\xff\xd8\xff\xe0')
+    raw1 = tmp_path / 'photo1.CR2'
+    raw1.write_bytes(b'RAW')
+    raw2 = tmp_path / 'photo1.NEF'
+    raw2.write_bytes(b'RAW')
+    unrelated = tmp_path / 'photo2.jpg'
+    unrelated.write_bytes(b'\xff\xd8\xff\xe0')
+    return jpg, raw1, raw2, unrelated
+
+
+@pytest.fixture
 def thumbnail_card(qtbot):
     card = ThumbnailCard(Path('/tmp/test_image.jpg'))
     qtbot.addWidget(card)
@@ -147,14 +162,9 @@ def test_cards__deduplicates_paired_card(gallery, paired_image_files):
     assert gallery.images[jpg] in gallery.cards
 
 
-def test_load_images__ambiguous_pair_stays_ungrouped(gallery, tmp_path):
+def test_load_images__ambiguous_pair_stays_ungrouped(gallery, ambiguous_raw_group_files):
     """A stem shared by 2 raw files + 1 jpg has no unambiguous partner, so stays ungrouped."""
-    jpg = tmp_path / 'photo1.jpg'
-    jpg.write_bytes(b'\xff\xd8\xff\xe0')
-    raw1 = tmp_path / 'photo1.CR2'
-    raw1.write_bytes(b'RAW')
-    raw2 = tmp_path / 'photo1.NEF'
-    raw2.write_bytes(b'RAW')
+    jpg, raw1, raw2, _unrelated = ambiguous_raw_group_files
 
     with patch.object(ThumbnailCard, 'load_image_async'):
         gallery.load_images([jpg, raw1, raw2])
@@ -162,6 +172,28 @@ def test_load_images__ambiguous_pair_stays_ungrouped(gallery, tmp_path):
     assert len(gallery.images) == 3
     assert len(set(gallery.images.values())) == 3
     assert all(card.raw_path is None for card in gallery.images.values())
+
+
+def test_load_images__cross_batch_repair_after_ambiguous_group_narrows(
+    gallery, ambiguous_raw_group_files
+):
+    """An ambiguous RAW+RAW+JPG group loads as 3 standalone cards. Removing one RAW leaves the
+    remaining RAW+JPG both individually unpaired. A later, unrelated load_images() call must
+    merge them into one paired card instead of only removing one side."""
+    jpg, raw1, raw2, unrelated = ambiguous_raw_group_files
+
+    with patch.object(ThumbnailCard, 'load_image_async'):
+        gallery.load_images([jpg, raw1, raw2])
+        assert len(gallery.images) == 3
+        assert all(card.raw_path is None for card in gallery.images.values())
+
+        gallery.remove_image(raw2)
+        gallery.load_images([unrelated])
+
+    assert gallery.images[jpg] is gallery.images[raw1]
+    assert gallery.images[jpg].raw_path == raw1
+    assert len(gallery.images) == 3
+    assert len(set(gallery.images.values())) == 2
 
 
 def test_load_images__empty(gallery):
