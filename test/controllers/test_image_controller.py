@@ -1,5 +1,6 @@
 """Tests for ImageController."""
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -42,11 +43,12 @@ def test_run__no_selection(controller):
     on_message.assert_any_call('Select either an observation or an organism to tag images with')
 
 
-def _run_and_invoke_scheduled_task(controller, mock_app, result_metadata):
+def _run_and_invoke_scheduled_task(controller, mock_app, result_metadata=None, side_effect=None):
     """Call controller.run(), then extract and invoke the scheduled per-card callable."""
-    with patch(
-        'naturtag.controllers.image_controller.tag_images', return_value=[result_metadata]
-    ) as mock_tag:
+    mock_kwargs = (
+        {'side_effect': side_effect} if side_effect else {'return_value': [result_metadata]}
+    )
+    with patch('naturtag.controllers.image_controller.tag_images', **mock_kwargs) as mock_tag:
         controller.run()
         scheduled_fn = mock_app.threadpool.schedule.call_args[0][0]
         scheduled_card = mock_app.threadpool.schedule.call_args[1]['card']
@@ -90,6 +92,31 @@ def test_run__batches_paired_paths_into_one_task(controller, mock_app):
     mock_app.threadpool.schedule.assert_called_once()
     assert mock_tag.call_args[0][0] == ['/tmp/photo.jpg', '/tmp/photo.CR2']
     assert result is result_metadata
+
+
+def test_run__reports_failed_tagging_via_info_message(controller, mock_app):
+    """When the primary (JPG) path's write fails but the paired RAW's write succeeds, tag_card
+    surfaces the failure via self.info() instead of silently leaving the card 'pending' with no
+    explanation."""
+    card = MagicMock(image_path='/tmp/photo.jpg', raw_path='/tmp/photo.CR2')
+    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+    controller.selected_taxon_id = 42
+    mock_app._futures.clear()
+    mock_app.threadpool.schedule.reset_mock()
+    on_message = MagicMock()
+    controller.on_message.connect(on_message)
+
+    def fake_tag_images(
+        paths, obs_id=None, taxon_id=None, client=None, settings=None, failed_paths=None
+    ):
+        # Simulates the JPG's write failing while the paired RAW's write succeeds.
+        failed_paths.append(Path('/tmp/photo.jpg'))
+        return [MagicMock(image_path='/tmp/photo.CR2')]
+
+    result, _ = _run_and_invoke_scheduled_task(controller, mock_app, side_effect=fake_tag_images)
+
+    assert result is None
+    on_message.assert_any_call('Failed to tag: photo.jpg')
 
 
 def test_update_metadata__skips_visual_update_for_non_primary_path(controller):

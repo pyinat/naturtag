@@ -128,29 +128,20 @@ class ImageGallery(BaseController):
         # Also re-pair with any standalone card loaded in a previous call.
         unpaired_loaded = {p for p, card in self.images.items() if card.raw_path is None}
         pairs = find_raw_pairs(set(new_images) | unpaired_loaded)
-        paired_raw_paths = set(pairs.values())
+        paired_paths = set(pairs.keys()) | set(pairs.values())
 
         cards = []
-        cross_batch_paths = set()
         for primary, raw in pairs.items():
-            stale = (
-                primary if primary in unpaired_loaded else (raw if raw in unpaired_loaded else None)
-            )
-            if stale is not None:
-                self.remove_image(stale)
-                cards.append(self.load_image(primary, delayed_load=True, raw_path=raw))
-                cross_batch_paths.update({primary, raw})
+            for stale in (primary, raw):
+                if stale in unpaired_loaded:
+                    self.remove_image(stale)
+            cards.append(self.load_image(primary, delayed_load=True, raw_path=raw))
 
-        primary_images = [
-            p for p in new_images if p not in paired_raw_paths and p not in cross_batch_paths
-        ]
+        primary_images = [p for p in new_images if p not in paired_paths]
 
         # Load blank placeholder cards first
         logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
-        cards += [
-            self.load_image(image_path, delayed_load=True, raw_path=pairs.get(image_path))
-            for image_path in primary_images
-        ]
+        cards += [self.load_image(image_path, delayed_load=True) for image_path in primary_images]
 
         # Then load actual images
         for thumbnail_card in filter(None, cards):

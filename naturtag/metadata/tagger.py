@@ -6,6 +6,7 @@
 # TODO: Include eol:dataObject info (metadata for an individual observation photo)
 from collections.abc import Iterator
 from logging import getLogger
+from pathlib import Path
 from typing import Iterable, Optional
 
 from pyinaturalist import Observation
@@ -26,6 +27,8 @@ def tag_images(
     include_sidecars: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
+    *,
+    failed_paths: Optional[list[Path]] = None,
 ) -> list[DerivedMetadata]:
     """
     Get taxonomy tags from an iNaturalist observation or taxon, and write them to local image
@@ -50,13 +53,21 @@ def tag_images(
         recursive: Recursively search subdirectories for valid image files
         include_sidecars: Allow loading a sidecar file without an associated image
         settings: Settings for metadata types to generate
+        failed_paths: Optional list to populate with any paths that failed to write
 
     Returns:
         Updated image metadata for each image
     """
     return list(
         _tag_images_iter(
-            image_paths, observation_id, taxon_id, recursive, include_sidecars, client, settings
+            image_paths,
+            observation_id,
+            taxon_id,
+            recursive,
+            include_sidecars,
+            client,
+            settings,
+            failed_paths=failed_paths,
         )
     )
 
@@ -69,6 +80,8 @@ def _tag_images_iter(
     include_sidecars: bool = False,
     client: Optional[iNatDbClient] = None,
     settings: Optional[Settings] = None,
+    *,
+    failed_paths: Optional[list[Path]] = None,
 ) -> Iterator[DerivedMetadata]:
     """Same as :py:func:`tag_images`, but returns an iterator"""
     settings = settings or Settings.read()
@@ -118,6 +131,8 @@ def _tag_images_iter(
             # OSError: sidecar-stub file I/O failure (permissions, disk full)
             # Ensure one file's failure doesn't discard results already produced for other files
             logger.exception(f'Failed to tag {image_path}')
+            if failed_paths is not None:
+                failed_paths.append(image_path)
 
 
 def refresh_tags(

@@ -1,5 +1,6 @@
 from functools import partial
 from logging import getLogger
+from pathlib import Path
 from typing import Optional
 
 from pyinaturalist import Observation, Taxon
@@ -103,13 +104,17 @@ class ImageController(BaseController):
             # Tag paired paths (e.g. RAW+JPG) together in one call, so writes to their shared
             # sidecar happen sequentially in this thread instead of racing across worker threads.
             paths = [card.image_path, *([card.raw_path] if card.raw_path else [])]
+            failed_paths: list[Path] = []
             results = tag_images(
                 paths,
                 obs_id,
                 taxon_id,
                 client=self.app.client,
                 settings=self.app.settings,
+                failed_paths=failed_paths,
             )
+            if failed_paths:
+                self.info(f'Failed to tag: {", ".join(p.name for p in failed_paths)}')
             return next((m for m in results if m.image_path == card.image_path), None)
 
         for card in cards:
