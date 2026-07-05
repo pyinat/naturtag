@@ -14,7 +14,7 @@ from pyinaturalist import Observation
 from naturtag.constants import PathOrStr
 from naturtag.metadata import DerivedMetadata
 from naturtag.storage import Settings, iNatDbClient
-from naturtag.utils import get_sidecar_path, get_valid_image_paths, is_raw_path
+from naturtag.utils import find_raw_pairs, get_sidecar_path, get_valid_image_paths
 
 logger = getLogger().getChild(__name__)
 
@@ -107,14 +107,18 @@ def _tag_images_iter(
         create_sidecars=settings.sidecar,
         include_raw=True,
     )
-    # Deduplicate sidecar write for a non-RAW file paired with a RAW file in this batch
-    raw_sidecar_targets = {get_sidecar_path(p) for p in paths if is_raw_path(p)}
+    # Deduplicate sidecar write for a RAW+JPG/PNG pair in this batch, by skipping the companion
+    # file's write whenever it resolves to the same sidecar path as its paired RAW file
+    paired_sidecar_targets = {
+        companion: get_sidecar_path(raw) for companion, raw in find_raw_pairs(paths).items()
+    }
 
     def _tag_image(
         image_path,
     ):
         img_metadata = DerivedMetadata(image_path).merge(inat_metadata)
-        write_sidecar = settings.sidecar and img_metadata.sidecar_path not in raw_sidecar_targets
+        paired_sidecar = paired_sidecar_targets.get(image_path)
+        write_sidecar = settings.sidecar and img_metadata.sidecar_path != paired_sidecar
         img_metadata.write(
             write_exif=settings.exif,
             write_iptc=settings.iptc,
@@ -169,19 +173,39 @@ def _refresh_tags_iter(
     """Same as :py:func:`refresh_tags`, but returns an iterator"""
     settings = settings or Settings.read()
     client = client or iNatDbClient(settings.db_path)
-    for image_path in get_valid_image_paths(
+    paths = get_valid_image_paths(
         image_paths, recursive, create_sidecars=settings.sidecar, include_raw=True
-    ):
-        yield _refresh_tags(DerivedMetadata(image_path), client, settings)
+    )
+    pairs = find_raw_pairs(paths)
+    raw_in_pair = set(pairs.values())
+    for image_path in paths:
+        if image_path in raw_in_pair:
+            continue  # handled alongside its companion
+        try:
+            yield _refresh_tags(
+                DerivedMetadata(image_path), client, settings, raw_path=pairs.get(image_path)
+            )
+        except Exception:
+            logger.exception(f'Failed to refresh {image_path}')
+            yield None
 
 
 def _refresh_tags(
-    metadata: DerivedMetadata, client: iNatDbClient, settings: Settings
+    metadata: DerivedMetadata,
+    client: iNatDbClient,
+    settings: Settings,
+    *,
+    raw_path: Optional[Path] = None,
 ) -> Optional[DerivedMetadata]:
-    """Refresh existing metadata for a single image
+    """Refresh existing metadata for a single image, and its paired RAW file, if any
+
+    Args:
+        metadata: Previously loaded metadata for the companion (displayed) image path
+        raw_path: A RAW file sharing a basename with ``metadata``'s image, to refresh alongside it
 
     Returns:
-        Updated metadata if existing IDs were found, otherwise ``None``
+        Updated metadata for the companion image if existing IDs were found and its write
+        succeeded, otherwise ``None``
     """
     if not metadata.has_observation and not metadata.has_taxon:
         logger.debug(f'No IDs found in {metadata.image_path}')
@@ -190,18 +214,53 @@ def _refresh_tags(
     logger.debug(f'Refreshing tags for {metadata.image_path}')
     settings = settings or Settings.read()
     observation = client.from_id(metadata.observation_id, metadata.taxon_id)
-    metadata.from_observation(
+    # Build a fresh observation-only template
+    inat_metadata = DerivedMetadata().from_observation(
         observation,
         common_names=settings.common_names,
         hierarchical=settings.hierarchical,
     )
+    metadata.merge(inat_metadata)
 
-    metadata.write(
-        write_exif=settings.exif,
-        write_iptc=settings.iptc,
-        write_xmp=settings.xmp,
-        write_sidecar=settings.sidecar,
+    # Reuse the same refreshed tags for the paired RAW file
+    raw_metadata = DerivedMetadata(raw_path).merge(inat_metadata) if raw_path else None
+    write_sidecar = settings.sidecar and (
+        raw_metadata is None or metadata.sidecar_path != raw_metadata.sidecar_path
     )
+    try:
+        metadata.write(
+            write_exif=settings.exif,
+            write_iptc=settings.iptc,
+            write_xmp=settings.xmp,
+            write_sidecar=write_sidecar,
+        )
+    except (RuntimeError, OSError):
+        # RuntimeError: exiv2 write failure (locked/corrupted file)
+        # OSError: sidecar-stub file I/O failure (permissions, disk full)
+        logger.exception(f'Failed to refresh {metadata.image_path}')
+        return None
+
+    if raw_metadata is not None:
+        try:
+            raw_metadata.write(
+                write_exif=settings.exif,
+                write_iptc=settings.iptc,
+                write_xmp=settings.xmp,
+                write_sidecar=settings.sidecar,
+            )
+        except (RuntimeError, OSError):
+            # Don't discard the companion's already-successful refresh over a paired RAW failure
+            logger.exception(f'Failed to refresh paired RAW file {raw_metadata.image_path}')
+            # If the sidecar was delegated to the RAW (companion skipped it), write it from the
+            # companion now so the sidecar isn't left stale
+            if not write_sidecar:
+                try:
+                    metadata.write(
+                        write_exif=False, write_iptc=False, write_xmp=False, write_sidecar=True
+                    )
+                except (RuntimeError, OSError):
+                    logger.exception(f'Also failed sidecar fallback for {metadata.image_path}')
+
     return metadata
 
 

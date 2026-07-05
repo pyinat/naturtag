@@ -13,7 +13,7 @@ from naturtag.metadata.derived import (
     _get_taxon_hierarchical_keywords,
     _get_taxonomy_keywords,
 )
-from naturtag.metadata.tagger import observation_to_metadata, tag_images
+from naturtag.metadata.tagger import _refresh_tags, observation_to_metadata, tag_images
 from naturtag.storage import Settings
 from test.conftest import DEMO_IMAGES_DIR, SAMPLE_DATA_DIR
 
@@ -309,3 +309,99 @@ def test_tag_images__jpg_embedded_only_xmp_not_copied_to_shared_sidecar(
 
     jpg_meta = DerivedMetadata(jpg)
     assert jpg_meta.xmp.get('Xmp.dc.identifier') == 'pre-existing embedded tag'
+
+
+def test_refresh_tags__no_raw_path_refreshes_only_companion(tmp_path, mock_client, settings):
+    """Without a raw_path, refresh behaves as it did before RAW+JPG pairing existed."""
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(DEMO_IMAGE.read_bytes())
+    tag_images([jpg], taxon_id=SPECIES.id, client=mock_client, settings=settings)
+
+    result = _refresh_tags(DerivedMetadata(jpg), mock_client, settings)
+
+    assert result.image_path == jpg
+    assert (tmp_path / 'photo1.xmp').is_file()
+
+
+def test_refresh_tags__refreshes_paired_raw_file(tmp_path, mock_client, settings):
+    """Refreshing a card's companion path also refreshes its paired RAW file's metadata, via
+    their shared sidecar."""
+    jpg, raw, _ = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    result = _refresh_tags(DerivedMetadata(jpg), mock_client, settings, raw_path=raw)
+
+    assert result.image_path == jpg
+    raw_metadata = DerivedMetadata(raw)
+    assert raw_metadata.taxon_id == SPECIES.id
+    assert raw_metadata.sidecar_path == result.sidecar_path
+
+
+def test_refresh_tags__paired_raw_shares_single_observation_fetch(tmp_path, mock_client, settings):
+    """Refreshing a paired RAW+JPG card fetches the observation once, not once per path."""
+    jpg, raw, _ = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+    mock_client.from_id.reset_mock()
+
+    _refresh_tags(DerivedMetadata(jpg), mock_client, settings, raw_path=raw)
+
+    mock_client.from_id.assert_called_once()
+
+
+def test_refresh_tags__paired_raw_dedupes_sidecar_write(tmp_path, mock_client, settings):
+    """Refreshing a RAW+JPG pair only writes their shared sidecar once, not twice."""
+    jpg, raw, _ = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    with patch.object(BaseMetadata, '_write_sidecar') as mock_write_sidecar:
+        _refresh_tags(DerivedMetadata(jpg), mock_client, settings, raw_path=raw)
+
+    mock_write_sidecar.assert_not_called()
+
+
+def test_refresh_tags__does_not_leak_companion_only_metadata_to_raw(
+    tmp_path, mock_client, settings
+):
+    """Refreshing a paired RAW+JPG card only propagates the observation-derived data to the RAW
+    file, not any of the companion's own pre-existing, unrelated metadata."""
+    jpg, raw, _ = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    # Add metadata to the JPG's own file that has nothing to do with the observation
+    jpg_only = DerivedMetadata(jpg)
+    jpg_only.update({'Xmp.dc.identifier': 'jpg-only tag'})
+    jpg_only.write(write_exif=False, write_iptc=False, write_xmp=True, write_sidecar=False)
+
+    _refresh_tags(DerivedMetadata(jpg), mock_client, settings, raw_path=raw)
+
+    raw_metadata = DerivedMetadata(raw)
+    assert 'Xmp.dc.identifier' not in raw_metadata.xmp
+
+
+def test_refresh_tags__companion_write_failure_returns_none(tmp_path, mock_client, settings):
+    """A write failure on the companion path aborts the refresh and returns None."""
+    jpg = tmp_path / 'photo1.jpg'
+    jpg.write_bytes(DEMO_IMAGE.read_bytes())
+    tag_images([jpg], taxon_id=SPECIES.id, client=mock_client, settings=settings)
+
+    with patch.object(DerivedMetadata, 'write', side_effect=RuntimeError('simulated corrupt file')):
+        result = _refresh_tags(DerivedMetadata(jpg), mock_client, settings)
+
+    assert result is None
+
+
+def test_refresh_tags__raw_write_failure_does_not_discard_companion_result(
+    tmp_path, mock_client, settings
+):
+    """A write failure on the paired RAW file doesn't discard the companion's already-successful
+    refresh result."""
+    jpg, raw, _ = _tag_raw_jpg_pair(tmp_path, mock_client, settings)
+
+    original_write = BaseMetadata.write
+
+    def flaky_write(self, *args, **kwargs):
+        if self.image_path == raw:
+            raise RuntimeError('simulated corrupt RAW file')
+        return original_write(self, *args, **kwargs)
+
+    with patch.object(DerivedMetadata, 'write', flaky_write):
+        result = _refresh_tags(DerivedMetadata(jpg), mock_client, settings, raw_path=raw)
+
+    assert result is not None
+    assert result.image_path == jpg

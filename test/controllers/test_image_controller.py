@@ -34,7 +34,7 @@ def test_run__no_images(controller):
 
 def test_run__no_selection(controller):
     """Has images but no taxon/observation selected."""
-    controller.gallery.images = {'/tmp/img.jpg': MagicMock()}
+    controller.gallery._cards = [MagicMock(image_path='/tmp/img.jpg', raw_path=None)]
     on_message = MagicMock()
     controller.on_message.connect(on_message)
 
@@ -63,7 +63,7 @@ def _run_and_invoke_scheduled_task(controller, mock_app, result_metadata=None, s
 )
 def test_run__schedules_tagging(controller, mock_app, taxon_id, obs_id):
     card = MagicMock(image_path='/tmp/img.jpg', raw_path=None)
-    controller.gallery.images = {'/tmp/img.jpg': card}
+    controller.gallery._cards = [card]
     controller.selected_taxon_id = taxon_id
     controller.selected_observation_id = obs_id
     mock_app._futures.clear()
@@ -81,7 +81,7 @@ def test_run__batches_paired_paths_into_one_task(controller, mock_app):
     """A RAW+JPG pair (same card under two dict keys) is tagged in a single threadpool task,
     not two, to avoid two threads racing to write the same shared sidecar file."""
     card = MagicMock(image_path='/tmp/photo.jpg', raw_path='/tmp/photo.CR2')
-    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+    controller.gallery._cards = [card]
     controller.selected_taxon_id = 42
     mock_app._futures.clear()
     mock_app.threadpool.schedule.reset_mock()
@@ -95,11 +95,11 @@ def test_run__batches_paired_paths_into_one_task(controller, mock_app):
 
 
 def test_run__reports_failed_tagging_via_info_message(controller, mock_app):
-    """When the primary (JPG) path's write fails but the paired RAW's write succeeds, tag_card
+    """When the companion (JPG) path's write fails but the paired RAW's write succeeds, tag_card
     surfaces the failure via self.info() instead of silently leaving the card 'pending' with no
     explanation."""
     card = MagicMock(image_path='/tmp/photo.jpg', raw_path='/tmp/photo.CR2')
-    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+    controller.gallery._cards = [card]
     controller.selected_taxon_id = 42
     mock_app._futures.clear()
     mock_app.threadpool.schedule.reset_mock()
@@ -119,11 +119,11 @@ def test_run__reports_failed_tagging_via_info_message(controller, mock_app):
     on_message.assert_any_call('Failed to tag: photo.jpg')
 
 
-def test_update_metadata__skips_visual_update_for_non_primary_path(controller):
-    """update_metadata only applies the visual update when metadata is for the card's primary
+def test_update_metadata__skips_visual_update_for_raw_path(controller):
+    """update_metadata only applies the visual update when metadata is for the card's companion
     path, so a paired RAW file's tagging result doesn't double-pulse the card."""
-    card = MagicMock(image_path='/tmp/photo.jpg')
-    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+    card = MagicMock(image_path='/tmp/photo.jpg', raw_path='/tmp/photo.CR2')
+    controller.gallery._cards = [card]
 
     controller.update_metadata(MagicMock(image_path='/tmp/photo.CR2'))
     card.update_metadata.assert_not_called()
@@ -135,8 +135,8 @@ def test_update_metadata__skips_visual_update_for_non_primary_path(controller):
 def test_update_metadata__no_raise_when_card_already_removed(controller):
     """A tagging result arriving after its card was removed mid-flight is silently
     ignored instead of raising KeyError, and doesn't touch unrelated loaded cards."""
-    other_card = MagicMock(image_path='/tmp/other.jpg')
-    controller.gallery.images = {'/tmp/other.jpg': other_card}
+    other_card = MagicMock(image_path='/tmp/other.jpg', raw_path=None)
+    controller.gallery._cards = [other_card]
 
     controller.update_metadata(MagicMock(image_path='/tmp/removed.jpg'))
 
@@ -273,14 +273,28 @@ def test_refresh__no_images(controller):
 
 
 def test_refresh__deduplicates_paired_cards(controller, mock_app):
-    """refresh() schedules exactly one task per unique card, even with two dict keys."""
-    card = MagicMock()
-    controller.gallery.images = {'/tmp/photo.jpg': card, '/tmp/photo.CR2': card}
+    """refresh() schedules exactly one task per unique card, even when paired with a RAW file."""
+    card = MagicMock(image_path='/tmp/photo.jpg', raw_path='/tmp/photo.CR2')
+    controller.gallery._cards = [card]
     mock_app.threadpool.schedule.reset_mock()
 
     controller.refresh()
 
     mock_app.threadpool.schedule.assert_called_once()
+
+
+def test_refresh__passes_paired_raw_path(controller, mock_app):
+    """refresh() forwards a card's raw_path to _refresh_tags, so a paired RAW file's metadata
+    is refreshed alongside its companion instead of being silently skipped."""
+    card = MagicMock(image_path='/tmp/photo.jpg', raw_path='/tmp/photo.CR2')
+    controller.gallery._cards = [card]
+    mock_app.threadpool.schedule.reset_mock()
+
+    controller.refresh()
+
+    scheduled_fn = mock_app.threadpool.schedule.call_args[0][0]
+    assert scheduled_fn.args[0] is card.metadata
+    assert scheduled_fn.keywords['raw_path'] == '/tmp/photo.CR2'
 
 
 @pytest.mark.parametrize(

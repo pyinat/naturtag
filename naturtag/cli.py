@@ -224,14 +224,13 @@ def refresh(recursive, image_paths):
     setup()
 
     result_iter = _refresh_tags_iter(image_paths, recursive=recursive)
-    metadata_objs = list(
-        track(
-            result_iter,
-            description='Refreshing tags...',
-            total=len(image_paths),
-            show_speed=False,
-        )
+    metadata_objs = track(
+        result_iter,
+        description='Refreshing tags...',
+        total=len(image_paths),
+        show_speed=False,
     )
+    metadata_objs = list(filter(None, metadata_objs))
     click.echo(f'{len(metadata_objs)} Images refreshed')
 
 

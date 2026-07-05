@@ -226,7 +226,7 @@ def test_load_image__creates_card(gallery, image_files):
 
 
 def test_load_image__raw_path_param(gallery, paired_image_files):
-    """Passing raw_path registers the card under both the primary and raw paths."""
+    """Passing raw_path registers the card under both the companion and raw paths."""
     jpg, raw, _lone = paired_image_files
     card = gallery.load_image(jpg, delayed_load=True, raw_path=raw)
 
@@ -264,11 +264,11 @@ def test_select_image(gallery, image_files):
     with patch.object(gallery.image_window, 'display_image_fullscreen') as mock_display:
         gallery.select_image(image_files[0])
 
-    mock_display.assert_called_once_with(image_files[0], list(gallery.images.keys()))
+    mock_display.assert_called_once_with(image_files[0], gallery.companion_paths)
 
 
 def test_remove_image__removes_paired_raw_too(gallery, paired_image_files):
-    """Removing a paired card's primary path also removes its raw path."""
+    """Removing a paired card's companion path also removes its raw path."""
     jpg, raw, _lone = paired_image_files
     with patch.object(ThumbnailCard, 'load_image_async'):
         gallery.load_images([jpg, raw])
@@ -280,7 +280,7 @@ def test_remove_image__removes_paired_raw_too(gallery, paired_image_files):
 
 
 def test_select_image__nav_list_deduplicated(gallery, paired_image_files):
-    """The fullscreen nav list only includes primary paths, not paired raw paths."""
+    """The fullscreen nav list only includes companion paths, not paired raw paths."""
     jpg, raw, lone = paired_image_files
     with patch.object(ThumbnailCard, 'load_image_async'):
         gallery.load_images([jpg, raw, lone])

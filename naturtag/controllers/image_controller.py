@@ -125,7 +125,7 @@ class ImageController(BaseController):
     @Slot(DerivedMetadata)
     def update_metadata(self, metadata: Optional[DerivedMetadata]):
         if metadata and metadata.image_path:
-            image = self.gallery.images.get(metadata.image_path)
+            image = self.gallery.get_card(metadata.image_path)
             if image is not None and metadata.image_path == image.image_path:
                 image.update_metadata(metadata)
 
@@ -139,7 +139,13 @@ class ImageController(BaseController):
         self.info(f'Refreshing tags for {len(images)} images')
         for image in images:
             future = self.app.threadpool.schedule(
-                partial(_refresh_tags, image.metadata, self.app.client, self.app.settings),
+                partial(
+                    _refresh_tags,
+                    image.metadata,
+                    self.app.client,
+                    self.app.settings,
+                    raw_path=image.raw_path,
+                ),
             )
             future.on_result.connect(self.update_metadata)
 
