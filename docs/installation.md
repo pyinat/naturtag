@@ -9,6 +9,14 @@ These packages and installers have not yet been thoroughly tested on all platfor
 Please [create a bug report](https://github.com/pyinat/naturtag/issues/new) if you encounter any installation issues!
 ```
 
+## CLI (`nt`)
+The `nt` command-line tool is included with all platform packages. After installing,
+it is available on PATH automatically on Linux and Windows. On macOS, add it manually:
+```sh
+# Add to your shell profile (~/.zshrc, ~/.bash_profile, etc.)
+export PATH="/Applications/naturtag.app/Contents/MacOS:$PATH"
+```
+
 ::::{tab-set}
 
 :::{tab-item} Debian

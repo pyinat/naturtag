@@ -23,6 +23,11 @@ find "$PKG_DIR/opt/naturtag/" -type f -exec chmod 644 -- {} +
 find "$PKG_DIR/opt/naturtag/" -type d -exec chmod 755 -- {} +
 find "$PKG_DIR/usr/share" -type f -exec chmod 644 -- {} +
 chmod +x "$PKG_DIR/opt/naturtag/naturtag"
+chmod +x "$PKG_DIR/opt/naturtag/nt"
+
+# Symlink nt into /usr/bin so it's available on PATH after install
+mkdir -p "$PKG_DIR/usr/bin"
+ln -s ../opt/naturtag/nt "$PKG_DIR/usr/bin/nt"
 
 # Get app version from pyproject.toml
 app_version=$(uv run python "$SCRIPT_DIR/get_version.py")

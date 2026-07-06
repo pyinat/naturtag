@@ -3,14 +3,16 @@
 from io import BytesIO, IOBase
 from logging import getLogger
 from pathlib import Path
+from typing import TYPE_CHECKING, Optional
 
 from PIL import Image
 from PIL.ImageOps import exif_transpose, flip
-from PIL.ImageQt import ImageQt
-from PySide6.QtGui import QImage
 
 from naturtag.constants import EXIF_ORIENTATION_ID, SIZE_DEFAULT, Dimensions, PathOrStr
 from naturtag.utils.image_glob import is_raw_path
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QImage  # noqa: F401
 
 logger = getLogger().getChild(__name__)
 
@@ -19,8 +21,8 @@ def generate_thumbnail(
     path: PathOrStr,
     target_size: Dimensions = SIZE_DEFAULT,
     default_flip: bool = True,
-) -> QImage:
-    """Generate a thumbnail from source image (thread-safe)
+) -> Optional['QImage']:
+    """Generate a thumbnail from the source image (thread-safe)
 
     Args:
         path: Image file path
@@ -42,8 +44,16 @@ def generate_thumbnail(
     else:
         logger.debug(f'Thumbnails: Image is already thumbnail size: ({image.size})')
 
-    # Note: copy() is important; otherwise the QImage can become dangling if the PIL Image is GC'd
-    return ImageQt(image).copy()
+    try:
+        from PIL.ImageQt import ImageQt
+
+        # Note: copy() is important; otherwise the QImage can become dangling if the PIL Image is GC'd
+        return ImageQt(image).copy()
+
+    # If we're unable to generate a thumbnail, just return the original image source
+    except RuntimeError:
+        logger.warning('Thumbnails: Failed to generate thumbnail')
+        return None
 
 
 def generate_preview(path: PathOrStr) -> QImage:
