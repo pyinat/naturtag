@@ -36,7 +36,7 @@ dependencies = [
     'pyyaml>=6.0',
     'qtawesome~=1.4.0',
     'sqlalchemy~=2.0.47',
-    "rawpy>=0.26.1",
+    'rawpy>=0.26',
 ]
 
 [project.scripts]
@@ -53,7 +53,7 @@ Documentation = 'https://naturtag.readthedocs.io'
 dev = [
     'babel>=2.0',
     'ipython>=9.0',
-    'nox>=2025.11',
+    'nox>=2026.4',
     'pandas>=2.0',
     'prek>=0.2',
     'prettyprinter>=0.18',
