@@ -30,7 +30,7 @@ from shiboken6 import isValid
 from naturtag.constants import IMAGE_FILETYPES, RAW_FILETYPES, SIZE_DEFAULT, Dimensions, PathOrStr
 from naturtag.controllers import BaseController
 from naturtag.metadata import DerivedMetadata
-from naturtag.utils import generate_thumbnail, get_valid_image_paths
+from naturtag.utils import generate_thumbnail, get_image_pairs, get_valid_image_paths
 from naturtag.widgets import (
     FAIcon,
     FlowLayout,
@@ -60,7 +60,8 @@ class ImageGallery(BaseController):
     def __init__(self):
         super().__init__()
         self.setAcceptDrops(True)
-        self.images: dict[Path, ThumbnailCard] = {}
+        self._card_list: list['ThumbnailCard'] = []
+        self._card_index: dict[Path, 'ThumbnailCard'] = {}
         self._pending_signal = None
         self._current_pending: frozenset[str] = frozenset()
         self.image_window = ImageWindow()
@@ -94,8 +95,50 @@ class ImageGallery(BaseController):
 
     def clear(self):
         """Clear all images from the viewer"""
-        self.images = {}
+        self._cards = []
         self.flow_layout.clear()
+
+    @property
+    def _cards(self) -> list['ThumbnailCard']:
+        return self._card_list
+
+    @_cards.setter
+    def _cards(self, cards: list['ThumbnailCard']):
+        self._card_list = cards
+        self._card_index = {}
+        for card in cards:
+            self._index_card(card)
+
+    def _index_card(self, card: 'ThumbnailCard'):
+        """Add/refresh a card's lookup entries, keyed by its companion and (if any) RAW path"""
+        self._card_index[card.image_path] = card
+        if card.raw_path is not None:
+            self._card_index[card.raw_path] = card
+
+    def _deindex_card(self, card: 'ThumbnailCard'):
+        """Remove a card's lookup entries"""
+        self._card_index.pop(card.image_path, None)
+        if card.raw_path is not None:
+            self._card_index.pop(card.raw_path, None)
+
+    @property
+    def cards(self) -> list['ThumbnailCard']:
+        """Thumbnail cards currently loaded, one entry per card"""
+        return list(self._cards)
+
+    @property
+    def images(self) -> dict[Path, 'ThumbnailCard']:
+        """Path -> card lookup. A paired card is reachable by either its companion or its RAW path."""
+        return dict(self._card_index)
+
+    @property
+    def companion_paths(self) -> list[Path]:
+        """Paths that are a card's companion (displayed) path, excluding paired RAW alias keys."""
+        return [card.image_path for card in self._cards]
+
+    def get_card(self, path: Path) -> Optional['ThumbnailCard']:
+        """Find the card for a given image or RAW path, or None if not loaded."""
+        return self._card_index.get(path)
 
     def load_file_dialog(self, start_dir: Optional[PathOrStr] = None):
         """Show a file chooser dialog"""
@@ -110,42 +153,78 @@ class ImageGallery(BaseController):
     def load_images(self, image_paths: Iterable[PathOrStr]):
         """Load multiple images, and ignore any duplicates"""
         images = get_valid_image_paths(image_paths, recursive=True, include_raw=True)
-        new_images = sorted(images - set(self.images.keys()))
+        loaded_images = self.images
+        new_images = sorted(images - set(loaded_images.keys()))
         if not new_images:
             return
 
-        # Load blank placeholder cards first
-        logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
-        cards = [self.load_image(image_path, delayed_load=True) for image_path in new_images]
+        # Collapse RAW+JPG/PNG pairs sharing a basename into a single card.
+        # Also re-pair with any standalone card loaded in a previous call.
+        unpaired_loaded = {p for p, card in loaded_images.items() if card.raw_path is None}
+        new_images_set = set(new_images)
+        image_pairs = get_image_pairs(new_images_set | unpaired_loaded)
 
-        # Then load actual images
+        logger.info(f'Loading {len(new_images)} ({len(images) - len(new_images)} already loaded)')
+        cards = []
+        for pair in image_pairs:
+            if pair.raw_path is None and not any(p in new_images_set for p in pair.all_paths):
+                continue  # Standalone path already loaded; nothing to change
+
+            existing_companion = (
+                loaded_images.get(pair.image_path) if pair.image_path in unpaired_loaded else None
+            )
+            if existing_companion is not None:
+                # Companion already loaded standalone; attach the RAW pairing in place, without
+                # re-reading metadata or regenerating its thumbnail.
+                if pair.raw_path is not None and pair.raw_path in unpaired_loaded:
+                    self.remove_image(pair.raw_path)
+                existing_companion.set_raw_path(pair.raw_path)
+                self._index_card(existing_companion)
+                continue
+
+            for stale in pair.all_paths:
+                if stale in unpaired_loaded:
+                    self.remove_image(stale)
+            cards.append(
+                self.load_image(pair.image_path, delayed_load=True, raw_path=pair.raw_path)
+            )
+
         for thumbnail_card in filter(None, cards):
             thumbnail_card.load_image_async(self.app.threadpool)
 
         self.on_load_images.emit(new_images)
 
-    def load_image(self, image_path: Path, delayed_load: bool = False) -> Optional['ThumbnailCard']:
-        """Load an image"""
+    def load_image(
+        self,
+        image_path: Path,
+        delayed_load: bool = False,
+        raw_path: Optional[Path] = None,
+    ) -> Optional['ThumbnailCard']:
+        """Load an image, optionally paired with a RAW file sharing its basename"""
         if not image_path.is_file():
             logger.debug(f'File does not exist: {image_path}')
             return None
-        elif image_path in self.images:
+        elif self.get_card(image_path) is not None:
             logger.debug(f'Image already loaded: {image_path}')
             return None
+        elif raw_path is not None and self.get_card(raw_path) is not None:
+            logger.debug(f'Paired RAW file already loaded: {raw_path}')
+            raw_path = None
 
         # Clear initial help text if still present
-        if not self.images:
+        if not self._cards:
             self.flow_layout.clear()
 
-        logger.info(f'Loading {image_path}')
-        thumbnail_card = ThumbnailCard(image_path)
+        logger.info(f'Loading {image_path}' + (f' (paired with {raw_path})' if raw_path else ''))
+        thumbnail_card = ThumbnailCard(image_path, raw_path=raw_path)
         thumbnail_card.on_loaded.connect(self._bind_image_actions)
         thumbnail_card.on_load_error.connect(self.on_message)
         if self._pending_signal is not None:
             thumbnail_card.set_pending(bool(self._current_pending))
             thumbnail_card.set_pending_icons(self._current_pending)
         self.flow_layout.addWidget(thumbnail_card)
-        self.images[thumbnail_card.image_path] = thumbnail_card
+        self._cards.append(thumbnail_card)
+        self._index_card(thumbnail_card)
 
         if not delayed_load:
             thumbnail_card.load_image()
@@ -169,7 +248,7 @@ class ImageGallery(BaseController):
 
     def _update_pending_state(self, pending: frozenset[str]):
         self._current_pending = pending
-        for card in self.images.values():
+        for card in self._cards:
             card.set_pending(bool(pending))
             card.set_pending_icons(pending)
 
@@ -186,13 +265,17 @@ class ImageGallery(BaseController):
     @Slot(str)
     def remove_image(self, image_path: Path):
         logger.debug(f'Removing image {image_path}')
-        thumbnail = self.images.pop(image_path)
+        thumbnail = self.get_card(image_path)
+        if thumbnail is None:
+            raise KeyError(image_path)
+        self._cards.remove(thumbnail)
+        self._deindex_card(thumbnail)
         thumbnail.setParent(None)
         thumbnail.deleteLater()
 
     @Slot(str)
     def select_image(self, image_path: Path):
-        self.image_window.display_image_fullscreen(image_path, list(self.images.keys()))
+        self.image_window.display_image_fullscreen(image_path, self.companion_paths)
 
 
 class ThumbnailCard(StylableWidget):
@@ -210,9 +293,15 @@ class ThumbnailCard(StylableWidget):
     on_remove = Signal(Path)  #: Request for the image to be removed from the gallery
     on_select = Signal(Path)  #: The image was clicked
 
-    def __init__(self, image_path: Path, size: Dimensions = SIZE_DEFAULT):
+    def __init__(
+        self,
+        image_path: Path,
+        size: Dimensions = SIZE_DEFAULT,
+        raw_path: Optional[Path] = None,
+    ):
         super().__init__()
         self.image_path = image_path
+        self.raw_path = raw_path
         self.metadata: DerivedMetadata = None  # type: ignore
         self.load_error: str | None = None
         self.layout = VerticalLayout(self)
@@ -224,6 +313,9 @@ class ThumbnailCard(StylableWidget):
         self.context_menu = ThumbnailContextMenu(self)
         self.icons = ThumbnailMetaIcons(self)
         self.icons.setObjectName('metadata_icons')
+        self.icons.pair_icon.set_enabled(raw_path is not None)
+        if raw_path is not None:
+            self.icons.pair_icon.setToolTip(f'Paired with {raw_path.name}')
 
         # Filename label
         text = re.sub('([_-])', '\\1\u200b', self.image_path.name)  # To allow word wrapping
@@ -348,6 +440,15 @@ class ThumbnailCard(StylableWidget):
         self.pulse()
         self.set_metadata(metadata)
 
+    def set_raw_path(self, raw_path: Optional[Path]):
+        """Attach or detach a paired RAW file in place, without re-reading metadata or
+        regenerating the thumbnail for the already-displayed companion image."""
+        self.raw_path = raw_path
+        self.icons.pair_icon.set_enabled(raw_path is not None)
+        self.icons.pair_icon.setToolTip(f'Paired with {raw_path.name}' if raw_path else '')
+        if self.metadata is not None:
+            self.context_menu.refresh_actions(self)
+
 
 class MetaThumbnail(HoverMixin, PixmapLabel):
     """Thumbnail for a local image plus metadata"""
@@ -465,11 +566,17 @@ class ThumbnailContextMenu(QMenu):
             tooltip=f'Open containing folder: {thumbnail_card.image_path.parent}',
             callback=thumbnail_card.open_directory,
         )
+        remove_tooltip = (
+            f'Remove this image and paired RAW file ({thumbnail_card.raw_path.name}) '
+            'from the selection'
+            if thumbnail_card.raw_path
+            else 'Remove this image from the selection'
+        )
         self._add_action(
             parent=thumbnail_card,
             icon='ei.remove',
             text='Remove image',
-            tooltip='Remove this image from the selection',
+            tooltip=remove_tooltip,
             callback=thumbnail_card.remove,
         )
 
@@ -500,7 +607,7 @@ class ThumbnailMetaIcons(QLabel):
         self.icon_layout = HorizontalLayout(self)
         self.icon_layout.setAlignment(Qt.AlignLeft)
         self.icon_layout.setContentsMargins(0, 0, 0, 0)
-        self.setGeometry(9, img_size[0] - 11, 130, 20)
+        self.setGeometry(9, img_size[0] - 11, 155, 20)
 
         # Main metadata icons
         self.taxon_icon = SwappableIcon('mdi.bird', secondary=True, size=20)
@@ -508,19 +615,21 @@ class ThumbnailMetaIcons(QLabel):
         self.geo_icon = SwappableIcon('mdi.map-marker', secondary=True, size=20)
         self.tag_icon = SwappableIcon('fa6s.tags', secondary=True, size=20)
         self.sidecar_icon = SwappableIcon('mdi.xml', secondary=True, size=20)
+        self.pair_icon = SwappableIcon('mdi6.raw', secondary=True, size=20)
         self.icon_layout.addWidget(self.taxon_icon)
         self.icon_layout.addWidget(self.observation_icon)
         self.icon_layout.addWidget(self.geo_icon)
         self.icon_layout.addWidget(self.tag_icon)
         self.icon_layout.addWidget(self.sidecar_icon)
+        self.icon_layout.addWidget(self.pair_icon)
 
-        # Pending tags indicator — parented to the image widget so coordinates are image-relative
+        # Pending tags indicator; child of image widget so coordinates are relative to image
         self.pending_container, self.pending_icon = self._create_icon_container(
             parent.image, 'fa6s.floppy-disk', img_size[0] - 40, img_size[1] - 40
         )
         self.pending_icon.setToolTip('Pending tags: click Run (Ctrl+R) to apply')
 
-        # Error indicator — centered in the thumbnail
+        # Error indicator, centered in the thumbnail
         icon_size = 128
         x = (img_size[0] - icon_size) // 2
         y = (img_size[1] - icon_size) // 2

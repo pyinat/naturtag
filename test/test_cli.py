@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -88,6 +89,7 @@ def test_tag__with_id_or_url(
         observation_id=expected_observation_id,
         taxon_id=expected_taxon_id,
         include_sidecars=True,
+        failed_paths=[],
     )
     mock_setup.assert_called_once()
 
@@ -109,6 +111,42 @@ def test_tag__multiple_images(mock_setup, mock_tag_images, runner):
     )
     assert result.exit_code == 0
     assert '3 images tagged' in result.output
+
+
+@pytest.mark.parametrize(
+    'tagged_results, expected_output',
+    [
+        ([MagicMock()], '1 images tagged'),
+        ([], None),
+    ],
+    ids=['partial_failure', 'all_fail'],
+)
+@patch('naturtag.cli._tag_images_iter')
+@patch('naturtag.cli.setup')
+def test_tag__failed_paths_reported_and_exits_nonzero(
+    mock_setup, mock_tag_images, runner, tagged_results, expected_output
+):
+    """A failed path is always reported and exits non-zero, whether or not other images in the
+    same batch were tagged successfully. When none succeed, the failure message replaces
+    the usual 'no results' message."""
+
+    def fake_tag_images_iter(
+        paths, observation_id=None, taxon_id=None, include_sidecars=True, failed_paths=None
+    ):
+        failed_paths.append(Path('bad.jpg'))
+        return iter(tagged_results)
+
+    mock_tag_images.side_effect = fake_tag_images_iter
+    result = runner.invoke(
+        main, ['tag', '-t', '48978', 'good.jpg', 'bad.jpg'], catch_exceptions=False
+    )
+
+    assert result.exit_code == 1
+    assert 'Failed to tag' in result.output
+    assert 'bad.jpg' in result.output
+    assert 'No search results found' not in result.output
+    if expected_output:
+        assert expected_output in result.output
 
 
 @pytest.mark.parametrize(
@@ -161,6 +199,7 @@ def test_tag__taxon_name_with_match(mock_search, mock_setup, mock_tag_images, ru
         observation_id=None,
         taxon_id=12345,
         include_sidecars=True,
+        failed_paths=[],
     )
 
 
@@ -183,6 +222,17 @@ def test_refresh(mock_setup, mock_refresh_tags, runner, flags, images, expected_
     assert result.exit_code == 0
     assert f'{len(images)} Images refreshed' in result.output
     mock_refresh_tags.assert_called_once_with(tuple(images), recursive=expected_recursive)
+
+
+@patch('naturtag.cli._refresh_tags_iter')
+@patch('naturtag.cli.setup')
+def test_refresh__counts_both_files_in_a_pair(mock_setup, mock_refresh_tags, runner):
+    """A RAW+JPG pair refreshes 2 files from 2 given paths; the reported count reflects both
+    files, not just one item per pair."""
+    mock_refresh_tags.return_value = iter([MagicMock(), MagicMock()])
+    result = runner.invoke(main, ['refresh', 'photo1.jpg', 'photo1.CR2'], catch_exceptions=False)
+    assert result.exit_code == 0
+    assert '2 Images refreshed' in result.output
 
 
 # -- setup db command --

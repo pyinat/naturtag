@@ -165,11 +165,13 @@ def tag(
     # Run first-time setup if necessary
     setup()
 
+    failed_paths: list[Path] = []
     result_iter = _tag_images_iter(
         image_paths,
         observation_id=observation,
         taxon_id=taxon,
         include_sidecars=True,
+        failed_paths=failed_paths,
     )
     if image_paths:
         metadata_objs = list(
@@ -181,6 +183,7 @@ def tag(
             )
         )
         if not metadata_objs:
+            _report_and_exit_on_tag_failures(ctx, failed_paths)
             click.secho('No search results found', fg='red')
             return
         click.echo(f'{len(metadata_objs)} images tagged')
@@ -193,6 +196,8 @@ def tag(
     # Print keywords if specified
     if not image_paths or ctx.meta['verbose'] or flickr:
         print_metadata(list(metadata_objs)[0].keyword_meta, flickr)
+
+    _report_and_exit_on_tag_failures(ctx, failed_paths)
 
 
 @main.command()
@@ -219,14 +224,13 @@ def refresh(recursive, image_paths):
     setup()
 
     result_iter = _refresh_tags_iter(image_paths, recursive=recursive)
-    metadata_objs = list(
-        track(
-            result_iter,
-            description='Refreshing tags...',
-            total=len(image_paths),
-            show_speed=False,
-        )
+    metadata_objs = track(
+        result_iter,
+        description='Refreshing tags...',
+        total=len(image_paths),
+        show_speed=False,
     )
+    metadata_objs = list(filter(None, metadata_objs))
     click.echo(f'{len(metadata_objs)} Images refreshed')
 
 
@@ -421,3 +425,14 @@ def _install_bash_completion():
     print('Installed bash completion scripts.')
     print('Add the following to your ~/.bashrc, and restart your shell:')
     print(f'source {completion_dir}/*.bash\n')
+
+
+def _report_and_exit_on_tag_failures(ctx, failed_paths: list[Path]):
+    """Print a summary of any paths that failed to tag"""
+    if not failed_paths:
+        return
+    click.secho(
+        f'Failed to tag {len(failed_paths)} image(s): ' + ', '.join(str(p) for p in failed_paths),
+        fg='red',
+    )
+    ctx.exit(1)
