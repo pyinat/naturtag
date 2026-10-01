@@ -35,7 +35,7 @@ dependencies = [
     'pyqtdarktheme-fork>=2.3.6',
     'pyyaml>=6.0',
     'qtawesome~=1.4.0',
-    'sqlalchemy~=2.0.47',
+    'sqlalchemy>=2.0.47,<2.2.0',
     'rawpy>=0.26',
 ]
 
