@@ -8,7 +8,10 @@ from shutil import copyfile
 from typing import Optional
 
 import click
-import pyexiv2
+import gi
+gi.require_version('GExiv2', '0.10')
+from gi.repository import GExiv2
+from gi.repository import GExiv2
 from click.shell_completion import CompletionItem
 from platformdirs import user_config_dir
 from pyinaturalist import ICONIC_EMOJI, get_taxa_autocomplete
@@ -64,7 +67,7 @@ def main(ctx, verbose, version):
     if verbose == 0:
         enable_logging(level='WARNING', external_level='ERROR')
     else:
-        pyexiv2.set_log_level(2)  # exiv2 C logger: errors + warnings
+        GExiv2.log_set_level(2)  # exiv2 C logger: errors + warnings
 
     if verbose == 1:
         enable_logging(level='INFO', external_level='WARNING')
@@ -319,7 +322,7 @@ def print_all_metadata(
     hierarchical: bool = False,
 ):
     """Print keyword metadata for all specified files"""
-    for image_path in get_valid_image_paths(image_paths, include_raw=True):
+    for image_path in get_valid_image_paths(image_paths):
         metadata = DerivedMetadata(image_path)
         click.secho(f'\n{image_path}', fg='white')
         print_metadata(metadata.keyword_meta, flickr, hierarchical)

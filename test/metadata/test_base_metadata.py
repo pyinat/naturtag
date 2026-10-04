@@ -1,6 +1,8 @@
 import shutil
 
-import pyexiv2
+import gi
+gi.require_version('GExiv2', '0.10')
+from gi.repository import GExiv2
 import pytest
 
 from naturtag.metadata import BaseMetadata
@@ -123,11 +125,9 @@ def test_write__lr_hierarchical_subject_uses_rdf_bag(tmp_path):
     meta.xmp['Xmp.lr.hierarchicalSubject'] = ['Animalia', 'Animalia|Arthropoda']
     meta.write(write_exif=False, write_iptc=False, write_xmp=True, write_sidecar=False)
 
-    img = pyexiv2.Image(str(img_copy))
+    img = GExiv2.Metadata(str(img_copy))
     try:
-        raw = img.read_raw_xmp()
-    finally:
-        img.close()
+        raw = img.get_xmp_packet()
 
     assert '<rdf:Bag>' in raw
     # Ensure no rdf:Seq wraps lr:hierarchicalSubject specifically
@@ -151,9 +151,7 @@ def test_write__raw_without_sidecar_creates_sidecar(tmp_path):
     sidecar_path = raw_copy.with_suffix('.xmp')
     assert sidecar_path.is_file()
 
-    img = pyexiv2.Image(str(sidecar_path))
+    img = GExiv2.Metadata(str(sidecar_path))
     try:
-        xmp = img.read_xmp()
-    finally:
-        img.close()
+        xmp = img.get_xmp_tags()
     assert 'Xmp.dc.subject' in xmp
