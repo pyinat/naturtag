@@ -3,14 +3,15 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any
 
-import pyexiv2
-from pyexiv2 import Image
+import gi
+gi.require_version('GExiv2', '0.10')
+from gi.repository import GExiv2
 
 from naturtag.constants import EXIF_HIDE_PREFIXES, PathOrStr
 from naturtag.utils.image_glob import get_sidecar_path, is_raw_path
 
 # Suppress exiv2 thumbnail warnings (log level 3 = error)
-pyexiv2.set_log_level(3)
+GExiv2.log_set_level(3)
 
 # Minimal XML content needed to create a new XMP file; exiv2 can handle the rest
 NEW_XMP_CONTENTS = """
@@ -59,25 +60,23 @@ class BaseMetadata:
             return {}, {}, {}
 
         try:
-            exif = img.read_exif(encoding=encoding)
-            iptc = img.read_iptc(encoding=encoding)
-            xmp = img.read_xmp(encoding=encoding)
+            exif = img.get_exif_tags()
+            iptc = img.get_iptc_tags()
+            xmp = img.get_xmp_tags()
         except UnicodeDecodeError:
             logger.warning(f'Non-UTF-encoded metadata in {path}')
             return self._safe_read_metadata(path, encoding='unicode_escape')
-        finally:
-            img.close()
 
         return exif, iptc, xmp
 
     @staticmethod
-    def _read_exiv2_image(path: PathOrStr) -> Image:
+    def _read_exiv2_image(path: PathOrStr) -> GExiv2.Metadata:
         """
         Read an image with basic error handling. Note: Exiv2 ``RuntimeError`` usually means
         corrupted metadata. See: https://dev.exiv2.org/issues/637#note-1
         """
         try:
-            return Image(str(path))
+            return GExiv2.Metadata(str(path))
         except RuntimeError:
             if not Path(path).is_file():
                 logger.warning(f'Metadata file does not exist: {path}')
@@ -158,14 +157,16 @@ class BaseMetadata:
                 return
             try:
                 if write_exif:
-                    img.modify_exif(self.simple_exif)
+                    for tag_key, tag_value in self.simple_exif:
+                        img[tag_key] = tag_value
                 if write_iptc:
-                    img.modify_iptc(self.iptc)
+                    for tag_key, tag_value in self.iptc:
+                        img[tag_key] = str(tag_value)
                 if write_xmp:
-                    img.modify_xmp(fixed_xmp)
-                    _fix_xmp_bag_types(img)
+                    for tag_key, tag_value in fixed_xmp:
+                        img[tag_key] = str(tag_value)
             finally:
-                img.close()
+                img.save_file()
 
         # Write sidecar for non-RAW files (RAW already wrote to sidecar via metadata_path)
         if write_sidecar and not self.is_sidecar and not self.is_raw:
@@ -178,10 +179,10 @@ class BaseMetadata:
         if sidecar_img is None:
             return
         try:
-            sidecar_img.modify_xmp(fixed_xmp)
-            _fix_xmp_bag_types(sidecar_img)
+            for tag_key, tag_value in fixed_xmp:
+                img[tag_key] = str(tag_value)
         finally:
-            sidecar_img.close()
+            sidecar_img.save_file()
 
     def _fix_xmp(self):
         """Fix some invalid/incompatible XMP tags"""
@@ -211,22 +212,3 @@ def _create_sidecar_stub(path: Path):
     if not path.is_file():
         with open(path, 'w') as f:
             f.write(NEW_XMP_CONTENTS.strip())
-
-
-def _fix_xmp_bag_types(img) -> None:
-    """Fix lr:hierarchicalSubject to use rdf:Bag instead of rdf:Seq.
-
-    pyexiv2 writes all XMP arrays as rdf:Seq, but lr:hierarchicalSubject is defined
-    as an unordered bag in the LR namespace spec and expected as rdf:Bag by Digikam.
-    """
-    raw = img.read_raw_xmp()
-    if not raw or 'lr:hierarchicalSubject' not in raw:
-        return
-    fixed = re.sub(
-        r'(<lr:hierarchicalSubject>\s*)<rdf:Seq>(.*?)</rdf:Seq>(\s*</lr:hierarchicalSubject>)',
-        r'\1<rdf:Bag>\2</rdf:Bag>\3',
-        raw,
-        flags=re.DOTALL,
-    )
-    if fixed != raw:
-        img.modify_raw_xmp(fixed)
