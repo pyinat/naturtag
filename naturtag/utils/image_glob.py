@@ -1,11 +1,13 @@
 """Utilities for finding and resolving image paths from directories, URIs, and/or glob patterns"""
 
+from collections import defaultdict
+from dataclasses import dataclass
 from fnmatch import fnmatch
 from glob import glob
 from itertools import chain
 from logging import getLogger
 from pathlib import Path, PosixPath, PureWindowsPath
-from typing import Iterator
+from typing import Iterator, Optional
 from urllib.parse import unquote_plus, urlparse
 
 from pyinaturalist import Iterable
@@ -13,6 +15,38 @@ from pyinaturalist import Iterable
 from naturtag.constants import ALL_IMAGE_FILETYPES, IMAGE_FILETYPES, RAW_FILETYPES, PathOrStr
 
 logger = getLogger().getChild(__name__)
+
+# Non-raw extensions that may be paired with a RAW file sharing the same basename.
+# Narrower than IMAGE_FILETYPES since gif/webp pairing isn't a real camera workflow.
+_PAIRABLE_EXTS = frozenset(('.jpg', '.jpeg', '.png'))
+
+
+@dataclass(frozen=True)
+class ImagePair:
+    """A logical image unit: a displayable image file optionally paired with a RAW file sharing
+    the same basename. ``image_path`` may itself be a standalone RAW when there is no companion.
+    """
+
+    image_path: Path
+    raw_path: Optional[Path] = None
+
+    @property
+    def all_paths(self) -> list[Path]:
+        return [p for p in (self.image_path, self.raw_path) if p is not None]
+
+
+def get_image_pairs(paths: Iterable[Path]) -> list['ImagePair']:
+    """Convert a flat list of image paths into logical :class:`ImagePair` units.
+
+    Paths sharing a basename that form an unambiguous RAW+JPG/PNG pair are grouped into a single
+    :class:`ImagePair`. All other paths become standalone pairs with ``raw_path=None``.
+    """
+    paths = list(paths)
+    pairs_dict = find_raw_pairs(paths)
+    paired = pairs_dict.keys() | pairs_dict.values()
+    result = [ImagePair(companion, raw) for companion, raw in pairs_dict.items()]
+    result += [ImagePair(p) for p in paths if p not in paired]
+    return result
 
 
 def get_valid_image_paths(
@@ -136,6 +170,30 @@ def is_image_path(path: Path, include_sidecars: bool = False, include_raw: bool 
 def is_raw_path(path: Path) -> bool:
     """Determine if a path points to a RAW image file"""
     return any(fnmatch(path.suffix.lower(), ext) for ext in RAW_FILETYPES)
+
+
+def find_raw_pairs(paths: Iterable[Path]) -> dict[Path, Path]:
+    """Find RAW+JPG/PNG pairs sharing a directory and basename (stem, case-insensitive).
+
+    A stem-group is only paired when it contains exactly one RAW file and exactly one
+    jpg/jpeg/png; any other combination (2 raw + 1 jpg, 1 raw + 2 jpg, raw + gif, etc.) is left
+    ungrouped, since there's no unambiguous partner to pick.
+
+    Returns:
+        ``{companion_path: raw_path}``, one entry per confirmed pair, where ``companion_path`` is
+        the jpg/png file.
+    """
+    groups: dict[tuple[Path, str], list[Path]] = defaultdict(list)
+    for path in paths:
+        groups[(path.parent, path.stem.lower())].append(path)
+
+    pairs = {}
+    for group in groups.values():
+        raw_paths = [p for p in group if is_raw_path(p)]
+        companion_paths = [p for p in group if p.suffix.lower() in _PAIRABLE_EXTS]
+        if len(raw_paths) == 1 and len(companion_paths) == 1:
+            pairs[companion_paths[0]] = raw_paths[0]
+    return pairs
 
 
 def uri_to_path(path_or_uri) -> Path:

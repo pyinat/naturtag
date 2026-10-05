@@ -54,7 +54,6 @@ def mock_rawpy():
 def _setup_rawpy_mock(mock_rawpy, thumb_data, thumb_format_enum):
     """Helper to set up rawpy mock with thumbnail data"""
     mock_raw = MagicMock()
-    # MagicMock.__enter__ returns a new mock by default, not self — wire it explicitly
     mock_raw.__enter__ = MagicMock(return_value=mock_raw)
     mock_raw.__exit__ = MagicMock(return_value=False)
     # rawpy returns a Thumbnail namedtuple with .format and .data

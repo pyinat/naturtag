@@ -126,7 +126,7 @@ def test_setup__passes_download_flag_to_load(mock_setup_deps, db_path, download)
 
 def test_setup__skips_load_if_taxon_table_populated(mock_setup_deps, db_path):
     """After a version bump, setup_complete is reset but _load_taxon_db should not run if the
-    taxon table is already populated — prevents UNIQUE constraint errors on second tag invocation.
+    taxon table is already populated. This prevents UNIQUE constraint errors on second tag run.
     """
     mock_setup_deps['taxon_table_populated'].return_value = True
 

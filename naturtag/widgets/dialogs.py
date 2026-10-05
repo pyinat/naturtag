@@ -243,7 +243,7 @@ class WelcomeDialog(QDialog):
         signals.on_error.connect(self._on_count_error)
 
     def _on_cancel(self):
-        """Skip during step 1 — do not start a download, but suppress the dialog on future runs."""
+        """Skip during step 1; do not start a download, but suppress the dialog on future runs."""
         if self._step == _STEP_INPUT:
             self.app.settings.disable_obs_sync = True
             self.app.settings.write()
